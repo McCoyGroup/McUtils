@@ -1786,14 +1786,16 @@ class TensorDerivativeConverter:
         return np.prod(multinomial_num / full_denom)
 
     @classmethod
-    def convert_partition(cls, partition, derivs, vals, val_axis=-1):
-        if len(vals) < len(partition) - 1:
+    def convert_partition(cls, partition, derivs, vals, val_axis=0):
+        if len(vals) <= len(partition) - 1:
             return 0
         base_term = vals[len(partition) - 1]
         if isinstance(base_term, (int, float, np.integer, np.floating)) and base_term == 0:
             return 0
         perm_counter = len(partition)
         perm_idx = []  # to establish the set of necessary permutations to make things symmetric
+        if val_axis < 0:
+            val_axis = base_term.ndim + val_axis
         for i in partition:
             if len(derivs) < i - 1:
                 return 0
@@ -1807,6 +1809,7 @@ class TensorDerivativeConverter:
                 perm_counter -= 1
             else:
                 perm_idx.append(perm_counter)
+            val_axis = min(base_term.ndim - 1, val_axis + d.ndim - 1)
 
         # sometimes we overcount, so we factor that out here
         nterms = cls.compute_partition_terms(partition)
@@ -1815,15 +1818,17 @@ class TensorDerivativeConverter:
         overcount = len(perm_inds) / nterms
         base_term = base_term / overcount
 
-        # print(base_term.shape, perm_idx, _, perm_inds)
-
-        return sum(base_term.transpose(p) for p in perm_inds)
+        return sum(
+            base_term.transpose(list(p) + list(range(len(p), base_term.ndim)))
+            for p in perm_inds
+        )
 
     @classmethod
     def convert_fast(cls, derivs, vals, val_axis=-1, order=None):
         terms = []
         if order is None:
             order = len(vals)
+
         for o in range(1, order+1):
             term = sum(
                 cls.convert_partition(p, derivs, vals, val_axis=val_axis)
