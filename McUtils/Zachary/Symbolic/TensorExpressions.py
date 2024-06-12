@@ -1797,7 +1797,7 @@ class TensorDerivativeConverter:
         if val_axis < 0:
             val_axis = base_term.ndim + val_axis
         for i in partition:
-            if len(derivs) < i - 1:
+            if len(derivs) <= i - 1:
                 return 0
 
             d = derivs[i - 1]
