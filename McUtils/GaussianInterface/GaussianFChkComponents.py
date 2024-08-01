@@ -14,6 +14,8 @@ FormattedCheckpointComponents = { } # we'll register on this bit by bit
 
 # FormattedCheckpointComponents["Name"] = parser
 
+#endregion
+
 ########################################################################################################################
 #
 #                                          Int Atom Types
@@ -21,7 +23,7 @@ FormattedCheckpointComponents = { } # we'll register on this bit by bit
 
 #region IInt Atom Types
 
-def get_names(atom_ints):
+def get_names(atom_ints, reader=None):
     from ..Data import AtomData
     return [ AtomData[x, "Symbol"] for x in atom_ints ]
 FormattedCheckpointComponents["Int Atom Types"] = get_names
@@ -35,7 +37,7 @@ FormattedCheckpointComponents["Int Atom Types"] = get_names
 
 #region Current cartesian coordinates
 
-def reformat(coords):
+def reformat(coords, reader=None):
     import numpy as np
 
     ncoords = len(coords)
@@ -99,7 +101,7 @@ FormattedCheckpointComponents["Dipole Derivatives num derivs"] = FchkDipoleHighe
 
 #region Vib-Modes
 
-def split_vib_modes(mcoeffs):
+def split_vib_modes(mcoeffs, reader=None):
     """Pulls the mode vectors from the coeffs
     There should be 3N-6 modes where each vector is 3N long so N = (1 + sqrt(1 + l/9))
 
@@ -110,9 +112,9 @@ def split_vib_modes(mcoeffs):
     """
     import numpy as np
 
-    l = len(mcoeffs)
-    n = int(1 + np.sqrt(1 + l/9))
-    return np.reshape(mcoeffs, (3*n-6, 3*n))
+    # l = len(mcoeffs)
+    n = reader.num_atoms#int(1 + np.sqrt(1 + l/9))
+    return np.reshape(mcoeffs, (-1, 3*n))
 FormattedCheckpointComponents["Vib-Modes"] = split_vib_modes
 
 #endregion
@@ -124,7 +126,7 @@ FormattedCheckpointComponents["Vib-Modes"] = split_vib_modes
 
 #region Vib-E2
 
-def split_vib_e2(e2):
+def split_vib_e2(e2, reader=None):
     """Pulls the vibrational data out of the file
 
     :param e2:
@@ -133,18 +135,21 @@ def split_vib_e2(e2):
     :rtype:
     """
 
-    l = len(e2)
-    n = 1 + np.sqrt(1 + l/9) # I thought this was the way it was defined but...seems like not exactly
-    if n != int(n):
-        n = l/14
-        if n != int(n):
-            raise ValueError("Gaussian FChk Vib-E2 block malformatted")
-    n = int(n)
+    # l = len(e2)
+    # n = 1 + np.sqrt(1 + l/9) # I thought this was the way it was defined but...seems like not exactly
+    n = reader.num_atoms
+    # if n != int(n):
+    #     n = l/14
+    #     if n != int(n):
+    #         raise ValueError("Gaussian FChk Vib-E2 block malformatted")
+    # n = int(n)
 
-    freq = e2[:n]
-    red_m = e2[n:2*n]
-    frc_const = e2[2*n:3*n]
-    intense = e2[3*n:4*n]
+    m = 3*n - 6
+
+    freq = e2[:m]
+    red_m = e2[m:2*m]
+    frc_const = e2[2*m:3*m]
+    intense = e2[3*m:4*m]
 
     return {
         "Frequencies"    : freq,
@@ -165,7 +170,6 @@ FormattedCheckpointComponents["Vib-E2"] = split_vib_e2
 #region CommonNames
 
 FormattedCheckpointCommonNames = {
-
     "Atomic numbers": "AtomicNumbers",
     "Current cartesian coordinates":"Coordinates",
     "Cartesian Gradient": "Gradient",
@@ -179,7 +183,6 @@ FormattedCheckpointCommonNames = {
     "Vib-Modes" : "VibrationalModes",
     "Vib-AtMass" : "VibrationalAtomicMasses",
     "Real atomic weights" : "AtomicMasses"
-
 }
 
 #endregion

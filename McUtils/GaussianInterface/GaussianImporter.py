@@ -158,6 +158,12 @@ class GaussianFChkReader(FileStreamReader):
     registered_components = FormattedCheckpointComponents
     common_names = {to_:from_ for from_, to_ in FormattedCheckpointCommonNames.items()}
     to_common_name = FormattedCheckpointCommonNames
+
+    def __init__(self, file, **kwargs):
+        super().__init__(file, **kwargs)
+        self._num_atoms = None
+        # with self: self.num_atoms = self.parse("Number of atoms")["Number of atoms"]
+
     def read_header(self):
         """Reads the header and skips the stream to where we want to be
 
@@ -252,11 +258,12 @@ class GaussianFChkReader(FileStreamReader):
             else:
                 value = block_str
 
-        try:
-            parser = self.registered_components[name]
-            value = parser(value)
-        except KeyError:
-            pass
+        # try:
+        parser = self.registered_components.get(name, None)
+        if parser is not None:
+            value = parser(value, reader=self)
+        # except KeyError:
+        #     pass
 
         return value
 
@@ -270,6 +277,11 @@ class GaussianFChkReader(FileStreamReader):
         if byte_count is not None:
             self.seek(self.tell() + byte_count)
 
+    @property
+    def num_atoms(self):
+        if self._num_atoms is None:
+            self._num_atoms = self.parse(["Number of atoms"])["Number of atoms"]
+        return self._num_atoms
     def parse(self, keys=None, default='raise'):
         if keys is None:
             keys_to_go = None
@@ -281,6 +293,9 @@ class GaussianFChkReader(FileStreamReader):
 
         parse_results = {}
         header = self.read_header()
+        if self._num_atoms is None:
+            self._num_atoms = self.get_block(**self.get_next_block_params())
+        parse_results["Number of atoms"] = self._num_atoms
 
         parse_results['Header'] = header
         if keys_to_go is None:

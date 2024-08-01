@@ -90,7 +90,7 @@ class DensePolynomial(AbstractPolynomial):
     @property
     def coeffs(self) -> 'np.ndarray|SparseArray':
         if self._shift is not None:
-            self._poly_coeffs = self._compute_shifted_coeffs(self._poly_coeffs, self._shift, stack_dim=self.stack_dim)
+            self._poly_coeffs = self.compute_shifted_coeffs(self._poly_coeffs, self._shift, stack_dim=self.stack_dim)
             self._shift = None
         if self._scaling is not None:
             self._poly_coeffs = self._poly_coeffs * self._scaling
@@ -385,7 +385,7 @@ class DensePolynomial(AbstractPolynomial):
             stack_dim=self.stack_dim
         )
     @classmethod
-    def _compute_shifted_coeffs(cls, poly_coeffs, shift, stack_dim=0):
+    def compute_shifted_coeffs(cls, poly_coeffs, shift, stack_dim=0):
         #TODO: make this consistent with non-zero stack_dim
 
         # if fourier_coeffs is None:
@@ -801,7 +801,7 @@ class SparsePolynomial(AbstractPolynomial):
     A semi-symbolic representation of a polynomial of tensor
     coefficients
     """
-    def __init__(self, terms:dict, prefactor=1, ndim=None):
+    def __init__(self, terms:dict, prefactor=1, ndim=None, canonicalize=True):
         self.terms = terms
         self.prefactor = prefactor
         self._ndim = ndim
@@ -818,7 +818,8 @@ class SparsePolynomial(AbstractPolynomial):
         if self.prefactor == 1:
             return self
         else:
-            return type(self)({k:self.prefactor*v for k,v in self.terms.items()}, prefactor=1)
+            return type(self)({k:self.prefactor*v for k,v in self.terms.items()}, prefactor=1,
+                              canonicalize=False)
     @classmethod
     def monomial(cls, idx, value=1):
         return cls({idx:value})
@@ -874,7 +875,7 @@ class SparsePolynomial(AbstractPolynomial):
                         new_terms[k2] = new
             if len(new_terms) == 0:
                 return 0
-            return type(self)(new_terms)
+            return type(self)(new_terms, canonicalize=False)
 
     @classmethod
     def _to_tensor_idx(cls, term, ndim, tupleate=True):
@@ -1006,15 +1007,18 @@ class PureMonicPolynomial(SparsePolynomial):
 
         new_terms = {}
         term_hashes = {}
-        for k, v in other.terms.items():
-            for k2, v2 in self.terms.items():
+        for k, v in self.terms.items():
+            for k2, v2 in other.terms.items():
                 for k3, v3 in key_value_generator(k, k2, v, v2):
-                    new_hash = self.key_hash(k3) + self.key_hash(k2)
-                    if new_hash in term_hashes:
-                        t = term_hashes[new_hash]
-                    else:
-                        t = self.canonical_key(k3)  # construct new tuple and canonicalize
-                        term_hashes[new_hash] = t
+                    # new_hash = self.key_hash(k3) #+ self.key_hash(k2)
+                    # if new_hash in term_hashes:
+                    #     t = term_hashes[new_hash]
+                    #     if t != self.canonical_key(k3):
+                    #         raise ValueError(k, k2, t, self.canonical_key(k3))
+                    # else:
+                    #     t = self.canonical_key(k3)  # construct new tuple and canonicalize
+                    #     term_hashes[new_hash] = t
+                    t = self.canonical_key(k3) # caching this led to collisions, need better tuple hashes
                     new_terms[t] = new_terms.get(t, 0) + v3  # this is the case where after mult. two terms merge
                     if new_terms[t] == 0:
                         del new_terms[t]
@@ -1039,8 +1043,8 @@ class PureMonicPolynomial(SparsePolynomial):
                 key_func = lambda key1,key2:k+k2
             new_terms = {}
             term_hashes = {}
-            for k,v in other.terms.items():
-                for k2,v2 in self.terms.items():
+            for k,v in self.terms.items():
+                for k2,v2 in other.terms.items():
                     new_hash = self.key_hash(k) + self.key_hash(k2)
                     if new_hash in term_hashes:
                         t = term_hashes[new_hash]
@@ -1059,6 +1063,28 @@ class PureMonicPolynomial(SparsePolynomial):
             return type(self)(new_terms, prefactor=pref, canonicalize=False)
         else:
             return type(self)(self.terms, prefactor=self.prefactor*other if self.prefactor is not None else other, canonicalize=False)
+
+    def rebuild(self, new_terms, prefactor=None, canonicalize=None):
+        return type(self)(new_terms,
+                          prefactor=self.prefactor if prefactor is None else prefactor,
+                          canonicalize=False if canonicalize is None else canonicalize
+                          )
+    def filter_terms(self, required_keys):
+        subterms = {}
+        test_terms = self.terms
+        for t, v in test_terms.items():
+            test_t = t
+            for k in required_keys:
+                if k in test_t:
+                    i = test_t.index(k)
+                    test_t = test_t[:i] + test_t[i + 1:]
+                else:
+                    break
+            else:
+                subterms[t] = v
+
+        return self.rebuild(subterms)
+
     def __mul__(self, other):
         return self.direct_product(other)
 class TensorCoefficientPoly(PureMonicPolynomial):

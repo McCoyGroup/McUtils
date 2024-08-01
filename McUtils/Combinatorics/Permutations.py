@@ -1793,7 +1793,7 @@ class UniquePartitions:
             inds = None
 
         N = len(subs) if subs is not None else len(inds)
-        self._populate_partitions(partition, [s for s in sizes if s > 0], tree_sizes, ind_blocks, N, subs, inds)
+        self._populate_partitions(partition, np.array([s for s in sizes if s > 0]), tree_sizes, ind_blocks, N, subs, inds)
 
         # TODO: find a way to handle unique masking inside numba loop
         if take_unique:
@@ -1829,7 +1829,7 @@ class UniquePartitions:
             ret += (inv,)
         return ret
     @staticmethod
-    @jit(nopython=True, cache=True)
+    # @jit(nopython=True, cache=True)
     def _populate_partitions(partition, sizes, tree_sizes, blocks, N, subs, inds):
         """
         :param partition:
@@ -1841,7 +1841,7 @@ class UniquePartitions:
 
         k = len(sizes)
         p = len(partition)
-        bs = np.concatenate([[0], np.cumsum(sizes)]) # block starts
+        bs = np.concatenate([np.array([0]), np.cumsum(sizes)]) # block starts
         r = np.arange(p) # for remainder indices
         for i in range(N): # product of tree/block shapes
             # these assertions sometimes help numba
@@ -3134,6 +3134,7 @@ class SymmetricGroupGenerator:
                                          split_results=False,
                                          excluded_permutations=None,
                                          filter_perms=None,
+                                         filter_negatives=True,
                                          return_filter=False,
                                          preserve_ordering=True,
                                          indexing_method='direct',
@@ -3359,7 +3360,8 @@ class SymmetricGroupGenerator:
                                                       return_change_positions=return_change_positions,
                                                       filter=filter, inds_dtype=inds_dtype,
                                                       excluded_permutations=exc,
-                                                      full_basis=full_basis
+                                                      full_basis=full_basis,
+                                                      filter_negatives=filter_negatives
                                                       )
                         # gc.collect()
                         if split_results or preserve_ordering:

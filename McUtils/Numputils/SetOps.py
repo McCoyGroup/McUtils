@@ -3,8 +3,8 @@ Provides customized set operations based off of the NumPy builtins
 to minimize things like excess sorts
 """
 
-import numpy as np
-from .Misc import flatten_dtype, unflatten_dtype, recast_permutation, recast_indices, downcast_index_array
+import numpy as np, itertools
+from .Misc import flatten_dtype, unflatten_dtype, recast_permutation, downcast_index_array, is_numeric
 
 __all__ = [
     'unique',
@@ -14,7 +14,12 @@ __all__ = [
     'find',
     'argsort',
     'group_by',
-    'split_by_regions'
+    'split_by_regions',
+    "combination_indices",
+    "vector_ix",
+    "vector_take",
+    "index_mask",
+    "index_complement"
 ]
 
 coerce_dtype = flatten_dtype
@@ -511,3 +516,96 @@ def split_by_regions(ar, regions, sortings=None, return_indices=False):
     output = ((uinds, groups),) + output[1:]
 
     return output
+
+def combination_indices(n, r):
+    if r == 0:
+        return np.array([[]])
+    elif r == n:
+        return np.arange(n)[np.newaxis]
+    return np.fromiter(
+        itertools.combinations(range(n), r),
+        count=np.math.comb(n, r),
+        dtype=np.dtype((int, (r,)))
+    )
+
+def vector_ix(shape, inds, return_shape=False):
+    if isinstance(inds, tuple):
+        if is_numeric(inds[0]): inds = tuple(np.asanyarray(ii) for ii in inds)
+    else:
+        inds = (np.asanyarray(inds),)
+    if is_numeric(shape, int): shape = (shape,)
+    if len(inds) != len(shape): raise ValueError("shape mismatch")
+    extra = inds[0].shape[:-1]
+    ee = len(extra)
+    xx = list(range(ee))
+    mask_inds = tuple(
+        np.expand_dims(np.arange(s), xx[:i] + xx[i + 1:] + [ee])
+        for i, s in enumerate(extra)
+    ) + inds
+    if return_shape:
+        return mask_inds, extra + shape
+    else:
+        return mask_inds
+
+def index_mask(shape, inds, complement=False):
+    inds, shape = vector_ix(shape, inds, return_shape=True)
+    mask = np.full(shape, True if complement else False)
+    mask[inds] = False if complement else True
+    return mask
+
+def index_complement(shape, inds):
+    if isinstance(inds, tuple):
+        if is_numeric(inds[0]): inds = tuple(np.asanyarray(ii) for ii in inds)
+    else:
+        inds = (np.asanyarray(inds),)
+    if is_numeric(shape, int): shape = (shape,)
+    extra = inds[0].shape[:-len(shape)]
+    mask = index_mask(shape, inds, complement=True)
+    mask_inds = np.where(mask)
+    comp_shape = tuple(s - i for s,i in zip(shape, inds[0].shape[-len(shape):]))
+    targ_shape = extra + comp_shape
+    return tuple(
+        mask_inds[k].reshape(targ_shape)
+        for k in range(-len(shape), 0)
+    )
+
+def vector_take(arr, inds, shared=None):
+    """
+    A generalized array indexing that broadcasts properly across everything except for the specified "take" index
+    :param arr:
+    :param inds:
+    :return:
+    """
+    # if axis != -1:
+    #     arr = np.moveaxis(arr, axis, -1)
+    if isinstance(inds, tuple):
+        if is_numeric(inds[0]): inds = tuple(np.asanyarray(ii) for ii in inds)
+    else:
+        inds = (np.asanyarray(inds),)
+
+    if shared is None: shared = 0
+    shared_shape = arr.shape[:shared]
+    bcast_shape_ind = inds[-1].shape[shared:-1]
+    bcast_shape_arr = arr.shape[shared:-len(inds)]
+
+    total_shape = shared_shape + bcast_shape_arr + bcast_shape_ind
+
+    arr_pad_dims = shared + len(bcast_shape_arr)
+    arr = np.broadcast_to(
+        np.expand_dims(arr, list(range(arr_pad_dims, arr_pad_dims+len(bcast_shape_ind)))),
+        total_shape + arr.shape[-len(inds):]
+    )
+
+    inds_nob = tuple(
+        np.broadcast_to(
+            np.expand_dims(x, list(range(shared, shared + len(bcast_shape_arr)))),
+            total_shape + x.shape[-len(inds):]
+        )
+        for x in inds
+    )
+    inds = vector_ix(arr.shape[-len(inds):], inds_nob)
+
+    return arr[inds]
+
+
+

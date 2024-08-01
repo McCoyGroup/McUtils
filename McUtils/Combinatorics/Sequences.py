@@ -12,6 +12,7 @@ __all__ = [
 
 import numpy as np
 
+
 def StirlingS1(n):
     """Computes the Stirling numbers
 
