@@ -1,11 +1,11 @@
-# <a id="McUtils.Numputils.Misc.recast_permutation">recast_permutation</a>
+# <a id="McUtils.Numputils.TensorDerivatives.tensor_reexpand">tensor_reexpand</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Misc.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Misc.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L377)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L377?message=Update%20Docs)]
 </div>
 
 ```python
-recast_permutation(permutation_array): 
+tensor_reexpand(derivs, vals, order=None, axes=None): 
 ```
 
 
@@ -53,13 +53,13 @@ recast_permutation(permutation_array):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Numputils/Misc/recast_permutation.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Numputils/Misc/recast_permutation.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Numputils/TensorDerivatives/tensor_reexpand.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Numputils/TensorDerivatives/tensor_reexpand.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/Misc/recast_permutation.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/Misc/recast_permutation.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/TensorDerivatives/tensor_reexpand.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/tensor_reexpand.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Misc.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L377?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.GaussianInterface.FChkDerivatives.FchkDipoleDerivatives">FchkDipoleDerivatives</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives.py#L157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives.py#L157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives.py#L176)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives.py#L176?message=Update%20Docs)]
 </div>
 
 Holder class for dipole derivatives coming out of an fchk file
@@ -21,11 +21,11 @@ Holder class for dipole derivatives coming out of an fchk file
  
 <a id="McUtils.GaussianInterface.FChkDerivatives.FchkDipoleDerivatives.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, derivs): 
+__init__(self, derivs, num_atoms=None, reader=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L159)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L159?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L178)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L178?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, derivs):
 n(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L172)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L172?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L191?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ n(self):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L194)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L194?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ shape(self):
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.py#L197?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -113,7 +113,7 @@ array(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives.py#L157?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/FChkDerivatives.py#L176?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

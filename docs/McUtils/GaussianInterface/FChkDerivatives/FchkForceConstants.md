@@ -22,7 +22,7 @@ Allows us to construct the force constant matrix in lazy fashion if we want.
  
 <a id="McUtils.GaussianInterface.FChkDerivatives.FchkForceConstants.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, fcs): 
+__init__(self, fcs, reader=None): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/FChkDerivatives/FchkForceConstants.py#L20)/

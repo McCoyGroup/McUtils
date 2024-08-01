@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.Misc.infer_int_dtype">infer_int_dtype</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Misc.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Misc.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Misc.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Misc.py#L57?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ infer_int_dtype(max_dim):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/Misc/infer_int_dtype.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/Misc/infer_int_dtype.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Misc.py#L43?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Misc.py#L57?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

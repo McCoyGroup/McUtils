@@ -61,7 +61,7 @@ compute_partition_terms(partition):
 
 <a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert_partition" class="docs-object-method">&nbsp;</a> 
 ```python
-convert_partition(partition, derivs, vals, val_axis=-1): 
+convert_partition(partition, derivs, vals, val_axis=0): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1788)/
@@ -74,8 +74,8 @@ convert_partition(partition, derivs, vals, val_axis=-1):
 convert_fast(derivs, vals, val_axis=-1, order=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1822)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1822?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1826)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1826?message=Update%20Docs)]
 </div>
  </div>
 </div>

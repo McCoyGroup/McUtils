@@ -124,6 +124,16 @@ shift(self, shift) -> 'DensePolynomial':
 </div>
 
 
+<a id="McUtils.Zachary.Polynomials.DensePolynomial.compute_shifted_coeffs" class="docs-object-method">&nbsp;</a> 
+```python
+compute_shifted_coeffs(poly_coeffs, shift, stack_dim=0): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L387)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L387?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Zachary.Polynomials.DensePolynomial.fill_tensors" class="docs-object-method">&nbsp;</a> 
 ```python
 fill_tensors(tensors, idx, value, stack_dim, pcache, permute, rescale): 

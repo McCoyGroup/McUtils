@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.FileStreamReader">FileStreamReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer.py#L445)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L445?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer.py#L456)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L456?message=Update%20Docs)]
 </div>
 
 Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
@@ -24,8 +24,8 @@ Represents a file from which we'll stream blocks of data by finding tags and par
 __init__(self, file, mode='r', encoding='utf-8', **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer/FileStreamReader.py#L449)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer/FileStreamReader.py#L449?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer/FileStreamReader.py#L460)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer/FileStreamReader.py#L460?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -80,7 +80,7 @@ __init__(self, file, mode='r', encoding='utf-8', **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Parsers/FileStreamer/FileStreamReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L445?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L456?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
