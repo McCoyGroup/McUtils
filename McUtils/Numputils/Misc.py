@@ -9,10 +9,24 @@ __all__ = [
     'recast_permutation',
     'recast_indices',
     'downcast_index_array',
-    'numeric_types'
+    'numeric_types',
+    'is_atomic',
+    'is_numeric',
+    'is_zero'
 ]
 
 numeric_types = (int, float, np.integer, np.floating)
+atomic_types = numeric_types + (str, )
+def is_atomic(obj, types=None):
+    if types is None: types = atomic_types
+    return isinstance(obj, types) or (
+            isinstance(obj, np.ndarray) and obj.shape == () and is_atomic(obj[()], types)
+    )
+def is_numeric(obj, types=None):
+    if types is None: types = numeric_types
+    return is_atomic(obj, types=types)
+def is_zero(obj, numeric_types=None):
+    return is_numeric(obj, types=numeric_types) and obj == 0
 
 def downcast_index_array(a, max_val):
     return a.astype(infer_inds_dtype(max_val))

@@ -17,9 +17,9 @@ class FchkForceConstants:
     Holder class for force constants coming out of an fchk file.
     Allows us to construct the force constant matrix in lazy fashion if we want.
     """
-    def __init__(self, fcs):
+    def __init__(self, fcs, reader=None):
         self.fcs = fcs
-        self._n = None
+        self._n = reader.num_atoms
 
     def __len__(self):
         return len(self.fcs)
@@ -58,31 +58,50 @@ class FchkForceConstants:
 
 class FchkForceDerivatives:
     """Holder class for force constant derivatives coming out of an fchk file"""
-    def __init__(self, derivs):
+    def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
         self.derivs = derivs
-        self._n = None
+        self._n = num_atoms if num_atoms is not None else reader.num_atoms
+        self._m = num_modes
 
     def __len__(self):
         return len(self.derivs)
 
-    def _get_n(self):
+    def _get_n_m(self):
         if self._n is None:
             l = len(self)
-            # had to use Mathematica to get this from the cubic poly
-            #  2*(3n-6)*(3n)^2 == 2*l - 2*(3n-6)*(3n)
-            l_quad = 81*l**2 + 3120*l - 5292
-            l_body = (3*np.sqrt(l_quad) - 27*l - 520)
-            if l_body > 0:
-                l1 = l_body**(1/3)
+            if self._m is None:
+                # had to use Mathematica to get this from the cubic poly
+                #  2*(3n-6)*(3n)^2 == 2*l - 2*(3n-6)*(3n)
+                l_quad = 81*l**2 + 3120*l - 5292
+                l_body = (3*np.sqrt(l_quad) - 27*l - 520)
+                if l_body > 0:
+                    l1 = l_body**(1/3)
+                else:
+                    l1 = -(-l_body)**(1/3)
+                n = (1/18)*( 10 + (2**(1/3))*( l1 - 86/l1) )
+                self._n = int(np.ceil(n)) # precision issues screw this up in python, but not in Mathematica (I think)
+                self._m = 3*self._n - 6
             else:
-                l1 = -(-l_body)**(1/3)
-            n = (1/18)*( 10 + (2**(1/3))*( l1 - 86/l1) )
-            self._n = int(np.ceil(n)) # precision issues screw this up in python, but not in Mathematica (I think)
-        return self._n
+                # solving a quadratic poly
+                m = self._m
+                self._n = int(
+                    (np.sqrt(4*l*m - m**2) - m)/ (6*m)
+                )
+        elif self._m is None:
+            l = len(self)
+            self._m = int(l / (3*self._n * (1 + 3*self._n)))
 
     @property
     def n(self):
-        return self._get_n()
+        if self._n is None:
+            self._get_n_m()
+        return self._n
+
+    @property
+    def num_modes(self):
+        if self._m is None:
+            self._get_n_m()
+        return self._m
 
     def _get_third_derivs(self):
         # fourth and third derivs are same len
@@ -102,7 +121,7 @@ class FchkForceDerivatives:
     def fourth_derivs(self):
         return self._get_fourth_derivs()
     @staticmethod
-    def _fill_3d_tensor(n, derivs):
+    def _fill_3d_tensor(n, derivs, m=None):
         """Makes and fills a 3D tensor for our derivatives
         :param n:
         :type n:
@@ -112,7 +131,7 @@ class FchkForceDerivatives:
         :rtype: np.ndarray
         """
         dim_1 = (3*n)
-        mode_n = 3*n-6
+        mode_n = 3*n - 6 if m is None else m
 
         full_array_1 = np.zeros((mode_n, dim_1, dim_1))
         # set the lower triangle
@@ -135,7 +154,7 @@ class FchkForceDerivatives:
         """
         n = self.n
         derivs = self.third_derivs
-        return self._fill_3d_tensor(n, derivs)
+        return self._fill_3d_tensor(n, derivs, m=self.num_modes)
     @property
     def third_deriv_array(self):
         return self._get_third_deriv_array()
@@ -149,16 +168,16 @@ class FchkForceDerivatives:
         """
         n = self.n
         derivs = self.fourth_derivs
-        return SparseArray.from_diag(self._fill_3d_tensor(n, derivs))
+        return SparseArray.from_diag(self._fill_3d_tensor(n, derivs, m=self.num_modes))
     @property
     def fourth_deriv_array(self):
         return self._get_fourth_deriv_array()
 
 class FchkDipoleDerivatives:
     """Holder class for dipole derivatives coming out of an fchk file"""
-    def __init__(self, derivs):
+    def __init__(self, derivs, num_atoms=None, reader=None):
         self.derivs = derivs
-        self._n = None
+        self._n = num_atoms if num_atoms is not None else reader.num_atoms
 
     def _get_n(self):
         """
@@ -181,10 +200,11 @@ class FchkDipoleDerivatives:
 
 class FchkDipoleHigherDerivatives:
     """Holder class for dipole derivatives coming out of an fchk file"""
-    def __init__(self, derivs):
+    def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
         self.derivs = derivs
-        self._n = None
-    def _get_n(self):
+        self._n = num_atoms if num_atoms is not None else reader.num_atoms
+        self._m = num_modes
+    def _get_n_m(self):
         """
         :return:
         :rtype: int
@@ -193,14 +213,31 @@ class FchkDipoleHigherDerivatives:
         # Gaussian gives us stuff out like d^2mu/dQdx and d^3mu/dQ^2dx
         if self._n is None:
             l = len(self.derivs)
-            self._n = int(1 + np.sqrt(1 + l/54)) # solving 3n*(3n-6) == l/6
-        return self._n
+            if self._m is None:
+                self._n = int(1 + np.sqrt(1 + l/54)) # solving 3n*(3n-6) == l/6
+                self._m = 3*self._n - 6
+            else:
+                self._n = l // self.num_modes // 3
+        elif self._m is None:
+            l = len(self.derivs)
+            self._m = l // (6 * 3 * self._n)
+        # return self._n
+    @property
+    def num_modes(self):
+        if self._m is None:
+            self._get_n_m()
+        return self._m
     @property
     def n(self):
-        return self._get_n()
+        if self._n is None:
+            self._get_n_m()
+        return self._n
+    # @n.setter
+    # def n(self, n):
+    #     self._n = n
     @property
     def shape(self):
-        return (3*self.n - 6, 3*self.n, 3)
+        return (self.num_modes, 3*self.n, 3)
 
     @property
     def second_deriv_array(self):
@@ -210,8 +247,8 @@ class FchkDipoleHigherDerivatives:
     def third_deriv_array(self):
         nels = int(np.prod(self.shape))
         base_array = np.reshape(self.derivs[nels:], self.shape)
-        full_array = np.zeros((3*self.n - 6, 3*self.n - 6, 3*self.n, 3))
-        for i in range(3*self.n - 6):
+        full_array = np.zeros((self.num_modes, self.num_modes, 3*self.n, 3))
+        for i in range(self.num_modes):
             full_array[i, i] = base_array[i]
         return full_array
 
@@ -220,25 +257,26 @@ class FchkDipoleNumDerivatives:
     Holder class for numerical derivatives coming out of an fchk file.
     Gaussian returns first and second derivatives
     """
-    def __init__(self, derivs):
+    def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
         self.derivs = derivs
-        self._n = None
-    def _get_n(self):
+        # self._n = num_atoms if num_atoms is not None else reader.num_atoms
+        self._m = num_modes
+    def _get_m(self):
         """
         Returns the number of _modes_ in the system
         :return:
         :rtype: int
         """
         # derivatives with respect to (3N - 6) modes...
-        if self._n is None:
-            self._n = len(self.derivs)//6 # solving 2*3*n == l
-        return self._n
+        if self._m is None:
+            self._m = len(self.derivs)//6 # solving 2*3*n == l
+        return self._m
     @property
-    def n(self):
-        return self._get_n()
+    def num_modes(self):
+        return self._get_m()
     @property
     def shape(self):
-        return (self.n, 3)
+        return (self.num_modes, 3)
     @property
     def first_derivatives(self):
         return np.reshape(self.derivs[:len(self.derivs)//2], self.shape)

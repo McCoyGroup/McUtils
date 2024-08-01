@@ -358,6 +358,7 @@ class SearchStreamReader:
                         parser=None,
                         parse_mode="List",
                         num=None,
+                        pass_context=False,
                         **ignore
                         ):
         """Parses a block by starting at tag_start and looking for tag_end and parsing what's in between them
@@ -392,7 +393,7 @@ class SearchStreamReader:
                 if isinstance(num, int):
                     blocks = [None]*num
                     if parser is None:
-                        parser = lambda a:a
+                        parser = lambda a, reader=None:a
 
                     i = 0 # protective
                     for i in range(num):
@@ -400,7 +401,10 @@ class SearchStreamReader:
                         if block is None:
                             break
                         if parse_mode != "List":
-                            block = parser(block)
+                            if pass_context:
+                                block = parser(block, reader=self)
+                            else:
+                                block = parser(block)
                         blocks[i] = block
 
                     if parse_mode == "List":
@@ -409,15 +413,22 @@ class SearchStreamReader:
                     blocks = []
                     block = self.get_tagged_block(tag_start, tag_end)
                     if parser is None:
-                        parser = lambda a:a
+                        parser = lambda a, reader=None:a
                     while block is not None:
                         if parse_mode != "List":
-                            block = parser(block)
+                            if pass_context:
+                                block = parser(block, reader=self)
+                            else:
+                                block = parser(block)
+
                         blocks.append(block)
                         block = self.get_tagged_block(tag_start, tag_end)
 
                     if parse_mode == "List":
-                        blocks = parser(blocks)
+                        if pass_context:
+                            blocks = parser(blocks, reader=self)
+                        else:
+                            blocks = parser(blocks)
                 return blocks
         else:
             block = self.get_tagged_block(tag_start, tag_end)
