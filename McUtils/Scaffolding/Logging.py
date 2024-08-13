@@ -105,9 +105,13 @@ class LoggingBlock:
             if callable(self._tag):
                 self._tag = self._tag()
             else:
-                self._tag = self._tag[0].format(**self._tag[1])
+                tag_vars = self._tag[1] # type:dict
+                tag_vars = tag_vars.get('preformatter', lambda **kw:kw)(**tag_vars)
+                self._tag = self._tag[0].format(**tag_vars)
         elif self._tagvars is not None:
-            self._tag = self._tag.format(**self._tagvars)
+            tag_vars = self._tagvars
+            tag_vars = tag_vars.get('preformatter', lambda **kw:kw)(**tag_vars)
+            self._tag = self._tag.format(**tag_vars)
             self._tagvars = None
 
         return self._tag
@@ -155,10 +159,12 @@ class Logger:
                  log_level=None,
                  print_function=None,
                  padding="",
-                 newline="\n"
+                 newline="\n",
+                 repad_messages=True
                  ):
         self.log_file = log_file
         self.verbosity = log_level if log_level is not None else self.default_verbosity
+        self.repad = repad_messages
         self.padding = padding
         self.newline = newline
         self.block_level = 0 # just an int to pass to `block(...)` so that it can
@@ -243,7 +249,7 @@ class Logger:
             return args, kwargs
         return preformat
 
-    def format_message(self, message, *params, preformatter=None, **kwargs):
+    def format_message(self, message, *params, preformatter=None, _repad=None, _newline=None, _padding=None, **kwargs):
         if preformatter is not None:
             args = preformatter(*params, **kwargs)
             if isinstance(args, dict):
@@ -258,6 +264,18 @@ class Logger:
             else:
                 params = ()
                 kwargs = args
+
+        if _repad is None: _repad = self.repad
+        if _repad:
+            kwargs = {
+                k: (
+                    self.pad_newlines(v, newline=_newline, padding=_padding, **kwargs)
+                        if isinstance(v, str) else
+                    v
+                )
+                for k,v in kwargs.items()
+            }
+
         if len(kwargs) > 0:
             message = message.format(*params, **kwargs)
         elif len(params) > 0:
@@ -271,6 +289,12 @@ class Logger:
             import json
             return json.dumps(metainfo)
 
+    def pad_newlines(self, obj, padding=None, newline=None, **kwargs):
+        if not isinstance(obj, str): obj = '{}'.format(obj)
+        if padding is None: padding = self.padding
+        if newline is None: newline = self.newline
+        rep = (newline + padding).format(**kwargs)
+        return obj.replace("\n", rep)
     @staticmethod
     def split_lines(obj):
         return str(obj).splitlines()
@@ -358,6 +382,8 @@ class Logger:
                 msg = self.format_message(message,
                                           meta=self.format_metainfo(metainfo),
                                           preformatter=preformatter,
+                                          _newline=newline,
+                                          _padding=padding,
                                           **kwargs)
                 if isinstance(print_function, str) and print_function == 'echo':
                     if self.log_file is not None:

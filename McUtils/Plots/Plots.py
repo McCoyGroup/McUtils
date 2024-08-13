@@ -252,7 +252,7 @@ class Plot(Graphics):
         if method is None:
            method = self.method
         if isinstance(method, str):
-            method = getattr(self.axes, method)
+            method = self.axes.get_plotter(method)
         self._method = method
 
         if len(params) > 0:

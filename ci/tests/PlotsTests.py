@@ -20,8 +20,9 @@ class PlotsTests(TestCase):
     def test_Plot(self):
         grid = np.linspace(0, 2*np.pi, 100)
         plot = Plot(grid, np.sin(grid))
+        plot.show()
 
-        plot.savefig(self.result_file("test_Plot.png"))
+        # plot.savefig(self.result_file("test_Plot.png"))
         plot.close()
         # plot.show()
 
@@ -72,14 +73,15 @@ class PlotsTests(TestCase):
                     )
         # plot.savefig(file)
         # plot = Image.from_file(file)
-        # plot.show()
-        plot.savefig(self.result_file("test_PlotStyling.png"))
+        plot.show()
+        # plot.savefig(self.result_file("test_PlotStyling.png"))
         plot.close()
 
     @debugTest
     def test_PlotGridStyling(self):
         main = GraphicsGrid(ncols=3, nrows=1, theme='Solarize_Light2', figure_label='my beuatufil triptych',
-                            padding=((35, 60), (35, 40)))
+                            padding=((50, 10), (50, 65)),
+                            spacings=[50, 0])
         grid = np.linspace(0, 2 * np.pi, 100)
         grid_2D = np.meshgrid(grid, grid)
         x = grid_2D[1]; y = grid_2D[0]
@@ -94,20 +96,19 @@ class PlotsTests(TestCase):
         main[0, 2] = ContourPlot(x, y, np.cos(y), plot_label='$cos(y)$', figure=main[0, 2])
         main.colorbar = {"graphics": main[0, 1].graphics}
 
-        # main.show()
-
-        main.savefig(self.result_file("test_PlotGridStyling.png"))
+        main.show()
+        # main.savefig(self.result_file("test_PlotGridStyling.png"))
         main.close()
 
-    @debugTest
+    @validationTest
     def test_Scatter(self):
         pts = np.random.rand(50, 2)
         plot = ScatterPlot(*pts.T,
                            aspect_ratio=2,
                            image_size=250
                            )
-        # plot.show()
-        plot.savefig(self.result_file("test_Scatter.pdf"), format='pdf')
+        plot.show()
+        # plot.savefig(self.result_file("test_Scatter.pdf"), format='pdf')
         plot.close()
 
     @validationTest

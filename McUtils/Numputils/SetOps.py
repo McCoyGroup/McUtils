@@ -16,6 +16,7 @@ __all__ = [
     'group_by',
     'split_by_regions',
     "combination_indices",
+    "permutation_indices",
     "vector_ix",
     "vector_take",
     "index_mask",
@@ -517,6 +518,14 @@ def split_by_regions(ar, regions, sortings=None, return_indices=False):
 
     return output
 
+def permutation_indices(n, r):
+    if r == 0:
+        return np.array([[]])
+    return np.fromiter(
+        itertools.permutations(range(n), r),
+        count=np.math.factorial(n)//np.math.factorial(n-r),
+        dtype=np.dtype((int, (r,)))
+    )
 def combination_indices(n, r):
     if r == 0:
         return np.array([[]])
@@ -558,7 +567,7 @@ def index_complement(shape, inds):
         if is_numeric(inds[0]): inds = tuple(np.asanyarray(ii) for ii in inds)
     else:
         inds = (np.asanyarray(inds),)
-    if is_numeric(shape, int): shape = (shape,)
+    if is_numeric(shape): shape = (shape,)
     extra = inds[0].shape[:-len(shape)]
     mask = index_mask(shape, inds, complement=True)
     mask_inds = np.where(mask)

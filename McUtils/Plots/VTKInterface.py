@@ -2,6 +2,8 @@
 Provides an interface to VTK that implements all necessary components with a matplotlib compatible API
 """
 
+from ..ExternalPrograms import VTKInterface as vtk
+
 __all__ = [
     "VTKWindow",
     "VTKPrimitive",
@@ -27,8 +29,7 @@ class VTKObject:
 
     def __init__(self, obj):
         if isinstance(obj, str):
-            import vtk
-            obj = getattr(vtk, 'vtk' + obj)()
+            obj = vtk.graphics_object(obj)
         self.obj = obj
 
     def chain_to(self, src):
@@ -70,12 +71,10 @@ class VTKObject:
 
     @classmethod
     def color_tuple(cls, c):
-        import vtk
-
         if isinstance(c, str) and c.startswith("#"):
             c = cls._HTMLColorToRGB(c)
         elif isinstance(c, str):
-            colors = vtk.vtkNamedColors()
+            colors = vtk.named_colors()
             c = colors.GetColor3d(c)
         else:
             if any(x > 1 for x in c):
@@ -276,18 +275,18 @@ class VTKWindow:
     # this will take care of all of the low level communication with the window object
 
     def __init__(self,
-                 title = None,
-                 legend = None,
-                 window = None,
-                 cube = None,
-                 use_axes = True,
-                 interactor = None,
-                 renderer = None,
-                 background = 'white',
-                 image_size = (640, 480),
-                 viewpoint = (5, 5, 5),
-                 focalpoint = (0, 0, 0),
-                 scale = (1, 1, 1)
+                 title=None,
+                 legend=None,
+                 window=None,
+                 cube=None,
+                 use_axes=True,
+                 interactor=None,
+                 renderer=None,
+                 background='white',
+                 image_size=(640, 480),
+                 viewpoint=(5, 5, 5),
+                 focalpoint=(0, 0, 0),
+                 scale=(1, 1, 1)
                  ):
 
         self._window = VTKObject("RenderWindow") if window is None else window
@@ -472,7 +471,7 @@ class VTKWindow:
 
         # handle other affine transforms here
 
-        self.camera['model_tranform_matrix'] = transform['matrix']
+        self.camera['model_transform_matrix'] = transform['matrix']
 
     def get_xscale(self):
         # self._not_imped_warning('get_xscale')

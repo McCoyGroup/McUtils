@@ -2,6 +2,7 @@
 Handles all the nastiness of Matplotlib properties so that we can use a more classically python plotting method
 """
 
+from .Backends import DPI_SCALING
 from .Styling import Styled, PlotLegend
 
 __all__ = [
@@ -50,11 +51,11 @@ class GraphicsPropertyManager:
         self._figure_label = label
         if not self.managed:
             if label is None:
-                self.figure.suptitle("")
+                self.figure.set_figure_label("")
             elif isinstance(label, Styled):
-                self.figure.suptitle(*label.val, **label.opts)
+                self.figure.set_figure_label(*label.val, **label.opts)
             else:
-                self.figure.suptitle(label)
+                self.figure.set_figure_label(label)
 
     @property
     def plot_label(self):
@@ -63,14 +64,14 @@ class GraphicsPropertyManager:
     def plot_label(self, label):
         self._plot_label = label
         if label is None:
-            self.axes.set_title("")
+            self.axes.set_plot_label("")
         elif isinstance(label, Styled):
-            self.axes.set_title(*label.val, **label.opts)
+            self.axes.set_plot_label(*label.val, **label.opts)
         elif Styled.could_be(label):
             label = Styled.construct(label)
-            self.axes.set_title(*label.val, **label.opts)
+            self.axes.set_plot_label(*label.val, **label.opts)
         else:
-            self.axes.set_title(label)
+            self.axes.set_plot_label(label)
 
     # set plot legend
     @property
@@ -83,6 +84,7 @@ class GraphicsPropertyManager:
         if PlotLegend.could_be_legend(legend):
             self._plot_legend = PlotLegend.construct(legend)
         else:
+            raise NotImplementedError("plot legends not properly supported..")
             artists = self.graphics.artists
             if artists is not None:
                 if legend is None:
@@ -134,7 +136,7 @@ class GraphicsPropertyManager:
         if xlab is None:
             self.axes.set_xlabel("")
         elif isinstance(xlab, Styled):
-            self.axes.set_xlabel(*xlab.val, **xlab.opts)
+            self.axes.set_xlabel(xlab.val[0], **xlab.opts)
         elif Styled.could_be(xlab):
             xlab = Styled.construct(xlab)
             self.axes.set_xlabel(*xlab.val, **xlab.opts)
@@ -272,8 +274,7 @@ class GraphicsPropertyManager:
                 x = dict(bottom=True, labelbottom=True)
             elif x is False:
                 x = dict(bottom=False, top=False, labelbottom=False, labeltop=False)
-            self.axes.tick_params(
-                axis='x',
+            self.axes.set_xtick_style(
                 **x
             )
         if y is not None:
@@ -281,8 +282,7 @@ class GraphicsPropertyManager:
                 y = dict(left=True, labelleft=True)
             elif y is False:
                 y = dict(left=False, right=False, labelleft=False, labelright=False)
-            self.axes.tick_params(
-                axis='y',
+            self.axes.set_ytick_style(
                 **y
             )
     @property
@@ -299,8 +299,6 @@ class GraphicsPropertyManager:
             x, y = f_style
         except ValueError:
             x, y = f_style = (f_style, f_style)
-        # else:
-        #     print(">", x, y)
         if isinstance(y, dict):
             y = (y, y)
         if isinstance(x, dict):
@@ -315,11 +313,9 @@ class GraphicsPropertyManager:
             l = r = x
 
         self._frame_style = ((l, r), (b, t))
-        lax, rax, bax, tax = self.axes.spines.values()
-        # print(l, r, b, t)
-        for a,o in zip((lax, rax, bax, tax), (l, r, b, t)):
-            if o is not None:
-                a.set(**o)
+        self.axes.set_frame_style(
+            self._frame_style
+        )
 
     ticks_label_base_styles = {
         'size', 'color',
@@ -349,13 +345,11 @@ class GraphicsPropertyManager:
         self._ticks_label_style = ticks_style
 
         if x is not None:
-            self.axes.tick_params(
-                axis='x',
+            self.axes.set_xtick_style(
                 **{self.clean_tick_label_styles(k):v for k,v in x.items()}
             )
         if y is not None:
-            self.axes.tick_params(
-                axis='y',
+            self.axes.set_ytick_style(
                 **{self.clean_tick_label_styles(k):v for k,v in y.items()}
             )
 
@@ -368,20 +362,21 @@ class GraphicsPropertyManager:
             a, b = self.plot_range
             cur_ar = abs(b[1] - b[0]) / abs(a[1] - a[0])
             targ_ar = ar / cur_ar
-            self.axes.set_aspect(targ_ar)
+            self.axes.set_aspect_ratio(targ_ar)
         elif isinstance(ar, str):
-            self.axes.set_aspect(ar)
+            self.axes.set_aspect_ratio(ar)
         else:
-            self.axes.set_aspect(ar[0], **ar[1])
+            self.axes.set_aspect_ratio(ar[0], **ar[1])
         self._aspect_ratio = ar
 
     def _compute_inset_imagesize(self):
         if self.managed or self.graphics.inset:
-            ((alx, aby), (arx, aty)) = self.axes.bbox.get_points()
+            bbox = self.axes.get_bbox()
+            ((alx, aby), (arx, aty)) = bbox
             ((plx, prx), (pby, pty)) = self.padding
             return (arx - alx + prx + plx, aty - aby + pty + pby)
         else:
-            return tuple(s * 72. for s in self.figure.get_size_inches())
+            return tuple(s * DPI_SCALING for s in self.figure.get_size_inches())
     # set size
     @property
     def image_size(self):
@@ -421,35 +416,26 @@ class GraphicsPropertyManager:
                 if h is None:
                     h = self._image_size[1]
 
-                if w > 72: # refuse to have anything smaller than 1 inch?
-                    wi = w / 72
+                if w > DPI_SCALING: # refuse to have anything smaller than 1 inch?
+                    wi = w / DPI_SCALING
                 else:
                     wi = w
-                    w = 72 * w
+                    w = DPI_SCALING * w
 
-                if h > 72:
-                    hi = h / 72
+                if h > DPI_SCALING:
+                    hi = h / DPI_SCALING
                 else:
                     hi = h
-                    h = 72 * h
+                    h = DPI_SCALING * h
                 self.figure.set_size_inches(wi, hi)
     @property
     def axes_bbox(self):
-        bbox = self.axes.get_position()
-        if hasattr(bbox, 'get_points'):
-            bbox = bbox.get_points()
-        return bbox
+        return self.axes.get_bbox()
+        # return bbox
     @axes_bbox.setter
     def axes_bbox(self, bbox):
-        # if lx > 72:
-        #     ...
-        # elif by > 72:
-        #     ...
         if bbox is not None:
-            if hasattr(bbox, 'get_points'):
-                bbox = bbox.get_points()
-            ((lx, by), (rx, ty)) = bbox
-            self.axes.set_position([lx, by, rx-lx, ty-by])
+            self.axes.set_bbox(bbox)
 
     # set background color
     @property
@@ -476,7 +462,7 @@ class GraphicsPropertyManager:
     def frame(self, fr):
         self._frame = fr
         if fr is True or fr is False:
-            self.axes.set_frame_on(fr)
+            self.axes.set_frame_visible(fr)
         else:
             lr, bt = fr
             if len(lr) == 2:
@@ -487,8 +473,9 @@ class GraphicsPropertyManager:
                 b, t = bt
             else:
                 b = bt; t = bt
-            self.axes.spines['left'].set_visible(l); self.axes.spines['right'].set_visible(r)
-            self.axes.spines['bottom'].set_visible(b); self.axes.spines['top'].set_visible(t)
+            self.axes.set_frame_visible(
+                ((l, r), (b, t))
+            )
 
     @property
     def scale(self):
@@ -522,57 +509,7 @@ class GraphicsPropertyManager:
     @property
     def padding(self):
         if self.managed or self.graphics.inset:
-            padding = [
-                ['left', 'right'],
-                ['bottom', 'top']
-            ]
-            xlab_padding = None
-            ylab_padding = None
-            for i,l in enumerate(padding):
-                for j,key in enumerate(l):
-                    spine = self.axes.spines[key]
-                    viz = spine.get_visible()
-                    if viz:
-                        ((l, b), (r, t)) = bbox = spine.get_window_extent().get_points()
-                        # print(key)
-                        # print(bbox)
-                        if i == 0:
-                            base_pad = r - l
-                            if xlab_padding is None:
-                                xlabs = self.axes.get_xticklabels()
-                                if len(xlabs) > 0:
-                                    min_x = 1e10
-                                    max_x = -1e10
-                                    for lab in xlabs:
-                                        ((l, b), (r, t)) = lab.get_window_extent().get_points()
-                                        min_x = min(l, min_x)
-                                        max_x = max(r, max_x)
-                                    xlab_padding = max_x - min_x
-                                else:
-                                    xlab_padding = 0
-                            padding[i][j] = base_pad + xlab_padding
-                        else:
-                            base_pad = t - b
-                            if ylab_padding is None:
-                                ylabs = self.axes.get_yticklabels()
-                                if len(ylabs) > 0:
-                                    min_y = 1e10
-                                    max_y = -1e10
-                                    for lab in ylabs:
-                                        ((l, b), (r, t)) = lab.get_window_extent().get_points()
-                                        min_y = min(b, min_y)
-                                        max_y = max(t, max_y)
-                                    ylab_padding = max_y - min_y
-                                else:
-                                    ylab_padding = 0
-                            padding[i][j] = base_pad + ylab_padding
-                    else:
-                        padding[i][j] = 0
-
-            # padding = [[0, 0], [0, 0]]
-            # print(">>", padding)
-
-            return padding
+            return self.axes.get_padding()
         else:
             return self._padding
     @padding.setter
@@ -603,7 +540,10 @@ class GraphicsPropertyManager:
         wx = wx / W; wy = wy / W
         hx = hx / H; hy = hy / H
         if not self.managed and not self.graphics.inset:
-            self.figure.subplots_adjust(left=wx, right=1 - wy, bottom=hx, top=1 - hy)#, hspace=0, wspace=0)
+            self.figure.set_extents([
+                [wx, 1-wy],
+                [hx, 1-hy]
+            ])
     @property
     def padding_left(self):
         return self._padding[0][0]
@@ -654,7 +594,13 @@ class GraphicsPropertyManager:
             """
             The width of the padding between subplots, as a fraction of the average Axes width.
             """
-            bboxes = [a.bbox.get_points() for a in self.figure.axes]
+            if hasattr(self.axes, 'get_bboxes'):
+                bboxes = self.axes.get_bboxes()
+            else:
+                bboxes = self.figure.get_bboxes()
+            # bboxes = [a.get_bbox() for a in self.axes]
+            # W = bbox[1][0] - bbox[0][0]
+            # H = bbox[1][1] - bbox[0][1]
             W = sum(b[1][0] - b[0][0] for b in bboxes) / len(bboxes)
             H = sum(b[1][1] - b[0][1] for b in bboxes) / len(bboxes)
 
@@ -672,7 +618,7 @@ class GraphicsPropertyManager:
             w = wp / W
             h = hp / H
 
-            self.figure.subplots_adjust(wspace=w, hspace=h)
+            self.figure.set_figure_spacings([w, h])
 
 
     @property
@@ -840,18 +786,15 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
             x, y, z = ticks_style = (self._ticks_style[0], self._ticks_style[1], ticks_style)
         self._ticks_style = ticks_style
         if x is not None:
-            self.axes.tick_params(
-                axis='x',
+            self.axes.set_xtick_style(
                 **x
             )
         if y is not None:
-            self.axes.tick_params(
-                axis='y',
+            self.axes.set_ytick_style(
                 **y
             )
         if z is not None:
-            self.axes.tick_params(
-                axis='z',
+            self.axes.set_ztick_style(
                 **z
             )
 
