@@ -5,7 +5,11 @@ Utilities for working with permutations and permutation indexing
 import numpy as np, time, typing, gc, itertools
 import collections, functools as ft
 from ..Misc import jit, objmode, prange
-from ..Numputils import flatten_dtype, unflatten_dtype, difference as set_difference, unique, contained, group_by, split_by_regions, find, infer_int_dtype
+from ..Numputils import (
+    flatten_dtype, unflatten_dtype, difference as set_difference,
+    unique, contained, group_by, split_by_regions, find, infer_int_dtype,
+    vector_take
+)
 from ..Scaffolding import NullLogger
 
 __all__ = [
@@ -491,7 +495,14 @@ class UniquePermutations:
     where we don't want to instantiate a permutations object for every partition
     """
     def __init__(self, partition):
-        self.part = np.flip(np.sort(partition))
+        partition = np.asanyarray(partition)
+        self.sorting = np.flip(np.argsort(partition))
+        if np.equal(self.sorting, np.arange(len(partition))).all():
+            self.sorting = None
+        else:
+            partition = partition[self.sorting,]
+        self.inv = np.argsort(self.sorting) if self.sorting is not None else None
+        self.part = partition
         v, c = np.unique(partition, return_counts=True)
         self.vals = np.flip(v)
         self.counts = np.flip(c)
@@ -585,8 +596,18 @@ class UniquePermutations:
                 if num_perms is None:
                     num_perms = self.num_permutations - self.index_permutations(initial_permutation)
 
-            return self.get_subsequent_permutations(initial_permutation, return_indices=return_indices, num_perms=num_perms)
+            ret = self.get_subsequent_permutations(initial_permutation, return_indices=return_indices, num_perms=num_perms)
+            if return_indices:
+                inds, perms = ret
+                if self.sorting is not None:
+                    inds = vector_take(self.inv, inds)
+                ret = (inds, perms)
+            return ret
+
         else:
+
+            if return_indices: raise NotImplementedError("blocks don't support indices yet")
+
             # we'll read a position block spec like [3, 3, 4, 4, 4, 6, 6]
             # to mean that the first two elements can only go as far as position 3,
             # the third through fifth can only go as far as position 4

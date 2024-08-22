@@ -975,7 +975,11 @@ class SparsePolynomial(AbstractPolynomial):
 class PureMonicPolynomial(SparsePolynomial):
     def __init__(self, terms: dict, prefactor=1, canonicalize=True):
         if canonicalize:
-            terms = {self.canonical_key(k):v for k,v in terms.items()}
+            new_terms = {}
+            for k,v in terms.items():
+                k = self.canonical_key(k)
+                new_terms[k] = new_terms.get(k, 0) + v
+            terms = new_terms
         super().__init__(terms, prefactor)
 
     @property
@@ -1069,16 +1073,51 @@ class PureMonicPolynomial(SparsePolynomial):
                           prefactor=self.prefactor if prefactor is None else prefactor,
                           canonicalize=False if canonicalize is None else canonicalize
                           )
-    def filter_terms(self, required_keys):
+
+    def filter(self, keys, mode='match'):
+        if mode == 'match':
+            return self._filter_exact(keys)
+        elif mode == 'include':
+            return self._filter_include(keys)
+        elif mode == 'exclude':
+            return self._filter_exclude(keys)
+        else:
+            raise ValueError("bad mode '{}'".format(mode))
+    def _filter_exact(self, test_keys):
         subterms = {}
         test_terms = self.terms
         for t, v in test_terms.items():
             test_t = t
-            for k in required_keys:
-                if k in test_t:
-                    i = test_t.index(k)
-                    test_t = test_t[:i] + test_t[i + 1:]
+            for required_keys in test_keys:
+                for k in required_keys:
+                    if k in test_t:
+                        i = test_t.index(k)
+                        test_t = test_t[:i] + test_t[i + 1:]
+                    else:
+                        break
                 else:
+                    subterms[t] = v
+
+        return self.rebuild(subterms)
+    def _filter_include(self, test_keys):
+        subterms = {}
+        test_terms = self.terms
+        test_keys = set(test_keys)
+        for t, v in test_terms.items():
+            for k in t:
+                if k not in test_keys:
+                    break
+            else:
+                subterms[t] = v
+
+        return self.rebuild(subterms)
+    def _filter_exclude(self, test_keys):
+        subterms = {}
+        test_terms = self.terms
+        test_keys = set(test_keys)
+        for t, v in test_terms.items():
+            for k in test_keys:
+                if k in t:
                     break
             else:
                 subterms[t] = v

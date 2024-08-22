@@ -3,7 +3,7 @@ Provides scaffolding for creating serializers that dump data to a reloadable for
 Light-weight and unsophisticated, but that's what makes this useful..
 """
 
-import abc, numpy as np, json, io, pickle, importlib, base64, types, warnings
+import abc, numpy as np, json, io, pickle, os, base64, types, warnings
 from collections import OrderedDict
 
 __all__= [
@@ -16,6 +16,9 @@ __all__= [
     "YAMLSerializer",
     "ModuleSerializer"
 ]
+
+import h5py
+
 
 class PseudoPickler:
     """
@@ -48,6 +51,12 @@ class PseudoPickler:
                          np.dtype
                          )
     _safe_modules = ["numpy", "multiprocessing"]
+
+    def _sanitize_key(self, key):
+        # JSON only supports string/int/bool keys
+        if not isinstance(key, (str, int, float, bool)):
+            raise ValueError("serialized keys must be primitive types")
+        return key
     def _to_state(self, obj, cache):
         """
         Tries to extract state for `obj` by walking through the
@@ -78,7 +87,7 @@ class PseudoPickler:
         elif isinstance(obj, self._list_types):
             return type(obj)(self.serialize(v, cache) for v in obj)
         elif isinstance(obj, self._dict_types):
-            return type(obj)((k, self.serialize(v, cache)) for k,v in obj.items())
+            return type(obj)((self._sanitize_key(k), self.serialize(v, cache)) for k,v in obj.items())
         elif isinstance(obj, self._importable_types):
             return self._to_importable_state(obj)
         elif self._can_import(obj):
@@ -130,11 +139,11 @@ class PseudoPickler:
         :rtype:
         """
 
-        if hasattr(obj, 'to_state'):
-            try:
-                return obj.to_state(serializer=self)
-            except TypeError: # usually mean we're pickling the class
-                pass
+        if hasattr(obj, 'to_state') and not isinstance(obj, type):
+            # try:
+            return obj.to_state(serializer=self)
+            # except TypeError: # usually mean we're pickling the class
+            #     pass
         try:
             return self._to_state(obj, cache)
         except ValueError:
@@ -318,7 +327,6 @@ class JSONSerializer(BaseSerializer):
                         stream = json.JSONEncoder.default(self, obj)
                     except TypeError:
                         stream = self.pickler.serialize(obj)
-
                     return stream
                 else:
                     return json.JSONEncoder.default(self, obj)
@@ -715,14 +723,26 @@ class HDF5Serializer(BaseSerializer):
             or isinstance(data, np.ndarray)
         )
     def _prune_existing(self, h5_obj, key):
+        og = h5_obj
+        if isinstance(key, str):
+            key = [key]
+        for k in key[:-1]:
+            h5_obj = h5_obj[k]
         try:
-            del h5_obj[key]
+            del h5_obj[key[-1]]
         except OSError:
-            raise IOError("failed to remove key {} from {}".format(key, h5_obj))
+            raise IOError("failed to remove key {} from {}".format(key, og))
     def _destroy_and_add(self, h5_obj, key, data):
         self._prune_existing(h5_obj, key)
+        if isinstance(key, str):
+            key = [key]
+        for subk in key[:-1]:
+            try:
+                h5_obj = h5_obj.create_group(subk)
+            except TypeError:
+                raise TypeError("can't coerce {}:{} to HDF5 format".format(key, data))
         try:
-            ds = self._create_dataset(h5_obj, key, data)
+            ds = self._create_dataset(h5_obj, key[-1], data)
         except TypeError:
             raise TypeError("can't coerce {}:{} to HDF5 format".format(key, data))
     def _write_data(self, h5_obj, key, data):
@@ -747,50 +767,61 @@ class HDF5Serializer(BaseSerializer):
                 # If so, convert the array to one with bytes
                 data = data.astype(dtype=dtype_name.replace('<U', '|S'))
 
+        if isinstance(key, str):
+            key = [key]
+        ds = h5_obj
+        for i, subk in enumerate(key):
+            try:
+                ds = ds[subk] #type: h5py.Dataset
+            except KeyError as e:
+                if e.args[0] in {
+                    "Unable to open object (bad flag combination for message)",
+                    "Unable to open object (message type not found)",
+                }:
+                    raise KeyError("failed to load key {} in {}".format(key, ds))
+                else:
+                    if isinstance(ds, self.api.Dataset):
+                        ds = ds.parent
+                    # self._destroy_and_add(h5_obj, key, data)
+                    sub = ds
+                    for subk in key[i:-1]:
+                        try:
+                            sub = sub.create_group(subk)
+                        except TypeError:
+                            raise TypeError("can't coerce {}:{} to HDF5 format".format(key, data))
+                    ds = self._create_dataset(sub, key[-1], data)
+                    break
+            except ValueError:
+                if isinstance(ds, self.api.Dataset):
+                    ds = ds.parent
+
+                self._destroy_and_add(ds, key[i:], data)
+                ds = ds[key[-1]]
+                break
+
+        if not isinstance(ds, h5py.Dataset):
+            raise TypeError("expected {} got {}".format(h5py.Dataset.__name__, type(ds).__name__))
+        # else:
         try:
-            ds = h5_obj[key] #type: h5py.Dataset
-        except KeyError as e:
-            if e.args[0] in {
-                "Unable to open object (bad flag combination for message)",
-                "Unable to open object (message type not found)",
-            }:
-                raise KeyError("failed to load key {} in {}".format(key, h5_obj))
-            else:
-                if isinstance(h5_obj, self.api.Dataset):
-                    h5_obj = h5_obj.parent
-                # self._destroy_and_add(h5_obj, key, data)
-                try:
-                    ds = self._create_dataset(h5_obj, key, data)
-                except TypeError:
-                    raise TypeError("can't coerce {}:{} to HDF5 format".format(key, data))
-        except ValueError:
-            if isinstance(h5_obj, self.api.Dataset):
-                h5_obj = h5_obj.parent
+            dt = ds.dtype
+        except AttributeError:
+            dt = None
+            if data is not None:
+                raise ValueError(data)
+        if (
+                data is None
+                or dt != data.dtype and dt.names is not None
+        ): # record arrays are a pain
+            if data is None:
+                data = self.api.Empty("i")
             self._destroy_and_add(h5_obj, key, data)
-            # self._prune_existing(h5_obj, key)
-            # try:
-            #     ds = self._create_dataset(h5_obj, key, data)
-            # except TypeError:
-            #     raise TypeError("can't coerce {}:{} to HDF5 format".format(key, data))
         else:
             try:
-                dt = ds.dtype
-            except AttributeError:
-                dt = None
-            if (
-                    data is None
-                    or dt != data.dtype and dt.names is not None
-            ): # record arrays are a pain
-                if data is None:
-                    data = self.api.Empty("i")
+                ds[...] = data
+            except (TypeError, AttributeError):
                 self._destroy_and_add(h5_obj, key, data)
-            else:
-                try:
-                    ds[...] = data
-                except (TypeError, AttributeError):
-                    self._destroy_and_add(h5_obj, key, data)
-                except:
-                    raise IOError("failed to write key '{}' to HDF5 dataset {}".format(key, ds))
+            except:
+                raise IOError("failed to write key '{}' to HDF5 dataset {}".format(key, ds))
         # no need to return stuff, since we're just serializing
     def _write_dict(self, h5_obj, data):
         """
@@ -806,12 +837,17 @@ class HDF5Serializer(BaseSerializer):
             # print(h5_obj, k)
             # we want to either make a new Group or write the array to the key
             if isinstance(v, dict):
-                try:
-                    new_grp = h5_obj[k]
-                except KeyError:
-                    new_grp = h5_obj.create_group(k)
-                self._write_dict(new_grp, v)
-                # print(new_grp)
+                sub_obj = h5_obj
+                if isinstance(k, str):
+                    k = [k]
+                for i,subk in enumerate(k):
+                    try:
+                        sub_obj = sub_obj[subk]
+                    except KeyError:
+                        for subk in k[i:]:
+                            sub_obj = sub_obj.create_group(subk)
+                        break
+                self._write_dict(sub_obj, v)
             else:
                 self._write_data(h5_obj, k, v)
 
@@ -821,11 +857,12 @@ class HDF5Serializer(BaseSerializer):
         if not isinstance(file, (self.api.File, self.api.Group)):
             file = self.api.File(file, "a")
         data = data.data
-        if isinstance(data, np.ndarray):
-            key = "_data"
-            self._write_data(file, key, data)
-        else:
-            self._write_dict(file, data)
+        with file:
+            if isinstance(data, np.ndarray):
+                key = "_data"
+                self._write_data(file, key, data)
+            else:
+                self._write_dict(file, data)
 
     def deconvert(self, data):
         """
@@ -852,12 +889,24 @@ class HDF5Serializer(BaseSerializer):
 
         return res
 
+    @classmethod
+    def _extract_key(cls, dataset, key):
+        if not isinstance(key, str):
+            for k in key:
+                dataset = dataset[k]
+        else:
+            dataset = dataset[key]
+        return dataset
     def deserialize(self, file, key=None, **kwargs):
         if not isinstance(file, (self.api.File, self.api.Group)):
-            file = self.api.File(file, "r")
-        if key is not None:
-            file = file[key]
-        return self.deconvert(file)
+            if not isinstance(file, str) and hasattr(file, 'name'):
+                file = self.api.File(file.name, "a")
+            else:
+                file = self.api.File(file, "a")
+        with file as cache:
+            if key is not None:
+                cache = self._extract_key(cache, key)
+            return self.deconvert(cache)
 
 class NumPySerializer(BaseSerializer):
     """

@@ -3,7 +3,7 @@ Defines a helper class Styled to make it easier to style plots and stuff and a T
 """
 import contextlib
 from collections import deque
-from .Backends import Backends
+from .Backends import GraphicsBackend
 
 __all__ = [
     "Styled",
@@ -17,6 +17,9 @@ class Styled:
     Simple styling class
     """
     def __init__(self, *str, **opts):
+        if len(str) == 2 and isinstance(str[1], dict):
+            opts = dict(str[1], **opts)
+            str = [str[0]]
         self.val = str
         self.opts = opts
     @classmethod
@@ -117,14 +120,15 @@ class ThemeManager:
     _resolved_theme_cache = {
 
     }
-    def __init__(self, *theme_names, backend=Backends.MPL, graphics_styles=None, **extra_styles):
+    def __init__(self, *theme_names, backend=None, graphics_styles=None, **extra_styles):
         self.main_theme_names = theme_names
         self.extra_styles = extra_styles
         self.graphics_styles = graphics_styles
-        self.backend=backend
+        if backend is None: backend = GraphicsBackend.lookup('matplotlib')
+        self.backend = backend
         self.context_manager = None
     @classmethod
-    def from_spec(cls, theme):
+    def from_spec(cls, theme, backend=None):
         if theme is None:
             return NoThemeManager()
         if isinstance(theme, (str, dict)):
@@ -143,19 +147,17 @@ class ThemeManager:
         else:
             theme_names = []
             theme_properties = {}
-        return cls(*theme_names, **theme_properties)
+        return cls(*theme_names, backend=backend, **theme_properties)
     def _test_rcparam(self, k):
         return '.' in k
     def __enter__(self):
-        if self.backend == Backends.MPL:
-            import matplotlib.pyplot as plt
-            theme = self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
-            name_list = self.validate_theme(*theme)
-            # name_list = list(theme[0])
-            opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
+        theme = self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
+        name_list = self.validate_theme(*theme)
+        # name_list = list(theme[0])
+        opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
 
-            self.context_manager = plt.style.context(name_list+[opts])
-            return self.context_manager.__enter__()
+        self.context_manager = self.backend.theme_context(name_list+[opts])
+        return self.context_manager.__enter__()
         # don't currently support any other backends...
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.context_manager is not None:
@@ -163,11 +165,7 @@ class ThemeManager:
             self.context_manager = None
     @property
     def theme(self):
-        if self.backend == Backends.MPL:
-            import matplotlib.pyplot as plt
-            return self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
-        else:
-            raise NotImplemented("Haven't implemented themes for anything other than MPL right now...")
+        return self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
     @classmethod
     def add_theme(self, theme_name, *base_theme, **extra_styles):
         """
@@ -273,11 +271,7 @@ class ThemeManager:
 
     @property
     def backend_themes(self):
-        if self.backend == Backends.MPL: # default
-            import matplotlib.style as sty
-            theme_names = sty.available
-        else:
-            theme_names = ()
+        theme_names = self.backend.get_available_themes()
         return tuple(theme_names)
     @property
     def theme_names(self):
