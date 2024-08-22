@@ -975,7 +975,11 @@ class SparsePolynomial(AbstractPolynomial):
 class PureMonicPolynomial(SparsePolynomial):
     def __init__(self, terms: dict, prefactor=1, canonicalize=True):
         if canonicalize:
-            terms = {self.canonical_key(k):v for k,v in terms.items()}
+            new_terms = {}
+            for k,v in terms.items():
+                k = self.canonical_key(k)
+                new_terms[k] = new_terms.get(k, 0) + v
+            terms = new_terms
         super().__init__(terms, prefactor)
 
     @property

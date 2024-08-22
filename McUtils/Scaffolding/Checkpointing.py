@@ -61,6 +61,8 @@ class Checkpointer(metaclass=abc.ABCMeta):
             return NullCheckpointer(None)
         elif isinstance(checkpoint, str):
             return Checkpointer.from_file(checkpoint)
+        elif isinstance(checkpoint, Checkpointer):
+            return checkpoint
         elif Schema(["file"]).validate(checkpoint, throw=False):
             checkpoint = Schema(["file"], ['keys', 'opts']).to_dict(checkpoint)
             opts = checkpoint['opts'] if 'opts' in checkpoint else {}
@@ -169,18 +171,22 @@ class Checkpointer(metaclass=abc.ABCMeta):
         raise NotImplementedError("CheckpointerBase is an abstract base class...")
 
     def check_allowed_key(self, item):
-        if self.allowed_keys is not None:
-            if item not in self.allowed_keys:
-                raise CheckpointerKeyError("key {} not allowed by {}".format(
-                    item,
-                    self
-                ))
-        if self.omitted_keys is not None:
-            if item in self.omitted_keys:
-                raise CheckpointerKeyError("key {} not allowed by {}".format(
-                    item,
-                    self
-                ))
+        if isinstance(item, tuple):
+            # for subkey in item:
+            self.check_allowed_key(item[0]) # only check topline items
+        else:
+            if self.allowed_keys is not None:
+                if item not in self.allowed_keys:
+                    raise CheckpointerKeyError("key {} not allowed by {}".format(
+                        item,
+                        self
+                    ))
+            if self.omitted_keys is not None:
+                if item in self.omitted_keys:
+                    raise CheckpointerKeyError("key {} not allowed by {}".format(
+                        item,
+                        self
+                    ))
 
     def __getitem__(self, item):
         if not self.is_open:
@@ -277,7 +283,16 @@ class DumpCheckpointer(Checkpointer):
         :return:
         :rtype:
         """
-        self.backend[key] = value
+        if isinstance(key, tuple):
+            base = self.backend
+            cur = key[0]
+            for subk in key[1:]:
+                if cur not in base: base[cur] = {}
+                base = base[cur]
+                cur = subk
+            base[cur] = value
+        else:
+            self.backend[key] = value
     def load_parameter(self, key):
         """
         Loads a parameter from the checkpoint file
@@ -286,7 +301,17 @@ class DumpCheckpointer(Checkpointer):
         :return:
         :rtype:
         """
-        return self.backend[key]
+        if isinstance(key, tuple):
+            base = self.backend
+            cur = key[0]
+            for subk in key[1:]:
+                if cur not in base: base[cur] = {}
+                base = base[cur]
+                cur = subk
+            val = base[cur]
+        else:
+            val = self.backend[key]
+        return val
 
     def keys(self):
         if not self.is_open:

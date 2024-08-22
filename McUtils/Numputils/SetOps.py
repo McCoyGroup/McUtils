@@ -578,7 +578,7 @@ def index_complement(shape, inds):
         for k in range(-len(shape), 0)
     )
 
-def vector_take(arr, inds, shared=None):
+def vector_take(arr, inds, shared=None, return_spec=False):
     """
     A generalized array indexing that broadcasts properly across everything except for the specified "take" index
     :param arr:
@@ -613,8 +613,10 @@ def vector_take(arr, inds, shared=None):
         for x in inds
     )
     inds = vector_ix(arr.shape[-len(inds):], inds_nob)
-
-    return arr[inds]
+    if return_spec:
+        return arr, inds
+    else:
+        return arr[inds]
 
 
 
