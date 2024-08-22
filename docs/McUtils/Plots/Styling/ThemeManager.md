@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Styling.ThemeManager">ThemeManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling.py#L103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L103?message=Update%20Docs)]
 </div>
 
 Simple manager class for plugging into themes in a semi-background agnostic way
@@ -23,21 +23,21 @@ extra_themes: dict
 ```
 <a id="McUtils.Plots.Styling.ThemeManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, *theme_names, backend=<Backends.MPL: 'matplotlib'>, graphics_styles=None, **extra_styles): 
+__init__(self, *theme_names, backend=None, graphics_styles=None, **extra_styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L123?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Plots.Styling.ThemeManager.from_spec" class="docs-object-method">&nbsp;</a> 
 ```python
-from_spec(theme): 
+from_spec(theme, backend=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L130?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ from_spec(theme):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L149)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L149?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L153)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L153?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L162)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L162?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 theme(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L164)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L164?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L166?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ theme(self):
 add_theme(theme_name, *base_theme, **extra_styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L169?message=Update%20Docs)]
 </div>
 Adds a theme to the extra themes dict. At some future date we'll
 want to make it so that this does a level of validation, too.
@@ -97,8 +97,8 @@ want to make it so that this does a level of validation, too.
 resolve_theme(theme_name, *base_themes, **extra_styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L184?message=Update%20Docs)]
 </div>
 Resolves a theme so that it only uses strings for built-in styles
   - `:returns`: `_`
@@ -110,8 +110,8 @@ Resolves a theme so that it only uses strings for built-in styles
 validate_theme(self, theme_names, theme_styless): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L246)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L246?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L244)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L244?message=Update%20Docs)]
 </div>
 
 
@@ -121,8 +121,8 @@ validate_theme(self, theme_names, theme_styless):
 backend_themes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L272)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L272?message=Update%20Docs)]
 </div>
 
 
@@ -132,8 +132,8 @@ backend_themes(self):
 theme_names(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L282)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L282?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/ThemeManager.py#L276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/ThemeManager.py#L276?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -188,7 +188,7 @@ theme_names(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Styling/ThemeManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Styling/ThemeManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L100?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L103?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -73,8 +73,8 @@ from the supplied data
 from_file(file, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L83)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L83?message=Update%20Docs)]
 </div>
 Dispatch function to load from the appropriate file
   - `file`: `str | File`
@@ -90,8 +90,8 @@ Dispatch function to load from the appropriate file
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L110?message=Update%20Docs)]
 </div>
 
 
@@ -100,8 +100,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L115?message=Update%20Docs)]
 </div>
 
 
@@ -111,8 +111,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 is_open(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L122?message=Update%20Docs)]
 </div>
 
 
@@ -122,8 +122,8 @@ is_open(self):
 stream(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L126?message=Update%20Docs)]
 </div>
 
 
@@ -132,8 +132,8 @@ stream(self):
 open_checkpoint_file(self, chk): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L130?message=Update%20Docs)]
 </div>
 Opens the passed `checkpoint_file` (if not already open)
   - `chk`: `Any`
@@ -147,8 +147,8 @@ Opens the passed `checkpoint_file` (if not already open)
 close_checkpoint_file(self, stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L140?message=Update%20Docs)]
 </div>
 Closes the opened checkpointing stream
   - `stream`: `Any`
@@ -162,8 +162,8 @@ Closes the opened checkpointing stream
 save_parameter(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L150)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L150?message=Update%20Docs)]
 </div>
 Saves a parameter to the checkpoint file
   - `key`: `Any`
@@ -179,8 +179,8 @@ Saves a parameter to the checkpoint file
 load_parameter(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L162)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L162?message=Update%20Docs)]
 </div>
 Loads a parameter from the checkpoint file
   - `key`: `Any`
@@ -194,8 +194,8 @@ Loads a parameter from the checkpoint file
 check_allowed_key(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L173)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L173?message=Update%20Docs)]
 </div>
 
 
@@ -204,8 +204,8 @@ check_allowed_key(self, item):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L185)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L185?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L191?message=Update%20Docs)]
 </div>
 
 
@@ -214,8 +214,8 @@ __getitem__(self, item):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L197?message=Update%20Docs)]
 </div>
 
 
@@ -224,8 +224,8 @@ __setitem__(self, key, value):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/Checkpointer.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/Checkpointer.py#L204?message=Update%20Docs)]
 </div>
 Returns the keys of currently checkpointed
 objects

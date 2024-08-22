@@ -1,12 +1,11 @@
-## <a id="McUtils.Zachary.Polynomials.TensorCoefficientPoly">TensorCoefficientPoly</a> 
+## <a id="McUtils.ExternalPrograms.ChemToolkits.OpenChemistryInterface">OpenChemistryInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L1129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L1129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/ChemToolkits.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/ChemToolkits.py#L32?message=Update%20Docs)]
 </div>
 
-Represents a polynomial constructed using tensor elements as monomials
-by tracking sets of indices
+
 
 
 
@@ -19,15 +18,11 @@ by tracking sets of indices
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
- 
-<a id="McUtils.Zachary.Polynomials.TensorCoefficientPoly.canonical_key" class="docs-object-method">&nbsp;</a> 
-```python
-canonical_key(monomial_tuple): 
+ ```python
+name: str
+module: str
 ```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/TensorCoefficientPoly.py#L1135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/TensorCoefficientPoly.py#L1135?message=Update%20Docs)]
-</div>
+
  </div>
 </div>
 
@@ -75,13 +70,13 @@ canonical_key(monomial_tuple):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L1129?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/ChemToolkits.py#L32?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

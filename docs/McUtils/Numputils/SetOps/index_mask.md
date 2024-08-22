@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.SetOps.index_mask">index_mask</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L550)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L550?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L559)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L559?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ index_mask(shape, inds, complement=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/SetOps/index_mask.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/SetOps/index_mask.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L550?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L559?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

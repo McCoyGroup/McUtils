@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.HDF5Serializer">HDF5Serializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers.py#L658)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L658?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers.py#L666)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L666?message=Update%20Docs)]
 </div>
 
 Defines a serializer that can prep/dump python data to HDF5.
@@ -28,8 +28,8 @@ default_extension: str
 __init__(self, allow_pickle=True, psuedopickler=None, converters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L665)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L665?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L673)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L673?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ __init__(self, allow_pickle=True, psuedopickler=None, converters=None):
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L680)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L680?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L688)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L688?message=Update%20Docs)]
 </div>
 Converts data into format that can be serialized easily
   - `data`: `Any`
@@ -53,8 +53,8 @@ Converts data into format that can be serialized easily
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L818)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L818?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L854)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L854?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ serialize(self, file, data, **kwargs):
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L830)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L830?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L867)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L867?message=Update%20Docs)]
 </div>
 Converts an HDF5 Dataset into a NumPy array or Group into a dict
   - `data`: `Any`
@@ -78,8 +78,8 @@ Converts an HDF5 Dataset into a NumPy array or Group into a dict
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L855)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L855?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/HDF5Serializer.py#L900)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/HDF5Serializer.py#L900?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -134,7 +134,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/Serializers/HDF5Serializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/HDF5Serializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L658?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L666?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

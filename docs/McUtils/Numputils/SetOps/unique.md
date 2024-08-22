@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.SetOps.unique">unique</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L35?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ A variant on np.unique with default support for `axis=0` and sorting
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/SetOps/unique.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/SetOps/unique.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L35?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.SetOps.vector_take">vector_take</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L572)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L572?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L581)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L581?message=Update%20Docs)]
 </div>
 
 ```python
-vector_take(arr, inds, shared=None): 
+vector_take(arr, inds, shared=None, return_spec=False): 
 ```
 A generalized array indexing that broadcasts properly across everything except for the specified "take" index
   - `arr`: `Any`
@@ -64,7 +64,7 @@ A generalized array indexing that broadcasts properly across everything except f
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/SetOps/vector_take.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/SetOps/vector_take.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L572?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L581?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

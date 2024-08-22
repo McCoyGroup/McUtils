@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Checkpointing.DumpCheckpointer">DumpCheckpointer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing.py#L209)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L209?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing.py#L215)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L215?message=Update%20Docs)]
 </div>
 
 A subclass of `CheckpointerBase` that writes an entire dump to file at once & maintains
@@ -25,8 +25,8 @@ a backend cache to update it cleanly
 __init__(self, file, cache=None, open_kwargs=None, allowed_keys=None, omitted_keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L214)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L214?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L220)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L220?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, file, cache=None, open_kwargs=None, allowed_keys=None, omitted_ke
 load_cache(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L223)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L223?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L229)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L229?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ load_cache(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L232)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L232?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L229)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L229?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L235)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L235?message=Update%20Docs)]
 </div>
 
 
@@ -65,8 +65,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 dump(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L240)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L240?message=Update%20Docs)]
 </div>
 Writes the entire data structure
   - `:returns`: `_`
@@ -78,8 +78,8 @@ Writes the entire data structure
 convert(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L242)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L242?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L248)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L248?message=Update%20Docs)]
 </div>
 Converts the cache to an exportable form if needed
   - `:returns`: `_`
@@ -91,8 +91,8 @@ Converts the cache to an exportable form if needed
 open_checkpoint_file(self, chk): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L249)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L249?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L255?message=Update%20Docs)]
 </div>
 Opens the passed `checkpoint_file` (if not already open)
   - `chk`: `Any`
@@ -106,8 +106,8 @@ Opens the passed `checkpoint_file` (if not already open)
 close_checkpoint_file(self, stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L260)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L260?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L266?message=Update%20Docs)]
 </div>
 Closes the opened checkpointing stream
   - `stream`: `Any`
@@ -121,8 +121,8 @@ Closes the opened checkpointing stream
 save_parameter(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L270)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L270?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L276?message=Update%20Docs)]
 </div>
 Saves a parameter to the checkpoint file
   - `key`: `Any`
@@ -138,8 +138,8 @@ Saves a parameter to the checkpoint file
 load_parameter(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L281)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L281?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L296)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L296?message=Update%20Docs)]
 </div>
 Loads a parameter from the checkpoint file
   - `key`: `Any`
@@ -153,8 +153,8 @@ Loads a parameter from the checkpoint file
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L291)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L291?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L316)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DumpCheckpointer.py#L316?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -209,7 +209,7 @@ keys(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/Checkpointing/DumpCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L209?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L215?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

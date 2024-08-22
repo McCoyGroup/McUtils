@@ -34,8 +34,8 @@ __init__(self, *str, **opts):
 could_be(data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L22)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L22?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L25?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ could_be(data):
 construct(data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L28)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L28?message=Update%20Docs)]
 </div>
  </div>
 </div>

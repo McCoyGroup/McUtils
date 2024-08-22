@@ -231,98 +231,98 @@ Any lowish-level numerical operations that need to be shared go here.
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[permutation_indices](Numputils/SetOps/permutation_indices.md)   
+</div>
+   <div class="col" markdown="1">
 [vector_ix](Numputils/SetOps/vector_ix.md)   
 </div>
    <div class="col" markdown="1">
 [vector_take](Numputils/SetOps/vector_take.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [index_mask](Numputils/SetOps/index_mask.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [index_complement](Numputils/SetOps/index_complement.md)   
 </div>
    <div class="col" markdown="1">
 [infer_inds_dtype](Numputils/Misc/infer_inds_dtype.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [infer_int_dtype](Numputils/Misc/infer_int_dtype.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [flatten_dtype](Numputils/Misc/flatten_dtype.md)   
 </div>
    <div class="col" markdown="1">
 [unflatten_dtype](Numputils/Misc/unflatten_dtype.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [recast_permutation](Numputils/Misc/recast_permutation.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [recast_indices](Numputils/Misc/recast_indices.md)   
 </div>
    <div class="col" markdown="1">
 [downcast_index_array](Numputils/Misc/downcast_index_array.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [is_atomic](Numputils/Misc/is_atomic.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [is_numeric](Numputils/Misc/is_numeric.md)   
 </div>
    <div class="col" markdown="1">
 [is_zero](Numputils/Misc/is_zero.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [nca_op_deriv](Numputils/TensorDerivatives/nca_op_deriv.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [tensordot_deriv](Numputils/TensorDerivatives/tensordot_deriv.md)   
 </div>
    <div class="col" markdown="1">
 [tensorprod_deriv](Numputils/TensorDerivatives/tensorprod_deriv.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [scalarprod_deriv](Numputils/TensorDerivatives/scalarprod_deriv.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [inverse_transformation](Numputils/TensorDerivatives/inverse_transformation.md)   
 </div>
    <div class="col" markdown="1">
 [optimizing_transformation](Numputils/TensorDerivatives/optimizing_transformation.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [matinv_deriv](Numputils/TensorDerivatives/matinv_deriv.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [matdet_deriv](Numputils/TensorDerivatives/matdet_deriv.md)   
 </div>
    <div class="col" markdown="1">
 [scalarinv_deriv](Numputils/TensorDerivatives/scalarinv_deriv.md)   
 </div>
-   <div class="col" markdown="1">
-[tensor_reexpand](Numputils/TensorDerivatives/tensor_reexpand.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[tensorops_deriv](Numputils/TensorDerivatives/tensorops_deriv.md)   
+[tensor_reexpand](Numputils/TensorDerivatives/tensor_reexpand.md)   
 </div>
    <div class="col" markdown="1">
-   
+[tensorops_deriv](Numputils/TensorDerivatives/tensorops_deriv.md)   
 </div>
    <div class="col" markdown="1">
    

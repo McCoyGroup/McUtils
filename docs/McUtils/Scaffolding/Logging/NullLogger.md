@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Logging.NullLogger">NullLogger</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging.py#L391)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging.py#L391?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging.py#L417)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging.py#L417?message=Update%20Docs)]
 </div>
 
 A logger that implements the interface, but doesn't ever print.
@@ -25,8 +25,8 @@ Allows code to avoid a bunch of "if logger is not None" blocks
 log_print(self, message, *params, print_options=None, padding=None, newline=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/NullLogger.py#L396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/NullLogger.py#L396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/NullLogger.py#L422)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/NullLogger.py#L422?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ log_print(self, message, *params, print_options=None, padding=None, newline=None
 __bool__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/NullLogger.py#L398)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/NullLogger.py#L398?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/NullLogger.py#L424)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/NullLogger.py#L424?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -91,7 +91,7 @@ __bool__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/Logging/NullLogger.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/Logging/NullLogger.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging.py#L391?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging.py#L417?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
