@@ -63,7 +63,18 @@ been written over the years.
 [Misc](McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
+[Formatters](McUtils/Formatters.md)   
+</div>
+   <div class="col" markdown="1">
 [Docs](McUtils/Docs.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
