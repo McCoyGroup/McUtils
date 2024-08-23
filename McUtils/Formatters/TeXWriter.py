@@ -1,6 +1,6 @@
 
 import abc, numpy as np, io, weakref
-from .Symbolics import Abstract
+from ..Misc.Symbolics import Abstract
 
 __all__ = [
     "TeX"

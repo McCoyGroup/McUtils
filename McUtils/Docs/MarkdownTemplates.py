@@ -1,6 +1,6 @@
 
 import re, uuid, pathlib
-from ..Misc.TemplateEngine import *
+from ..Formatters.TemplateEngine import *
 from ..Jupyter.JHTML import *
 
 class MarkdownOps:

@@ -12,7 +12,6 @@ __all__ = [
 
 import numpy as np
 
-
 def StirlingS1(n):
     """Computes the Stirling numbers
 
@@ -21,7 +20,7 @@ def StirlingS1(n):
     :return:
     :rtype:
     """
-    stirlings = np.eye(n)
+    stirlings = np.eye(n, dtype='uint64')
     for i in range(n):
         for j in range(i+1):
             stirlings[i, j] = (-1)**(i-j) *( (i-1)*abs(stirlings[i-1, j]) + abs(stirlings[i-1, j-1]))
@@ -74,7 +73,7 @@ def Factorial(n):
     :rtype:
     """
 
-    base = np.arange(n, dtype=np.int64)
+    base = np.arange(n, dtype='uint64')
     base[0] = 1
     for i in range(1, n):
         base[i] = base[i]*base[i-1]

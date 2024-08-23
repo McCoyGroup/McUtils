@@ -34,5 +34,6 @@ __all__ = [
     "Parallelizers",
     "Jupyter",
     "Misc",
+    "Formatters",
     "Docs"
 ]
