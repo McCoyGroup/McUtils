@@ -6,7 +6,7 @@ import os, types, collections, inspect, importlib, re, uuid
 import subprocess
 import sys
 
-from ..Misc.TemplateEngine import *
+from ..Formatters.TemplateEngine import *
 from ..Misc import mixedmethod
 from .ExamplesParser import ExamplesParser
 from .MarkdownTemplates import MarkdownTemplateFormatter, MarkdownOps
@@ -24,7 +24,7 @@ __all__ = [
     "jdoc"
 ]
 
-from ..Misc.TemplateEngine.TemplateEngine import TemplateInterfaceList
+from ..Formatters.TemplateEngine.TemplateEngine import TemplateInterfaceList
 
 
 class DocSpec(ObjectSpec):

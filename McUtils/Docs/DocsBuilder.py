@@ -2,7 +2,7 @@
 import os, shutil
 
 from .DocWalker import DocWalker
-from ..Misc.TemplateEngine import ResourceLocator
+from ..Formatters.TemplateEngine import ResourceLocator
 
 __all__ = [
     "DocBuilder"
