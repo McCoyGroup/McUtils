@@ -3,7 +3,7 @@ from .Derivatives import FiniteDifferenceDerivative
 from ...Coordinerds import CoordinateSet, CoordinateSystem
 from ..Symbolic import TensorDerivativeConverter
 from ...Numputils import vec_tensordot
-import numpy as np, itertools, copy
+import numpy as np, itertools, copy, math
 
 __all__ = [
     'FunctionExpansion'
@@ -253,7 +253,7 @@ class TaylorPoly:
             if order is None:
                 order = len(t.shape)
             if order > 1:
-                weighted = weighted * (1/np.math.factorial(order))
+                weighted = weighted * (1/math.factorial(order))
                 # s = t.shape
                 # weights = np.ones(s)
                 # all_inds = list(range(len(s)))
@@ -261,7 +261,7 @@ class TaylorPoly:
                 #     for inds in itertools.combinations(all_inds, i):
                 #         # define a diagonal slice through
                 #         sel = tuple(slice(None, None, None) if a not in inds else np.arange(s[a]) for a in all_inds)
-                #         weights[sel] = 1/np.math.factorial(i)
+                #         weights[sel] = 1/math.factorial(i)
                 # weighted = weighted.mul(weights)
                 # print(weights, weighted.array)
 
