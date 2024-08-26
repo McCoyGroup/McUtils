@@ -3,7 +3,7 @@ Provides customized set operations based off of the NumPy builtins
 to minimize things like excess sorts
 """
 
-import numpy as np, itertools
+import numpy as np, itertools, math
 from .Misc import flatten_dtype, unflatten_dtype, recast_permutation, downcast_index_array, is_numeric
 
 __all__ = [
@@ -523,7 +523,7 @@ def permutation_indices(n, r):
         return np.array([[]])
     return np.fromiter(
         itertools.permutations(range(n), r),
-        count=np.math.factorial(n)//np.math.factorial(n-r),
+        count=math.factorial(n)//math.factorial(n-r),
         dtype=np.dtype((int, (r,)))
     )
 def combination_indices(n, r):
@@ -533,7 +533,7 @@ def combination_indices(n, r):
         return np.arange(n)[np.newaxis]
     return np.fromiter(
         itertools.combinations(range(n), r),
-        count=np.math.comb(n, r),
+        count=math.comb(n, r),
         dtype=np.dtype((int, (r,)))
     )
 

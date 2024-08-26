@@ -2,7 +2,7 @@
 Utilities for working with permutations and permutation indexing
 """
 
-import numpy as np, time, typing, gc, itertools
+import numpy as np, time, typing, gc, itertools, math
 import collections, functools as ft
 from ..Misc import jit, objmode, prange
 from ..Numputils import (
@@ -1789,8 +1789,8 @@ class UniquePartitions:
         n = m = len(partition)
         for size in sizes: # we prep a bunch of data to feed to numba
             # tree_sizes.append( # binomial terms at each size
-            #     np.math.factorial(m) / (
-            #             np.math.factorial(size) * np.math.factorial(m - size)
+            #     math.factorial(m) / (
+            #             math.factorial(size) * math.factorial(m - size)
             #     )
             # )
             if size > 0:

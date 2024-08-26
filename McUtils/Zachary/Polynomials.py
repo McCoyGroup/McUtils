@@ -1,4 +1,4 @@
-import abc, numpy as np, scipy.signal
+import abc, numpy as np, scipy.signal, math
 import itertools as it
 from ..Combinatorics import UniquePermutations, Binomial
 from ..Numputils import SparseArray, group_by
@@ -404,10 +404,10 @@ class DensePolynomial(AbstractPolynomial):
         shift = np.broadcast_to(shift, stack_shape + (poly_dim,))
 
         # factorial outer product
-        factorial_terms = np.array([np.math.factorial(x) for x in range(poly_shape[0])])
+        factorial_terms = np.array([math.factorial(x) for x in range(poly_shape[0])])
         for s in poly_shape[1:]:
             factorial_terms = np.expand_dims(factorial_terms, -1) * np.reshape(
-                np.array([np.math.factorial(x) for x in range(s)]),
+                np.array([math.factorial(x) for x in range(s)]),
                 [1]*factorial_terms.ndim + [s]
             )
         if stack_dim > 0:

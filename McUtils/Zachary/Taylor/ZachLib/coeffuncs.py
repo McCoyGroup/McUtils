@@ -1,7 +1,7 @@
 """
 coeffuncs defines the functions we use when computing coefficients for FD
 """
-import numpy as np
+import numpy as np, math
 
 def StirlingS1(n):
     """Computes the Stirling numbers
@@ -69,7 +69,7 @@ def GammaBinomial(s, n):
     :return:
     :rtype:
     """
-    g = np.math.gamma
+    g = math.gamma
     g1 = g(s+1)
     g2 = np.array([g(m+1)*g(s-m+1) for m in range(n)])
     g3 = g1/g2

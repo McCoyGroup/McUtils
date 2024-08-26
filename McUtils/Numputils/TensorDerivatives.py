@@ -1,5 +1,5 @@
 
-import itertools, numpy as np
+import itertools, numpy as np, math
 from .VectorOps import vec_tensordot, vec_outer
 from .Misc import is_numeric, is_zero
 from ..Combinatorics import IntegerPartitioner, UniquePermutations, SymmetricGroupGenerator
@@ -20,7 +20,7 @@ __all__ = [
 
 def get_nca_shifts(order, k):
     permute_pos = np.arange(k)
-    ncombs = np.math.comb(order, k)
+    ncombs = math.comb(order, k)
     shifts = np.broadcast_to(np.arange(order)[np.newaxis], (ncombs, order)).copy()
     for i,pos in enumerate(itertools.combinations(range(order), r=k)):
         shifts[i, pos] = permute_pos
@@ -251,7 +251,7 @@ def scalarinv_deriv(scalar_expansion, order):
         term = 0
         for parts in IntegerPartitioner.partitions(o):
             l = len(parts[0])
-            scaling = ((-1)**l) * np.math.factorial(l) / (s**(l+1))
+            scaling = ((-1)**l) * math.factorial(l) / (s**(l+1))
             term += sum(scaling*nca_partition_prod(p, scalar_expansion[1:]) for p in parts)
         scalar_exp.append(term)
     return scalar_exp
