@@ -20,7 +20,7 @@ def StirlingS1(n):
     :return:
     :rtype:
     """
-    stirlings = np.eye(n, dtype='uint64')
+    stirlings = np.eye(n)
     for i in range(n):
         for j in range(i+1):
             stirlings[i, j] = (-1)**(i-j) *( (i-1)*abs(stirlings[i-1, j]) + abs(stirlings[i-1, j-1]))
