@@ -30,7 +30,7 @@ supported_alignments: dict
 ```
 <a id="McUtils.Formatters.TableFormatters.TableFormatter.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, column_formats, header_format=None, column_join=None, row_join=None, header_column_join=None, header_row_join=None, separator=None, separator_lines=1, content_join=None, column_alignments=None, header_alignments=None, row_padding=None): 
+__init__(self, column_formats, *, headers=None, header_spans=None, header_format=None, column_join=None, row_join=None, header_column_join=None, header_row_join=None, separator=None, separator_lines=1, content_join=None, column_alignments=None, header_alignments=None, row_padding=None): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L21)/
@@ -43,8 +43,8 @@ __init__(self, column_formats, header_format=None, column_join=None, row_join=No
 prep_input_arrays(headers, data, header_spans): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L53)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L53?message=Update%20Docs)]
 </div>
 
 
@@ -53,8 +53,8 @@ prep_input_arrays(headers, data, header_spans):
 custom_formatter(f): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L92)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L92?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L97?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ custom_formatter(f):
 resolve_formatters(ncols, col_formats): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L115?message=Update%20Docs)]
 </div>
 
 
@@ -73,8 +73,8 @@ resolve_formatters(ncols, col_formats):
 prep_formatters(formats): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L123?message=Update%20Docs)]
 </div>
 
 
@@ -83,8 +83,8 @@ prep_formatters(formats):
 format_tablular_data_columns(data, formats, row_padding=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L132)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L132?message=Update%20Docs)]
 </div>
 
 
@@ -93,8 +93,8 @@ format_tablular_data_columns(data, formats, row_padding=None):
 align_left(col, width): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L141)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L141?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L146)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L146?message=Update%20Docs)]
 </div>
 
 
@@ -103,8 +103,8 @@ align_left(col, width):
 align_right(col, width): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L150)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L150?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ align_right(col, width):
 align_center(col, width): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L155?message=Update%20Docs)]
 </div>
 
 
@@ -123,8 +123,8 @@ align_center(col, width):
 align_dot(col, width, dot='.'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L155)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L155?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L160)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L160?message=Update%20Docs)]
 </div>
 
 
@@ -133,18 +133,18 @@ align_dot(col, width, dot='.'):
 resolve_aligner(alignment): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L181?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Formatters.TableFormatters.TableFormatter.align_column" class="docs-object-method">&nbsp;</a> 
 ```python
-align_column(header_data, cols_data, header_alignment, column_alignment, join_width, format_data): 
+align_column(header_data, cols_data, header_alignment, column_alignment, join_width, header_widths): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L183)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L183?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ align_column(header_data, cols_data, header_alignment, column_alignment, join_wi
 format(self, headers_or_table, *table_data, header_format=None, header_spans=None, column_formats=None, column_alignments=None, header_alignments=None, column_join=None, row_join=None, header_column_join=None, header_row_join=None, separator=None, separator_lines=None, content_join=None, row_padding=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TableFormatters/TableFormatter.py#L227)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TableFormatters/TableFormatter.py#L227?message=Update%20Docs)]
 </div>
  </div>
 </div>
