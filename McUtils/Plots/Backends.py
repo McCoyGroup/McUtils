@@ -742,12 +742,10 @@ class MPLAxes(GraphicsAxes):
             vals = [vals]
         text_plotter = self.get_plotter('text')
         for pt, txt in zip(points, vals):
-
             return text_plotter(
                 *pt, txt,
                 **styles
             )
-
 
 class MPLFigure(GraphicsFigure):
     Axes = MPLAxes
