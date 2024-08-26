@@ -59,8 +59,8 @@ converter_dispatch(self):
 convert(self, data, allow_pickle=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NDarrayMarshaller.py#L567)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NDarrayMarshaller.py#L567?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NDarrayMarshaller.py#L571)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NDarrayMarshaller.py#L571?message=Update%20Docs)]
 </div>
 Recursively loop through, test data, make sure HDF5 compatible
   - `data`: `Any`
@@ -74,8 +74,8 @@ Recursively loop through, test data, make sure HDF5 compatible
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NDarrayMarshaller.py#L611)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NDarrayMarshaller.py#L611?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NDarrayMarshaller.py#L615)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NDarrayMarshaller.py#L615?message=Update%20Docs)]
 </div>
 Reverses the conversion process
 used to marshall the data
@@ -90,8 +90,8 @@ used to marshall the data
 __call__(self, data, allow_pickle=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NDarrayMarshaller.py#L661)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NDarrayMarshaller.py#L661?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NDarrayMarshaller.py#L665)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NDarrayMarshaller.py#L665?message=Update%20Docs)]
 </div>
  </div>
 </div>
