@@ -337,7 +337,9 @@ def find1d(ar, to_find, sorting=None,
     # so now we need to invert that back to the unsorted version
     if len(sorting) > 0:
         big_vals = vals == len(ar)
-        vals[big_vals] = -1
+        if np.any(big_vals):
+            vals = vals.astype(int)
+            vals[big_vals] = -1
         if not presorted:
             vals = sorting[vals]
         if check:
@@ -349,6 +351,7 @@ def find1d(ar, to_find, sorting=None,
                     vals = -1
             else:
                 # print(vals, bad_vals)
+                vals = vals.astype(int)
                 vals[bad_vals] = -1
         else:
             bad_vals = big_vals

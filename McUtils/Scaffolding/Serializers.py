@@ -486,10 +486,14 @@ class NDarrayMarshaller:
 
                 if try_numpy:
                     #TODO: need to reset this later
-                    warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
+                    try:
+                        warning_type = np.VisibleDeprecationWarning
+                    except AttributeError:
+                        warning_type = DeprecationWarning
+                    warnings.filterwarnings('error', category=warning_type)
                     try:
                         arr = np.asanyarray(data)
-                    except (ValueError, np.VisibleDeprecationWarning):
+                    except (ValueError, warning_type):
                         arr = np.empty(shape=(len(data),), dtype=object)
                         for i, v in enumerate(data):
                             arr[i] = v
