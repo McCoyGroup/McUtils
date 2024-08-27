@@ -1424,7 +1424,7 @@ class NumputilsTests(TestCase):
         )
 
 
-    @debugTest
+    @validationTest
     def test_ConvertInternals(self):
 
         from Psience.Molecools import Molecule
