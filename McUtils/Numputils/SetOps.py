@@ -363,6 +363,7 @@ def find1d(ar, to_find, sorting=None,
         if isinstance(missing_val, str) and missing_val == 'raise':
             raise IndexError("{} not in array".format(to_find[bad_vals]))
         else:
+            vals = vals.astype(int)
             vals[bad_vals] = missing_val
 
     if minimal_dtype and not bad_vals.any(): # protecting the missings

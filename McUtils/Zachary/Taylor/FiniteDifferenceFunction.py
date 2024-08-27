@@ -476,12 +476,12 @@ class RegularGridFiniteDifference(FiniteDifference1D):
         m = order
         outer_stencil = stencil + end_point_precision
         lefthand_coeffs = cls.get_weights(m, 0, outer_stencil)
-        centered_coeffs = cls.get_weights(m, np.ceil(stencil / 2), stencil)
+        centered_coeffs = cls.get_weights(m, math.ceil(stencil / 2), stencil)
         righthand_coeffs = cls.get_weights(m, outer_stencil, outer_stencil)
         sten = len(centered_coeffs)
         widths = [
             [0, len(lefthand_coeffs)],
-            [np.ceil(sten / 2), np.floor(sten / 2)],
+            [math.ceil(sten / 2), math.floor(sten / 2)],
             [len(righthand_coeffs), 0]
         ]
         coeffs = [lefthand_coeffs, centered_coeffs, righthand_coeffs]
@@ -581,8 +581,8 @@ class IrregularGridFiniteDifference(FiniteDifference1D):
         outer_stencil = stencil + end_point_precision
 
         # we're gonna do just the 1D case for now
-        left_pad = np.floor(stencil / 2)
-        right_pad = np.ceil(stencil / 2)
+        left_pad = math.floor(stencil / 2)
+        right_pad = math.ceil(stencil / 2)
         slices_outer = cls.get_grid_slices(grid, outer_stencil)
         slices_core = cls.get_grid_slices(grid, stencil)
         slices_left = slices_outer[:left_pad]
@@ -804,7 +804,7 @@ class FiniteDifferenceMatrix:
             else:
                 fdm = np.zeros(shape)
             lcf = len(c_left)
-            mid = np.floor(lcc)
+            mid = math.floor(lcc)
             x = c_center[mid]
             p = lcf+mid
             fdm[p:p+len(x)] = x
@@ -844,14 +844,14 @@ class FiniteDifferenceMatrix:
                 fdm = sparse.lil_matrix((1, npts), dtype=dtype)
             else:
                 fdm = np.zeros((1, npts))
-            grid_mid = np.floor((npts - lcc + (lcc % 2))/2)
+            grid_mid = math.floor((npts - lcc + (lcc % 2))/2)
             x = c_center
             p = grid_mid
             fdm[0, p:p + len(x)] = x
         elif only_core:
             fdm = cls._fdm_core(c_center, npts - lcc + (lcc % 2), npts, mode=mode)
         else:
-            bound_l = min(int(np.floor(lcc / 2)), int(np.floor(npts / 2)))
+            bound_l = min(int(math.floor(lcc / 2)), int(math.floor(npts / 2)))
             # TODO: sometimes the grid-point stencils overrun the grid I actually have (for small grids)
             # which means I need to handle these boundary cases better
 
