@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.AnalyticDerivs.rock_vec">rock_vec</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/AnalyticDerivs.py#L1125)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/AnalyticDerivs.py#L1125?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/AnalyticDerivs.py#L1147)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/AnalyticDerivs.py#L1147?message=Update%20Docs)]
 </div>
 
 ```python
-rock_vec(coords, i, j, k): 
+rock_vec(coords, i, j, k, order=None): 
 ```
 Returns the full vectors that define the linearized version of an angle displacement
   - `coords`: `Any`
@@ -66,7 +66,7 @@ Returns the full vectors that define the linearized version of an angle displace
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/AnalyticDerivs/rock_vec.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/AnalyticDerivs/rock_vec.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/AnalyticDerivs.py#L1125?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/AnalyticDerivs.py#L1147?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
