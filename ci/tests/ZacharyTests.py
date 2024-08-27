@@ -1229,7 +1229,7 @@ class ZacharyTests(TestCase):
                 np.allclose(np.array([c1, c2]), cm)
             )
 
-    @debugTest
+    @validationTest
     def test_SparseShifts(self):
         d = SparsePolynomial({
             # 1 + 2x + 3y^2 - xy
@@ -2334,3 +2334,55 @@ class ZacharyTests(TestCase):
 
 
     #endregion
+
+
+    @inactiveTest
+    def test_InternalReexpansions(self):
+
+        import McUtils.Numputils as nput
+
+
+        nat = 5
+        coords = np.random.rand(nat, 3)
+        nx = np.prod(coords.shape, dtype=int)
+        grad = np.random.rand(nx)
+        hess = np.random.rand(nx, nx)
+        hess = hess @ hess.T
+
+        sample_coords = [
+            [0, 1], # bond length
+            [0, 2],
+            [0, 3],
+            [0, 1, 2], # angle between the first three atoms
+            [0, 1, 3],
+            [1, 2, 3]
+        ]
+
+        vals = []
+        jacs = []
+        jac_derivs = []
+        for idx in sample_coords:
+            if len(idx) == 2:
+                fun = nput.dist_vec
+            elif len(idx) == 3:
+                fun = nput.angle_vec
+            elif len(idx) == 4:
+                fun = nput.angle_vec
+            else:
+                raise ValueError("no dispatch")
+
+            d0, d1, d2 = fun(coords, *idx, order=2)
+            vals.append(d0)
+            jacs.append(d1)
+            jac_derivs.append(d2)
+
+        raise Exception(np.array(jac_derivs).shape)
+
+        new_surf = nput.tensor_reexpand(
+            [np.array(jacs), np.array(jac_derivs)],
+            [grad, hess],
+            2
+        )
+
+        raise Exception(new_surf)
+

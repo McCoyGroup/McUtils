@@ -1,6 +1,8 @@
 """
 Provides analytic derivatives for some common base terms with the hope that we can reuse them elsewhere
 """
+import itertools
+
 import numpy as np
 from .VectorOps import *
 from .Options import Options
@@ -1084,7 +1086,31 @@ def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, zero_point_step_s
     return derivs
 
 
-def dist_vec(coords, i, j):
+def _pop_bond_vecs(bond_tf, i, j, coords):
+    bond_vectors = np.zeros(coords.shape)
+    bond_vectors[..., i, :] = bond_tf[0]
+    bond_vectors[..., j, :] = bond_tf[1]
+
+    return bond_vectors.reshape(
+        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
+    )
+def _fill_derivs(coords, idx, derivs):
+    vals = []
+    # nx = np.prod(coords.shape, dtype=int)
+    nats = len(coords)
+    for n, d in enumerate(derivs):
+        if n == 0:
+            vals.append(d)
+            continue
+        tensor = np.zeros((nats, 3) * n)
+        for pos in itertools.product(*[range(len(idx)) for _ in range(n)]):
+            actual = ()
+            for r in pos:
+                actual += (idx[r], slice(None))
+            tensor[actual] = d[pos]
+        vals.append(tensor.reshape((nats * 3,) * n))
+    return vals
+def dist_vec(coords, i, j, order=None):
     """
     Returns the full vectors that define the linearized version of a bond displacement
 
@@ -1093,16 +1119,15 @@ def dist_vec(coords, i, j):
     :param j:
     :return:
     """
-    bond_tf = dist_deriv(coords, i, j)[1]
-    bond_vectors = np.zeros(coords.shape)
-    bond_vectors[..., i, :] = bond_tf[0]
-    bond_vectors[..., j, :] = bond_tf[1]
 
-    return bond_vectors.reshape(
-        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
-    )
+    derivs = dist_deriv(coords, i, j, order=(1 if order is None else order))
+    if order is None:
+        return _pop_bond_vecs(derivs[1], i, j, coords)
+    else:
+        return _fill_derivs(coords, (i,j), derivs)
 
-def angle_vec(coords, i, j, k):
+
+def angle_vec(coords, i, j, k, order=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
 
@@ -1112,17 +1137,14 @@ def angle_vec(coords, i, j, k):
     :return:
     """
 
-    ang_tf = angle_deriv(coords, i, j, k)[1]
-    ang_vectors = np.zeros(coords.shape)
-    ang_vectors[..., i, :] = ang_tf[0]
-    ang_vectors[..., j, :] = ang_tf[1]
-    ang_vectors[..., k, :] = ang_tf[2]
+    derivs = angle_deriv(coords, i, j, k, order=(1 if order is None else order))
+    full = _fill_derivs(coords, (i, j, k), derivs)
+    if order is None:
+        return full[1]
+    else:
+        return full
 
-    return ang_vectors.reshape(
-        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
-    )
-
-def rock_vec(coords, i, j, k):
+def rock_vec(coords, i, j, k, order=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
 
@@ -1132,17 +1154,14 @@ def rock_vec(coords, i, j, k):
     :return:
     """
 
-    ang_tf = rock_deriv(coords, i, j, k)[1]
-    ang_vectors = np.zeros(coords.shape)
-    ang_vectors[..., i, :] = ang_tf[0]
-    ang_vectors[..., j, :] = ang_tf[1]
-    ang_vectors[..., k, :] = ang_tf[2]
+    derivs = rock_deriv(coords, i, j, k, order=(1 if order is None else order))
+    full = _fill_derivs(coords, (i, j, k), derivs)
+    if order is None:
+        return full[1]
+    else:
+        return full
 
-    return ang_vectors.reshape(
-        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
-    )
-
-def dihed_vec(coords, i, j, k, l):
+def dihed_vec(coords, i, j, k, l, order=None):
     """
     Returns the full vectors that define the linearized version of a dihedral displacement
 
@@ -1152,19 +1171,15 @@ def dihed_vec(coords, i, j, k, l):
     :return:
     """
 
-    dihed_tf = dihed_deriv(coords, i, j, k, l)[1]
-    dihed_vectors = np.zeros(coords.shape)
-    dihed_vectors[..., i, :] = dihed_tf[0]
-    dihed_vectors[..., j, :] = dihed_tf[1]
-    dihed_vectors[..., k, :] = dihed_tf[2]
-    dihed_vectors[..., l, :] = dihed_tf[3]
-
-    return dihed_vectors.reshape(
-        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
-    )
+    derivs = dihed_deriv(coords, i, j, k, l, order=(1 if order is None else order))
+    full = _fill_derivs(coords, (i, j, k, l), derivs)
+    if order is None:
+        return full[1]
+    else:
+        return full
 
 
-def oop_vec(coords, i, j, k):
+def oop_vec(coords, i, j, k, order=None):
     """
     Returns the full vectors that define the linearized version of an oop displacement
 

@@ -112,7 +112,7 @@ class NumputilsTests(TestCase):
         #     ]
         # )
 
-    @debugTest
+    @validationTest
     def test_PtsDihedralsDeriv(self):
         # need some proper values to test this against...
         np.random.seed(0)
@@ -1422,3 +1422,43 @@ class NumputilsTests(TestCase):
                 vec_outer(a, b, axes=[[2, 3], [2, 3, 4]])
             )
         )
+
+
+    @debugTest
+    def test_ConvertInternals(self):
+
+        from Psience.Molecools import Molecule
+        import McUtils.Numputils as nput
+
+        mol = Molecule.from_file(
+            # I'm just using this to read in the atoms
+            # and coordinates, you can supply your own
+            TestManager.test_data('OCHD_freq.fchk'),
+            internals=[
+                # This can be modified to take any arbitrary function of Z-matrix
+                # coordinates which allows us to use symmetrized or redundant
+                # coordinate sets if needed, but I figured I'd get you started with this
+
+                [0, -1, -1, -1], # centered on the carbon
+                [1,  0, -1, -1], # OC bond length
+                [2,  1,  0, -1], # HCO
+                [3,  1,  0,  2], # HCO
+            ]
+        )
+
+        # this stands in for your gradient and Hessian from electronic structure
+        nat = 4
+        nx = nat * 3
+        grad = np.random.rand(nx)
+        hess = np.random.rand(nx, nx)
+        hess = hess @ hess.T
+
+        # uses finite difference to get derivatives of Cartesians w.r.t internals
+        # and then reexpresses the Cartesian expansion
+        jacobians = mol.embedding.get_cartesians_by_internals(order=2, strip_embedding=True)
+        surf = nput.tensor_reexpand(jacobians, [grad, hess])
+
+        print(surf)
+        print(surf[1])
+
+
