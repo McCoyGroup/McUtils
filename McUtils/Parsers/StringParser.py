@@ -931,10 +931,10 @@ class StringParser:
                 arr = arr.reshape(shape)
             elif len(fudge_axis) == 1:
                 fudge_axis = fudge_axis[0]
-                num_els = np.product(arr.shape)
+                num_els = np.prod(arr.shape)
                 shoop = list(shape)
                 shoop[fudge_axis] = 1
-                num_not_on_axis = np.product(shoop)
+                num_not_on_axis = np.prod(shoop)
                 if num_els % num_not_on_axis == 0:
                     num_left = num_els // num_not_on_axis
                     shoop[fudge_axis] = num_left
