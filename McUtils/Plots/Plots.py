@@ -454,8 +454,8 @@ class ListErrorBarPlot(ErrorBarPlot):
 class StickPlot(Plot):
     """A Plot object that plots sticks"""
 
-    default_plot_style = {'basefmt': " ", 'use_line_collection':True, 'markerfmt': " "}
-    known_styles = {"linefmt", "markerfmt", "basefmt", "bottom", "label", "use_line_collection", "orientation", "data", 'color', 'line_style'}
+    default_plot_style = {'basefmt': " ", 'markerfmt': " "}
+    known_styles = {"linefmt", "markerfmt", "basefmt", "bottom", "label", "orientation", "data", 'color', 'line_style'}
     method = "stem"
     def plot(self, *params, insert_default_styles=True, **plot_style):
         """
