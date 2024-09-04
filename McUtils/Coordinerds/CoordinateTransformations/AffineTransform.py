@@ -95,7 +95,7 @@ class AffineTransform(TransformationFunction):
         if len(coord_shape) == 1:
             adj_coord = coords.reshape((1, coord_shape[0]))
         elif len(coord_shape) > 2:
-            nels = np.product(coord_shape[:-1])
+            nels = np.prod(coord_shape[:-1])
             adj_coord = coords.reshape((nels, 3))
         else:
             adj_coord = coords

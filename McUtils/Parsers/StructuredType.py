@@ -366,7 +366,7 @@ class StructuredTypeArray:
         if self.is_simple:
             s = list(self.shape)
             s[self.extension_axis] = 1 # this will mess up on things like (3,)...
-            self._block_size = np.product(s)
+            self._block_size = np.prod(s)
         else:
             self._block_size = sum([s.block_size for s in self._array])
         return self._block_size
@@ -738,7 +738,7 @@ class StructuredTypeArray:
                 value = [ None ]*len(shapes)
                 for i, s in enumerate(shapes):
                     sub_shape = s[1:]
-                    s_num = np.product(sub_shape) # get the number of elements
+                    s_num = np.prod(sub_shape) # get the number of elements
                     if s_num == 1:
                         value[i] = old_value[0]
                         old_value = old_value[1:]
@@ -931,9 +931,9 @@ class StructuredTypeArray:
         ss = self.shape
         vs_a = vs[:axis] + vs[axis+1:]
         ss_a = ss[:axis] + ss[axis+1:]
-        my_stuffs = np.product(ss_a)
+        my_stuffs = np.prod(ss_a)
         if vs_a != ss_a and my_stuffs > 0:
-            total_stuffs = np.product(vs)
+            total_stuffs = np.prod(vs)
             remaining_stuff = total_stuffs/my_stuffs
             new_shape = ss[:axis] + (int(remaining_stuff),) + ss[axis+1:]
         else:
@@ -1166,7 +1166,7 @@ class StructuredTypeArray:
                         arr = arr.flatten()
                         num_els = len(arr)
                         # the number of elements that the length of the parsed out array must be divisible by
-                        num_not_along_axis = np.product(shape) / shape[axis]
+                        num_not_along_axis = np.prod(shape) / shape[axis]
                         if num_els % num_not_along_axis == 0:
                             # means we can cleanly reshape it once we know the target shape
                             shape[self.extension_axis] = num_els / num_not_along_axis

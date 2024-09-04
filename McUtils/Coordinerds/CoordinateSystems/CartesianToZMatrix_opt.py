@@ -49,7 +49,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         if ordering is None:
             ordering = range(len(coords[0]))
         base_shape = coords.shape
-        new_coords = np.reshape(coords, (np.product(base_shape[:-1]),) + base_shape[-1:])
+        new_coords = np.reshape(coords, (np.prod(base_shape[:-1]),) + base_shape[-1:])
         new_coords, ops = self.convert(new_coords, ordering=ordering, use_rad=use_rad, return_derivs=return_derivs)
         single_coord_shape = (base_shape[-2]-1, new_coords.shape[-1])
         new_shape = base_shape[:-2] + single_coord_shape
