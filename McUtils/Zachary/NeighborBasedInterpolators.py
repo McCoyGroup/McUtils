@@ -1036,7 +1036,7 @@ class RBFDInterpolator(NeighborBasedInterpolator):
                 # need many evals of this...
                 for tup in itertools.combinations_with_replacement(crds, r=n//2):
                     idx, counts = np.unique(tup, return_counts=True)
-                    val = np.product([np.arange(1, 2*c+1, 2) for c in counts])/(e**n) # rising factorial
+                    val = np.prod([np.arange(1, 2*c+1, 2) for c in counts])/(e**n) # rising factorial
                     idx = sum(
                         [
                             [i] * (2 * c) for i, c in
@@ -1057,7 +1057,7 @@ class RBFDInterpolator(NeighborBasedInterpolator):
     def thin_plate_spline_derivative(n: int, inds=None):
         def deriv(r, o=3, inds=inds):
             if o % 2 == 1:
-                k = np.product(o-np.arange(n))
+                k = np.prod(o-np.arange(n))
                 return k * r**(o-n)
             elif n == 1: # clearly could work this out but I don't want to right now
                 """r^n/(1 + r) + n r^(-1 + n) Log[1 + r]"""
@@ -1118,7 +1118,7 @@ class RBFDInterpolator(NeighborBasedInterpolator):
             l = np.floor(d / 2) + k + 1
             powers = np.arange(n, l + 2*k+1)
             coeffs = [
-                np.product(j - np.arange(n)) * cls.wendland_coefficient(l, j, k)
+                np.prod(j - np.arange(n)) * cls.wendland_coefficient(l, j, k)
                     if j % 2 == 1 or j > 2 * k - 1 else  # "the first k odd powers vanish"
                 0
                 for j in powers

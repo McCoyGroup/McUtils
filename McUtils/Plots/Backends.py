@@ -178,6 +178,9 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def set_size_inches(self, w, h):
         ...
+    @abc.abstractmethod
+    def savefig(self, file, **opts):
+        ...
 
 class GraphicsBackend(metaclass=abc.ABCMeta):
     Figure = GraphicsFigure
@@ -819,6 +822,9 @@ class MPLFigure(GraphicsFigure):
 
     def set_facecolor(self, fg):
         return self.obj.set_facecolor(fg)
+
+    def savefig(self, file, **opts):
+        return self.obj.savefig(file, **opts)
 
 class MPLBackend(GraphicsBackend):
     Figure = MPLFigure

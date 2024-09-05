@@ -589,8 +589,13 @@ def vector_take(arr, inds, shared=None, return_spec=False):
     :param inds:
     :return:
     """
-    # if axis != -1:
-    #     arr = np.moveaxis(arr, axis, -1)
+    arr = np.asanyarray(arr)
+    if shared is None and not return_spec: # so common we have to...
+        inds = np.asanyarray(inds)
+        flat_inds = inds.flatten()
+        flat_vals = np.reshape(arr[..., flat_inds], arr.shape[:-1] + inds.shape)
+        return flat_vals
+
     if isinstance(inds, tuple):
         if is_numeric(inds[0]): inds = tuple(np.asanyarray(ii) for ii in inds)
     else:

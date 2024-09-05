@@ -134,7 +134,7 @@ class Mesh(np.ndarray):
         :return:
         :rtype: int
         """
-        return np.product(g.shape[:-1])
+        return np.prod(g.shape[:-1])
     @classmethod
     def get_gridpoints(cls, g):
         """Returns the gridpoints in the grid

@@ -562,7 +562,7 @@ def vec_tensordot(tensa, tensb, axes=2, shared=None):
     N2_a = 1
     for axis in axes_a:
         N2_a *= as_[axis]
-    newshape_a = as_[:shared] + (int(np.product([as_[ax] for ax in notin_a if ax >= shared])), N2_a)
+    newshape_a = as_[:shared] + (int(np.prod([as_[ax] for ax in notin_a if ax >= shared])), N2_a)
     olda = [as_[axis] for axis in notin_a if axis >= shared]
 
     notin_b = [k for k in range(shared, ndb) if k not in axes_b]
@@ -570,7 +570,7 @@ def vec_tensordot(tensa, tensb, axes=2, shared=None):
     N2_b = 1
     for axis in axes_b:
         N2_b *= bs[axis]
-    newshape_b = as_[:shared] + (N2_b, int(np.product([bs[ax] for ax in notin_b if ax >= shared])))
+    newshape_b = as_[:shared] + (N2_b, int(np.prod([bs[ax] for ax in notin_b if ax >= shared])))
     oldb = [bs[axis] for axis in notin_b if axis >= shared]
 
     at = a.transpose(newaxes_a).reshape(newshape_a)

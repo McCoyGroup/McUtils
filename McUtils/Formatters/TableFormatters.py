@@ -297,16 +297,25 @@ class TableFormatter:
         if column_join is None: column_join = self.default_column_join
 
         if headers is None:
-            col_ = [
-                self.align_column(
-                    None, [d],
+            col_ = []
+            sp = [1] * len(data_columns)
+            split_cols = []
+            split_alignments = []
+            p = 0
+            for s in sp:
+                split_alignments.append(column_alignments[p:p + s])
+                split_cols.append(data_columns[p:p + s])
+                p += s
+
+            for d,al in zip(split_cols, column_alignments):
+                _, dc = self.align_column(
+                    None, d,
                     None, al,
                     0, True
-                )[1]
-                for d, al in zip(data_columns, column_alignments)
-            ]
+                )
+                col_.extend(dc)
+
             data_columns = col_
-            header_rows = []
         else:
             header_rows = []
             col_ = []

@@ -301,7 +301,7 @@ class Logger:
     @staticmethod
     def prep_array(obj):
         import numpy as np
-        with np.printoptions(linewidth=1e8):
+        with np.printoptions(linewidth=1e8, edgeitems=1e3, threshold=1e8):
             return str(obj).splitlines()
     @staticmethod
     def prep_dict(obj):
