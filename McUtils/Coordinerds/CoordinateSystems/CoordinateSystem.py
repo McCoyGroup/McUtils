@@ -207,8 +207,8 @@ class CoordinateSystem:
         # then reshape so as to actually fit the shape of the basis
         out_shape = excess_shape + target_coordinate_shape
         if nones == 1:
-            the_stuff = np.product([z for z in out_shape if z is not None])
-            leftover = int(np.product(coords.shape) / the_stuff)
+            the_stuff = np.prod([z for z in out_shape if z is not None])
+            leftover = int(np.prod(coords.shape) / the_stuff)
             out_shape = tuple(z if z is not None else leftover for z in out_shape)
         coords = np.reshape(coords, out_shape)
 

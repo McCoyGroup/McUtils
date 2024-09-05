@@ -199,7 +199,7 @@ class DerivativeGenerator:
         flattened_dims = None
         if multiconfig:
             flattened_dims = configs_dims
-            num_flattened = np.product(flattened_dims)
+            num_flattened = np.prod(flattened_dims)
             # I think by being smarter I could have avoided this reshape and avoided a bunch of hassle
             coords = coords.reshape((num_flattened, ) + coord_shape)
 
@@ -339,7 +339,7 @@ class DerivativeGenerator:
     def _build_displacement_array(self, coord, stencil_shapes, stencil_widths, displacement, use_sparse=False):
 
         # not too worried about looping over coordinates since the number of loops will be like max in the small hundreds
-        num_displacements = np.product(stencil_widths)
+        num_displacements = np.prod(stencil_widths)
         displacement_shape = (num_displacements,) + displacement.shape
 
         if use_sparse:
@@ -580,7 +580,7 @@ class DerivativeGenerator:
         :rtype:
         """
         if coordinates is None:
-            coordinates = np.arange(np.product(self.coord_shape))
+            coordinates = np.arange(np.prod(self.coord_shape))
         elif not isinstance(coordinates[0], (int, np.integer)):
             coordinates = self._fidx(coordinates)
 
@@ -718,7 +718,7 @@ class DerivativeGenerator:
                 for which, o in enumerate(order):
                     pos = [slice(None, None, None) if a is None else a for a in pos]
                     if coordinates is None:
-                        coordinates = np.arange(np.product(self.coord_shape))
+                        coordinates = np.arange(np.prod(self.coord_shape))
                     elif not isinstance(coordinates[0], (int, np.integer)):
                         coordinates = self._fidx(coordinates)
 
