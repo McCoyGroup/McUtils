@@ -531,7 +531,7 @@ class version_info:
         return cls.numpy_version
 def from_iter_nd(iter, dtype, shape, like=None, **extra):
     version = version_info.get_np_version()
-    if version[0] > 1 or version_info[1] > 22:
+    if version[0] > 1 or version[1] > 22:
         return np.fromiter(
             iter,
             count=shape[0],
