@@ -522,23 +522,48 @@ def split_by_regions(ar, regions, sortings=None, return_indices=False):
 
     return output
 
-def permutation_indices(n, r):
+class version_info:
+    numpy_version = None
+    @classmethod
+    def get_np_version(cls):
+        if cls.numpy_version is None:
+            cls.numpy_version = tuple(int(x) for x in np.version.full_version.split("."))
+        return cls.numpy_version
+def from_iter_nd(iter, dtype, shape, like=None, **extra):
+    version = version_info.get_np_version()
+    if version[0] > 1 or version_info[1] > 22:
+        return np.fromiter(
+            iter,
+            count=shape[0],
+            dtype=np.dtype((dtype, shape[1:])),
+            **extra
+        )
+    else:
+        if like is None:
+            base_array = np.empty(shape, dtype)
+        else:
+            # probably wrong, but here's the idea
+            base_array = like(shape, dtype)
+        for i,elem in enumerate(iter):
+            base_array[i] = elem
+        return base_array
+def permutation_indices(n, r, dtype=int):
     if r == 0:
         return np.array([[]])
-    return np.fromiter(
+    return from_iter_nd(
         itertools.permutations(range(n), r),
-        count=math.factorial(n)//math.factorial(n-r),
-        dtype=np.dtype((int, (r,)))
+        shape=(math.factorial(n)//math.factorial(n-r), r),
+        dtype=dtype
     )
-def combination_indices(n, r):
+def combination_indices(n, r, dtype=int):
     if r == 0:
         return np.array([[]])
     elif r == n:
         return np.arange(n)[np.newaxis]
-    return np.fromiter(
-        itertools.combinations(range(n), r),
-        count=math.comb(n, r),
-        dtype=np.dtype((int, (r,)))
+    return from_iter_nd(
+        itertools.permutations(range(n), r),
+        shape=(math.comb(n, r), r),
+        dtype=dtype
     )
 
 def vector_ix(shape, inds, return_shape=False):
