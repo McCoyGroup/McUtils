@@ -152,7 +152,7 @@ OutputArea: OutputArea
 ```
 <a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.load" class="docs-object-method">&nbsp;</a> 
 ```python
-load(overwrite=False): 
+load(exec_prefix=None, overwrite=False): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTMLWidgets/HTMLWidgets.py#L1037)/

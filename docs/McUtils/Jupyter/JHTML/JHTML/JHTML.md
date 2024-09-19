@@ -72,7 +72,7 @@ manage_attrs(attrs, sanitize=True):
 
 <a id="McUtils.Jupyter.JHTML.JHTML.JHTML.load" class="docs-object-method">&nbsp;</a> 
 ```python
-load(overwrite=False): 
+load(exec_prefix=None, overwrite=False): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L23)/
