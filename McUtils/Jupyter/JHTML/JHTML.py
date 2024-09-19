@@ -21,11 +21,11 @@ class JHTML:
     extract_styles = HTML.extract_styles
     manage_attrs = HTML.manage_attrs
     @classmethod
-    def load(cls, overwrite=False):
+    def load(cls, exec_prefix=None, overwrite=False):
         from IPython.core.display import display
 
         elems = [
-            HTMLWidgets.load(overwrite=overwrite)
+            HTMLWidgets.load(exec_prefix=exec_prefix, overwrite=overwrite)
             # BootstrapWidgets.load()
         ]
         display(*(e for e in elems if e is not None))

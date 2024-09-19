@@ -1035,11 +1035,11 @@ class ActiveHTMLWrapper:
 
 class HTMLWidgets:
     @classmethod
-    def load(cls, overwrite=False):
+    def load(cls, exec_prefix=None, overwrite=False):
         from .ActiveHTMLWidget import HTMLElement
 
-        nb = HTMLElement.jupyternb_install(overwrite=overwrite)
-        lab = HTMLElement.jupyterlab_install(overwrite=overwrite)
+        nb = HTMLElement.jupyternb_install(exec_prefix=exec_prefix, overwrite=overwrite)
+        lab = HTMLElement.jupyterlab_install(exec_prefix=exec_prefix, overwrite=overwrite)
         res = []
         if nb is not None:
             res.append(nb)

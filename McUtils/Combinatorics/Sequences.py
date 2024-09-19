@@ -26,7 +26,7 @@ def StirlingS1(n):
             stirlings[i, j] = (-1)**(i-j) *( (i-1)*abs(stirlings[i-1, j]) + abs(stirlings[i-1, j-1]))
     return stirlings
 
-def Binomial(n):
+def Binomial(n, dtype=None):
     """
     Fast recursion to calculate all
     binomial coefficients up to binom(n, n)
@@ -36,7 +36,13 @@ def Binomial(n):
     :return:
     :rtype:
     """
-    binomials = np.eye(n, dtype='uint64')
+    if dtype is None:
+        max_int = np.iinfo(np.dtype('uint64')).max
+        if max_int > math.comb(n, n//2):
+            dtype = 'uint64'
+        else:
+            dtype = object
+    binomials = np.eye(n, dtype=dtype)
     binomials[:, 0] = 1
     for i in range(2, n):
         if i%2 == 0:
