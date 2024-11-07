@@ -23,6 +23,7 @@ __all__ = [
     'dist_vec',
     'angle_vec',
     'dihed_vec',
+    'book_vec',
     'oop_vec'
 ]
 
@@ -1172,6 +1173,23 @@ def dihed_vec(coords, i, j, k, l, order=None):
     """
 
     derivs = dihed_deriv(coords, i, j, k, l, order=(1 if order is None else order))
+    full = _fill_derivs(coords, (i, j, k, l), derivs)
+    if order is None:
+        return full[1]
+    else:
+        return full
+
+def book_vec(coords, i, j, k, l, order=None):
+    """
+    Returns the full vectors that define the linearized version of a dihedral displacement
+
+    :param coords:
+    :param i:
+    :param j:
+    :return:
+    """
+
+    derivs = dihed_deriv(coords, j, k, i, l, order=(1 if order is None else order))
     full = _fill_derivs(coords, (i, j, k, l), derivs)
     if order is None:
         return full[1]
