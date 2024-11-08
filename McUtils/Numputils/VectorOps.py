@@ -24,6 +24,7 @@ __all__ = [
     "pts_normals",
     "vec_dihedrals",
     "pts_dihedrals",
+    "pts_book_angles",
     "mat_vec_muls",
     "one_pad_vecs",
     "affine_multiply",
@@ -599,7 +600,7 @@ def vec_tdot(tensa, tensb, axes=[[-1], [1]]):
 #
 #       pts_norms
 #
-def pts_norms(pts1, pts2):
+def pts_norms(pts1, pts2, **opts):
     """Provides the distance between the points
 
     :param pts1:
@@ -609,13 +610,13 @@ def pts_norms(pts1, pts2):
     :return:
     :rtype: np.ndarray
     """
-    return vec_norms(pts2-pts1)
+    return vec_norms(pts2-pts1, **opts)
 
 ################################################
 #
 #       pts_angles
 #
-def pts_angles(pts1, pts2, pts3):
+def pts_angles(pts1, pts2, pts3, **opts):
     """Provides the vector normal to the plane of the three points
 
     :param pts1:
@@ -627,13 +628,13 @@ def pts_angles(pts1, pts2, pts3):
     :return:
     :rtype: np.ndarray
     """
-    return vec_angles(pts1-pts2, pts3-pts2)
+    return vec_angles(pts1-pts2, pts3-pts2, **opts)
 
 ################################################
 #
 #       pts_normals
 #
-def pts_normals(pts1, pts2, pts3, normalize=True):
+def pts_normals(pts1, pts2, pts3, normalize=True, **opts):
     """Provides the vector normal to the plane of the three points
 
     :param pts1:
@@ -648,7 +649,7 @@ def pts_normals(pts1, pts2, pts3, normalize=True):
     :rtype: np.ndarray
     """
     # should I normalize these...?
-    return vec_crosses(pts2-pts1, pts3-pts1, normalize=normalize)
+    return vec_crosses(pts2-pts1, pts3-pts1, normalize=normalize, **opts)
 
 ################################################
 #
@@ -720,7 +721,7 @@ def vec_dihedrals(b1, b2, b3,
 def pts_dihedrals(pts1, pts2, pts3, pts4,
                   crosses=None,
                   norms=None,
-                  return_crosses=False
+                  return_crosses=False, **opts
                   ):
     """
     Provides the dihedral angle between pts4 and the plane of the other three vectors
@@ -753,7 +754,27 @@ def pts_dihedrals(pts1, pts2, pts3, pts4,
         b1, b2, b3,
         crosses=crosses,
         norms=norms,
-        return_crosses=return_crosses
+        return_crosses=return_crosses,
+        **opts
+    )
+
+def pts_book_angles(pts1, pts2, pts3, pts4,
+        crosses=None,
+        norms=None,
+        return_crosses=False,
+        **opts
+):
+    # compute signed angle between the normals to the b1xb2 plane and b2xb3 plane
+    b2 = pts1 - pts2  # 1->2
+    b1 = pts2 - pts3  # 1->2
+    b3 = pts4 - pts2  # 2->3
+
+    return vec_dihedrals(
+        b1, b2, b3,
+        crosses=crosses,
+        norms=norms,
+        return_crosses=return_crosses,
+        **opts
     )
 
 ################################################

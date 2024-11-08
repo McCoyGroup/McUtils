@@ -561,7 +561,7 @@ def combination_indices(n, r, dtype=int):
     elif r == n:
         return np.arange(n)[np.newaxis]
     return from_iter_nd(
-        itertools.permutations(range(n), r),
+        itertools.combinations(range(n), r),
         shape=(math.comb(n, r), r),
         dtype=dtype
     )
