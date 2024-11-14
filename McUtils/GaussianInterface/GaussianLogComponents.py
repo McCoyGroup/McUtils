@@ -779,19 +779,22 @@ normal_mode_block = RegexPattern(
 
 def parse_nms_modes(label, symmetries, freqs, masses, fcs, ir_ints, _, disps):
     freqs = [float(x) for x in freqs[len('Frequencies --'):].split()] # since len max 3, probably fastest way
+    masses = [float(x) for x in masses[len('Red. masses --'):].split()] # since len max 3, probably fastest way
     disps = StringParser.array_handler(dtype=float)(disps)[:, 2:]
     disps = np.moveaxis(disps.reshape(disps.shape[0], 3, -1), 1, -1).reshape(-1, 3)
-    return freqs, disps
+    return freqs, masses, disps
 def parse_nms_block(block):
     bits = normal_mode_block.findall(block)
     freqs = [None] * len(bits)
+    masses = [None] * len(bits)
     disps = [None] * len(bits)
     for i,bit in enumerate(bits):
-        f, d = parse_nms_modes(*bit)
+        f, m, d = parse_nms_modes(*bit)
         freqs[i] = f
+        masses[i] = m
         disps[i] = d
 
-    return np.concatenate(freqs), np.concatenate(disps, axis=1)
+    return np.concatenate(freqs), np.concatenate(masses), np.concatenate(disps, axis=1)
 def parse(blocks):
     return [parse_nms_block(b) for b in blocks]
 
