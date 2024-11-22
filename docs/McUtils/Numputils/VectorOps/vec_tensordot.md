@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.VectorOps.vec_tensordot">vec_tensordot</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L475)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L475?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L480)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L480?message=Update%20Docs)]
 </div>
 
 ```python
@@ -13,7 +13,7 @@ Basically had to duplicate the code for regular tensordot but then change the fi
     > 
   - `tensb`: `Any`
     > 
-  - `axes`: `Any`
+  - `axes`: `[list[int]|int, list[int]|int] | int`
     > 
   - `shared`: `int | None`
     > the axes that should be treated as shared (for now just an int)
@@ -69,7 +69,7 @@ Basically had to duplicate the code for regular tensordot but then change the fi
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/VectorOps/vec_tensordot.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/vec_tensordot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L475?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L480?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

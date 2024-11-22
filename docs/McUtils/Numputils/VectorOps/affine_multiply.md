@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.VectorOps.affine_multiply">affine_multiply</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L808)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L808?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L877)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L877?message=Update%20Docs)]
 </div>
 
 ```python
@@ -64,7 +64,7 @@ Multiplies affine mats and vecs
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/VectorOps/affine_multiply.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/affine_multiply.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L808?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L877?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

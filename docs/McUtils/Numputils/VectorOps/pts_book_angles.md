@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.VectorOps.pts_book_angles">pts_book_angles</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L761)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L761?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L830)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L830?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ pts_book_angles(pts1, pts2, pts3, pts4, crosses=None, norms=None, return_crosses
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/VectorOps/pts_book_angles.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/pts_book_angles.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L761?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L830?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

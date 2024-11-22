@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.TensorDerivatives.scalarprod_deriv">scalarprod_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L310)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L310?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ scalarprod_deriv(s_expansion, A_expansion, order, identical=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/TensorDerivatives/scalarprod_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/scalarprod_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L175?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L310?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

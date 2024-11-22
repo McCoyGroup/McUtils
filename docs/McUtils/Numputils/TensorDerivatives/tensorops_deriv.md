@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.TensorDerivatives.tensorops_deriv">tensorops_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L535)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L535?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L888)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L888?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ tensorops_deriv(*expansion_op_pairs, order, shared=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/TensorDerivatives/tensorops_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/tensorops_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L535?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L888?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.TensorDerivatives.matdet_deriv">matdet_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L235)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L235?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L456)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L456?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ matdet_deriv(forward_expansion, order):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/TensorDerivatives/matdet_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/matdet_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L235?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L456?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

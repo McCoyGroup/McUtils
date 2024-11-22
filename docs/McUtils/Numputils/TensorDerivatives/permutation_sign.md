@@ -1,11 +1,11 @@
-# <a id="McUtils.Numputils.TensorDerivatives.tensorprod_deriv">tensorprod_deriv</a>
+# <a id="McUtils.Numputils.TensorDerivatives.permutation_sign">permutation_sign</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L273)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L273?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TensorDerivatives.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L33?message=Update%20Docs)]
 </div>
 
 ```python
-tensorprod_deriv(A_expansion, B_expansion, order, axes=None, identical=False): 
+permutation_sign(perm, check=True): 
 ```
 
 
@@ -53,13 +53,13 @@ tensorprod_deriv(A_expansion, B_expansion, order, axes=None, identical=False):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Numputils/TensorDerivatives/tensorprod_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Numputils/TensorDerivatives/tensorprod_deriv.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Numputils/TensorDerivatives/permutation_sign.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Numputils/TensorDerivatives/permutation_sign.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/TensorDerivatives/tensorprod_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/tensorprod_deriv.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/TensorDerivatives/permutation_sign.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/permutation_sign.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L273?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TensorDerivatives.py#L33?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
