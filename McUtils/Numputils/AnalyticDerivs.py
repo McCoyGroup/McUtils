@@ -5,10 +5,11 @@ import itertools
 
 import numpy as np
 from .VectorOps import *
+from . import TensorDerivatives as td
+from . import Misc as misc
 from .Options import Options
 
 __all__ = [
-    'levi_cevita3',
     'rot_deriv',
     'rot_deriv2',
     'cartesian_from_rad_derivatives',
@@ -26,30 +27,6 @@ __all__ = [
     'book_vec',
     'oop_vec'
 ]
-
-# felt too lazy to look up some elegant formula
-levi_cevita3 = np.array([
-    [
-        [ 0,  0,  0],
-        [ 0,  0,  1],
-        [ 0, -1,  0]
-    ],
-    [
-        [ 0,  0, -1],
-        [ 0,  0,  0],
-        [ 1,  0,  0]
-    ],
-    [
-        [ 0,  1,  0],
-        [-1,  0,  0],
-        [ 0,  0,  0]
-    ]
-])
-# levi_cevita3.__name__ = "levi_cevita3"
-# levi_cevita3.__doc__ = """
-#     The 3D Levi-Cevita tensor.
-#     Used to turn cross products into matmuls
-#     """
 
 def _prod_deriv(op, a, b, da, db):
     """
@@ -128,8 +105,8 @@ def rot_deriv(angle, axis, dAngle, dAxis):
     c = np.cos(angle)[..., np.newaxis]
     s = np.sin(angle)[..., np.newaxis]
     i3 = np.broadcast_to(np.eye(3), axis.shape[:-1] + (3, 3))
-    e3 = np.broadcast_to(levi_cevita3, axis.shape[:-1] + (3, 3, 3))
-    # e3 = levi_cevita3
+    e3 = np.broadcast_to(td.levi_cevita3, axis.shape[:-1] + (3, 3, 3))
+    # e3 = td.levi_cevita3
     # i3 = np.eye(3)
     ct = vdOdv*(1-c[..., np.newaxis])
     st = (i3-vec_outer(axis, axis))*s[..., np.newaxis]*dAngle
@@ -163,7 +140,7 @@ def rot_deriv2(angle, axis, dAngle1, dAxis1, dAngle2, dAxis2, d2Angle, d2Axis):
     d2vXv = _prod_deriv_2(vec_outer, axis, axis, dAxis1, dAxis2, dAxis1, dAxis2, d2Axis, d2Axis)
 
     i3 = np.broadcast_to(np.eye(3), axis.shape[:-1] + (3, 3))
-    e3 = np.broadcast_to(levi_cevita3, axis.shape[:-1] + (3, 3, 3))
+    e3 = np.broadcast_to(td.levi_cevita3, axis.shape[:-1] + (3, 3, 3))
 
     c = np.cos(angle)
     s = np.sin(angle)
@@ -540,12 +517,12 @@ def vec_sin_cos_derivs(a, b, order=1,
                         ))
 
             if extra_dims > 0:
-                e3 = np.broadcast_to(levi_cevita3,  extra_shape + (3, 3, 3))
+                e3 = np.broadcast_to(td.levi_cevita3,  extra_shape + (3, 3, 3))
                 td = np.tensordot
                 outer = vec_outer
                 vec_td = lambda a, b, **kw: vec_tensordot(a, b, shared=extra_dims, **kw)
             else:
-                e3 = levi_cevita3
+                e3 = td.levi_cevita3
                 td = np.tensordot
                 vec_td = lambda a, b, **kw: vec_tensordot(a, b, shared=0, **kw)
                 outer = np.outer
@@ -631,6 +608,51 @@ def vec_sin_cos_derivs(a, b, order=1,
             cos_derivs.append(c2)
 
     return sin_derivs, cos_derivs
+
+def coord_deriv_mat(nats, coords, axes=None, base_shape=None):
+    if axes is None:
+        axes = [0, 1, 2]
+    if misc.is_numeric(coords):
+        coords = [coords]
+    z = np.zeros((nats, 3, nats, 3))
+    row_inds = np.repeat(coords, len(axes), axis=0)
+    col_inds = np.repeat(axes, len(coords), axis=0).flatten()
+    z[row_inds, col_inds, row_inds, col_inds] = 1
+    z = z.reshape(nats*3, nats*3)
+    if base_shape is not None:
+        sh = z.shape
+        expax = list(range(len(base_shape)))
+        z = np.broadcast_to(np.expand_dims(z, expax), base_shape + sh)
+    return z
+
+def disp_deriv_mat(nats, i, j, axes=None):
+    if axes is None:
+        axes = [0, 1, 2]
+    smol = misc.is_numeric(i)
+    if smol:
+        i = [i]
+        j = [j]
+    i = np.asanyarray(i)
+    j = np.asanyarray(j)
+    base_shape = i.shape
+    nstruct = np.prod(base_shape, dtype=int)
+    i = i.reshape(-1)
+    j = j.reshape(-1)
+
+    z = np.zeros((nstruct, nats, 3, 3))
+    row_inds = np.repeat(i, len(axes), axis=0)
+    col_inds = np.repeat(axes, len(i), axis=0).flatten()
+    z[:, row_inds, col_inds, col_inds] = 1
+
+    row_inds = np.repeat(j, len(axes), axis=0)
+    col_inds = np.repeat(axes, len(j), axis=0).flatten()
+    z[:, row_inds, col_inds, col_inds] = -1
+
+    z = z.reshape(base_shape + (nats*3, 3))
+    if smol:
+        z = z[0]
+
+    return z
 
 def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_comps=False):
     """
@@ -854,7 +876,6 @@ def angle_deriv(coords, i, j, k, order=1, zero_thresh=None):
 
     return derivs
 
-
 def rock_deriv(coords, i, j, k, order=1, zero_thresh=None):
     """
     Gives the derivative of the rocking motion (symmetric bend basically)
@@ -900,7 +921,7 @@ def rock_deriv(coords, i, j, k, order=1, zero_thresh=None):
 
     return derivs
 
-def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, zero_point_step_size=1.0e-4):
+def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion', zero_point_step_size=1.0e-4):
     """
     Gives the derivative of the dihedral between i, j, k, and l with respect to the Cartesians
     Currently gives what are sometimes called the `psi` angles.
@@ -920,172 +941,182 @@ def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, zero_point_step_s
     :rtype: np.ndarray
     """
 
-    if order > 2:
-        raise NotImplementedError("derivatives currently only up to order {}".format(2))
+    if method == 'expansion':
+        a = coords[..., j, :] - coords[..., i, :]
+        b = coords[..., k, :] - coords[..., j, :]
+        c = coords[..., l, :] - coords[..., k, :]
 
-    a = coords[..., j, :] - coords[..., i, :]
-    b = coords[..., k, :] - coords[..., j, :]
-    c = coords[..., l, :] - coords[..., k, :]
+        A_expansion = [a, disp_deriv_mat(coords.shape[-2], j, i)]
+        B_expansion = [b, disp_deriv_mat(coords.shape[-2], k, j)]
+        C_expansion = [c, disp_deriv_mat(coords.shape[-2], l, k)]
 
-    n1 = vec_crosses(a, b)
-    n2 = vec_crosses(b, c)
+        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+    else:
+        if order > 2:
+            raise NotImplementedError("derivatives currently only up to order {}".format(2))
 
-    # coll = vec_crosses(n1, n2)
-    # coll_norms = vec_norms(coll)
-    # bad = coll_norms < 1.e-17
-    # if bad.any():
-    #     raise Exception([
-    #         bad,
-    #         i, j, k, l,
-    #         a[bad], b[bad], c[bad]])
+        a = coords[..., j, :] - coords[..., i, :]
+        b = coords[..., k, :] - coords[..., j, :]
+        c = coords[..., l, :] - coords[..., k, :]
 
-    # zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
+        n1 = vec_crosses(a, b)
+        n2 = vec_crosses(b, c)
 
-    cnb = vec_crosses(n1, n2)
+        # coll = vec_crosses(n1, n2)
+        # coll_norms = vec_norms(coll)
+        # bad = coll_norms < 1.e-17
+        # if bad.any():
+        #     raise Exception([
+        #         bad,
+        #         i, j, k, l,
+        #         a[bad], b[bad], c[bad]])
 
-    cnb, n_cnb, bad_friends = vec_apply_zero_threshold(cnb, zero_thresh=zero_thresh, return_zeros=True)
-    bad_friends = bad_friends.reshape(cnb.shape[:-1])
-    orient = vec_dots(b, cnb)
-    # orient[np.abs(orient) < 1.0] = 0.
-    sign = np.sign(orient)
+        # zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
 
-    d, (sin_derivs, cos_derivs) = vec_angle_derivs(n1, n2, order=order,
-                                                   up_vectors=vec_normalize(b),
-                                                   zero_thresh=zero_thresh, return_comps=True)
+        cnb = vec_crosses(n1, n2)
 
-    derivs = []
+        cnb, n_cnb, bad_friends = vec_apply_zero_threshold(cnb, zero_thresh=zero_thresh, return_zeros=True)
+        bad_friends = bad_friends.reshape(cnb.shape[:-1])
+        orient = vec_dots(b, cnb)
+        # orient[np.abs(orient) < 1.0] = 0.
+        sign = np.sign(orient)
 
-    derivs.append(d[0])
+        d, (sin_derivs, cos_derivs) = vec_angle_derivs(n1, n2, order=order,
+                                                       up_vectors=vec_normalize(b),
+                                                       zero_thresh=zero_thresh, return_comps=True)
 
-    if order >= 1:
-        dn1 = d[1][..., 0, :]; dn2 = d[1][..., 1, :]
-        if dn1.ndim == 1:
-            if bad_friends:
-                dn1 = sin_derivs[1][0]
-                dn2 = sin_derivs[1][1]
-                sign = np.array(1)
-        else:
-            dn1[bad_friends] = sin_derivs[1][bad_friends, 0, :] # TODO: clean up shapes I guess...
-            dn2[bad_friends] = sin_derivs[1][bad_friends, 1, :]
-            sign[bad_friends] = 1
+        derivs = []
 
-        # raise Exception(
-        #     dn1,
-        #     b,
-        #     vec_crosses(b, dn1)
-        # )
+        derivs.append(d[0])
 
-        di = vec_crosses(b, dn1)
-        dj = vec_crosses(c, dn2) - vec_crosses(a+b, dn1)
-        dk = vec_crosses(a, dn1) - vec_crosses(b+c, dn2)
-        dl = vec_crosses(b, dn2)
+        if order >= 1:
+            dn1 = d[1][..., 0, :]; dn2 = d[1][..., 1, :]
+            if dn1.ndim == 1:
+                if bad_friends:
+                    dn1 = sin_derivs[1][0]
+                    dn2 = sin_derivs[1][1]
+                    sign = np.array(1)
+            else:
+                dn1[bad_friends] = sin_derivs[1][bad_friends, 0, :] # TODO: clean up shapes I guess...
+                dn2[bad_friends] = sin_derivs[1][bad_friends, 1, :]
+                sign[bad_friends] = 1
 
-        deriv_tensors = sign[np.newaxis, ..., np.newaxis]*np.array([di, dj, dk, dl])
+            # raise Exception(
+            #     dn1,
+            #     b,
+            #     vec_crosses(b, dn1)
+            # )
 
-        # if we have problem points we deal with them via averaging
-        # over tiny displacements since the dihedral derivative is
-        # continuous
-        # if np.any(bad_friends):
-        #     raise NotImplementedError("planar dihedral angles remain an issue for me...")
-        #     if coords.ndim > 2:
-        #         raise NotImplementedError("woof")
-        #     else:
-        #         bad_friends = bad_friends.flatten()
-        #         bad_i = i[bad_friends]
-        #         bad_j = j[bad_friends]
-        #         bad_k = k[bad_friends]
-        #         bad_l = l[bad_friends]
-        #         bad_coords = np.copy(coords)
-        #         if isinstance(i, (int, np.integer)):
-        #             raise NotImplementedError("woof")
-        #         else:
-        #             # for now we do this with finite difference...
-        #             for which,(bi,bj,bk,bl) in enumerate(zip(bad_i, bad_j, bad_k, bad_l)):
-        #                 for nat,at in enumerate([bi, bj, bk, bl]):
-        #                     for x in range(3):
-        #                         bad_coords[at, x] += zero_point_step_size
-        #                         d01, = dihed_deriv(bad_coords, bi, bj, bk, bl, order=0, zero_thresh=-1.0)
-        #                         bad_coords[at, x] -= 2*zero_point_step_size
-        #                         d02, = dihed_deriv(bad_coords, bi, bj, bk, bl, order=0, zero_thresh=-1.0)
-        #                         bad_coords[at, x] += zero_point_step_size
-        #                         deriv_tensors[nat, which, x] = (d01[0] + d02[0])/(2*zero_point_step_size)
-        #                         # print(
-        #                         #     "D1", d1[nat, x]
-        #                         #
-        #                         # )
-        #                         # print(
-        #                         #     "D2", d2[nat, x]
-        #                         #
-        #                         # )
-        #                         # print("avg", (d1[nat, x] + d2[nat, x])/2)
-        #                         # print("FD", (d01[0], d02[0]))#/(2*zero_point_step_size))
-        #                         # raise Exception(
-        #                         #  "wat",
-        #                         #     di,
-        #                         # d01.shape
-        #                         # )
+            di = vec_crosses(b, dn1)
+            dj = vec_crosses(c, dn2) - vec_crosses(a+b, dn1)
+            dk = vec_crosses(a, dn1) - vec_crosses(b+c, dn2)
+            dl = vec_crosses(b, dn2)
 
-        derivs.append(deriv_tensors)
+            deriv_tensors = sign[np.newaxis, ..., np.newaxis]*np.array([di, dj, dk, dl])
+
+            # if we have problem points we deal with them via averaging
+            # over tiny displacements since the dihedral derivative is
+            # continuous
+            # if np.any(bad_friends):
+            #     raise NotImplementedError("planar dihedral angles remain an issue for me...")
+            #     if coords.ndim > 2:
+            #         raise NotImplementedError("woof")
+            #     else:
+            #         bad_friends = bad_friends.flatten()
+            #         bad_i = i[bad_friends]
+            #         bad_j = j[bad_friends]
+            #         bad_k = k[bad_friends]
+            #         bad_l = l[bad_friends]
+            #         bad_coords = np.copy(coords)
+            #         if isinstance(i, (int, np.integer)):
+            #             raise NotImplementedError("woof")
+            #         else:
+            #             # for now we do this with finite difference...
+            #             for which,(bi,bj,bk,bl) in enumerate(zip(bad_i, bad_j, bad_k, bad_l)):
+            #                 for nat,at in enumerate([bi, bj, bk, bl]):
+            #                     for x in range(3):
+            #                         bad_coords[at, x] += zero_point_step_size
+            #                         d01, = dihed_deriv(bad_coords, bi, bj, bk, bl, order=0, zero_thresh=-1.0)
+            #                         bad_coords[at, x] -= 2*zero_point_step_size
+            #                         d02, = dihed_deriv(bad_coords, bi, bj, bk, bl, order=0, zero_thresh=-1.0)
+            #                         bad_coords[at, x] += zero_point_step_size
+            #                         deriv_tensors[nat, which, x] = (d01[0] + d02[0])/(2*zero_point_step_size)
+            #                         # print(
+            #                         #     "D1", d1[nat, x]
+            #                         #
+            #                         # )
+            #                         # print(
+            #                         #     "D2", d2[nat, x]
+            #                         #
+            #                         # )
+            #                         # print("avg", (d1[nat, x] + d2[nat, x])/2)
+            #                         # print("FD", (d01[0], d02[0]))#/(2*zero_point_step_size))
+            #                         # raise Exception(
+            #                         #  "wat",
+            #                         #     di,
+            #                         # d01.shape
+            #                         # )
+
+            derivs.append(deriv_tensors)
 
 
-    if order >= 2:
+        if order >= 2:
 
-        d11 = d[2][..., 0, 0, :, :]; d12 = d[2][..., 0, 1, :, :]
-        d21 = d[2][..., 1, 0, :, :]; d22 = d[2][..., 1, 1, :, :]
+            d11 = d[2][..., 0, 0, :, :]; d12 = d[2][..., 0, 1, :, :]
+            d21 = d[2][..., 1, 0, :, :]; d22 = d[2][..., 1, 1, :, :]
 
-        # explicit write out of chain-rule transformations to isolate different Kron-delta terms
-        extra_dims = a.ndim - 1
-        extra_shape = a.shape[:-1]
-        dot = lambda x, y, axes=(-1, -2) : vec_tensordot(x, y, axes=axes, shared=extra_dims)
-        if extra_dims > 0:
-            e3 = np.broadcast_to(levi_cevita3,  extra_shape + levi_cevita3.shape)
-        else:
-            e3 = levi_cevita3
+            # explicit write out of chain-rule transformations to isolate different Kron-delta terms
+            extra_dims = a.ndim - 1
+            extra_shape = a.shape[:-1]
+            dot = lambda x, y, axes=(-1, -2) : vec_tensordot(x, y, axes=axes, shared=extra_dims)
+            if extra_dims > 0:
+                e3 = np.broadcast_to(td.levi_cevita3,  extra_shape + td.levi_cevita3.shape)
+            else:
+                e3 = td.levi_cevita3
 
-        Ca = dot(e3, a, axes=[-1, -1])
-        Cb = dot(e3, b, axes=[-1, -1])
-        Cc = dot(e3, c, axes=[-1, -1])
-        Cab = Ca+Cb
-        Cbc = Cb+Cc
+            Ca = dot(e3, a, axes=[-1, -1])
+            Cb = dot(e3, b, axes=[-1, -1])
+            Cc = dot(e3, c, axes=[-1, -1])
+            Cab = Ca+Cb
+            Cbc = Cb+Cc
 
-        CaCa, CaCb, CaCc, CaCab, CaCbc = [dot(Ca, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
-        CbCa, CbCb, CbCc, CbCab, CbCbc = [dot(Cb, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
-        CcCa, CcCb, CcCc, CcCab, CcCbc = [dot(Cc, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
-        CabCa, CabCb, CabCc, CabCab, CabCbc = [dot(Cab, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
-        CbcCa, CbcCb, CbcCc, CbcCab, CbcCbc = [dot(Cbc, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
+            CaCa, CaCb, CaCc, CaCab, CaCbc = [dot(Ca, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
+            CbCa, CbCb, CbCc, CbCab, CbCbc = [dot(Cb, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
+            CcCa, CcCb, CcCc, CcCab, CcCbc = [dot(Cc, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
+            CabCa, CabCb, CabCc, CabCab, CabCbc = [dot(Cab, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
+            CbcCa, CbcCb, CbcCc, CbcCab, CbcCbc = [dot(Cbc, x) for x in (Ca, Cb, Cc, Cab, Cbc)]
 
-        dii = dot(CbCb, d11)
-        dij = dot(CcCb, d12) - dot(CabCb, d11)
-        dik = dot(CaCb, d11) - dot(CbcCb, d12)
-        dil = dot(CbCb, d12)
+            dii = dot(CbCb, d11)
+            dij = dot(CcCb, d12) - dot(CabCb, d11)
+            dik = dot(CaCb, d11) - dot(CbcCb, d12)
+            dil = dot(CbCb, d12)
 
-        dji = dot(CbCc, d21) - dot(CbCab, d11)
-        djj = dot(CabCab, d11) - dot(CabCc, d21) - dot(CcCab, d12) + dot(CcCc, d22)
-        djk = dot(CbcCab, d12) - dot(CbcCc, d22) - dot(CaCab, d11) + dot(CaCc, d21)
-        djl = dot(CbCc, d22) - dot(CbCab, d12)
+            dji = dot(CbCc, d21) - dot(CbCab, d11)
+            djj = dot(CabCab, d11) - dot(CabCc, d21) - dot(CcCab, d12) + dot(CcCc, d22)
+            djk = dot(CbcCab, d12) - dot(CbcCc, d22) - dot(CaCab, d11) + dot(CaCc, d21)
+            djl = dot(CbCc, d22) - dot(CbCab, d12)
 
-        dki = dot(CbCa, d11) - dot(CbCbc, d21)
-        dkj = dot(CabCbc, d21) - dot(CcCbc, d22) - dot(CabCa, d11) + dot(CcCa, d12)
-        dkk = dot(CaCa, d11) - dot(CaCbc, d21) - dot(CbcCa, d12) + dot(CbcCbc, d22)
-        dkl = dot(CbCa, d12) - dot(CbCbc, d22)
+            dki = dot(CbCa, d11) - dot(CbCbc, d21)
+            dkj = dot(CabCbc, d21) - dot(CcCbc, d22) - dot(CabCa, d11) + dot(CcCa, d12)
+            dkk = dot(CaCa, d11) - dot(CaCbc, d21) - dot(CbcCa, d12) + dot(CbcCbc, d22)
+            dkl = dot(CbCa, d12) - dot(CbCbc, d22)
 
-        dli = dot(CbCb, d21)
-        dlj = dot(CcCb, d22) - dot(CabCb, d21)
-        dlk = dot(CaCb, d21) - dot(CbcCb, d22)
-        dll = dot(CbCb, d22)
+            dli = dot(CbCb, d21)
+            dlj = dot(CcCb, d22) - dot(CabCb, d21)
+            dlk = dot(CaCb, d21) - dot(CbcCb, d22)
+            dll = dot(CbCb, d22)
 
-        derivs.append(
-            -sign[np.newaxis, np.newaxis, ..., np.newaxis, np.newaxis] *
-            np.array([
-                [dii, dij, dik, dil],
-                [dji, djj, djk, djl],
-                [dki, dkj, dkk, dkl],
-                [dli, dlj, dlk, dll]
-            ])
-        )
+            derivs.append(
+                -sign[np.newaxis, np.newaxis, ..., np.newaxis, np.newaxis] *
+                np.array([
+                    [dii, dij, dik, dil],
+                    [dji, djj, djk, djl],
+                    [dki, dkj, dkk, dkl],
+                    [dli, dlj, dlk, dll]
+                ])
+            )
 
     return derivs
-
 
 def _pop_bond_vecs(bond_tf, i, j, coords):
     bond_vectors = np.zeros(coords.shape)
@@ -1127,7 +1158,6 @@ def dist_vec(coords, i, j, order=None):
     else:
         return _fill_derivs(coords, (i,j), derivs)
 
-
 def angle_vec(coords, i, j, k, order=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
@@ -1162,7 +1192,7 @@ def rock_vec(coords, i, j, k, order=None):
     else:
         return full
 
-def dihed_vec(coords, i, j, k, l, order=None):
+def dihed_vec(coords, i, j, k, l, method='expansion', order=None):
     """
     Returns the full vectors that define the linearized version of a dihedral displacement
 
@@ -1171,13 +1201,15 @@ def dihed_vec(coords, i, j, k, l, order=None):
     :param j:
     :return:
     """
-
-    derivs = dihed_deriv(coords, i, j, k, l, order=(1 if order is None else order))
-    full = _fill_derivs(coords, (i, j, k, l), derivs)
-    if order is None:
-        return full[1]
+    derivs = dihed_deriv(coords, i, j, k, l, method=method, order=(1 if order is None else order))
+    if method == 'expansion':
+        return derivs
     else:
-        return full
+        full = _fill_derivs(coords, (i, j, k, l), derivs)
+        if order is None:
+            return full[1]
+        else:
+            return full
 
 def book_vec(coords, i, j, k, l, order=None):
     """
@@ -1195,7 +1227,6 @@ def book_vec(coords, i, j, k, l, order=None):
         return full[1]
     else:
         return full
-
 
 def oop_vec(coords, i, j, k, order=None):
     """
@@ -1216,3 +1247,4 @@ def oop_vec(coords, i, j, k, order=None):
     return dihed_vectors.reshape(
         coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
     )
+

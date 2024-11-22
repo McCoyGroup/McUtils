@@ -3,6 +3,7 @@ A module of useful math for handling coordinate transformations and things
 """
 
 import numpy as np
+from . import Misc as util
 from .Options import Options
 
 __all__ = [
@@ -14,6 +15,8 @@ __all__ = [
     "vec_tensordot",
     "vec_tensordiag",
     "vec_tdot",
+    "semisparse_tensordot",
+    "frac_powh",
     "vec_crosses",
     "vec_angles",
     "vec_sins",
@@ -30,7 +33,8 @@ __all__ = [
     "affine_multiply",
     "cartesian_from_rad",
     "polar_to_cartesian",
-    "apply_pointwise"
+    "apply_pointwise",
+    # "kron_sum",
 ]
 
 ##
@@ -422,14 +426,15 @@ def vec_outer(a, b, axes=None, order=2):
             axes = [0, 0]
 
     a_ax, b_ax = axes
-    if isinstance(a_ax, int): a_ax = [a_ax]
-    if isinstance(b_ax, int): b_ax = [b_ax]
+    if isinstance(a_ax, (int, np.integer)): a_ax = [a_ax]
+    if isinstance(b_ax, (int, np.integer)): b_ax = [b_ax]
     a_ax = [a.ndim + x if x < 0 else x for x in a_ax]
     b_ax = [b.ndim + x if x < 0 else x for x in b_ax]
 
-    a_ax = np.sort(a_ax)
-    b_ax = np.sort(b_ax)
-    if order == 0: # we resolve axis conflicts, where two axes are mapping to the same spot
+    a_ax = list(np.sort(a_ax))
+    b_ax = list(np.sort(b_ax))
+    # we resolve axis conflicts, where two axes are mapping to the same spot
+    if order == 0: # pad b to get block form (a first, then b)
         b_ax = bump_axes(a_ax, b_ax)
     elif order == 1: # pad a to get block form (b first, then a)
         a_ax = bump_axes(b_ax, a_ax)
@@ -481,7 +486,7 @@ def vec_tensordot(tensa, tensb, axes=2, shared=None):
     :param tensb:
     :type tensb:
     :param axes:
-    :type axes:
+    :type axes: [list[int]|int, list[int]|int] | int
     :param shared: the axes that should be treated as shared (for now just an int)
     :type shared: int | None
     :return:
@@ -580,7 +585,7 @@ def vec_tensordot(tensa, tensb, axes=2, shared=None):
     final_shape = list(a_shape[:shared]) + olda + oldb
     # raise Exception(res.shape, final_shape)
     return res.reshape(final_shape)
-def vec_tdot(tensa, tensb, axes=[[-1], [1]]):
+def vec_tdot(tensa, tensb, axes=((-1,), (1,))):
     """
     Tensor dot but just along the final axes by default. Totally a convenience function.
 
@@ -596,6 +601,70 @@ def vec_tdot(tensa, tensb, axes=[[-1], [1]]):
 
     return vec_tensordot(tensa, tensb, axes=axes)
 
+def semisparse_tensordot(sparse_data, a, /, axes, shared=None):
+    pos, vals, shape = sparse_data
+    a = np.asanyarray(a)
+    lv_axes = axes[0]
+    a_axes = axes[1]
+    if util.is_numeric(lv_axes):
+        lv_axes = [lv_axes]
+    if util.is_numeric(a_axes):
+        a_axes = [a_axes]
+
+
+    if shared is None:
+        shared = 0
+    nax = len(lv_axes)
+    for ax in reversed(a_axes):
+        a = np.moveaxis(a, ax, shared)
+
+    idx = np.setdiff1d(np.arange(len(shape)), lv_axes)
+
+    target_shape = a.shape[:shared] + tuple(shape[i] for i in idx) + a.shape[nax + shared:]
+
+    pos = [pos[i] for i in idx] + [pos[i] for i in lv_axes]
+    shape = [shape[i] for i in idx] + [shape[i] for i in lv_axes]
+    flat_shape = (np.prod([shape[i] for i in idx], dtype=int), np.prod([shape[i] for i in lv_axes], dtype=int))
+    flat_pos = np.array(np.unravel_index(np.ravel_multi_index(pos, shape), flat_shape)).T
+
+    a = np.reshape(a, a.shape[:shared] + (np.prod([a.shape[i+shared] for i in range(nax)], dtype=int), -1))
+
+    # now we can do a form of sparse dot product
+
+    ndim = len(shape) - shared
+    if nax == ndim:
+        idx = (slice(None),)*shared + (flat_pos,)
+        new = vec_tensordot(
+            vals,
+            a[idx],
+            axes=[0, shared]
+        )
+    else:
+        new_shape = a.shape[:shared] + (flat_shape[0],) + a.shape[shared+1:]
+        new = np.zeros(new_shape)
+        pad_pos = (slice(None),)*shared
+        for (i,k),v in zip(flat_pos, vals):
+            i = pad_pos + (i,)
+            k = pad_pos + (k,)
+            new[i] += v * a[k]
+
+    return np.reshape(new, target_shape)
+
+
+def frac_powh(A, k, eigsys=None, pow=None):
+    if eigsys is None:
+        eigsys = np.linalg.eigh(A)
+    eigvals, Q = eigsys
+    if pow is None:
+        pow = np.pow
+    eigvals = pow(eigvals, k)
+    # TODO: speed up with semisparse dot products
+    if eigvals.ndim == 1:
+        return Q @ np.diag(eigvals) @ Q.T
+    else:
+        shared = eigvals.ndim - 1
+        v = vec_tensordiag(eigvals, extra_dims=shared)
+        return vec_tensordot(vec_tensordot(Q, v, axes=[-1, -2], shared=shared), Q, axes=[-1, -2], shared=shared)
 ################################################
 #
 #       pts_norms
@@ -1015,3 +1084,23 @@ def apply_pointwise(tf, points, reroll=None, **kwargs):
         return vals, rest
     else:
         return vals
+
+# ##############################################################################
+# #
+# #       kron_sum
+# #
+# def kron_sum(A, B, shared=None)
+#     if shared is None:
+#         n = A.shape[0]
+#         m = B.shape[0]
+#     else:
+#         raise NotImplementedError("vectorized kron sum not implemented yet...just use vec_outer tricks")
+#         n = A.shape[shared]
+#         m = B.shape[shared]:
+#     A_ = vec_outer(A, np.eye())
+#     A_ = np.kron(A, np.eye(m))
+#     B_ = np.kron(np.eye(n), B)
+#     if shared is not None:
+#         B_ = np.moveaxis
+#
+#     np.moveaxis(np.kron(np.eye(), A), ) +
