@@ -1423,6 +1423,21 @@ class NumputilsTests(TestCase):
             )
         )
 
+    @debugTest
+    def test_DihedralDerivativeComparison(self):
+
+        np.random.seed(0)
+        coords = np.random.rand(4, 3)
+        coords = self.problem_coords
+        new_vecs = dihed_vec(coords, 0, 3, 2, 1, method='expansion', order=1)
+        print("="*10)
+        print(new_vecs[1])
+        print("-"*10)
+        old_vecs = dihed_vec(coords, 0, 3, 2, 1, method='og', order=1)
+        print(old_vecs[1])
+        raise Exception(new_vecs[0], old_vecs[0])
+        raise Exception(...)
+
 
     @validationTest
     def test_ConvertInternals(self):
