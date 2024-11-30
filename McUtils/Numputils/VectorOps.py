@@ -526,7 +526,7 @@ def vec_tensordot(tensa, tensb, axes=2, shared=None):
 
     # the minimum number of possible shared axes
     # is constrained by the contraction of axes
-    shared = min(shared, min(axes_a), min(axes_b))
+    shared = min([shared, min(axes_a), min(axes_b)])
 
     if shared == 0: #easier to just delegate here than handle more special cases
         return np.tensordot(a, b, axes=axes)

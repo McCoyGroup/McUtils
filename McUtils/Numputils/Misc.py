@@ -12,7 +12,8 @@ __all__ = [
     'numeric_types',
     'is_atomic',
     'is_numeric',
-    'is_zero'
+    'is_zero',
+    'flatten_inds'
 ]
 
 numeric_types = (int, float, np.integer, np.floating)
@@ -125,3 +126,26 @@ def unflatten_dtype(consolidated, orig_shape, orig_dtype, axis=None):
     if axis is not None:
         uniq = np.moveaxis(uniq, 0, axis)
     return uniq
+
+
+def flatten_inds(A, *idx_blocks):
+    idx_blocks = [
+        (
+            (i + A.ndim) if i < 0 else i,
+            (j + A.ndim) if j < 0 else j
+        )
+        for i, j in idx_blocks
+    ]
+    block_map = {
+        i: np.prod(A.shape[i:j+1], dtype=int)
+        for i, j in idx_blocks
+    }
+    new_shape = [
+        A.shape[k]
+        if not any(i <= k and k <= j for i, j in idx_blocks) else
+        block_map.get(k)
+        for k in range(A.ndim)
+    ]
+    new_shape = [s for s in new_shape if s is not None]
+
+    return A.reshape(new_shape)

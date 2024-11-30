@@ -1,3 +1,4 @@
+import os.path
 
 from Peeves.TestUtils import *
 from Peeves import BlockProfiler
@@ -1425,10 +1426,58 @@ class NumputilsTests(TestCase):
 
     @debugTest
     def test_DihedralDerivativeComparison(self):
+        from Psience.Molecools import Molecule
 
-        np.random.seed(0)
-        coords = np.random.rand(4, 3)
-        coords = self.problem_coords
+        coords = Molecule.from_file(
+            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/HOONO_freq.fchk")
+        ).coords
+
+        coords = Molecule.from_file(
+            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/nh3.fchk")
+        ).coords
+
+        coords = Molecule.from_file(
+            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/HOH_freq.fchk")
+        ).coords
+
+        # np.random.seed(0)
+        # coords = np.random.rand(4, 3)
+        # coords = self.problem_coords
+        raise Exception(
+            "?",
+            # coords[:3],
+            wag_vec(coords, 2, 0, 1, order=1)[-1].reshape(-1, 3)[:4],
+            # book_vec(coords, 0, 1, 2, 3, method='og').reshape(-1, 3)[:4]
+            # dihed_vec(coords, 0, 1, 2, 3, method='og').reshape(-1, 3)[:4]
+        )
+        raise Exception(
+            # coords[:3],
+            # angle_vec(coords, 0, 1, 2, method='expansion', order=1),
+            # angle_vec(coords, 0, 1, 2, method='expansion', fixed_atoms=[0], order=1)
+            # angle_vec(coords, 0, 1, 2).reshape(-1, 3)[:3],
+            # # angle_vec(coords, 0, 1, 2, method='og'),
+            # rock_vec(coords, 0, 1, 2).reshape(-1, 3)[:3],
+            int_coord_tensors(
+                coords,
+                [
+                    (0, 1, 2),
+                    {'rock': (0, 1, 2)},
+                    {'rock': (0, 1, 2), 'fixed_atoms':[0]},
+                ]
+            )
+        )
+        """
+        (array([ 9.29682337e-01,  3.68362256e-01,  7.97024412e-17, -9.29682337e-01,
+       -3.68362256e-01, -1.00000000e+00, -1.16328812e-17,  2.93593711e-17,
+        1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+        0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+        0.00000000e+00,  0.00000000e+00]), 
+        array([ 
+        9.29682337e-01,  3.68362256e-01, -1.00000000e+00, -9.29682337e-01,
+       -3.68362256e-01, -7.97024412e-17, -1.16328812e-17,  2.93593711e-17,
+        1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+        0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+        0.00000000e+00,  0.00000000e+00]))"""
         new_vecs = dihed_vec(coords, 0, 3, 2, 1, method='expansion', order=1)
         print("="*10)
         print(new_vecs[1])

@@ -16,6 +16,9 @@ __all__ = [
     'dist_deriv',
     'angle_deriv',
     'dihed_deriv',
+    'book_deriv',
+    'oop_deriv',
+    'wag_deriv',
     'vec_norm_derivs',
     'vec_sin_cos_derivs',
     'vec_angle_derivs',
@@ -25,7 +28,9 @@ __all__ = [
     'angle_vec',
     'dihed_vec',
     'book_vec',
-    'oop_vec'
+    'oop_vec',
+    'wag_vec',
+    "int_coord_tensors"
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -518,12 +523,12 @@ def vec_sin_cos_derivs(a, b, order=1,
 
             if extra_dims > 0:
                 e3 = np.broadcast_to(td.levi_cevita3,  extra_shape + (3, 3, 3))
-                td = np.tensordot
+                # td = np.tensordot
                 outer = vec_outer
                 vec_td = lambda a, b, **kw: vec_tensordot(a, b, shared=extra_dims, **kw)
             else:
                 e3 = td.levi_cevita3
-                td = np.tensordot
+                # td = np.tensordot
                 vec_td = lambda a, b, **kw: vec_tensordot(a, b, shared=0, **kw)
                 outer = np.outer
                 a = a.squeeze()
@@ -625,34 +630,82 @@ def coord_deriv_mat(nats, coords, axes=None, base_shape=None):
         z = np.broadcast_to(np.expand_dims(z, expax), base_shape + sh)
     return z
 
-def disp_deriv_mat(nats, i, j, axes=None):
+def jacobian_mat_inds(ind_lists, axes=None):
     if axes is None:
         axes = [0, 1, 2]
-    smol = misc.is_numeric(i)
+
+    smol = misc.is_numeric(ind_lists[0])
+    ind_lists = [
+        np.asanyarray([i] if smol else i).reshape(-1)
+        for i in ind_lists
+    ]
+
+    nstruct = ind_lists[0].shape[0]
+    struct_inds = np.repeat(np.arange(nstruct), len(axes), axis=0)
+
+    inds = []
+    for i in ind_lists:
+        row_inds = np.repeat(i, len(axes), axis=0)
+        col_inds = np.repeat(axes, len(i), axis=0).flatten()
+        inds.append((struct_inds, row_inds, col_inds, col_inds))
+
+    return inds
+
+def fill_disp_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None):
+    ind_lists = [i for i,v in ind_val_pairs]
+    vals = [v for i,v in ind_val_pairs]
+    smol = misc.is_numeric(ind_lists[0])
+    ind_lists = [
+        np.asanyarray([i] if smol else i)
+        for i in ind_lists
+    ]
+
+    i_shape = ind_lists[0].shape
+    nnew = len(i_shape)
+    if base_shape is None:
+        base_shape = mat.shape[:-3]
+    target_shape = base_shape + i_shape + mat.shape[-3:]
+    if target_shape != mat.shape:
+        nog = len(base_shape)
+        mat = np.broadcast_to(
+            np.expand_dims(mat, np.arange(nog, nog+nnew).tolist()),
+            target_shape
+        ).copy()
+    else:
+        base_shape = mat.shape[:-(3+nnew)]
+        # target_shape = base_shape + i_shape + mat.shape[-3:]
+
+    mat = np.reshape(mat, base_shape + (np.prod(i_shape, dtype=int),) + mat.shape[-3:])
+    for idx_tup,val in zip(jacobian_mat_inds(ind_lists, axes=axes), vals):
+        idx_tup = (...,) + idx_tup
+        mat[idx_tup] = val
+    mat = mat.reshape(target_shape)
+
     if smol:
-        i = [i]
-        j = [j]
-    i = np.asanyarray(i)
-    j = np.asanyarray(j)
-    base_shape = i.shape
-    nstruct = np.prod(base_shape, dtype=int)
-    i = i.reshape(-1)
-    j = j.reshape(-1)
+        mat = mat.reshape(base_shape + mat.shape[-3:])
+    return mat
 
-    z = np.zeros((nstruct, nats, 3, 3))
-    row_inds = np.repeat(i, len(axes), axis=0)
-    col_inds = np.repeat(axes, len(i), axis=0).flatten()
-    z[:, row_inds, col_inds, col_inds] = 1
+def disp_deriv_mat(coords, i, j, axes=None):
+    mats = np.zeros(coords.shape + (3,))
+    return fill_disp_jacob_atom(
+        mats,
+        [[i, 1], [j, -1]],
+        axes=axes,
+        base_shape=coords.shape[:-2]
+    )
 
-    row_inds = np.repeat(j, len(axes), axis=0)
-    col_inds = np.repeat(axes, len(j), axis=0).flatten()
-    z[:, row_inds, col_inds, col_inds] = -1
+def prep_disp_expansion(coords, i, j, fixed_atoms=None, expand=True):
+    a = coords[..., j, :] - coords[..., i, :]
 
-    z = z.reshape(base_shape + (nats*3, 3))
-    if smol:
-        z = z[0]
+    if expand:
+        A_d = disp_deriv_mat(coords, j, i)
+        if fixed_atoms is not None:
+            A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
 
-    return z
+        return [a, misc.flatten_inds(A_d, [-3, -2])]
+    else:
+        return [a]
+
 
 def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_comps=False):
     """
@@ -792,7 +845,7 @@ def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_co
     else:
         return derivs
 
-def dist_deriv(coords, i, j, order=1, zero_thresh=None):
+def dist_deriv(coords, i, j, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
     """
     Gives the derivative of the distance between i and j with respect to coords i and coords j
 
@@ -806,32 +859,43 @@ def dist_deriv(coords, i, j, order=1, zero_thresh=None):
     :rtype: list
     """
 
-    if order > 2:
-        raise NotImplementedError("derivatives currently only up to order {}".format(2))
+    if method == 'expansion':
+        a = coords[..., j, :] - coords[..., i, :]
 
-    a = coords[..., j, :] - coords[..., i, :]
-    d = vec_norm_derivs(a, order=order, zero_thresh=zero_thresh)
+        A_d = disp_deriv_mat(coords, j, i)
+        if fixed_atoms is not None:
+            A_d = fill_disp_jacob_atom(A_d, [[i, 0] for i in fixed_atoms], base_shape=coords.shape[:-2])
+        A_expansion = [a, misc.flatten_inds(A_d, [-3, -2])]
 
-    derivs = []
+        return td.vec_norm_unit_deriv(A_expansion, order=order)[0]
+    else:
 
-    derivs.append(d[0])
+        if order > 2:
+            raise NotImplementedError("derivatives currently only up to order {}".format(2))
 
-    if order >= 1:
-        da = d[1]
-        derivs.append(np.array([-da, da]))
+        a = coords[..., j, :] - coords[..., i, :]
+        d = vec_norm_derivs(a, order=order, zero_thresh=zero_thresh)
 
-    if order >= 2:
-        daa = d[2]
-        # ii ij
-        # ji jj
-        derivs.append(np.array([
-            [ daa, -daa],
-            [-daa,  daa]
-        ]))
+        derivs = []
 
-    return derivs
+        derivs.append(d[0])
 
-def angle_deriv(coords, i, j, k, order=1, zero_thresh=None):
+        if order >= 1:
+            da = d[1]
+            derivs.append(np.array([-da, da]))
+
+        if order >= 2:
+            daa = d[2]
+            # ii ij
+            # ji jj
+            derivs.append(np.array([
+                [ daa, -daa],
+                [-daa,  daa]
+            ]))
+
+        return derivs
+
+def angle_deriv(coords, i, j, k, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
     """
     Gives the derivative of the angle between i, j, and k with respect to the Cartesians
 
@@ -847,36 +911,45 @@ def angle_deriv(coords, i, j, k, order=1, zero_thresh=None):
     :rtype: np.ndarray
     """
 
-    if order > 2:
-        raise NotImplementedError("derivatives currently only up to order {}".format(2))
+    if method == 'expansion':
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, i, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
 
-    a = coords[..., j, :] - coords[..., i, :]
-    b = coords[..., k, :] - coords[..., i, :]
-    d = vec_angle_derivs(a, b, order=order, zero_thresh=zero_thresh)
+        return td.vec_angle_deriv(A_expansion, B_expansion, order=order)
+    else:
 
-    derivs = []
+        if order > 2:
+            raise NotImplementedError("derivatives currently only up to order {}".format(2))
 
-    derivs.append(d[0])
+        a = coords[..., j, :] - coords[..., i, :]
+        b = coords[..., k, :] - coords[..., i, :]
+        d = vec_angle_derivs(a, b, order=order, zero_thresh=zero_thresh)
 
-    if order >= 1:
-        da = d[1][..., 0, :]; db = d[1][..., 1, :]
-        derivs.append(np.array([-(da + db), da, db]))
+        derivs = []
 
-    if order >= 2:
-        daa = d[2][..., 0, 0, :, :]; dab = d[2][..., 0, 1, :, :]
-        dba = d[2][..., 1, 0, :, :]; dbb = d[2][..., 1, 1, :, :]
-        # ii ij ik
-        # ji jj jk
-        # ki kj kk
-        derivs.append(np.array([
-            [daa + dba + dab + dbb, -(daa + dab), -(dba + dbb)],
-            [         -(daa + dba),          daa,   dba       ],
-            [         -(dab + dbb),          dab,   dbb       ]
-        ]))
+        derivs.append(d[0])
 
-    return derivs
+        if order >= 1:
+            da = d[1][..., 0, :]; db = d[1][..., 1, :]
+            derivs.append(np.array([-(da + db), da, db]))
 
-def rock_deriv(coords, i, j, k, order=1, zero_thresh=None):
+        if order >= 2:
+            daa = d[2][..., 0, 0, :, :]; dab = d[2][..., 0, 1, :, :]
+            dba = d[2][..., 1, 0, :, :]; dbb = d[2][..., 1, 1, :, :]
+            # ii ij ik
+            # ji jj jk
+            # ki kj kk
+            derivs.append(np.array([
+                [daa + dba + dab + dbb, -(daa + dab), -(dba + dbb)],
+                [         -(daa + dba),          daa,   dba       ],
+                [         -(dab + dbb),          dab,   dbb       ]
+            ]))
+
+        return derivs
+
+def rock_deriv(coords, i, j, k, order=1, method='expansion', zero_thresh=None, fixed_atoms=None, expanded_vectors=None):
     """
     Gives the derivative of the rocking motion (symmetric bend basically)
 
@@ -892,36 +965,78 @@ def rock_deriv(coords, i, j, k, order=1, zero_thresh=None):
     :rtype: np.ndarray
     """
 
-    if order > 2:
-        raise NotImplementedError("derivatives currently only up to order {}".format(2))
 
-    a = coords[..., j, :] - coords[..., i, :]
-    b = coords[..., k, :] - coords[..., i, :]
-    d = vec_angle_derivs(a, b, order=order, zero_thresh=zero_thresh)
+    if method == 'expansion':
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, i, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        A_deriv = td.vec_angle_deriv(A_expansion, B_expansion[:1], order=order)
+        B_deriv = td.vec_angle_deriv(A_expansion[:1], B_expansion, order=order)
+        return [A_deriv[0]] + [ad - bd for ad,bd in zip(A_deriv[1:], B_deriv[1:])]
 
-    derivs = []
+        return td.vec_angle_deriv(A_expansion, B_expansion, order=order)
+        # if fixed_atoms is None:
+        #     fixed_atoms = []
+        # else:
+        #     fixed_atoms = list(fixed_atoms)
+        # k_derivs = angle_deriv(coords, i, j, k, order=order, method='expansion', fixed_atoms=fixed_atoms+[k])
+        # j_derivs = angle_deriv(coords, i, j, k, order=order, method='expansion', fixed_atoms=fixed_atoms+[j])
+        # raise Exception(k_derivs[1], j_derivs[1])
+        # return [k_derivs[0]] + [ad - bd for ad,bd in zip(k_derivs[1:], j_derivs[1:])]
 
-    derivs.append(d[0])
+        a = coords[..., j, :] - coords[..., i, :]
+        b = coords[..., k, :] - coords[..., i, :]
 
-    if order >= 1:
-        da = d[1][..., 0, :]; db = d[1][..., 1, :]
-        derivs.append(np.array([-(da - db), da, -db]))
+        A_d = disp_deriv_mat(coords, j, i)
+        B_d = disp_deriv_mat(coords, k, i)
+        if fixed_atoms is not None:
+            A_d = fill_disp_jacob_atom(A_d, [[i, 0] for i in fixed_atoms], base_shape=coords.shape[:-2])
+            B_d = fill_disp_jacob_atom(B_d, [[i, 0] for i in fixed_atoms], base_shape=coords.shape[:-2])
 
-    if order >= 2:
-        daa = d[2][..., 0, 0, :, :]; dab = d[2][..., 0, 1, :, :]
-        dba = d[2][..., 1, 0, :, :]; dbb = d[2][..., 1, 1, :, :]
-        # ii ij ik
-        # ji jj jk
-        # ki kj kk
-        derivs.append(np.array([
-            [daa + dba + dab + dbb, -(daa + dab), -(dba + dbb)],
-            [         -(daa + dba),          daa,   dba       ],
-            [         -(dab + dbb),          dab,   dbb       ]
-        ]))
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1]
+        A_expansion = [a, misc.flatten_inds(A_d, [-3, -2])] if 0 in expanded_vectors else [a]
+        B_expansion = [b, misc.flatten_inds(B_d, [-3, -2])] if 1 in expanded_vectors else [b]
 
-    return derivs
+        A_deriv = td.vec_angle_deriv(A_expansion, [b], order=order)
+        B_deriv = td.vec_angle_deriv([a], B_expansion, order=order)
+        return [A_deriv[0]] + [ad - bd for ad,bd in zip(A_deriv[1:], B_deriv[1:])]
+    else:
 
-def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion', zero_point_step_size=1.0e-4):
+        if order > 2:
+            raise NotImplementedError("derivatives currently only up to order {}".format(2))
+        a = coords[..., j, :] - coords[..., i, :]
+        b = coords[..., k, :] - coords[..., i, :]
+
+        d = vec_angle_derivs(a, b, order=order, zero_thresh=zero_thresh)
+
+        derivs = []
+
+        derivs.append(d[0])
+
+        if order >= 1:
+            da = d[1][..., 0, :]; db = d[1][..., 1, :]
+            derivs.append(np.array([-(da - db), da, -db]))
+
+        if order >= 2:
+            daa = d[2][..., 0, 0, :, :]; dab = d[2][..., 0, 1, :, :]
+            dba = d[2][..., 1, 0, :, :]; dbb = d[2][..., 1, 1, :, :]
+            # ii ij ik
+            # ji jj jk
+            # ki kj kk
+            derivs.append(np.array([
+                [daa + dba + dab + dbb, -(daa + dab), -(dba + dbb)],
+                [         -(daa + dba),          daa,   dba       ],
+                [         -(dab + dbb),          dab,   dbb       ]
+            ]))
+
+        return derivs
+
+def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion',
+                fixed_atoms=None,
+                expanded_vectors=None,
+                zero_point_step_size=1.0e-4):
     """
     Gives the derivative of the dihedral between i, j, k, and l with respect to the Cartesians
     Currently gives what are sometimes called the `psi` angles.
@@ -942,16 +1057,43 @@ def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion
     """
 
     if method == 'expansion':
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1, 2]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        C_expansion = prep_disp_expansion(coords, l, k, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+
+        # raise Exception(
+        #     [a.shape for a in A_expansion],
+        #     [b.shape for b in B_expansion],
+        #     [c.shape for c in C_expansion]
+        # )
+
+        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+
+        return td.vec_angle_deriv(A_expansion, B_expansion, order=order)
         a = coords[..., j, :] - coords[..., i, :]
         b = coords[..., k, :] - coords[..., j, :]
         c = coords[..., l, :] - coords[..., k, :]
 
-        A_expansion = [a, disp_deriv_mat(coords.shape[-2], j, i)]
-        B_expansion = [b, disp_deriv_mat(coords.shape[-2], k, j)]
-        C_expansion = [c, disp_deriv_mat(coords.shape[-2], l, k)]
+        A_d = disp_deriv_mat(coords, j, i)
+        B_d = disp_deriv_mat(coords, k, j)
+        C_d = disp_deriv_mat(coords, l, k)
+        if fixed_atoms is not None:
+            A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
+            B_d = fill_disp_jacob_atom(B_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
+            C_d = fill_disp_jacob_atom(C_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
+
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1, 2]
+        A_expansion = [a, misc.flatten_inds(A_d, [-3, -2])] if 0 in expanded_vectors else [a]
+        B_expansion = [b, misc.flatten_inds(B_d, [-3, -2])] if 1 in expanded_vectors else [b]
+        C_expansion = [c, misc.flatten_inds(C_d, [-3, -2])] if 2 in expanded_vectors else [c]
 
         return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
     else:
+        if fixed_atoms is not None:
+            raise NotImplementedError("direct derivatives with specified fixed atoms not implemented")
         if order > 2:
             raise NotImplementedError("derivatives currently only up to order {}".format(2))
 
@@ -1118,6 +1260,57 @@ def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion
 
     return derivs
 
+def book_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion',
+               fixed_atoms=None,
+               expanded_vectors=None,
+               zero_point_step_size=1.0e-4):
+    if method == 'expansion':
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1, 2]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        C_expansion = prep_disp_expansion(coords, l, j, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+
+        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+    else:
+        raise NotImplementedError("too annoying")
+
+def oop_deriv(coords, i, j, k, order=1, method='expansion',
+               fixed_atoms=None,
+               expanded_vectors=None):
+    if method == 'expansion':
+        if fixed_atoms is None: fixed_atoms = []
+        fixed_atoms = list(fixed_atoms) + [j]
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        C_expansion = prep_disp_expansion(coords, i, k, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+
+        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+    else:
+        raise NotImplementedError("too annoying")
+
+def wag_deriv(coords, i, j, k, order=1, method='expansion',
+               fixed_atoms=None,
+               expanded_vectors=None):
+    if method == 'expansion':
+        if fixed_atoms is None: fixed_atoms = []
+        fixed_atoms = list(fixed_atoms) + [j]
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        C_expansion = prep_disp_expansion(coords, i, k, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+
+        i_deriv = td.vec_dihed_deriv(A_expansion, B_expansion[:1], C_expansion, order=order)
+        k_deriv = td.vec_dihed_deriv(A_expansion[:1], B_expansion, C_expansion, order=order)
+        return [i_deriv[0]] + [ad - bd for ad, bd in zip(i_deriv[1:], k_deriv[1:])]
+    else:
+        raise NotImplementedError("too annoying")
+
+
+
 def _pop_bond_vecs(bond_tf, i, j, coords):
     bond_vectors = np.zeros(coords.shape)
     bond_vectors[..., i, :] = bond_tf[0]
@@ -1138,11 +1331,11 @@ def _fill_derivs(coords, idx, derivs):
         for pos in itertools.product(*[range(len(idx)) for _ in range(n)]):
             actual = ()
             for r in pos:
-                actual += (idx[r], slice(None))
+                actual += (slice(None) if idx[r] is None else idx[r], slice(None))
             tensor[actual] = d[pos]
         vals.append(tensor.reshape((nats * 3,) * n))
     return vals
-def dist_vec(coords, i, j, order=None):
+def dist_vec(coords, i, j, order=None, method='expansion', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of a bond displacement
 
@@ -1152,13 +1345,16 @@ def dist_vec(coords, i, j, order=None):
     :return:
     """
 
-    derivs = dist_deriv(coords, i, j, order=(1 if order is None else order))
-    if order is None:
-        return _pop_bond_vecs(derivs[1], i, j, coords)
+    derivs = dist_deriv(coords, i, j, method=method, order=(1 if order is None else order), fixed_atoms=fixed_atoms)
+    if method == 'expansion':
+        return derivs[1] if order is None else derivs
     else:
-        return _fill_derivs(coords, (i,j), derivs)
+        if order is None:
+            return _pop_bond_vecs(derivs[1], i, j, coords)
+        else:
+            return _fill_derivs(coords, (i,j), derivs)
 
-def angle_vec(coords, i, j, k, order=None):
+def angle_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
 
@@ -1168,14 +1364,17 @@ def angle_vec(coords, i, j, k, order=None):
     :return:
     """
 
-    derivs = angle_deriv(coords, i, j, k, order=(1 if order is None else order))
-    full = _fill_derivs(coords, (i, j, k), derivs)
-    if order is None:
-        return full[1]
+    derivs = angle_deriv(coords, i, j, k, order=(1 if order is None else order), method=method, fixed_atoms=fixed_atoms)
+    if method == 'expansion':
+        return derivs[1] if order is None else derivs
     else:
-        return full
+        full = _fill_derivs(coords, (i, j, k), derivs)
+        if order is None:
+            return full[1]
+        else:
+            return full
 
-def rock_vec(coords, i, j, k, order=None):
+def rock_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
 
@@ -1185,14 +1384,17 @@ def rock_vec(coords, i, j, k, order=None):
     :return:
     """
 
-    derivs = rock_deriv(coords, i, j, k, order=(1 if order is None else order))
-    full = _fill_derivs(coords, (i, j, k), derivs)
-    if order is None:
-        return full[1]
+    derivs = rock_deriv(coords, i, j, k, order=(1 if order is None else order), fixed_atoms=fixed_atoms, method=method)
+    if method == 'expansion':
+        return derivs[1] if order is None else derivs
     else:
-        return full
+        full = _fill_derivs(coords, (i, j, k), derivs)
+        if order is None:
+            return full[1]
+        else:
+            return full
 
-def dihed_vec(coords, i, j, k, l, method='expansion', order=None):
+def dihed_vec(coords, i, j, k, l, order=None, method='expansion', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of a dihedral displacement
 
@@ -1201,9 +1403,9 @@ def dihed_vec(coords, i, j, k, l, method='expansion', order=None):
     :param j:
     :return:
     """
-    derivs = dihed_deriv(coords, i, j, k, l, method=method, order=(1 if order is None else order))
+    derivs = dihed_deriv(coords, i, j, k, l, method=method, order=(1 if order is None else order), fixed_atoms=fixed_atoms)
     if method == 'expansion':
-        return derivs
+        return derivs[1] if order is None else derivs
     else:
         full = _fill_derivs(coords, (i, j, k, l), derivs)
         if order is None:
@@ -1211,7 +1413,7 @@ def dihed_vec(coords, i, j, k, l, method='expansion', order=None):
         else:
             return full
 
-def book_vec(coords, i, j, k, l, order=None):
+def book_vec(coords, i, j, k, l, order=None, method='expansion', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of a dihedral displacement
 
@@ -1221,14 +1423,19 @@ def book_vec(coords, i, j, k, l, order=None):
     :return:
     """
 
-    derivs = dihed_deriv(coords, j, k, i, l, order=(1 if order is None else order))
-    full = _fill_derivs(coords, (i, j, k, l), derivs)
-    if order is None:
-        return full[1]
+    if method == 'expansion':
+        derivs = book_deriv(coords, i, j, k, l, method=method, order=(1 if order is None else order), fixed_atoms=fixed_atoms)
+        return derivs[1] if order is None else derivs
     else:
-        return full
+        derivs = dihed_deriv(coords, j, k, i, l, order=(1 if order is None else order), method=method,
+                             fixed_atoms=fixed_atoms)
+        full = _fill_derivs(coords, (i, j, k, l), derivs)
+        if order is None:
+            return full[1]
+        else:
+            return full
 
-def oop_vec(coords, i, j, k, order=None):
+def oop_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of an oop displacement
 
@@ -1238,13 +1445,87 @@ def oop_vec(coords, i, j, k, order=None):
     :return:
     """
 
-    dihed_tf = dihed_deriv(coords, i, j, k, i)[1]
-    dihed_vectors = np.zeros(coords.shape)
-    dihed_vectors[..., i, :] = dihed_tf[0]
-    dihed_vectors[..., j, :] = dihed_tf[1]
-    dihed_vectors[..., k, :] = dihed_tf[2]
+    if method == 'expansion':
+        derivs = oop_deriv(coords, i, j, k, order=(1 if order is None else order), method=method, fixed_atoms=fixed_atoms)
+        return derivs[1] if order is None else derivs
+    else:
+        dihed_tf = dihed_deriv(coords, i, k, j, i, order=(1 if order is None else order), method=method,
+                               fixed_atoms=fixed_atoms,
+                               expanded_vectors=[0]
+                               )
+        full = _fill_derivs(coords, (i, j, k, None), dihed_tf)
+        if order is None:
+            return full[1]
+        else:
+            return full
+        # if order is not None and order > 1:
+        #     raise NotImplementedError("OOP deriv reshaping not done yet")
+        # else:
+        #     dihed_tf = dihed_tf[1]
+        # dihed_vectors = np.zeros(coords.shape)
+        # dihed_vectors[..., i, :] = dihed_tf[0]
+        # dihed_vectors[..., j, :] = dihed_tf[1]
+        # dihed_vectors[..., k, :] = dihed_tf[2]
+        #
+        # return dihed_vectors.reshape(
+        #     coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
+        # )
 
-    return dihed_vectors.reshape(
-        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
-    )
+def wag_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
+    """
+    Returns the full vectors that define the linearized version of an oop displacement
 
+    :param coords:
+    :param i:
+    :param j:
+    :return:
+    """
+
+    if method == 'expansion':
+        derivs = wag_deriv(coords, i, j, k, order=(1 if order is None else order), method=method, fixed_atoms=fixed_atoms)
+        return derivs[1] if order is None else derivs
+    else:
+        raise NotImplementedError("too annoying")
+
+coord_type_map = {
+    'dist':dist_vec,
+    'bend':angle_vec,
+    'rock':rock_vec,
+    'dihed':dihed_vec,
+    'book':book_vec,
+    'oop':oop_vec,
+    'wag':wag_vec
+}
+def int_coord_tensors(coords, specs, order=None, **opts):
+    targets = []
+    for idx in specs:
+        if isinstance(idx, dict):
+            for k in coord_type_map.keys():
+                if k in idx:
+                    coord_type = k
+                    subopts = idx.copy()
+                    idx = idx[k]
+                    del subopts[k]
+                    break
+            else:
+                raise ValueError("can't parse coordinate spec {}".format(idx))
+        else:
+            nidx = len(idx)
+            if nidx == 2:
+                coord_type = 'dist'
+            elif nidx == 3:
+                coord_type = 'bend'
+            elif nidx == 4:
+                coord_type = 'dihed'
+            else:
+                raise ValueError("can't parse coordinate spec {}".format(idx))
+            subopts = {}
+        targets.append(coord_type_map[coord_type](coords, *idx, order=order, **dict(opts, **subopts)))
+
+    if order is None:
+        return np.moveaxis(np.array(targets), 0, -1)
+    else:
+        return [
+            np.moveaxis(np.array(t), 0, -1)
+            for t in zip(*targets)
+        ]
