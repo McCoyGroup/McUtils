@@ -1426,15 +1426,34 @@ class NumputilsTests(TestCase):
 
     @debugTest
     def test_DihedralDerivativeComparison(self):
+        import Psience as psi
+        test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
         from Psience.Molecools import Molecule
 
         coords = Molecule.from_file(
-            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/HOONO_freq.fchk")
+            os.path.join(test_root, "HOONO_freq.fchk")
         ).coords
 
         coords = Molecule.from_file(
-            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/nh3.fchk")
+            os.path.join(test_root, "nh3.fchk")
         ).coords
+
+        inv_coords = inverse_coordinate_solve(
+                [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 1, 2),
+                    (0, 1, 3),
+                    (0, 2, 3)
+                ],
+                [
+                    1.9126349402213, 1.9126349325765, 1.9126349325765,
+                    1.8634707086348 + .2, 1.8634707086348, 1.8634707045268
+                ],
+                coords,
+                remove_translation_rotation=False
+            )
 
         raise Exception(
             # [
@@ -1451,22 +1470,7 @@ class NumputilsTests(TestCase):
             #         order=1
             #     )[0][0]
             # ],
-            inverse_coordinate_solve(
-                [
-                    (0, 1),
-                    (0, 2),
-                    (0, 3),
-                    (0, 1, 2),
-                    (0, 1, 3),
-                    (0, 2, 3)
-                ],
-                [
-                    1.9126349402213, 1.9126349325765, 1.9126349325765,
-                    1.8634707086348 + .2, 1.8634707086348, 1.8634707045268
-                ],
-                coords,
-                remove_translation_rotation=False
-            )[-1][1].shape
+            coords - inv_coords[0][0]
         )
 
         coords = Molecule.from_file(

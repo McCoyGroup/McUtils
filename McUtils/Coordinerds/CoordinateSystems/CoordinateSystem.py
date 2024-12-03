@@ -449,6 +449,7 @@ class CoordinateSystem:
                 return derivs
 
     return_derivs_key = 'return_derivs'
+    deriv_key = 'derivs'
     def jacobian(self,
                  coords,
                  system,
@@ -512,7 +513,7 @@ class CoordinateSystem:
                 del converter_options[ret_d_key]
             else:
                 converter_options[ret_d_key] = rd
-            deriv_key = 'derivs'
+            deriv_key = self.deriv_key
             if deriv_key in test_opts and test_opts[deriv_key] is not None:
                 deriv_tensors = test_opts[deriv_key]
                 # we now check to see how many derivs we got

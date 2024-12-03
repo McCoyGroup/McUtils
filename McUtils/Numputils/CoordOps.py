@@ -1565,7 +1565,10 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     if order is None:
         order = DEFAULT_SOLVER_ORDER
 
-    conversion = internal_conversion_function(specs)
+    if callable(specs):
+        conversion = specs
+    else:
+        conversion = internal_conversion_function(specs)
     target_internals = np.asanyarray(target_internals)
     initial_cartesians = np.asanyarray(initial_cartesians)
 
@@ -1577,7 +1580,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         base_shape = (1,)
     shared = len(base_shape)
 
-    coords = initial_cartesians
+    coords = initial_cartesians.copy()
     errors = np.full(base_shape, -1)
     opt_inds = np.where(np.full(base_shape, True, dtype=bool))
     done_counter = np.prod(base_shape, dtype=int)
@@ -1619,6 +1622,11 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     else:
         if raise_on_failure:
             raise ValueError(f"failed to find coordinates after {max_iterations} iterations")
+
+    if smol:
+        coords = coords[0]
+        errors = errors[0]
+        opt_expansions = [o[0] for o in opt_expansions]
 
     if return_expansions:
         return (coords, errors), opt_expansions

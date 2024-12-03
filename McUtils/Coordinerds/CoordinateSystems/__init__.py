@@ -12,5 +12,7 @@ from .CoordinateSystem import *; from .CoordinateSystem import __all__ as expose
 __all__ += exposed
 from .CompositeCoordinateSystems import *; from .CompositeCoordinateSystems import __all__ as exposed
 __all__ += exposed
+from .GenericInternalCoordinateSystem import *; from .GenericInternalCoordinateSystem import __all__ as exposed
+__all__ += exposed
 from .CoordinateSet import *; from .CoordinateSet import __all__ as exposed
 __all__ += exposed
