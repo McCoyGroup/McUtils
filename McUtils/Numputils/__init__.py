@@ -12,7 +12,7 @@ from .TransformationTransformations import *; from .TransformationTransformation
 __all__ += _all
 from .VectorOps import *; from .VectorOps import __all__ as _all
 __all__ += _all
-from .AnalyticDerivs import *; from .AnalyticDerivs import __all__ as _all
+from .CoordOps import *; from .CoordOps import __all__ as _all
 __all__ += _all
 from .Sparse import *; from .Sparse import __all__ as _all
 __all__ += _all
@@ -21,4 +21,6 @@ __all__ += _all
 from .Misc import *; from .Misc import __all__ as _all
 __all__ += _all
 from .TensorDerivatives import *; from .TensorDerivatives import __all__ as _all
+__all__ += _all
+from .CoordinateFrames import *; from .CoordinateFrames import __all__ as _all
 __all__ += _all

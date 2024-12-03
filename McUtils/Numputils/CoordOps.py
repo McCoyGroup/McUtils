@@ -2,6 +2,7 @@
 Provides analytic derivatives for some common base terms with the hope that we can reuse them elsewhere
 """
 import itertools
+import math
 
 import numpy as np
 from .VectorOps import *
@@ -30,7 +31,9 @@ __all__ = [
     'book_vec',
     'oop_vec',
     'wag_vec',
-    "int_coord_tensors"
+    "internal_conversion_function",
+    "internal_coordinate_tensors",
+    "inverse_coordinate_solve"
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -1487,16 +1490,7 @@ def wag_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
     else:
         raise NotImplementedError("too annoying")
 
-coord_type_map = {
-    'dist':dist_vec,
-    'bend':angle_vec,
-    'rock':rock_vec,
-    'dihed':dihed_vec,
-    'book':book_vec,
-    'oop':oop_vec,
-    'wag':wag_vec
-}
-def int_coord_tensors(coords, specs, order=None, **opts):
+def internal_conversion_specs(specs, **opts):
     targets = []
     for idx in specs:
         if isinstance(idx, dict):
@@ -1520,12 +1514,113 @@ def int_coord_tensors(coords, specs, order=None, **opts):
             else:
                 raise ValueError("can't parse coordinate spec {}".format(idx))
             subopts = {}
-        targets.append(coord_type_map[coord_type](coords, *idx, order=order, **dict(opts, **subopts)))
+        targets.append((coord_type_map[coord_type], idx, dict(opts, **subopts)))
+
+    return targets
+
+def internal_conversion_function(specs, **opts):
+    base_specs = internal_conversion_specs(specs, **opts)
+    def convert(coords, order=None):
+        targets = []
+        for f, idx, subopts in base_specs:
+            targets.append(f(coords, *idx, **dict(subopts, order=order)))
+
+        if order is None:
+            return np.moveaxis(np.array(targets), 0, -1)
+        else:
+            return [
+                np.moveaxis(np.array(t), 0, -1)
+                for t in zip(*targets)
+            ]
+    return convert
+
+
+coord_type_map = {
+    'dist':dist_vec,
+    'bend':angle_vec,
+    'rock':rock_vec,
+    'dihed':dihed_vec,
+    'book':book_vec,
+    'oop':oop_vec,
+    'wag':wag_vec
+}
+def internal_coordinate_tensors(coords, specs, order=None, **opts):
+    return internal_conversion_function(specs, **opts)(
+        coords,
+        order=order
+    )
+
+DEFAULT_SOLVER_ORDER = 1
+def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
+                             masses=None,
+                             remove_translation_rotation=True,
+                             order=None, tol=1e-8, max_iterations=5,
+                             raise_on_failure=True,
+                             return_expansions=True
+):
+    # use Newton-Raphson to solve
+
+    from .CoordinateFrames import remove_translation_rotations
 
     if order is None:
-        return np.moveaxis(np.array(targets), 0, -1)
+        order = DEFAULT_SOLVER_ORDER
+
+    conversion = internal_conversion_function(specs)
+    target_internals = np.asanyarray(target_internals)
+    initial_cartesians = np.asanyarray(initial_cartesians)
+
+    base_shape = target_internals.shape[:-1]
+    smol = len(base_shape) == 0
+    if smol:
+        target_internals = target_internals[np.newaxis]
+        initial_cartesians = initial_cartesians[np.newaxis]
+        base_shape = (1,)
+    shared = len(base_shape)
+
+    coords = initial_cartesians
+    errors = np.full(base_shape, -1)
+    opt_inds = np.where(np.full(base_shape, True, dtype=bool))
+    done_counter = np.prod(base_shape, dtype=int)
+    opt_counter = 0
+    opt_expansions = None
+    for it in range(max_iterations):
+        expansion = conversion(coords[opt_inds], order=order)
+        if opt_expansions is None:
+            opt_expansions = expansion
+        internals, expansion = expansion[0], expansion[1:]
+        delta = target_internals[opt_inds] - internals
+        norm = np.linalg.norm(delta, axis=-1)
+        errors[opt_inds] = norm
+        opt_expansions[0][opt_inds] = internals
+        for opt_e, e in zip(opt_expansions[1:], expansion):
+            opt_e[opt_inds] = e
+        norm_tests = norm > tol
+        rem_pos = np.where(norm_tests)[0]
+        if len(rem_pos) == 0:
+            break
+        mod_pos = tuple(o[rem_pos] for o in opt_inds)
+        opt_inds = tuple(o[rem_pos] for o in opt_inds)
+        opt_counter += len(opt_inds[0]) - len(rem_pos)
+        if opt_counter == done_counter:
+            break
+
+        if remove_translation_rotation:
+            expansion = remove_translation_rotations(expansion, coords, masses)
+        inverse_expansion = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
+
+        nr_change = 0
+        for n,e in enumerate(inverse_expansion):
+            for ax in range(n+1):
+                e = vec_tensordot(e, delta, axes=[shared, -1], shared=shared)
+            nr_change += (1/math.factorial(n+1)) * e
+        nr_change = nr_change.reshape(nr_change.shape[:-1] + (-1, 3))
+
+        coords[mod_pos] += nr_change
     else:
-        return [
-            np.moveaxis(np.array(t), 0, -1)
-            for t in zip(*targets)
-        ]
+        if raise_on_failure:
+            raise ValueError(f"failed to find coordinates after {max_iterations} iterations")
+
+    if return_expansions:
+        return (coords, errors), opt_expansions
+    else:
+        return coords, errors

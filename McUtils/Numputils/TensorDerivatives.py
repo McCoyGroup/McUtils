@@ -424,21 +424,26 @@ def scalarprod_deriv(s_expansion, A_expansion,
             n += 1
     return final_expansion
 
-def inverse_transformation(forward_expansion, order, reverse_expansion=None):
+def inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False):
     if reverse_expansion is None:
-        B = np.linalg.inv(forward_expansion[0])
+        if allow_pseudoinverse and forward_expansion[0].shape[0] != forward_expansion[0].shape[1]:
+            B = np.linalg.pinv(forward_expansion[0])
+        else:
+            B = np.linalg.inv(forward_expansion[0])
         reverse_expansion = [B]
     else:
         reverse_expansion = list(reverse_expansion)
         B = reverse_expansion[0]
 
-    if is_numeric(order): order = list(range(1, order+1))
+    if not is_numeric(order): order = np.max(order)
+    order = list(range(2, order+1))
+    shared = B.ndim - 2
 
     for o in order:
-        new_B = -tensor_reexpand(reverse_expansion, forward_expansion, [o+1])[-1]
+        new_B = -tensor_reexpand(reverse_expansion, forward_expansion, [o])[-1]
         if isinstance(new_B, np.ndarray):
             # need to multiply in the inverse now, too
-            new_B = np.tensordot(new_B, B, axes=[-1, 0])
+            new_B = vec_ops.vec_tensordot(new_B, B, axes=[-1, shared], shared=shared)
             # for _ in range(new_B.ndim - 1):
             #     new_B = np.tensordot(B, new_B, axes=[1, -2])
         reverse_expansion = reverse_expansion + [new_B]
@@ -594,7 +599,7 @@ def scalarpow_deriv(scalar_expansion, exp, order):
 def vec_norm_unit_deriv(vec_expansion, order, norm_expansion=None, unit_expansion=None):
     if norm_expansion is None:
         a = vec_expansion[0]
-        r = np.linalg.norm(a)
+        r = np.linalg.norm(a, axis=-1)
         norm_expansion = [r]
     norm_expansion = list(norm_expansion)
     norm_inv_expansion = scalarinv_deriv(norm_expansion, order=len(norm_expansion)-1)
@@ -607,7 +612,8 @@ def vec_norm_unit_deriv(vec_expansion, order, norm_expansion=None, unit_expansio
 
     for o in range(len(norm_expansion), order+1):
         if len(norm_expansion) <= o:
-            norm_expansion = norm_expansion + tensordot_deriv(vec_expansion, unit_expansion, axes=[-1, -1], order=[o])
+            norm_expansion = norm_expansion + tensordot_deriv(vec_expansion, unit_expansion, axes=[-1, -1], order=[o],
+                                                              shared=vec_expansion[0].ndim-1)
             norm_inv_expansion = norm_inv_expansion + scalarinv_deriv(norm_expansion, order=[o])
         if len(unit_expansion) <= o:
             unit_expansion = unit_expansion + scalarprod_deriv(norm_inv_expansion, vec_expansion, order=[o])
@@ -763,7 +769,7 @@ def vec_angle_deriv(A_expansion, B_expansion, order, unitized=False):
     return [np.arctan2(sin_expansion[0], cos_expansion[0])] + tensordot_deriv(
         cos_sin_expansion[1:],
         [arctan_deriv],
-        axes=[-1, 0],
+        axes=[-1, -1],
         order=order-1,
         shared=arctan_deriv.ndim - 1
     )
@@ -852,7 +858,7 @@ def nca_symmetrize(tensor, partition,
     else:
         l = list(range(shared))
         perm_inds = [
-            l + [shared + pp for pp in p] + list(range(len(p), tensor.ndim))
+            l + [shared + pp for pp in p] + list(range(shared+len(p), tensor.ndim))
             for p in perm_inds
         ]
 
@@ -863,7 +869,7 @@ def nca_symmetrize(tensor, partition,
 
 def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=None, symmetrize=True):
     if axes is None:
-        axes = [-1, 0]
+        axes = [-1, (0 if shared is None else shared)]
     if len(B_expansion) <= len(partition) - 1:
         return 0
     B = B_expansion[len(partition) - 1]
@@ -918,11 +924,12 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
     if order is None:
         order = len(vals)
 
+    shared = derivs[0].ndim - 2
     if is_numeric(order): order = list(range(1, order+1))
 
     for o in order:
         term = sum(
-            nca_partition_dot(p, derivs, vals, axes=axes)
+            nca_partition_dot(p, derivs, vals, axes=axes, shared=shared)
             for parts in IntegerPartitioner.partitions(o)
             for p in parts
         )

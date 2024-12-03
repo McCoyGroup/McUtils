@@ -15,6 +15,7 @@ __all__ = [
     "vec_tensordot",
     "vec_tensordiag",
     "vec_tdot",
+    "identity_tensors",
     "semisparse_tensordot",
     "frac_powh",
     "vec_crosses",
@@ -472,6 +473,13 @@ def vec_tensordiag(obj, axis=-1, extra_dims=1):
     inds = diag_indices(base_shape, shp[0], k=(extra_dims + 1))
     tensor[inds] = obj
     return tensor
+
+def identity_tensors(base_shape, ndim):
+    eye = np.eye(ndim)
+    return np.broadcast_to(
+        np.expand_dims(eye, list(range(len(base_shape)))),
+        base_shape + (ndim, ndim)
+    )
 
 #################################################################################
 #

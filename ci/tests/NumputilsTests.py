@@ -1436,6 +1436,39 @@ class NumputilsTests(TestCase):
             os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/nh3.fchk")
         ).coords
 
+        raise Exception(
+            # [
+            #     f"{ic:.13f}" for ic in internal_coordinate_tensors(
+            #         coords[np.newaxis],
+            #         [
+            #             (0, 1),
+            #             (0, 2),
+            #             (0, 3),
+            #             (0, 1, 2),
+            #             (0, 1, 3),
+            #             (0, 2, 3)
+            #         ],
+            #         order=1
+            #     )[0][0]
+            # ],
+            inverse_coordinate_solve(
+                [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 1, 2),
+                    (0, 1, 3),
+                    (0, 2, 3)
+                ],
+                [
+                    1.9126349402213, 1.9126349325765, 1.9126349325765,
+                    1.8634707086348 + .2, 1.8634707086348, 1.8634707045268
+                ],
+                coords,
+                remove_translation_rotation=False
+            )[-1][1].shape
+        )
+
         coords = Molecule.from_file(
             os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/HOH_freq.fchk")
         ).coords
