@@ -1554,8 +1554,11 @@ DEFAULT_SOLVER_ORDER = 1
 def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              masses=None,
                              remove_translation_rotation=True,
-                             order=None, tol=1e-8, max_iterations=5,
+                             order=None,
+                             solver_order=None,
+                             tol=1e-8, max_iterations=5,
                              raise_on_failure=True,
+                             return_internals=True,
                              return_expansions=True
 ):
     # use Newton-Raphson to solve
@@ -1564,6 +1567,10 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
 
     if order is None:
         order = DEFAULT_SOLVER_ORDER
+    if solver_order is None:
+        solver_order = order
+    if not misc.is_numeric(solver_order):
+        solver_order = max(solver_order)
 
     if callable(specs):
         conversion = specs
@@ -1578,57 +1585,82 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         target_internals = target_internals[np.newaxis]
         initial_cartesians = initial_cartesians[np.newaxis]
         base_shape = (1,)
-    shared = len(base_shape)
-
-    coords = initial_cartesians.copy()
-    errors = np.full(base_shape, -1)
-    opt_inds = np.where(np.full(base_shape, True, dtype=bool))
+    if initial_cartesians.ndim == 2:
+        coords = np.expand_dims(initial_cartesians, list(range(len(base_shape))))
+        coords = np.broadcast_to(coords, base_shape + coords.shape[-2:]).copy()
+    else:
+        coords = initial_cartesians.copy()
+    coords = coords.reshape((-1,) + coords.shape[-2:])
+    target_internals = target_internals.reshape((-1,) + target_internals.shape[-1:])
+    errors = np.full(base_shape, -1).reshape(-1)
+    opt_inds = np.arange(len(errors))
     done_counter = np.prod(base_shape, dtype=int)
     opt_counter = 0
-    opt_expansions = None
+    opt_internals = None
     for it in range(max_iterations):
-        expansion = conversion(coords[opt_inds], order=order)
-        if opt_expansions is None:
-            opt_expansions = expansion
+        expansion = conversion(coords[opt_inds,], order=order)
+        if opt_internals is None:
+            opt_internals = expansion
         internals, expansion = expansion[0], expansion[1:]
-        delta = target_internals[opt_inds] - internals
+        delta = target_internals[opt_inds,] - internals
         norm = np.linalg.norm(delta, axis=-1)
         errors[opt_inds] = norm
-        opt_expansions[0][opt_inds] = internals
-        for opt_e, e in zip(opt_expansions[1:], expansion):
+        opt_internals[0][opt_inds] = internals
+        for opt_e, e in zip(opt_internals[1:], expansion):
             opt_e[opt_inds] = e
         norm_tests = norm > tol
         rem_pos = np.where(norm_tests)[0]
         if len(rem_pos) == 0:
             break
-        mod_pos = tuple(o[rem_pos] for o in opt_inds)
-        opt_inds = tuple(o[rem_pos] for o in opt_inds)
-        opt_counter += len(opt_inds[0]) - len(rem_pos)
+        opt_counter += len(opt_inds) - len(rem_pos)
+        opt_inds = opt_inds[rem_pos]
         if opt_counter == done_counter:
             break
 
+        expansion = [e[rem_pos,] for e in expansion]
+        delta = delta[rem_pos]
         if remove_translation_rotation:
-            expansion = remove_translation_rotations(expansion, coords, masses)
-        inverse_expansion = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
+            expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
+        inverse_expansion = td.inverse_transformation(expansion, order=solver_order, allow_pseudoinverse=True)
 
         nr_change = 0
         for n,e in enumerate(inverse_expansion):
             for ax in range(n+1):
-                e = vec_tensordot(e, delta, axes=[shared, -1], shared=shared)
+                e = vec_tensordot(e, delta, axes=[1, -1], shared=1)
             nr_change += (1/math.factorial(n+1)) * e
         nr_change = nr_change.reshape(nr_change.shape[:-1] + (-1, 3))
 
-        coords[mod_pos] += nr_change
+        coords[opt_inds] += nr_change
     else:
         if raise_on_failure:
             raise ValueError(f"failed to find coordinates after {max_iterations} iterations")
 
+    if return_expansions:
+        expansion = opt_internals[1:]
+        if remove_translation_rotation:
+            expansion = remove_translation_rotations(expansion, coords, masses)
+        opt_expansions = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
+    else:
+        opt_expansions = None
+
+    coords = coords.reshape(base_shape + coords.shape[-2:])
+    errors = errors.reshape(base_shape)
+    if opt_expansions is not None:
+        opt_expansions = [o.reshape(base_shape + o.shape[1:]) for o in opt_expansions]
+    opt_internals = [o.reshape(base_shape + o.shape[1:]) for o in opt_internals]
     if smol:
         coords = coords[0]
         errors = errors[0]
-        opt_expansions = [o[0] for o in opt_expansions]
+        opt_internals = [o[0] for o in opt_internals]
+        if opt_expansions is not None:
+            opt_expansions = [o[0] for o in opt_expansions]
+
 
     if return_expansions:
-        return (coords, errors), opt_expansions
+        tf = [coords] + opt_expansions
     else:
-        return coords, errors
+        tf = coords
+    if return_internals:
+        return (tf, errors), opt_internals
+    else:
+        return tf, errors

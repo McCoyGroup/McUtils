@@ -557,6 +557,11 @@ def matdet_deriv(forward_expansion, order):
         det_exp = det_exp + [scalarprod_deriv(det_exp, tr_exp, [o])[-1]]
     return det_exp
 
+def _broadcast_mul(scalar, other):
+    if isinstance(scalar, np.ndarray) and scalar.ndim < other.ndim:
+        return np.expand_dims(scalar, list(range(scalar.ndim, other.ndim))) * other
+    else:
+        return scalar * other
 def _scalarinv_deriv(scalar_expansion, o):
     from ..Combinatorics import IntegerPartitioner
 
@@ -565,7 +570,10 @@ def _scalarinv_deriv(scalar_expansion, o):
     for parts in IntegerPartitioner.partitions(o):
         l = len(parts[0])
         scaling = ((-1) ** l) * math.factorial(l) / (scalar_expansion[0] ** (l + 1))
-        term += sum(scaling * nca_partition_prod(p, scalar_expansion[1:], shared=shared) for p in parts)
+        term += sum(
+            _broadcast_mul(scaling, nca_partition_prod(p, scalar_expansion[1:], shared=shared))
+            for p in parts
+        )
     return term
 
 def scalarinv_deriv(scalar_expansion, order):
@@ -586,7 +594,10 @@ def _scalarpow_deriv(scalar_expansion, exp, o):
         if factorial_terms == 0:
             continue
         scaling = factorial_terms * (scalar_expansion[0] ** (exp - l))
-        term += sum(scaling * nca_partition_prod(p, scalar_expansion[1:], shared=shared) for p in parts)
+        term += sum(
+            _broadcast_mul(scaling, nca_partition_prod(p, scalar_expansion[1:], shared=shared))
+            for p in parts
+        )
     return term
 
 def scalarpow_deriv(scalar_expansion, exp, order):
@@ -606,9 +617,15 @@ def vec_norm_unit_deriv(vec_expansion, order, norm_expansion=None, unit_expansio
 
     if unit_expansion is None:
         a = vec_expansion[0]
-        u = a / norm_expansion[0]
+        if a.ndim > 1:
+            u = a / norm_expansion[0][..., np.newaxis]
+        else:
+            u = a / norm_expansion[0]
         unit_expansion = [u]
     unit_expansion = list(unit_expansion)
+
+    if not is_numeric(order):
+        order = max(order)
 
     for o in range(len(norm_expansion), order+1):
         if len(norm_expansion) <= o:
@@ -875,7 +892,7 @@ def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=Non
     B = B_expansion[len(partition) - 1]
     if is_numeric(B) and B == 0:
         return 0
-    a_ax, b_ax = [[x] if isinstance(x, (int, np.integer)) else x for x in axes]
+    a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
     b_ax = [B.ndim + b if b < 0 else b for b in b_ax]
     for i in reversed(partition):
         if len(A_expansion) <= i - 1:
@@ -887,7 +904,7 @@ def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=Non
             B = np.tensordot(A, B, axes=[a_ax, b_ax])
         else:
             B = vec_ops.vec_tensordot(A, B, axes=[a_ax, b_ax], shared=shared)
-        b_ax = [min(B.ndim - 1, b + A.ndim - 1) for b in b_ax]
+        b_ax = [min(B.ndim - 1 - shared, b + A.ndim - 1 - shared) for b in b_ax]
 
     if symmetrize:
         B = nca_symmetrize(B, partition, shared=shared)
@@ -981,7 +998,6 @@ def apply_nca_multi_ops(partition, expansions, ops, shared):
     A = terms[0]
     # d = partition[0]
     d = A.ndim - 2 - shared
-    # print("???", A.shape, A.ndim - shared, d)
     for B,p,(op, axes, contract) in zip(terms[1:], partition[1:], ops):
         a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
         a_ax = [a if a >= 0 else (A.ndim + a - d) for a in a_ax]
@@ -1073,7 +1089,7 @@ def nca_canonicalize_multiops(expansion_op_pairs):
 
 def _contract(a, b, axes=None, shared=None):
     if shared is not None:
-        res = vec_ops.vec_tensordot(a, b, axes=axes)
+        res = vec_ops.vec_tensordot(a, b, axes=axes, shared=shared)
     else:
         res = np.tensordot(a, b, axes=axes)
     return res

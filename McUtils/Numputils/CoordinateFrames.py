@@ -294,8 +294,8 @@ def remove_translation_rotations(expansion, coords, masses=None):
 
     proj_expansion = []
     for n,d in enumerate(expansion):
-        for ax in range(n):
-            d = vec_ops.vec_tensordot(d, projector, axes=[-(1+ax), -1], shared=shared)
+        for ax in range(n+1):
+            d = vec_ops.vec_tensordot(projector, d, axes=[-1, shared+ax], shared=shared)
         proj_expansion.append(d)
 
     return proj_expansion

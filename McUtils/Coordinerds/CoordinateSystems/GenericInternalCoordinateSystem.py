@@ -52,12 +52,19 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
 
     def convert_many(self, coords, *, specs, order=0, masses=None, remove_translation_rotation=True,
                      reference_coordinates=None,
+                     return_derivs=None,
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?
         """
 
-        internals = nput.internal_coordinate_tensors(coords, specs, order=order, **kw)
+        if return_derivs is None:
+            return_derivs = order
+        if return_derivs == 0: return_derivs = 1
+        if not nput.is_numeric(return_derivs):
+            return_derivs = max(return_derivs)
+
+        internals = nput.internal_coordinate_tensors(coords, specs, order=return_derivs, **kw)
         internals, derivs = internals[0], internals[1:]
         return internals, {
             'specs':specs,
@@ -84,20 +91,26 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                      masses=None,
                      remove_translation_rotation=True,
                      derivs=None,
+                     return_derivs=None,
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?
         """
 
-        if order == 0: order = 1
-        (carts, errors), expansions = nput.inverse_coordinate_solve(specs, coords, reference_coordinates,
-                                                                    order=order,
+        if return_derivs is None or return_derivs is True:
+            return_derivs = order
+        if return_derivs == 0: return_derivs = 1
+        if not nput.is_numeric(return_derivs):
+            return_derivs = max(return_derivs)
+        (expansions, errors), _ = nput.inverse_coordinate_solve(specs, coords, reference_coordinates,
+                                                                    order=return_derivs,
                                                                     return_expansions=True,
+                                                                    return_internals=True,
                                                                     masses=masses,
                                                                     remove_translation_rotation=remove_translation_rotation,
                                                                     **kw
                                                                     )
-        derivs = expansions[1:]
+        carts, derivs = expansions[0], expansions[1:]
         return carts, {
             'specs':specs,
             'derivs': derivs,

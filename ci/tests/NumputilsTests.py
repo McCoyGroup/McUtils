@@ -1455,22 +1455,28 @@ class NumputilsTests(TestCase):
                 remove_translation_rotation=False
             )
 
+        spec = [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 1, 2),
+                    (0, 1, 3),
+                    (0, 2, 3)
+                ]
+        fwd = internal_coordinate_tensors(
+                coords,
+                spec,
+                order=2
+            )
+        (rev, _), _ = inverse_coordinate_solve(
+            spec,
+            fwd[0],
+            coords,
+            order=2
+        )
         raise Exception(
-            # [
-            #     f"{ic:.13f}" for ic in internal_coordinate_tensors(
-            #         coords[np.newaxis],
-            #         [
-            #             (0, 1),
-            #             (0, 2),
-            #             (0, 3),
-            #             (0, 1, 2),
-            #             (0, 1, 3),
-            #             (0, 2, 3)
-            #         ],
-            #         order=1
-            #     )[0][0]
-            # ],
-            coords - inv_coords[0][0]
+            [s.shape for s in fwd[1:]],
+            [s.shape for s in rev[1:]]
         )
 
         coords = Molecule.from_file(
