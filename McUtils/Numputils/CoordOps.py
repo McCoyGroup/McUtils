@@ -592,16 +592,32 @@ def vec_sin_cos_derivs(a, b, order=1,
 
             sin_derivs.append(s2)
 
+            # na_daa = np.zeros_like(na_daa)
+
+            """
+            [[ 7.88683191e-02 -2.75554267e-18  1.11635800e-18 -7.88683191e-02  2.75554267e-18 -1.11635800e-18  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [-2.75554267e-18  1.11197017e-02  2.74471203e-02  2.75554267e-18 -1.11197017e-02 -2.74471203e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 1.11635800e-18  2.74471203e-02  6.77486175e-02 -1.11635800e-18 -2.74471203e-02 -6.77486175e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [-7.88683191e-02  2.75554267e-18 -1.11635800e-18  7.88683191e-02 -2.75554267e-18  1.11635800e-18  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 2.75554267e-18 -1.11197017e-02 -2.74471203e-02 -2.75554267e-18  1.11197017e-02  2.74471203e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [-1.11635800e-18 -2.74471203e-02 -6.77486175e-02  1.11635800e-18  2.74471203e-02  6.77486175e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]
+             [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00]]
+            """
+
             c_daa = - (
-                outer(na_da, c_da) + outer(c_da, na_da) + c[..., np.newaxis] * na_daa
+                outer(na_da, c_da) + outer(c_da, na_da)
+                + c[..., np.newaxis] * na_daa
             ) / n_a[..., np.newaxis]
-
-            c_dab = ( na_daa - outer(c_da, nb_db) ) / n_b[..., np.newaxis]
-
-            c_dba = ( nb_dbb - outer(c_db, na_da) ) / n_a[..., np.newaxis]
-
+            c_dab = (na_daa - outer(c_da, nb_db)) / n_b[..., np.newaxis]
+            c_dba = (nb_dbb - outer(c_db, na_da)) / n_a[..., np.newaxis]
             c_dbb = - (
-                outer(nb_db, c_db) + outer(c_db, nb_db) + c[..., np.newaxis] * nb_dbb
+                outer(nb_db, c_db) + outer(c_db, nb_db)
+                + c[..., np.newaxis] * nb_dbb
             ) / n_b[..., np.newaxis]
 
             c2 = np.array([
@@ -1550,6 +1566,20 @@ def internal_coordinate_tensors(coords, specs, order=None, **opts):
         order=order
     )
 
+def _transrot_invariant_inverse(expansion, coords, masses, order):
+    from .CoordinateFrames import translation_rotation_invariant_transformation
+
+    # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
+    L_base = translation_rotation_invariant_transformation(coords, masses,
+                                                              mass_weighted=False, strip_embedding=True)
+
+    new_tf = td.tensor_reexpand([np.moveaxis(L_base, -1, -2)], expansion, order)
+    inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
+    return [
+        np.tensordot(j, L_base, axes=[-1, -1])
+        for j in inverse_tf
+    ]
+
 DEFAULT_SOLVER_ORDER = 1
 def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              masses=None,
@@ -1559,8 +1589,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              tol=1e-8, max_iterations=5,
                              raise_on_failure=True,
                              return_internals=True,
-                             return_expansions=True
-):
+                             return_expansions=True):
     # use Newton-Raphson to solve
 
     from .CoordinateFrames import remove_translation_rotations
@@ -1620,8 +1649,9 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         expansion = [e[rem_pos,] for e in expansion]
         delta = delta[rem_pos]
         if remove_translation_rotation:
-            expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
-        inverse_expansion = td.inverse_transformation(expansion, order=solver_order, allow_pseudoinverse=True)
+            inverse_expansion = _transrot_invariant_inverse(expansion, coords[opt_inds], masses, solver_order)
+        else:
+            inverse_expansion = td.inverse_transformation(expansion, order=solver_order, allow_pseudoinverse=True)
 
         nr_change = 0
         for n,e in enumerate(inverse_expansion):
@@ -1638,8 +1668,9 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     if return_expansions:
         expansion = opt_internals[1:]
         if remove_translation_rotation:
-            expansion = remove_translation_rotations(expansion, coords, masses)
-        opt_expansions = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
+            opt_expansions = _transrot_invariant_inverse(expansion, coords, masses, order)
+        else:
+            opt_expansions = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
     else:
         opt_expansions = None
 

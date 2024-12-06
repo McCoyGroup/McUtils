@@ -5,13 +5,14 @@ __all__ = [
     "moments_of_inertia",
     "inertial_frame_derivatives",
     "translation_rotation_eigenvectors",
-    "remove_translation_rotations"
-
+    "remove_translation_rotations",
+    "translation_rotation_invariant_transformation"
 ]
 
 import numpy as np
 from . import VectorOps as vec_ops
 from . import TensorDerivatives as td_ops
+from . import SetOps as set_ops
 
 def center_of_mass(coords, masses):
     """Gets the center of mass for the coordinates
@@ -159,7 +160,7 @@ def moments_of_inertia(coords, masses):
         axes = axes[0]
     return moms, axes
 
-def translation_rotation_eigenvectors(coords, masses):
+def translation_rotation_eigenvectors(coords, masses, mass_weighted=True):
     """
     Returns the eigenvectors corresponding to translations and rotations
     in the system
@@ -275,6 +276,10 @@ def translation_rotation_eigenvectors(coords, masses):
     M = np.broadcast_to(M[np.newaxis], R.shape)
     eigs = np.concatenate([M, R], axis=2)
 
+    if not mass_weighted:
+        W = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        eigs = np.moveaxis(np.tensordot(eigs, W, axes=[-2, 0]), -1, -2)
+
     if smol:
         eigs = eigs[0]
         freqs = freqs[0]
@@ -284,13 +289,23 @@ def translation_rotation_eigenvectors(coords, masses):
 
     return freqs, eigs
 
-def remove_translation_rotations(expansion, coords, masses=None):
+def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False):
     if masses is None:
         masses = np.ones(coords.shape[-2])
-    _, tr_modes = translation_rotation_eigenvectors(coords, masses)
+    _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
     shared = tr_modes.ndim - 2
     eye = vec_ops.identity_tensors(tr_modes.shape[:-2], tr_modes.shape[-2])
     projector = eye - vec_ops.vec_tensordot(tr_modes, tr_modes, axes=[-1, -1], shared=shared)
+
+    if return_modes:
+        return projector, tr_modes
+    else:
+        return projector
+
+
+def remove_translation_rotations(expansion, coords, masses=None, mass_weighted=False):
+    projector = translation_rotation_projector(coords, masses=masses, mass_weighted=mass_weighted)
+    shared = projector.ndim - 2
 
     proj_expansion = []
     for n,d in enumerate(expansion):
@@ -299,3 +314,39 @@ def remove_translation_rotations(expansion, coords, masses=None):
         proj_expansion.append(d)
 
     return proj_expansion
+
+def translation_rotation_invariant_transformation(
+        coords, masses,
+        mass_weighted=True,
+        strip_embedding=True
+):
+    A, L_tr = translation_rotation_projector(coords, masses, mass_weighted=True, return_modes=True)
+    base_shape = A.shape[:-2]
+    A = A.reshape((-1,) + A.shape[-2:])
+    L_tr = L_tr.reshape((-1,) + L_tr.shape[-2:])
+    evals, tf = np.linalg.eigh(A)
+    # zero_pos = np.where(np.abs(evals) < 1e-4) # the rest should be 1
+    # raise Exception(
+    #     evals.shape,
+    #     zero_pos,
+    #     # set_ops.vector_ix(tf.shape, zero_pos)
+    # )
+
+    # zero_pos = zero_pos[:-1] + (slice(None),) + zero_pos[-1:]
+    # raise Exception(zero_pos, tf.shape, tf[zero_pos].shape, L_tr.shape)
+    # tf[zero_pos] = np.moveaxis(L_tr)
+    tf[:, :, :6] = L_tr
+    if strip_embedding:
+        # nzpos = np.where(np.abs(evals) > 1e-4) # the rest should be 1
+        # nzpos = nzpos[:-1] + (slice(None),) + nzpos[-1:]
+        tf = tf[:, :, 6:]
+
+    if not mass_weighted:
+        W = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        tf = np.moveaxis(
+            np.tensordot(W, tf, axes=[0, 1]),
+            1, 0
+        )
+    tf = tf.reshape(base_shape + tf.shape[-2:])
+
+    return tf

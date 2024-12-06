@@ -103,13 +103,13 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
         if not nput.is_numeric(return_derivs):
             return_derivs = max(return_derivs)
         (expansions, errors), _ = nput.inverse_coordinate_solve(specs, coords, reference_coordinates,
-                                                                    order=return_derivs,
-                                                                    return_expansions=True,
-                                                                    return_internals=True,
-                                                                    masses=masses,
-                                                                    remove_translation_rotation=remove_translation_rotation,
-                                                                    **kw
-                                                                    )
+                                                                order=return_derivs,
+                                                                return_expansions=True,
+                                                                return_internals=True,
+                                                                masses=masses,
+                                                                remove_translation_rotation=remove_translation_rotation,
+                                                                **kw
+                                                                )
         carts, derivs = expansions[0], expansions[1:]
         return carts, {
             'specs':specs,
