@@ -928,7 +928,7 @@ def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=Non
             B = np.tensordot(A, B, axes=[a_ax, b_ax])
         else:
             B = vec_ops.vec_tensordot(A, B, axes=[a_ax, b_ax], shared=shared)
-        b_ax = [min(B.ndim - 1 - shared, b + A.ndim - 1 - shared) for b in b_ax]
+        b_ax = [min(B.ndim - 1, b + A.ndim - 1 - shared) for b in b_ax]
 
     if symmetrize:
         B = nca_symmetrize(B, partition, shared=shared)
