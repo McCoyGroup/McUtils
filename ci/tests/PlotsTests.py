@@ -77,7 +77,7 @@ class PlotsTests(TestCase):
         # plot.savefig(self.result_file("test_PlotStyling.png"))
         plot.close()
 
-    @debugTest
+    @validationTest
     def test_PlotGridStyling(self):
         main = GraphicsGrid(ncols=3, nrows=1, theme='Solarize_Light2', figure_label='my beuatufil triptych',
                             padding=((50, 10), (50, 65)),
@@ -178,11 +178,11 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_ListTriContourPlot.gif"))
         plot.close()
 
-    @inactiveTest
-    def test_VTK(self):
-        plot = Graphics3D(backend="VTK", image_size=[1500, 500])
-        Sphere().plot(plot)
-        # plot.show()
+    @debugTest
+    def test_VPythin(self):
+        plot = Graphics3D(backend="x3d", image_size=[1500, 500], background='white')
+        Sphere(color='red').plot(plot)
+        plot.show()
 
     # @validationTest
     # def test_Plot3D_adaptive(self):

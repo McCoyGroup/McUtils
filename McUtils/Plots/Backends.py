@@ -10,15 +10,68 @@ __all__ = [
 ]
 
 import enum, abc, contextlib, numpy as np
-from ..Numputils import is_numeric
+from . import VTKInterface as vtk
+from .. import Numputils as nput
+from ..ExternalPrograms import VPythonInterface as vpython
+from ..Jupyter import JHTML, X3D
 
 DPI_SCALING = 72
+
+class XAxisManager:
+    def __init__(self,
+                 tick_getter,
+                 tick_setter,
+                 tick_locator,
+                 minor_tick_locator
+                 ):
+        self.get_xticks = tick_getter
+        self.set_xticks = tick_setter
+        self.set_major_locator = tick_locator
+        self.set_minor_locator = minor_tick_locator
+
+class YAxisManager:
+    def __init__(self,
+                 tick_getter,
+                 tick_setter,
+                 tick_locator,
+                 minor_tick_locator
+                 ):
+        self.get_yticks = tick_getter
+        self.set_yticks = tick_setter
+        self.set_major_locator = tick_locator
+        self.set_minor_locator = minor_tick_locator
+
+class ZAxisManager:
+    def __init__(self,
+                 tick_getter,
+                 tick_setter,
+                 tick_locator,
+                 minor_tick_locator
+                 ):
+        self.get_zticks = tick_getter
+        self.set_zticks = tick_setter
+        self.set_major_locator = tick_locator
+        self.set_minor_locator = minor_tick_locator
 
 class GraphicsAxes(metaclass=abc.ABCMeta):
     """
     A wrapper to provide a canonical form for matplotlib.axes.Axes
     so that other backends can plug in cleanly
     """
+    def __init__(self):
+        self.xaxis = XAxisManager(
+            self.get_xticks,
+            self.set_xticks,
+            None,
+            None
+        )
+        self.yaxis = YAxisManager(
+            self.get_yticks,
+            self.set_yticks,
+            None,
+            None
+        )
+
     @classmethod
     def canonicalize_opts(cls, opts):
         return opts
@@ -47,7 +100,7 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     def set_frame_visible(self, frame_spec):
         ...
     @abc.abstractmethod
-    def get_frame_styke(self):
+    def get_frame_style(self):
         ...
     @abc.abstractmethod
     def set_frame_style(self, frame_spec):
@@ -137,6 +190,38 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def draw_text(self, points, vals, **styles):
         ...
+    @abc.abstractmethod
+    def draw_sphere(self, points, rads, **styles):
+        ...
+
+class GraphicsAxes3D(GraphicsAxes):
+    def __init__(self):
+        super().__init__()
+        self.zaxis = ZAxisManager(
+            self.get_zticks,
+            self.set_zticks,
+            None,
+            None
+        )
+
+    @abc.abstractmethod
+    def get_zlim(self):
+        ...
+    @abc.abstractmethod
+    def set_zlim(self, val, **opts):
+        ...
+    @abc.abstractmethod
+    def get_zticks(self):
+        ...
+    @abc.abstractmethod
+    def set_zticks(self, val, **opts):
+        ...
+    @abc.abstractmethod
+    def get_ztick_style(self):
+        ...
+    @abc.abstractmethod
+    def set_ztick_style(self, **opts):
+        ...
 
 class GraphicsFigure(metaclass=abc.ABCMeta):
     """
@@ -146,6 +231,9 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
     Axes = None
     def __init__(self, axes=None):
         self.axes = axes
+    @classmethod
+    def construct(self, **kw) -> 'GraphicsFigure':
+        raise NotImplementedError("needs an overload")
     @classmethod
     def canonicalize_opts(cls, opts):
         return opts
@@ -178,6 +266,17 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def set_size_inches(self, w, h):
         ...
+    @abc.abstractmethod
+    def set_extents(self, extents):
+        ...
+
+    @abc.abstractmethod
+    def get_facecolor(self):
+        ...
+    @abc.abstractmethod
+    def set_facecolor(self, fg):
+        ...
+
     @abc.abstractmethod
     def savefig(self, file, **opts):
         ...
@@ -216,22 +315,29 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
     def get_available_themes(self):
         ...
     class ThemeContextManager(metaclass=abc.ABCMeta):
-        def __init__(self, theme_spec):
-            self.spec = theme_spec
+        def __init__(self, theme_parents, theme_spec):
+            self.spec = self.canonicalize_theme_opts(theme_parents, theme_spec)
+
+        @classmethod
+        @abc.abstractmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec):
+            ...
         @abc.abstractmethod
         def __enter__(self):
             ...
         @abc.abstractmethod
         def __exit__(self, exc_type, exc_val, exc_tb):
             ...
-    def theme_context(self, spec):
-        return self.ThemeContextManager(spec)
+    def theme_context(self, theme_parents, spec):
+        return self.ThemeContextManager(theme_parents, spec)
 
     class DefaultBackends(enum.Enum):
         MPL = 'matplotlib'
         MPL3D = 'matplotlib3D'
         VTK = 'vtk'
         VPython = 'vpython'
+        VPython2D = 'vpython2D'
+        X3D = 'x3d'
 
     registered_backends = {}
     @classmethod
@@ -240,7 +346,9 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             cls.DefaultBackends.MPL.value: MPLBackend,
             cls.DefaultBackends.MPL3D.value: MPLBackend,
             cls.DefaultBackends.VTK.value: VTKBackend,
-            cls.DefaultBackends.VPython.value: VPythonBackend
+            cls.DefaultBackends.VPython2D.value: VPythonBackend,
+            cls.DefaultBackends.VPython.value: VPythonBackend3D,
+            cls.DefaultBackends.X3D.value: X3DBackend,
         }
     @classmethod
     def lookup(cls, backend, opts=None) -> 'GraphicsBackend':
@@ -258,6 +366,7 @@ class MPLManager:
     _patch = None
     _coll = None
     _mpl = None
+    _colors = None
     _jlab = None
 
     @classmethod
@@ -272,6 +381,12 @@ class MPLManager:
             import matplotlib as mpl
             cls._mpl = mpl
         return cls._mpl
+    @classmethod
+    def color_api(cls):
+        if cls._colors is None:
+            import matplotlib.colors as colors
+            cls._colors = colors
+        return cls._colors
 
     @classmethod
     def patch_api(cls):
@@ -474,7 +589,10 @@ class MPLManager:
 class MPLAxes(GraphicsAxes):
     def __init__(self, mpl_axes_object, **opts):
         self.obj = mpl_axes_object
-        super().__init__(**self.canonicalize_opts(opts))
+        self.opts = self.canonicalize_opts(opts)
+        super().__init__()
+        self.xaxis = self.obj.xaxis
+        self.yaxis = self.obj.yaxis
     def clear(self, *, backend=None):
         ax = self.obj
         all_things = ax.artists + ax.patches
@@ -529,7 +647,7 @@ class MPLAxes(GraphicsAxes):
             ]:
                 if v is not None: self.obj.spines[k].set_visible(v)
 
-    def get_frame_styke(self):
+    def get_frame_style(self):
         return (
             (
                 self.obj.spines['left'].get(),
@@ -562,7 +680,6 @@ class MPLAxes(GraphicsAxes):
             ['top', t]
         ]:
             if v is not None: self.obj.spines[k].set(**v)
-
 
     def get_xlabel(self):
         return self.obj.get_xlabel()
@@ -737,18 +854,67 @@ class MPLAxes(GraphicsAxes):
             points[:, 1],
             **styles
         )
+
     def draw_text(self, points, vals, **styles):
         points = np.asanyarray(points)
         if points.ndim == 2:
             points = points[np.newaxis]
         if isinstance(vals, str):
             vals = [vals]
+
         text_plotter = self.get_plotter('text')
-        for pt, txt in zip(points, vals):
-            return text_plotter(
-                *pt, txt,
-                **styles
-            )
+        text = [
+             text_plotter(*pt, txt, **styles)
+             for pt, txt in zip(points, vals)
+        ]
+
+        return text
+
+    def draw_sphere(self, center, radius, sphere_points=48, **opts):
+        surface = self.get_plotter('plot_surface')
+
+        u = np.linspace(0, 2 * np.pi, sphere_points)
+        v = np.linspace(0, np.pi, sphere_points)
+        x = radius * np.outer(np.cos(u), np.sin(v))
+        y = radius * np.outer(np.sin(u), np.sin(v))
+        z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+        return surface(x + center[0], y + center[1], z + center[2], **opts)
+
+    def draw_cylinder(self, start, end, rad, circle_points=48, **opts):
+        surface = self.get_plotter('plot_surface')
+
+        u = np.linspace(0, 2 * np.pi, circle_points)
+        v = np.linspace(0, np.pi, circle_points)
+
+        # pulled from SO: https://stackoverflow.com/a/32383775/5720002
+
+        # vector in direction of axis
+        v = end - start
+        # find magnitude of vector
+        mag = np.linalg.norm(v)
+        # unit vector in direction of axis
+        v = v / mag
+        # make some vector not in the same direction as v
+        not_v = np.array([1, 0, 0])
+        if (v == not_v).all():
+            not_v = np.array([0, 1, 0])
+        # make vector perpendicular to v
+        n1 = np.cross(v, not_v)
+        # normalize n1
+        n1 /= np.linalg.norm(n1)
+        # make unit vector perpendicular to v and n1
+        n2 = np.cross(v, n1)
+        # surface ranges over t from 0 to length of axis and 0 to 2*pi
+        t = np.linspace(0, mag, circle_points)
+        theta = np.linspace(0, 2 * np.pi, circle_points)
+        # use meshgrid to make 2d arrays
+        t, theta = np.meshgrid(t, theta)
+        # generate coordinates for surface
+        X, Y, Z = [start[i] + v[i] * t + rad * np.sin(theta) * n1[i] + rad * np.cos(theta) * n2[i] for i
+                   in [0, 1, 2]]
+
+        return surface(X, Y, Z, **opts)
 
 class MPLFigure(GraphicsFigure):
     Axes = MPLAxes
@@ -819,7 +985,6 @@ class MPLFigure(GraphicsFigure):
 
     def get_facecolor(self):
         return self.obj.get_facecolor()
-
     def set_facecolor(self, fg):
         return self.obj.set_facecolor(fg)
 
@@ -849,9 +1014,25 @@ class MPLBackend(GraphicsBackend):
         self.plt.show()
 
     class ThemeContextManager(GraphicsBackend.ThemeContextManager):
-        def __init__(self, theme_spec):
-            super().__init__(theme_spec)
-            self.context = MPLManager.plt_api().style.context(theme_spec)
+        def __init__(self, theme_parents, theme_spec):
+            super().__init__(theme_parents, theme_spec)
+            self.context = MPLManager.plt_api().style.context(self.spec)
+
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_opts) -> 'tuple[list[str], dict]':
+            from matplotlib import cycler
+
+            theme_dict = {}
+            for k,v in theme_opts.items():
+                if isinstance(v, dict):
+                    for sk,sv in v.items():
+                        if isinstance(sv, dict):
+                            sv = cycler(**sv)
+                        theme_dict[k+'.'+sk] = sv
+                # else:
+                #     theme_dict[k] = v
+            return theme_parents + [theme_dict]
+
         def __enter__(self):
             return self.context.__enter__()
         def __exit__(self, exc_type, exc_val, exc_tb):
@@ -872,9 +1053,18 @@ class MPLBackend(GraphicsBackend):
         theme_names = sty.available
         return theme_names
 
+class MPLAxes3D(GraphicsAxes3D):
+    def __init__(self, mpl_axes_object, **opts):
+        self.obj = mpl_axes_object
+        self.opts = self.canonicalize_opts(opts)
+        super().__init__()
+        self.xaxis = self.obj.xaxis
+        self.yaxis = self.obj.yaxis
+        self.zaxis = self.obj.zaxis
 class MPLFigure3D(MPLFigure):
+    Axes = MPLAxes3D
     def create_axes(self, rows, cols, spans, projection='3d', **kw):
-        super().create_axes(rows, cols, spans, projection=projection, **kw)
+        return super().create_axes(rows, cols, spans, projection=projection, **kw)
 class MPLBackend3D(MPLBackend):
     Figure = MPLFigure3D
     def create_figure(self, *args, subplot_kw=None, **kwargs):
@@ -882,8 +1072,1279 @@ class MPLBackend3D(MPLBackend):
         subplot_kw = dict({"projection": '3d'}, **({} if subplot_kw is None else subplot_kw))
         return super().create_axes(*args, subplot_kw=subplot_kw, **kwargs)
 
+class GraphicsRegionAxes(GraphicsAxes):
+    def __init__(self, figure_region):
+        self.region = figure_region
+
+    @staticmethod
+    def renormalize(pos, og_reg, final_reg=None):
+        o_min, o_max = og_reg
+        pos = (pos - o_min) / (o_max - o_min)
+        if final_reg is not None:
+            F_min, F_max = final_reg
+            pos = pos * (F_max - F_min) + F_min
+        return pos
+
+    def normalize_positions(self, pos):
+        ndim = pos.shape[-1]
+
+        x = self.renormalize(pos[..., 0], self.get_xlim(), self.region[0])
+        y = self.renormalize(pos[..., 1], self.get_ylim(), self.region[1])
+        if ndim == 2:
+            z = self.renormalize(pos[..., 2], self.get_zlim(), self.region[2])
+            crds = [x, y, z]
+        else:
+            crds = [x, y]
+        return np.moveaxis(np.array(crds), 0, -1)
+
+class VTKAxes(GraphicsRegionAxes):
+
+    def __init__(self, figure_region, figure: vtk.VTKWindow):
+        self.obj = figure
+        self.objs = []
+        self._plot_label = None
+        super().__init__(figure_region)
+
+    @classmethod
+    def canonicalize_opts(cls, opts):
+        return opts
+
+    def remove(self, *, backend):
+        self.obj.close()
+
+    def clear(self, *, backend):
+        for o in self.objs:
+            self.obj.remove_object(o)
+
+    def get_plotter(self, method):
+        raise NotImplementedError(f"plotter for {method} not implemented")
+
+    def get_plot_label(self):
+        return self.obj.get_title()
+        # return self._plot_label
+
+    def set_plot_label(self, val, **style):
+        return self.obj.set_title(val)
+        # x_min, x_max = self.region[0]
+        # y_min, y_max = self.region[1]
+        # pos = self.renormalize(np.array([(x_max+x_min)/2, (y_max+y_min)/2, 0]))
+        # self.obj.draw_text(val, )
+
+    def get_frame_visible(self):
+        raise NotImplementedError("get_frame_visible")
+
+    def set_frame_visible(self, frame_spec):
+        raise NotImplementedError("set_frame_visible")
+
+    def get_frame_style(self):
+        raise NotImplementedError("get_frame_style")
+
+    def set_frame_style(self, frame_spec):
+        raise NotImplementedError("set_frame_style")
+
+    def get_xlabel(self):
+        raise NotImplementedError("get_xlabel")
+
+    def set_xlabel(self, val, **style):
+        raise NotImplementedError("set_xlabel")
+
+    def get_ylabel(self):
+        raise NotImplementedError("get_xlabel")
+
+    def set_ylabel(self, val, **style):
+        raise NotImplementedError("set_ylabel")
+
+    def get_xlim(self):
+        return self.obj.get_xlim()
+    def set_xlim(self, val, **opts):
+        return self.obj.set_xlim(val)
+
+    def get_ylim(self):
+        return self.obj.get_ylim()
+    def set_ylim(self, val, **opts):
+        return self.obj.set_ylim(val)
+
+    def get_zlim(self):
+        return self.obj.get_zlim()
+    def set_zlim(self, val, **opts):
+        return self.obj.set_zlim(val)
+
+    def get_xticks(self):
+        raise NotImplementedError("get_xticks")
+    def set_xticks(self, val, **opts):
+        raise NotImplementedError("set_xticks")
+
+    def get_yticks(self):
+        raise NotImplementedError("get_yticks")
+    def set_yticks(self, val, **opts):
+        raise NotImplementedError("set_yticks")
+
+    def get_xtick_style(self):
+        raise NotImplementedError("get_xtick_style")
+    def set_xtick_style(self, **opts):
+        raise NotImplementedError("set_xtick_style")
+
+    def get_ytick_style(self):
+        raise NotImplementedError("get_ytick_style")
+    def set_ytick_style(self, **opts):
+        raise NotImplementedError("set_ytick_style")
+
+    def set_aspect_ratio(self, ar):
+        raise NotImplementedError("set_aspect_ratio")
+
+    def get_bbox(self):
+        raise NotImplementedError("get_bbox")
+        return [self.obj.get_xlim(), self.obj.get_ylim(), self.obj.get_zlim()]
+    def set_bbox(self, bbox):
+        raise NotImplementedError("set_bbox")
+
+    def get_facecolor(self):
+        return self.obj.get_facecolor()
+    def set_facecolor(self, fg):
+        return self.obj.set_facecolor(fg)
+
+    def get_padding(self):
+        raise NotImplementedError("get_padding")
+
+    @abc.abstractmethod
+    def draw_line(self, points, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_disk(self, points, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_rect(self, points, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_poly(self, points, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_arrow(self, points, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_text(self, points, vals, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_sphere(self, points, rads, **styles):
+        ...
+
+class VTKFigure(GraphicsFigure):
+    Axes = VTKAxes
+
+    def __init__(self, vtk_window: vtk.VTKWindow, **opts):
+        self.obj = vtk_window
+        super().__init__(**self.canonicalize_opts(opts))
+
+    def create_axes(self, rows, cols, spans, **kw) -> 'GraphicsAxes':
+        return self.add_axes(
+            self.obj.add_subplot((rows, cols, spans), **kw)
+        )
+
+    @abc.abstractmethod
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError(...)
+
+    @abc.abstractmethod
+    def clear(self, *, backend):
+        self.obj.clear()
+        # for obj in ...:
+
+
+    @abc.abstractmethod
+    def close(self, *, backend):
+        ...
+
+    def get_bboxes(self):
+        return [
+            a.get_bbox() for a in self.axes
+        ]
+
+    @abc.abstractmethod
+    def get_size_inches(self):
+        ...
+
+    @abc.abstractmethod
+    def set_size_inches(self, w, h):
+        ...
+
+    @abc.abstractmethod
+    def savefig(self, file, **opts):
+        ...
+
 class VTKBackend(GraphicsBackend):
     ...
 
-class VPythonBackend(VTKBackend):
-    ...
+class VPythonWrapper:
+    _vec = None
+    @classmethod
+    def vpythonify(cls, arg):
+        if cls._vec is None:
+            cls._vec = vpython.method('vector')
+        if isinstance(arg, (list, tuple, np.ndarray)):
+            arg = cls._vec(*arg)
+        return arg
+    @classmethod
+    def vpython_color(cls, color):
+        if isinstance(color, str):
+            color = MPLManager.color_api().to_rgb(color)
+        return cls.vpythonify(color)
+
+class VPythonCanvasWrapper(VPythonWrapper):
+
+    def __init__(self, canvas):
+        self.canvas = canvas
+
+    def remove(self, *, backend=None):
+        self.canvas.delete()
+    def clear(self, *, backend=None):
+        for obj in self.canvas.objects:
+            obj.visible = False
+
+    @property
+    def width(self):
+        return self.canvas.width
+    @width.setter
+    def width(self, width):
+        self.canvas.width = width
+
+    @property
+    def height(self):
+        return self.canvas.height
+    @height.setter
+    def height(self, height):
+        self.canvas.height = height
+
+    @property
+    def title(self):
+        return self.canvas.title
+    @title.setter
+    def title(self, title):
+        self.canvas.title = title
+
+    @property
+    def axis(self):
+        return self.canvas.axis
+    @axis.setter
+    def axis(self, axis):
+        self.canvas.axis = axis
+
+    @property
+    def up(self):
+        return self.canvas.up
+    @up.setter
+    def up(self, up):
+        self.canvas.up = up
+
+    @property
+    def background(self):
+        return self.canvas.background
+    @background.setter
+    def background(self, background):
+        self.canvas.background = self.vpython_color(background)
+
+    def primitive(self, name, *args, color=None, **opts):
+        args = [
+            self.vpythonify(arg) for arg in args
+        ]
+        opts = {
+            k:self.vpythonify(arg) for k,arg in opts.items()
+        }
+        opts['color'] = self.vpython_color(color)
+        opts = {
+            k:o for k,o in opts.items()
+            if o is not None
+        }
+        return vpython.method(name)(*args, canvas=self.canvas, **opts)
+
+    def box(self, left_corner, right_corner, **styles):
+        return self.primitive('box',
+                              pos=left_corner,
+                              length=right_corner[0] - left_corner[0],
+                              height=right_corner[1] - left_corner[1],
+                              width=right_corner[2] - left_corner[2], **styles)
+
+    def curve(self, points, **styles):
+        return self.primitive('curve', points, **styles)
+
+    def cylinder(self, start, end, rad, **styles):
+        start = np.asanyarray(start)
+        end = np.asanyarray(end)
+        v = end - start
+        n = np.linalg.norm(v)
+        v = v / n
+
+        return self.primitive('cylinder',
+                              start,
+                              rad=rad,
+                              axis=v,
+                              length=n,
+                              **styles)
+
+    def arrow(self, points, **styles):
+        return self.primitive('arrow', points, **styles)
+
+    def label(self, pos, text, **styles):
+        return self.primitive('label', pos, text **styles)
+
+    def sphere(self, points, rads, **styles):
+        return self.primitive('sphere', pos=points, rad=rads, **styles)
+
+class VPythonGraphWrapper(VPythonWrapper):
+
+    def __init__(self, graph):
+        self.graph = graph
+        self.objs = []
+
+    @property
+    def title(self):
+        return self.graph.title
+    @title.setter
+    def title(self, title):
+        self.graph.title = title
+
+    @property
+    def xtitle(self):
+        return self.graph.xtitle
+    @xtitle.setter
+    def xtitle(self, xtitle):
+        self.graph.xtitle = xtitle
+
+    @property
+    def ytitle(self):
+        return self.graph.ytitle
+    @ytitle.setter
+    def ytitle(self, ytitle):
+        self.graph.ytitle = ytitle
+
+    @property
+    def background(self):
+        return self.graph.background
+    @background.setter
+    def background(self, background):
+        self.graph.background = self.vpython_color(background)
+
+    @property
+    def foreground(self):
+        return self.graph.foreground
+    @foreground.setter
+    def foreground(self, foreground):
+        self.graph.foreground = self.vpython_color(foreground)
+
+    @property
+    def xmin(self):
+        return self.graph.xmin
+    @xmin.setter
+    def xmin(self, xmin):
+        self.graph.xmin = xmin
+
+    @property
+    def xmax(self):
+        return self.graph.xmax
+    @xmax.setter
+    def xmax(self, xmax):
+        self.graph.xmax = xmax
+
+    @property
+    def ymin(self):
+        return self.graph.ymin
+    @ymin.setter
+    def ymin(self, ymin):
+        self.graph.ymin = ymin
+
+    @property
+    def ymax(self):
+        return self.graph.ymax
+    @ymax.setter
+    def ymax(self, ymax):
+        self.graph.ymax = ymax
+
+    @property
+    def width(self):
+        return self.graph.width
+    @width.setter
+    def width(self, width):
+        self.graph.width = width
+
+    @property
+    def height(self):
+        return self.graph.height
+    @height.setter
+    def height(self, height):
+        self.graph.height = height
+
+    def remove(self, *, backend=None):
+        self.graph.delete()
+    def clear(self, *, backend=None):
+        for obj in self.graph.objects:
+            obj.visible = False
+
+    def plot(self, x, y, color=None, marker_color=None, dot_color=None, **styles):
+        curve = vpython.gcurve(
+            color=self.vpython_color(color),
+            marker_color=self.vpython_color(marker_color),
+            dot_color=self.vpython_color(dot_color),
+            graph=self.graph,
+            **styles
+        )
+        curve.plot(np.array([x, y]).T)
+        self.objs.append(curve)
+        return curve
+
+    def scatter(self, x, y, color=None, marker_color=None, dot_color=None, **styles):
+        curve = vpython.gdots(
+            color=self.vpython_color(color),
+            marker_color=self.vpython_color(marker_color),
+            dot_color=self.vpython_color(dot_color),
+            graph=self.graph,
+            **styles
+        )
+        curve.plot(np.array([x, y]).T)
+        self.objs.append(curve)
+        return curve
+
+    def vbars(self, x, y, color=None, marker_color=None, dot_color=None, **styles):
+        curve = vpython.gvbars(
+            color=self.vpython_color(color),
+            marker_color=self.vpython_color(marker_color),
+            dot_color=self.vpython_color(dot_color),
+            graph=self.graph,
+            **styles
+        )
+        curve.plot(np.array([x, y]).T)
+        self.objs.append(curve)
+        return curve
+
+    def hbars(self, x, y, color=None, marker_color=None, dot_color=None, **styles):
+        curve = vpython.ghbars(
+            color=self.vpython_color(color),
+            marker_color=self.vpython_color(marker_color),
+            dot_color=self.vpython_color(dot_color),
+            graph=self.graph,
+            **styles
+        )
+        curve.plot(np.array([x, y]).T)
+        self.objs.append(curve)
+        return curve
+
+class VPythonAxes(GraphicsAxes):
+    def __init__(self, graph:VPythonGraphWrapper):
+        super().__init__()
+        self.graph = graph
+
+    def remove(self, *, backend):
+        self.graph.remove(backend=backend)
+    def clear(self, *, backend):
+        self.graph.clear(backend=backend)
+
+    def get_plotter(self, method):
+        raise NotImplementedError(...)
+
+    def get_plot_label(self):
+        return self.graph.title
+    def set_plot_label(self, val, **style):
+        self.graph.title = val
+
+    def get_frame_visible(self):
+        raise NotImplementedError(...)
+    def set_frame_visible(self, frame_spec):
+        raise NotImplementedError(...)
+
+    def get_frame_style(self):
+        raise NotImplementedError(...)
+    def set_frame_style(self, frame_spec):
+        raise NotImplementedError(...)
+
+    def get_xlabel(self):
+        return self.graph.xtitle
+    def set_xlabel(self, val, **style):
+        self.graph.xtitle = val
+
+    def get_ylabel(self):
+        return self.graph.ytitle
+    def set_ylabel(self, val, **style):
+        self.graph.ytitle = val
+
+    def get_xlim(self):
+        return [self.graph.xmin, self.graph.xmax]
+    def set_xlim(self, val, **opts):
+        self.graph.xmin, self.graph.xmax = val
+
+    def get_ylim(self):
+        return [self.graph.ymin, self.graph.ymax]
+    def set_ylim(self, val, **opts):
+        self.graph.ymin, self.graph.ymax = val
+
+    def get_xticks(self):
+        raise NotImplementedError(...)
+    def set_xticks(self, val, **opts):
+        raise NotImplementedError(...)
+
+    def get_yticks(self):
+        raise NotImplementedError(...)
+    def set_yticks(self, val, **opts):
+        raise NotImplementedError(...)
+
+    def get_xtick_style(self):
+        raise NotImplementedError(...)
+    def set_xtick_style(self, **opts):
+        raise NotImplementedError(...)
+
+    def get_ytick_style(self):
+        raise NotImplementedError(...)
+    def set_ytick_style(self, **opts):
+        raise NotImplementedError(...)
+
+    def set_aspect_ratio(self, ar):
+        raise NotImplementedError(...)
+
+    def get_bbox(self):
+        raise NotImplementedError(...)
+    def set_bbox(self, bbox):
+        raise NotImplementedError(...)
+
+    def get_facecolor(self):
+        return self.graph.background
+    def set_facecolor(self, fg):
+        self.graph.background = fg
+
+    def get_padding(self):
+        raise NotImplementedError(...)
+
+    def draw_line(self, points, **styles):
+        return self.graph.plot(*np.asanyarray(points).T, **styles)
+
+    def draw_disk(self, points, color=None, **styles):
+        return self.graph.scatter(*np.asanyarray(points).T, **styles)
+
+    def draw_rect(self, points, **styles):
+        raise NotImplementedError("too annoying")
+
+    def draw_poly(self, points, **styles):
+        raise NotImplementedError("too annoying")
+
+    def draw_arrow(self, points, color=None, **styles):
+        raise NotImplementedError("too annoying")
+
+    def draw_text(self, points, vals, color=None, **styles):
+        raise NotImplementedError("too annoying")
+        # pts = np.asanyarray(points)
+        # if pts.ndim == 1:
+        #     return vpython.label(pts, vals, color=self.vpython_color(color), canvas=self.canvas, **styles)
+        # else:
+        #     return [
+        #         vpython.label(pt, t, color=self.vpython_color(color), canvas=self.canvas, **styles)
+        #         for pt, t in zip(pts, vals)
+        #     ]
+
+    def draw_sphere(self, points, rads, color=None, **styles):
+        raise NotImplementedError("too annoying")
+        # return vpython.sphere(points, rads, color=self.vpython_color(color), canvas=self.canvas, **styles)
+
+class VPythonFigure(GraphicsFigure):
+    Axes = VPythonAxes
+
+    _refs = set()
+    def __init__(self, vpython_graph:VPythonGraphWrapper, **opts):
+        if vpython_graph in self._refs: raise ValueError(...)
+        self._refs.add(vpython_graph)
+        self.graph = vpython_graph
+        super().__init__(**self.canonicalize_opts(opts))
+    @classmethod
+    def construct(cls, **kw) -> 'VPythonFigure':
+        return cls(vpython.graph(**kw))
+    def create_axes(self, rows=1, cols=1, spans=1, **kw) -> 'GraphicsAxes':
+        if (rows, cols, spans) != (1, 1, 1):
+            raise NotImplementedError("can't create subcanvases")
+        return self.add_axes(self.graph)
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError(...)
+    def clear(self, *, backend):
+        self.graph.clear()
+    def close(self, *, backend):
+        self.graph.remove()
+
+    def get_size_inches(self):
+        return [self.graph.width//72, self.graph.height//72]
+    def set_size_inches(self, w, h):
+        self.graph.width, self.graph.height = w*72, h*72
+
+    def get_facecolor(self):
+        return self.graph.background
+    def set_facecolor(self, fg):
+        self.graph.background = fg
+
+    def savefig(self, file, **opts):
+        raise NotImplementedError("too annoying")
+
+class VPythonBackend(GraphicsBackend):
+    Figure = VPythonFigure
+    def create_figure(self, *args, **kwargs):
+        figure = self.Figure.construct(**kwargs)
+        axes = self.Figure.create_axes()
+        return figure, axes
+
+    class ThemeContextManager(GraphicsBackend.ThemeContextManager):
+        theme_stack = []
+
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec):
+            return []
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            ...
+
+    def show_figure(self, graphics, reshow=None):
+        ...
+
+    def get_interactive_status(self) -> 'bool':
+        return True
+    def disable_interactivity(self):
+        raise NotImplementedError("not possible")
+    def enable_interactivity(self):
+        ...
+    def get_available_themes(self):
+        return []
+
+class VPythonAxes3D(GraphicsAxes3D):
+    def __init__(self, canvas:VPythonCanvasWrapper):
+        super().__init__()
+        self.canvas = canvas
+
+    def remove(self, *, backend):
+        self.canvas.remove(backend=backend)
+    def clear(self, *, backend):
+        self.canvas.clear(backend=backend)
+
+    def get_plotter(self, method):
+        raise NotImplementedError(...)
+
+    def get_plot_label(self):
+        return self.canvas.title
+    def set_plot_label(self, val, **style):
+        self.canvas.title = val
+
+    def get_frame_visible(self):
+        raise NotImplementedError(...)
+    def set_frame_visible(self, frame_spec):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_frame_style(self):
+        raise NotImplementedError(...)
+    def set_frame_style(self, frame_spec):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_xlabel(self):
+        raise NotImplementedError(...)
+    def set_xlabel(self, val, **style):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_ylabel(self):
+        raise NotImplementedError(...)
+    def set_ylabel(self, val, **style):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_xlim(self):
+        raise NotImplementedError(...)
+    def set_xlim(self, val, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_ylim(self):
+        raise NotImplementedError(...)
+    def set_ylim(self, val, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_zlim(self):
+        raise NotImplementedError(...)
+    def set_zlim(self, val, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_xticks(self):
+        return []
+    def set_xticks(self, val, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_yticks(self):
+        return []
+    def set_yticks(self, val, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_zticks(self):
+        return []
+    def set_zticks(self, val, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_xtick_style(self):
+        return {}
+    def set_xtick_style(self, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_ytick_style(self):
+        return {}
+    def set_ytick_style(self, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_ztick_style(self):
+        return {}
+    def set_ztick_style(self, **opts):
+        ...
+        # raise NotImplementedError(...)
+
+    def set_aspect_ratio(self, ar):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_bbox(self):
+        raise NotImplementedError(...)
+    def set_bbox(self, bbox):
+        raise NotImplementedError(...)
+
+    def get_facecolor(self):
+        return self.canvas.background
+    def set_facecolor(self, fg):
+        self.canvas.background = fg
+
+    def get_padding(self):
+        raise NotImplementedError(...)
+
+    def draw_line(self, points, **styles):
+        return self.canvas.curve(points, **styles)
+
+    def draw_disk(self, points, **styles):
+        raise NotImplementedError("2D")
+
+    def draw_rect(self, points, **styles):
+        raise NotImplementedError("2D")
+
+    def draw_poly(self, points, **styles):
+        raise NotImplementedError("2D")
+
+    def draw_arrow(self, points, **styles):
+        return self.canvas.arrow(points, **styles)
+
+    def draw_text(self, points, vals, **styles):
+        pts = np.asanyarray(points)
+        if pts.ndim == 1:
+            return self.canvas.label(pts, vals, **styles)
+        else:
+            return [
+                self.canvas.label(pt, t, **styles)
+                for pt, t in zip(pts, vals)
+            ]
+
+    def draw_sphere(self, points, rads, **styles):
+        return self.canvas.sphere(points, rads, **styles)
+
+    def draw_cylinder(self, start, end, rad, **styles):
+        return self.canvas.cylinder(start, end, rad, **styles)
+
+    def draw_primitive(self, name, *args, **kwargs):
+        return self.canvas.primitive(name, *args, **kwargs)
+
+class VPythonFigure3D(GraphicsFigure):
+    Axes = VPythonAxes3D
+
+    _refs = set()
+    def __init__(self, vpython_canvas:VPythonCanvasWrapper, **opts):
+        if isinstance(vpython_canvas, VPythonCanvasWrapper):
+            vpython_canvas = vpython_canvas.canvas
+        if vpython_canvas in self._refs: raise ValueError(...)
+        self._refs.add(vpython_canvas)
+        self.canvas = VPythonCanvasWrapper(vpython_canvas)
+        super().__init__(**self.canonicalize_opts(opts))
+    @classmethod
+    def construct(cls, **kw) -> 'GraphicsFigure':
+        return cls(vpython.method('canvas')(**kw))
+    def create_axes(self, rows=1, cols=1, spans=1, **kw) -> 'GraphicsAxes':
+        if (rows, cols, spans) != (1, 1, 1):
+            raise NotImplementedError("can't create subcanvases")
+        return self.add_axes(self.canvas)
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError(...)
+    def clear(self, *, backend):
+        self.canvas.clear()
+    def close(self, *, backend):
+        self.canvas.remove()
+    def get_size_inches(self):
+        return [self.canvas.width//72, self.canvas.height//72]
+    def set_size_inches(self, w, h):
+        self.canvas.width, self.canvas.height = w*72, h*72
+    def set_extents(self, extents):
+        ...
+    def get_facecolor(self):
+        return self.canvas.background
+    def set_facecolor(self, fg):
+        self.canvas.background = fg
+    def savefig(self, file, **opts):
+        raise NotImplementedError("too annoying")
+
+class VPythonBackend3D(GraphicsBackend):
+    Figure = VPythonFigure3D
+    def create_figure(self, *args, **kwargs):
+        figure = self.Figure.construct(**kwargs)
+        axes = figure.create_axes()
+        return figure, axes
+
+    class ThemeContextManager(VPythonBackend.ThemeContextManager):
+        ...
+
+    def show_figure(self, graphics, reshow=None):
+        ...
+
+    def get_interactive_status(self) -> 'bool':
+        return True
+    def disable_interactivity(self):
+        ...
+    def enable_interactivity(self):
+        ...
+    def get_available_themes(self):
+        return []
+
+class X3DAxes(GraphicsAxes3D):
+    def __init__(self, title=None, background=None, **opts):
+        super().__init__()
+        self.children = []
+        self.title = title
+        self.background = background
+        self.opts = opts
+
+    style_map = {
+        "color":"diffuseColor"
+    }
+    @classmethod
+    def prep_styles(cls, styles):
+        return {
+            cls.style_map.get(k, k):str(o) for k,o in styles.items()
+            if o is not None
+        }
+
+    @classmethod
+    def prep_shape(cls, shape, styles):
+        styles = cls.prep_styles(styles)
+        if len(styles) > 0:
+            return X3D.Shape(
+                X3D.Appearance(X3D.Material(**styles)),
+                shape
+            )
+        else:
+            return shape
+
+    @classmethod
+    def canonicalize_opts(cls, opts):
+        return opts
+
+    def remove(self, *, backend):
+        self.children = []
+        self.title = ""
+        self.background = "white"
+
+    def clear(self, *, backend):
+        self.children = []
+        self.title = ""
+        self.background = "white"
+
+    def get_plotter(self, method):
+        ...
+
+    def get_plot_label(self):
+        return self.title
+    def set_plot_label(self, val, **style):
+        self.title = val
+
+    def get_frame_visible(self):
+        raise NotImplementedError(...)
+    def set_frame_visible(self, frame_spec):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_frame_style(self):
+        raise NotImplementedError(...)
+    def set_frame_style(self, frame_spec):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_xlabel(self):
+        raise NotImplementedError(...)
+    def set_xlabel(self, val, **style):
+        ...
+
+    def get_ylabel(self):
+        raise NotImplementedError(...)
+    def set_ylabel(self, val, **style):
+        ...
+
+    def get_xlim(self):
+        raise NotImplementedError(...)
+    def set_xlim(self, val, **opts):
+        ...
+
+    def get_ylim(self):
+        raise NotImplementedError(...)
+    def set_ylim(self, val, **opts):
+        ...
+
+    def get_zlim(self):
+        raise NotImplementedError(...)
+    def set_zlim(self, val, **opts):
+        ...
+
+    def get_xticks(self):
+        return []
+    def set_xticks(self, val, **opts):
+        ...
+
+    def get_yticks(self):
+        return []
+    def set_yticks(self, val, **opts):
+        ...
+
+    def get_zticks(self):
+        return []
+    def set_zticks(self, val, **opts):
+        ...
+
+    def get_xtick_style(self):
+        return {}
+    def set_xtick_style(self, **opts):
+        ...
+
+    def get_ytick_style(self):
+        return {}
+    def set_ytick_style(self, **opts):
+        ...
+
+    def get_ztick_style(self):
+        return {}
+    def set_ztick_style(self, **opts):
+        ...
+
+    def set_aspect_ratio(self, ar):
+        ...
+
+    def get_bbox(self):
+        raise NotImplementedError(...)
+    def set_bbox(self, bbox):
+        raise NotImplementedError(...)
+
+    def get_facecolor(self):
+        return self.background
+    def set_facecolor(self, fg):
+        self.background = fg
+
+    def get_padding(self):
+        raise NotImplementedError(...)
+
+    def draw_line(self, points, **styles):
+        points = np.asanyarray(points)
+        if points.ndim == 2:
+            points = points[np.newaxis]
+
+        line_set = self.prep_shape(
+            X3D.LineSet(coord=" ".join(str(x) for x in np.asanyarray(points).flatten())),
+            styles
+        ),
+        self.children.append(line_set)
+
+        return line_set
+
+    def draw_disk(self, points, **styles):
+        points = np.asanyarray(points)
+        if points.ndim == 2:
+            points = points[np.newaxis]
+        disks = [
+            X3D.Transform(
+                self.prep_shape(X3D.Disk2D(), styles),
+                translation=f"{center[0]} {center[1]}"
+            )
+            for center in points
+        ]
+        self.children.extend(disks)
+
+        return disks
+
+    def draw_arrow(self, points, rads=.1, cone_padding=.2, **styles):
+        points = np.asanyarray(points)
+        if points.ndim == 2:
+            points = points[np.newaxis]
+        starts = points[:, 0]
+        ends = points[:, 1]
+
+        rads = np.asanyarray(rads)
+        if rads.ndim == 0:
+            rads = rads[np.newaxis]
+        rads = np.broadcast_to(rads, ends.shape[0])
+
+        vecs = ends - starts
+        angs, crosses, norms = nput.vec_angles([0, 0, 1], vecs, return_crosses=True, return_norms=True)
+        arrows = [
+            X3D.Group(
+                X3D.Transform(
+                    self.prep_shape(
+                        X3D.Cone(radius=str(rad+cone_padding), height=str(rad+cone_padding)),
+                        styles
+                    ),
+                    translation=f"{end[0]} {end[1]} {end[2]}",
+                    rotation=f"{cross[0]} {cross[1]} {cross[2]} {ang}"
+                ),
+                X3D.Transform(
+                    self.prep_shape(
+                        X3D.Cylinder(radius=str(rad), height=str(n)),
+                        styles
+                    ),
+                    translation=f"{start[0]} {start[1]} {start[2]}",
+                    rotation=f"{cross[0]} {cross[1]} {cross[2]} {ang}"
+                )
+            )
+            for start, end, cross, rad, n, ang in zip(
+                starts, ends, crosses, rads, norms[1], angs
+            )
+        ]
+
+        self.children.extend(arrows)
+        return arrows
+
+    def draw_text(self, points, vals, **styles):
+        points = np.asanyarray(points)
+        if points.ndim == 2:
+            points = points[np.newaxis]
+        if isinstance(vals, str):
+            vals = [vals]
+
+        text = [
+            X3D.Transform(
+                self.prep_shape(
+                    X3D.Text(string=v),
+                    styles
+                ),
+                translation=f"{center[0]} {center[1]} {center[2]}"
+            )
+            for center, v in zip(points, vals)
+        ]
+        self.children.extend(text)
+
+        return text
+
+    def draw_rect(self, points, **styles):
+        points = np.asanyarray(points)
+        if points.ndim == 2:
+            points = points[np.newaxis]
+
+        anchors = points[:, 0]
+        widths = points[:, 1, 0] - points[:, 0, 0]
+        heights = points[:, 1, 1] - points[:, 0, 1]
+
+        rects = [
+            X3D.Transform(
+                self.prep_shape(
+                    X3D.Rectangle2D(size="{w},{h}"),
+                    styles
+                ),
+                translation=f"{a[0]} {a[1]}"
+            )
+            for a, w, h in zip(anchors, widths, heights)
+        ]
+        self.children.extend(rects)
+
+        return rects
+
+    def draw_poly(self, points, **styles):
+        raise NotImplementedError("2D")
+
+    def draw_sphere(self, centers, rads, **styles):
+        centers = np.asanyarray(centers)
+        if centers.ndim == 1:
+            centers = centers[np.newaxis]
+        rads = np.asanyarray(rads)
+        if rads.ndim == 0:
+            rads = rads[np.newaxis]
+        rads = np.broadcast_to(rads, (centers.shape[0],))
+        spheres = [
+            X3D.Transform(
+                self.prep_shape(
+                    X3D.Sphere(radius=str(rad)), styles
+                ),
+                translation=f"{center[0]} {center[1]} {center[2]}"
+            )
+            for center,rad in zip(centers, rads)
+        ]
+        self.children.extend(spheres)
+
+        return spheres
+
+    def draw_cylinder(self, starts, ends, rads, **styles):
+        starts = np.asanyarray(starts)
+        if starts.ndim == 1:
+            starts = starts[np.newaxis]
+        ends = np.asanyarray(ends)
+        if ends.ndim == 1:
+            ends = ends[np.newaxis]
+        rads = np.asanyarray(rads)
+        if rads.ndim == 0:
+            rads = rads[np.newaxis]
+        rads = np.broadcast_to(rads, (ends.shape[0],))
+        vecs = ends - starts
+        angs, crosses, norms = nput.vec_angles(vecs, [0, 1, 0], return_crosses=True, return_norms=True)
+        mids = (starts + ends) / 2
+        cylinders = [
+            X3D.Transform(
+                self.prep_shape(X3D.Cylinder(radius=str(rad), height=str(n)), styles),
+                translation=f"{start[0]} {start[1]} {start[2]}",
+                rotation=f"{cross[0]} {cross[1]} {cross[2]} {ang}"
+            )
+            for start, cross, rad, n, ang in zip(
+                mids, crosses, rads, norms[0], -angs
+            )
+        ]
+
+        self.children.extend(cylinders)
+        return cylinders
+
+    def draw_primitive(self, name, *args, **kwargs):
+        ...
+        # return self.canvas.primitive(name, *args, **kwargs)
+
+    def to_x3d(self):
+        opts = dict(
+            self.opts,
+            background=self.background,
+            title=self.title
+        )
+        opts = {
+            k:str(o) for k,o in opts.items()
+            if o is not None
+        }
+        return X3D.Scene(
+            self.children,
+            **opts
+        )
+
+class X3DFigure(GraphicsFigure):
+    Axes = X3DAxes
+
+    def __init__(self, width=640, height=500, background='white', profile='Immersive', version='3.3', **opts):
+        self.profile = profile
+        self.version = version
+        self.opts = dict(opts)
+        self.width = width
+        self.height = height
+        self.background = background
+        self.shown = False
+        super().__init__()
+
+    def __setitem__(self, key, value):
+        self.opts[key] = value
+    def __getitem__(self, item):
+        return self.opts[item]
+
+    def clear(self, *, backend):
+        self.axes = []
+
+    def close(self, *, backend):
+        self.clear(backend=backend)
+
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError("not possible")
+
+    def create_axes(self, rows=1, cols=1, spans=1, **kw) -> 'GraphicsAxes':
+        if (rows, cols, spans) != (1, 1, 1):
+            raise NotImplementedError("can't create subcanvases")
+        return self.add_axes(self.Axes(**kw))
+
+    @classmethod
+    def construct(cls, **kw) -> 'GraphicsFigure':
+        return cls(**kw)
+
+    def get_size_inches(self):
+        return [self.width//72, self.height//72]
+    def set_size_inches(self, w, h):
+        self.width, self.height = w*72, h*72
+    def set_extents(self, extents):
+        ...
+    def get_facecolor(self):
+        return self.background
+    def set_facecolor(self, fg):
+        self.background = fg
+    def savefig(self, file, **opts):
+        raise NotImplementedError("too annoying")
+    def to_x3d(self):
+        opts = dict(
+            self.opts,
+            profile=self.profile,
+            version=self.version
+        )
+        opts = {
+            k:str(o) for k,o in opts.items()
+            if o is not None
+        }
+        return JHTML.Figure(
+            JHTML.Script(src='http://www.x3dom.org/download/x3dom.js'),
+            JHTML.Link(rel='stylesheet', href='http://www.x3dom.org/download/x3dom.css'),
+            #     "<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
+            # <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>"
+            X3D.X3D(
+                *[a.to_x3d() for a in self.axes],
+                **opts
+            )
+        )
+
+class X3DBackend(GraphicsBackend):
+    Figure = X3DFigure
+    def create_figure(self, *args, **kwargs):
+        figure = self.Figure.construct(**kwargs)
+        axes = figure.create_axes()
+        return figure, axes
+
+    class ThemeContextManager(GraphicsBackend.ThemeContextManager):
+        theme_stack = []
+
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec):
+            return []
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            ...
+
+    # def _ipython_repr_(self, graphics: X3DFigure, reshow=None):
+    #     from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
+    #
+    #     display = JupyterAPIs.get_display_api()
+    #     return display.display(display.HTML(graphics.to_x3d().tostring())
+    def show_figure(self, graphics:X3DFigure, reshow=None):
+        if not graphics.shown:
+            graphics.shown = True
+
+            from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
+
+            display = JupyterAPIs.get_display_api()
+            html = graphics.to_x3d().tostring()
+            return display.display(display.HTML(html))
+
+    def get_interactive_status(self) -> 'bool':
+        return True
+    def disable_interactivity(self):
+        ...
+    def enable_interactivity(self):
+        ...
+    def get_available_themes(self):
+        return []

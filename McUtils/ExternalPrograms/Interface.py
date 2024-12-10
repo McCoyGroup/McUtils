@@ -6,6 +6,9 @@ __all__ = [
     "ExternalProgramInterface"
 ]
 
+import weakref
+
+
 class ExternalProgramInterface:
     name = None
     module = None
@@ -37,9 +40,12 @@ class ExternalProgramInterface:
         return __import__(cls.module)
         # raise NotImplementedError("{} needs to implement `load_library`".format(cls.__name__))
 
+    method_table = weakref.WeakValueDictionary()
     @classmethod
     def method(cls, name):
-        return getattr(cls.get_lib(), name)
+        if name not in cls.method_table:
+            cls.method_table[name] = getattr(cls.get_lib(), name)
+        return cls.method_table[name]
     @property
     def lib(self):
         return self.get_lib()

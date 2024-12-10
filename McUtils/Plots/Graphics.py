@@ -1238,6 +1238,7 @@ class Graphics3D(Graphics):
             animate=animate,
             view_settings=view_settings,
             backend=backend,
+            background=background,
             prop_manager=GraphicsPropertyManager3D,
             **kwargs
         )

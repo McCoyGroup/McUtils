@@ -100,17 +100,36 @@ class PlotLegend(list):
             self.opts
         )
 
+class cycler:
+    # transparent mimic of mpl cycler
+    def __init__(self, **style_cycles):
+        self.opts = style_cycles
+        self.keys = list(style_cycles.keys())
+        self.lens = [len(style_cycles[k]) for k in self.keys]
+        self.inds = [0]*len(style_cycles)
+    def __next__(self):
+        vals = {
+            k:self.opts[k][i]
+            for k,i in zip(self.keys, self.inds)
+        }
+        self.inds = [(i+1)%l for i,l in zip(self.inds, self.lens)]
+        return vals
+
 class ThemeManager:
     """
     Simple manager class for plugging into themes in a semi-background agnostic way
     """
     extra_themes = {
         'mccoy': (
-            (['seaborn-dark-palette', 'seaborn-v0_8-dark-palette'],),
+            ([],),
             {
-                'axes.labelsize': 13,
-                'xtick.labelsize':13,
-                'ytick.labelsize':13,
+                'axes': {
+                    'prop_cycle':{'color': ['001C7F', '017517', '8C0900', '7600A1', 'B8860B', '006374']},
+                    'labelsize':13
+                },
+                'patch': {'facecolor': '001C7F'},
+                'xtick': {'labelsize': 13},
+                'ytick': {'labelsize': 13},
                 'padding': 50,
                 'aspect_ratio': 'auto'
             }
@@ -131,8 +150,10 @@ class ThemeManager:
     def from_spec(cls, theme, backend=None):
         if theme is None:
             return NoThemeManager()
-        if isinstance(theme, (str, dict)):
+        if isinstance(theme, str):
             theme = [theme]
+        elif isinstance(theme, dict):
+            theme = [(), theme]
         if len(theme) > 0:
             try:
                 theme_names, theme_properties = theme
@@ -154,9 +175,9 @@ class ThemeManager:
         theme = self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
         name_list = self.validate_theme(*theme)
         # name_list = list(theme[0])
-        opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
+        # opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
 
-        self.context_manager = self.backend.theme_context(name_list+[opts])
+        self.context_manager = self.backend.theme_context(name_list, theme[1])
         return self.context_manager.__enter__()
         # don't currently support any other backends...
     def __exit__(self, exc_type, exc_val, exc_tb):

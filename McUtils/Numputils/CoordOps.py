@@ -864,7 +864,7 @@ def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_co
     else:
         return derivs
 
-def dist_deriv(coords, i, j, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
+def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
     """
     Gives the derivative of the distance between i and j with respect to coords i and coords j
 
@@ -914,7 +914,7 @@ def dist_deriv(coords, i, j, order=1, method='expansion', fixed_atoms=None, expa
 
         return derivs
 
-def angle_deriv(coords, i, j, k, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
+def angle_deriv(coords, i, j, k, /, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
     """
     Gives the derivative of the angle between i, j, and k with respect to the Cartesians
 
@@ -968,7 +968,7 @@ def angle_deriv(coords, i, j, k, order=1, method='expansion', fixed_atoms=None, 
 
         return derivs
 
-def rock_deriv(coords, i, j, k, order=1, method='expansion', zero_thresh=None, fixed_atoms=None, expanded_vectors=None):
+def rock_deriv(coords, i, j, k, /, order=1, method='expansion', zero_thresh=None, fixed_atoms=None, expanded_vectors=None):
     """
     Gives the derivative of the rocking motion (symmetric bend basically)
 
@@ -994,33 +994,6 @@ def rock_deriv(coords, i, j, k, order=1, method='expansion', zero_thresh=None, f
         B_deriv = td.vec_angle_deriv(A_expansion[:1], B_expansion, order=order)
         return [A_deriv[0]] + [ad - bd for ad,bd in zip(A_deriv[1:], B_deriv[1:])]
 
-        return td.vec_angle_deriv(A_expansion, B_expansion, order=order)
-        # if fixed_atoms is None:
-        #     fixed_atoms = []
-        # else:
-        #     fixed_atoms = list(fixed_atoms)
-        # k_derivs = angle_deriv(coords, i, j, k, order=order, method='expansion', fixed_atoms=fixed_atoms+[k])
-        # j_derivs = angle_deriv(coords, i, j, k, order=order, method='expansion', fixed_atoms=fixed_atoms+[j])
-        # raise Exception(k_derivs[1], j_derivs[1])
-        # return [k_derivs[0]] + [ad - bd for ad,bd in zip(k_derivs[1:], j_derivs[1:])]
-
-        a = coords[..., j, :] - coords[..., i, :]
-        b = coords[..., k, :] - coords[..., i, :]
-
-        A_d = disp_deriv_mat(coords, j, i)
-        B_d = disp_deriv_mat(coords, k, i)
-        if fixed_atoms is not None:
-            A_d = fill_disp_jacob_atom(A_d, [[i, 0] for i in fixed_atoms], base_shape=coords.shape[:-2])
-            B_d = fill_disp_jacob_atom(B_d, [[i, 0] for i in fixed_atoms], base_shape=coords.shape[:-2])
-
-        if expanded_vectors is None:
-            expanded_vectors = [0, 1]
-        A_expansion = [a, misc.flatten_inds(A_d, [-3, -2])] if 0 in expanded_vectors else [a]
-        B_expansion = [b, misc.flatten_inds(B_d, [-3, -2])] if 1 in expanded_vectors else [b]
-
-        A_deriv = td.vec_angle_deriv(A_expansion, [b], order=order)
-        B_deriv = td.vec_angle_deriv([a], B_expansion, order=order)
-        return [A_deriv[0]] + [ad - bd for ad,bd in zip(A_deriv[1:], B_deriv[1:])]
     else:
 
         if order > 2:
@@ -1052,10 +1025,9 @@ def rock_deriv(coords, i, j, k, order=1, method='expansion', zero_thresh=None, f
 
         return derivs
 
-def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion',
+def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion',
                 fixed_atoms=None,
-                expanded_vectors=None,
-                zero_point_step_size=1.0e-4):
+                expanded_vectors=None):
     """
     Gives the derivative of the dihedral between i, j, k, and l with respect to the Cartesians
     Currently gives what are sometimes called the `psi` angles.
@@ -1279,10 +1251,9 @@ def dihed_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion
 
     return derivs
 
-def book_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion',
+def book_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion',
                fixed_atoms=None,
-               expanded_vectors=None,
-               zero_point_step_size=1.0e-4):
+               expanded_vectors=None):
     if method == 'expansion':
         if expanded_vectors is None:
             expanded_vectors = [0, 1, 2]
@@ -1294,7 +1265,7 @@ def book_deriv(coords, i, j, k, l, order=1, zero_thresh=None, method='expansion'
     else:
         raise NotImplementedError("too annoying")
 
-def oop_deriv(coords, i, j, k, order=1, method='expansion',
+def oop_deriv(coords, i, j, k, /, order=1, method='expansion',
                fixed_atoms=None,
                expanded_vectors=None):
     if method == 'expansion':
@@ -1310,7 +1281,25 @@ def oop_deriv(coords, i, j, k, order=1, method='expansion',
     else:
         raise NotImplementedError("too annoying")
 
-def wag_deriv(coords, i, j, k, order=1, method='expansion',
+def plane_angle_deriv(coords, i, j, k, l, m, n, /, order=1,
+                      method='expansion',
+                      fixed_atoms=None,
+                      expanded_vectors=None,
+
+                      ):
+    if method == 'expansion':
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1, 2, 3]
+        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        C_expansion = prep_disp_expansion(coords, m, l, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        D_expansion = prep_disp_expansion(coords, n, m, fixed_atoms=fixed_atoms, expand=3 in expanded_vectors)
+
+        return td.vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order=order)
+    else:
+        raise NotImplementedError("too annoying")
+
+def wag_deriv(coords, i, j, k, l=None, m=None, n=None, /, order=1, method='expansion',
                fixed_atoms=None,
                expanded_vectors=None):
     if method == 'expansion':
@@ -1320,7 +1309,11 @@ def wag_deriv(coords, i, j, k, order=1, method='expansion',
             expanded_vectors = [0, 1]
         A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
-        C_expansion = prep_disp_expansion(coords, i, k, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        if l is None: l = i
+        if m is None: m = j
+        if n is None: n = k
+        C_expansion = prep_disp_expansion(coords, m, l, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        D_expansion = prep_disp_expansion(coords, n, m, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
         i_deriv = td.vec_dihed_deriv(A_expansion, B_expansion[:1], C_expansion, order=order)
         k_deriv = td.vec_dihed_deriv(A_expansion[:1], B_expansion, C_expansion, order=order)

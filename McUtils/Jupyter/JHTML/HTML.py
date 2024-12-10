@@ -408,10 +408,14 @@ class HTML:
             attrs = {k:cls.sanitize_value(v) for k,v in attrs.items()}
         return attrs
     @classmethod
-    def extract_styles(cls, attrs):
+    def extract_styles(cls, attrs, style_props=None, ignored_styles=None):
+        if style_props is None:
+            style_props = CSS.known_properties
+        if ignored_styles is not None:
+            style_props = style_props - set(ignored_styles)
         styles = {}
         for k,v in tuple(attrs.items()):
-            if k in CSS.known_properties:
+            if k in style_props:
                 styles[k] = v
                 del attrs[k]
         return styles, attrs
@@ -420,6 +424,8 @@ class HTML:
         Convenience API for ElementTree
         """
 
+        ignored_styles = None
+        style_props = None
         def __init__(self, tag, *elems, on_update=None, style=None, activator=None, **attrs):
             self.tag = tag
             self._elems = [
@@ -432,7 +438,7 @@ class HTML:
             ]
             self._elem_view = None
             attrs = HTML.manage_attrs(attrs)
-            extra_styles, attrs = HTML.extract_styles(attrs)
+            extra_styles, attrs = HTML.extract_styles(attrs, style_props=self.style_props, ignored_styles=self.ignored_styles)
             if style is not None:
                 style = HTML.manage_styles(style).props
                 for k,v in extra_styles.items():

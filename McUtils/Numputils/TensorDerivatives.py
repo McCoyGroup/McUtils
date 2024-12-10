@@ -30,7 +30,8 @@ __all__ = [
     "vec_cross_deriv",
     "vec_anglecos_deriv",
     "vec_anglesin_deriv",
-    "vec_dihed_deriv"
+    "vec_dihed_deriv",
+    "vec_plane_angle_deriv"
 ]
 
 def permutation_sign(perm, check=True):
@@ -826,17 +827,20 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, planar=None, p
     axb_expansion = vec_cross_deriv(A_expansion, B_expansion, max_order)
     bxc_expansion = vec_cross_deriv(B_expansion, C_expansion, max_order)
 
-    # if planar is None:
-    #     planar = np.linalg.norm(np.cross(
-    #         axb_expansion[0],
-    #         bxc_expansion[0]
-    #     )) <= planar_threshold
-    #
-    # if planar:
-    #     return vec_anglesin_deriv(axb_expansion, bxc_expansion, order, unitized=False, return_unit_vectors=False)
-    # else:
     return vec_angle_deriv(axb_expansion, bxc_expansion, order, unitized=False)
 
+def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=1e-14):
+    # quick check
+
+    if is_numeric(order):
+        max_order = order
+    else:
+        max_order = max(order)
+
+    axb_expansion = vec_cross_deriv(A_expansion, B_expansion, max_order)
+    cxd_expansion = vec_cross_deriv(C_expansion, D_expansion, max_order)
+
+    return vec_angle_deriv(axb_expansion, cxd_expansion, order, unitized=False)
 
 
 def nca_partition_terms(partition):
