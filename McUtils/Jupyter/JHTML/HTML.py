@@ -669,13 +669,13 @@ class HTML:
 
         atomic_types = (int, bool, float)
         @classmethod
-        def construct_etree_element(cls, elem, root, parent=None):
+        def construct_etree_element(cls, elem, root, parent=None, attr_converter=None):
             if isinstance(elem, cls.atomic_types):
                 elem = str(elem)
             if hasattr(elem, 'to_tree'):
-                elem.to_tree(root=root, parent=parent)
+                elem.to_tree(root=root, parent=parent, attr_converter=attr_converter)
             elif hasattr(elem, 'modify'):
-                elem.modify().to_tree(root=root, parent=parent)
+                elem.modify().to_tree(root=root, parent=parent, attr_converter=attr_converter)
             elif isinstance(elem, ElementTree.Element):
                 root.append(elem)
             elif isinstance(elem, (str, int, float, CSS)):
@@ -694,8 +694,10 @@ class HTML:
                         elem))
             else:
                 raise ValueError("don't know what to do with {}".format(elem))
+
+        attr_converter = None
         @classmethod
-        def construct_etree_attrs(cls, attrs):
+        def construct_etree_attrs(cls, attrs, attr_converter=None):
             _copied = False
             if 'style' in attrs:
                 styles = attrs['style']
@@ -719,30 +721,39 @@ class HTML:
                         attrs['class'] = " ".join(str(c) for c in attrs['class'])
                     if len(attrs['class']) == 0:
                         del attrs['class']
+            if attr_converter is None:
+                attr_converter = cls.attr_converter
+            if attr_converter is not None:
+                attrs = attr_converter(attrs)
             return attrs
         @property
         def tree(self):
             return self.to_tree()
-        def to_tree(self, root=None, parent=None):
+        def to_tree(self, root=None, parent=None, attr_converter=None):
             if parent is not None:
                 self._parents.add(parent)
             if self._tree_cache is None:
                 if root is None:
                     root = ElementTree.Element('root')
-                attrs = self.construct_etree_attrs(self.attrs)
+                attrs = self.construct_etree_attrs(self.attrs, attr_converter=attr_converter)
                 my_el = ElementTree.SubElement(root, self.tag, attrs)
                 if all(isinstance(e, str) for e in self.elems):
                     my_el.text = "\n".join(self.elems)
                 else:
                     for elem in self.elems:
-                        self.construct_etree_element(elem, my_el, parent=self)
+                        self.construct_etree_element(elem, my_el, parent=self, attr_converter=attr_converter)
                 self._tree_cache = my_el
             elif root is not None:
                 if self._tree_cache not in root:
                     root.append(self._tree_cache)
             return self._tree_cache
-        def tostring(self):
-            return "\n".join(s.decode() for s in ElementTree.tostringlist(self.to_tree(), method='html'))
+        def tostring(self, attr_converter=None):
+            return "\n".join(
+                s.decode() for s in ElementTree.tostringlist(
+                    self.to_tree(attr_converter=attr_converter),
+                    method='html'
+                )
+            )
 
         def sanitize_key(self, key):
             key = key.replace("-", "_")

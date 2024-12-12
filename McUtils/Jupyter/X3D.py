@@ -1,13 +1,35 @@
 from .JHTML import HTML
 
 __all__ = [
-    "X3D"
+    "X3DHTML"
 ]
 
-class X3D:
+__reload_hooks__ = [".JHTML"]
+class X3DHTML:
     class X3DElement(HTML.TagElement):
         ignored_styles = {"height", "width"}
         style_props = None
+
+        @classmethod
+        def convert_attrs(cls, attrs:dict):
+            copied = False
+            for k,v in attrs.items():
+                if isinstance(v, str):
+                    continue
+                if not copied:
+                    copied = True
+                    attrs = attrs.copy()
+                if v is None:
+                    del attrs[k]
+                else:
+                    if hasattr(v, "__getitem__") or hasattr(v, "__iter__"):
+                        v = " ".join(str(x) for x in v)
+                    else:
+                        v = str(v)
+                    attrs[k] = v
+            return attrs
+
+        attr_converter = convert_attrs
         # class_map = {"cls":"class_", "id":"id_", "style":"style_"}
         # def to_x3d(self):
         #     tag = x3d.method(self.tag)
@@ -129,7 +151,6 @@ class X3D:
     class MetadataString(X3DElement): tag = "MetadataString"
     class MotorJoint(X3DElement): tag = "MotorJoint"
     class MovieTexture(X3DElement): tag = "MovieTexture"
-    class MovieTexture(X3DElement): tag = "MovieTexture"
     class MultiTexture(X3DElement): tag = "MultiTexture"
     class MultiTextureCoordinate(X3DElement): tag = "MultiTextureCoordinate"
     class NavigationInfo(X3DElement): tag = "NavigationInfo"
@@ -174,6 +195,7 @@ class X3D:
     class RenderedTexture(X3DElement): tag = "RenderedTexture"
     class RigidBody(X3DElement): tag = "RigidBody"
     class RigidBodyCollection(X3DElement): tag = "RigidBodyCollection"
+    class Route(X3DElement): tag = "Route"
     class ScalarChaser(X3DElement): tag = "ScalarChaser"
     class ScalarDamper(X3DElement): tag = "ScalarDamper"
     class ScalarInterpolator(X3DElement): tag = "ScalarInterpolator"
@@ -209,6 +231,7 @@ class X3D:
     class TextureTransform3D(X3DElement): tag = "TextureTransform3D"
     class TextureTransformMatrix3D(X3DElement): tag = "TextureTransformMatrix3D"
     class TimeSensor(X3DElement): tag = "TimeSensor"
+    class IntegerSequencer(X3DElement): tag = "IntegerSequencer"
     class ToneMappedVolumeStyle(X3DElement): tag = "ToneMappedVolumeStyle"
     class Torus(X3DElement): tag = "Torus"
     class TouchSensor(X3DElement): tag = "TouchSensor"

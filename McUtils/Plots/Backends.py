@@ -10,10 +10,11 @@ __all__ = [
 ]
 
 import enum, abc, contextlib, numpy as np
-from . import VTKInterface as vtk
 from .. import Numputils as nput
+
+from . import VTKInterface as vtk
 from ..ExternalPrograms import VPythonInterface as vpython
-from ..Jupyter import JHTML, X3D
+from . import X3DInterface as x3d
 
 DPI_SCALING = 72
 
@@ -1926,27 +1927,6 @@ class X3DAxes(GraphicsAxes3D):
         self.background = background
         self.opts = opts
 
-    style_map = {
-        "color":"diffuseColor"
-    }
-    @classmethod
-    def prep_styles(cls, styles):
-        return {
-            cls.style_map.get(k, k):str(o) for k,o in styles.items()
-            if o is not None
-        }
-
-    @classmethod
-    def prep_shape(cls, shape, styles):
-        styles = cls.prep_styles(styles)
-        if len(styles) > 0:
-            return X3D.Shape(
-                X3D.Appearance(X3D.Material(**styles)),
-                shape
-            )
-        else:
-            return shape
-
     @classmethod
     def canonicalize_opts(cls, opts):
         return opts
@@ -2053,115 +2033,32 @@ class X3DAxes(GraphicsAxes3D):
         raise NotImplementedError(...)
 
     def draw_line(self, points, **styles):
-        points = np.asanyarray(points)
-        if points.ndim == 2:
-            points = points[np.newaxis]
-
-        line_set = self.prep_shape(
-            X3D.LineSet(coord=" ".join(str(x) for x in np.asanyarray(points).flatten())),
-            styles
-        ),
+        line_set = x3d.X3DLine(points, **styles)
         self.children.append(line_set)
 
         return line_set
 
     def draw_disk(self, points, **styles):
+        disk_set = x3d.X3DDisk(points, **styles)
+        self.children.append(disk_set)
+
+        return disk_set
+
+    def draw_arrow(self, points, rads=.1, cone_radius=.15, **styles):
         points = np.asanyarray(points)
-        if points.ndim == 2:
-            points = points[np.newaxis]
-        disks = [
-            X3D.Transform(
-                self.prep_shape(X3D.Disk2D(), styles),
-                translation=f"{center[0]} {center[1]}"
-            )
-            for center in points
-        ]
-        self.children.extend(disks)
-
-        return disks
-
-    def draw_arrow(self, points, rads=.1, cone_padding=.2, **styles):
-        points = np.asanyarray(points)
-        if points.ndim == 2:
-            points = points[np.newaxis]
-        starts = points[:, 0]
-        ends = points[:, 1]
-
-        rads = np.asanyarray(rads)
-        if rads.ndim == 0:
-            rads = rads[np.newaxis]
-        rads = np.broadcast_to(rads, ends.shape[0])
-
-        vecs = ends - starts
-        angs, crosses, norms = nput.vec_angles([0, 0, 1], vecs, return_crosses=True, return_norms=True)
-        arrows = [
-            X3D.Group(
-                X3D.Transform(
-                    self.prep_shape(
-                        X3D.Cone(radius=str(rad+cone_padding), height=str(rad+cone_padding)),
-                        styles
-                    ),
-                    translation=f"{end[0]} {end[1]} {end[2]}",
-                    rotation=f"{cross[0]} {cross[1]} {cross[2]} {ang}"
-                ),
-                X3D.Transform(
-                    self.prep_shape(
-                        X3D.Cylinder(radius=str(rad), height=str(n)),
-                        styles
-                    ),
-                    translation=f"{start[0]} {start[1]} {start[2]}",
-                    rotation=f"{cross[0]} {cross[1]} {cross[2]} {ang}"
-                )
-            )
-            for start, end, cross, rad, n, ang in zip(
-                starts, ends, crosses, rads, norms[1], angs
-            )
-        ]
-
-        self.children.extend(arrows)
+        arrows = x3d.X3DArrow(points[..., 0, :], points[..., 1, :], radius=rads, cone_radius=cone_radius, **styles)
+        self.children.append(arrows)
         return arrows
 
     def draw_text(self, points, vals, **styles):
-        points = np.asanyarray(points)
-        if points.ndim == 2:
-            points = points[np.newaxis]
-        if isinstance(vals, str):
-            vals = [vals]
-
-        text = [
-            X3D.Transform(
-                self.prep_shape(
-                    X3D.Text(string=v),
-                    styles
-                ),
-                translation=f"{center[0]} {center[1]} {center[2]}"
-            )
-            for center, v in zip(points, vals)
-        ]
-        self.children.extend(text)
-
+        text = x3d.X3DText(points, text=vals, **styles)
+        self.children.append(text)
         return text
 
     def draw_rect(self, points, **styles):
         points = np.asanyarray(points)
-        if points.ndim == 2:
-            points = points[np.newaxis]
-
-        anchors = points[:, 0]
-        widths = points[:, 1, 0] - points[:, 0, 0]
-        heights = points[:, 1, 1] - points[:, 0, 1]
-
-        rects = [
-            X3D.Transform(
-                self.prep_shape(
-                    X3D.Rectangle2D(size="{w},{h}"),
-                    styles
-                ),
-                translation=f"{a[0]} {a[1]}"
-            )
-            for a, w, h in zip(anchors, widths, heights)
-        ]
-        self.children.extend(rects)
+        rects = x3d.X3DRectangle2D(points[..., 0, :], points[..., 1, :], **styles)
+        self.children.append(rects)
 
         return rects
 
@@ -2169,53 +2066,16 @@ class X3DAxes(GraphicsAxes3D):
         raise NotImplementedError("2D")
 
     def draw_sphere(self, centers, rads, **styles):
-        centers = np.asanyarray(centers)
-        if centers.ndim == 1:
-            centers = centers[np.newaxis]
-        rads = np.asanyarray(rads)
-        if rads.ndim == 0:
-            rads = rads[np.newaxis]
-        rads = np.broadcast_to(rads, (centers.shape[0],))
-        spheres = [
-            X3D.Transform(
-                self.prep_shape(
-                    X3D.Sphere(radius=str(rad)), styles
-                ),
-                translation=f"{center[0]} {center[1]} {center[2]}"
-            )
-            for center,rad in zip(centers, rads)
-        ]
-        self.children.extend(spheres)
+        spheres = x3d.X3DSphere(centers, radius=rads, **styles)
+        self.children.append(spheres)
 
         return spheres
 
     def draw_cylinder(self, starts, ends, rads, **styles):
-        starts = np.asanyarray(starts)
-        if starts.ndim == 1:
-            starts = starts[np.newaxis]
-        ends = np.asanyarray(ends)
-        if ends.ndim == 1:
-            ends = ends[np.newaxis]
-        rads = np.asanyarray(rads)
-        if rads.ndim == 0:
-            rads = rads[np.newaxis]
-        rads = np.broadcast_to(rads, (ends.shape[0],))
-        vecs = ends - starts
-        angs, crosses, norms = nput.vec_angles(vecs, [0, 1, 0], return_crosses=True, return_norms=True)
-        mids = (starts + ends) / 2
-        cylinders = [
-            X3D.Transform(
-                self.prep_shape(X3D.Cylinder(radius=str(rad), height=str(n)), styles),
-                translation=f"{start[0]} {start[1]} {start[2]}",
-                rotation=f"{cross[0]} {cross[1]} {cross[2]} {ang}"
-            )
-            for start, cross, rad, n, ang in zip(
-                mids, crosses, rads, norms[0], -angs
-            )
-        ]
+        cyls = x3d.X3DCylinder(starts, ends, radius=rads, **styles)
+        self.children.append(cyls)
 
-        self.children.extend(cylinders)
-        return cylinders
+        return cyls
 
     def draw_primitive(self, name, *args, **kwargs):
         ...
@@ -2227,11 +2087,7 @@ class X3DAxes(GraphicsAxes3D):
             background=self.background,
             title=self.title
         )
-        opts = {
-            k:str(o) for k,o in opts.items()
-            if o is not None
-        }
-        return X3D.Scene(
+        return x3d.X3DScene(
             self.children,
             **opts
         )
@@ -2290,19 +2146,9 @@ class X3DFigure(GraphicsFigure):
             profile=self.profile,
             version=self.version
         )
-        opts = {
-            k:str(o) for k,o in opts.items()
-            if o is not None
-        }
-        return JHTML.Figure(
-            JHTML.Script(src='http://www.x3dom.org/download/x3dom.js'),
-            JHTML.Link(rel='stylesheet', href='http://www.x3dom.org/download/x3dom.css'),
-            #     "<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
-            # <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>"
-            X3D.X3D(
-                *[a.to_x3d() for a in self.axes],
-                **opts
-            )
+        return x3d.X3D(
+            *[a.to_x3d() for a in self.axes],
+            **opts
         )
 
 class X3DBackend(GraphicsBackend):
@@ -2337,7 +2183,7 @@ class X3DBackend(GraphicsBackend):
             from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
 
             display = JupyterAPIs.get_display_api()
-            html = graphics.to_x3d().tostring()
+            html = graphics.to_x3d().to_widget().tostring()
             return display.display(display.HTML(html))
 
     def get_interactive_status(self) -> 'bool':
