@@ -191,9 +191,6 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def draw_text(self, points, vals, **styles):
         ...
-    @abc.abstractmethod
-    def draw_sphere(self, points, rads, **styles):
-        ...
 
 class GraphicsAxes3D(GraphicsAxes):
     def __init__(self):
@@ -222,6 +219,14 @@ class GraphicsAxes3D(GraphicsAxes):
         ...
     @abc.abstractmethod
     def set_ztick_style(self, **opts):
+        ...
+
+    @abc.abstractmethod
+    def draw_sphere(self, points, rads, **styles):
+        ...
+
+    @abc.abstractmethod
+    def draw_cylinder(self, start, end, rad, circle_points=48, **opts):
         ...
 
 class GraphicsFigure(metaclass=abc.ABCMeta):
@@ -281,6 +286,18 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def savefig(self, file, **opts):
         ...
+
+    @abc.abstractmethod
+    def animate_frames(self, frames, **animation_opts):
+        ...
+
+    def to_html(self):
+        ...
+    def _repr_html_(self):
+        return self.to_html()
+    def tight_layout(self):
+        ...
+
 
 class GraphicsBackend(metaclass=abc.ABCMeta):
     Figure = GraphicsFigure
@@ -369,6 +386,8 @@ class MPLManager:
     _mpl = None
     _colors = None
     _jlab = None
+    _widg = None
+    _anim = None
 
     @classmethod
     def plt_api(cls):
@@ -401,6 +420,18 @@ class MPLManager:
             import matplotlib.collections as coll
             cls._coll = coll
         return cls._coll
+    @classmethod
+    def widgets_api(cls):
+        if cls._widg is None:
+            import matplotlib.widgets as widg
+            cls._widg = widg
+        return cls._widg
+    @classmethod
+    def animations_api(cls):
+        if cls._anim is None:
+            import matplotlib.animation as anim
+            cls._anim = anim
+        return cls._anim
     @classmethod
     def draw_if_interactive(self, *args, **kwargs):
         pass
@@ -871,6 +902,11 @@ class MPLAxes(GraphicsAxes):
 
         return text
 
+class MPLAxes3D(MPLAxes):
+    def __init__(self, mpl_axes_object, **opts):
+        super().__init__(mpl_axes_object, **opts)
+        self.zaxis = self.obj.zaxis
+
     def draw_sphere(self, center, radius, sphere_points=48, **opts):
         surface = self.get_plotter('plot_surface')
 
@@ -992,6 +1028,34 @@ class MPLFigure(GraphicsFigure):
     def savefig(self, file, **opts):
         return self.obj.savefig(file, **opts)
 
+    def animate_frames(self, frames, export_html=True, **animation_opts):
+        fig = self.obj
+        frames = [
+            [f] if hasattr(f, 'axes') else f
+            for f in frames
+        ]
+        frames = [
+            [
+                f.graphics if hasattr(f, 'graphics') else f
+                for f in frame_list
+            ]
+            for frame_list in frames
+        ]
+        animation = MPLManager.animations_api().ArtistAnimation(
+            fig,
+            frames,
+            **animation_opts
+        )
+        if export_html:
+            from ..Jupyter import JHTML
+            display = JHTML.APIs.get_display_api()
+            animation = display.HTML(animation.to_jshtml())
+        return animation
+    def to_html(self):
+        return self.obj._repr_html_()
+    def tight_layout(self):
+        self.obj.tight_layout()
+
 class MPLBackend(GraphicsBackend):
     Figure = MPLFigure
     @property
@@ -1054,14 +1118,6 @@ class MPLBackend(GraphicsBackend):
         theme_names = sty.available
         return theme_names
 
-class MPLAxes3D(GraphicsAxes3D):
-    def __init__(self, mpl_axes_object, **opts):
-        self.obj = mpl_axes_object
-        self.opts = self.canonicalize_opts(opts)
-        super().__init__()
-        self.xaxis = self.obj.xaxis
-        self.yaxis = self.obj.yaxis
-        self.zaxis = self.obj.zaxis
 class MPLFigure3D(MPLFigure):
     Axes = MPLAxes3D
     def create_axes(self, rows, cols, spans, projection='3d', **kw):
@@ -1233,6 +1289,10 @@ class VTKAxes(GraphicsRegionAxes):
 
     @abc.abstractmethod
     def draw_sphere(self, points, rads, **styles):
+        ...
+
+    @abc.abstractmethod
+    def animate_frames(self, frames, **animation_opts):
         ...
 
 class VTKFigure(GraphicsFigure):
@@ -1646,6 +1706,9 @@ class VPythonAxes(GraphicsAxes):
     def draw_sphere(self, points, rads, color=None, **styles):
         raise NotImplementedError("too annoying")
         # return vpython.sphere(points, rads, color=self.vpython_color(color), canvas=self.canvas, **styles)
+
+    def animate_frames(self, frames, **animation_opts):
+        raise NotImplementedError("not sure how to animate vpython")
 
 class VPythonFigure(GraphicsFigure):
     Axes = VPythonAxes
@@ -2077,10 +2140,6 @@ class X3DAxes(GraphicsAxes3D):
 
         return cyls
 
-    def draw_primitive(self, name, *args, **kwargs):
-        ...
-        # return self.canvas.primitive(name, *args, **kwargs)
-
     def to_x3d(self):
         opts = dict(
             self.opts,
@@ -2150,6 +2209,25 @@ class X3DFigure(GraphicsFigure):
             *[a.to_x3d() for a in self.axes],
             **opts
         )
+
+    def animate_frames(self, frames: list['X3DAxes'], background=None, title=None, **animation_opts):
+        animator = x3d.X3DScene(
+            x3d.X3DListAnimator(
+                [
+                    x3d.X3DGroup(f.children if hasattr(f, 'children') else f)
+                    for f in frames
+                ],
+                **animation_opts
+            ),
+            background=background,
+            title=title
+        )
+        opts = dict(
+            self.opts,
+            profile=self.profile,
+            version=self.version
+        )
+        return x3d.X3D(animator.to_x3d(), **opts).to_widget()
 
 class X3DBackend(GraphicsBackend):
     Figure = X3DFigure

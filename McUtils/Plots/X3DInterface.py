@@ -282,7 +282,7 @@ class X3DTorus(X3DGeometryGroup):
         ]
 
 class X3DListAnimator(X3DGroup):
-    def __init__(self, *frames, id=None, animation_duration=5, running=True, slider=False, **opts):
+    def __init__(self, *frames, id=None, animation_duration=2, running=True, slider=False, **opts):
         self.uuid = str(uuid.uuid4())
         if id is None:
             id = f"animation-{self.uuid}"
@@ -319,3 +319,4 @@ class X3DListAnimator(X3DGroup):
             ])
 
         super().__init__(elements, **opts)
+

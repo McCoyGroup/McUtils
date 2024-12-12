@@ -6,6 +6,7 @@ from .Graphics import GraphicsBase, Graphics
 __all__ = [
     "EventHandler",
     "Animator"
+    # "FrameAnimator"
 ]
 
 class EventHandler:
@@ -374,3 +375,7 @@ class Animator:
         else:
             buffer = self.to_html5_video()
         return HTML(buffer)
+
+# class FrameAnimator:
+#     def __init__(self, figure, *frame, **opts):
+#         figure.animate_frames

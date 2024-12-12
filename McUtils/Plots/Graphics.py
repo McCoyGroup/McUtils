@@ -443,6 +443,9 @@ class GraphicsBase(metaclass=ABCMeta):
                 self.animator.stop()
             self.animator = Animator(self, *args, **opts)
 
+    def animate_frames(self, frames, **opts):
+        return self.figure.animate_frames(frames, **opts)
+
     known_keys = layout_keys
     def _check_opts(self, opts):
         diff = opts.keys() - self.known_keys
@@ -835,8 +838,6 @@ class GraphicsBase(metaclass=ABCMeta):
             ax = self.figure.add_axes([lx, by, rx-lx, ty-by])
         return graphics_class(figure=self, axes=ax, **opts)
 
-
-
 ########################################################################################################################
 #
 #                                               Graphics
@@ -1194,7 +1195,7 @@ class Graphics(GraphicsBase):
 #
 class Graphics3D(Graphics):
 
-    opt_keys = GraphicsBase.opt_keys | {'view_settings'}
+    opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios'}
     known_keys = Graphics.opt_keys | {'animate'}
 
     # layout_keys = axes_keys | figure_keys | GraphicsBase.layout_keys
@@ -1216,6 +1217,7 @@ class Graphics3D(Graphics):
                  image_size=None,
                  background=None,
                  view_settings=None,
+                 box_ratios=None,
                  backend='matplotlib3D',
                  **kwargs
                  ):
@@ -1239,12 +1241,14 @@ class Graphics3D(Graphics):
             view_settings=view_settings,
             backend=backend,
             background=background,
+            box_ratios=box_ratios,
             prop_manager=GraphicsPropertyManager3D,
             **kwargs
         )
 
     def set_options(self,
                     view_settings=None,
+                    box_ratios=None,
                     **parent_opts
                     ):
 
@@ -1252,6 +1256,7 @@ class Graphics3D(Graphics):
 
         opts = (
             ('view_settings', view_settings),
+            ('box_ratios', box_ratios),
         )
         for oname, oval in opts:
             oval = self._get_def_opt(oname, oval, {})
