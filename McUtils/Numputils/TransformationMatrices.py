@@ -7,7 +7,8 @@ __all__ = [
     "skew_symmetric_matrix",
     "rotation_matrix_skew",
     "translation_matrix",
-    "affine_matrix"
+    "affine_matrix",
+    "extract_rotation_angle_axis"
 ]
 
 #######################################################################################################################
@@ -108,24 +109,48 @@ def rotation_matrix_ER_vec(axes, thetas):
     Vectorized version of basic ER
     """
 
-    axes = np.asarray(axes)
-    thetas = np.asarray(thetas)
-    if len(axes.shape) == 1:
-        axes = axes/np.linalg.norm(axes)
-        axes = np.broadcast_to(axes, (len(thetas), 3))
+    axes = np.asanyarray(axes)
+    thetas = np.asanyarray(thetas)
+    # if len(axes.shape) == 1:
+    #     axes = axes/np.linalg.norm(axes)
+    #     axes = np.broadcast_to(axes, (len(thetas), 3))
+    # else:
+    #     axes = vec_normalize(axes)
+
+    ax_shape = axes.shape[:-1]
+    t_shape = thetas.shape
+    axes = np.reshape(axes, (-1, 3))
+    thetas = thetas.reshape(-1)
+    if thetas.ndim == 0:
+        base_shape = ax_shape
+    elif axes.ndim == 1:
+        base_shape = t_shape
+    elif thetas.ndim != axes.ndim - 1:
+        raise ValueError(f"can't broadcast axes and angles with shapes {ax_shape} and {t_shape}")
     else:
-        axes = vec_normalize(axes)
+        base_shape = tuple(a if t == 1 else t for a,t in zip(ax_shape, t_shape))
 
     a = np.cos(thetas/2.0)
-    b, c, d = ( -axes * np.reshape(np.sin(thetas / 2.0), (len(thetas), 1)) ).T
-    # raise Exception(axes)
-    aa, bb, cc, dd = a * a, b * b, c * c, d * d
-    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([
-        [aa + bb - cc - dd, 2 * (bc + ad),     2 * (bd - ac)    ],
-        [2 * (bc - ad),     aa + cc - bb - dd, 2 * (cd + ab)    ],
-        [2 * (bd + ac),    2 * (cd - ab),     aa + dd - bb - cc]
-    ]).T
+    b, c, d = np.moveaxis(-axes * np.reshape(np.sin(thetas / 2.0), (len(thetas), 1)), -1, 0)
+    v = np.array([a, b, c, d])
+    # triu_indices
+    rows, cols = (
+        np.array([0, 0, 0, 0, 1, 1, 1, 2, 2, 3]),
+        np.array([0, 1, 2, 3, 1, 2, 3, 2, 3, 3])
+    )
+    aa, ab, ac, ad, bb, bc, bd, cc, cd, dd = v[rows] * v[cols]
+    ## Uses half-angle formula to get compact form for Euler-Rodrigues
+    # a^2 * I + [[ 0,    2ad, -2ac]   + [[b^2 - c^2 - d^2,               2bc,              2bd]
+    #            [-2ad,    0,  2ab],     [             2bc, -b^2 + c^2 - d^2,              2cd]
+    #            [ 2ac, -2ab,    0]]     [             2bd,              2cd, -b^2 - c^2 + d^2]]
+    R = np.array([
+        [aa + bb - cc - dd,      2 * (bc + ad),         2 * (bd - ac)],
+        [    2 * (bc - ad),  aa - bb + cc - dd,         2 * (cd + ab)],
+        [    2 * (bd + ac),      2 * (cd - ab),     aa - bb - cc + dd]
+    ])
+    R = np.moveaxis(R, -1, 0)
+
+    return R.reshape(base_shape + (3, 3))
 
 def rotation_matrix_align_vectors(vec1, vec2):
     angles, normals = vec_angles(vec1, vec2)
@@ -186,6 +211,13 @@ def skew_symmetric_matrix(upper_tri):
     m[rows, cols] =  upper_tri
     m[cols, rows] = -upper_tri
     return m
+
+def extract_rotation_angle_axis(rot_mat):
+    ang = np.arccos((np.trace(rot_mat) - 1)/2)
+    skew = (rot_mat - rot_mat.T)/2
+    ax = np.array([skew[2, 1], skew[0, 2], skew[1, 0]])
+    n = np.linalg.norm(ax)
+    return ang, ax/n
 
 def youla_skew_decomp(A):
     n = len(A)

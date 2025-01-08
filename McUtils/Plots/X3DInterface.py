@@ -30,8 +30,8 @@ class X3DObject(metaclass=abc.ABCMeta):
 
 class X3D(X3DObject):
     defaults = dict(
-        width="500px",
-        height="500px"
+        width=500,
+        height=500
     )
     def __init__(self, *children, **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
@@ -52,9 +52,15 @@ class X3D(X3DObject):
     def _ipython_repr_(self):
         return self.to_widget()
     def to_x3d(self):
+        base_opts = dict(self.defaults, **self.opts)
+        for k in ['width', 'height']:
+            if k in base_opts:
+                v = base_opts[k]
+                if nput.is_numeric(v):
+                    base_opts[k] = f'{v}px'
         return X3DHTML.X3D(
                     *[a.to_x3d() if hasattr(a, 'to_x3d') else a for a in self.children],
-                    **dict(self.defaults, **self.opts)
+                    **base_opts
                 )
 
 class X3DMaterial(X3DObject):
@@ -71,10 +77,14 @@ class X3DMaterial(X3DObject):
         self.attrs = attrs
 
     conversion_map = {
+        "brightness": "ambientIntensity",
+        "glow":"emissiveColor",
         "color": "diffuseColor",
-        "glow": "emissiveColor",
         "specularity": "specularColor"
     }
+    @classmethod
+    def prop_keys(cls):
+        return (cls.__props__ | cls.conversion_map.keys())
     def prep_attrs(self, attrs:dict):
         attrs = {
             self.conversion_map.get(k, k):v
@@ -96,7 +106,7 @@ class X3DPrimitive(X3DObject):
         self.children = children
         self.opts = opts
     def split_opts(self, opts:dict):
-        material_keys = opts.keys() & (X3DMaterial.__props__ | X3DMaterial.conversion_map.keys())
+        material_keys = opts.keys() & X3DMaterial.prop_keys()
         rem_keys = opts.keys() - material_keys
         return {k:opts[k] for k in rem_keys}, {k:opts[k] for k in material_keys}
     def get_appearance(self, material_opts):
@@ -125,11 +135,15 @@ class X3DPrimitive(X3DObject):
 
 class X3DScene(X3DPrimitive):
     wrapper_class = X3DHTML.Scene
-
-    def __init__(self, *children, view_all=True, **opts):
+    default_viewpoint = {'viewAll':True}
+    def __init__(self, *children, viewpoint=None, **opts):
+        if viewpoint is None:
+            viewpoint = self.default_viewpoint
+        elif viewpoint is False:
+            viewpoint = {}
         super().__init__(*children, **opts)
-        if view_all:
-            self.children = [X3DHTML.Viewpoint(viewAll=True)] + list(self.children)
+        if len(viewpoint) > 0:
+            self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
 
 class X3DGroup(X3DPrimitive):
     wrapper_class = X3DHTML.Group

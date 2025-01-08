@@ -7,7 +7,7 @@ __all__ = [
 __reload_hooks__ = [".JHTML"]
 class X3DHTML:
     class X3DElement(HTML.TagElement):
-        ignored_styles = {"height", "width"}
+        ignored_styles = {"height", "width", "position"}
         style_props = None
 
         @classmethod

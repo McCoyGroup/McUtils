@@ -22,6 +22,7 @@ class GenericInternalCoordinateSystem(InternalCoordinateSystem):
                  converter_options=None,
                  dimension=(None,),
                  coordinate_shape=(None,),
+                 angle_ordering='ijk',
                  **opts):
         """
         :param converter_options: options to be passed through to a `CoordinateSystemConverter`
@@ -35,6 +36,7 @@ class GenericInternalCoordinateSystem(InternalCoordinateSystem):
         """
         if converter_options is None:
             converter_options = opts
+        converter_options['angle_ordering'] = converter_options.get('angle_ordering', angle_ordering)
         super().__init__(dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
 
 GenericInternalCoordinates = GenericInternalCoordinateSystem()
@@ -53,6 +55,7 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
     def convert_many(self, coords, *, specs, order=0, masses=None, remove_translation_rotation=True,
                      reference_coordinates=None,
                      return_derivs=None,
+                     derivs=None,
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?

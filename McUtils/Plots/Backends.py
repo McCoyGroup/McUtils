@@ -10,6 +10,8 @@ __all__ = [
 ]
 
 import enum, abc, contextlib, numpy as np
+import uuid
+
 from .. import Numputils as nput
 
 from . import VTKInterface as vtk
@@ -219,6 +221,13 @@ class GraphicsAxes3D(GraphicsAxes):
         ...
     @abc.abstractmethod
     def set_ztick_style(self, **opts):
+        ...
+
+    @abc.abstractmethod
+    def get_view_settings(self):
+        ...
+    @abc.abstractmethod
+    def set_view_settings(self, **ops):
         ...
 
     @abc.abstractmethod
@@ -906,6 +915,23 @@ class MPLAxes3D(MPLAxes):
     def __init__(self, mpl_axes_object, **opts):
         super().__init__(mpl_axes_object, **opts)
         self.zaxis = self.obj.zaxis
+
+    def get_view_settings(self):
+        return {'elev': self.obj.elev, 'azim':self.obj.azim,
+                'roll':self.obj.roll, 'vertical_axis':self.obj.vertical_axis}
+    def set_view_settings(self, **values):
+        # if isinstance(value, dict):
+        #     if 'elev' not in value:
+        #         value['elev'] = self.obj.elev
+        #     if 'azim' not in value:
+        #         value['azim'] = self.obj.azim
+        #     if 'roll' not in value:
+        #         value['roll'] = self.obj.arollzim
+        #     if 'vertical_axis' not in value:
+        #         value['vertical_axis'] = self.obj.vertical_axis
+        # else:
+        #     value = dict(zip(['elev', 'azim', 'roll', 'vertical_axis'], value))
+        self.obj.view_init(**values)
 
     def draw_sphere(self, center, radius, sphere_points=48, **opts):
         surface = self.get_plotter('plot_surface')
@@ -1983,9 +2009,9 @@ class VPythonBackend3D(GraphicsBackend):
         return []
 
 class X3DAxes(GraphicsAxes3D):
-    def __init__(self, title=None, background=None, **opts):
+    def __init__(self, *children, title=None, background=None, **opts):
         super().__init__()
-        self.children = []
+        self.children = list(children)
         self.title = title
         self.background = background
         self.opts = opts
@@ -2095,6 +2121,18 @@ class X3DAxes(GraphicsAxes3D):
     def get_padding(self):
         raise NotImplementedError(...)
 
+    def get_view_settings(self):
+        return self.opts.get('viewpoint', {})
+    def set_view_settings(self, **values):
+        new_opts = {
+            k:v for k,v in dict(self.opts.get('viewpoint', {}), **values).items()
+            if v is not None
+        }
+        if len(new_opts) == 0 and 'viewpoint' in self.opts:
+            del self.opts['viewpoint']
+        else:
+            self.opts['viewpoint'] = new_opts
+
     def draw_line(self, points, **styles):
         line_set = x3d.X3DLine(points, **styles)
         self.children.append(line_set)
@@ -2154,12 +2192,20 @@ class X3DAxes(GraphicsAxes3D):
 class X3DFigure(GraphicsFigure):
     Axes = X3DAxes
 
-    def __init__(self, width=640, height=500, background='white', profile='Immersive', version='3.3', **opts):
+    def __init__(self, width=640, height=500,
+                 background='white', figsize=None, profile='Immersive', version='3.3',
+                 id=None,
+                 **opts):
+        if id is None:
+            id = f"x3d-{uuid.uuid4()}"
+        self.id = id
         self.profile = profile
         self.version = version
         self.opts = dict(opts)
         self.width = width
         self.height = height
+        if figsize is not None:
+            self.set_size_inches(*figsize)
         self.background = background
         self.shown = False
         super().__init__()
@@ -2188,9 +2234,9 @@ class X3DFigure(GraphicsFigure):
         return cls(**kw)
 
     def get_size_inches(self):
-        return [self.width//72, self.height//72]
+        return [self.width/DPI_SCALING, self.height/DPI_SCALING]
     def set_size_inches(self, w, h):
-        self.width, self.height = w*72, h*72
+        self.width, self.height = w*DPI_SCALING, h*DPI_SCALING
     def set_extents(self, extents):
         ...
     def get_facecolor(self):
@@ -2203,15 +2249,18 @@ class X3DFigure(GraphicsFigure):
         opts = dict(
             self.opts,
             profile=self.profile,
-            version=self.version
+            version=self.version,
+            width=self.width,
+            height=self.height,
+            id=self.id
         )
         return x3d.X3D(
             *[a.to_x3d() for a in self.axes],
             **opts
         )
 
-    def animate_frames(self, frames: list['X3DAxes'], background=None, title=None, **animation_opts):
-        animator = x3d.X3DScene(
+    def animate_frames(self, frames: list['X3DAxes'], **animation_opts):
+        animator = X3DAxes(
             x3d.X3DListAnimator(
                 [
                     x3d.X3DGroup(f.children if hasattr(f, 'children') else f)
@@ -2219,13 +2268,14 @@ class X3DFigure(GraphicsFigure):
                 ],
                 **animation_opts
             ),
-            background=background,
-            title=title
+            **self.axes[0].opts
         )
         opts = dict(
             self.opts,
             profile=self.profile,
-            version=self.version
+            version=self.version,
+            width=self.width,
+            height=self.height
         )
         return x3d.X3D(animator.to_x3d(), **opts).to_widget()
 
@@ -2249,11 +2299,6 @@ class X3DBackend(GraphicsBackend):
         def __exit__(self, exc_type, exc_val, exc_tb):
             ...
 
-    # def _ipython_repr_(self, graphics: X3DFigure, reshow=None):
-    #     from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
-    #
-    #     display = JupyterAPIs.get_display_api()
-    #     return display.display(display.HTML(graphics.to_x3d().tostring())
     def show_figure(self, graphics:X3DFigure, reshow=None):
         if not graphics.shown:
             graphics.shown = True
