@@ -2,7 +2,8 @@ from .Interface import *
 
 __all__ = [
     "VPythonInterface",
-    "VTKInterface"
+    "VTKInterface",
+    "X3DInterface"
 ]
 
 class VPythonInterface(ExternalProgramInterface):
@@ -11,6 +12,13 @@ class VPythonInterface(ExternalProgramInterface):
     """
     name = 'VPython'
     module = 'vpython'
+
+class X3DInterface(ExternalProgramInterface):
+    """
+    A simple class to support operations that make use of the VPython visualization toolkit
+    """
+    name = 'X3D'
+    module = 'x3d'
 
 class VTKInterface(ExternalProgramInterface):
     """

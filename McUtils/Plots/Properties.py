@@ -800,14 +800,7 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def view_settings(self):
-        return {'elev': self.axes.elev, 'azim':self.axes.azim}
+        return self.axes.get_view_settings()
     @view_settings.setter
     def view_settings(self, value):
-        if isinstance(value, dict):
-            if 'elev' not in value:
-                value['elev'] = self.axes.elev
-            if 'azim' not in value:
-                value['azim'] = self.axes.azim
-        else:
-            value = dict(zip(['elev', 'azim'], value))
-        self.axes.view_init(elev=value['elev'], azim=value['azim'])
+        self.axes.set_view_settings(**value)

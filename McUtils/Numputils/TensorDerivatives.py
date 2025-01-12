@@ -30,7 +30,8 @@ __all__ = [
     "vec_cross_deriv",
     "vec_anglecos_deriv",
     "vec_anglesin_deriv",
-    "vec_dihed_deriv"
+    "vec_dihed_deriv",
+    "vec_plane_angle_deriv"
 ]
 
 def permutation_sign(perm, check=True):
@@ -357,16 +358,19 @@ def scalarprod_deriv(s_expansion, A_expansion,
                      ):
     s_expansion = [np.asarray(s) for s in s_expansion]
     A_expansion = [np.asarray(a) for a in A_expansion]
-    # s0_shape = s_expansion[0].shape if len(s_expansion) > 0 else ()
-    # A0_shape = A_expansion[0].shape if len(A_expansion) > 0 else ()
-    # shared = min([len(s0_shape), len(A0_shape)])
-    # return tensorprod_deriv(
-    #     [np.asarray(s) for s in s_expansion],
-    #     [np.asarray(a) for a in A_expansion],
-    #     order=order,
-    #     identical=identical,
-    #     axes=[[], []]
-    # )
+    s0_shape = s_expansion[0].shape if len(s_expansion) > 0 else ()
+    A0_shape = A_expansion[0].shape if len(A_expansion) > 0 else ()
+    shared = min([len(s0_shape), len(A0_shape)])
+    return tensorprod_deriv(
+        s_expansion,
+        A_expansion,
+        order=order,
+        identical=identical,
+        axes=[
+            np.arange(shared, s_expansion[0].ndim),
+            np.arange(shared, A_expansion[0].ndim)
+        ]
+    )
     if is_numeric(order):
         order = list(range(order+1))
     suborder = [o for o in order if o > 0]
@@ -424,21 +428,26 @@ def scalarprod_deriv(s_expansion, A_expansion,
             n += 1
     return final_expansion
 
-def inverse_transformation(forward_expansion, order, reverse_expansion=None):
+def inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False):
     if reverse_expansion is None:
-        B = np.linalg.inv(forward_expansion[0])
+        if allow_pseudoinverse and forward_expansion[0].shape[0] != forward_expansion[0].shape[1]:
+            B = np.linalg.pinv(forward_expansion[0])
+        else:
+            B = np.linalg.inv(forward_expansion[0])
         reverse_expansion = [B]
     else:
         reverse_expansion = list(reverse_expansion)
         B = reverse_expansion[0]
 
-    if is_numeric(order): order = list(range(1, order+1))
+    if not is_numeric(order): order = np.max(order)
+    order = list(range(2, order+1))
+    shared = B.ndim - 2
 
     for o in order:
-        new_B = -tensor_reexpand(reverse_expansion, forward_expansion, [o+1])[-1]
+        new_B = -tensor_reexpand(reverse_expansion, forward_expansion, [o])[-1]
         if isinstance(new_B, np.ndarray):
             # need to multiply in the inverse now, too
-            new_B = np.tensordot(new_B, B, axes=[-1, 0])
+            new_B = vec_ops.vec_tensordot(new_B, B, axes=[-1, shared], shared=shared)
             # for _ in range(new_B.ndim - 1):
             #     new_B = np.tensordot(B, new_B, axes=[1, -2])
         reverse_expansion = reverse_expansion + [new_B]
@@ -552,6 +561,11 @@ def matdet_deriv(forward_expansion, order):
         det_exp = det_exp + [scalarprod_deriv(det_exp, tr_exp, [o])[-1]]
     return det_exp
 
+def _broadcast_mul(scalar, other):
+    if isinstance(scalar, np.ndarray) and scalar.ndim < other.ndim:
+        return np.expand_dims(scalar, list(range(scalar.ndim, other.ndim))) * other
+    else:
+        return scalar * other
 def _scalarinv_deriv(scalar_expansion, o):
     from ..Combinatorics import IntegerPartitioner
 
@@ -560,7 +574,10 @@ def _scalarinv_deriv(scalar_expansion, o):
     for parts in IntegerPartitioner.partitions(o):
         l = len(parts[0])
         scaling = ((-1) ** l) * math.factorial(l) / (scalar_expansion[0] ** (l + 1))
-        term += sum(scaling * nca_partition_prod(p, scalar_expansion[1:], shared=shared) for p in parts)
+        term += sum(
+            _broadcast_mul(scaling, nca_partition_prod(p, scalar_expansion[1:], shared=shared))
+            for p in parts
+        )
     return term
 
 def scalarinv_deriv(scalar_expansion, order):
@@ -581,7 +598,10 @@ def _scalarpow_deriv(scalar_expansion, exp, o):
         if factorial_terms == 0:
             continue
         scaling = factorial_terms * (scalar_expansion[0] ** (exp - l))
-        term += sum(scaling * nca_partition_prod(p, scalar_expansion[1:], shared=shared) for p in parts)
+        term += sum(
+            _broadcast_mul(scaling, nca_partition_prod(p, scalar_expansion[1:], shared=shared))
+            for p in parts
+        )
     return term
 
 def scalarpow_deriv(scalar_expansion, exp, order):
@@ -591,26 +611,49 @@ def scalarpow_deriv(scalar_expansion, exp, order):
         order
     )
 
-def vec_norm_unit_deriv(vec_expansion, order, norm_expansion=None, unit_expansion=None):
-    if norm_expansion is None:
+def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None):
+    if base_expansion is None:
         a = vec_expansion[0]
-        r = np.linalg.norm(a)
-        norm_expansion = [r]
-    norm_expansion = list(norm_expansion)
-    norm_inv_expansion = scalarinv_deriv(norm_expansion, order=len(norm_expansion)-1)
+        r = np.linalg.norm(a, axis=-1)
+        if a.ndim > 1:
+            u = a / r[..., np.newaxis]
+        else:
+            u = a / r
+        base_expansion = [r, u]
+    base_expansion = list(base_expansion)
+    norm_inv_expansion = scalarinv_deriv(base_expansion, order=len(base_expansion)-2)
 
-    if unit_expansion is None:
-        a = vec_expansion[0]
-        u = a / norm_expansion[0]
-        unit_expansion = [u]
-    unit_expansion = list(unit_expansion)
+    a_expansion = [vec_expansion[0], vec_ops.identity_tensors(base_expansion[1].shape[:-1], 3)]
 
-    for o in range(len(norm_expansion), order+1):
-        if len(norm_expansion) <= o:
-            norm_expansion = norm_expansion + tensordot_deriv(vec_expansion, unit_expansion, axes=[-1, -1], order=[o])
-            norm_inv_expansion = norm_inv_expansion + scalarinv_deriv(norm_expansion, order=[o])
-        if len(unit_expansion) <= o:
-            unit_expansion = unit_expansion + scalarprod_deriv(norm_inv_expansion, vec_expansion, order=[o])
+    if not is_numeric(order):
+        order = max(order)
+
+    for o in range(len(base_expansion), order+2):
+        # if len(base_expansion) <= o:
+        norm_inv_expansion = norm_inv_expansion + scalarinv_deriv(base_expansion, order=[o-1])
+        base_expansion = base_expansion + scalarprod_deriv(norm_inv_expansion, a_expansion, order=[o-1])
+        #     norm_expansion = norm_expansion + tensordot_deriv(vec_expansion, unit_expansion, axes=[-1, -1], order=[o],
+        #                                                       shared=vec_expansion[0].ndim-1)
+        #     norm_inv_expansion = norm_inv_expansion + scalarinv_deriv(norm_expansion, order=[o])
+        # if len(unit_expansion) <= o:
+        #     deriv_term = scalarprod_deriv(norm_inv_expansion, vec_expansion, order=[o])
+        #     unit_expansion = unit_expansion + deriv_term
+
+    # reexpand in terms of original vectors
+    # raise Exception(vec_expansion)
+    norm_expansion = [base_expansion[0]] + tensor_reexpand(
+        vec_expansion[1:],
+        base_expansion[1:],
+        order + 1
+        # shared=vec_expansion[0].ndim - 1
+    )
+
+    unit_expansion = [base_expansion[1]] + tensor_reexpand(
+        vec_expansion[1:],
+        base_expansion[2:],
+        order
+        # shared=vec_expansion[0].ndim - 1
+    )
 
     return norm_expansion, unit_expansion
 
@@ -648,8 +691,6 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
     shared = len(base_shape)
     i3 = np.broadcast_to(np.expand_dims(i3, list(range(shared))), base_shape + (3, 3, 3))
 
-    # max_order = (order if is_numeric(order) else max(order))
-
     pseudo_norm_2 = np.sqrt(tensorops_deriv(
         B_expansion,
             [-1, -1],
@@ -676,11 +717,7 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
         for o in order
     ]
     pseudonorm_expansion = [a-b for a,b in zip(A_exp, B_exp)]
-    # wtf = scalarpow_deriv(pseudonorm_expansion, 1/2, order)
     return pseudonorm_expansion
-    # raise Exception(pseudonorm_expansion)
-    #
-    # return scalarpow_deriv(pseudonorm_expansion, 1/2, order)
 
 def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None, planar_threshold=1e-14):
     if is_numeric(order):
@@ -745,28 +782,39 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
 
 def vec_angle_deriv(A_expansion, B_expansion, order, unitized=False):
     if not unitized:
-        A_expansion = vec_norm_unit_deriv(A_expansion, order)[1]
-        B_expansion = vec_norm_unit_deriv(B_expansion, order)[1]
-    sin_expansion = vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=True, return_unit_vectors=False)
+        units_A, A_expansion = vec_norm_unit_deriv(A_expansion, order)
+        units_B, B_expansion = vec_norm_unit_deriv(B_expansion, order)
     cos_expansion = vec_anglecos_deriv(A_expansion, B_expansion, order, unitized=True)
+    sin_expansion = vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=True, return_unit_vectors=False)
     cos_sin_expansion = [
         np.moveaxis(np.array([c, s]), 0, -1)
         for c, s in zip(cos_expansion, sin_expansion)
     ]
-    arctan_deriv = np.moveaxis(
+    arctan_expansion = [
         np.array([
             -sin_expansion[0],
             cos_expansion[0]
         ]),
-        0, -1
-    )
-    return [np.arctan2(sin_expansion[0], cos_expansion[0])] + tensordot_deriv(
+        np.array([
+            [np.zeros_like(sin_expansion[0]), -np.ones_like(sin_expansion[0])],
+            [np.ones_like(sin_expansion[0]),   np.zeros_like(cos_expansion[0])]
+        ])
+    ]
+    # raise Exception(arctan_expansion)
+    new_expansions = []
+    for i, e in enumerate(arctan_expansion):
+        for _ in range(i + 1):
+            e = np.moveaxis(e, 0, -1)
+        new_expansions.append(e)
+    arctan_expansion = new_expansions
+    angle_derivs = [np.arctan2(sin_expansion[0], cos_expansion[0])] + tensor_reexpand(
         cos_sin_expansion[1:],
-        [arctan_deriv],
-        axes=[-1, 0],
-        order=order-1,
-        shared=arctan_deriv.ndim - 1
+        arctan_expansion,
+        # axes=[-1, -1],
+        order=order,
+        # shared=arctan_expansion[0].ndim - 1
     )
+    return angle_derivs
 
 def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, planar=None, planar_threshold=1e-14):
     # quick check
@@ -779,17 +827,20 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, planar=None, p
     axb_expansion = vec_cross_deriv(A_expansion, B_expansion, max_order)
     bxc_expansion = vec_cross_deriv(B_expansion, C_expansion, max_order)
 
-    # if planar is None:
-    #     planar = np.linalg.norm(np.cross(
-    #         axb_expansion[0],
-    #         bxc_expansion[0]
-    #     )) <= planar_threshold
-    #
-    # if planar:
-    #     return vec_anglesin_deriv(axb_expansion, bxc_expansion, order, unitized=False, return_unit_vectors=False)
-    # else:
     return vec_angle_deriv(axb_expansion, bxc_expansion, order, unitized=False)
 
+def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=1e-14):
+    # quick check
+
+    if is_numeric(order):
+        max_order = order
+    else:
+        max_order = max(order)
+
+    axb_expansion = vec_cross_deriv(A_expansion, B_expansion, max_order)
+    cxd_expansion = vec_cross_deriv(C_expansion, D_expansion, max_order)
+
+    return vec_angle_deriv(axb_expansion, cxd_expansion, order, unitized=False)
 
 
 def nca_partition_terms(partition):
@@ -852,7 +903,7 @@ def nca_symmetrize(tensor, partition,
     else:
         l = list(range(shared))
         perm_inds = [
-            l + [shared + pp for pp in p] + list(range(len(p), tensor.ndim))
+            l + [shared + pp for pp in p] + list(range(shared+len(p), tensor.ndim))
             for p in perm_inds
         ]
 
@@ -863,13 +914,13 @@ def nca_symmetrize(tensor, partition,
 
 def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=None, symmetrize=True):
     if axes is None:
-        axes = [-1, 0]
+        axes = [-1, (0 if shared is None else shared)]
     if len(B_expansion) <= len(partition) - 1:
         return 0
     B = B_expansion[len(partition) - 1]
     if is_numeric(B) and B == 0:
         return 0
-    a_ax, b_ax = [[x] if isinstance(x, (int, np.integer)) else x for x in axes]
+    a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
     b_ax = [B.ndim + b if b < 0 else b for b in b_ax]
     for i in reversed(partition):
         if len(A_expansion) <= i - 1:
@@ -881,7 +932,7 @@ def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=Non
             B = np.tensordot(A, B, axes=[a_ax, b_ax])
         else:
             B = vec_ops.vec_tensordot(A, B, axes=[a_ax, b_ax], shared=shared)
-        b_ax = [min(B.ndim - 1, b + A.ndim - 1) for b in b_ax]
+        b_ax = [min(B.ndim - 1, b + A.ndim - 1 - shared) for b in b_ax]
 
     if symmetrize:
         B = nca_symmetrize(B, partition, shared=shared)
@@ -918,11 +969,12 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
     if order is None:
         order = len(vals)
 
+    shared = derivs[0].ndim - 2
     if is_numeric(order): order = list(range(1, order+1))
 
     for o in order:
         term = sum(
-            nca_partition_dot(p, derivs, vals, axes=axes)
+            nca_partition_dot(p, derivs, vals, axes=axes, shared=shared)
             for parts in IntegerPartitioner.partitions(o)
             for p in parts
         )
@@ -974,7 +1026,7 @@ def apply_nca_multi_ops(partition, expansions, ops, shared):
     A = terms[0]
     # d = partition[0]
     d = A.ndim - 2 - shared
-    # print("???", A.shape, A.ndim - shared, d)
+    scaling = 2 if len(partition) == 3 and tuple(partition) == (1, 0, 1) else 1
     for B,p,(op, axes, contract) in zip(terms[1:], partition[1:], ops):
         a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
         a_ax = [a if a >= 0 else (A.ndim + a - d) for a in a_ax]
@@ -1002,7 +1054,6 @@ def apply_nca_multi_ops(partition, expansions, ops, shared):
         for i in range(p):
             A = np.moveaxis(A, deriv_axis+i, shared)
         d += B.ndim - 2 - shared
-
     partition = [p for p in partition if p > 0]
     if len(partition) > 1:
         A = nca_symmetrize(A, partition, shared=shared, identical=False)
@@ -1066,7 +1117,7 @@ def nca_canonicalize_multiops(expansion_op_pairs):
 
 def _contract(a, b, axes=None, shared=None):
     if shared is not None:
-        res = vec_ops.vec_tensordot(a, b, axes=axes)
+        res = vec_ops.vec_tensordot(a, b, axes=axes, shared=shared)
     else:
         res = np.tensordot(a, b, axes=axes)
     return res

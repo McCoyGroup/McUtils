@@ -449,6 +449,7 @@ class CoordinateSystem:
                 return derivs
 
     return_derivs_key = 'return_derivs'
+    deriv_key = 'derivs'
     def jacobian(self,
                  coords,
                  system,
@@ -505,15 +506,15 @@ class CoordinateSystem:
             # sort of a hack right now: if the conversion returns 'derivs', then we use those for the FD
             # unless we got enough analytic derivatives to not need to do any more FD
             ret_d_key = self.return_derivs_key
-            rd = converter_options[ret_d_key] if ret_d_key in converter_options else None
+            rd = converter_options.get(ret_d_key)
             converter_options[ret_d_key] = True if analytic_deriv_order is None else analytic_deriv_order
-            test_crd, test_opts = self.convert_coords(coords, system, **converter_options)
+            test_crd, test_opts = self.convert_coords(coords, system, order=order, **converter_options)
             if rd is None:
                 del converter_options[ret_d_key]
             else:
                 converter_options[ret_d_key] = rd
-            deriv_key = 'derivs'
-            if deriv_key in test_opts and test_opts[deriv_key] is not None:
+            deriv_key = self.deriv_key
+            if test_opts.get(deriv_key) is not None:
                 deriv_tensors = test_opts[deriv_key]
                 # we now check to see how many derivs we got
                 # so that we can decrement the order by that amount
@@ -537,6 +538,7 @@ class CoordinateSystem:
                     order = [o-num_derivs for o in order if o > num_derivs]
 
                 kw = converter_options.copy()
+                kw["order"] = order
                 if ret_d_key in kw:
                     del kw[ret_d_key]
 

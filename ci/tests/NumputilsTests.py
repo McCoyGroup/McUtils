@@ -1426,15 +1426,151 @@ class NumputilsTests(TestCase):
 
     @debugTest
     def test_DihedralDerivativeComparison(self):
+        import Psience as psi
+        test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
         from Psience.Molecools import Molecule
 
         coords = Molecule.from_file(
-            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/HOONO_freq.fchk")
+            os.path.join(test_root, "HOONO_freq.fchk")
         ).coords
 
         coords = Molecule.from_file(
-            os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/nh3.fchk")
+            os.path.join(test_root, "nh3.fchk")
         ).coords
+
+        from McUtils.McUtils.Numputils.CoordOps import prep_disp_expansion
+
+        A_expansion = prep_disp_expansion(coords, 1, 0)
+        B_expansion = prep_disp_expansion(coords, 2, 0)
+        # _, na_da, na_daa = vec_norm_derivs(A_expansion[0], order=2)
+        # norms, units = vec_norm_unit_deriv(A_expansion, 2)
+        # woof = tensor_reexpand(A_expansion[1:], [na_da, na_daa], 2)
+        # raise Exception(units[1])
+        # raise Exception(
+        #     np.round(woof[1] - norms[2], 16)
+        # )
+        # new_d2 = 1/norms[0] * np.tensordot(A_expansion[1],
+        #                                    np.eye(3) - units[0][np.newaxis, :] * units[0][:, np.newaxis],
+        #                                    axes=[-1, -1]
+        #                                    )
+        # new_d3 = 1/norms[0] * np.tensordot(A_expansion[1],
+        #                                    np.tensordot(A_expansion[1],
+        #                                                 np.eye(3) - units[0][np.newaxis, :] * units[0][:, np.newaxis],
+        #                                                 axes=[-1, -1]
+        #                                                 ),
+        #                                    axes=[-1, -1]
+        #                                    )
+        # print(norms[2] / 2 - new_d3)
+        # # print(new_d3)
+        # raise Exception(...)
+        # raise Exception(
+        #     units[2],
+        #     new_d2
+        # )
+        # a = A_expansion[0]
+        # b = B_expansion[0]
+        # sin_derivs, cos_derivs = vec_sin_cos_derivs(a, b, order=2)
+        # cos_expansion = sum(
+        #     np.tensordot(e2, np.tensordot(e1, d, axes=[-1, -1]), axes=[-1, -1])
+        #     for e1, e2, d in [
+        #         [A_expansion[1], A_expansion[1], cos_derivs[2][0, 0]],
+        #         [B_expansion[1], A_expansion[1], cos_derivs[2][0, 1]],
+        #         [A_expansion[1], B_expansion[1], cos_derivs[2][1, 0]],
+        #         [B_expansion[1], B_expansion[1], cos_derivs[2][1, 1]],
+        #     ]
+        #     )
+        # sin_expansion = sum(
+        #     np.tensordot(e2, np.tensordot(e1, d, axes=[-1, -1]), axes=[-1, -1])
+        #     for e1, e2, d in [
+        #         [A_expansion[1], A_expansion[1], sin_derivs[2][0, 0]],
+        #         [B_expansion[1], A_expansion[1], sin_derivs[2][0, 1]],
+        #         [A_expansion[1], B_expansion[1], sin_derivs[2][1, 0]],
+        #         [B_expansion[1], B_expansion[1], sin_derivs[2][1, 1]],
+        #     ]
+        # )
+        # with np.printoptions(linewidth=1e8):
+        #     print()
+        #     print(sin_expansion)
+        #     print("-"*20)
+        #     woof = angle_vec(coords, 0, 1, 2, order=2)
+        # raise Exception(...)
+        #
+        # # raise Exception([c.shape for c in cos_derivs])
+        # print(sin_derivs[2])
+        # woof = angle_vec(coords, 0, 1, 2, order=2)
+        # print(woof[2].reshape(4, 3, 4, 3))
+        # raise Exception(...)
+        # sin_expansion = tensor_reexpand(
+        #     [
+        #         [a, ]
+        #     ],
+        #     [sin_derivs[1][0], sin_derivs[2][0, 0]]
+        # )
+        # raise Exception(
+        #     sin_derivs[2][0]
+        # )
+
+        new = angle_vec(coords, 0, 1, 2, order=2)
+        old = angle_vec(coords, 0, 1, 2, order=2, method='classic')
+        with np.printoptions(linewidth=1e8):
+            print("="*10)
+            print(new[1])
+            print(old[1])
+
+            print("-"*10)
+            print(np.round(new[2] - np.moveaxis(new[2], 0, 1), 8))
+            # print(old[2] - np.moveaxis(old[2], 0, 1))
+
+            print("-"*10)
+            print(new[2][0])
+            print(old[2][0])
+        raise Exception(...)
+
+        n = 4
+        print(angle_vec(coords, 0, 1, 2, order=2)[2][:, n])
+        print(angle_vec(coords, 0, 1, 2, order=2, method='classic')[2][:, n])
+        raise Exception(...)
+
+        inv_coords = inverse_coordinate_solve(
+                [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 1, 2),
+                    (0, 1, 3),
+                    (0, 2, 3)
+                ],
+                [
+                    1.9126349402213, 1.9126349325765, 1.9126349325765,
+                    1.8634707086348 + .2, 1.8634707086348, 1.8634707045268
+                ],
+                coords,
+                remove_translation_rotation=False
+            )
+
+        spec = [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 1, 2),
+                    (0, 1, 3),
+                    (0, 2, 3)
+                ]
+        fwd = internal_coordinate_tensors(
+                coords,
+                spec,
+                order=2
+            )
+        (rev, _), _ = inverse_coordinate_solve(
+            spec,
+            fwd[0],
+            coords,
+            order=2
+        )
+        raise Exception(
+            [s.shape for s in fwd[1:]],
+            [s.shape for s in rev[1:]]
+        )
 
         coords = Molecule.from_file(
             os.path.expanduser("~/Documents/UW/Research/Development/Psience/ci/tests/TestData/HOH_freq.fchk")

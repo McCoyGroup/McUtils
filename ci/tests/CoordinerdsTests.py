@@ -6,7 +6,7 @@ from unittest import TestCase
 from McUtils.Coordinerds import *
 from McUtils.Plots import *
 from McUtils.Numputils import *
-import sys, numpy as np
+import sys, numpy as np, os
 
 class ConverterTest(TestCase):
 
@@ -331,7 +331,7 @@ class ConverterTest(TestCase):
         self.assertEquals(jacob.shape, (n*3, (n-1)*3)) # we always lose one atom
         self.assertAlmostEqual(np.sum((ijacob@jacob)), 3*n-6, 3)
 
-    @debugTest
+    @validationTest
     def test_CartesianToZMatrixMultiJacobian(self):
         nstruct=20
         ndim=10
@@ -620,4 +620,30 @@ class ConverterTest(TestCase):
 
         # self.assertAlmostEquals(np.sum(coord_set.jacobian(new)[:, 0].reshape(30, 30) + np.eye(30, 30)), 0.)
 
+    @debugTest
+    def test_GenericInternals(self):
+        import Psience as psi
+        test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
+        from Psience.Molecools import Molecule
+
+        coords = Molecule.from_file(
+            os.path.join(test_root, "nh3.fchk")
+        ).coords
+
+        new_coords = CoordinateSet(coords).convert(
+            GenericInternalCoordinates,
+            specs=[
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (1, 0, 2),
+                (1, 0, 3),
+                (2, 0, 3)
+            ]
+        )
+        new_coords = new_coords + np.array([0, 0, 0, .2, 0, 0])
+
+        raise Exception(
+            coords - new_coords.convert(CartesianCoordinates3D)
+        )
     #endregion

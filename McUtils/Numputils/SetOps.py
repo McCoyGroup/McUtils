@@ -14,6 +14,8 @@ __all__ = [
     'find',
     'argsort',
     'group_by',
+    'grouping_info',
+    'take_where_groups',
     'split_by_regions',
     "combination_indices",
     "permutation_indices",
@@ -411,7 +413,17 @@ def find(ar, to_find, sorting=None,
                     )
     return output
 
-def group_by1d(ar, keys, sorting=None, return_indices=False):
+def group_by_spec1d(keys, sorting=None, return_sizes=False):
+    uinds, sorting, mask = unique(keys, sorting=sorting, return_inverse=True)
+    _, _, inds = unique(mask[sorting], sorting=np.arange(len(mask)), return_index=True)
+
+    ret = (uinds, inds, sorting)
+    if return_sizes:
+        sizes = np.concatenate([[inds[0]], np.diff(inds)], axis=0)
+        ret += (sizes,)
+    return ret
+
+def group_by1d(ar, keys, sorting=None, return_sizes=False, return_indices=False):
     """
     Splits an array by a keys
     :param ar:
@@ -424,16 +436,47 @@ def group_by1d(ar, keys, sorting=None, return_indices=False):
     :rtype:
     """
 
-    uinds, sorting, mask = unique(keys, sorting=sorting, return_inverse=True)
-    _, _, inds = unique(mask[sorting], sorting=np.arange(len(mask)), return_index=True)
+    spec = group_by_spec1d(keys, sorting=sorting, return_sizes=return_sizes)
+    if return_sizes:
+        sizes = spec[-1]
+        spec = spec[:-1]
+    else:
+        sizes = None
+    uinds, inds, sorting = spec
     groups = np.split(ar[sorting,], inds)[1:]
 
     ret = ((uinds, groups), sorting)
     if return_indices:
         ret += (inds,)
+    if return_sizes:
+        ret += (sizes,)
     return ret
 
-def group_by(ar, keys, sorting=None, return_indices=False):
+def grouping_info(keys, sorting=None, return_sizes=False):
+    """
+    Grouping info for keys
+
+    :param keys:
+    :type keys:
+    :param sorting:
+    :type sorting:
+    :return: group pairs & sorting info
+    :rtype:
+    """
+
+    keys = np.asanyarray(keys)
+    if keys.ndim == 1:
+        ret = group_by_spec1d(keys, sorting=sorting, return_sizes=return_sizes)
+        return ret
+
+    keys, dtype, orig_shape, orig_dtype = coerce_dtype(keys)
+    output = group_by_spec1d(keys, sorting=sorting, return_sizes=return_sizes)
+    ukeys = output[0]
+    ukeys = uncoerce_dtype(ukeys, orig_shape, orig_dtype, None)
+    output = (ukeys,) + output[1:]
+    return output
+
+def group_by(ar, keys, sorting=None, return_sizes=False, return_indices=False):
     """
     Groups an array by keys
 
@@ -451,11 +494,11 @@ def group_by(ar, keys, sorting=None, return_indices=False):
     keys = np.asanyarray(keys)
 
     if keys.ndim == 1:
-        ret = group_by1d(ar, keys, sorting=sorting, return_indices=return_indices)
+        ret = group_by1d(ar, keys, sorting=sorting, return_sizes=return_sizes, return_indices=return_indices)
         return ret
 
     keys, dtype, orig_shape, orig_dtype = coerce_dtype(keys)
-    output = group_by1d(ar, keys, sorting=sorting, return_indices=return_indices)
+    output = group_by1d(ar, keys, sorting=sorting, return_sizes=return_sizes, return_indices=return_indices)
     ukeys, groups = output[0]
     ukeys = uncoerce_dtype(ukeys, orig_shape, orig_dtype, None)
     output = ((ukeys, groups),) + output[1:]
@@ -652,5 +695,29 @@ def vector_take(arr, inds, shared=None, return_spec=False):
     else:
         return arr[inds]
 
+def take_where_groups(arr, where, presorted=True, return_rows=False):
+    if len(where) == 1:
+        raise ValueError("can't group 1D data")
+    vals = arr[where]
+    if len(where) > 2:
+        keys = np.array(where[:-1]).T
+    else:
+        keys = where[0]
+    if presorted:
+        sorting = np.arange(len(keys))
+    else:
+        sorting = None
+    rows, splits, sorting, sizes = grouping_info(where[0], sorting=sorting, return_sizes=True)
+    if not presorted:
+        presorted = np.equal(np.arange(len(keys)), sorting).all()
+    if presorted and len(np.unique(sizes)) == 1:
+        # we can just reshape vals
+        vals = vals.reshape(-1, sizes[0])
+    else:
+        vals = np.split(vals[sorting,], splits)[1:]
 
+    if return_rows:
+        return (rows, vals)
+    else:
+        return vals
 

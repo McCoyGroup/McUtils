@@ -67,7 +67,10 @@ class CoordinateSystemConverter(metaclass=abc.ABCMeta):
         :rtype:
         """
         if where is None:
-            where = self.converters if not isinstance(self.converters, weakref.ref) else self.converters()
+            where = self.converters if not (self.converters, weakref.ref) else self.converters()
+            if where is None:
+                type(self).converters = weakref.ref(CoordinateSystemConverters)
+                where = type(self).converters()
         where.register_converter(*self.types, self, check=check)
 
     def __call__(self, coords, **kwargs):
@@ -228,7 +231,7 @@ class CoordinateSystemConverters:
         :rtype:
         """
         cls._preload_converters()
-        if check and not isinstance(converter, cls.converter_type):
+        if check and not hasattr(converter, 'convert'): #isinstance(converter, cls.converter_type):
             raise TypeError('{}: registered converters should be subclasses of {} <{}> (got {} which inherits from {})'.format(
                 cls.__name__,
                 cls.converter_type, id(cls.converter_type),

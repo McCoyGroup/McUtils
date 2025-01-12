@@ -196,9 +196,7 @@ class VTKTicks:
         ...
 
 class VTKAxis:
-    def __init__(self,
-                 lines, title, label
-                 ):
+    def __init__(self, lines, title, label):
         self.lines = lines
         self.title = title
         self.label = label
@@ -289,7 +287,7 @@ class VTKWindow:
                  scale=(1, 1, 1)
                  ):
 
-        self._window = VTKObject("RenderWindow") if window is None else window
+        self._window = VTKRenderWindow() if window is None else window
         self._axes = None
         self._objects = set()
         self._interactor = interactor
@@ -326,20 +324,30 @@ class VTKWindow:
             for actor in actors:
                 self.renderer.AddActor(actor.obj)
 
+    def _remove_obj(self, thing):
+        self._objects.remove(thing)
+
+        if isinstance(thing, VTKObject):
+            actors = [thing]
+        else:
+            try:
+                actors = thing.actor[0]
+            except (TypeError, IndexError, KeyError):
+                actors = [thing.actor]
+
+        for actor in actors:
+            self.renderer.RemoveActor(actor.obj)
+
     def remove_object(self, thing):
         if thing in self._objects:
-            self._objects.remove(thing)
+            self._remove_obj(thing)
 
-            if isinstance(thing, VTKObject):
-                actors = [ thing ]
-            else:
-                try:
-                    actors = thing.actor[0]
-                except (TypeError, IndexError, KeyError):
-                    actors = [thing.actor]
-
-            for actor in actors:
-                self.renderer.RemoveActor(actor.obj)
+    def clear(self):
+        for obj in self._objects:
+            self._remove_obj(obj)
+    def close(self):
+        ...
+        # self.window.close()
 
     @property
     def window(self):
@@ -497,6 +505,8 @@ class VTKWindow:
     def set_legend(self, l):
         return self._not_imped_warning('set_legend')
 
+    def get_facecolor(self):
+        return self.renderer["background"]
     def set_facecolor(self, bg):
         self.renderer["background"] = bg
     @property

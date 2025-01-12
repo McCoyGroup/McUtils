@@ -19,26 +19,20 @@ There are a few primary divisions:
 Image/animation support and other back end support for 3D graphics (`VTK`) are provided at the experimental level.
 """
 
-from .Graphics import *
-from .Plots import *
-from .Primitives import *
-from .Interactive import *
-from .Styling import *
-from .Image import *
-from .Properties import *
-
 __all__ = []
-from .Graphics import __all__ as exposed
+from .Graphics import *; from .Graphics import __all__ as exposed
 __all__ += exposed
-from .Plots import __all__ as exposed
+from .Plots import *; from .Plots import __all__ as exposed
 __all__ += exposed
-from .Primitives import __all__ as exposed
+from .Primitives import *; from .Primitives import __all__ as exposed
 __all__ += exposed
-from .Interactive import __all__ as exposed
+from .Interactive import *; from .Interactive import __all__ as exposed
 __all__ += exposed
-from .Styling import __all__ as exposed
+from .Styling import *; from .Styling import __all__ as exposed
 __all__ += exposed
-from .Image import __all__ as exposed
+from .Image import *; from .Image import __all__ as exposed
 __all__ += exposed
-from .Properties import __all__ as exposed
+from .Properties import *; from .Properties import __all__ as exposed
+__all__ += exposed
+from .X3DInterface import *; from .X3DInterface import __all__ as exposed
 __all__ += exposed
