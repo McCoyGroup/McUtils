@@ -39,24 +39,26 @@ class RDMolecule:
     @property
     def rings(self):
         return self.rdmol.GetRingInfo().AtomRings()
+    @property
+    def meta(self):
+        return self.rdmol.GetPropsAsDict()
 
     @classmethod
     def chem_api(cls):
-        return RDKitInterface.method("Chem")
+        return RDKitInterface.submodule("Chem")
     @classmethod
     def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True, sanitize_ops=None):
         if guess_bonds:
             Chem = cls.chem_api() # to get nice errors
+            rdDetermineBonds = RDKitInterface.submodule("Chem.rdDetermineBonds")
             rdmol = Chem.Mol(rdmol)
-
-            from rdkit.Chem import rdDetermineBonds
             if charge is None:
                 charge = 0
             rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
             # return cls.from_rdmol(rdmol, conf_id=conf_id, guess_bonds=False, charge=charge)
         if sanitize:
             Chem = cls.chem_api() # to get nice errors
-            from rdkit.Chem import rdmolops
+            rdmolops = RDKitInterface.submodule("Chem.rdmolops")
             if sanitize_ops is None:
                 sanitize_ops = (
                         rdmolops.SANITIZE_ALL
@@ -125,7 +127,7 @@ class RDMolecule:
     @classmethod
     def from_sdf(cls, sdf_string, which=0):
         if os.path.isfile(sdf_string):
-            with open(sdf_string) as stream:
+            with open(sdf_string, 'rb') as stream:
                 mol = cls._load_sdf_conf(stream, which=which)
         else:
             mol = cls._load_sdf_conf(io.BytesIO(sdf_string.encode()), which=which)
@@ -145,7 +147,7 @@ class RDMolecule:
         params.removeHs = False
         rdkit_mol = Chem.MolFromSmiles(smiles, params)
         mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
-        from rdkit.Chem import rdDistGeom
+        rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
         rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
 
         return cls.from_rdmol(mol)

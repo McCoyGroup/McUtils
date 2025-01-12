@@ -7,6 +7,7 @@ __all__ = [
 ]
 
 import weakref
+import importlib
 
 
 class ExternalProgramInterface:
@@ -46,6 +47,10 @@ class ExternalProgramInterface:
         if name not in cls.method_table:
             cls.method_table[name] = getattr(cls.get_lib(), name)
         return cls.method_table[name]
+    @classmethod
+    def submodule(cls, submodule):
+        check_load = cls.get_lib()
+        return importlib.import_module(cls.module+"."+submodule)
     @property
     def lib(self):
         return self.get_lib()

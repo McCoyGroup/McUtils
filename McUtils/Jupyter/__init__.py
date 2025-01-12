@@ -17,6 +17,8 @@ from .MoleculeGraphics import *; from .MoleculeGraphics import __all__ as expose
 __all__ += exposed
 from .X3D import *; from .X3D import __all__ as exposed
 __all__ += exposed
+from .JSMol import *; from .JSMol import __all__ as exposed
+__all__ += exposed
 del exposed
 
 def _ipython_pinfo_():

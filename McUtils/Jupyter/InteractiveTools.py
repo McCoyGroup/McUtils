@@ -5,7 +5,10 @@ import sys, os, types, importlib, inspect
 
 __all__ = [
     "ModuleReloader",
+    "ExamplesManager",
     "NotebookExporter",
+    "FormattedTable",
+    "NoLineWrapFormatter",
     "patch_pinfo"
 ]
 
@@ -198,6 +201,26 @@ class ModuleReloader:
                         print_indent=print_indent
                         )
 
+    @classmethod
+    def load_module(cls, module):
+        if module in sys.modules:
+            cls(module).reload()
+        return importlib.import_module(module)
+
+    @classmethod
+    def import_from(cls, module, names, set_glob=True):
+        mod = cls.load_module(module)
+        objs = []
+        single = isinstance(names, str)
+        if single: names = [names]
+        for name in names:
+            obj = getattr(mod, name)
+            if set_glob:
+                globals()[name] = obj
+            objs.append(obj)
+        if single: objs = objs[0]
+        return objs
+
 class NotebookExporter:
     tag_filters = {
         'cell':('ignore',),
@@ -303,6 +326,82 @@ class NotebookExporter:
 #
 #     def _ipython_display_(self):
 #         raise NotImplementedError("...")
+
+class ExamplesManager:
+    data_path = ("ci", "tests", "TestData")
+    def __init__(self, root, data_path=None):
+        if os.path.isdir(root):
+            root = root
+        else:
+            if isinstance(root, str) and "/" not in root:
+                root = importlib.import_module(root)
+            if not isinstance(root, str):
+                root = os.path.dirname(root.__file__)
+        if data_path is None:
+            data_path = self.data_path
+        if isinstance(data_path, str):
+            data_path = [data_path]
+        self.test_dir = os.path.join(root, *data_path)
+
+    def test_data(cls, *path):
+        return os.path.join(cls.test_dir, *path)
+
+    @classmethod
+    def load_module(cls, module):
+        return ModuleReloader.load_module(module)
+
+    @classmethod
+    def import_from(cls, module, names, set_glob=True):
+        return ModuleReloader.import_from(module, names, set_glob=set_glob)
+
+    @classmethod
+    def parse_x3d_view_matrix(cls, vs, view_all=True):
+        import json, numpy as np
+        from .. import Numputils as nput
+
+        # vs from JSON.stringify(document.getElementById('x3d').runtime.viewMatrix())
+        vm = json.loads(vs)
+        vm = np.linalg.inv([
+            [vm[f"_{i}{j}"] for j in range(4)]
+            for i in range(4)
+        ])
+        ang, ax = nput.extract_rotation_angle_axis(vm[:3, :3])
+        v_pos = vm[:3, -1].tolist()
+        v_ort = np.array(list(ax) + [ang]).tolist()
+        opts = {"position": v_pos, "orientation": v_ort}
+        if view_all:
+            opts['viewAll'] = True
+        return opts
+
+class NoLineWrapFormatter:
+    def __init__(self, *objs, white_space="pre", **opts):
+        self.objs = [self._canonicalize(o) for o in objs]
+        self.opts = dict(opts, white_space=white_space)
+        self._widg = None
+    def _canonicalize(self, o):
+        if hasattr(o, 'to_widget') or hasattr(o, 'to_tree'):
+            return o
+        else:
+            return str(o)
+    def create_obj(self):
+        from .JHTML import JHTML
+        return JHTML.Pre(*self.objs, **self.opts)
+    def to_widget(self):
+        if self._widg is None:
+            self._widg = self.create_obj()
+        return self._widg
+    # def show(self):
+    #     return self.to_widget()
+    def _ipython_display_(self):
+        return self.to_widget()._ipython_display_()
+
+class FormattedTable(NoLineWrapFormatter):
+    def __init__(self, table_data, column_formats="8.3f", **format_opts):
+        from ..Formatters import TableFormatter
+        super().__init__(
+            TableFormatter(column_formats, **format_opts).format(table_data)
+        )
+
 
 def patch_pinfo():
     from IPython.core.oinspect import Inspector

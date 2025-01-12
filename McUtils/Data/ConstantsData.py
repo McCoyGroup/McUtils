@@ -284,11 +284,16 @@ class UnitsDataHandler(DataHandler):
 
     def _get_pathy_conversion(self, src, targ):
         conv_path = self._unit_graph.find_path_bfs(src, targ)
+        invert = False
         if conv_path is None:
-            return conv_path
+            conv_path = self._unit_graph.find_path_bfs(src, targ)
+            if conv_path is None: return None
+            invert = True
         cval = 1
         for me, you in zip(conv_path, conv_path[1:]):
             cval *= self.data[(me, you)]["Value"]
+        if invert:
+            cval = 1 / cval
         return cval
     def _find_path_conversion(self, src, targ):
         # here we have to try the 4 or so types of path conversions
