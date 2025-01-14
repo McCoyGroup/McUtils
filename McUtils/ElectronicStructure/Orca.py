@@ -60,6 +60,11 @@ class OrcaKeywordsBlock(OrcaOptionsBlock):
 class OrcaMethodsBlock(OrcaOptionsBlock):
     opts_key = "Blocks"
 
+    def __init__(self, opts=None, **rest):
+        if opts is not None:
+            rest.update(opts)
+        super().__init__(**rest)
+
     def format_options_block(self, header, opts):
         if len(opts.items()) == 0:
             return ""
@@ -67,6 +72,10 @@ class OrcaMethodsBlock(OrcaOptionsBlock):
             padding = " " * len("%"+header)
             rows = "\n".join(padding + f"{k} {v}" for k,v in opts.items())
             return "\n".join(["%"+header, rows, padding+"end"])
+
+    @classmethod
+    def get_props(cls):
+        return super().get_props() + ["opts"]
 
     def get_params(self):
         kws = []

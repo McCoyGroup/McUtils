@@ -5,18 +5,14 @@ from McUtils.ElectronicStructure import *
 
 class ElectronicStructureTests(TestCase):
 
-    @debugTest
+    @validationTest
     def test_GaussianJobs(self):
         basic_gjf = GaussianJob(
-                Mem="200gb",
                 title="woof",
-
+                Mem="200gb",
                 MP2=("aug-cc-pvtz", "Direct"),
                 Opt="VeryTight",
                 Freq=True,
-
-                # level_of_theory="MP2/aug-cc-pvtz",
-                # route="Opt Freq"
 
                 atoms=["O", "H", "H"],
                 # cartesians=[[0, 0, 0], [-1, 0, 0], [0, 1, 0]],
@@ -24,7 +20,6 @@ class ElectronicStructureTests(TestCase):
                     [1, 1],
                     [1, 1, 2, 90]
                 ]
-                # system=[],
             ).format()
         print(basic_gjf)
 
@@ -32,6 +27,11 @@ class ElectronicStructureTests(TestCase):
     def test_OrcaJobs(self):
         orca_def2 = OrcaJob(
                 MP2=("def2-TZVP", "TightSCF"),
+                opts=dict(mp2={"Density":"none"}),
+                tddft=dict(
+                    NROOTS=5,
+                    IROOT=1
+                ),
                 atoms=["O", "H", "H"],
                 # cartesians=[[0, 0, 0], [-1, 0, 0], [0, 1, 0]],
                 zmatrix=[
