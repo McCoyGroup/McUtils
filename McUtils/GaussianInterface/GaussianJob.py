@@ -7,7 +7,7 @@ from collections import OrderedDict, namedtuple
 from ..Data import AtomData
 
 __all__ = [
-    "GaussianJob",
+    "GaussianJobTemplater",
     "GaussianJobArray"
 ]
 
@@ -75,7 +75,7 @@ class GJFOptFormatter:
 #                                               GaussianJob
 #
 
-class GaussianJob:
+class GaussianJobTemplater:
     """A class that writes Gaussian .gjf files given a system and config/template options"""
 
     job_template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Templates")
