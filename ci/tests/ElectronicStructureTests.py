@@ -5,21 +5,22 @@ from McUtils.ElectronicStructure import *
 
 class ElectronicStructureTests(TestCase):
 
-    @validationTest
+    @debugTest
     def test_GaussianJobs(self):
         basic_gjf = GaussianJob(
                 title="woof",
                 Mem="200gb",
                 MP2=("aug-cc-pvtz", "Direct"),
                 Opt="VeryTight",
-                Freq=True,
+                Freq="Anharmonic",
 
                 atoms=["O", "H", "H"],
                 # cartesians=[[0, 0, 0], [-1, 0, 0], [0, 1, 0]],
                 zmatrix=[
                     [1, 1],
                     [1, 1, 2, 90]
-                ]
+                ],
+            variables={'r1':35}
             ).format()
         print(basic_gjf)
 

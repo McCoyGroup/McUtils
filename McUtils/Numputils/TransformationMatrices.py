@@ -109,7 +109,7 @@ def rotation_matrix_ER_vec(axes, thetas):
     Vectorized version of basic ER
     """
 
-    axes = np.asanyarray(axes)
+    axes = vec_normalize(np.asanyarray(axes))
     thetas = np.asanyarray(thetas)
     # if len(axes.shape) == 1:
     #     axes = axes/np.linalg.norm(axes)
