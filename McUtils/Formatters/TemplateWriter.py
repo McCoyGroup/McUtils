@@ -1,8 +1,10 @@
 import os, shutil
+from string import Formatter
 from .FileMatcher import *
 
 __all__ = [
-    "TemplateWriter"
+    "TemplateWriter",
+    "OptionalTemplate"
 ]
 
 class TemplateWriter:
@@ -98,3 +100,39 @@ class TemplateWriter:
                     self.write_file(f, out_dir, apply_template = apply_template, template_dir = template_dir)
                 else:
                     self.iterate_write(out_dir, apply_template = apply_template, src_dir = f, template_dir = template_dir)
+
+
+class OptionalTemplate:
+    def __init__(self, template, **opts):
+        self.opts = opts
+        if os.path.isfile(template):
+            with open(template) as t:
+                template = t.read()
+        self.template = template
+
+    class DefaultFormatter(Formatter):
+        default_key = "-MISSING-"
+
+        def get_value(self, key, args, kwds):
+            if isinstance(key, str):
+                try:
+                    return kwds[key]
+                except KeyError:
+                    return self.default_key
+            else:
+                return Formatter.get_value(key, args, kwds)
+
+    @classmethod
+    def apply_template(cls, template, opts, formatter=None, strip_missing_blocks=None, strip_missing=True):
+        if formatter is None:
+            formatter = cls.DefaultFormatter()
+        applied_template = formatter.format(template, **opts)
+        if strip_missing_blocks is None: strip_missing_blocks = strip_missing
+        if strip_missing_blocks:
+            applied_template = applied_template.replace(formatter.default_key + "\n", "")
+        if strip_missing:
+            applied_template = applied_template.replace(formatter.default_key, "")
+        return applied_template
+
+    def apply(self, **opts):
+        return self.apply_template(self.template, dict(self.opts, **opts))

@@ -8,7 +8,8 @@ __all__ = [
     "OpenBabelInterface",
     "PybelInterface",
     "RDKitInterface",
-    "OpenChemistryInterface"
+    "OpenChemistryInterface",
+    "CCLibInterface"
 ]
 
 class OpenBabelInterface(ExternalProgramInterface):
@@ -79,3 +80,6 @@ class OpenChemistryInterface:
     #     return self._ob
 
 
+class CCLibInterface:
+    name = 'CCLib'
+    module = 'cclib'
