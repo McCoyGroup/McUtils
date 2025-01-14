@@ -905,7 +905,8 @@ def affine_multiply(mats, vecs):
 ###
 #
 #       cartesian_from_rad_transforms
-def cartesian_from_rad_transforms(centers, vecs1, vecs2, angles, dihedrals, return_comps=False):
+default_angle_sign = 1
+def cartesian_from_rad_transforms(centers, vecs1, vecs2, angles, dihedrals, return_comps=False, angle_sign=None):
     """Builds a single set of affine transformation matrices to apply to the vecs1 to get a set of points
 
     :param centers: central coordinates
@@ -922,9 +923,11 @@ def cartesian_from_rad_transforms(centers, vecs1, vecs2, angles, dihedrals, retu
     :rtype:
     """
     from .TransformationMatrices import rotation_matrix, affine_matrix
+    if angle_sign is None:
+        angle_sign = default_angle_sign
 
     crosses = vec_crosses(vecs1, vecs2)
-    rot_mats_1 = rotation_matrix(crosses, -angles)
+    rot_mats_1 = rotation_matrix(crosses, angle_sign*angles)
     if dihedrals is not None:
         rot_mats_2 = rotation_matrix(vecs1, dihedrals)
         rot_mat = np.matmul(rot_mats_2, rot_mats_1)
