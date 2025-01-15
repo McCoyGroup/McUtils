@@ -1,7 +1,8 @@
 """
 Miscellaneous tools for interactive messing around in Jupyter environments
 """
-import sys, os, types, importlib, inspect
+import sys, os, types, importlib, inspect, io, tempfile as tf
+import subprocess
 
 __all__ = [
     "ModuleReloader",
@@ -9,6 +10,8 @@ __all__ = [
     "NotebookExporter",
     "FormattedTable",
     "NoLineWrapFormatter",
+    "OutputCapture",
+    # "SlurmTools",
     "patch_pinfo"
 ]
 
@@ -401,6 +404,152 @@ class FormattedTable(NoLineWrapFormatter):
         super().__init__(
             TableFormatter(column_formats, **format_opts).format(table_data)
         )
+
+
+class OutputCapture:
+    def __init__(self, handles=None,
+                 bind_global=True,
+                 # bind_jupyter=None,
+                 file_handles=True, autoclose=None, save_output=True):
+        self.stdout, self.stderr = self.get_handles(handles, file_handles)
+        self._old_stdout = None
+        self._old_stderr = None
+        self.bind = bind_global
+        # if bind_jupyter is None:
+        #     bind_jupyter = bind_global
+        # self.bind_jupyter = bind_jupyter
+        self._jupyter_bind = None
+        if autoclose is None: autoclose = bool(file_handles)
+        if autoclose is True:
+            self._close = [True, True]
+        elif autoclose is False:
+            self._close = [False, False]
+        else:
+            self._close = [autoclose[0], autoclose[1]]
+        self._tmp = [False, False]
+        self.save = save_output
+        self.outputs = None
+
+    @classmethod
+    def get_handles(cls, handles=None, file_handles=False):
+        if handles is not None:
+            return handles
+        if not file_handles:
+            return io.StringIO(), io.StringIO()
+        else:
+            return None, None
+
+    @classmethod
+    def get_temp_stream(cls):
+        return tf.NamedTemporaryFile(mode='w+').__enter__()
+
+    def __enter__(self):
+        if self.stdout is None:
+            self._tmp[0] = True
+            self.stdout = self.get_temp_stream()
+        if self.stderr is None:
+            self._tmp[1] = True
+            self.stderr = self.get_temp_stream()
+        self.outputs = None
+        # if self.bind_jupyter:
+        #     # try:
+        #     from IPython.utils import io as jio
+        #     # except ImportError:
+        #     #     pass
+        #     # else:
+        #     self._jupyter_bind = jio.capture_output(std)
+        #     self._jupyter_bind.__enter__()
+        if self.bind:
+            self._old_stdout = sys.stdout
+            self._old_stderr = sys.stderr
+            sys.stdout = self.stdout
+            sys.stderr = self.stderr
+        return self
+
+    def __exit__(self, *args):
+        try:
+            if self.save:
+                try:
+                    self.stdout.seek(0)
+                except io.UnsupportedOperation:
+                    ...
+                try:
+                    self.stderr.seek(0)
+                except io.UnsupportedOperation:
+                    ...
+                self.outputs = [self.stdout.read(), self.stderr.read()]
+        finally:
+            if self._tmp[0]:
+                self.stdout.__exit__(*args)
+                self.stdout = None
+            if self._tmp[1]:
+                self.stderr.__exit__(*args)
+                self.stderr = None
+            # if self.bind_jupyter:
+            #     self._jupyter_bind.__exit__(*args)
+            if self.bind:
+                sys.stdout = self._old_stdout
+                sys.stderr = self._old_stderr
+
+
+class SlurmInterface:
+
+    @classmethod
+    def format_kwargs(cls, kwargs):
+        return [
+            "".join([
+                (
+                    k
+                    if k.startswith("-") else
+                    "--" + k
+                    if len(k) > 1 else
+                    "-" + k
+                ),
+                " " if len(k.strip("-")) == 1 else "=",
+                "" if v is True else str(v)
+            ])
+            for k, v in kwargs.items()
+            if v is not None
+        ]
+    @classmethod
+    def run(cls, cmd, *args, **kwargs):
+        return subprocess.run([cmd, *args, *cls.format_kwargs(kwargs)],
+                              capture_output=True)
+
+    @classmethod
+    def parse_slurm_table(cls, tab:str, headers=True, sep=None):
+        lines = [l.strip() for l in tab.splitlines()]
+        if headers:
+            headers = lines[0].split(sep)
+            split_rows = [r.split(sep) for r in lines[1:]]
+            split_len = max(len(r) for r in split_rows)
+            if split_len > len(headers):
+                headers = headers + ["extra_{i}" for i in range(split_len - len(headers))]
+            return [
+                dict(zip(headers, r))
+                for r in split_rows
+            ]
+        else:
+            return [l.split(sep) for l in lines]
+
+    @classmethod
+    def sinfo(cls, all=None, format=None, **kw):
+        if all is None: all = format is None
+        if all:
+            return cls.parse_slurm_table(cls.run("sinfo", format="%all").stdout.decode(), sep='|')
+        else:
+            base = cls.run("sinfo", format=format, **kw).stdout.decode().split("\n", 1)[-1]
+            return cls.parse_slurm_table(base)
+
+    @classmethod
+    def squeue(cls, user=None, all=None, format=None, **kw):
+        if all is None: all = format is None
+        if all:
+            return cls.parse_slurm_table(cls.run("squeue", format="%all", user=user, **kw).stdout.decode(), sep='|')
+        else:
+            base = cls.run("sinfo", format=format, user=user, **kw).stdout.decode().split("\n", 1)[-1]
+            return cls.parse_slurm_table(base)
+
 
 
 def patch_pinfo():
