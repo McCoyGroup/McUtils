@@ -4,7 +4,7 @@ import uuid
 import numpy as np
 
 from ..Jupyter import JHTML, X3DHTML
-from ... import Numputils as nput
+from .. import Numputils as nput
 
 __all__ = [
     "X3D",
