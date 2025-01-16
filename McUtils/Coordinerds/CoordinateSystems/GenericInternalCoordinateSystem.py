@@ -39,6 +39,30 @@ class GenericInternalCoordinateSystem(InternalCoordinateSystem):
         converter_options['angle_ordering'] = converter_options.get('angle_ordering', angle_ordering)
         super().__init__(dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
 
+    # def jacobian(self,
+    #              coords,
+    #              system,
+    #              order=1,
+    #              coordinates=None,
+    #              converter_options=None,
+    #              all_numerical=False,
+    #              analytic_deriv_order=None,
+    #              **finite_difference_options
+    #              ):
+    #     carts = self.convert_coords(coords, CartesianCoordinates3D,
+    #                                 order=order,
+    #                                 converter_options=converter_options
+    #                                 )
+    #     if system
+    #     cart_jacs = carts.jacobian(system, order=order,
+    #                                all_numerical=all_numerical,
+    #                                analytic_deriv_order=analytic_deriv_order,
+    #                                **finite_difference_options
+    #                                )
+    #     return nput.tensor_reexpand(
+    #         super().jacobian(coords, CartesianCoordinates3D, order)
+    #     )
+
 GenericInternalCoordinates = GenericInternalCoordinateSystem()
 GenericInternalCoordinates.__name__ = "ZMatrixCoordinates"
 GenericInternalCoordinates.__doc__ = """Generic internals"""
@@ -61,7 +85,7 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
         We'll implement this by having the ordering arg wrap around in coords?
         """
 
-        if return_derivs is None:
+        if return_derivs is None or return_derivs is True:
             return_derivs = order
         if return_derivs == 0: return_derivs = 1
         if not nput.is_numeric(return_derivs):

@@ -20,8 +20,8 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
     @staticmethod
     def get_angles(lefts, centers, rights):
         # need to look up again what the convention is for which atom is the central one...
-        v1s = centers-lefts
-        v2s = centers-rights
+        v1s = lefts-centers
+        v2s = rights-centers
         return vec_angles(v1s, v2s)[0]
     @staticmethod
     def get_diheds(points, centers, seconds, thirds):

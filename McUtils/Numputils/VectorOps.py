@@ -929,7 +929,7 @@ def cartesian_from_rad_transforms(centers, vecs1, vecs2, angles, dihedrals, retu
     crosses = vec_crosses(vecs1, vecs2)
     rot_mats_1 = rotation_matrix(crosses, angle_sign*angles)
     if dihedrals is not None:
-        rot_mats_2 = rotation_matrix(vecs1, dihedrals)
+        rot_mats_2 = rotation_matrix(vecs1, -dihedrals) # add negative sign to match Gaussian sign convention
         rot_mat = np.matmul(rot_mats_2, rot_mats_1)
     else:
         rot_mat = rot_mats_1

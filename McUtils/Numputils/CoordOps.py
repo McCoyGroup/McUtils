@@ -1581,13 +1581,13 @@ def _transrot_invariant_inverse(expansion, coords, masses, order):
     from .CoordinateFrames import translation_rotation_invariant_transformation
 
     # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
-    L_base = translation_rotation_invariant_transformation(coords, masses,
-                                                              mass_weighted=False, strip_embedding=True)
+    L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
+                                                                mass_weighted=False, strip_embedding=True)
 
-    new_tf = td.tensor_reexpand([np.moveaxis(L_base, -1, -2)], expansion, order)
+    new_tf = td.tensor_reexpand([L_inv], expansion, order)
     inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
     return [
-        vec_tensordot(j, L_base, axes=[-1, -1], shared=L_base.ndim - 2)
+        vec_tensordot(j, np.moveaxis(L_inv, -1, -2), axes=[-1, -1], shared=L_base.ndim - 2)
         for j in inverse_tf
     ]
 

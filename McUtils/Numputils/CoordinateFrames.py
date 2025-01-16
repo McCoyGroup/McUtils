@@ -340,13 +340,21 @@ def translation_rotation_invariant_transformation(
         # nzpos = np.where(np.abs(evals) > 1e-4) # the rest should be 1
         # nzpos = nzpos[:-1] + (slice(None),) + nzpos[-1:]
         tf = tf[:, :, 6:]
+    else:
+        tf[:, :, :6] = L_tr
 
+    inv = np.moveaxis(tf, -1, -2)
     if not mass_weighted:
-        W = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        W = np.diag(np.repeat(np.sqrt(masses), 3))
         tf = np.moveaxis(
             np.tensordot(W, tf, axes=[0, 1]),
             1, 0
         )
-    tf = tf.reshape(base_shape + tf.shape[-2:])
 
-    return tf
+        W = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        inv = np.tensordot(inv, W, axes=[2, 0])
+
+    tf = tf.reshape(base_shape + tf.shape[-2:])
+    inv = inv.reshape(base_shape + inv.shape[-2:])
+
+    return tf, inv
