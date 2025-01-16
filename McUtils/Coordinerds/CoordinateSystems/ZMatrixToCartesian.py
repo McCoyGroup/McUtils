@@ -60,6 +60,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         :return:
         :rtype:
         """
+        if return_derivs: raise NotImplementedError("analytic derivatives need maintenance")
 
         # make sure we have the ordering stuff in hand
         if ordering is None:

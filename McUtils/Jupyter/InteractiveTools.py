@@ -211,15 +211,15 @@ class ModuleReloader:
         return importlib.import_module(module)
 
     @classmethod
-    def import_from(cls, module, names, set_glob=True):
+    def import_from(cls, module, names, globs=None):
         mod = cls.load_module(module)
         objs = []
         single = isinstance(names, str)
         if single: names = [names]
         for name in names:
             obj = getattr(mod, name)
-            if set_glob:
-                globals()[name] = obj
+            if globs is not None:
+                globs[name] = obj
             objs.append(obj)
         if single: objs = objs[0]
         return objs
@@ -332,7 +332,7 @@ class NotebookExporter:
 
 class ExamplesManager:
     data_path = ("ci", "tests", "TestData")
-    def __init__(self, root, data_path=None):
+    def __init__(self, root, data_path=None, globs=None):
         if os.path.isdir(root):
             root = root
         else:
@@ -345,17 +345,20 @@ class ExamplesManager:
         if isinstance(data_path, str):
             data_path = [data_path]
         self.test_dir = os.path.join(root, *data_path)
+        if globs is None:
+            globs = inspect.stack(1)[0]
+        self.globs = globs
 
     def test_data(cls, *path):
         return os.path.join(cls.test_dir, *path)
 
-    @classmethod
-    def load_module(cls, module):
+    def load_module(self, module):
         return ModuleReloader.load_module(module)
 
-    @classmethod
-    def import_from(cls, module, names, set_glob=True):
-        return ModuleReloader.import_from(module, names, set_glob=set_glob)
+    def import_from(self, module, names, globs=None):
+        if globs is None:
+            globs = self.globs
+        return ModuleReloader.import_from(module, names, globs=globs)
 
     @classmethod
     def parse_x3d_view_matrix(cls, vs, view_all=True):

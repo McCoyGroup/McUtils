@@ -507,15 +507,15 @@ class CoordinateSystem:
             # unless we got enough analytic derivatives to not need to do any more FD
             ret_d_key = self.return_derivs_key
             rd = converter_options.get(ret_d_key)
-            converter_options[ret_d_key] = True if analytic_deriv_order is None else analytic_deriv_order
+            converter_options[ret_d_key] = order if analytic_deriv_order is None else analytic_deriv_order
             test_crd, test_opts = self.convert_coords(coords, system, order=order, **converter_options)
             if rd is None:
                 del converter_options[ret_d_key]
             else:
                 converter_options[ret_d_key] = rd
             deriv_key = self.deriv_key
-            if test_opts.get(deriv_key) is not None:
-                deriv_tensors = test_opts[deriv_key]
+            deriv_tensors = test_opts.get(deriv_key)
+            if deriv_tensors is not None:
                 # we now check to see how many derivs we got
                 # so that we can decrement the order by that amount
                 # if we just get back one numpy array of derivatives
@@ -544,9 +544,7 @@ class CoordinateSystem:
 
                 convert = self._converter(system, deriv_key, self, num_derivs, kw)
             else:
-                # print(">>>", converter_options)
                 convert = self._converter(system, deriv_key, self, None, converter_options)
-                # convert = lambda c, s=system, kw=converter_options:
         else:
             convert = self._converter(system, None, self, None, converter_options)
             # convert = lambda c, s=system, kw=converter_options: self.convert_coords(c, s, **kw)[0]
