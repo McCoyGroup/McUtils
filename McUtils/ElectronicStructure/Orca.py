@@ -1,12 +1,10 @@
-import json
-import os.path
+import json, numbers, os
 
 from .Jobs import ElectronicStructureJob, OptionsBlock, SystemBlock
 
 __all__ = [
     "OrcaJob"
 ]
-
 
 class OrcaOptionsBlock(OptionsBlock):
     opts_key = None
@@ -27,6 +25,13 @@ class OrcaOptionsBlock(OptionsBlock):
 class OrcaKeywordsBlock(OrcaOptionsBlock):
     opts_key = "Keywords"
 
+    require_value = False
+
+    def __init__(self, keywords=None, **rest):
+        if keywords is not None:
+            rest.update(keywords)
+        super().__init__(**rest)
+
     _bs = None
     @classmethod
     def load_basis_sets(cls):
@@ -36,7 +41,7 @@ class OrcaKeywordsBlock(OrcaOptionsBlock):
 
     @classmethod
     def get_props(cls):
-        return super().get_props() + list(cls.load_basis_sets().values())
+        return ['keywords'] + super().get_props() + list(cls.load_basis_sets().values())
 
     def canonicalize_basis_set(self, k):
         bs = self.load_basis_sets()
@@ -48,17 +53,46 @@ class OrcaKeywordsBlock(OrcaOptionsBlock):
             if v is True:
                 kws.append(k)
             else:
-                if isinstance(v, str):
+                if isinstance(v, (str, int, float, )):
+                    kws.append(f'{k} {v}')
+                else:
+                    kws.append(k+" "+" ".join(str(v) for v in v))
+        if len(kws) > 0:
+            return {"keywords":"!" + " ".join(g for g in kws)}
+        else:
+            return {}
+
+class OrcaGlobalsBlock(OrcaKeywordsBlock):
+    opts_key = "Globals"
+    require_value = True
+
+    @classmethod
+    def load_basis_sets(cls):
+        return {}
+
+    @classmethod
+    def get_props(cls):
+        return super().get_props()[1:]
+
+    def get_params(self):
+        kws = []
+        for k,v in self.opts.items():
+            if v is True:
+                kws.append(k)
+            else:
+                if isinstance(v, (str, numbers.Number)):
                     kws.append(f'{k} {v}')
                 else:
                     kws.append(k+" "+" ".join(v))
         if len(kws) > 0:
-            return {"keywords":"\n".join("!"+g for g in kws)}
+            return {"globals":"\n".join("%"+g for g in kws)}
         else:
             return {}
 
 class OrcaMethodsBlock(OrcaOptionsBlock):
     opts_key = "Blocks"
+
+    require_value = True
 
     def __init__(self, opts=None, **rest):
         if opts is not None:
@@ -66,6 +100,8 @@ class OrcaMethodsBlock(OrcaOptionsBlock):
         super().__init__(**rest)
 
     def format_options_block(self, header, opts):
+        if opts is True:
+            opts = {}
         if len(opts.items()) == 0:
             return ""
         else:
@@ -133,6 +169,7 @@ class OrcaJob(ElectronicStructureJob):
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'orca_job.inp')
     blocks = [
         OrcaKeywordsBlock,
+        OrcaGlobalsBlock,
         OrcaMethodsBlock,
         OrcaSystemBlock
     ]
@@ -148,8 +185,9 @@ class OrcaJob(ElectronicStructureJob):
         #         opts[o] = True
         #     else:
         #         o[]
+        opts = {o.lower():v for o,v in opts.items()}
         for o in strs:
-            opts[o] = True
+            opts[o.lower()] = True
         super().__init__(**opts)
 
     # @classmethod

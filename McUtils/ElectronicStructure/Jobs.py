@@ -70,8 +70,18 @@ class OptionsBlock(JobBlock):
             }
         return cls._inv_alias_map
 
+    require_value = None
     @classmethod
-    def check_canon(cls, opt):
+    def check_canon(cls, opt, val):
+
+        if cls.require_value is not None:
+            no_val = val is None or val is True
+            if (
+                    (no_val and cls.require_value)
+                    or (not no_val and not cls.require_value)
+            ):
+                return False, opt
+
         opt = cls.canonicalize_opt_name(opt)
         return opt in cls.get_props_set(), opt
 
@@ -325,7 +335,7 @@ class ElectronicStructureJob(metaclass=abc.ABCMeta):
         bad_opts = set()
         for o,v in opts.items():
             for i,b in enumerate(self.blocks):
-                valid, o = b.check_canon(o)
+                valid, o = b.check_canon(o, v)
                 if valid:
                     block_opts[i][o] = v
                     break
@@ -354,5 +364,9 @@ class ElectronicStructureJob(metaclass=abc.ABCMeta):
         return OptionalTemplate(self.base_template).apply(**all_opts)
 
     def write(self, file, mode='w'):
-        with open(file, mode) as out:
-            out.write(self.format())
+        if hasattr(file, 'write'):
+            file.write(self.format())
+        else:
+            with open(file, mode) as out:
+                out.write(self.format())
+        return file

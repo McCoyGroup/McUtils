@@ -234,7 +234,7 @@ def youla_skew_decomp(A):
         else:
             start = 0
             end = n - 1
-        l = l[start:end-1]
+    l = l[start:end-1:2]
     cos = np.cos(l)
     sin = np.sin(l)
 

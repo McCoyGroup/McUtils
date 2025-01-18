@@ -346,7 +346,7 @@ class ExamplesManager:
             data_path = [data_path]
         self.test_dir = os.path.join(root, *data_path)
         if globs is None:
-            globs = inspect.stack(1)[0]
+            globs = inspect.stack(1)[0].frame.f_globals
         self.globs = globs
 
     def test_data(cls, *path):

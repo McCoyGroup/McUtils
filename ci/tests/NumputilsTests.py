@@ -1,3 +1,4 @@
+import math
 import os.path
 
 from Peeves.TestUtils import *
@@ -17,6 +18,54 @@ class NumputilsTests(TestCase):
                                   [-1.97215226e-31,  1.43714410e+00, -9.00306410e-01],
                                   [-1.75999392e-16, -1.43714410e+00, -9.00306410e-01]
     ])
+
+    @debugTest
+    def test_Optimize(self):
+        ndim = 6
+
+        # rot = rotation_matrix_skew(np.random.rand(math.comb(ndim, 2)))
+        # A = rot @ np.diag(np.random.uniform(.5, 2, (ndim,))) @ rot.T
+        # A_inv = np.linalg.inv(A)
+        # def f(guess, *_):
+        #     return 1/2 * np.tensordot(guess, A, axes=[-1, 0])[:, np.newaxis, :] @ guess[:, :, np.newaxis]
+        # def fjac(guess, *_):
+        #     return np.tensordot(guess, A, axes=[-1, 0])
+        # def fhess(guess, *_):
+        #     return np.broadcast_to(A_inv[np.newaxis], (len(guess),) + A.shape)
+        #
+        # minimum, convd, (error, its) = iterative_step_minimize(
+        #     np.random.rand(ndim),
+        #     NewtonStepFinder(fjac, fhess, hess_mode='inverse'),
+        #     max_iterations=3
+        # )
+        # self.assertEquals(error, 0)
+
+        def f(guess, *_):
+            return np.sum(np.sin(guess), axis=-1) + 1/2*np.sum(guess**2, axis=-1)
+            # return 1/2*np.sum(guess**2, axis=-1)
+        def fjac(guess, *_):
+            return np.cos(guess) + guess
+            # return guess
+        def fhess(guess, *_):
+            return -vec_tensordiag(np.sin(guess)) + identity_tensors(guess.shape[:-1], guess.shape[-1])
+            # return identity_tensors(guess.shape[:-1], guess.shape[-1])
+        # for i in range(1000):
+        np.random.seed(1)
+        guess = np.random.uniform(-np.pi/2, np.pi/2, ndim)
+        minimum, convd, (error, its) = iterative_step_minimize(
+            guess,
+            # NewtonStepFinder(fjac, fhess, damping_parameter=.99, damping_exponent=1.01),
+            # GradientDescentStepFinder(fjac, damping_parameter=.9, damping_exponent=1.01),
+            QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
+            max_iterations=50
+        )
+            # if error > 1e-4:
+            #     print(i)
+            #     break
+        print(error, its)
+        print(guess)
+        print(minimum)
+
 
     @validationTest
     def test_skewRotationMatrix(self):
@@ -1424,7 +1473,7 @@ class NumputilsTests(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_DihedralDerivativeComparison(self):
         import Psience as psi
         test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
