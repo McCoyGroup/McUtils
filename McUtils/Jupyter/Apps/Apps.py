@@ -9,7 +9,7 @@ import types, typing
 
 import numpy as np
 
-from ..JHTML import JHTML, DefaultOutputArea#, HTML, ActiveHTMLWrapper
+from ..JHTML import JHTML, DefaultOutputWidget#, HTML, ActiveHTMLWrapper
 from .Interfaces import *
 from .Controls import Control, FunctionDisplay
 from .Variables import WidgetControl, InterfaceVars, DefaultVars
@@ -170,7 +170,7 @@ class App(Component):
         if self._stack_depth == 0:
             self._vv = DefaultVars(self.vars)
             self._vv.__enter__()
-            self._out = DefaultOutputArea(self.output)
+            self._out = DefaultOutputWidget(self.output)
             self._out.__enter__()
             self._app_stack.append(self)
         self._stack_depth += 1

@@ -57,6 +57,7 @@ class NumputilsTests(TestCase):
             # NewtonStepFinder(fjac, fhess, damping_parameter=.99, damping_exponent=1.01),
             # GradientDescentStepFinder(fjac, damping_parameter=.9, damping_exponent=1.01),
             QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
+            # ConjugateGradientStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
             max_iterations=50
         )
             # if error > 1e-4:

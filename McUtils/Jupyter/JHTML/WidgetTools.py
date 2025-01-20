@@ -1,7 +1,7 @@
 
 __all__ = [
     "JupyterAPIs",
-    "DefaultOutputArea"
+    "DefaultOutputWidget"
 ]
 
 class JupyterAPIs:
@@ -83,7 +83,7 @@ class JupyterAPIs:
     #     out.append_display_data(cls.get_display_api().Markdown(markdown))
     #     return out
 
-class DefaultOutputArea:
+class DefaultOutputWidget:
     _output_area_stack = []
     def __init__(self, obj=None):
         self.obj = JupyterAPIs.get_widgets_api().Output() if obj is None else obj

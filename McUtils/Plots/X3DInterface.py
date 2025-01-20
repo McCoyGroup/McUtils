@@ -33,22 +33,39 @@ class X3D(X3DObject):
         width=500,
         height=500
     )
-    def __init__(self, *children, **opts):
+    def __init__(self, *children, id=None, **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
         self.opts = opts
+        if id is None:
+            id = "x3d-" + str(uuid.uuid4())[:6]
+        self.id = id
 
     X3DOM_JS = 'http://www.x3dom.org/download/x3dom.js'
     X3DOM_CSS = 'http://www.x3dom.org/download/x3dom.css'
     def to_widget(self):
+        id = self.id
+        x3d_embed = self.to_x3d()#.tostring()
+
+        JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+        load_script = JHTML.Script(src=self.X3DOM_JS).tostring()
+        kill_id = "tmp-"+str(uuid.uuid4())[:10]
         return JHTML.Figure(
-                JHTML.Script(src=self.X3DOM_JS),
-                JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-                #     "<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
-                # <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>"
-                self.to_x3d()
-            )
+            # JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+            x3d_embed,
+            JHTML.Image(
+                src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                id=kill_id,
+                onload=f"""
+                (function() {{
+                    document.getElementById("{kill_id}").remove();
+                    const frag = document.createRange().createContextualFragment(`{load_script}`);
+                    document.head.appendChild(frag);
+                }})()"""
+                ),
+            id=id
+        )
     def _ipython_repr_(self):
         return self.to_widget()
     def to_x3d(self):

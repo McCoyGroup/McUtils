@@ -87,16 +87,16 @@ class JSMol:
                 loader = f'jmolApplet(400, "load {model_file}; {load_script}", "{targ}")'
             else:
                 loader = f'jmolAppletInline(400, `{model_file}`, "{load_script}", "{targ}")'
-            return HTML.Div(
-                self.load_applet_script(self.id, loader),
-                # HTML.Script(f"""window.setTimeout((function () {{
-                #     let loaded = false;
-                #     if (!loaded) {{
-                #         loaded = true;
-                #         let applet = {loader};
-                #          document.getElementById("{self.id}").innerHTML = applet._code;
-                #         // window.setTimeout(() => {{ applet._cover(false); }}, 250)
-                #     }}
-                # }}), 250)"""),
-                id=f"{self.id}-pane"
-            )
+
+            kill_id = "tmp-" + str(uuid.uuid4())[:10]
+            load_script = self.load_applet_script(self.id, loader).tostring().replace("`", "\`")
+            return HTML.Image(
+                    src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                    id=kill_id,
+                    onload=f"""
+                        (function() {{
+                            document.getElementById("{kill_id}").remove();
+                            const frag = document.createRange().createContextualFragment(`{load_script}`);
+                            document.head.appendChild(frag);
+                        }})()"""
+                )

@@ -1,10 +1,12 @@
 
 import abc, weakref, uuid, traceback as tb
 import sys
+import threading
+
 from .types import *
 
 from ...Misc import mixedmethod
-from ..JHTML import JHTML, DefaultOutputArea
+from ..JHTML import JHTML, DefaultOutputWidget
 from ..JHTML.WidgetTools import JupyterAPIs, frozendict
 
 class JHTMLConversionError(Exception):
@@ -24,6 +26,8 @@ class JHTMLConversionError(Exception):
 
 __all__ = [
     "WidgetInterface",
+    "GenericDisplay",
+    "DelayedResult",
     "Component",
     "WrapperComponent",
     "Container",
@@ -119,7 +123,7 @@ class Component(WidgetInterface):
         self._widget_cache = None
         attrs['dynamic'] = dynamic
         self._attrs = attrs
-        self.debug_pane = DefaultOutputArea.get_default() if debug_pane is None else debug_pane
+        self.debug_pane = DefaultOutputWidget.get_default() if debug_pane is None else debug_pane
     @property
     def attrs(self):
         return frozendict(self._attrs)
@@ -233,7 +237,7 @@ class Component(WidgetInterface):
         if parent is not None:
             self._parents.add(parent)
         if self._widget_cache is None:
-            with DefaultOutputArea(self.debug_pane):
+            with DefaultOutputWidget(self.debug_pane):
                 try:
                     self._widget_cache = self.to_jhtml()
                 except JHTMLConversionError as e:
@@ -1926,3 +1930,89 @@ class Flex(Layout):
         )
 
 #endregion
+
+
+class GenericDisplay(WidgetInterface):
+    def __init__(self, obj):
+        self.obj = obj
+    def to_widget(self):
+        if hasattr(self.obj, 'to_widget'):
+            res = self.obj.to_widget()
+        else:
+            res = JHTML.OutputArea(autoclear=True)
+            res.show_buffered(self.obj)
+            # with res:
+            # res.show_buffered(self.obj)
+            # with res:
+            #     if hasattr(self.obj, '_ipython_display_'):
+            #         self.obj._ipython_display_()
+            #     else:
+            #         JupyterAPIs.get_display_api().display(self.obj)
+        return res
+
+class ResultTypes:
+    NoResult = "NoResult"
+class DelayedResult(WidgetInterface):
+
+    NoResult = ResultTypes.NoResult
+
+    def __init__(self, func, *args,
+                 output=None,
+                 callback=None,
+                 **kwargs
+                 ):
+        self.output = self.get_output_area(output)
+        self.caller = (func, args, kwargs)
+        self._thread = None
+        self.result = self.NoResult
+        self.error = None
+        self.callback = callback
+
+    def get_output_area(self, output=None):
+        if output is None:
+            output = JHTML.OutputArea()
+        return output
+
+    def __enter__(self):
+        self.output.__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.output.__exit__()
+
+    def _run(self):
+        # with self.output:
+        try:
+            res = self.caller[0](*self.caller[1], **self.caller[2], runner=self)
+        except Exception as e:
+            self.error = e
+            with self.output:
+                raise
+        else:
+            self.result = res
+            # with self.output:
+            try:
+                if hasattr(res, 'to_widget'):
+                    res = res.to_widget()
+                self.output.show_buffered(res)
+                # with self.output:
+                #     if hasattr(res, '_ipython_display_'):
+                #         res._ipython_display_()
+                #     else:
+                #         JupyterAPIs.get_display_api().display(res)
+            except:
+                with self.output:
+                    raise
+
+        if self.callback is not None:
+            self.callback(self.result, self.error, self)
+
+    def start_process(self):
+        if self._thread is None:
+            self._thread = threading.Thread(target=self._run)
+            self._thread.start()
+        return self._thread
+
+    def to_widget(self):
+        self.start_process()
+        return self.output

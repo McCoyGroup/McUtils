@@ -1,7 +1,7 @@
 import uuid
 
 import numpy as np, weakref
-from ..JHTML import JHTML, DefaultOutputArea, JupyterAPIs
+from ..JHTML import JHTML, DefaultOutputWidget, JupyterAPIs
 
 __all__ = [
     "Var",
@@ -176,7 +176,7 @@ class VariableSynchronizer:
         self.namespace = namespace
         self._value = value
         self.callbacks = weakref.WeakSet(callbacks)
-        self.output_pane = DefaultOutputArea.get_default() if output_pane is None else output_pane
+        self.output_pane = DefaultOutputWidget.get_default() if output_pane is None else output_pane
         self._watchers = weakref.WeakSet()
     def __repr__(self):
         return "{}({}, {!r})".format(
