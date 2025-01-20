@@ -3,7 +3,7 @@ from .HTML import HTML, CSS
 from .Bootstrap import Bootstrap
 from .HTMLWidgets import ActiveHTMLWrapper, HTMLWidgets
 from .BootstrapWidgets import BootstrapWidgets
-from .WidgetTools import JupyterAPIs, DefaultOutputArea
+from .WidgetTools import JupyterAPIs, DefaultOutputWidget
 
 import functools
 
@@ -31,7 +31,7 @@ class JHTML:
         display(*(e for e in elems if e is not None))
 
     APIs = JupyterAPIs
-    DefaultOutputArea = DefaultOutputArea
+    DefaultOutputWidget = DefaultOutputWidget
 
     # RawHTML = JupyterAPIs.raw_html
     @classmethod
@@ -55,8 +55,8 @@ class JHTML:
         self._callbacks = callbacks
         self._widgets = widgets
         self._output_pane = (
-            DefaultOutputArea() if output_pane is True
-            else DefaultOutputArea(output_pane) if output_pane is not None
+            DefaultOutputWidget() if output_pane is True
+            else DefaultOutputWidget(output_pane) if output_pane is not None
             else output_pane
         )
 
@@ -226,6 +226,10 @@ class JHTML:
 
     @classmethod
     def _check_widg(cls, elems):
+        wapi = JupyterAPIs.get_widgets_api()
+        if wapi is None:
+            return False
+
         Widget = JupyterAPIs.get_widgets_api().Widget
         if isinstance(elems, (list, tuple)) and len(elems) == 0:
             return False

@@ -2,7 +2,7 @@
 Miscellaneous tools for interactive messing around in Jupyter environments
 """
 import sys, os, types, importlib, inspect, io, tempfile as tf
-import subprocess
+import subprocess, threading
 
 __all__ = [
     "ModuleReloader",
@@ -346,7 +346,7 @@ class ExamplesManager:
             data_path = [data_path]
         self.test_dir = os.path.join(root, *data_path)
         if globs is None:
-            globs = inspect.stack(1)[0]
+            globs = inspect.stack(1)[1].frame.f_globals
         self.globs = globs
 
     def test_data(cls, *path):

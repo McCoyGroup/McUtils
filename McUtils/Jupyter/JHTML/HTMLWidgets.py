@@ -1,7 +1,8 @@
 import os.path, pathlib
+import sys
 import weakref, io, asyncio, threading, time
 from .HTML import CSS, HTML
-from .WidgetTools import JupyterAPIs, DefaultOutputArea
+from .WidgetTools import JupyterAPIs, DefaultOutputWidget
 
 __all__ = [
     "HTMLWidgets",
@@ -194,7 +195,7 @@ class ActiveHTMLWrapper:
         self._html_cache = None
 
         if debug_pane is None:
-            debug_pane = DefaultOutputArea.get_default()
+            debug_pane = DefaultOutputWidget.get_default()
         self.debug_pane = debug_pane
 
         self._event_handlers = {} if event_handlers is None else event_handlers
@@ -1034,9 +1035,29 @@ class ActiveHTMLWrapper:
         return cls.LazyLoader(cls, args, kwargs)
 
 class HTMLWidgets:
+
+    @classmethod
+    def get_exec_prefix(cls):
+        import subprocess
+        ext_call = subprocess.run(["jupyter", "labextension", "list"], capture_output=True)
+        path_list = ext_call.stdout.decode() + "\n" + ext_call.stderr.decode()
+        end_path = ("share", "jupyter", "labextensions")
+        for p in path_list.split():
+            if os.path.isdir(p):
+                p, p3 = os.path.split(p)
+                p, p2 = os.path.split(p)
+                root, p1 = os.path.split(p)
+                if (p1, p2, p3) == end_path: # TODO: be a bit more careful?
+                    return root
+        else:
+            return sys.exec_prefix
+
+
     @classmethod
     def load(cls, exec_prefix=None, overwrite=False):
         from .ActiveHTMLWidget import HTMLElement
+        if exec_prefix is None:
+            exec_prefix = cls.get_exec_prefix()
 
         nb = HTMLElement.jupyternb_install(exec_prefix=exec_prefix, overwrite=overwrite)
         lab = HTMLElement.jupyterlab_install(exec_prefix=exec_prefix, overwrite=overwrite)
@@ -1280,6 +1301,10 @@ class HTMLWidgets:
                             })
             return outs
 
+        def append_stdout(self, arg):
+            self.output.append_stdout(arg)
+        def append_stderr(self, arg):
+            self.output.append_stderr(arg)
         def show_buffered(self, *args):
             self.output.outputs += tuple(self._get_display_data(args))
         def set_output(self, *args):
@@ -1297,7 +1322,8 @@ class HTMLWidgets:
             if self._call_depth < 1 and self.autoclear:
                 self.clear(wait=True)
             self._call_depth += 1
-            return self.output.__enter__()
+            self.output.__enter__()
+            return self
         def __exit__(self, exc_type, exc_val, exc_tb):
             self._call_depth = max(self._call_depth-1, 0)
             if self.max_messages is not None:

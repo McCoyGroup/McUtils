@@ -834,6 +834,15 @@ class HTML:
             return self.tostring()
         def _ipython_display_(self):
             self.display()
+        def get_mime_bundle(self):
+            # from .WidgetTools import JupyterAPIs
+            # display = JupyterAPIs.get_display_api()
+            # from IPython.display import HTML as dispHTML
+            wrapper = HTML.Div(self, cls='jhtml')
+            data = {
+                'text/html': wrapper.tostring()
+            }
+            return data
         def display(self):
             from .WidgetTools import JupyterAPIs
             display = JupyterAPIs.get_display_api()
