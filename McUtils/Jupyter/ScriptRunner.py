@@ -60,7 +60,7 @@ class ScriptContext:
                 if isinstance(v, types.ModuleType)
             }
             imports = [
-                name if val.__name__ == name else (val.__name__, name)
+                name if val.__name__ == name else ["", val.__name__, name]
                 for name, val in mods.items()
             ]
             objs = {
@@ -130,7 +130,7 @@ os.chdir("{dir}")
                 if len(imp) == 1:
                     imp = ["", imp, ""]
                 elif len(imp) == 2:
-                    imp = ["", imp[0], imp[1]]
+                    imp = [imp[0], imp[1], ""]
 
                 from_, import_, as_ = ["" if i is None else i for i in imp]
                 if len(from_) == 0:
@@ -246,6 +246,17 @@ os.chdir("{dir}")
                 if name in globs
             }
 
+            ded = []
+            for k, v in objects.items():
+                if isinstance(v, type) and v.__module__ in modules:
+                    if k == v.__name__:
+                        imps.append([v.__module__, k, ""])
+                    else:
+                        imps.append([v.__module__, v.__name__, k])
+                    ded.append(k)
+            for d in ded:
+                del objects[d]
+
         if imports is None:
             imports = imps
         # imps = {
@@ -295,15 +306,17 @@ class ScriptRunner:
             return self.process.stdout.decode()
 
 
-    def _run_py_subprocess(self, result, script, runner=None):
+    def _run_py_subprocess(self, result, script, dry_run=False, runner=None):
         py_script = None
         try:
             with tempfile.NamedTemporaryFile(prefix=self.prefix, suffix=self.suffix, mode='w+', delete=False) as py_script:
                 py_script.write(script)
                 py_file = py_script.name
+            if dry_run:
+                return (self.python, py_file)
             proc = subprocess.run([self.python, py_file], capture_output=True)
         finally:
-            if self.autodelete and py_script is not None:
+            if not dry_run and self.autodelete and py_script is not None:
                 try:
                     os.remove(py_script.name)
                 except FileNotFoundError:
@@ -321,15 +334,17 @@ class ScriptRunner:
         return script
 
 
-    def run_script(self, script, background=True, interactive=False):
+    def run_script(self, script, dry_run=False, background=True, interactive=False):
         if self.context is not None:
             self.context.__enter__()
         script = self.prep_script(script)
         result = self.Result(script)
 
-        if interactive:
+        if dry_run:
+            return self._run_py_subprocess(result, script, dry_run=dry_run)
+        elif interactive:
             from .Apps import DelayedResult
-            return DelayedResult(self._run_py_subprocess, result, script)
+            return DelayedResult(self._run_py_subprocess, result, script, parent=self)
         elif background:
             thread = threading.Thread(target=self._run_py_subprocess, args=(result, script,))
             result.thread = thread
@@ -350,7 +365,8 @@ class ScriptRunner:
             autodelete=None,
             path=None,
             background=True,
-            interactive=False
+            interactive=False,
+            dry_run=False
             ):
         context = ScriptContext.from_script(
             script,
@@ -364,4 +380,8 @@ class ScriptRunner:
             path=path
         )
 
-        return cls(context, autodelete=autodelete).run_script(script, background=background, interactive=interactive)
+        return cls(context, autodelete=autodelete).run_script(script,
+                                                              dry_run=dry_run,
+                                                              background=background,
+                                                              interactive=interactive
+                                                              )

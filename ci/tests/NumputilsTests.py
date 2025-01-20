@@ -23,7 +23,8 @@ class NumputilsTests(TestCase):
     def test_Optimize(self):
         ndim = 6
 
-        # rot = rotation_matrix_skew(np.random.rand(math.comb(ndim, 2)))
+        np.random.seed(1)
+        rot = rotation_matrix_skew(np.random.rand(math.comb(ndim, 2)))
         # A = rot @ np.diag(np.random.uniform(.5, 2, (ndim,))) @ rot.T
         # A_inv = np.linalg.inv(A)
         # def f(guess, *_):
@@ -41,31 +42,37 @@ class NumputilsTests(TestCase):
         # self.assertEquals(error, 0)
 
         def f(guess, *_):
-            return np.sum(np.sin(guess), axis=-1) + 1/2*np.sum(guess**2, axis=-1)
+            guess = (rot[np.newaxis] @ guess[:, :, np.newaxis]).reshape(guess.shape)
+            return np.sum(np.sin(guess), axis=-1) + 1/2*np.sum((guess)**2, axis=-1)
             # return 1/2*np.sum(guess**2, axis=-1)
         def fjac(guess, *_):
-            return np.cos(guess) + guess
+            guess = (rot[np.newaxis] @ guess[:, :, np.newaxis]).reshape(guess.shape)
+            return (rot.T[np.newaxis] @ (np.cos(guess) + guess)[:, :, np.newaxis]).reshape(guess.shape)
             # return guess
         def fhess(guess, *_):
-            return -vec_tensordiag(np.sin(guess)) + identity_tensors(guess.shape[:-1], guess.shape[-1])
+            guess = (rot[np.newaxis] @ guess[:, :, np.newaxis]).reshape(guess.shape)
+            h = -vec_tensordiag(np.sin(guess)) + identity_tensors(guess.shape[:-1], guess.shape[-1])
+            return rot.T[np.newaxis] @ h @ rot[np.newaxis]
             # return identity_tensors(guess.shape[:-1], guess.shape[-1])
         # for i in range(1000):
         np.random.seed(1)
-        guess = np.random.uniform(-np.pi/2, np.pi/2, ndim)
+        # [ 0.03378176  0.06135116  0.46629297  0.38138027 -1.05175418 -1.34294785]
+        guess = vec_normalize(np.random.uniform(-np.pi/2, np.pi/2, ndim))
         minimum, convd, (error, its) = iterative_step_minimize(
             guess,
             # NewtonStepFinder(fjac, fhess, damping_parameter=.99, damping_exponent=1.01),
             # GradientDescentStepFinder(fjac, damping_parameter=.9, damping_exponent=1.01),
-            QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
-            # ConjugateGradientStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
-            max_iterations=50
+            # QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
+            ConjugateGradientStepFinder(f, fjac),
+            max_iterations=50,
+            unitary=True
         )
             # if error > 1e-4:
             #     print(i)
             #     break
         print(error, its)
-        print(guess)
-        print(minimum)
+        print(guess, np.linalg.norm(guess, axis=-1))
+        print(minimum, np.linalg.norm(minimum, axis=-1))
 
 
     @validationTest

@@ -1959,6 +1959,7 @@ class DelayedResult(WidgetInterface):
     def __init__(self, func, *args,
                  output=None,
                  callback=None,
+                 parent=None,
                  **kwargs
                  ):
         self.output = self.get_output_area(output)
@@ -1967,6 +1968,7 @@ class DelayedResult(WidgetInterface):
         self.result = self.NoResult
         self.error = None
         self.callback = callback
+        self.parent = parent
 
     def get_output_area(self, output=None):
         if output is None:

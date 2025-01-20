@@ -35,6 +35,10 @@ __all__ = [
     "cartesian_from_rad",
     "polar_to_cartesian",
     "apply_pointwise",
+    "projection_matrix",
+    "orthogonal_projection_matrix",
+    "project_onto",
+    "project_out",
     # "kron_sum",
 ]
 
@@ -790,7 +794,6 @@ def vec_dihedrals(b1, b2, b3,
         ret = (ret, crosses)
     return ret
 
-
 ################################################
 #
 #       pts_dihedrals
@@ -1115,3 +1118,50 @@ def apply_pointwise(tf, points, reroll=None, **kwargs):
 #         B_ = np.moveaxis
 #
 #     np.moveaxis(np.kron(np.eye(), A), ) +
+
+
+##############################################################################
+#
+#       project_out
+#
+
+def projection_matrix(basis, orthornomal=False):
+    basis = np.asanyarray(basis)
+    if basis.ndim == 1:
+        basis = basis[np.newaxis]
+    if not orthornomal:
+        basis, _ = np.linalg.qr(np.moveaxis(basis, -1, -2))
+        basis = np.moveaxis(basis, -2, -1)
+
+    return np.moveaxis(basis, -1, -2) @ basis
+
+def orthogonal_projection_matrix(basis, orthornomal=False):
+    proj = projection_matrix(basis, orthornomal=orthornomal)
+    identities = identity_tensors(proj.shape[:-2], proj.shape[-1])
+    return identities - proj
+
+def _proj(projection_type, vecs, basis, ndim=None, orthornomal=False):
+    vecs = np.asanyarray(vecs)
+    basis = np.asanyarray(basis)
+    if ndim is None:
+        base_shape = basis.shape[:-2]
+        if len(base_shape) == 0:
+            ndim = 1
+        else:
+            ndim = vecs.ndim - len(base_shape)
+    base_shape = vecs.shape[:-ndim]
+
+    proj = projection_type(basis, orthornomal=orthornomal)
+    if ndim == 1:
+        vecs = (vecs[..., np.newaxis, :] @ proj).reshape(vecs.shape)
+    else:
+        for _ in range(ndim):
+            vecs = np.moveaxis(vecs @ proj, -1, len(base_shape))
+
+    return vecs
+
+def project_onto(vecs, basis, ndim=None, orthornomal=False):
+    return _proj(projection_matrix, vecs, basis, ndim=ndim, orthornomal=orthornomal)
+
+def project_out(vecs, basis, ndim=None, orthornomal=False):
+    return _proj(orthogonal_projection_matrix, vecs, basis, ndim=ndim, orthornomal=orthornomal)

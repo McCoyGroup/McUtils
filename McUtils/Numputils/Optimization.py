@@ -4,12 +4,14 @@ import numpy as np
 # from scipy.optimize.linesearch import line_search_armijo
 from . import VectorOps as vec_ops
 from . import Misc as misc
+from . import TransformationMatrices as tfs
 
 __all__ = [
     "iterative_step_minimize",
     "GradientDescentStepFinder",
     "NewtonStepFinder",
     "QuasiNewtonStepFinder",
+    "ConjugateGradientStepFinder"
 ]
 
 def get_step_finder(jacobian, hessian=None, **opts):
@@ -19,16 +21,25 @@ def get_step_finder(jacobian, hessian=None, **opts):
         return NewtonStepFinder(jacobian)
 
 
-def iterative_step_minimize(guess, step_predictor, dtype='float64', tol=1e-8, max_iterations=100):
+def iterative_step_minimize(guess, step_predictor,
+                            unitary=False,
+                            generate_rotation=False,
+                            dtype='float64', tol=1e-8, max_iterations=100):
     guess = np.array(guess, dtype=dtype)
     base_shape = guess.shape[:-1]
     guess = guess.reshape(-1, guess.shape[-1])
     its = np.zeros(guess.shape[0], dtype=int)
     errs = np.zeros(guess.shape[0], dtype=float)
     mask = np.arange(guess.shape[0])
+    if unitary and generate_rotation:
+        rotations = vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
+    else:
+        rotations = None
     converged = True
     for i in range(max_iterations):
         step = step_predictor(guess[mask,], mask)
+        if unitary:
+            step = vec_ops.project_out(step, guess[mask][:, np.newaxis, :])
         # print(step)
         norms = np.linalg.norm(step, axis=1)
         errs[mask,] = norms
@@ -38,7 +49,20 @@ def iterative_step_minimize(guess, step_predictor, dtype='float64', tol=1e-8, ma
             mask = np.delete(mask, done)
         else:
             rem = np.arange(len(mask))
-        guess[mask,] += step[rem,]
+        if not unitary:
+            guess[mask,] += step[rem,]
+        else:
+            step = step[rem,]
+            norms = norms[rem,]
+            g = guess[mask,].copy()
+            v = np.linalg.norm(g, axis=-1)
+            r = np.sqrt(norms[rem,]**2 + v**2)
+            guess[mask,] = (g + step) / r[:, np.newaxis]
+            if generate_rotation:
+                axis = vec_ops.vec_crosses(g, guess[mask,])[0]
+                ang = np.arctan2(norms/r, v/r)
+                rot = tfs.rotation_matrix(axis, ang)
+                rotations = rot @ rotations
         its[mask,] += 1
         if len(mask) == 0:
             break
@@ -50,7 +74,12 @@ def iterative_step_minimize(guess, step_predictor, dtype='float64', tol=1e-8, ma
     errs = errs.reshape(base_shape)
     its = its.reshape(base_shape)
 
-    return guess, converged, (errs, its)
+    if unitary and generate_rotation:
+        res = (guess, rotations), converged, (errs, its)
+    else:
+        res = guess, converged, (errs, its)
+
+    return res
 
 # class NetwonHessianGenerator(metaclass=typing.Protocol):
 #     def jacobian(self, guess, mask):
@@ -380,7 +409,7 @@ class QuasiNewtonStepFinder:
         else:
             return gen
 
-class QuasiaNetwonHessianApproximator:
+class QuasiNetwonHessianApproximator:
 
     line_search = ArmijoSearch
     def __init__(self, func, jacobian, initial_beta=1, damping_parameter=None, damping_exponent=None, restart_interval=10):
@@ -458,7 +487,7 @@ class QuasiaNetwonHessianApproximator:
 
         return new_step
 
-class BFGSApproximator(QuasiaNetwonHessianApproximator):
+class BFGSApproximator(QuasiNetwonHessianApproximator):
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
         diff_outer = jacobian_diffs[:, np.newaxis, :] * prev_steps[:, :, np.newaxis]
         diff_norm = jacobian_diffs[:, np.newaxis, :] @ prev_steps[:, :, np.newaxis]
@@ -468,70 +497,76 @@ class BFGSApproximator(QuasiaNetwonHessianApproximator):
         H = diff_step @ prev_hess @ np.moveaxis(diff_step, -1, -2) + step_step
         return H
 
-from scipy.optimize import fmin_bfgs
-
-
 class ConjugateGradientStepFinder:
-    def __init__(self, function, jacobian, reset_interval=100):
-        self.func = function
-        self.jac = jacobian
-        self.n = 0
-        self.resets = reset_interval
-        self.prev_jac = None
-        self.prev_step_dir = None
 
-    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
-        raise NotImplementedError("abstract")
-
-    def get_beta(self, new_jacs, prev_jacs, prev_steps):
-        ...
-
-    def get_step_size(self, step_dir, new_jacs):
-        ...
+    def __init__(self, func, jacobian, approximation_type='fletcher-reeves', **generator_opts):
+        self.step_appx = self.beta_approximations[approximation_type.lower()](func, jacobian, **generator_opts)
+    @property
+    def beta_approximations(self):
+        return {
+            'fletcher-reeves':FletcherReevesApproximator
+        }
 
     def __call__(self, guess, mask):
-        new_jacs = -self.jac(guess, mask)
-        self.n += 1
-        if self.n % self.resets == 0:
-            self.prev_step_dir = None
+        gen = self.step_appx(guess, mask)
+        return gen
 
-        if self.prev_step_dir is None:
-            new_step = new_jacs
-            self.prev_step_dir = new_step
+class ConjugateGradientStepApproximator:
+    line_search = ArmijoSearch
+
+    def __init__(self, func, jacobian,
+                 # damping_parameter=None, damping_exponent=None,
+                 restart_interval=10):
+        self.func = func
+        self.jac = jacobian
+        self.base_hess = None
+        self.prev_jac = None
+        self.prev_step_dir = None
+        # self.damper = Damper(
+        #     damping_parameter=damping_parameter,
+        #     damping_exponent=damping_exponent,
+        #     restart_interval=restart_interval
+        # )
+        self.n = 0
+        self.restart_interval = restart_interval
+        self.searcher = self.line_search(func)
+
+    def get_beta(self, new_jacs, prev_jac, prev_step_dir):
+        raise NotImplementedError("abstract")
+
+    def __call__(self, guess, mask):
+        new_jacs = self.jac(guess, mask)
+
+        if self.prev_jac is None or self.n == 0:
+            new_step_dir = -new_jacs
+        else:
+            prev_jac = self.prev_jac[mask,]
+            prev_step_dir = self.prev_step_dir[mask,]
+            beta = self.get_beta(new_jacs, prev_jac, prev_step_dir)
+            new_step_dir = -new_jacs + beta[:, np.newaxis] * prev_step_dir
+
+        alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=new_jacs)
+        # handle convergence issues?
+        new_step = alpha[:, np.newaxis] * new_step_dir
+
+        if self.prev_jac is None:
             self.prev_jac = new_jacs
         else:
-            prev_step = self.prev_step_dir[mask,]
-            prev_jacs = self.prev_jac[mask,]
-            beta = self.get_beta(new_jacs, prev_jacs, prev_step)
-            new_step_dir = new_jacs + beta * prev_step
-
-            opt = self.line_search_armijo(self.func, guess, new_step_dir, -new_jacs)
-            new_step = opt * new_step_dir
-
             self.prev_jac[mask,] = new_jacs
+
+        if self.prev_step_dir is None:
+            self.prev_step_dir = new_step_dir
+        else:
             self.prev_step_dir[mask,] = new_step_dir
+
+        self.n = (self.n + 1) % self.restart_interval
 
         return new_step
 
 
-
-
-
-
-
-
-def unitary_optimize(guess, step_predictor, tol=1e-8, max_iterations=None):
-    ...
-
-
-def unitary_optimize_from_derivatives(guess, gradient, hessian=None):
-    """
-    Optimizes a function through a series of rotations,
-
-    :param guess:
-    :param gradient:
-    :param hessian:
-    :return:
-    """
-
-
+class FletcherReevesApproximator(ConjugateGradientStepApproximator):
+    def get_beta(self, new_jacs, prev_jac, prev_step_dir):
+        return (
+                (new_jacs[:, np.newaxis, :] @new_jacs[:, :, np.newaxis]) /
+                (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis])
+        ).reshape(len(new_jacs))
