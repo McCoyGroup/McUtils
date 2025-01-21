@@ -19,8 +19,8 @@ class NumputilsTests(TestCase):
                                   [-1.75999392e-16, -1.43714410e+00, -9.00306410e-01]
     ])
 
-    @debugTest
-    def test_Optimize(self):
+    @validationTest
+    def test_OptimizeClassic(self):
         ndim = 6
 
         np.random.seed(1)
@@ -74,6 +74,29 @@ class NumputilsTests(TestCase):
         print(guess, np.linalg.norm(guess, axis=-1))
         print(minimum, np.linalg.norm(minimum, axis=-1))
 
+    @debugTest
+    def test_BoysLocalize(self):
+
+        ndim = 3*3
+
+        np.random.seed(1)
+        rot = rotation_matrix_skew(np.random.rand(math.comb(ndim, 2)))
+
+        def f(col):
+            subcol = col.reshape(-1, 3)
+            return np.sum(vec_dots(subcol, subcol, axis=-1)**2)
+        def fprime(col):
+            subcol = col.reshape(-1, 3)
+            squares = vec_dots(subcol, subcol, axis=-1)
+            return 4 * (subcol*squares[:, np.newaxis]).flatten()
+
+        mat, U, err = jacobi_maximize(rot,
+                                      # GradientDescentRotationGenerator(f, fprime),
+                                      LineSearchRotationGenerator(f),
+                                      max_iterations=20
+                                      )
+        print(mat)
+        raise Exception(np.linalg.det(U), err)
 
     @validationTest
     def test_skewRotationMatrix(self):

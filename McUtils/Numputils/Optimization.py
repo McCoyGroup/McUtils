@@ -1,6 +1,8 @@
 import collections, abc
 import functools
 import numpy as np
+import itertools
+
 # from scipy.optimize.linesearch import line_search_armijo
 from . import VectorOps as vec_ops
 from . import Misc as misc
@@ -11,7 +13,10 @@ __all__ = [
     "GradientDescentStepFinder",
     "NewtonStepFinder",
     "QuasiNewtonStepFinder",
-    "ConjugateGradientStepFinder"
+    "ConjugateGradientStepFinder",
+    "jacobi_maximize",
+    "LineSearchRotationGenerator",
+    "GradientDescentRotationGenerator"
 ]
 
 def get_step_finder(jacobian, hessian=None, **opts):
@@ -214,25 +219,6 @@ class ArmijoSearch(LineSearcher):
     def __init__(self, func, c1=1e-4):
         super().__init__(func, c1=c1)
         self.func = func
-
-    @classmethod
-    def line_search_armijo(cls, f, xk, pk, gfk, c1=1e-4, alpha0=1):
-        """
-        Adapted from scipy linesearch for broadcasting
-        """
-        # xk = np.atleast_1d(xk)
-        fc = np.zeros(len(xk), dtype=int)
-
-        def phi(alpha1, mask):
-            fc[mask] += 1
-            return f(xk[mask,] + alpha1 * pk[mask,])
-
-        mask = np.arange(len(xk))
-        phi0 = phi(np.zeros(len(xk)), mask)
-
-        derphi0 = np.reshape(gfk @ pk[:, :, np.newaxis], (-1,))
-        alpha, phi1 = cls.scalar_search_armijo(phi, phi0, derphi0, mask, c1=c1, alpha0=alpha0)
-        return alpha, fc[0], phi1
 
     def prep_search(self, initial_geom, search_dir, *, initial_grad, **rest):
         a0, opts, phi = super().prep_search(initial_geom, search_dir, **rest)
@@ -570,3 +556,169 @@ class FletcherReevesApproximator(ConjugateGradientStepApproximator):
                 (new_jacs[:, np.newaxis, :] @new_jacs[:, :, np.newaxis]) /
                 (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis])
         ).reshape(len(new_jacs))
+
+def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-8):
+    mat = np.asanyarray(initial_matrix)
+
+    k = initial_matrix.shape[1]
+    perms = list(itertools.combinations(range(k), 2))
+    U = np.eye(k)
+
+    total_delta = -1
+    iteration = -1
+    for iteration in range(max_iterations):
+        total_delta = 0
+        for n, (p_i, q_i) in enumerate(perms):
+            A, B, delta = rotation_generator(mat, p_i, q_i)
+
+            if delta > 0:
+                total_delta += delta
+
+                new_pi = A * mat[:, p_i] + B * mat[:, q_i]
+                new_qi = A * mat[:, q_i] - B * mat[:, p_i]
+                mat[:, p_i] = new_pi
+                mat[:, q_i] = new_qi
+
+                rot_pi = A * U[:, p_i] + B * U[:, q_i]
+                rot_qi = A * U[:, q_i] - B * U[:, p_i]
+                U[:, p_i] = rot_pi
+                U[:, q_i] = rot_qi
+
+        if abs(total_delta) < tol:
+            break
+
+    return mat, U, (total_delta, iteration)
+
+class LineSearchRotationGenerator:
+    def __init__(self, column_function, tol=1e-16, max_iterations=10):
+        self.one_e_func = column_function
+        self.tol = tol
+        self.max_iter = max_iterations
+
+    @classmethod
+    def quadratic_opt(self,
+                  g0, g1, g2,
+                  f0, f1, f2
+                  ):
+        g02 = g0**2
+        g12 = g1**2
+        g22 = g2**2
+        denom = (2*f1*g0 - 2*f2*g0 - 2*f0*g1 + 2*f2*g1 + 2*f0*g2 - 2*f1*g2)
+        if abs(denom) < 1e-8:
+            return None
+        else:
+            return (
+                    (f1*g02 - f2*g02 - f0*g12 + f2*g12 + f0*g22 - f1*g22)
+                      / denom
+            )
+
+    def _phi(self, g, f_i, f_j):
+        c = np.cos(g)
+        s = np.sin(g)
+        f_i, f_j = (
+            c * f_i + s * f_j,
+            -s * f_i + c * f_j
+        )
+        val = sum(self.one_e_func(f) for f in [f_i, f_j])
+        return val, (c, s), (f_i, f_j)
+
+    def __call__(self, mat, col_i, col_j):
+        f_i, f_j = [mat[:, x] for x in [col_i, col_j]]
+        phi0 = sum(self.one_e_func(f) for f in [f_i, f_j])
+
+        g0 = 0
+        g1 = np.pi
+        g2 = 2*np.pi
+
+        f0 = phi0
+        f1, (c, s), _ = self._phi(g1, f_i, f_j)
+        f2 = phi0
+
+        prev = max([f0, f1, f2])
+        for it in range(self.max_iter):
+            g = self.quadratic_opt(
+                  g0, g1, g2,
+                  f0, f1, f2
+                  )
+            if g is None or g < g0 or g > g2:
+                if f2 > f0:
+                    g0 = g1
+                    f0 = f1
+                else:
+                    g2 = g1
+                    f2 = f1
+                g = (g0 + g2) / 2
+                f, (c, s), _ = self._phi(g, f_i, f_j)
+            else:
+                f, (c, s), _ = self._phi(g, f_i, f_j)
+                if f <= min([f0, f1, f2]):
+                    if f2 > f0:
+                        g0 = g1
+                        f0 = f1
+                    else:
+                        g2 = g1
+                        f2 = f1
+                    g = (g0 + g2) / 2
+                    f, (c, s), _ = self._phi(g, f_i, f_j)
+                else:
+                    if g < g1:
+                        g2 = g1
+                        f2 = f1
+                    else:
+                        g0 = g1
+                        f0 = f1
+            # if abs(f - prev) < self.tol:
+            #     break
+            f1 = f
+            g1 = g
+
+        return c, s, f1 - prev
+
+class GradientDescentRotationGenerator:
+    def __init__(self, column_function, gradient, tol=1e-16, max_iterations=10,
+                 damping_parameter=.9,
+                 damping_exponent=1.1,
+                 restart_interval=3
+                 ):
+        self.one_e_func = column_function
+        self.grad = gradient
+        self.tol = tol
+        self.max_iter = max_iterations
+        self.damper = Damper(
+            damping_parameter=damping_parameter,
+            damping_exponent=damping_exponent,
+            restart_interval=restart_interval
+        )
+
+    def __call__(self, mat, col_i, col_j):
+        f_i, f_j = [mat[:, x] for x in [col_i, col_j]]
+        cur_val = sum(self.one_e_func(f) for f in [f_i, f_j])
+
+        g = 0
+        c = 1
+        s = 0
+        cur_grads = np.array([self.grad(f) for f in [f_i, f_j]])
+
+        new_i, new_j = f_i, f_j
+        for it in range(self.max_iter):
+            grads = [np.dot(f, g) for f,g in zip([new_i, new_j], cur_grads)]
+            step = sum(grads)
+            if abs(step) < self.tol:
+                break
+            else:
+                u = self.damper.get_damping_factor()
+                if u is not None:
+                    step *= u
+                g = (g + step) % (2*np.pi)
+                # if abs(g) > np.pi/2: g = np.sign(g) * np.pi/2
+                c = np.cos(g)
+                s = np.sin(g)
+                new_i, new_j = (
+                    c * f_i + s * f_j,
+                    -s * f_i + c * f_j
+                )
+                cur_grads = np.array([self.grad(f) for f in [new_i, new_j]])
+
+
+        new_vals = sum(self.one_e_func(f) for f in [new_i, new_j])
+        return c, s, new_vals - cur_val
