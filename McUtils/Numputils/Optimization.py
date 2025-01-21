@@ -560,7 +560,7 @@ class FletcherReevesApproximator(ConjugateGradientStepApproximator):
         ).reshape(len(new_jacs))
 
 def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-8):
-    mat = np.asanyarray(initial_matrix)
+    mat = np.asanyarray(initial_matrix).copy()
 
     k = initial_matrix.shape[1]
     perms = list(itertools.combinations(range(k), 2))

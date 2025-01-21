@@ -77,10 +77,13 @@ class NumputilsTests(TestCase):
     @debugTest
     def test_BoysLocalize(self):
 
-        ndim = 3*3
+        ndim = 4*3
 
         np.random.seed(1)
-        rot = rotation_matrix_skew(np.random.rand(math.comb(ndim, 2)))
+        rot = rotation_matrix_skew(np.random.uniform(
+            1, 2,
+            math.comb(ndim, 2)
+        ))[:, 6:]
 
         def f(col):
             subcol = col.reshape(-1, 3)
@@ -101,58 +104,50 @@ class NumputilsTests(TestCase):
 
 
         mat, U, err = jacobi_maximize(rot,
-                                      GradientDescentRotationGenerator(f, fprime),
-                                      # LineSearchRotationGenerator(f),
+                                      # GradientDescentRotationGenerator(f, fprime),
+                                      LineSearchRotationGenerator(f),
                                       # displacement_localizing_rotation_generator,
                                       # OperatorMatrixRotationGenerator(f, op_f),
                                       max_iterations=30
                                       )
-        """ #GD
-[[31.  0.  0.  0. 22.  0.  0. 46.  0.]
- [10.  2.  0.  0. 74.  1.  0. 13.  0.]
- [59.  0.  0.  0.  0.  0.  0. 40.  0.]
- [ 0. 11.  9. 12.  2. 67.  0.  0.  0.]
- [ 0.  0. 29. 68.  1.  1.  0.  0.  0.]
- [ 0.  1. 61. 20.  0. 17.  0.  0.  0.]
- [ 0. 45.  0.  0.  1.  7. 22.  0. 25.]
- [ 0. 26.  0.  0.  0.  4. 70.  0.  0.]
- [ 0. 15.  0.  0.  0.  3.  7.  0. 74.]]
-        """
-        """ # Linesearch
-[[ 0.  0.  0. 13.  0.  0. 36.  0. 50.]
- [ 0.  0.  0. 49.  0.  0. 46.  0.  5.]
- [ 0.  0.  0. 38.  0.  0. 17.  0. 45.]
- [ 0. 80.  5.  0.  0.  0.  0. 15.  0.]
- [ 0.  1. 52.  0.  0.  0.  0. 47.  0.]
- [ 0. 19. 43.  0.  0.  0.  0. 38.  0.]
- [31.  0.  0.  0. 63.  6.  0.  0.  0.]
- [69.  0.  0.  0. 30.  1.  0.  0.  0.]
- [ 0.  0.  0.  0.  7. 93.  0.  0.  0.]]
- """
-        """ # Analytic
-[[84.  9.  1.  2.  0.  0.  0.  0.  2.]
- [ 4.  1.  0.  0.  1.  6.  1.  2. 85.]
- [ 9. 74.  0.  9.  0.  3.  0.  2.  3.]
- [ 0.  1.  1.  2.  0. 34.  0. 55.  7.]
- [ 0. 11.  1. 19.  3. 31.  1. 33.  0.]
- [ 0.  2.  0. 54.  9. 24.  3.  6.  1.]
- [ 0.  0. 22.  0.  0.  2. 72.  2.  1.]
- [ 1.  0. 48.  2. 32.  0. 14.  0.  1.]
- [ 0.  0. 26. 10. 53.  0.  8.  0.  2.]]
- """
-        """
-[[53.  3.  0.  0.  1.  0. 42.  0.  0.]
- [23. 29.  0.  0.  0.  0. 46.  0.  2.]
- [21. 57.  1.  6.  5.  1.  7.  2.  0.]
- [ 1.  2. 36.  1. 12. 22.  0. 25.  0.]
- [ 1.  4.  0.  7.  0. 51.  1. 35.  1.]
- [ 0.  0. 63.  1.  4. 15.  0. 17.  0.]
- [ 0.  4.  0. 23. 17.  1.  0.  7. 47.]
- [ 0.  1.  0.  1. 52.  4.  3.  7. 31.]
- [ 0.  0.  0. 62.  8.  5.  1.  5. 19.]]
- """
         with np.printoptions(linewidth=1e8):
-            print(np.round(100*(mat**2)))
+            # print(
+            #     np.round(100*np.sum((rot ** 2).reshape(-1, 3, rot.shape[-1]), axis=1))
+            # )
+            print(
+                np.round(100*np.sum((mat ** 2).reshape(-1, 3, rot.shape[-1]), axis=1))
+            )
+            """
+# Unmixed
+ [[12.  1. 28.  9. 50. 51.]
+  [21. 25.  5.  6. 10. 12.]
+  [54. 23. 11.  9. 22. 16.]
+  [13. 50. 56. 77. 17. 21.]]
+ 
+ # Gradient Descent
+ [[68.  3. 69.  1.  8.  2.]
+  [ 6.  4. 13. 41.  9.  6.]
+  [26. 10. 15.  1. 81.  1.]
+  [ 0. 83.  3. 57.  2. 90.]]
+ 
+ # Linesearch
+ [[ 1. 71. 69.  1.  6.  2.]
+  [41. 12.  7.  6. 10.  4.]
+  [ 1. 16. 24.  1. 83. 10.]
+  [57.  1.  0. 91.  0. 85.]]
+ 
+ # Analytic
+[[67. 63.  4.  2.  6.  8.]
+ [ 6. 17.  5.  9.  8. 34.]
+ [23. 15. 12.  7. 69. 10.]
+ [ 5.  5. 79. 82. 17. 48.]]
+ 
+ # Pairwise
+ [[ 8.  1. 10. 15. 50. 66.]
+  [13. 35.  5. 11. 10.  7.]
+  [73.  7.  2.  5. 22. 25.]
+  [ 6. 57. 83. 69. 17.  3.]]
+"""
         raise Exception(np.linalg.det(U), err)
 
     @validationTest
