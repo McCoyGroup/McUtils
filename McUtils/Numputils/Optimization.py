@@ -16,7 +16,9 @@ __all__ = [
     "ConjugateGradientStepFinder",
     "jacobi_maximize",
     "LineSearchRotationGenerator",
-    "GradientDescentRotationGenerator"
+    "GradientDescentRotationGenerator",
+    "OperatorMatrixRotationGenerator",
+    "displacement_localizing_rotation_generator"
 ]
 
 def get_step_finder(jacobian, hessian=None, **opts):
@@ -722,3 +724,64 @@ class GradientDescentRotationGenerator:
 
         new_vals = sum(self.one_e_func(f) for f in [new_i, new_j])
         return c, s, new_vals - cur_val
+
+class OperatorMatrixRotationGenerator:
+    def __init__(self, one_e_func, matrix_func):
+        self.one_e_func = one_e_func
+        self.mat_func = matrix_func
+    def __call__(self, mat, col_i, col_j):
+        f_i, f_j = [mat[:, x] for x in [col_i, col_j]]
+        cur_val = sum(self.one_e_func(f) for f in [f_i, f_j])
+        a, b, c = self.mat_func(f_i, f_j)
+
+        test_mat = np.array([[a, b], [b, c]])
+        # rot = np.linalg.eigh(test_mat)[1] # do this analytically...
+        # print(rot)
+        # cos_g = rot[0, 0]
+        # sin_g = np.sign(rot[0, 0] * rot[1, 1]) * rot[1, 0]
+        # new_rot = np.array([
+        #     [cos_g, -sin_g],
+        #     [sin_g, cos_g]
+        # ])
+        # explicit 2x2 form
+        tau = (c - a) / (2 * b)
+        t = np.sign(tau) / (abs(tau) + np.sqrt(1 + tau ** 2))
+        cos_g = 1 / np.sqrt(1 + t ** 2)
+        sin_g = -cos_g * t
+        # new_rot = np.array([
+        #         [cos_g, -sin_g],
+        #         [sin_g, cos_g]
+        #     ])
+        # print(new_rot.T @ test_mat @ new_rot)
+
+        f_i, f_j = (
+            cos_g * f_i + sin_g * f_j,
+            -sin_g * f_i + cos_g * f_j
+        )
+        new_val = sum(self.one_e_func(f) for f in [f_i, f_j])
+
+
+        return cos_g, sin_g, new_val - cur_val
+
+def displacement_localizing_rotation_generator(mat, col_i, col_j):
+    # Foster-Boys localization
+
+    p = mat[:, col_i].reshape(-1, 3)
+    q = mat[:, col_j].reshape(-1, 3)
+    pq_norms = vec_ops.vec_dots(p, q, axis=-1)
+    pp_norms = vec_ops.vec_dots(p, p, axis=-1)
+    qq_norms = vec_ops.vec_dots(q, q, axis=-1)
+
+    pqpq = np.dot(pq_norms, pq_norms)
+    pppp = np.dot(pp_norms, pp_norms)
+    qqqq = np.dot(qq_norms, qq_norms)
+    ppqq = np.dot(pp_norms, qq_norms)
+    pppq = np.dot(pp_norms, pq_norms)
+    qqqp = np.dot(qq_norms, pq_norms)
+
+    A = pqpq - (pppp + qqqq - 2 * ppqq) / 4
+    B = pppq - qqqp
+
+    AB_norm = np.sqrt(A ** 2 + B ** 2)
+
+    return A / AB_norm, B / AB_norm, A
