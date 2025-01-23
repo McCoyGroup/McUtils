@@ -1545,20 +1545,44 @@ def internal_conversion_specs(specs, angle_ordering='jik', **opts):
 
     return targets
 
-def internal_conversion_function(specs, **opts):
+def internal_conversion_function(specs,
+                                 base_transformation=None,
+                                 reference_internals=None,
+                                 **opts):
     base_specs = internal_conversion_specs(specs, **opts)
-    def convert(coords, order=None):
+    def convert(coords, order=None, reference_internals=reference_internals, base_transformation=base_transformation):
         targets = []
         for f, idx, subopts in base_specs:
             targets.append(f(coords, *idx, **dict(subopts, order=order)))
 
         if order is None:
-            return np.moveaxis(np.array(targets), 0, -1)
+            base = np.moveaxis(np.array(targets), 0, -1)
+            if base_transformation is not None:
+                base = td.tensor_reexpand(base, base_transformation) # del_XR * del_RQ
         else:
-            return [
+            base = [
                 np.moveaxis(np.array(t), 0, -1)
                 for t in zip(*targets)
             ]
+            internals, expansion = base[0], base[1:]
+            if reference_internals is not None:
+                if reference_internals.ndim == 1 and internals.ndim > 1:
+                    reference_internals = np.expand_dims(reference_internals, list(range(internals.ndim - 1)))
+                internals = internals - reference_internals
+            if base_transformation is not None:
+                if base_transformation[0].ndim == 2 and expansion[0].ndim > 2:
+                    base_transformation = [
+                        np.broadcast_to(
+                            np.expand_dims(b, list(range(expansion[0].ndim - 2))),
+                            expansion[0].shape[:-2] + b.shape
+                        ) for b in base_transformation
+                    ]
+                internals = (internals[..., np.newaxis, :] @ base_transformation[0]).reshape(
+                    internals.shape[:-1] + base_transformation[0].shape[-1:]
+                )
+                expansion = td.tensor_reexpand(expansion, base_transformation, order=len(expansion))
+            base = [internals] + expansion
+        return base
     return convert
 
 
@@ -1588,6 +1612,8 @@ def _transrot_invariant_inverse(expansion, coords, masses, order):
     inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
     return [
         vec_tensordot(j, np.moveaxis(L_inv, -1, -2), axes=[-1, -1], shared=L_base.ndim - 2)
+            if not misc.is_numeric(j) else
+        j
         for j in inverse_tf
     ]
 
@@ -1598,13 +1624,25 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              order=None,
                              solver_order=None,
                              tol=1e-8, max_iterations=5,
+                             damping_parameter=None,#.99,
+                             damping_exponent=None,#1.01,
+                             restart_interval=None,#10,
                              raise_on_failure=True,
                              return_internals=True,
                              return_expansions=True,
+                             base_transformation=None,
+                             reference_internals=None,
                              angle_ordering='jik'):
     # use Newton-Raphson to solve
 
     from .CoordinateFrames import remove_translation_rotations
+    from .Optimization import Damper
+
+    damper = Damper(
+        damping_parameter=damping_parameter,
+        damping_exponent=damping_exponent,
+        restart_interval=restart_interval
+    )
 
     if order is None:
         order = DEFAULT_SOLVER_ORDER
@@ -1616,7 +1654,10 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     if callable(specs):
         conversion = specs
     else:
-        conversion = internal_conversion_function(specs, angle_ordering=angle_ordering)
+        conversion = internal_conversion_function(specs, angle_ordering=angle_ordering,
+                                                  base_transformation=base_transformation,
+                                                  reference_internals=reference_internals
+                                                  )
     target_internals = np.asanyarray(target_internals)
     initial_cartesians = np.asanyarray(initial_cartesians)
 
@@ -1665,6 +1706,9 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         else:
             inverse_expansion = td.inverse_transformation(expansion, order=solver_order, allow_pseudoinverse=True)
 
+        u = damper.get_damping_factor()
+        if u is not None:
+            delta = delta * u
         nr_change = 0
         for n,e in enumerate(inverse_expansion):
             for ax in range(n+1):
@@ -1674,7 +1718,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         coords[opt_inds] += nr_change
     else:
         if raise_on_failure:
-            raise ValueError(f"failed to find coordinates after {max_iterations} iterations")
+            raise ValueError(f"failed to find coordinates after {max_iterations} iterations (residuals: {delta})")
 
     if return_expansions:
         expansion = opt_internals[1:]
@@ -1688,14 +1732,20 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     coords = coords.reshape(base_shape + coords.shape[-2:])
     errors = errors.reshape(base_shape)
     if opt_expansions is not None:
-        opt_expansions = [o.reshape(base_shape + o.shape[1:]) for o in opt_expansions]
+        opt_expansions = [
+            o.reshape(base_shape + o.shape[1:]) if isinstance(o, np.ndarray) else o
+            for o in opt_expansions
+        ]
     opt_internals = [o.reshape(base_shape + o.shape[1:]) for o in opt_internals]
     if smol:
         coords = coords[0]
         errors = errors[0]
         opt_internals = [o[0] for o in opt_internals]
         if opt_expansions is not None:
-            opt_expansions = [o[0] for o in opt_expansions]
+            opt_expansions = [
+                o[0] if isinstance(o, np.ndarray) else o
+                for o in opt_expansions
+            ]
 
 
     if return_expansions:

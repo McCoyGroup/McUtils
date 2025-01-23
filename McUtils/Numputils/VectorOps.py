@@ -39,6 +39,7 @@ __all__ = [
     "orthogonal_projection_matrix",
     "project_onto",
     "project_out",
+    "fractional_power"
     # "kron_sum",
 ]
 
@@ -1165,3 +1166,11 @@ def project_onto(vecs, basis, ndim=None, orthornomal=False):
 
 def project_out(vecs, basis, ndim=None, orthornomal=False):
     return _proj(orthogonal_projection_matrix, vecs, basis, ndim=ndim, orthornomal=orthornomal)
+
+def fractional_power(A, pow, zero_cutoff=1e-8):
+    # only applies to symmetric A
+    vals, vecs = np.linalg.eigh(A)
+    take_pos = np.where(np.abs(vals) > zero_cutoff)[0]
+    vals = vals[..., take_pos,]
+    vecs = vecs[..., take_pos]
+    return vecs @ vec_tensordiag(np.power(vals, pow)) @ vecs.T
