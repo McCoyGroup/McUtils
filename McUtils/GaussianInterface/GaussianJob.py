@@ -92,6 +92,7 @@ class GaussianJobTemplater:
             footer=None,
             file = None
             ):
+        raise NotImplementedError("use the new `GaussianJob` framework in `ExternalPrograms`")
 
         if not isinstance(name, str):
             raise GaussianJobException("{}: name argument must be string instead of {}".format(

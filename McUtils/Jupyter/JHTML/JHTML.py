@@ -1,5 +1,5 @@
 
-from .HTML import HTML, CSS
+from .HTML import HTML, CSS, ContentXML, HTMLManager
 from .Bootstrap import Bootstrap
 from .HTMLWidgets import ActiveHTMLWrapper, HTMLWidgets
 from .BootstrapWidgets import BootstrapWidgets
@@ -12,14 +12,24 @@ __reload_hook__ = [".HTML", ".HTMLWidgets", ".Bootstrap", ".BootstrapWidgets", "
 
 
 class JHTML:
+    HTML = HTML
+    HTMLManager = HTMLManager
+    CSS = CSS
+    XML = ContentXML
+    HTMLWidgets = HTMLWidgets
+
+
+    APIs = JupyterAPIs
+    DefaultOutputWidget = DefaultOutputWidget
+
     """
     Provides dispatchers to either pure HTML components or Widget components based on whether interactivity
     is required or not
     """
-    manage_class = HTML.manage_class
-    manage_style = HTML.manage_styles
-    extract_styles = HTML.extract_styles
-    manage_attrs = HTML.manage_attrs
+    manage_class = HTMLManager.manage_class
+    manage_style = HTMLManager.manage_styles
+    extract_styles = HTMLManager.extract_styles
+    manage_attrs = HTMLManager.manage_attrs
     @classmethod
     def load(cls, exec_prefix=None, overwrite=False):
         from IPython.core.display import display
@@ -29,9 +39,6 @@ class JHTML:
             # BootstrapWidgets.load()
         ]
         display(*(e for e in elems if e is not None))
-
-    APIs = JupyterAPIs
-    DefaultOutputWidget = DefaultOutputWidget
 
     # RawHTML = JupyterAPIs.raw_html
     @classmethod

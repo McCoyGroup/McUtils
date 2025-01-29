@@ -54,22 +54,22 @@ class RegexPattern:
     """
     def __init__(self,
                  pat,
-                 name = None,
-                 children = None,
-                 parents = None,
-                 dtype = None,
-                 repetitions = None,
-                 key = None,
-                 joiner = "",
-                 join_function = None,
-                 wrapper_function = None,
-                 suffix = None, # often we need a start or end RegexPattern for the match, but we don't actually care the data in it
-                 prefix = None,
-                 parser = None, # a parser function we can use instead of the default StringParser parser
-                 handler = None, # a data handler for after capturing a block
-                 default_value = None, # default value for Optional types
-                 capturing = None,
-                 allow_inner_captures = False # whether or not to multiple captures for a given pattern
+                 name=None,
+                 children=None,
+                 parents=None,
+                 dtype=None,
+                 repetitions=None,
+                 key=None,
+                 joiner="",
+                 join_function=None,
+                 wrapper_function=None,
+                 suffix=None, # often we need a start or end RegexPattern for the match, but we don't actually care the data in it
+                 prefix=None,
+                 parser=None, # a parser function we can use instead of the default StringParser parser
+                 handler=None, # a data handler for after capturing a block
+                 default_value=None, # default value for Optional types
+                 capturing=None,
+                 allow_inner_captures=False # whether or not to multiple captures for a given pattern
                  ):
         """
         :param pat:
@@ -416,13 +416,13 @@ class RegexPattern:
         if isinstance(self.pat, str) and isinstance(op, str):
             return self.pat + op
         elif isinstance(self.pat, str):
-            def apply_op(p, *arg, wrap = op, prefix = self.pat, a = args, kw = kwargs, **kwarg):
+            def apply_op(p, *arg, wrap=op, prefix=self.pat, a=args, kw=kwargs, **kwarg):
                 return prefix + wrap(p, *a, **kw)
             return apply_op
         elif isinstance(op, str):
             return self.pat(op, *args, **kwargs)
         else:
-            def merge_ops(p, *arg, wrap = op, prewrap = self.pat, a = args, kw = kwargs, **kwarg):
+            def merge_ops(p, *arg, wrap=op, prewrap=self.pat, a=args, kw=kwargs, **kwarg):
                 return prewrap(wrap(p, *a, **kw))
             return merge_ops
 
@@ -457,8 +457,8 @@ class RegexPattern:
             no_caps = no_captures or recomp_captures
             kids = [
                 c.build(
-                    recompile = True if recompile else ('No Cache' if (c.has_capturing_child and recomp_captures) else False),
-                    no_captures = no_caps
+                    recompile=True if recompile else ('No Cache' if (c.has_capturing_child and recomp_captures) else False),
+                    no_captures=no_caps
                 ) for c in self._children
             ]
 
@@ -471,9 +471,9 @@ class RegexPattern:
                 prefix = self.prefix
             if suffix is None:
                 suffix = self.suffix
-            joiner = joiner.build( no_captures = no_caps ) if isinstance(joiner, RegexPattern) else joiner if joiner is not None else ""
-            prefix = prefix.build( no_captures = no_caps ) if isinstance(prefix, RegexPattern) else prefix if prefix is not None else ""
-            suffix = suffix.build( no_captures = no_caps ) if isinstance(suffix, RegexPattern) else suffix if suffix is not None else ""
+            joiner = joiner.build(no_captures=no_caps) if isinstance(joiner, RegexPattern) else joiner if joiner is not None else ""
+            prefix = prefix.build(no_captures=no_caps) if isinstance(prefix, RegexPattern) else prefix if prefix is not None else ""
+            suffix = suffix.build(no_captures=no_caps) if isinstance(suffix, RegexPattern) else suffix if suffix is not None else ""
             if verbose:
                 print("Joiner:{}\n Prefix:{}\n Suffix:{}".format(joiner, prefix, suffix))
 
@@ -986,7 +986,7 @@ WordCharacter.__doc__ = """
     Represents a single number or letter (i.e. non-whitespace)
     """
 
-Word = RegexPattern("\w+", "Word", dtype=str)
+Word = RegexPattern("[^\W\d_]\w*", "Word", dtype=str)
 Word.__name__ = "Word"
 Word.__doc__ = """
     Represents a block of WordCharacters

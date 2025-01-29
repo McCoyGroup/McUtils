@@ -1,6 +1,6 @@
 import json, numbers, os
 
-from .Jobs import ElectronicStructureJob, OptionsBlock, SystemBlock
+from .Jobs import ExternalProgramJob, OptionsBlock, SystemBlock
 
 __all__ = [
     "OrcaJob"
@@ -165,7 +165,7 @@ class OrcaSystemBlock(SystemBlock):
                 base_opts[self.fmt_key + "bonds"] = self.format_bonds_block()
         return base_opts
 
-class OrcaJob(ElectronicStructureJob):
+class OrcaJob(ExternalProgramJob):
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'orca_job.inp')
     blocks = [
         OrcaKeywordsBlock,

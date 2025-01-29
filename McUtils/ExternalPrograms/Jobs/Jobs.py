@@ -1,9 +1,9 @@
 import abc
-from ..Formatters import OptionalTemplate
+from ...Formatters import OptionalTemplate
 
 __all__ = [
     "OptionsBlock",
-    "ElectronicStructureJob"
+    "ExternalProgramJob"
 ]
 
 class JobBlockBase(metaclass=abc.ABCMeta):
@@ -309,7 +309,7 @@ class SystemBlock(OptionsBlock):
             for b in bonds
         )
 
-class ElectronicStructureJob(metaclass=abc.ABCMeta):
+class ExternalProgramJob(metaclass=abc.ABCMeta):
     # blocks: 'tuple[OptionsBlock]' = []
     # base_template = None
     def __init__(self, **opts):
@@ -370,3 +370,4 @@ class ElectronicStructureJob(metaclass=abc.ABCMeta):
             with open(file, mode) as out:
                 out.write(self.format())
         return file
+

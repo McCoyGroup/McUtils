@@ -39,7 +39,8 @@ __all__ = [
     "orthogonal_projection_matrix",
     "project_onto",
     "project_out",
-    "fractional_power"
+    "fractional_power",
+    "unitarize_transformation"
     # "kron_sum",
 ]
 
@@ -1169,8 +1170,23 @@ def project_out(vecs, basis, ndim=None, orthornomal=False):
 
 def fractional_power(A, pow, zero_cutoff=1e-8):
     # only applies to symmetric A
+    # if symmetric:
     vals, vecs = np.linalg.eigh(A)
     take_pos = np.where(np.abs(vals) > zero_cutoff)[0]
-    vals = vals[..., take_pos,]
-    vecs = vecs[..., take_pos]
-    return vecs @ vec_tensordiag(np.power(vals, pow)) @ vecs.T
+    s = vals[..., take_pos,]
+    u = vecs[..., take_pos]
+    v = np.moveaxis(u, -1, -2)
+    # else:
+    #     #TODO, make this resilient to rectangular matrices
+    #     u, s, v = np.linalg.svd(A)
+    #     take_pos = np.where(np.abs(s) > zero_cutoff)[0]
+    #     s = s[..., take_pos,]
+    #     u = u[..., take_pos]
+    #     v = v[..., take_pos, :]
+
+    return u @ vec_tensordiag(np.power(s, pow)) @ v
+
+def unitarize_transformation(tf):
+    u, s, v = np.linalg.svd(tf)
+    shared_dim = min((u.shape[-1], v.shape[-2]))
+    return u[..., :, :shared_dim] @ v[..., :shared_dim, :]

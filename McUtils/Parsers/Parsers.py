@@ -6,14 +6,17 @@ from .StringParser import *
 from .RegexPatterns import *
 
 __all__= [
-    "XYZParser"
+    "XYZParser",
+    "XYZBlock"
 ]
+
+__reload_hook__ = [".StringParser", '.RegexPatterns']
 
 XYZParser = StringParser(
     RegexPattern(
         (
             Named(PositiveInteger, "NumberOfAtoms"),
-            Named(Repeating(Any, min = None), "Comment", dtype=str),
+            Named(Repeating(Any, min=0), "Comment", dtype=str),
             Named(
                 Repeating(
                     RegexPattern(
@@ -33,6 +36,22 @@ XYZParser = StringParser(
         ),
         "XYZ",
         joiner=Newline
+    )
+)
+
+XYZBlock = StringParser(
+    Repeating(
+        RegexPattern(
+            (
+                Capturing(AtomName),
+                Capturing(
+                    Repeating(Capturing(Number), min=3, max=3, suffix=Optional(Whitespace)),
+                    handler=StringParser.array_handler(shape=(None, 3))
+                )
+            ),
+            joiner=Whitespace
+        ),
+        suffix=Optional(Newline)
     )
 )
 

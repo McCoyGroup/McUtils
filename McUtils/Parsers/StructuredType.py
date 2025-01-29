@@ -714,6 +714,7 @@ class StructuredTypeArray:
                 else:
                     # I think this is what there being no residual dims means
                     # (essentially single-element insert)
+                    print(self._array.shape)
                     self._array[key] = value
 
             if isinstance(key, int) and key == self.filled_to[0]:
@@ -813,7 +814,7 @@ class StructuredTypeArray:
                     s1 = st.shape
                     st.shape = (None,) + st.shape
                     self._array = None
-                    self._array = self.empty_array(num_elements = self._default_num_elements if num_elements is None else num_elements)
+                    self._array = self.empty_array(num_elements=self._default_num_elements if num_elements is None else num_elements)
                     if not change_shape:
                         self.stype.shape = s1
                     self.filled_to = [0] + self.filled_to
@@ -998,7 +999,6 @@ class StructuredTypeArray:
             val = val.reshape(new_shape).astype(self.dtype)
 
             filling = self.filled_to[ax] # I should update this so it works for axis != 0 too...
-            # print(self._array.shape, val.shape, val)
             self._array = np.concatenate(
                 (
                     self._array[:filling],
@@ -1080,8 +1080,15 @@ class StructuredTypeArray:
                 if self.dtype is not None:
                     array = array.astype(self.dtype)
                 shp = self._stype.shape
-                if shp is None or all(a is None for a in shp):
+                if shp is None:
                     self._array = array
+                elif all(a is None for a in shp):
+                    if array.ndim == self._array.ndim:
+                        self._array = array
+                    elif array.ndim > self._array.ndim:
+                        raise ValueError(f"can't stuff array of shape {array.shape} into storage array of shape {self._array.shape}")
+                    else:
+                        self._array = np.expand_dims(array, list(range(self._array.ndim - array.ndim)))
                 else:
                     ashp = array.shape
                     if len(shp) > len(ashp):

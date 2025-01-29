@@ -1,7 +1,7 @@
 import json
 import os.path
 
-from .Jobs import ElectronicStructureJob, OptionsBlock, SystemBlock
+from .Jobs import ExternalProgramJob, OptionsBlock, SystemBlock
 
 __all__ = [
     "GaussianJob"
@@ -274,7 +274,7 @@ class GaussianRestBlock(GaussianOptionsBlock):
             return {"rest":{s.strip("{").strip("}"):[] for s in t.split()}}
         return cls._json
 
-class GaussianJob(ElectronicStructureJob):
+class GaussianJob(ExternalProgramJob):
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'gaussian_job.gjf')
     blocks = [
         GaussianLinkBlock,

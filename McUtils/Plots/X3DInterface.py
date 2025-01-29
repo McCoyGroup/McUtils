@@ -33,7 +33,7 @@ class X3D(X3DObject):
         width=500,
         height=500
     )
-    def __init__(self, *children, id=None, **opts):
+    def __init__(self, *children, id=None, dynamic_loading=True, **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
@@ -41,6 +41,7 @@ class X3D(X3DObject):
         if id is None:
             id = "x3d-" + str(uuid.uuid4())[:6]
         self.id = id
+        self.dynamic_loading = dynamic_loading
 
     X3DOM_JS = 'http://www.x3dom.org/download/x3dom.js'
     X3DOM_CSS = 'http://www.x3dom.org/download/x3dom.css'
@@ -48,37 +49,72 @@ class X3D(X3DObject):
         id = self.id
         x3d_embed = self.to_x3d()#.tostring()
 
-        JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-        load_script = JHTML.Script(src=self.X3DOM_JS).tostring()
-        kill_id = "tmp-"+str(uuid.uuid4())[:10]
-        return JHTML.Figure(
-            # JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-            x3d_embed,
-            JHTML.Image(
-                src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-                id=kill_id,
-                onload=f"""
-                (function() {{
-                    document.getElementById("{kill_id}").remove();
-                    const frag = document.createRange().createContextualFragment(`{load_script}`);
-                    document.head.appendChild(frag);
-                }})()"""
-                ),
+        if not self.dynamic_loading:
+            return JHTML.Div(
+                JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+                JHTML.Script(src=self.X3DOM_JS),
+                x3d_embed,
+                id=id
+            )
+        else:
+            JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+            load_script = JHTML.Script(src=self.X3DOM_JS).tostring()
+            kill_id = "tmp-"+str(uuid.uuid4())[:10]
+            return JHTML.Figure(
+                # JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+                x3d_embed,
+                JHTML.Image(
+                    src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                    id=kill_id,
+                    onload=f"""
+                    (function() {{
+                        document.getElementById("{kill_id}").remove();
+                        const frag = document.createRange().createContextualFragment(`{load_script}`);
+                        document.head.appendChild(frag);
+                    }})()"""
+                    ),
+                id=id
+            )
+
+    def to_html(self, *base_elems, header_elems=None, **header_info):
+        id = self.id
+        x3d_embed = self.to_x3d()  # .tostring()
+
+        return JHTML.Html(
+            JHTML.Head(
+                *(header_elems if header_elems is not None else []),
+                JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+                JHTML.Script(src=self.X3DOM_JS),
+                **header_info
+            ),
+            JHTML.Body(
+                *base_elems,
+                x3d_embed
+            ),
             id=id
         )
-    def _ipython_repr_(self):
-        return self.to_widget()
+
+    def _ipython_display_(self):
+        return self.to_widget()._ipython_display_()
+    def get_mime_bundle(self):
+        return self.to_widget().get_mime_bundle()
     def to_x3d(self):
         base_opts = dict(self.defaults, **self.opts)
         for k in ['width', 'height']:
             if k in base_opts:
                 v = base_opts[k]
                 if nput.is_numeric(v):
-                    base_opts[k] = f'{v}px'
+                    base_opts[k] = f'{v:.0f}px'
         return X3DHTML.X3D(
-                    *[a.to_x3d() if hasattr(a, 'to_x3d') else a for a in self.children],
-                    **base_opts
-                )
+            JHTML.HTML.Head(),
+            *[a.to_x3d() if hasattr(a, 'to_x3d') else a for a in self.children],
+            **base_opts
+        )
+    def display(self):
+        return self.to_widget().display()
+
+    def dump(self, file, **opts):
+        return self.to_x3d().write(file, **opts)
 
 class X3DMaterial(X3DObject):
     __props__ = {

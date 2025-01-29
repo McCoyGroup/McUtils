@@ -1145,8 +1145,8 @@ class HTMLWidgets:
     class Canvas(WrappedHTMLElement): base=HTML.Canvas
     class Caption(WrappedHTMLElement): base=HTML.Caption
     class Cite(WrappedHTMLElement): base=HTML.Cite
-    class ClassAdder(WrappedHTMLElement): base=HTML.ClassAdder
-    class ClassRemover(WrappedHTMLElement): base=HTML.ClassRemover
+    # class ClassAdder(WrappedHTMLElement): base=HTMLManager.ClassAdder
+    # class ClassRemover(WrappedHTMLElement): base=HTMLManager.ClassRemover
     class Code(WrappedHTMLElement): base=HTML.Code
     class Col(WrappedHTMLElement): base=HTML.Col
     class Colgroup(WrappedHTMLElement): base=HTML.Colgroup
@@ -1160,7 +1160,7 @@ class HTMLWidgets:
     class Div(WrappedHTMLElement): base=HTML.Div
     class Dl(WrappedHTMLElement): base=HTML.Dl
     class Dt(WrappedHTMLElement): base=HTML.Dt
-    class ElementModifier(WrappedHTMLElement): base=HTML.ElementModifier
+    # class ElementModifier(WrappedHTMLElement): base=HTML.ElementModifier
     class Em(WrappedHTMLElement): base=HTML.Em
     class Embed(WrappedHTMLElement): base=HTML.Embed
     class Fieldset(WrappedHTMLElement): base=HTML.Fieldset
@@ -1172,6 +1172,7 @@ class HTMLWidgets:
     class Header(WrappedHTMLElement): base=HTML.Header
     class Heading(WrappedHTMLElement): base=HTML.Heading
     class Hr(WrappedHTMLElement): base=HTML.Hr
+    class Html(WrappedHTMLElement): base=HTML.Html
     class Iframe(WrappedHTMLElement): base=HTML.Iframe
     class Image(WrappedHTMLElement): base=HTML.Image
     class Img(WrappedHTMLElement): base=HTML.Img
@@ -1217,7 +1218,7 @@ class HTMLWidgets:
     class Span(WrappedHTMLElement): base=HTML.Span
     class Strong(WrappedHTMLElement): base=HTML.Strong
     class Style(WrappedHTMLElement): base=HTML.Style
-    class StyleAdder(WrappedHTMLElement): base=HTML.StyleAdder
+    # class StyleAdder(WrappedHTMLElement): base=HTML.StyleAdder
     class Sub(WrappedHTMLElement): base=HTML.Sub
     class SubHeading(WrappedHTMLElement): base=HTML.SubHeading
     class SubsubHeading(WrappedHTMLElement): base=HTML.SubsubHeading
