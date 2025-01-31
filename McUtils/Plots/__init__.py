@@ -34,5 +34,7 @@ from .Image import *; from .Image import __all__ as exposed
 __all__ += exposed
 from .Properties import *; from .Properties import __all__ as exposed
 __all__ += exposed
+from .SceneJSON import *; from .SceneJSON import __all__ as exposed
+__all__ += exposed
 from .X3DInterface import *; from .X3DInterface import __all__ as exposed
 __all__ += exposed

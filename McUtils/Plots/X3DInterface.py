@@ -113,8 +113,12 @@ class X3D(X3DObject):
     def display(self):
         return self.to_widget().display()
 
-    def dump(self, file, **opts):
-        return self.to_x3d().write(file, **opts)
+    def dump(self, file, write_html=True, **opts):
+        if write_html:
+            html = self.to_html()
+        else:
+            html = self.to_x3d()
+        return html.write(file, **opts)
 
 class X3DMaterial(X3DObject):
     __props__ = {

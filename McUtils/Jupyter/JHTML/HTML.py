@@ -1177,7 +1177,7 @@ class HTML(XMLBase):
                     if hasattr(file, 'write'):
                         file.write(tree)
                     else:
-                        with open(file) as f:
+                        with open(file, 'w+') as f:
                             f.write(tree)
                 else:
                     tree.write(file, **base_opts)

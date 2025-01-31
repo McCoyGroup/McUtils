@@ -2331,6 +2331,11 @@ class SceneJSONAxes(GraphicsAxes3D):
         self.background = background
         self.opts = opts
         self.mode = None
+        for c in children:
+            mode = c.attrs.get('mode')
+            if mode is not None:
+                self.mode = mode
+                break
 
     @classmethod
     def canonicalize_opts(cls, opts):
@@ -2455,7 +2460,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '3d'
         else:
             self.mode = '2d'
-        line_set = sceneJSON.Line(points=points.tolist(), **styles)
+        line_set = sceneJSON.Line(points=points.tolist(), mode=self.mode, **styles)
         self.children.append(line_set)
 
         return line_set
@@ -2467,7 +2472,7 @@ class SceneJSONAxes(GraphicsAxes3D):
         else:
             self.mode = '2d'
         rads = np.asanyarray(rads).tolist()
-        disk_set = sceneJSON.Disk(center=points.tolist(), radius=rads **styles)
+        disk_set = sceneJSON.Disk(center=points.tolist(), radius=rads, mode=self.mode, **styles)
         self.children.append(disk_set)
 
         return disk_set
@@ -2478,7 +2483,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '3d'
         else:
             self.mode = '2d'
-        arrows = sceneJSON.Arrow(points=points.tolist(), radius=rads, cone_radius=cone_radius, **styles)
+        arrows = sceneJSON.Arrow(points=points.tolist(), radius=rads, cone_radius=cone_radius, mode=self.mode, **styles)
         self.children.append(arrows)
         return arrows
 
@@ -2488,7 +2493,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '3d'
         else:
             self.mode = '2d'
-        text = sceneJSON.Text(centers=points.tolist(), text=vals, **styles)
+        text = sceneJSON.Text(centers=points.tolist(), text=vals, mode=self.mode, **styles)
         self.children.append(text)
         return text
 
@@ -2498,7 +2503,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '3d'
         else:
             self.mode = '2d'
-        rects = sceneJSON.Rectangle(points=points.tolist(), **styles)
+        rects = sceneJSON.Rectangle(points=points.tolist(), mode=self.mode, **styles)
         self.children.append(rects)
 
         return rects
@@ -2509,7 +2514,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '3d'
         else:
             self.mode = '2d'
-        rects = sceneJSON.Polygon(points=points.tolist(), **styles)
+        rects = sceneJSON.Polygon(points=points.tolist(), mode=self.mode, **styles)
         self.children.append(rects)
 
         return rects
@@ -2520,7 +2525,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '3d'
         else:
             self.mode = '2d'
-        spheres = sceneJSON.Sphere(center=centers.tolist(), radius=rads, **styles)
+        spheres = sceneJSON.Sphere(center=centers.tolist(), radius=rads, mode=self.mode, **styles)
         self.children.append(spheres)
 
         return spheres
@@ -2533,7 +2538,7 @@ class SceneJSONAxes(GraphicsAxes3D):
             self.mode = '2d'
         ends = np.asanyarray(ends).tolist()
         rads = np.asanyarray(rads).tolist()
-        cyls = sceneJSON.Cylinder(start=starts.tolist(), end=ends, radius=rads, **styles)
+        cyls = sceneJSON.Cylinder(start=starts.tolist(), end=ends, radius=rads, mode=self.mode, **styles)
         self.children.append(cyls)
 
         return cyls
@@ -2629,9 +2634,13 @@ class SceneJSONFigure(GraphicsFigure):
         )
 
     def animate_frames(self, frames: list['SceneJSONAxes'], **animation_opts):
+        frames = [
+            SceneJSONAxes(*f) if not isinstance(f, SceneJSONAxes) else f
+            for f in frames
+        ]
+        wrapper = sceneJSON.Graphics if frames[0].mode == '2d' else sceneJSON.Graphics3D
         return sceneJSON.Animation(
-            frames,
-            graphic_type=sceneJSON.Graphics.tag if frames[0].mode == '2d' else sceneJSON.Graphics3D.tag,
+            [wrapper(f.to_json()) for f in frames],
             **animation_opts
         )
         # animator = X3DAxes(

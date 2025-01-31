@@ -1,7 +1,7 @@
 
 from Peeves.TestUtils import *
 from unittest import TestCase
-from McUtils.ElectronicStructure import *
+from McUtils.Parsers import *
 
 class ElectronicStructureTests(TestCase):
 

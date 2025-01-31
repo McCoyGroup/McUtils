@@ -31,24 +31,40 @@ def get_step_finder(jacobian, hessian=None, **opts):
 def iterative_step_minimize(guess, step_predictor,
                             unitary=False,
                             generate_rotation=False,
-                            dtype='float64', tol=1e-8, max_iterations=100):
+                            dtype='float64',
+                            orthogonal_directions=None,
+                            convergence_metric=None,
+                            tol=1e-8, max_iterations=100):
     guess = np.array(guess, dtype=dtype)
     base_shape = guess.shape[:-1]
     guess = guess.reshape(-1, guess.shape[-1])
     its = np.zeros(guess.shape[0], dtype=int)
     errs = np.zeros(guess.shape[0], dtype=float)
     mask = np.arange(guess.shape[0])
+    if orthogonal_directions is not None:
+        orthogonal_directions = vec_ops.orthogonal_projection_matrix(orthogonal_directions)
     if unitary and generate_rotation:
         rotations = vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
     else:
         rotations = None
+
     converged = True
     for i in range(max_iterations):
-        step = step_predictor(guess[mask,], mask)
-        if unitary:
-            step = vec_ops.project_out(step, guess[mask][:, np.newaxis, :])
-        # print(step)
-        norms = np.linalg.norm(step, axis=1)
+        if unitary is not None:
+            projector = vec_ops.orthogonal_projection_matrix(guess[mask,].T)
+            if orthogonal_directions is not None:
+                projector = projector @ orthogonal_directions[np.newaxis]
+        elif orthogonal_directions is not None:
+            projector = orthogonal_directions[np.newaxis]
+        else:
+            projector = None
+        step, grad = step_predictor(guess[mask,], mask, projector=projector)
+        if projector is not None:
+            # just in case, will usually lead to non-convergence
+            step = (step[..., np.newaxis, :] @ projector).reshape(step.shape)
+            grad = (grad[..., np.newaxis, :] @ projector).reshape(step.shape)
+
+        norms = np.linalg.norm(grad, axis=1)
         errs[mask,] = norms
         done = np.where(norms < tol)[0]
         if len(done) > 0: # easy check
@@ -60,12 +76,14 @@ def iterative_step_minimize(guess, step_predictor,
             guess[mask,] += step[rem,]
         else:
             step = step[rem,]
-            norms = norms[rem,]
+            norms = np.linalg.norm(step, axis=1)
+            # norms = norms[rem,]
             g = guess[mask,].copy()
             v = np.linalg.norm(g, axis=-1)
             r = np.sqrt(norms[rem,]**2 + v**2)
             guess[mask,] = (g + step) / r[:, np.newaxis]
             if generate_rotation:
+                raise NotImplementedError(">3D rotations are complicated")
                 axis = vec_ops.vec_crosses(g, guess[mask,])[0]
                 ang = np.arctan2(norms/r, v/r)
                 rot = tfs.rotation_matrix(axis, ang)
@@ -117,9 +135,10 @@ class LineSearcher(metaclass=abc.ABCMeta):
     Adapted from scipy.optimize to handle multiple structures at once
     """
 
-    def __init__(self, func, **opts):
+    def __init__(self, func, min_alpha=0, **opts):
         self.func = func
         self.opts = opts
+        self.min_alpha = min_alpha
 
     @abc.abstractmethod
     def check_scalar_converged(self, phi_vals, alphas, **opts):
@@ -137,10 +156,12 @@ class LineSearcher(metaclass=abc.ABCMeta):
     def scalar_search(self,
                       scalar_func,
                       guess_alpha,
-                      min_alpha=1e-8,
+                      min_alpha=None,
                       max_iterations=100,
                       history_length=1,
                       **opts):
+        if min_alpha is None:
+            min_alpha = self.min_alpha
 
         alphas = np.asanyarray(guess_alpha)
         mask = np.arange(len(alphas))
@@ -162,7 +183,7 @@ class LineSearcher(metaclass=abc.ABCMeta):
         for i in range(max_iterations):
             if history is not None:
                 phi_vals_old = [p[mask,] for p,a in history]
-                alpha_vals_old = [p[mask,] for p,a in history]
+                alpha_vals_old = [a[mask,] for p,a in history]
             else:
                 phi_vals_old = None
                 alpha_vals_old = None
@@ -172,26 +193,38 @@ class LineSearcher(metaclass=abc.ABCMeta):
                                             mask,
                                             **opts
                                             )
-            new_phi = scalar_func(new_alphas, mask)
+                # mask = np.delete(mask, problem_alphas)
+                # if len(mask) == 0:
+                #     break  # alphas, (phi_vals, is_converged)
 
+            history.append([phi_vals.copy(), alphas.copy()])
+
+            new_phi = scalar_func(new_alphas, mask)
             phi_vals[mask,] = new_phi
+            # prev_alphas = alphas[mask,].copy()
             alphas[mask,] = new_alphas
+
+            problem_alphas = np.where(new_alphas < min_alpha)[0]
+            if len(problem_alphas) > 0:
+                alphas[mask[problem_alphas,],] = min_alpha
+                new_alphas = np.delete(new_alphas, problem_alphas)
+                new_phi = np.delete(new_phi, problem_alphas)
+                mask = np.delete(mask, problem_alphas)
+                if len(mask) == 0:
+                    break
 
             converged = np.where(self.check_scalar_converged(new_phi, new_alphas, **opts))[0]
             if len(converged) > 0:
                 is_converged[mask[converged,],] = True
                 mask = np.delete(mask, converged)
                 if len(mask) == 0:
-                    return alphas, (phi_vals, is_converged)
+                    break
 
-            problem_alphas = np.where(alphas[mask,] < min_alpha)[0]
-            if len(problem_alphas) > 0:
-                mask = np.delete(mask, problem_alphas)
-                if len(mask) == 0:
-                    return alphas, (phi_vals, is_converged)
-
-            history.append([phi_vals.copy(), alphas.copy()])
-
+            # problem_alphas = np.where(np.abs(prev_alphas - alphas[mask,]) < 1e-8)[0]
+            # if len(problem_alphas) > 0:
+            #     mask = np.delete(mask, problem_alphas)
+            #     if len(mask) == 0:
+            #         break# alphas, (phi_vals, is_converged)
         return alphas, (phi_vals, is_converged)
 
     def prep_search(self, initial_geom, search_dir, **opts):
@@ -201,8 +234,7 @@ class LineSearcher(metaclass=abc.ABCMeta):
     def _dir_func(cls, func, initial_geom, search_dir):
         @functools.wraps(func)
         def phi(alphas, mask):
-            woof = func(initial_geom[mask,] + alphas[:, np.newaxis] * search_dir[mask,])
-            return woof
+            return func(initial_geom[mask,] + alphas[:, np.newaxis] * search_dir[mask,], mask)
 
         return phi
 
@@ -218,16 +250,23 @@ class LineSearcher(metaclass=abc.ABCMeta):
 
 class ArmijoSearch(LineSearcher):
 
-    def __init__(self, func, c1=1e-4):
-        super().__init__(func, c1=c1)
+    def __init__(self, func, c1=1e-4, min_alpha=None, fixed_step_cutoff=1e-6, der_max=1e6):
+        super().__init__(func, min_alpha=min_alpha, c1=c1)
         self.func = func
+        self.der_max = der_max
+        self.fixed_step_cutoff = fixed_step_cutoff
 
-    def prep_search(self, initial_geom, search_dir, *, initial_grad, **rest):
+    def prep_search(self, initial_geom, search_dir, *, initial_grad, min_alpha=None, **rest):
         a0, opts, phi = super().prep_search(initial_geom, search_dir, **rest)
         mask = np.arange(len(initial_geom))
         derphi0 = np.reshape(initial_grad[:, np.newaxis, :] @ search_dir[:, :, np.newaxis], (-1,))
+        # derphi0 = np.clip(derphi0, -self.der_max, self.der_max)
         phi0 = phi(np.zeros_like(a0), mask)
-        return a0, dict(opts, phi0=phi0, derphi0=derphi0), phi
+        if min_alpha is None:
+            min_alpha = self.min_alpha
+        if min_alpha is None:
+            min_alpha = 0 if np.max(np.abs(derphi0)) > self.fixed_step_cutoff else 1
+        return a0, dict(opts, phi0=phi0, derphi0=derphi0, min_alpha=min_alpha), phi
 
     def check_scalar_converged(self, phi_vals, alphas, *, phi0, c1, derphi0):
         return phi_vals <= phi0 + c1 * alphas * derphi0
@@ -237,27 +276,54 @@ class ArmijoSearch(LineSearcher):
                       old_phi_vals, old_alphas_vals,
                       mask,
                       *,
-                      phi0, c1, derphi0
+                      phi0, c1, derphi0,
+                      zero_cutoff=1e-16
                       ):
+        phi0 = phi0[mask,]
+        derphi0 = derphi0[mask,]
         if iteration == 0:
-            alpha1 = -(derphi0) * alphas ** 2 / 2.0 / (phi_vals - phi0[mask,] - derphi0[mask,] * alphas)
+            factor = (phi_vals - phi0 - derphi0 * alphas)
+            # alpha1 = alphas.copy()
+            # safe_pos = np.where(np.abs(factor) > zero_cutoff)
+            # alpha1[safe_pos,] = -(derphi0[safe_pos,]) * alphas[safe_pos] ** 2 / 2.0 / factor[safe_pos]
+            # TODO: ensure stays numerically stable
+            # print(".>>", phi0)
+            alpha1 = -(derphi0) * alphas ** 2 / 2.0 / factor
             return alpha1
-
         else:
             phi_a0 = old_phi_vals[0]
             phi_a1 = phi_vals
             alpha0 = old_alphas_vals[0]
             alpha1 = alphas
 
-            factor = alpha0 ** 2 * alpha1 ** 2 * (alpha1 - alpha0)
-            a = alpha0 ** 2 * (phi_a1 - phi0 - derphi0 * alpha1) - \
-                alpha1 ** 2 * (phi_a0 - phi0 - derphi0 * alpha0)
-            a = a / factor
-            b = -alpha0 ** 3 * (phi_a1 - phi0 - derphi0 * alpha1) + \
-                alpha1 ** 3 * (phi_a0 - phi0 - derphi0 * alpha0)
-            b = b / factor
+            # da = (alpha1 - alpha0)
+
+            # safe_pos = np.where(np.abs(factor) < zero_cutoff)
+            # factor = alpha0 ** 2 * alpha1 ** 2 * (alpha1 - alpha0)
+            # a = alpha0 ** 2 * (phi_a1 - phi0 - derphi0 * alpha1) - \
+            #     alpha1 ** 2 * (phi_a0 - phi0 - derphi0 * alpha0)
+            # a = a / factor
+            # b = -alpha0 ** 3 * (phi_a1 - phi0 - derphi0 * alpha1) + \
+            #     alpha1 ** 3 * (phi_a0 - phi0 - derphi0 * alpha0)
+            # b = b / factor
+
+            # scaling = 1
+            n0 = (phi_a0 - phi0 - derphi0 * alpha0)
+            n1 = (phi_a1 - phi0 - derphi0 * alpha1)
+            d0 = alpha0 ** 2 * (alpha1 - alpha0)
+            d1 = alpha1 ** 2 * (alpha1 - alpha0)
+            # if d0 < 1e-8 or d1 < 1e-8:
+            #     scaling = 1e6
+            #     d0 = d0 * scaling
+            #     d1 = d1 * scaling
+            f1 = n1 / d1
+            f0 = n0 / d0
+
+            a = f1 - f0
+            b = alpha1 * f0 - alpha0 * f1
 
             alpha2 = (-b + np.sqrt(abs(b ** 2 - 3 * a * derphi0))) / (3.0 * a)
+            # alpha2 = alpha2 / scaling
 
             halved_alphas = np.where(
                 np.logical_or(
@@ -304,7 +370,11 @@ class _WolfeLineSearch(LineSearcher):
         ...
 
 class GradientDescentStepFinder:
-    def __init__(self, jacobian, damping_parameter=None, damping_exponent=None, restart_interval=10):
+    line_search = ArmijoSearch
+
+    def __init__(self, func, jacobian, damping_parameter=None, damping_exponent=None,
+                 line_search=True, restart_interval=10):
+        self.func = func
         self.jac = jacobian
         self.damper = Damper(
             damping_parameter=damping_parameter,
@@ -312,15 +382,39 @@ class GradientDescentStepFinder:
             restart_interval=restart_interval
         )
 
-    def __call__(self, guess, mask):
-        jac = -self.jac(guess, mask)
+        if line_search is True:
+            line_search = self.line_search(func)
+        self.searcher = line_search
+
+    def __call__(self, guess, mask, projector=None):
+        # jac = -self.jac(guess, mask)
+        # u = self.damper.get_damping_factor()
+        # if u is not None:
+        #     jac = u * jac
+        # return jac, jac
+
+
+        jacobian = self.jac(guess, mask)
+
+        new_step_dir = -jacobian
+        if projector is not None:
+            new_step_dir = (new_step_dir[..., np.newaxis, :] @ projector).reshape(new_step_dir.shape)
+
+        if self.searcher is not None:
+            alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=jacobian)
+            new_step_dir = alpha[:, np.newaxis] * new_step_dir
+
+        # h = func(guess, mask)
         u = self.damper.get_damping_factor()
         if u is not None:
-            jac = u * jac
-        return jac
+            new_step_dir = new_step_dir * u
+
+        return new_step_dir, jacobian
 
 class NetwonDirectHessianGenerator:
-    def __init__(self, jacobian, hessian, hess_mode='direct',
+
+    line_search = ArmijoSearch
+    def __init__(self, func, jacobian, hessian, hess_mode='direct', line_search=True,
                  damping_parameter=None, damping_exponent=None, restart_interval=10
                  ):
         hessian = self.wrap_hessian(hessian, hess_mode)
@@ -331,53 +425,66 @@ class NetwonDirectHessianGenerator:
             damping_exponent=damping_exponent,
             restart_interval=restart_interval
         )
+        if line_search is True:
+            line_search = self.line_search(func)
+        self.searcher = line_search
 
     def wrap_hessian(self, func, mode):
         if mode == 'direct':
             @functools.wraps(func)
             def hessian_inverse(guess, mask):
                 h = func(guess, mask)
-                u = self.damper.get_damping_factor()
-                if u is not None:
-                    h = h + u * vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
+                # u = self.damper.get_damping_factor()
+                # if u is not None:
+                #     h = h + u * vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
                 return np.linalg.inv(h)
         else:
-            @functools.wraps(func)
-            def hessian_inverse(guess, mask):
-                h = func(guess, mask)
-                u = self.damper.get_damping_factor()
-                if u is not None:
-                    h = h * u
-                return h
+            hessian_inverse = func
+            # @functools.wraps(func)
+            # def hessian_inverse(guess, mask):
+            #     return h
 
         return hessian_inverse
 
-    def __call__(self, guess, mask):
-        return self.jacobian(guess, mask), self.hessian_inverse(guess, mask)
+    def __call__(self, guess, mask, projector=None):
+
+        jacobian, hessian_inv = self.jacobian(guess, mask), self.hessian_inverse(guess, mask)
+
+        new_step_dir = -(hessian_inv @ jacobian[:, :, np.newaxis]).reshape(jacobian.shape)
+        if projector is not None:
+            new_step_dir = (new_step_dir[:, np.newaxis, :] @ projector).reshape(new_step_dir.shape)
+        if self.searcher is not None:
+            alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=jacobian)
+            new_step_dir = alpha[:, np.newaxis] * new_step_dir
+
+        # h = func(guess, mask)
+        u = self.damper.get_damping_factor()
+        if u is not None:
+            new_step_dir = new_step_dir * u
+
+        return new_step_dir, jacobian
 
 class NewtonStepFinder:
-
-    def __init__(self, jacobian, hessian=None, check_generator=True, **generator_opts):
+    def __init__(self, func, jacobian=None, hessian=None, *, check_generator=True, **generator_opts):
         if check_generator:
-            generator = self._prep_generator(jacobian, hessian, generator_opts)
+            generator = self._prep_generator(func, jacobian, hessian, generator_opts)
         else:
             generator = jacobian
         self.generator = generator
 
     @classmethod
-    def _prep_generator(cls, jac, hess, opts):
-        if (hasattr(jac, 'jacobian') and hasattr(jac, 'hessian_inverse')):
-            return jac
+    def _prep_generator(cls, func, jac, hess, opts):
+        if (hasattr(func, 'jacobian') and hasattr(func, 'hessian_inverse')):
+            return func
         else:
             if hess is None:
                 raise ValueError(
                     "Direct Netwon requires a Hessian or a generator for the Jacobian and Hessian inverse. "
                     "Consider using Quasi-Newton if only the Jacobian is fast to compute.")
-            return NetwonDirectHessianGenerator(jac, hess, **opts)
+            return NetwonDirectHessianGenerator(func, jac, hess, **opts)
 
-    def __call__(self, guess, mask):
-        jacobian, hessian_inv = self.generator(guess, mask)
-        return -(hessian_inv @ jacobian[:, :, np.newaxis]).reshape(jacobian.shape)
+    def __call__(self, guess, mask, projector=None):
+        return self.generator(guess, mask, projector=projector)
 
 class QuasiNewtonStepFinder:
 
@@ -389,18 +496,17 @@ class QuasiNewtonStepFinder:
             'bfgs':BFGSApproximator
         }
 
-    def __call__(self, guess, mask):
-        gen = self.hess_appx(guess, mask)
-        if isinstance(gen, tuple): # uncommon case...
-            jacobian, hessian_inv = gen
-            return -(hessian_inv @ jacobian)
-        else:
-            return gen
+    def __call__(self, guess, mask, projector=None):
+        return self.hess_appx(guess, mask, projector=projector)
 
 class QuasiNetwonHessianApproximator:
 
     line_search = ArmijoSearch
-    def __init__(self, func, jacobian, initial_beta=1, damping_parameter=None, damping_exponent=None, restart_interval=10):
+    def __init__(self, func, jacobian, initial_beta=1,
+                 damping_parameter=None, damping_exponent=None,
+                 line_search=True, restart_interval=10,
+                 restart_hessian_norm=1e-5
+                 ):
         self.func = func
         self.jac = jacobian
         self.initial_beta = initial_beta
@@ -414,7 +520,10 @@ class QuasiNetwonHessianApproximator:
             damping_exponent=damping_exponent,
             restart_interval=restart_interval
         )
-        self.searcher = self.line_search(func)
+        if line_search is True:
+            line_search = self.line_search(func)
+        self.searcher = line_search
+        self.restart_hessian_norm = restart_hessian_norm
 
     def identities(self, guess, mask):
         if self.eye_tensors is None:
@@ -438,25 +547,35 @@ class QuasiNetwonHessianApproximator:
             jac_diffs = new_jacs - prev_jacs
         return new_jacs, jac_diffs
 
-    def __call__(self, guess, mask):
+    def restart_hessian_approximation(self):
+        restart = np.any(
+            np.linalg.norm(self.prev_step, axis=-1) < self.restart_hessian_norm
+        )
+        return restart
+
+    def __call__(self, guess, mask, projector=None):
         new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask)
-        if self.prev_step is None:
+        if self.prev_step is None or self.restart_hessian_approximation():
             new_hess = self.initialize_hessians(guess, mask)
         else:
             prev_steps = self.prev_step[mask,]
             prev_hess = self.prev_hess_inv[mask,]
             new_hess = self.get_hessian_update(self.identities(guess, mask), jacobian_diffs, prev_steps, prev_hess)
 
-        u = self.damper.get_damping_factor()
-        if u is not None:
-            new_hess = u * new_hess
-
         # print(new_hess)
         new_step_dir = -(new_hess @ new_jacs[:, :, np.newaxis]).reshape(new_jacs.shape)
-        # raise Exception(self.func(guess, mask), new_jacs[:, np.newaxis, :] @ new_step_dir[:, :, np.newaxis])
-        alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=new_jacs)
+        if projector is not None:
+            new_step_dir = (new_step_dir[:, np.newaxis, :] @ projector).reshape(new_step_dir.shape)
+        if self.searcher is not None:
+            alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=new_jacs)
+        else:
+            alpha = np.ones(len(new_step_dir))
         # handle convergence issues?
         new_step = alpha[:, np.newaxis] * new_step_dir
+        # print(np.isnan(guess).any(), np.isnan(alpha).any(), np.linalg.norm(new_step_dir))
+        u = self.damper.get_damping_factor()
+        if u is not None:
+            new_step = new_step * u
 
         if self.prev_jac is None:
             self.prev_jac = new_jacs
@@ -473,16 +592,29 @@ class QuasiNetwonHessianApproximator:
         else:
             self.prev_hess_inv[mask,] = new_hess
 
-        return new_step
+        return new_step, new_jacs
 
 class BFGSApproximator(QuasiNetwonHessianApproximator):
+
+    orthogonal_dirs_cutoff = 1e-8
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
-        diff_outer = jacobian_diffs[:, np.newaxis, :] * prev_steps[:, :, np.newaxis]
         diff_norm = jacobian_diffs[:, np.newaxis, :] @ prev_steps[:, :, np.newaxis]
+        good_pos = np.where(np.abs(diff_norm.reshape(-1,)) > self.orthogonal_dirs_cutoff)
+
+        H = prev_hess.copy()
+
+        diff_norm = diff_norm[good_pos]
+        identities = identities[good_pos]
+        prev_steps = prev_steps[good_pos]
+        jacobian_diffs = jacobian_diffs[good_pos]
+
+        diff_outer = jacobian_diffs[:, np.newaxis, :] * prev_steps[:, :, np.newaxis]
         diff_step = identities - diff_outer / diff_norm
         step_outer = prev_steps[:, np.newaxis, :] * prev_steps[:, :, np.newaxis]
-        step_step = step_outer / diff_step
-        H = diff_step @ prev_hess @ np.moveaxis(diff_step, -1, -2) + step_step
+        # print("woof", np.linalg.norm(diff_step))
+        step_step = step_outer / diff_norm
+        H[good_pos] = diff_step @ H[good_pos] @ np.moveaxis(diff_step, -1, -2) + step_step
+
         return H
 
 class ConjugateGradientStepFinder:
@@ -495,37 +627,49 @@ class ConjugateGradientStepFinder:
             'fletcher-reeves':FletcherReevesApproximator
         }
 
-    def __call__(self, guess, mask):
-        gen = self.step_appx(guess, mask)
-        return gen
+    def __call__(self, guess, mask, projector=None):
+        return self.step_appx(guess, mask, projector=projector)
 
 class ConjugateGradientStepApproximator:
     line_search = ArmijoSearch
 
     def __init__(self, func, jacobian,
-                 # damping_parameter=None, damping_exponent=None,
-                 restart_interval=10):
+                 damping_parameter=None, damping_exponent=None,
+                 restart_interval=50, restart_parameter=.2,
+                 line_search=True):
         self.func = func
         self.jac = jacobian
         self.base_hess = None
         self.prev_jac = None
         self.prev_step_dir = None
-        # self.damper = Damper(
-        #     damping_parameter=damping_parameter,
-        #     damping_exponent=damping_exponent,
-        #     restart_interval=restart_interval
-        # )
+        self.damper = Damper(
+            damping_parameter=damping_parameter,
+            damping_exponent=damping_exponent,
+            restart_interval=restart_interval
+        )
         self.n = 0
         self.restart_interval = restart_interval
-        self.searcher = self.line_search(func)
+        self.restart_parameter = restart_parameter
+        if line_search is True:
+            line_search = self.line_search(func)
+        self.searcher = line_search
 
     def get_beta(self, new_jacs, prev_jac, prev_step_dir):
         raise NotImplementedError("abstract")
 
-    def __call__(self, guess, mask):
+    def determine_restart(self, new_jacs, mask):
+        if self.n == 0: return True
+        prev_jac = self.prev_jac[mask,]
+        new_norm = np.abs(new_jacs[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis]).flatten()
+        old_norm = (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis]).flatten()
+        return np.any(
+            self.restart_parameter * old_norm < new_norm
+        )
+
+    def __call__(self, guess, mask, projector=None):
         new_jacs = self.jac(guess, mask)
 
-        if self.prev_jac is None or self.n == 0:
+        if self.prev_jac is None or self.determine_restart(new_jacs, mask):
             new_step_dir = -new_jacs
         else:
             prev_jac = self.prev_jac[mask,]
@@ -533,9 +677,16 @@ class ConjugateGradientStepApproximator:
             beta = self.get_beta(new_jacs, prev_jac, prev_step_dir)
             new_step_dir = -new_jacs + beta[:, np.newaxis] * prev_step_dir
 
+        if projector is not None:
+            new_step_dir = (new_step_dir[:, np.newaxis, :] @ projector).reshape(new_step_dir.shape)
+
         alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=new_jacs)
         # handle convergence issues?
         new_step = alpha[:, np.newaxis] * new_step_dir
+
+        u = self.damper.get_damping_factor()
+        if u is not None:
+            new_step = new_step * u
 
         if self.prev_jac is None:
             self.prev_jac = new_jacs
@@ -549,7 +700,7 @@ class ConjugateGradientStepApproximator:
 
         self.n = (self.n + 1) % self.restart_interval
 
-        return new_step
+        return new_step, new_jacs
 
 
 class FletcherReevesApproximator(ConjugateGradientStepApproximator):

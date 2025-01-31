@@ -1132,10 +1132,9 @@ def projection_matrix(basis, orthornomal=False):
     if basis.ndim == 1:
         basis = basis[np.newaxis]
     if not orthornomal:
-        basis, _ = np.linalg.qr(np.moveaxis(basis, -1, -2))
-        basis = np.moveaxis(basis, -2, -1)
+        basis, _ = np.linalg.qr(basis)
 
-    return np.moveaxis(basis, -1, -2) @ basis
+    return basis @ np.moveaxis(basis, -2, -1)
 
 def orthogonal_projection_matrix(basis, orthornomal=False):
     proj = projection_matrix(basis, orthornomal=orthornomal)
@@ -1145,6 +1144,8 @@ def orthogonal_projection_matrix(basis, orthornomal=False):
 def _proj(projection_type, vecs, basis, ndim=None, orthornomal=False):
     vecs = np.asanyarray(vecs)
     basis = np.asanyarray(basis)
+    if vecs.shape[-1] != basis.shape[-2]:
+        raise ValueError(f"mismatch between vector dim {vecs.shape[-1]} and basis dim {basis.shape[-2]} ({basis.shape[-1]} basis vectors)")
     if ndim is None:
         base_shape = basis.shape[:-2]
         if len(base_shape) == 0:
