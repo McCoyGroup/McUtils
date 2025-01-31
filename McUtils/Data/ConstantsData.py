@@ -144,33 +144,49 @@ class UnitsDataHandler(DataHandler):
         :return: scaling, inverted, base_unit, power
         :rtype:
         """
+
+        if unit == 'Grams':
+            return ('Kilograms', False, 1 / 1000, 1)
+
         already_there = unit in self._unit_graph
         if already_there:
             scaling = 1
             inverted = False
-            if unit.startswith("Inverse"):
-                inverted = True
-                unit = unit.split("Inverse", 2)[1]
+            # if unit.startswith("Inverse"):
+            #     inverted = True
+            #     unit = unit.split("Inverse", 2)[1]
             base_unit = unit
             power = 1
         else:
+            scaling = 1
             power = 1
             for postfix in self.postfix_map:
                 if unit.endswith(postfix):
                     power = self.postfix_map[postfix]
                     unit = postfix.join(unit.split(postfix)[:-1])
                     break
+
             inverted = False
             if unit.startswith("Inverse"):
-                inverted = True
+                # inverted = True
                 unit = unit.split("Inverse", 2)[1]
-            scaling = 1
-            for prefix in self.prefix_map:
-                if unit.startswith(prefix):
-                    scaling = self.prefix_map[prefix]
-                    unit = unit.split(prefix, 2)[1]
-                    unit = unit[0].upper() + unit[1:]
-                    break
+                new_unit, new_inverted, scaling, new_power = self._get_unit_modifiers(unit)
+                inverted = not new_inverted
+                if new_power != 1:
+                    raise ValueError(f"not sure what to do with subunit {unit}")
+                unit = new_unit
+                scaling = 1 / scaling
+                # power = new_power * power
+
+            if unit == 'Kilograms':
+                pass
+            else:
+                for prefix in self.prefix_map:
+                    if unit.startswith(prefix):
+                        scaling = self.prefix_map[prefix]
+                        unit = unit.split(prefix, 2)[1]
+                        unit = unit[0].upper() + unit[1:]
+                        break
 
             # if unit not in self._unit_graph:
             #     base_unit = None
@@ -183,14 +199,30 @@ class UnitsDataHandler(DataHandler):
 
     def _canonicalize_unit(self, unit):
         if isinstance(unit, str):
-            bits = list(map(self._get_unit_modifiers, unit.split()))
+            if '/' in unit:
+                unit1, unit2 = [u.strip() for u in unit.split('/', 1)]
+                if unit2 == 'Mole':
+                    bits = self._canonicalize_unit(unit1)
+                    base_unit, inverted, scaling, power = bits[0]
+                    bits = [(base_unit, inverted, scaling / self.moles, power)] + bits[1:]
+                else:
+                    bits1 = self._canonicalize_unit(unit1)
+                    bits2 = self._canonicalize_unit(unit2)
+                    bits = bits1 + [
+                        (base_unit, not inverted, scaling, power)
+                        for base_unit, inverted, scaling, power in bits2
+                    ]
+            else:
+                bits = list(map(self._get_unit_modifiers, unit.split()))
         else:
             bits = []
             for u in unit:
-                if isinstance(u, tuple): # things can be fed in like (unit, power) for generality
+                if isinstance(u, (list, tuple)): # things can be fed in like (unit, power) for generality
                     base_unit, inverted, scaling, power = self._get_unit_modifiers(u[0])
                     power = u[1]
                     bits.append((base_unit, inverted, scaling, power))
+                else:
+                    bits.append(self._get_unit_modifiers(u))
 
         return bits
 
@@ -286,7 +318,7 @@ class UnitsDataHandler(DataHandler):
         conv_path = self._unit_graph.find_path_bfs(src, targ)
         invert = False
         if conv_path is None:
-            conv_path = self._unit_graph.find_path_bfs(src, targ)
+            conv_path = self._unit_graph.find_path_bfs(targ, src)
             if conv_path is None: return None
             invert = True
         cval = 1
@@ -423,6 +455,22 @@ class UnitsDataHandler(DataHandler):
 
         return conv
 
+
+    @property
+    def constants(self):
+        return [k for k in self.data.keys() if isinstance(k, str)]
+    def constant(self, const):
+        """Converts base unit into target using the scraped NIST data
+
+        :param unit:
+        :type unit:
+        :param target:
+        :type target:
+        :return:
+        :rtype:
+        """
+        return self[const]['Value']
+
     # Conveniences
     Wavenumbers = "Wavenumbers"
     Hartrees = "Hartrees"
@@ -439,6 +487,9 @@ class UnitsDataHandler(DataHandler):
     @property
     def amu_to_me(self):
         return self.convert("AtomicMassUnits", "ElectronMass")
+    @property
+    def moles(self):
+        return UnitsData.constant('AvogadroConstant')
 
     #endregion
 

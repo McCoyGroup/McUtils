@@ -4,6 +4,12 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 """
 
 __all__ = []
+from .Jobs import *; from .Jobs import __all__ as exposed
+__all__ += exposed
+from .Parsers import *; from .Parsers import __all__ as exposed
+__all__ += exposed
+from .Runner import *; from .Runner import __all__ as exposed
+__all__ += exposed
 from .ChemToolkits import *; from .ChemToolkits import __all__ as exposed
 __all__ += exposed
 from .Visualizers import *; from .Visualizers import __all__ as exposed

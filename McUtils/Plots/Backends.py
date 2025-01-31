@@ -17,6 +17,7 @@ from .. import Numputils as nput
 from . import VTKInterface as vtk
 from ..ExternalPrograms import VPythonInterface as vpython
 from . import X3DInterface as x3d
+from .SceneJSON import SceneJSON as sceneJSON
 
 DPI_SCALING = 72
 
@@ -365,6 +366,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         VPython = 'vpython'
         VPython2D = 'vpython2D'
         X3D = 'x3d'
+        SceneJSON = 'json'
 
     registered_backends = {}
     @classmethod
@@ -376,6 +378,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             cls.DefaultBackends.VPython2D.value: VPythonBackend,
             cls.DefaultBackends.VPython.value: VPythonBackend3D,
             cls.DefaultBackends.X3D.value: X3DBackend,
+            cls.DefaultBackends.SceneJSON.value: SceneJSONBackend,
         }
     @classmethod
     def lookup(cls, backend, opts=None) -> 'GraphicsBackend':
@@ -2243,16 +2246,17 @@ class X3DFigure(GraphicsFigure):
         return self.background
     def set_facecolor(self, fg):
         self.background = fg
-    def savefig(self, file, **opts):
-        raise NotImplementedError("too annoying")
-    def to_x3d(self):
+    def savefig(self, file, format=None, **opts):
+        return self.to_x3d(**opts).dump(file)
+    def to_x3d(self, **opts):
         opts = dict(
             self.opts,
             profile=self.profile,
             version=self.version,
             width=self.width,
             height=self.height,
-            id=self.id
+            id=self.id,
+            **opts
         )
         return x3d.X3D(
             *[a.to_x3d() for a in self.axes],
@@ -2277,7 +2281,7 @@ class X3DFigure(GraphicsFigure):
             width=self.width,
             height=self.height
         )
-        return x3d.X3D(animator.to_x3d(), **opts).to_widget()
+        return x3d.X3D(animator.to_x3d(), **opts)
 
 class X3DBackend(GraphicsBackend):
     Figure = X3DFigure
@@ -2302,12 +2306,391 @@ class X3DBackend(GraphicsBackend):
     def show_figure(self, graphics:X3DFigure, reshow=None):
         if not graphics.shown:
             graphics.shown = True
+            graphics.to_x3d().to_widget().display()
 
-            from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
+            # from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
+            #
+            # display = JupyterAPIs.get_display_api()
+            # html = graphics.to_x3d().to_widget().tostring()
+            # return display.display(display.HTML(html))
 
-            display = JupyterAPIs.get_display_api()
-            html = graphics.to_x3d().to_widget().tostring()
-            return display.display(display.HTML(html))
+    def get_interactive_status(self) -> 'bool':
+        return True
+    def disable_interactivity(self):
+        ...
+    def enable_interactivity(self):
+        ...
+    def get_available_themes(self):
+        return []
+
+class SceneJSONAxes(GraphicsAxes3D):
+    def __init__(self, *children, title=None, background=None, **opts):
+        super().__init__()
+        self.children = list(children)
+        self.title = title
+        self.background = background
+        self.opts = opts
+        self.mode = None
+        for c in children:
+            mode = c.attrs.get('mode')
+            if mode is not None:
+                self.mode = mode
+                break
+
+    @classmethod
+    def canonicalize_opts(cls, opts):
+        return opts
+
+    def remove(self, *, backend):
+        self.children = []
+        self.title = ""
+        self.background = "white"
+
+    def clear(self, *, backend):
+        self.children = []
+        self.title = ""
+        self.background = "white"
+
+    def get_plotter(self, method):
+        ...
+
+    def get_plot_label(self):
+        return self.title
+    def set_plot_label(self, val, **style):
+        self.title = val
+
+    def get_frame_visible(self):
+        raise NotImplementedError(...)
+    def set_frame_visible(self, frame_spec):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_frame_style(self):
+        raise NotImplementedError(...)
+    def set_frame_style(self, frame_spec):
+        ...
+        # raise NotImplementedError(...)
+
+    def get_xlabel(self):
+        raise NotImplementedError(...)
+    def set_xlabel(self, val, **style):
+        ...
+
+    def get_ylabel(self):
+        raise NotImplementedError(...)
+    def set_ylabel(self, val, **style):
+        ...
+
+    def get_xlim(self):
+        raise NotImplementedError(...)
+    def set_xlim(self, val, **opts):
+        ...
+
+    def get_ylim(self):
+        raise NotImplementedError(...)
+    def set_ylim(self, val, **opts):
+        ...
+
+    def get_zlim(self):
+        raise NotImplementedError(...)
+    def set_zlim(self, val, **opts):
+        ...
+
+    def get_xticks(self):
+        return []
+    def set_xticks(self, val, **opts):
+        ...
+
+    def get_yticks(self):
+        return []
+    def set_yticks(self, val, **opts):
+        ...
+
+    def get_zticks(self):
+        return []
+    def set_zticks(self, val, **opts):
+        ...
+
+    def get_xtick_style(self):
+        return {}
+    def set_xtick_style(self, **opts):
+        ...
+
+    def get_ytick_style(self):
+        return {}
+    def set_ytick_style(self, **opts):
+        ...
+
+    def get_ztick_style(self):
+        return {}
+    def set_ztick_style(self, **opts):
+        ...
+
+    def set_aspect_ratio(self, ar):
+        ...
+
+    def get_bbox(self):
+        raise NotImplementedError(...)
+    def set_bbox(self, bbox):
+        raise NotImplementedError(...)
+
+    def get_facecolor(self):
+        return self.background
+    def set_facecolor(self, fg):
+        self.background = fg
+
+    def get_padding(self):
+        raise NotImplementedError(...)
+
+    def get_view_settings(self):
+        return self.opts.get('viewpoint', {})
+    def set_view_settings(self, **values):
+        new_opts = {
+            k:v for k,v in dict(self.opts.get('viewpoint', {}), **values).items()
+            if v is not None
+        }
+        if len(new_opts) == 0 and 'viewpoint' in self.opts:
+            del self.opts['viewpoint']
+        else:
+            self.opts['viewpoint'] = new_opts
+
+    def draw_line(self, points, **styles):
+        points = np.asanyarray(points)
+        if points.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        line_set = sceneJSON.Line(points=points.tolist(), mode=self.mode, **styles)
+        self.children.append(line_set)
+
+        return line_set
+
+    def draw_disk(self, points, rads=1, **styles):
+        points = np.asanyarray(points)
+        if points.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        rads = np.asanyarray(rads).tolist()
+        disk_set = sceneJSON.Disk(center=points.tolist(), radius=rads, mode=self.mode, **styles)
+        self.children.append(disk_set)
+
+        return disk_set
+
+    def draw_arrow(self, points, rads=.1, cone_radius=.15, **styles):
+        points = np.asanyarray(points)
+        if points.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        arrows = sceneJSON.Arrow(points=points.tolist(), radius=rads, cone_radius=cone_radius, mode=self.mode, **styles)
+        self.children.append(arrows)
+        return arrows
+
+    def draw_text(self, points, vals, **styles):
+        points = np.asanyarray(points)
+        if points.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        text = sceneJSON.Text(centers=points.tolist(), text=vals, mode=self.mode, **styles)
+        self.children.append(text)
+        return text
+
+    def draw_rect(self, points, **styles):
+        points = np.asanyarray(points)
+        if points.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        rects = sceneJSON.Rectangle(points=points.tolist(), mode=self.mode, **styles)
+        self.children.append(rects)
+
+        return rects
+
+    def draw_poly(self, points, **styles):
+        points = np.asanyarray(points)
+        if points.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        rects = sceneJSON.Polygon(points=points.tolist(), mode=self.mode, **styles)
+        self.children.append(rects)
+
+        return rects
+
+    def draw_sphere(self, centers, rads, **styles):
+        centers = np.asanyarray(centers)
+        if centers.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        spheres = sceneJSON.Sphere(center=centers.tolist(), radius=rads, mode=self.mode, **styles)
+        self.children.append(spheres)
+
+        return spheres
+
+    def draw_cylinder(self, starts, ends, rads, **styles):
+        starts = np.asanyarray(starts)
+        if starts.shape[-1] == 3:
+            self.mode = '3d'
+        else:
+            self.mode = '2d'
+        ends = np.asanyarray(ends).tolist()
+        rads = np.asanyarray(rads).tolist()
+        cyls = sceneJSON.Cylinder(start=starts.tolist(), end=ends, radius=rads, mode=self.mode, **styles)
+        self.children.append(cyls)
+
+        return cyls
+
+    def to_json(self):
+        opts = dict(
+            self.opts,
+            background=self.background,
+            title=self.title
+        )
+        return sceneJSON.Scene(
+            self.children,
+            **opts
+        )
+
+class SceneJSONFigure(GraphicsFigure):
+    Axes = SceneJSONAxes
+
+    def __init__(self, width=640, height=500,
+                 background='white', figsize=None, profile='Immersive', version='3.3',
+                 id=None,
+                 **opts):
+        if id is None:
+            id = f"scene-{uuid.uuid4()}"
+        self.id = id
+        self.profile = profile
+        self.version = version
+        self.opts = dict(opts)
+        self.width = width
+        self.height = height
+        if figsize is not None:
+            self.set_size_inches(*figsize)
+        self.background = background
+        self.shown = False
+        super().__init__()
+
+    def __setitem__(self, key, value):
+        self.opts[key] = value
+    def __getitem__(self, item):
+        return self.opts[item]
+
+    def clear(self, *, backend):
+        self.axes = []
+
+    def close(self, *, backend):
+        self.clear(backend=backend)
+
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError("not possible")
+
+    def create_axes(self, rows=1, cols=1, spans=1, **kw) -> 'GraphicsAxes':
+        if (rows, cols, spans) != (1, 1, 1):
+            raise NotImplementedError("can't create subcanvases")
+        return self.add_axes(self.Axes(**kw))
+
+    @classmethod
+    def construct(cls, **kw) -> 'GraphicsFigure':
+        return cls(**kw)
+
+    def get_size_inches(self):
+        return [self.width/DPI_SCALING, self.height/DPI_SCALING]
+    def set_size_inches(self, w, h):
+        self.width, self.height = w*DPI_SCALING, h*DPI_SCALING
+    def set_extents(self, extents):
+        ...
+    def get_facecolor(self):
+        return self.background
+    def set_facecolor(self, fg):
+        self.background = fg
+    def savefig(self, file, format=None, **opts):
+        return self.to_json(**opts).dump(file)
+    def to_json(self, **opts):
+        opts = dict(
+            self.opts,
+            profile=self.profile,
+            version=self.version,
+            width=self.width,
+            height=self.height,
+            id=self.id,
+            **opts
+        )
+        mode = '2d'
+        for a in self.axes:
+            if a.mode == '3d': mode = '3d'
+        if mode == '3d':
+            wrapper = sceneJSON.Graphics3D
+        else:
+            wrapper = sceneJSON.Graphics
+
+        return wrapper(
+            *[a.to_json() for a in self.axes],
+            **opts
+        )
+
+    def animate_frames(self, frames: list['SceneJSONAxes'], **animation_opts):
+        frames = [
+            SceneJSONAxes(*f) if not isinstance(f, SceneJSONAxes) else f
+            for f in frames
+        ]
+        wrapper = sceneJSON.Graphics if frames[0].mode == '2d' else sceneJSON.Graphics3D
+        return sceneJSON.Animation(
+            [wrapper(f.to_json()) for f in frames],
+            **animation_opts
+        )
+        # animator = X3DAxes(
+        #     x3d.X3DListAnimator(
+        #         [
+        #             x3d.X3DGroup(f.children if hasattr(f, 'children') else f)
+        #             for f in frames
+        #         ],
+        #         **animation_opts
+        #     ),
+        #     **self.axes[0].opts
+        # )
+        # opts = dict(
+        #     self.opts,
+        #     profile=self.profile,
+        #     version=self.version,
+        #     width=self.width,
+        #     height=self.height
+        # )
+        # return x3d.X3D(animator.to_x3d(), **opts).to_widget()
+
+class SceneJSONBackend(GraphicsBackend):
+    Figure = SceneJSONFigure
+    def create_figure(self, *args, **kwargs):
+        figure = self.Figure.construct(**kwargs)
+        axes = figure.create_axes()
+        return figure, axes
+
+    class ThemeContextManager(GraphicsBackend.ThemeContextManager):
+        theme_stack = []
+
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec):
+            return []
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            ...
+
+    def show_figure(self, graphics:SceneJSONFigure, reshow=None):
+        if not graphics.shown:
+            graphics.shown = True
+
+            from ..Jupyter import JHTML
+            #
+            # display = JupyterAPIs.get_display_api()
+            return JHTML.Pre(graphics.to_json().tostring(indent=2)).display()
+            # return html.display()
 
     def get_interactive_status(self) -> 'bool':
         return True

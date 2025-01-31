@@ -19,7 +19,7 @@ class NumputilsTests(TestCase):
                                   [-1.75999392e-16, -1.43714410e+00, -9.00306410e-01]
     ])
 
-    @validationTest
+    @debugTest
     def test_OptimizeClassic(self):
         ndim = 6
 
@@ -60,21 +60,23 @@ class NumputilsTests(TestCase):
         guess = vec_normalize(np.random.uniform(-np.pi/2, np.pi/2, ndim))
         minimum, convd, (error, its) = iterative_step_minimize(
             guess,
-            # NewtonStepFinder(fjac, fhess, damping_parameter=.99, damping_exponent=1.01),
-            # GradientDescentStepFinder(fjac, damping_parameter=.9, damping_exponent=1.01),
-            # QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),
-            ConjugateGradientStepFinder(f, fjac),
-            max_iterations=50,
-            unitary=True
+            NewtonStepFinder(f, fjac, fhess, damping_parameter=.9, damping_exponent=1.01),
+            # GradientDescentStepFinder(f, fjac, line_search=True, damping_parameter=.9, damping_exponent=1.01),
+            # QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),#, line_search=True),
+            # ConjugateGradientStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01, restart_interval=10),
+            max_iterations=150,
+            unitary=True,
+            tol=1e-15
         )
             # if error > 1e-4:
             #     print(i)
             #     break
+        print()
         print(error, its)
         print(guess, np.linalg.norm(guess, axis=-1))
         print(minimum, np.linalg.norm(minimum, axis=-1))
 
-    @debugTest
+    @validationTest
     def test_BoysLocalize(self):
 
         ndim = 4*3

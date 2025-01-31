@@ -39,7 +39,8 @@ __all__ = [
     "orthogonal_projection_matrix",
     "project_onto",
     "project_out",
-    "fractional_power"
+    "fractional_power",
+    "unitarize_transformation"
     # "kron_sum",
 ]
 
@@ -1131,10 +1132,9 @@ def projection_matrix(basis, orthornomal=False):
     if basis.ndim == 1:
         basis = basis[np.newaxis]
     if not orthornomal:
-        basis, _ = np.linalg.qr(np.moveaxis(basis, -1, -2))
-        basis = np.moveaxis(basis, -2, -1)
+        basis, _ = np.linalg.qr(basis)
 
-    return np.moveaxis(basis, -1, -2) @ basis
+    return basis @ np.moveaxis(basis, -2, -1)
 
 def orthogonal_projection_matrix(basis, orthornomal=False):
     proj = projection_matrix(basis, orthornomal=orthornomal)
@@ -1144,6 +1144,8 @@ def orthogonal_projection_matrix(basis, orthornomal=False):
 def _proj(projection_type, vecs, basis, ndim=None, orthornomal=False):
     vecs = np.asanyarray(vecs)
     basis = np.asanyarray(basis)
+    if vecs.shape[-1] != basis.shape[-2]:
+        raise ValueError(f"mismatch between vector dim {vecs.shape[-1]} and basis dim {basis.shape[-2]} ({basis.shape[-1]} basis vectors)")
     if ndim is None:
         base_shape = basis.shape[:-2]
         if len(base_shape) == 0:
@@ -1169,8 +1171,23 @@ def project_out(vecs, basis, ndim=None, orthornomal=False):
 
 def fractional_power(A, pow, zero_cutoff=1e-8):
     # only applies to symmetric A
+    # if symmetric:
     vals, vecs = np.linalg.eigh(A)
     take_pos = np.where(np.abs(vals) > zero_cutoff)[0]
-    vals = vals[..., take_pos,]
-    vecs = vecs[..., take_pos]
-    return vecs @ vec_tensordiag(np.power(vals, pow)) @ vecs.T
+    s = vals[..., take_pos,]
+    u = vecs[..., take_pos]
+    v = np.moveaxis(u, -1, -2)
+    # else:
+    #     #TODO, make this resilient to rectangular matrices
+    #     u, s, v = np.linalg.svd(A)
+    #     take_pos = np.where(np.abs(s) > zero_cutoff)[0]
+    #     s = s[..., take_pos,]
+    #     u = u[..., take_pos]
+    #     v = v[..., take_pos, :]
+
+    return u @ vec_tensordiag(np.power(s, pow)) @ v
+
+def unitarize_transformation(tf):
+    u, s, v = np.linalg.svd(tf)
+    shared_dim = min((u.shape[-1], v.shape[-2]))
+    return u[..., :, :shared_dim] @ v[..., :shared_dim, :]

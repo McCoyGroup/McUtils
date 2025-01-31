@@ -333,6 +333,7 @@ class NotebookExporter:
 class ExamplesManager:
     data_path = ("ci", "tests", "TestData")
     def __init__(self, root, data_path=None, globs=None):
+        self.root = root
         if os.path.isdir(root):
             root = root
         else:
@@ -352,10 +353,16 @@ class ExamplesManager:
     def test_data(cls, *path):
         return os.path.join(cls.test_dir, *path)
 
-    def load_module(self, module):
+    def load_module(self, module, modify_relative_imports=True):
+        if modify_relative_imports:
+            if module.startswith(".") and not os.path.isdir(self.root):
+                module = self.root + module
         return ModuleReloader.load_module(module)
 
-    def import_from(self, module, names, globs=None):
+    def import_from(self, module, names, modify_relative_imports=True, globs=None):
+        if modify_relative_imports:
+            if module.startswith(".") and not os.path.isdir(self.root):
+                module = self.root + module
         if globs is None:
             globs = self.globs
         return ModuleReloader.import_from(module, names, globs=globs)

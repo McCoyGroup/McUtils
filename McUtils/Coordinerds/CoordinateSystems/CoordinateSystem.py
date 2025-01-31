@@ -118,6 +118,9 @@ class CoordinateSystem:
         """
 
         return self._origin
+    @origin.setter
+    def origin(self, orig):
+        self._origin = orig
     @property
     def matrix(self):
         """

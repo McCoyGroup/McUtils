@@ -1,5 +1,10 @@
 import shutil, os, sys, subprocess, importlib, platform
-from distutils.core import setup, Extension
+try:
+    from distutils.core import setup, Extension
+except ModuleNotFoundError:
+    class Extension:
+        def __init__(self, *args, **kwargs):
+            raise ImportError("the FFI framework uses `distutils`, which has since been removed")
 
 __all__ = [
     "CLoader"

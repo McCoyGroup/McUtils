@@ -181,17 +181,17 @@ class StringParser:
             match = re.search(regex, txt)
             try:
                 self._handle_parse_match(match, res, block_handlers, append=append, single=single)
-            except:
+            except Exception as e:
                 if append or (isinstance(append, int) and append == 0):
                     raise StringParserException('failed to append to results array {} for match {}'.format(
                         res,
                         match
-                    ))
+                    )) from e
                 else:
                     raise StringParserException('failed to insert into results array {} for match {}'.format(
                         res,
                         match
-                    ))
+                    )) from e
 
         # one issue here is that by default this would return a list or some structured object like that
         # sometimes we don't _want_ that list
@@ -673,7 +673,7 @@ class StringParser:
 
                 try:
                     self._handle_insert_result(r, handler, v, single=single, append=append)
-                except:
+                except Exception as e:
                     if append or (isinstance(append, int) and append == 0):
                         raise StringParserException(
                             "failed to append to key '{}' for results array {}; block handler={}, value={}".format(
@@ -681,14 +681,14 @@ class StringParser:
                                 res,
                                 handler,
                                 v[:50] + "...<{}>...".format(len(v) - 50) + v[-50:] if len(v) > 100 else v
-                            ))
+                            )) from e
                     else:
                         raise StringParserException("failed to insert into key '{}' for results array {}; block handler={}, value={}".format(
                             k,
                             res,
                             handler,
                             v[:50] + "...<{}>...".format(len(v) - 50) + v[-50:] if len(v) > 100 else v
-                        ))
+                        )) from e
 
 
     @classmethod
@@ -881,7 +881,7 @@ class StringParser:
         return handler
 
     @staticmethod
-    def load_array(data, dtype = 'float'):
+    def load_array(data, dtype='float'):
         import io
         return np.loadtxt(io.StringIO(data), dtype=dtype)
     @classmethod
