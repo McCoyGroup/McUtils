@@ -20,6 +20,14 @@ class NumputilsTests(TestCase):
     ])
 
     @debugTest
+    def test_VecOps(self):
+        v = np.random.rand(16, 3, 5)
+        u = vec_normalize(v, axis=1)
+        self.assertTrue(
+            np.allclose(vec_norms(u, axis=1), np.ones((16, 5)))
+        )
+
+    @validationTest
     def test_OptimizeClassic(self):
         ndim = 6
 

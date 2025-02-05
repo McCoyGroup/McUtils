@@ -43,6 +43,15 @@ class RDMolecule:
     def meta(self):
         return self.rdmol.GetPropsAsDict()
 
+    def copy(self):
+        Chem = self.chem_api()
+        conf = self.conf
+        new_mol = Chem.Mol(self.rdmol)
+        new_mol.AddConformer(conf)
+        return type(self).from_rdmol(new_mol,
+                                     conf_id=conf.GetId(),
+                                     charge=self.charge, sanitize=False, guess_bonds=False)
+
     @classmethod
     def chem_api(cls):
         return RDKitInterface.submodule("Chem")
@@ -160,4 +169,126 @@ class RDMolecule:
             mol = Chem.MolFromMolBlock(molblock, sanitize=False, removeHs=False)
         return cls.from_rdmol(mol)
 
+    @classmethod
+    def allchem_api(cls):
+        return RDKitInterface.submodule("Chem.AllChem")
+    @classmethod
+    def get_force_field_type(cls, ff_type):
+        AllChem = cls.allchem_api()
+
+        if isinstance(ff_type, str):
+            if ff_type == 'mmff':
+                ff_type = (AllChem.MMFFGetMoleculeForceField, AllChem.MMFFGetMoleculeProperties)
+            elif ff_type == 'uff':
+                ff_type = (AllChem.UFFGetMoleculeForceField, AllChem.UFFGetMoleculeProperties)
+            else:
+                raise ValueError(f"can't get RDKit force field type from '{ff_type}")
+
+        return ff_type
+
+    def get_force_field(self, force_field_type='mmff'):
+        conf = self.conf
+        mol = self.rdmol
+
+        force_field_type = self.get_force_field_type(force_field_type)
+        if isinstance(force_field_type, (list, tuple)):
+            force_field_type, prop_gen = force_field_type
+        else:
+            prop_gen = None
+
+        if prop_gen is not None:
+            props = prop_gen(mol)
+        else:
+            props = None
+
+        return force_field_type(mol, props, confId=conf.GetId())
+
+    def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff'):
+        if force_field_generator is None:
+            force_field_generator = self.get_force_field
+        if geoms is not None:
+            cur_geom = np.array(self.conf.GetPositions()).reshape(-1, 3)
+            geoms = np.asanyarray(geoms)
+            base_shape = geoms.shape[:-2]
+            geoms = geoms.reshape((-1,) + cur_geom.shape)
+            vals = np.empty(len(geoms), dtype=float)
+            try:
+                for i,g in enumerate(geoms):
+                    self.conf.SetPositions(g)
+                    ff = force_field_generator(force_field_type)
+                    vals[i] = ff.CalcEnergy()
+            finally:
+                self.conf.SetPositions(cur_geom)
+            return vals.reshape(base_shape)
+        else:
+            ff = force_field_generator(force_field_type)
+            return ff.CalcEnergy()
+
+    def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff'):
+        if force_field_generator is None:
+            force_field_generator = self.get_force_field
+        cur_geom = np.array(self.conf.GetPositions()).reshape(-1, 3)
+        if geoms is not None:
+            geoms = np.asanyarray(geoms)
+            base_shape = geoms.shape[:-2]
+            geoms = geoms.reshape((-1,) + cur_geom.shape)
+            vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
+            try:
+                for i, g in enumerate(geoms):
+                    self.conf.SetPositions(g)
+                    ff = force_field_generator(force_field_type)
+                    vals[i] = ff.CalcGrad()
+            finally:
+                self.conf.SetPositions(cur_geom)
+            return vals.reshape(base_shape + (-1,))
+        else:
+            ff = force_field_generator(force_field_type)
+            return np.array(ff.CalcGrad()).reshape(-1)
+
+    def calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=.01, **fd_opts):
+        from ..Zachary import FiniteDifferenceDerivative
+
+        cur_geom = np.array(self.conf.GetPositions()).reshape(-1, 3)
+
+        # if force_field_generator is None:
+        #     force_field_generator = self.get_force_field(force_field_type)
+
+        # def eng(structs):
+        #     structs = structs.reshape(structs.shape[:-1] + (-1, 3))
+        #     new_grad = self.calculate_energy(structs, ff=ff)
+        #     return new_grad
+        # der = FiniteDifferenceDerivative(eng, function_shape=((0,), (0,)), stencil=stencil, mesh_spacing=mesh_spacing, **fd_opts)
+        # return der.derivatives(cur_geom.flatten()).derivative_tensor(2)
+
+        def jac(structs):
+            structs = structs.reshape(structs.shape[:-1] + (-1, 3))
+            new_grad = self.calculate_gradient(structs,
+                                               force_field_generator=force_field_generator,
+                                               force_field_type=force_field_type
+                                               )
+            return new_grad
+        der = FiniteDifferenceDerivative(jac, function_shape=((0,), (0,)), stencil=stencil, mesh_spacing=mesh_spacing, **fd_opts)
+        return der.derivatives(cur_geom.flatten()).derivative_tensor(1)
+
+    def get_optimizer_params(self, maxAttempts=1000, useExpTorsionAnglePrefs=True, useBasicKnowledge=True, **etc):
+        AllChem = self.allchem_api()
+
+        params = AllChem.ETKDGv3()
+        params.maxAttempts = maxAttempts  # Increase the number of attempts
+        params.useExpTorsionAnglePrefs = useExpTorsionAnglePrefs
+        params.useBasicKnowledge = useBasicKnowledge
+        for k,v in etc.items():
+            setattr(params, k, v)
+
+        return params
+
+    def optimize_structure(self, force_field_type='mmff', optimizer=None, maxIters=1000, **opts):
+
+        ff = self.get_force_field(force_field_type)
+        if optimizer is None:
+            ff_helpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
+            optimizer = lambda mol, force_field, **etc: ff_helpers.OptimizeMolecule(force_field, **etc)
+
+        # optimizer = self.get_optimizer(optimizer)
+        return optimizer(self.rdmol, ff, maxIters=maxIters, **opts)
 
