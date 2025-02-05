@@ -40,7 +40,8 @@ __all__ = [
     "project_onto",
     "project_out",
     "fractional_power",
-    "unitarize_transformation"
+    "unitarize_transformation",
+    "maximum_similarity_transformation"
     # "kron_sum",
 ]
 
@@ -92,9 +93,9 @@ def vec_norms(vecs, axis=-1):
     :return:
     :rtype:
     """
-    if axis != -1:
-        raise NotImplementedError("Norm along not-the-last axis not there yet...")
-    return np.linalg.norm(vecs, axis=-1)
+    # if axis != -1:
+    #     raise NotImplementedError("Norm along not-the-last axis not there yet...")
+    return np.linalg.norm(vecs, axis=axis)
 
 ################################################
 #
@@ -121,7 +122,7 @@ def vec_apply_zero_threshold(vecs, zero_thresh=None, return_zeros=False):
     else:
         return vecs, norms
 
-def vec_handle_zero_norms(vecs, norms, zero_thresh=None):
+def vec_handle_zero_norms(vecs, norms, axis=-1, zero_thresh=None):
     """
     Tries to handle zero-threshold application to vectors
 
@@ -134,7 +135,7 @@ def vec_handle_zero_norms(vecs, norms, zero_thresh=None):
     :return:
     :rtype:
     """
-    norms = norms[..., np.newaxis]
+    norms = np.expand_dims(norms, axis)
     zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
     zeros = np.abs(norms) < zero_thresh
     vecs = vecs * (1 - zeros.astype(int))
@@ -150,13 +151,10 @@ def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None):
     :return:
     :rtype:
     """
-    if axis != -1:
-        raise NotImplementedError("Normalization along not-the-last axis not there yet...")
-
     if norms is None:
         norms = vec_norms(vecs, axis=axis)
-    vecs, zeros = vec_handle_zero_norms(vecs, norms, zero_thresh=zero_thresh)
-    norms = norms[..., np.newaxis]
+    vecs, zeros = vec_handle_zero_norms(vecs, norms, axis=axis, zero_thresh=zero_thresh)
+    norms = np.expand_dims(norms, axis)
     norms[zeros] = Options.zero_placeholder # since we already zeroed out the vector
 
     return vecs/norms
@@ -1191,3 +1189,11 @@ def unitarize_transformation(tf):
     u, s, v = np.linalg.svd(tf)
     shared_dim = min((u.shape[-1], v.shape[-2]))
     return u[..., :, :shared_dim] @ v[..., :shared_dim, :]
+
+def maximum_similarity_transformation(basis, target, apply_transformation=True):
+    lstsq_tf = np.linalg.lstsq(basis, target, rcond=None)[0]
+    tf = unitarize_transformation(lstsq_tf)
+    if apply_transformation:
+        return basis @ tf
+    else:
+        return tf

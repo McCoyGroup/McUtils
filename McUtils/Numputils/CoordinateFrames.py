@@ -5,6 +5,7 @@ __all__ = [
     "moments_of_inertia",
     "inertial_frame_derivatives",
     "translation_rotation_eigenvectors",
+    "translation_rotation_projector",
     "remove_translation_rotations",
     "translation_rotation_invariant_transformation"
 ]
