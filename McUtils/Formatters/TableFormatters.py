@@ -130,14 +130,24 @@ class TableFormatter:
         ]
 
     @classmethod
-    def format_tablular_data_columns(cls, data, formats, row_padding=None):
+    def _format_entry(cls, data, fmt, strict=False):
+        if strict:
+            return fmt.format(data)
+        else:
+            try:
+                return fmt.format(data)
+            except ValueError:
+                return str(data)
+
+    @classmethod
+    def format_tablular_data_columns(cls, data, formats, row_padding=None, strict=False):
         ncols = len(data[0])
         return [
             [
                 (
-                    row_padding + formats[i].format(d[i])
+                    row_padding + cls._format_entry(d[i], formats[i], strict=strict)
                         if row_padding is not None and i == 0 else
-                    formats[i].format(d[i])
+                    cls._format_entry(d[i], formats[i], strict=strict)
                 ) for d in data
             ]
             for i in range(ncols)

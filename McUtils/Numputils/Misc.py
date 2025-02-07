@@ -13,6 +13,8 @@ __all__ = [
     'is_atomic',
     'is_numeric',
     'is_zero',
+    'is_array_like',
+    'is_numeric_array_like',
     'flatten_inds'
 ]
 
@@ -28,6 +30,24 @@ def is_numeric(obj, types=None):
     return is_atomic(obj, types=types)
 def is_zero(obj, numeric_types=None):
     return is_numeric(obj, types=numeric_types) and obj == 0
+
+def is_array_like(obj, valid_dtypes=None):
+    if isinstance(obj, np.ndarray):
+        return True
+    elif is_atomic(obj):
+        return False
+    else:
+        try:
+            arr = np.asanyarray(obj)
+        except ValueError:
+            return False
+        else:
+            if valid_dtypes is not None:
+                return any(np.issubdtype(arr.dtype, dt) for dt in valid_dtypes)
+            else:
+                return arr.dtype != np.dtype(object)
+def is_numeric_array_like(obj):
+    return is_array_like(obj, [np.number])
 
 def downcast_index_array(a, max_val):
     return a.astype(infer_inds_dtype(max_val))
