@@ -7,7 +7,8 @@ __all__ = [
     "take_lists",
     "split",
     "split_by",
-    "counts"
+    "counts",
+    "transpose"
 ]
 
 def is_fixed_size(iterable):
@@ -78,3 +79,31 @@ def take_lists(a, splits):
 def counts(iterable, test=None):
     if test is None: test = lambda x:x
     return {k:len(g) for k,g in itertools.groupby(iterable, test)}
+
+def transpose_iter(data, default=None):
+    sentinel = object()
+    any_full = True
+    while any_full:
+        any_full = False
+        sublist = []
+        for d in data:
+            new = next(d, sentinel)
+            if new is sentinel:
+                sublist.append(default)
+            else:
+                any_full = True
+                sublist.append(new)
+        yield sublist
+def transpose(data, default=None):
+    if is_fixed_size(data):
+        fixed_data = is_fixed_size(data[0])
+        if fixed_data:
+            max_len = max(len(x) for x in data)
+            return [
+                [d[i] if len(d) > i else default for d in data]
+                for i in range(max_len)
+            ]
+        else:
+           return transpose_iter(data, default=default)
+    else:
+        return transpose(list(data), default=default) # need to cache results...

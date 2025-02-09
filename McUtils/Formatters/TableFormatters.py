@@ -177,7 +177,7 @@ class TableFormatter:
         ]
         max_dot_pos = max(dot_pos)
         col = [
-            c + " "*(max_dot_pos - dp)
+            c + " "*(max_dot_pos - dp if dp > 0 else 0)
             for c,dp in zip(col, dot_pos)
         ]
         new_width = max(len(c) for c in col)
