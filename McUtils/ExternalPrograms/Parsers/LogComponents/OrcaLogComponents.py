@@ -123,14 +123,7 @@ Components["VibrationalFrequencies"] = {
     "mode"     : "Single"
 }
 
-
-nms_start_tag = FileStreamerTag(
-    """NORMAL MODES""",
-    follow_ups="------------"
-)
-nms_end_tag = "\n\n\n"
-
-NormalModesParser = StringParser(
+OrcaMatrixParser = StringParser(
     Repeating(
         (
             Whitespace,
@@ -149,12 +142,12 @@ NormalModesParser = StringParser(
     )
 )
 
-def nms_parser(freq_str):
+def parse_orca_matrix(orca_mat):
 
     parse = np.concatenate(
         [
             p.value[:, 1:]
-            for p in NormalModesParser.parse_iter(freq_str)
+            for p in OrcaMatrixParser.parse_iter(orca_mat)
         ],
         axis=1
     )
@@ -165,10 +158,16 @@ def nms_parser(freq_str):
 
     return parse
 
+nms_start_tag = FileStreamerTag(
+    """NORMAL MODES""",
+    follow_ups="------------"
+)
+nms_end_tag = "\n\n\n"
+
 Components["NormalModes"] = {
     "tag_start": nms_start_tag,
     "tag_end"  : nms_end_tag,
-    "parser"   : nms_parser,
+    "parser"   : parse_orca_matrix,
     "mode"     : "Single"
 }
 

@@ -3,7 +3,7 @@ This lists the types of readers and things available to the GaussianLogReader
 """
 import numpy as np
 
-from ..Parsers import *
+from ...Parsers import *
 from collections import namedtuple, OrderedDict
 
 ########################################################################################################################

@@ -16,6 +16,8 @@ from .Visualizers import *; from .Visualizers import __all__ as exposed
 __all__ += exposed
 from .RDKit import *; from .RDKit import __all__ as exposed
 __all__ += exposed
+from .ASE import *; from .ASE import __all__ as exposed
+__all__ += exposed
 from .WebAPI import *; from .WebAPI import __all__ as exposed
 __all__ += exposed
 from .ChemSpiderAPI import *; from .ChemSpiderAPI import __all__ as exposed

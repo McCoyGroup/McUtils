@@ -5,7 +5,7 @@ Implements an importer for Gaussian output formats
 import numpy as np, re, math, io
 from .GaussianLogComponents import GaussianLogComponents, GaussianLogDefaults, GaussianLogOrdering
 from .GaussianFChkComponents import FormattedCheckpointComponents, FormattedCheckpointCommonNames
-from ..Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException
+from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException
 
 __all__ = ["GaussianFChkReader", "GaussianLogReader", "GaussianLogReaderException", "GaussianFChkReaderException"]
 __reload_hook__ = [ '.GaussianFChkComponents', ".GaussianLogComponents" ]

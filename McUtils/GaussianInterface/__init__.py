@@ -14,14 +14,14 @@ There are already direct hooks into (1.) in `Psience.Data` through the `DipoleSu
 These are still in the prototype stage, but hopefully will allow us to unify strands of our Gaussian support,
  and also make it easy to unify support for Psi4 and NWChem data, once we have the basic interface down.
 """
-from .GaussianImporter import *
-from .GaussianJob import *
-from .FChkDerivatives import *
+from ..ExternalPrograms.Parsers.GaussianImporter import *
+# from ..ExternalPrograms.Parsers.GaussianJob import *
+from ..ExternalPrograms.Parsers.FChkDerivatives import *
 
 __all__ = []
-from .GaussianImporter import __all__ as exposed
+from ..ExternalPrograms.Parsers.GaussianImporter import __all__ as exposed
 __all__ += exposed
-from .GaussianJob import __all__ as exposed
-__all__ += exposed
-from .FChkDerivatives import __all__ as exposed
+# from .GaussianJob import __all__ as exposed
+# __all__ += exposed
+from ..ExternalPrograms.Parsers.FChkDerivatives import __all__ as exposed
 __all__ += exposed

@@ -66,7 +66,28 @@ class BondDataHandler(DataHandler):
             elif w == 3:
                 w = "Triple"
         if isinstance(w, str):
-            w = w.capitalize()
+            if w == "first":
+                ww = None
+                dd = d.get("Single")
+                if dd is None:
+                    dd = d.get("Double")
+                else:
+                    ww = "Single"
+
+                if ww is None:
+                    if dd is None:
+                        dd = d.get("Triple")
+                    else:
+                        ww = "Double"
+
+                if ww is None:
+                    if dd is None:
+                        ww = next(iter(d.keys()))
+                    else:
+                        ww = "Triple"
+                w = ww
+            else:
+                w = w.capitalize()
 
         if w not in d:
             if default is None:
@@ -76,6 +97,18 @@ class BondDataHandler(DataHandler):
 
         return d[w]
 
+    def __getitem__(self, item):
+        """
+        Special cases the default getitem so tuples are mapped
+        :param item:
+        :type item:
+        :return:
+        :rtype:
+        """
+        if isinstance(item, tuple):
+            return self.get_distance(item)
+        else:
+            return super().__getitem__(item)
 
 BondData=BondDataHandler()
 BondData.__doc__ = """An instance of BondDataHandler that can be used for looking up bond distances"""
