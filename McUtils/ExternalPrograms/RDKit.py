@@ -146,22 +146,63 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def get_confgen_opts(cls):
-        return {}
+        AllChem = cls.allchem_api()
+        params = AllChem.ETKDGv3()
+        params.useExpTorsionAnglePrefs = True
+        params.useBasicKnowledge = True
+        return params
     @classmethod
-    def from_smiles(cls, smiles, num_confs=1, add_implicit_hydrogens=False):
+    def from_smiles(cls, smiles, num_confs=1, optimize=False, take_min=True,
+                    force_field_type='mmff',
+                    add_implicit_hydrogens=False):
 
         if os.path.isfile(smiles):
             with open(smiles) as f:
                 smiles = f.read()
         Chem = cls.chem_api()
+        AllChem = cls.allchem_api()
+
         params = Chem.SmilesParserParams()
         params.removeHs = False
         rdkit_mol = Chem.MolFromSmiles(smiles, params)
         mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
-        rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
-        rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
 
-        return cls.from_rdmol(mol)
+        # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
+        # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
+
+        conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=cls.get_confgen_opts())
+        if optimize:
+            rdForceFieldHelpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
+            if force_field_type == 'mmff':
+                rdForceFieldHelpers.MMFFOptimizeMoleculeConfs(mol)
+            elif force_field_type == 'uff':
+                rdForceFieldHelpers.UFFOptimizeMoleculeConfs(mol)
+            else:
+                raise NotImplementedError(f"no basic preoptimization support for {force_field_type}")
+
+        if take_min and num_confs > 1:
+            conf_ids = list(conformer_set)
+            force_field_type = cls.get_force_field_type(force_field_type)
+            if isinstance(force_field_type, (list, tuple)):
+                force_field_type, prop_gen = force_field_type
+            else:
+                prop_gen = None
+
+            if prop_gen is not None:
+                props = prop_gen(mol)
+            else:
+                props = None
+
+            engs = [
+                force_field_type(mol, props, confId=conf_id).CalcEnergy()
+                for conf_id in conf_ids
+            ]
+
+            conf_id = conf_ids[np.argmin(engs)]
+        else:
+            conf_id = 0
+
+        return cls.from_rdmol(mol, conf_id=conf_id)
     @classmethod
     def from_molblock(cls, molblock):
         Chem = cls.chem_api()
@@ -188,10 +229,11 @@ class RDMolecule(ExternalMolecule):
 
         return ff_type
 
-    def get_force_field(self, force_field_type='mmff', mol=None):
+    def get_force_field(self, force_field_type='mmff', mol=None, conf_id=None):
         if mol is None:
             mol = self
-        conf = mol.mol
+        if conf_id is None:
+            conf_id = mol.mol.GetId()
         mol = mol.rdmol
 
         force_field_type = self.get_force_field_type(force_field_type)
@@ -205,9 +247,9 @@ class RDMolecule(ExternalMolecule):
         else:
             props = None
 
-        return force_field_type(mol, props, confId=conf.GetId())
+        return force_field_type(mol, props, confId=conf_id)
 
-    def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff'):
+    def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
         if force_field_generator is None:
             force_field_generator = self.get_force_field
         if geoms is not None:
@@ -225,10 +267,10 @@ class RDMolecule(ExternalMolecule):
                 self.mol.SetPositions(cur_geom)
             return vals.reshape(base_shape)
         else:
-            ff = force_field_generator(force_field_type)
+            ff = force_field_generator(force_field_type, conf_id=conf_id)
             return ff.CalcEnergy()
 
-    def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff'):
+    def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
         if force_field_generator is None:
             force_field_generator = self.get_force_field
         cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
@@ -246,7 +288,7 @@ class RDMolecule(ExternalMolecule):
                 self.mol.SetPositions(cur_geom)
             return vals.reshape(base_shape + (-1,))
         else:
-            ff = force_field_generator(force_field_type)
+            ff = force_field_generator(force_field_type, conf_id=conf_id)
             return np.array(ff.CalcGrad()).reshape(-1)
 
     def calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=.01, **fd_opts):
