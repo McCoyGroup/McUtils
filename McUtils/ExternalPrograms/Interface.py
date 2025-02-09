@@ -43,14 +43,20 @@ class ExternalProgramInterface:
 
     method_table = weakref.WeakValueDictionary()
     @classmethod
-    def method(cls, name):
-        if name not in cls.method_table:
-            cls.method_table[name] = getattr(cls.get_lib(), name)
-        return cls.method_table[name]
+    def method(cls, name:'str|list[str]'):
+        if isinstance(name, str):
+            if name not in cls.method_table:
+                cls.method_table[name] = getattr(cls.get_lib(), name)
+            return cls.method_table[name]
+        else:
+            return [cls.method(s) for s in name]
     @classmethod
-    def submodule(cls, submodule):
+    def submodule(cls, submodule:'str|list[str]'):
         check_load = cls.get_lib()
-        return importlib.import_module(cls.module+"."+submodule)
+        if isinstance(submodule, str):
+            return importlib.import_module(cls.module+"."+submodule)
+        else:
+            return [importlib.import_module(cls.module+"."+s) for s in submodule]
     @property
     def lib(self):
         return self.get_lib()

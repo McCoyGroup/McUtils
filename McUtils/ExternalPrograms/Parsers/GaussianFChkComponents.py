@@ -1,6 +1,6 @@
 """Defines components of an .fchk file that are already known and parseable"""
 
-from ..Parsers.RegexPatterns import *
+# from ...Parsers.RegexPatterns import *
 from .FChkDerivatives import *
 import numpy as np
 

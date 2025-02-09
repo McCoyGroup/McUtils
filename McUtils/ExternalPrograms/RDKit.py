@@ -8,20 +8,21 @@ import numpy as np, io, os
 from .. import Numputils as nput
 
 from .ChemToolkits import RDKitInterface
+from .ExternalMolecule import ExternalMolecule
 
-class RDMolecule:
+class RDMolecule(ExternalMolecule):
     """
     A simple interchange format for RDKit molecules
     """
 
     def __init__(self, rdconf, charge=None):
         #atoms, coords, bonds):
-        self.conf = rdconf
+        super().__init__(rdconf)
         self.charge = charge
 
     @property
     def rdmol(self):
-        return self.conf.GetOwningMol()
+        return self.mol.GetOwningMol()
     @property
     def atoms(self):
         mol = self.rdmol
@@ -35,7 +36,7 @@ class RDMolecule:
         ]
     @property
     def coords(self):
-        return self.conf.GetPositions()
+        return self.mol.GetPositions()
     @property
     def rings(self):
         return self.rdmol.GetRingInfo().AtomRings()
@@ -45,7 +46,7 @@ class RDMolecule:
 
     def copy(self):
         Chem = self.chem_api()
-        conf = self.conf
+        conf = self.mol
         new_mol = Chem.Mol(self.rdmol)
         new_mol.AddConformer(conf)
         return type(self).from_rdmol(new_mol,
@@ -108,6 +109,7 @@ class RDMolecule:
         conf.SetPositions(np.asanyarray(coords))
         conf.SetId(0)
         mol.AddConformer(conf)
+        mol = Chem.AddHs(mol, explicitOnly=True)
 
         if guess_bonds is None:
             guess_bonds = bonds is None
@@ -186,9 +188,11 @@ class RDMolecule:
 
         return ff_type
 
-    def get_force_field(self, force_field_type='mmff'):
-        conf = self.conf
-        mol = self.rdmol
+    def get_force_field(self, force_field_type='mmff', mol=None):
+        if mol is None:
+            mol = self
+        conf = mol.mol
+        mol = mol.rdmol
 
         force_field_type = self.get_force_field_type(force_field_type)
         if isinstance(force_field_type, (list, tuple)):
@@ -207,18 +211,18 @@ class RDMolecule:
         if force_field_generator is None:
             force_field_generator = self.get_force_field
         if geoms is not None:
-            cur_geom = np.array(self.conf.GetPositions()).reshape(-1, 3)
+            cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
             geoms = np.asanyarray(geoms)
             base_shape = geoms.shape[:-2]
             geoms = geoms.reshape((-1,) + cur_geom.shape)
             vals = np.empty(len(geoms), dtype=float)
             try:
                 for i,g in enumerate(geoms):
-                    self.conf.SetPositions(g)
+                    self.mol.SetPositions(g)
                     ff = force_field_generator(force_field_type)
                     vals[i] = ff.CalcEnergy()
             finally:
-                self.conf.SetPositions(cur_geom)
+                self.mol.SetPositions(cur_geom)
             return vals.reshape(base_shape)
         else:
             ff = force_field_generator(force_field_type)
@@ -227,7 +231,7 @@ class RDMolecule:
     def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff'):
         if force_field_generator is None:
             force_field_generator = self.get_force_field
-        cur_geom = np.array(self.conf.GetPositions()).reshape(-1, 3)
+        cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
         if geoms is not None:
             geoms = np.asanyarray(geoms)
             base_shape = geoms.shape[:-2]
@@ -235,11 +239,11 @@ class RDMolecule:
             vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
             try:
                 for i, g in enumerate(geoms):
-                    self.conf.SetPositions(g)
+                    self.mol.SetPositions(g)
                     ff = force_field_generator(force_field_type)
                     vals[i] = ff.CalcGrad()
             finally:
-                self.conf.SetPositions(cur_geom)
+                self.mol.SetPositions(cur_geom)
             return vals.reshape(base_shape + (-1,))
         else:
             ff = force_field_generator(force_field_type)
@@ -248,7 +252,7 @@ class RDMolecule:
     def calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=.01, **fd_opts):
         from ..Zachary import FiniteDifferenceDerivative
 
-        cur_geom = np.array(self.conf.GetPositions()).reshape(-1, 3)
+        cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
 
         # if force_field_generator is None:
         #     force_field_generator = self.get_force_field(force_field_type)
@@ -282,13 +286,36 @@ class RDMolecule:
 
         return params
 
-    def optimize_structure(self, force_field_type='mmff', optimizer=None, maxIters=1000, **opts):
+    def optimize_structure(self, geoms=None, force_field_type='mmff', optimizer=None, maxIters=1000, **opts):
 
-        ff = self.get_force_field(force_field_type)
         if optimizer is None:
             ff_helpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
-            optimizer = lambda mol, force_field, **etc: ff_helpers.OptimizeMolecule(force_field, **etc)
+            def optimizer(mol, **etc):
+                ff = mol.get_force_field(force_field_type)
+                return ff_helpers.OptimizeMolecule(ff, **etc)
 
-        # optimizer = self.get_optimizer(optimizer)
-        return optimizer(self.rdmol, ff, maxIters=maxIters, **opts)
+        if geoms is not None:
+            cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
+            geoms = np.asanyarray(geoms, dtype=float)
+            base_shape = geoms.shape[:-2]
+            geoms = geoms.reshape((-1,) + cur_geom.shape)
+            opt_vals = np.empty((len(geoms),), dtype=int)
+            opt_geoms = np.empty_like(geoms)
+            try:
+                for i, g in enumerate(geoms):
+                    self.mol.SetPositions(g)
+                    opt_vals[i] = optimizer(self, maxIters=maxIters, **opts)
+                    opt_geoms[i] = self.mol.GetPositions()
+            finally:
+                self.mol.SetPositions(cur_geom)
+            return opt_vals.reshape(base_shape), opt_geoms.reshape(base_shape + opt_geoms.shape[1:])
+        else:
+            opt = optimizer(self, maxIters=maxIters, **opts)
+            return opt, self.mol.GetPositions()
 
+    def show(self):
+        return RDKitInterface.submodule('Chem.Draw.IPythonConsole').drawMol3D(
+            self.mol.GetOwningMol(),
+            confId=self.mol.GetId()
+            # view=None, confId=-1, drawAs=None, bgColor=None, size=None
+        )
