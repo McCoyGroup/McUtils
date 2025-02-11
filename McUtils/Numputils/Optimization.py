@@ -10,10 +10,13 @@ from . import TransformationMatrices as tfs
 
 __all__ = [
     "iterative_step_minimize",
+    "iterative_chain_minimize",
     "GradientDescentStepFinder",
     "NewtonStepFinder",
     "QuasiNewtonStepFinder",
     "ConjugateGradientStepFinder",
+    "EigenvalueFollowingStepFinder",
+    "NudgedElasticBandStepFinder",
     "jacobi_maximize",
     "LineSearchRotationGenerator",
     "GradientDescentRotationGenerator",
@@ -28,14 +31,31 @@ def lookup_method_name(method):
         'newton':NewtonStepFinder,
         'quasi-newton':QuasiNewtonStepFinder,
         'gradient-descent':GradientDescentStepFinder,
+        'neb':NudgedElasticBandStepFinder
     }.get(method)
-def get_step_finder(spec):
+def get_step_finder(spec,
+                    method=None,
+                    jacobian=None,
+                    hessian=None):
+    if not isinstance(spec, dict) and (
+            jacobian is not None
+            or method is not None
+    ):
+        spec = {
+            'method':method,
+            'func':spec,
+            'jacobian':jacobian,
+            'hessian':hessian
+        }
     if isinstance(spec, dict):
         spec = spec.copy() # don't mutate user data
-        method = spec.pop('method', None)
+        method = spec.pop('method', method)
         func = spec.pop('func')
-        jacobian = spec.pop('jacobian')
-        hessian = spec.pop('hessian', None)
+        if jacobian is None:
+            jacobian = spec.pop('jacobian')
+        else:
+            jacobian = spec.pop('jacobian', jacobian)
+        hessian = spec.pop('hessian', hessian)
         if method is None:
             if hessian is not None:
                 method = default_hessian_step_finder
@@ -51,15 +71,108 @@ def get_step_finder(spec):
         else:
             spec = method(func, jacobian, **spec)
     return spec
-def iterative_step_minimize(guess, step_predictor,
-                            unitary=False,
-                            generate_rotation=False,
-                            dtype='float64',
-                            orthogonal_directions=None,
-                            convergence_metric=None,
-                            max_displacement=None,
-                            tol=1e-8, max_iterations=100):
-    step_predictor = get_step_finder(step_predictor)
+def iterative_step_minimize_step(step_predictor,
+                                 guess, mask, tol,
+                                 orthogonal_projector, orthogonal_projection_generator,
+                                 region_constraints, unitary, max_displacement,
+                                 generate_rotation, prev_step
+                                 ):
+    if unitary:
+        projector = vec_ops.orthogonal_projection_matrix(guess.T)
+        if orthogonal_projector is not None:
+            projector = projector @ orthogonal_projector[np.newaxis]
+        if orthogonal_projection_generator is not None:
+            projector = projector @ orthogonal_projection_generator(guess)
+    elif orthogonal_projector is not None:
+        projector = orthogonal_projector[np.newaxis]
+        if orthogonal_projection_generator is not None:
+            projector = projector @ orthogonal_projection_generator(guess)
+    elif orthogonal_projection_generator is not None:
+        projector = orthogonal_projection_generator(guess)
+    else:
+        projector = None
+    step, grad = step_predictor(guess, mask, projector=projector)
+    if projector is not None:
+        # just in case, will usually lead to non-convergence
+        step = (step[..., np.newaxis, :] @ projector).reshape(step.shape)
+        grad = (grad[..., np.newaxis, :] @ projector).reshape(step.shape)
+
+    if max_displacement is not None:
+        step_sizes = np.linalg.norm(step, axis=1)
+        step *= max_displacement / np.clip(step_sizes, max_displacement, None)
+    if region_constraints is not None:
+        max_step = region_constraints[np.newaxis, :, 1] - guess
+        min_step = region_constraints[np.newaxis, :, 0] - guess
+        step = np.array([
+            np.clip(s, smin, smax)
+            for s,smin,smax in zip(guess, min_step, max_step)
+        ])
+    if isinstance(mask, tuple):
+        mask = mask[0]
+    norms = np.linalg.norm(grad, axis=1)
+    errs = norms
+    rem = np.arange(len(mask))
+    if tol > 0:
+        done = np.where(norms < tol)[0]
+        if len(done) > 0:  # easy check
+            rem = np.delete(rem, done)
+            mask = np.delete(mask, done)
+            if len(mask) == 0:
+                return step, errs, [], done
+    if unitary:
+        step = step[rem,]
+        norms = np.linalg.norm(step, axis=1)
+        # norms = norms[rem,]
+        v = np.linalg.norm(guess, axis=-1)
+        r = np.sqrt(norms[rem,] ** 2 + v ** 2)
+        step = guess * (1/r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+        if generate_rotation:
+            raise NotImplementedError(">3D rotations are complicated")
+            axis = vec_ops.vec_crosses(g, guess[mask,])[0]
+            ang = np.arctan2(norms / r, v / r)
+            rot = tfs.rotation_matrix(axis, ang)
+            rotations = rot @ rotations
+
+    if prev_step is not None:
+        prev_step = prev_step[mask,]
+        cur_norms = np.linalg.norm(step, axis=1)
+        pre_norms = np.linalg.norm(prev_step, axis=1)
+        overlaps = (step[:, np.newaxis, :] @ prev_step[:, :, np.newaxis] ) / (
+            cur_norms * pre_norms
+        )
+        if -1.02 < overlaps < -.98:
+            step = step / 2
+            if unitary:
+                norms = np.linalg.norm(step, axis=1)
+                # norms = norms[rem,]
+                v = np.linalg.norm(guess, axis=-1)
+                r = np.sqrt(norms[rem,] ** 2 + v ** 2)
+                step = guess * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+
+    return step, errs, mask, done
+
+def iterative_step_minimize(
+        guess,
+        step_predictor,
+        jacobian=None,
+        hessian=None,
+        *,
+        method=None,
+        unitary=False,
+        generate_rotation=False,
+        dtype='float64',
+        orthogonal_directions=None,
+        orthogonal_projection_generator=None,
+        region_constraints=None,
+        convergence_metric=None,
+        max_displacement=None,
+        prevent_oscillations=None,
+        tol=1e-8, max_iterations=100
+):
+    step_predictor = get_step_finder(step_predictor,
+                                     method=method,
+                                     jacobian=jacobian,
+                                     hessian=hessian)
 
     guess = np.array(guess, dtype=dtype)
     base_shape = guess.shape[:-1]
@@ -74,52 +187,35 @@ def iterative_step_minimize(guess, step_predictor,
     else:
         rotations = None
 
+    if prevent_oscillations is None:
+        prevent_oscillations = (
+                unitary
+                or orthogonal_projection_generator is not None
+                or orthogonal_directions is not None
+        )
+    prev_step = None
+
     converged = True
     for i in range(max_iterations):
-        if unitary:
-            projector = vec_ops.orthogonal_projection_matrix(guess[mask,].T)
-            if orthogonal_directions is not None:
-                projector = projector @ orthogonal_directions[np.newaxis]
-        elif orthogonal_directions is not None:
-            projector = orthogonal_directions[np.newaxis]
-        else:
-            projector = None
-        step, grad = step_predictor(guess[mask,], mask, projector=projector)
-        if projector is not None:
-            # just in case, will usually lead to non-convergence
-            step = (step[..., np.newaxis, :] @ projector).reshape(step.shape)
-            grad = (grad[..., np.newaxis, :] @ projector).reshape(step.shape)
-
-        if max_displacement is not None:
-            step_sizes = np.linalg.norm(step, axis=1)
-            step *= max_displacement / np.clip(step_sizes, max_displacement, None)
-        norms = np.linalg.norm(grad, axis=1)
-        errs[mask,] = norms
-        done = np.where(norms < tol)[0]
-        if len(done) > 0: # easy check
-            rem = np.delete(np.arange(len(mask)), done)
-            mask = np.delete(mask, done)
-        else:
-            rem = np.arange(len(mask))
-        if not unitary:
-            guess[mask,] += step[rem,]
-        else:
-            step = step[rem,]
-            norms = np.linalg.norm(step, axis=1)
-            # norms = norms[rem,]
-            g = guess[mask,].copy()
-            v = np.linalg.norm(g, axis=-1)
-            r = np.sqrt(norms[rem,]**2 + v**2)
-            guess[mask,] = (g + step) / r[:, np.newaxis]
-            if generate_rotation:
-                raise NotImplementedError(">3D rotations are complicated")
-                axis = vec_ops.vec_crosses(g, guess[mask,])[0]
-                ang = np.arctan2(norms/r, v/r)
-                rot = tfs.rotation_matrix(axis, ang)
-                rotations = rot @ rotations
-        its[mask,] += 1
-        if len(mask) == 0:
+        step, step_errs, new_mask, _ = iterative_step_minimize_step(
+            step_predictor, guess[mask,],
+            mask, tol,
+            orthogonal_directions, orthogonal_projection_generator,
+            region_constraints, unitary, max_displacement,
+            generate_rotation, prev_step
+        )
+        if prevent_oscillations:
+            if prev_step is None:
+                prev_step = step
+            else:
+                prev_step[new_mask,] = step
+        errs[mask,] = step_errs
+        if len(new_mask) == 0:
             break
+
+        mask = new_mask
+        guess[mask,] += step
+        its[mask,] += 1
     else:
         converged = False
         its[mask] = max_iterations
@@ -135,14 +231,162 @@ def iterative_step_minimize(guess, step_predictor,
 
     return res
 
-# class NetwonHessianGenerator(metaclass=typing.Protocol):
-#     def jacobian(self, guess, mask):
-#         raise NotImplementedError("abstract interface")
-#     def hessian_inverse(self, guess, mask):
-#         raise NotImplementedError("abstract interface")
-#
-#     def __call__(self, guess, mask):
-#         raise NotImplementedError("abstract interface")
+default_chain_step_finder='neb'
+def iterative_chain_minimize(
+        chain_guesses, step_predictors,
+        jacobian=None,
+        hessian=None,
+        *,
+        method=None,
+        unitary=False,
+        generate_rotation=False,
+        dtype='float64',
+        orthogonal_directions=None,
+        orthogonal_projection_generator=None,
+        prevent_oscillations=None,
+        region_constraints=None,
+        convergence_metric=None,
+        reparametrizer=None,
+        max_displacement=None,
+        tol=1e-8, max_iterations=100,
+        periodic=False
+):
+    step_predictors = [
+        get_step_finder(predictor,
+                        method=default_chain_step_finder if method is None else method,
+                        jacobian=jacobian,
+                        hessian=hessian)
+        for predictor in step_predictors
+    ]
+
+    guesses = np.array(chain_guesses, dtype=dtype)
+    base_shape = guesses.shape[:-2]
+    guesses = guesses.reshape((-1,) + guesses.shape[-2:])
+    its = np.zeros(guesses.shape[0], dtype=int)
+    errs = np.zeros(guesses.shape[0], dtype=float)
+    submasks = np.full(guesses.shape[:2], True, dtype=bool)
+    mask = np.arange(guesses.shape[0])
+    if orthogonal_directions is not None:
+        orthogonal_directions = vec_ops.orthogonal_projection_matrix(orthogonal_directions)
+    # if unitary and generate_rotation:
+    #     rotations = vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
+    # else:
+    #     rotations = None
+
+    if prevent_oscillations is None:
+        prevent_oscillations = (
+                unitary
+                or orthogonal_projection_generator is not None
+                or orthogonal_directions is not None
+        )
+    if prevent_oscillations:
+        prev_step = np.zeros_like(guesses)
+    else:
+        prev_step = None
+
+    nimg = guesses.shape[2]
+    n = nimg - 1
+
+    if reparametrizer is not None:
+        image_numbers = np.full(guesses.shape[0], nimg, dtype=int)
+    else:
+        image_numbers = None
+
+    converged = True
+    for i in range(max_iterations):
+        # for each unoptimized chain, we only move image `j` if
+        # or it's neihbors weren't optimized at the last step, every time an image is moved
+        # it's neighbors are marked as moveable again
+        errs[mask,] = 0
+        for j in range(nimg):
+            submask = mask[submasks[mask,][:, j]]
+            prev_im = j-1
+            next_im = j+1
+            if j == 0:
+                if periodic:
+                    prev_im = n
+                else:
+                    prev_im = None
+            elif j == n:
+                if periodic:
+                    next_im = 0
+                else:
+                    next_im = None
+
+
+            step_predictor = step_predictors[j]
+            step, step_errs, new_mask, done = iterative_step_minimize_step(
+                step_predictor, guesses[submask],
+                (submask, (j, prev_im, next_im)), tol,
+                orthogonal_directions, orthogonal_projection_generator,
+                region_constraints, unitary, max_displacement,
+                generate_rotation, prev_step[submask,][:, j]
+            )
+            if prevent_oscillations:
+                prev_step[new_mask,][:, j] = step
+
+            # set which chains are done or not
+            done = submask[done]
+            submasks[done,][:, j] = False
+            submasks[new_mask,][:, j] = True
+            if j == 0:
+                submasks[new_mask,][:, j+1] = True
+                if periodic:
+                    submasks[new_mask,][:, n] = True
+            elif j == n:
+                submasks[new_mask,][:, j-1] = True
+                if periodic:
+                    submasks[new_mask,][:, 0] = True
+            else:
+                submasks[new_mask,][:, j+1] = True
+                submasks[new_mask,][:, j-1] = True
+
+            errs[mask,] += step_errs
+            guesses[submask][:, j] += step
+
+        if reparametrizer is not None:
+            # for methods that want to satisfy some density function on
+            # the number of images
+            new_chains, is_static = reparametrizer(guesses[mask,])
+            nimg_new = new_chains.shape[1]
+            if nimg_new != nimg:
+                guesses = np.pad(guesses,  [ [0, 0], [0, nimg_new-nimg], [0, 0] ])
+                submasks = np.pad(submasks, [ [0, 0], [0, nimg_new-nimg] ])
+                submasks[mask,][:, :] = True
+                guesses[mask,] = new_chains
+                image_numbers[mask,] = nimg_new
+            else:
+                submasks[mask,][:, :] = np.logical_and(
+                    submasks[mask,][:, :],
+                    is_static
+                )
+
+            if prev_step is not None:
+                prev_step = np.zeros_like(guesses)
+
+        done = np.where(
+            np.logical_not(np.any(submasks[mask,], axis=1))
+        )[0]
+        if len(done) > 0:  # easy check
+            mask = np.delete(mask, done)
+            if len(mask) == 0:
+                break
+        its[mask,] += 1
+    else:
+        converged = False
+        its[mask,] = max_iterations
+
+    guesses = guesses.reshape(base_shape + (guesses.shape[-2:],))
+    errs = errs.reshape(base_shape)
+    its = its.reshape(base_shape)
+
+    if unitary and generate_rotation:
+        raise NotImplementedError(...)
+        res = (guess, rotations), converged, (errs, its)
+    else:
+        res = (guesses, image_numbers), converged, (errs, its)
+
+    return res
 
 class Damper:
     def __init__(self, damping_parameter=None, damping_exponent=None, restart_interval=10):
@@ -299,17 +543,23 @@ class ArmijoSearch(LineSearcher):
                min_alpha = 1e-8
         else:
            if min_alpha is None:
-               min_alpha = 0 if np.max(np.abs(derphi0)) > self.fixed_step_cutoff else 1e-8
+               min_alpha = 1e-8 #if np.max(np.abs(derphi0)) > self.fixed_step_cutoff else 1
            a0 = (
-                   (np.abs(derphi0) > self.fixed_step_cutoff) + (np.abs(derphi0) <= self.fixed_step_cutoff) * 1e-4
+                   (np.abs(derphi0) > self.fixed_step_cutoff) + (np.abs(derphi0) <= self.fixed_step_cutoff)
            ).astype(float)
-        # print(a0)
 
         phi0 = phi(np.zeros_like(a0), mask)
         return a0, dict(opts, phi0=phi0, derphi0=derphi0, min_alpha=min_alpha), phi
 
-    def check_scalar_converged(self, phi_vals, alphas, *, phi0, c1, derphi0):
-        return phi_vals <= phi0 + c1 * alphas * derphi0
+    converged_tolerance = 1e-8
+    def check_scalar_converged(self, phi_vals, alphas, *, phi0, c1, derphi0, tol=None):
+        if tol is None:
+            tol = self.converged_tolerance
+        test = phi0 + c1 * alphas * derphi0
+        return np.logical_or(
+            phi_vals < test,
+            np.allclose(phi_vals, test, rtol=0, atol=tol)
+        )
 
     def update_alphas(self,
                       phi_vals, alphas, iteration,
@@ -430,12 +680,9 @@ class GradientDescentStepFinder:
         self.searcher = line_search
 
     def __call__(self, guess, mask, projector=None):
-        # jac = -self.jac(guess, mask)
-        # u = self.damper.get_damping_factor()
-        # if u is not None:
-        #     jac = u * jac
-        # return jac, jac
-
+        if isinstance(mask, tuple):  # for chain minimizers
+            mask, (j, _, _) = mask
+            guess = guess[:, j]
 
         jacobian = self.jac(guess, mask)
 
@@ -530,6 +777,9 @@ class NewtonStepFinder:
             return NetwonDirectHessianGenerator(func, jac, hess, **opts)
 
     def __call__(self, guess, mask, projector=None):
+        if isinstance(mask, tuple):  # for chain minimizers
+            mask, (j, _, _) = mask
+            guess = guess[:, j]
         return self.generator(guess, mask, projector=projector)
 
 class QuasiNewtonStepFinder:
@@ -537,17 +787,30 @@ class QuasiNewtonStepFinder:
 
     def __init__(self, func, jacobian, approximation_type='bfgs', **generator_opts):
         self.hess_appx = self.hessian_approximations[approximation_type.lower()](func, jacobian, **generator_opts)
+    @classmethod
+    def get_hessian_approximations(cls):
+        return {
+            'bfgs': BFGSApproximator,
+            'broyden': BroydenApproximator,
+            'dfp': DFPApproximator,
+            'sr1': SR1Approximator,
+            'psb': PSBQuasiNewtonApproximator,
+            'bofill': BofillApproximator,
+            'schelegel': SchelgelApproximator,
+            'greenstadt': GreenstadtNewtonApproximator
+        }
     @property
     def hessian_approximations(self):
-        return {
-            'bfgs':BFGSApproximator
-        }
+        return self.get_hessian_approximations()
 
     def __call__(self, guess, mask, projector=None):
+        if isinstance(mask, tuple):  # for chain minimizers
+            mask, (j, _, _) = mask
+            guess = guess[:, j]
         return self.hess_appx(guess, mask, projector=projector)
 
 class QuasiNetwonHessianApproximator:
-
+    orthogonal_dirs_cutoff = 1e-8
     line_search = ArmijoSearch
     def __init__(self, func, jacobian, initial_beta=1,
                  damping_parameter=None, damping_exponent=None,
@@ -589,6 +852,16 @@ class QuasiNetwonHessianApproximator:
             return self.initial_beta * self.identities(guess, mask)
         else:
             return (1/self.initial_beta) * self.identities(guess, mask)
+
+    @classmethod
+    def take_nonzero_norm_regions(cls, norms, tensors, cutoff=None):
+        if cutoff is None:
+            cutoff = cls.orthogonal_dirs_cutoff
+        good_pos = np.where(np.logical_and(*[
+            np.abs(n.reshape(-1, )) > cutoff
+            for n in norms
+        ]))
+        return good_pos, [t[good_pos] for t in tensors]
 
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
         raise NotImplementedError("abstract")
@@ -657,49 +930,328 @@ class BFGSApproximator(QuasiNetwonHessianApproximator):
 
     orthogonal_dirs_cutoff = 1e-8
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        I = identities
+        dx = prev_steps[:, :, np.newaxis]
+        dx_T = prev_steps[:, np.newaxis, :]
+        y = jacobian_diffs[:, :, np.newaxis]
+        y_T = jacobian_diffs[:, np.newaxis, :]
+        B = prev_hess.copy()
         if self.approximation_mode == 'direct':
-            H = prev_hess.copy()
+            diff_norm = y_T @ dx
+            h_step = (B @ dx)
+            h_norm = dx_T @ h_step
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                h_step, h_norm, diff_norm
+            ) = self.take_nonzero_norm_regions([diff_norm, h_norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                h_step, h_norm, diff_norm])
+            h_step_T = np.moveaxis(h_step, -1, -2)
 
-            diff_norm = jacobian_diffs[:, np.newaxis, :] @ prev_steps[:, :, np.newaxis]
-            h_step = (H @ prev_steps[:, :, np.newaxis])
-            h_norm = prev_steps @ h_step
-            h_step = h_step.reshape(prev_steps.shape)
-            h_norm = h_norm.flatten()
-            good_pos = np.where(np.logical_and(
-                np.abs(diff_norm.reshape(-1, )) > self.orthogonal_dirs_cutoff,
-                np.abs(h_norm.reshape(-1, )) > self.orthogonal_dirs_cutoff
-            ))
-
-            diff_norm = diff_norm[good_pos]
-            identities = identities[good_pos]
-            prev_steps = prev_steps[good_pos]
-            jacobian_diffs = jacobian_diffs[good_pos]
-
-            diff_outer = jacobian_diffs[:, np.newaxis, :] * jacobian_diffs[:, :, np.newaxis]
-            step_outer = h_step[:, np.newaxis, :] * h_step[:, :, np.newaxis]
-            # print("woof", np.linalg.norm(diff_step))
+            diff_outer = y_T * y
+            step_outer = h_step_T * h_step
             diff_step = diff_outer / diff_norm
             step_step = step_outer / h_norm
-            H[good_pos] += diff_step - step_step
+            update = diff_step - step_step
         else:
-            diff_norm = jacobian_diffs[:, np.newaxis, :] @ prev_steps[:, :, np.newaxis]
-            good_pos = np.where(np.abs(diff_norm.reshape(-1,)) > self.orthogonal_dirs_cutoff)
+            diff_norm = y_T @ dx
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                diff_norm
+            ) = self.take_nonzero_norm_regions([diff_norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                diff_norm])
 
-            H = prev_hess.copy()
-
-            diff_norm = diff_norm[good_pos]
-            identities = identities[good_pos]
-            prev_steps = prev_steps[good_pos]
-            jacobian_diffs = jacobian_diffs[good_pos]
-
-            diff_outer = jacobian_diffs[:, np.newaxis, :] * prev_steps[:, :, np.newaxis]
+            diff_outer = y_T * y
             diff_step = identities - diff_outer / diff_norm
-            step_outer = prev_steps[:, np.newaxis, :] * prev_steps[:, :, np.newaxis]
-            # print("woof", np.linalg.norm(diff_step))
+            step_outer = dx_T * dx
             step_step = step_outer / diff_norm
-            H[good_pos] = diff_step @ H[good_pos] @ np.moveaxis(diff_step, -1, -2) + step_step
+            update = diff_step @ H @ np.moveaxis(diff_step, -1, -2) + step_step
 
-        return H
+        B[good_pos] += update
+        return B
+
+class DFPApproximator(QuasiNetwonHessianApproximator):
+
+    orthogonal_dirs_cutoff = 1e-8
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        I = identities
+        dx = prev_steps[:, :, np.newaxis]
+        dx_T = prev_steps[:, np.newaxis, :]
+        y = jacobian_diffs[:, :, np.newaxis]
+        y_T = jacobian_diffs[:, np.newaxis, :]
+        B = prev_hess.copy()
+        if self.approximation_mode == 'direct':
+            norm = y_T @ dx
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                norm
+            ) = self.take_nonzero_norm_regions([norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                norm])
+
+            proj = I - (y @ dx_T) / norm
+            update = proj @ H[good_pos] @ np.moveaxis(proj, -1, -2)
+
+            update = update + (y @ y_T)/norm
+        else:
+            norm = y_T @ dx
+            h_step = B @ y
+            h_norm = y_T @ h_step
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                norm, h_step, h_norm
+            ) = self.take_nonzero_norm_regions([norm, h_norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                norm, h_step, h_norm])
+
+            update = dx @ dx_T - (h_step/h_norm) @ np.moveaxis(h_step, -1, -2)
+
+        B[good_pos] += update
+        return B
+
+class BroydenApproximator(QuasiNetwonHessianApproximator):
+
+    orthogonal_dirs_cutoff = 1e-8
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        I = identities
+        dx = prev_steps[:, :, np.newaxis]
+        dx_T = prev_steps[:, np.newaxis, :]
+        y = jacobian_diffs[:, :, np.newaxis]
+        y_T = jacobian_diffs[:, np.newaxis, :]
+        B = prev_hess.copy()
+        if self.approximation_mode == 'direct':
+            dx_norm = dx_T * dx
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                dx_norm
+            ) = self.take_nonzero_norm_regions([dx_norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                dx_norm])
+
+            h_step = (H @ dx)
+            update = (y - h_step)/dx_norm * dx_T
+
+            B[good_pos] += update * dx_T
+        else:
+            h_y = B @ y
+            h_x = B @ dx
+            h_norm = dx_T @ h_y
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                h_y, h_x, h_norm
+            ) = self.take_nonzero_norm_regions([h_norm],
+                                               [I, H, dx, dx_T, y, y_T,
+                                                h_y, h_x, h_norm])
+
+            h_step = (dx - h_y) / h_norm
+            update = h_step * np.moveaxis(h_x, -1, -2)
+
+        B[good_pos] += update
+        return B
+
+class SR1Approximator(QuasiNetwonHessianApproximator):
+
+    orthogonal_dirs_cutoff = 1e-8
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        I = identities
+        dx = prev_steps[:, :, np.newaxis]
+        dx_T = prev_steps[:, np.newaxis, :]
+        y = jacobian_diffs[:, :, np.newaxis]
+        y_T = jacobian_diffs[:, np.newaxis, :]
+        B = prev_hess.copy()
+        if self.approximation_mode == 'direct':
+            h_step = y - (B @ dx)
+            h_step_T = np.moveaxis(h_step, -1, -2)
+            h_norm = dx_T @ h_step
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                h_step, h_step_T, h_norm
+            ) = self.take_nonzero_norm_regions([h_norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                h_step, h_step_T, h_norm])
+            update = (h_step_T * h_step) / h_norm
+        else:
+            h_step = dx - (B @ y)
+            h_step_T = np.moveaxis(h_step, -1, -2)
+            h_norm = y_T @ h_step
+            good_pos, (
+                I, H, dx, dx_T, y, y_T,
+                h_step, h_step_T, h_norm
+            ) = self.take_nonzero_norm_regions([h_norm],
+                                               [I, B, dx, dx_T, y, y_T,
+                                                h_step, h_step_T, h_norm])
+            update = (h_step_T * h_step) / h_norm
+
+        B[good_pos] += update
+        return B
+
+class CompactQuasiNewtonApproximator(QuasiNetwonHessianApproximator):
+    @classmethod
+    def get_direct_hessian_update_vector(cls, H, dx, y):
+        raise NotImplementedError("abstract")
+    @classmethod
+    def get_inverse_hessian_update_vector(cls, H, dx, y):
+        raise NotImplementedError("abstract")
+
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        I = identities
+        dx = prev_steps[:, :, np.newaxis]
+        dx_T = prev_steps[:, np.newaxis, :]
+        y = jacobian_diffs[:, :, np.newaxis]
+        y_T = jacobian_diffs[:, np.newaxis, :]
+        B = prev_hess.copy()
+
+        if self.approximation_mode == 'direct':
+            v = self.get_direct_hessian_update_vector(
+                B, dx, y
+            )
+        else:
+            v = self.get_inverse_hessian_update_vector(
+                B, dx, y
+            )
+            y, y_T, dx, dx_T = dx, dx_T, y, y_T
+
+        norm = v @ dx_T
+        good_pos, (
+            I, H, dx, dx_T, y, y_T,
+            v, norm
+        ) = self.take_nonzero_norm_regions([norm],
+                                           [I, B, dx, dx_T, y, y_T,
+                                            v, norm])
+
+        d = (dx - H @ y) / norm
+        d_T = np.moveaxis(d, -1, -2)
+        v_T = np.moveaxis(v, -1, -2)
+        dv = d * v_T
+        dv_T = np.moveaxis(dv, -1, -2)
+
+        B[good_pos,] += dv + dv_T - ((d_T @ y) / norm) * (v * v_T)
+
+        return B
+
+class PSBQuasiNewtonApproximator(CompactQuasiNewtonApproximator):
+    @classmethod
+    def get_direct_hessian_update_vector(cls, H, dx, y):
+        raise NotImplementedError("PSB only does inverse mode")
+    @classmethod
+    def get_inverse_hessian_update_vector(cls, H, dx, y):
+        return dx
+
+class GreenstadtNewtonApproximator(CompactQuasiNewtonApproximator):
+    @classmethod
+    def get_direct_hessian_update_vector(cls, H, dx, y):
+        raise y
+
+    @classmethod
+    def get_inverse_hessian_update_vector(cls, H, dx, y):
+        raise NotImplementedError("Greenstadt only does direct mode")
+
+class WeightedQuasiNewtonApproximator(QuasiNetwonHessianApproximator):
+
+    base_approximators = None
+    def __init__(
+            self,
+            func, jacobian, initial_beta=1,
+            damping_parameter=None, damping_exponent=None,
+            line_search=True, restart_interval=10,
+            restart_hessian_norm=1e-5,
+            approximation_mode='direct'
+    ):
+        super().__init__(
+            func, jacobian,
+            initial_beta=initial_beta,
+            damping_parameter=damping_parameter, damping_exponent=damping_exponent,
+            line_search=line_search, restart_interval=restart_interval,
+            restart_hessian_norm=restart_hessian_norm,
+            approximation_mode=approximation_mode
+        )
+        self.approximators = [
+            app(
+                None, None,
+                initial_beta=initial_beta,
+                damping_parameter=damping_parameter, damping_exponent=damping_exponent,
+                line_search=line_search, restart_interval=restart_interval,
+                restart_hessian_norm=restart_hessian_norm,
+                approximation_mode=approximation_mode
+            )
+            for app in self.base_approximators
+        ]
+
+    def get_direct_weights(self, jacobian_diffs, prev_steps, prev_hess):
+        raise NotImplementedError("abstract")
+    def get_inverse_weights(self, jacobian_diffs, prev_steps, prev_hess):
+        raise NotImplementedError("abstract")
+
+
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        if self.approximation_mode == 'direct':
+            weights = self.get_direct_weights(jacobian_diffs, prev_steps, prev_hess)
+        else:
+            weights = self.get_inverse_weights(jacobian_diffs, prev_steps, prev_hess)
+
+        base_updates = np.array([
+            app.get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)
+            for app in self.approximators
+        ])
+
+        # weights is kxb array and base_updates is bxkxnxn
+        avg = weights[:, np.newaxis, :] @ np.moveaxis(base_updates, 1, 0)[:, :, np.newaxis, :, :]
+        return avg.reshape(base_updates.shape[1:])
+
+class BofillApproximator(WeightedQuasiNewtonApproximator):
+    base_approximators = [
+        SR1Approximator,
+        PSBQuasiNewtonApproximator
+    ]
+    def get_direct_weights(self, jacobian_diffs, prev_steps, prev_hess):
+        raise NotImplementedError("only inverse supported")
+
+    @classmethod
+    def get_psi(self, jacobian_diffs, prev_steps, prev_hess):
+        psi = np.ones_like(prev_steps)
+
+        dx = prev_steps[:, :, np.newaxis]
+        dx_T = prev_steps[:, np.newaxis, :]
+        y = jacobian_diffs[:, :, np.newaxis]
+        y_T = jacobian_diffs[:, np.newaxis, :]
+        H = prev_hess
+        h_step = y + H @ dx
+        h_step_T = np.moveaxis(h_step, -2, -1)
+        h_norm = h_step_T @ h_step
+        s_norm = dx_T @ dx
+        good_pos, (
+            H, dx, dx_T, y, y_T,
+            s_norm, h_norm
+        ) = self.take_nonzero_norm_regions([s_norm, h_norm],
+                                           [H, dx, dx_T, y, y_T,
+                                            s_norm, h_norm])
+        step_disp = h_step_T @ dx
+
+        psi[good_pos] = np.reshape( (step_disp**2)/(s_norm * h_norm), -1)
+
+        return psi
+
+    def get_inverse_weights(self, jacobian_diffs, prev_steps, prev_hess):
+            psi = self.get_psi(jacobian_diffs, prev_steps, prev_hess)
+            return [psi, 1-psi]
+
+class SchelgelApproximator(BofillApproximator):
+    base_approximators = [
+        SR1Approximator,
+        BFGSApproximator
+    ]
+    def get_direct_weights(self, jacobian_diffs, prev_steps, prev_hess):
+        raise NotImplementedError("only inverse supported")
+
+    def get_psi(self, jacobian_diffs, prev_steps, prev_hess):
+        psi = np.sqrt(BofillApproximator.get_psi())
+
+        return psi
+
+    def get_inverse_weights(self, jacobian_diffs, prev_steps, prev_hess):
+            psi = np.sqrt(BofillApproximator.get_psi(jacobian_diffs, prev_steps, prev_hess))
+            return [psi, 1-psi]
 
 class ConjugateGradientStepFinder:
     supports_hessian = False
@@ -713,6 +1265,9 @@ class ConjugateGradientStepFinder:
         }
 
     def __call__(self, guess, mask, projector=None):
+        if isinstance(mask, tuple):  # for chain minimizers
+            mask, (j, _, _) = mask
+            guess = guess[:, j]
         return self.step_appx(guess, mask, projector=projector)
 
 class ConjugateGradientStepApproximator:
@@ -792,13 +1347,256 @@ class ConjugateGradientStepApproximator:
 
         return new_step, new_jacs
 
-
 class FletcherReevesApproximator(ConjugateGradientStepApproximator):
     def get_beta(self, new_jacs, prev_jac, prev_step_dir):
         return (
                 (new_jacs[:, np.newaxis, :] @new_jacs[:, :, np.newaxis]) /
                 (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis])
         ).reshape(len(new_jacs))
+
+class EigenvalueFollowingStepFinder:
+
+    line_search = ArmijoSearch
+    def __init__(self, func, jacobian, hessian, initial_beta=1,
+                 damping_parameter=None, damping_exponent=None,
+                 line_search=False, restart_interval=1,
+                 restart_hessian_norm=1e-5,
+                 hessian_approximator='bofill',
+                 approximation_mode='direct',
+                 target_mode=None,
+                 # approximation_mode='inverse'
+                 ):
+        self.base_approximator = QuasiNewtonStepFinder.get_hessian_approximations()[hessian_approximator.lower()](
+            func, jacobian
+        )
+
+        self.func = func
+        self.jac = jacobian
+        self.hess = hessian
+        self.initial_beta = initial_beta
+        self.base_hess = None
+        self.prev_jac = None
+        self.prev_step = None
+        self.prev_evec = None
+        self.prev_hess = None
+        self.eye_tensors = None
+        self.damper = Damper(
+            damping_parameter=damping_parameter,
+            damping_exponent=damping_exponent,
+            restart_interval=restart_interval
+        )
+        if line_search is True:
+            line_search = self.line_search(func)
+        elif line_search is False:
+            line_search = None
+        self.searcher = line_search
+        self.restart_hessian_norm = restart_hessian_norm
+        self.approximation_mode = approximation_mode
+        self.target_mode = target_mode
+
+    def identities(self, guess, mask):
+        if self.eye_tensors is None:
+            self.eye_tensors = vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
+            return self.eye_tensors
+        else:
+            return self.eye_tensors[mask,]
+
+    def initialize_hessians(self, guess, mask):
+        return self.hess(guess)
+
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        return self.base_approximator.get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)
+
+    negative_eigenvalue_offset = 0.015
+    positive_eigenvalue_offset = 0.005
+    mode_tracking_overlap_cutoff = 1e-5
+    def get_shift(self, evals, tf_new, target_mode):
+        if target_mode is None:
+            target_ev = evals[0] # could do np.min(ev) if we had some other (or complex) eigensolver
+        else:
+            overlaps = np.abs(tf_new @ target_mode) # TODO: check if this makes sense, in principle under a
+                                                    # quadratic appx. the "direction" of the step doesn't matter
+            abs_ov = np.abs(overlaps)
+            ev_pos = np.argmax(abs_ov)
+            if abs_ov[ev_pos] < self.mode_tracking_overlap_cutoff:
+                target_ev = evals[0]
+            else:
+                target_ev = evals[ev_pos]
+
+        if target_ev < 0:
+            shift = -target_ev + self.negative_eigenvalue_offset # make this very slightly positive
+        else:
+            shift = self.positive_eigenvalue_offset
+
+        return shift
+
+    def get_jacobian_updates(self, guess, mask):
+        new_jacs = self.jac(guess, mask)
+        if self.prev_jac is None:
+            jac_diffs = new_jacs
+        else:
+            prev_jacs = self.prev_jac[mask,]
+            jac_diffs = new_jacs - prev_jacs
+        return new_jacs, jac_diffs
+
+    def restart_hessian_approximation(self):
+        restart = np.any(
+            np.linalg.norm(self.prev_step, axis=-1) < self.restart_hessian_norm
+        )
+        return restart
+
+    def __call__(self, guess, mask, projector=None):
+        if isinstance(mask, tuple):  # for chain minimizers
+            mask, (j, _, _) = mask
+            guess = guess[:, j]
+
+        new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask)
+        if self.prev_step is None or self.restart_hessian_approximation():
+            new_hess = self.initialize_hessians(guess, mask)
+        else:
+            prev_steps = self.prev_step[mask,]
+            prev_hess = self.prev_hess[mask,]
+            new_hess = self.get_hessian_update(guess, self.identities(guess, mask), jacobian_diffs, prev_steps, prev_hess)
+
+        if self.prev_evec is None:
+            prev_evec = None
+        else:
+            prev_evec = self.prev_evec[mask,]
+
+        evals, tf = np.linalg.eigh(new_hess)
+        if misc.is_numeric(self.target_mode):
+            self.target_mode = tf[:, self.target_mode]
+
+        shift = self.get_shift(evals, tf, self.target_mode)
+
+        tf_grad = -np.diag(
+                np.moveaxis(tf, -1, -2) @ new_jacs[:, :, np.newaxis]
+        ) / (evals[:, :, np.newaxis] + shift[:, np.newaxis, np.newaxis])
+        new_step_dir = (tf_grad @ tf).reshape(new_jacs.shape)
+
+        # print(new_hess)
+        if projector is not None:
+            new_step_dir = (new_step_dir[:, np.newaxis, :] @ projector).reshape(new_step_dir.shape)
+        if self.searcher is not None:
+            alpha, (fvals, is_converged) = self.searcher(guess, new_step_dir, initial_grad=new_jacs)
+        else:
+            alpha = np.ones(len(new_step_dir))
+        # handle convergence issues?
+        new_step = alpha[:, np.newaxis] * new_step_dir
+        # print(np.isnan(guess).any(), np.isnan(alpha).any(), np.linalg.norm(new_step_dir))
+        u = self.damper.get_damping_factor()
+        if u is not None:
+            new_step = new_step * u
+
+        if self.prev_jac is None:
+            self.prev_jac = new_jacs
+        else:
+            self.prev_jac[mask,] = new_jacs
+
+        if self.prev_step is None:
+            self.prev_step = new_step
+        else:
+            self.prev_step[mask,] = new_step
+
+        if self.prev_hess is None:
+            self.prev_hess = new_hess
+        else:
+            self.prev_hess[mask,] = new_hess
+
+        return new_step, new_jacs
+
+class NudgedElasticBandStepFinder:
+    supports_hessian = True
+    def __init__(self,
+                 func,
+                 jacobian,
+                 hessian=None,
+                 spring_constants=.1,
+                 step_finder='conjugate-gradient',
+                 distance_function=None,
+                 **opts
+                 ):
+        self.spring_constants = spring_constants
+        self._spring_constants = None
+        self.distance_function = distance_function
+        self.step_finder = get_step_finder({
+            'method':step_finder,
+            'func':self.wrap_func(func),
+            'jacobian':self.wrap_jac(jacobian),
+            'hessian':self.wrap_hess(hessian),
+            **opts
+        })
+        self._mask_data = None
+
+    def get_dist(self, p1, p2):
+        return np.linalg.norm(p1 - p2)
+
+    def get_spring_params(self, guess, j, prev, next):
+        if prev is not None:
+            prev_dist = self.get_dist(guess[:, j], guess[:, prev])
+            if misc.is_numeric(self.spring_constants):
+                prev_const = self.spring_constants
+            else:
+                prev_const = self.spring_constants[prev]
+        else:
+            prev_dist = None
+            prev_const = None
+        if next is not None:
+            next_dist = self.get_dist(guess[:, j], guess[:, next])
+            if misc.is_numeric(self.spring_constants):
+                next_const = self.spring_constants
+            else:
+                next_const = self.spring_constants[j]
+        else:
+            next_dist = None
+            next_const = None
+        return (prev_dist, prev_const), (next_dist, next_const)
+
+    def wrap_func(self, func):
+        @functools.wraps(func)
+        def spring_func(guess, mask):
+            j, prev, next = self._mask_data
+            base = func(guess[:, j], mask)
+            (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, j, prev, next)
+            if prev_dist is not None:
+                base += (prev_dist**2) * prev_const
+            if next_dist is not None:
+                base += (next_dist**2) * next_const
+            return base
+        return spring_func
+
+    def wrap_jac(self, jac):
+        @functools.wraps(jac)
+        def spring_jac(guess, mask):
+            j, prev, next = self._mask_data
+            base = jac(guess[:, j], mask)
+            (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, j, prev, next)
+            if prev_dist is not None:
+                base += 2 * prev_const * (guess[:, j] - guess[:, prev])
+            if next_dist is not None:
+                base += 2 * next_const * (guess[:, j] - guess[:, next])
+            return base
+        return spring_jac
+
+    def wrap_hess(self, hess):
+        if hess is None:
+            return hess
+        @functools.wraps(hess)
+        def spring_hess(guess, mask):
+            j, prev, next = self._mask_data
+            base = hess(guess[:, j], mask)
+            (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, j, prev, next)
+            if prev_dist is not None:
+                base += 2 * prev_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
+            if next_dist is not None:
+                base += 2 * next_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
+            return base
+        return spring_hess
+
+    def __call__(self, guess, mask):
+        mask, self._mask_data = mask
+        return self.step_finder(guess, mask)
+
 
 def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-8):
     mat = np.asanyarray(initial_matrix).copy()
@@ -1026,3 +1824,15 @@ def displacement_localizing_rotation_generator(mat, col_i, col_j):
     AB_norm = np.sqrt(A ** 2 + B ** 2)
 
     return A / AB_norm, B / AB_norm, A
+
+
+class ImageChainOptimizer:
+    """
+    Represents a chain of images to be optimized in a conjoined manner
+    """
+
+    def __init__(self,
+                 image_coords,
+                 step_finder
+                 ):
+        ...

@@ -19,7 +19,7 @@ class NumputilsTests(TestCase):
                                   [-1.75999392e-16, -1.43714410e+00, -9.00306410e-01]
     ])
 
-    @debugTest
+    @validationTest
     def test_VecOps(self):
         v = np.random.rand(16, 3, 5)
         u = vec_normalize(v, axis=1)
@@ -27,7 +27,7 @@ class NumputilsTests(TestCase):
             np.allclose(vec_norms(u, axis=1), np.ones((16, 5)))
         )
 
-    @validationTest
+    @debugTest
     def test_OptimizeClassic(self):
         ndim = 6
 
@@ -68,11 +68,12 @@ class NumputilsTests(TestCase):
         guess = vec_normalize(np.random.uniform(-np.pi/2, np.pi/2, ndim))
         minimum, convd, (error, its) = iterative_step_minimize(
             guess,
-            NewtonStepFinder(f, fjac, fhess, damping_parameter=.9, damping_exponent=1.01),
-            # GradientDescentStepFinder(f, fjac, line_search=True, damping_parameter=.9, damping_exponent=1.01),
-            # QuasiNewtonStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01),#, line_search=True),
-            # ConjugateGradientStepFinder(f, fjac, damping_parameter=.9, damping_exponent=1.01, restart_interval=10),
-            max_iterations=150,
+            NewtonStepFinder(f, fjac, fhess),
+            # GradientDescentStepFinder(f, fjac),
+            # ConjugateGradientStepFinder(f, fjac),
+            # QuasiNewtonStepFinder(f, fjac),
+            max_displacement=.1,
+            max_iterations=50,
             unitary=True,
             tol=1e-15
         )
@@ -159,6 +160,10 @@ class NumputilsTests(TestCase):
   [ 6. 57. 83. 69. 17.  3.]]
 """
         raise Exception(np.linalg.det(U), err)
+
+    @validationTest
+    def test_NEB(self):
+        ...
 
     @validationTest
     def test_skewRotationMatrix(self):
