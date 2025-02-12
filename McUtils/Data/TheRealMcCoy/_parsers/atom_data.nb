@@ -3,10 +3,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[         0,          0]
-NotebookDataLength[     59830,       1369]
-NotebookOptionsPosition[     54276,       1270]
-NotebookOutlinePosition[     54670,       1286]
-CellTagsIndexPosition[     54627,       1283]
+NotebookDataLength[     59869,       1370]
+NotebookOptionsPosition[     54315,       1271]
+NotebookOutlinePosition[     54709,       1287]
+CellTagsIndexPosition[     54666,       1284]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1241,24 +1241,25 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"Export", "[", "\[IndentingNewLine]", 
-  RowBox[{
-   RowBox[{"FileNameJoin", "@", 
-    RowBox[{"{", "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"ParentDirectory", "@", 
-       RowBox[{"NotebookDirectory", "[", "]"}]}], ",", " ", 
-      "\[IndentingNewLine]", "\"\<AtomData.py\>\""}], "\[IndentingNewLine]", 
-     "}"}]}], ",", "\[IndentingNewLine]", 
+ RowBox[{"(*", 
+  RowBox[{"Export", "[", "\[IndentingNewLine]", 
    RowBox[{
-   "\"\<source = \
+    RowBox[{"FileNameJoin", "@", 
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"ParentDirectory", "@", 
+        RowBox[{"NotebookDirectory", "[", "]"}]}], ",", " ", 
+       "\[IndentingNewLine]", "\"\<AtomData.py\>\""}], "\[IndentingNewLine]", 
+      "}"}]}], ",", "\[IndentingNewLine]", 
+    RowBox[{
+    "\"\<source = \
 \\\"https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=&ascii=\
 ascii2\\\"\ndata = \>\"", "<>", "pythonAtomData"}], ",", 
-   "\[IndentingNewLine]", "\"\<Text\>\""}], "\[IndentingNewLine]", 
-  "]"}]], "Input",
- CellChangeTimes->{3.947980674011738*^9},
- CellLabel->
-  "In[285]:=",ExpressionUUID->"7ade6cd8-521c-4926-baa8-8af8ca7d436a"],
+    "\[IndentingNewLine]", "\"\<Text\>\""}], "\[IndentingNewLine]", "]"}], 
+  "*)"}]], "Input",
+ CellChangeTimes->{{3.947980674011738*^9, 
+  3.9479806868848886`*^9}},ExpressionUUID->"7ade6cd8-521c-4926-baa8-\
+8af8ca7d436a"],
 
 Cell[BoxData["\<\"/Users/Mark/Documents/UW/Research/Development/McUtils/\
 McUtils/Data/TheRealMcCoy/AtomData.py\"\>"], "Output",
@@ -1360,8 +1361,8 @@ Cell[51059, 1186, 386, 9, 30, "Input",ExpressionUUID->"c97e1bd7-b82b-4bba-82da-c
 Cell[51448, 1197, 655, 16, 73, "Input",ExpressionUUID->"d408f332-22d9-4b23-b881-b4232b6d3ef7"],
 Cell[52106, 1215, 1101, 23, 220, "Input",ExpressionUUID->"f528dab7-a264-4420-af32-cf1af850e1ce"],
 Cell[CellGroupData[{
-Cell[53232, 1242, 760, 18, 220, "Input",ExpressionUUID->"7ade6cd8-521c-4926-baa8-8af8ca7d436a"],
-Cell[53995, 1262, 253, 4, 56, "Output",ExpressionUUID->"506269cf-4b61-418d-85c1-1ee695e7c3e3"]
+Cell[53232, 1242, 799, 19, 220, "Input",ExpressionUUID->"7ade6cd8-521c-4926-baa8-8af8ca7d436a"],
+Cell[54034, 1263, 253, 4, 56, "Output",ExpressionUUID->"506269cf-4b61-418d-85c1-1ee695e7c3e3"]
 }, Open  ]]
 }, Open  ]]
 }

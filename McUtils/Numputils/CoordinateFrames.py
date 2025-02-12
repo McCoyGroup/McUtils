@@ -7,15 +7,21 @@ __all__ = [
     "translation_rotation_eigenvectors",
     "translation_rotation_projector",
     "remove_translation_rotations",
-    "translation_rotation_invariant_transformation"
+    "translation_rotation_invariant_transformation",
+    "eckart_embedding",
+    "rmsd_minimizing_transformation"
 ]
+
+import itertools
 
 import numpy as np
 from . import VectorOps as vec_ops
 from . import TensorDerivatives as td_ops
 from . import SetOps as set_ops
+from . import Misc as misc
+from . import TransformationMatrices as tf_mats
 
-def center_of_mass(coords, masses):
+def center_of_mass(coords, masses=None):
     """Gets the center of mass for the coordinates
 
     :param coords:
@@ -26,12 +32,15 @@ def center_of_mass(coords, masses):
     :rtype:
     """
 
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
+
     masses = masses.copy()
     masses[masses < 0] = 0
 
     return np.tensordot(masses / np.sum(masses), coords, axes=[0, -2])
 
-def inertia_tensors(coords, masses):
+def inertia_tensors(coords, masses=None):
     """
     Computes the moment of intertia tensors for the walkers with coordinates coords (assumes all have the same masses)
 
@@ -42,6 +51,9 @@ def inertia_tensors(coords, masses):
     :return:
     :rtype:
     """
+
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
 
     com = center_of_mass(coords, masses)
     coords = coords - com[..., np.newaxis, :]
@@ -59,28 +71,31 @@ def inertia_tensors(coords, masses):
 
     return tens
 
-def inertial_frame_derivatives(crds, mass, sel=None):
-    mass = np.asanyarray(mass)
-    crds = np.asanyarray(crds)
-    real_pos = mass > 0
+def inertial_frame_derivatives(coords, masses=None, sel=None):
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
+
+    masses = np.asanyarray(masses)
+    coords = np.asanyarray(coords)
+    real_pos = masses > 0
     if sel is not None:
         real_pos = np.intersect1d(sel, real_pos)
 
-    smol = crds.ndim == 2
+    smol = coords.ndim == 2
     if smol:
-        crds = crds[np.newaxis]
-    base_shape = crds.shape[:-2]
-    crds = crds.reshape((-1,) + crds.shape[-2:])
-    if mass.ndim == 1:
-        mass = mass[np.newaxis]
+        coords = coords[np.newaxis]
+    base_shape = coords.shape[:-2]
+    coords = coords.reshape((-1,) + coords.shape[-2:])
+    if masses.ndim == 1:
+        masses = masses[np.newaxis]
     else:
-        mass = np.reshape(mass, (-1, mass.shape[-1]))
+        masses = np.reshape(masses, (-1, masses.shape[-1]))
 
-    mass = mass[..., real_pos]
-    crds = crds[..., real_pos, :]
+    masses = masses[..., real_pos]
+    coords = coords[..., real_pos, :]
 
-    mass = np.sqrt(mass)
-    carts = mass[..., :, np.newaxis] * crds  # mass-weighted Cartesian coordinates
+    masses = np.sqrt(masses)
+    carts = masses[..., :, np.newaxis] * coords  # mass-weighted Cartesian coordinates
 
     ### compute basic inertia tensor derivatives
     # first derivs are computed as a full (nAt, 3, I_rows (3), I_cols (3)) tensor
@@ -117,7 +132,7 @@ def inertial_frame_derivatives(crds, mass, sel=None):
 
     return [I0Y, I0YY]
 
-def moments_of_inertia(coords, masses):
+def moments_of_inertia(coords, masses=None):
     """
     Computes the moment of inertia tensor for the walkers with coordinates coords (assumes all have the same masses)
 
@@ -140,6 +155,10 @@ def moments_of_inertia(coords, masses):
         extra_shape = coords.shape[:-2]
         coords = coords.reshape((np.prod(extra_shape),) + coords.shape[-2:])
 
+
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
+
     massy_doop = inertia_tensors(coords, masses)
     moms, axes = np.linalg.eigh(massy_doop)
     # a = axes[..., :, 0]
@@ -161,7 +180,7 @@ def moments_of_inertia(coords, masses):
         axes = axes[0]
     return moms, axes
 
-def translation_rotation_eigenvectors(coords, masses, mass_weighted=True):
+def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
     """
     Returns the eigenvectors corresponding to translations and rotations
     in the system
@@ -173,6 +192,10 @@ def translation_rotation_eigenvectors(coords, masses, mass_weighted=True):
     :return:
     :rtype:
     """
+
+
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
 
     n = len(masses)
     # explicitly put masses in m_e from AMU
@@ -317,10 +340,14 @@ def remove_translation_rotations(expansion, coords, masses=None, mass_weighted=F
     return proj_expansion
 
 def translation_rotation_invariant_transformation(
-        coords, masses,
+        coords, masses=None,
         mass_weighted=True,
         strip_embedding=True
 ):
+
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
+
     A, L_tr = translation_rotation_projector(coords, masses, mass_weighted=True, return_modes=True)
     base_shape = A.shape[:-2]
     A = A.reshape((-1,) + A.shape[-2:])
@@ -359,3 +386,177 @@ def translation_rotation_invariant_transformation(
     inv = inv.reshape(base_shape + inv.shape[-2:])
 
     return tf, inv
+
+def principle_axis_embedded_coords(coords, masses=None):
+    """
+    Returns coordinate embedded in the principle axis frame
+
+    :param coords:
+    :type coords:
+    :param masses:
+    :type masses:
+    :return:
+    :rtype:
+    """
+    com = center_of_mass(coords, masses)
+    # crds_ = coords
+    coords = coords - com[..., np.newaxis, :]
+    moms, pax_axes = moments_of_inertia(coords, masses)
+    # pax_axes = np.swapaxes(pax_axes, -2, -1)
+    coords = np.matmul(coords, pax_axes)
+
+    return coords, com, pax_axes
+
+
+planar_ref_tolerance=1e-6
+def _eckart_embedding(ref, coords,
+                     masses=None,
+                     sel=None,
+                     in_paf=False,
+                     planar_ref_tolerance=None,
+                     proper_rotation=False
+                     ):
+    """
+    Generates the Eckart rotation that will align ref and coords, assuming initially that `ref` and `coords` are
+    in the principle axis frame
+
+    :param masses:
+    :type masses:
+    :param ref:
+    :type ref:
+    :param coords:
+    :type coords: np.ndarray
+    :return:
+    :rtype:
+    """
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
+
+    if coords.ndim == 2:
+        coords = np.broadcast_to(coords, (1,) + coords.shape)
+
+    if planar_ref_tolerance is None:
+        planar_ref_tolerance = planar_ref_tolerance
+
+    if not in_paf:
+        coords, com, pax_axes = principle_axis_embedded_coords(coords, masses)
+        ref, ref_com, ref_axes = principle_axis_embedded_coords(ref, masses)
+        # raise ValueError(ref)
+    else:
+        com = pax_axes = None
+        ref_com = ref_axes = None
+
+    og_coords = coords
+    if sel is not None:
+        coords = coords[..., sel, :]
+        masses = masses[sel]
+        ref = ref[..., sel, :]
+
+    real_pos = masses > 0
+    # print(real_pos)
+    # og_coords = coords
+    coords = coords[..., real_pos, :]
+    masses = masses[real_pos,]
+    og_ref = ref
+    ref = ref[..., real_pos, :]
+
+    if ref.ndim == 2:
+        ref = ref[np.newaxis]
+    if ref.shape[0] > 1 and ref.shape[0] < coords.shape[0]:  # TODO: make less hacky
+        # need to make them broadcast together and we assume
+        # we have an extra stack of coords
+        n_sys = coords.shape[0]
+        ref = np.reshape(
+            np.broadcast_to(
+                ref[np.newaxis],
+                (n_sys // ref.shape[0],) + ref.shape
+            ),
+            (n_sys,) + ref.shape[1:]
+        )
+        ref_axes = np.reshape(
+            np.broadcast_to(
+                ref_axes[np.newaxis],
+                (n_sys // ref_axes.shape[0],) + ref_axes.shape
+            ),
+            (n_sys,) + ref_axes.shape[1:]
+        )
+        ref_com = np.reshape(
+            np.broadcast_to(
+                ref_com[np.newaxis],
+                (n_sys // ref_com.shape[0],) + ref_com.shape
+            ),
+            (n_sys,) + ref_com.shape[1:]
+        )
+
+    # needs to be updated for the multiple reference case?
+    # TODO: make sure that we broadcast this correctly to check if all or
+    #       none of the reference structures are planar
+    planar_ref = np.allclose(ref[0][:, 2], 0., atol=planar_ref_tolerance)
+
+    if not planar_ref:
+        # generate pair-wise product matrix
+        A = np.tensordot(
+            masses / np.sum(masses),
+            ref[:, :, :, np.newaxis] * coords[:, :, np.newaxis, :],
+            axes=[0, 1]
+        )
+        # take SVD of this
+        U, S, V = np.linalg.svd(A)
+        rot = np.matmul(U, V)
+    else:
+        # generate pair-wise product matrix but only in 2D
+        F = ref[:, :, :2, np.newaxis] * coords[:, :, np.newaxis, :2]
+        A = np.tensordot(masses / np.sum(masses), F, axes=[0, 1])
+        U, S, V = np.linalg.svd(A)
+        rot = np.broadcast_to(np.eye(3, dtype=float), (len(coords), 3, 3)).copy()
+        rot[..., :2, :2] = np.matmul(U, V)
+
+    if proper_rotation:
+        a = rot[..., :, 0]
+        b = rot[..., :, 1]
+        c = vec_ops.vec_crosses(a, b, normalize=True)  # force right-handedness because we can
+        rot[..., :, 2] = c  # ensure we have true rotation matrices
+        dets = np.linalg.det(rot)
+        rot[..., :, 2] /= dets[..., np.newaxis]  # ensure we have true rotation matrices
+
+    # dets = np.linalg.det(rot)
+    # raise ValueError(dets)
+
+    return rot, (og_ref, ref_com, ref_axes), (og_coords, com, pax_axes)
+
+def eckart_embedding(ref, coords,
+                     masses=None,
+                     sel=None,
+                     in_paf=False,
+                     planar_ref_tolerance=None,
+                     proper_rotation=False,
+                     permutable_groups=None):
+    if permutable_groups is None:
+        return _eckart_embedding(
+            ref, coords,
+            masses=masses,
+            sel=sel,
+            in_paf=in_paf,
+            planar_ref_tolerance=planar_ref_tolerance,
+            proper_rotation=proper_rotation
+        )
+    else:
+        if misc.is_numeric(permutable_groups[0]):
+            permutable_groups = permutable_groups[0]
+
+        if masses is None:
+            masses = np.ones(coords.shape[-2])
+        masses = np.asanyarray(masses)
+
+        # permutes solely based on the first element in coords
+        perm = np.arange(coords.shape[-2])
+        for g in permutable_groups:
+            rotation_angles = []
+            r = ref[..., g, :]
+            m = masses[g,]
+            for p in itertools.permutations(g):
+                c = coords[..., g, :]
+                rot = _eckart_embedding(r, c, masses=m, in_paf=False)
+                angle,axis = tf_mats.extract_rotation_angle_axis(rot)
+
+rmsd_minimizing_transformation = eckart_embedding

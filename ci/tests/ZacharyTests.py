@@ -1449,6 +1449,18 @@ class ZacharyTests(TestCase):
 
     #endregion Mesh
 
+    @debugTest
+    def test_ParametricCurveInterpolation(self):
+        grid = np.linspace(0, 1, 8)
+        vals = np.array([
+            np.cos(grid),
+            np.sin(grid),
+            np.sin(grid) + np.cos(grid)
+        ]).T
+
+        interp = Interpolator(grid, vals)
+        print(interp(.5))
+
     @validationTest
     def test_RegularGridInterpolatorND(self):
 

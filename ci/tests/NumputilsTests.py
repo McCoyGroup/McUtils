@@ -27,7 +27,7 @@ class NumputilsTests(TestCase):
             np.allclose(vec_norms(u, axis=1), np.ones((16, 5)))
         )
 
-    @debugTest
+    @validationTest
     def test_OptimizeClassic(self):
         ndim = 6
 
@@ -161,9 +161,72 @@ class NumputilsTests(TestCase):
 """
         raise Exception(np.linalg.det(U), err)
 
-    @validationTest
+    @debugTest
     def test_NEB(self):
-        ...
+        ndim = 1
+
+        np.random.seed(1)
+        if ndim == 1:
+            rot = np.array([[1]])
+        else:
+            rot = rotation_matrix_skew(np.random.rand(math.comb(ndim, 2)))
+
+        # A = rot @ np.diag(np.random.uniform(.5, 2, (ndim,))) @ rot.T
+        # A_inv = np.linalg.inv(A)
+        # def f(guess, *_):
+        #     return 1/2 * np.tensordot(guess, A, axes=[-1, 0])[:, np.newaxis, :] @ guess[:, :, np.newaxis]
+        # def fjac(guess, *_):
+        #     return np.tensordot(guess, A, axes=[-1, 0])
+        # def fhess(guess, *_):
+        #     return np.broadcast_to(A_inv[np.newaxis], (len(guess),) + A.shape)
+        #
+        # minimum, convd, (error, its) = iterative_step_minimize(
+        #     np.random.rand(ndim),
+        #     NewtonStepFinder(fjac, fhess, hess_mode='inverse'),
+        #     max_iterations=3
+        # )
+        # self.assertEquals(error, 0)
+
+        def f(guess, *_):
+            guess = (rot[np.newaxis] @ guess[:, :, np.newaxis]).reshape(guess.shape)
+            return np.sum(np.sin(guess), axis=-1) + 1 / 2 * np.sum((guess) ** 2, axis=-1)
+            # return 1/2*np.sum(guess**2, axis=-1)
+
+        def fjac(guess, *_):
+            guess = (rot[np.newaxis] @ guess[:, :, np.newaxis]).reshape(guess.shape)
+            return (rot.T[np.newaxis] @ (np.cos(guess) + guess)[:, :, np.newaxis]).reshape(guess.shape)
+            # return guess
+
+        def fhess(guess, *_):
+            guess = (rot[np.newaxis] @ guess[:, :, np.newaxis]).reshape(guess.shape)
+            h = -vec_tensordiag(np.sin(guess)) + identity_tensors(guess.shape[:-1], guess.shape[-1])
+            return rot.T[np.newaxis] @ h @ rot[np.newaxis]
+            # return identity_tensors(guess.shape[:-1], guess.shape[-1])
+
+        # for i in range(1000):
+        np.random.seed(1)
+        # [ 0.03378176  0.06135116  0.46629297  0.38138027 -1.05175418 -1.34294785]
+        guess = vec_normalize(np.random.uniform(-np.pi / 2, np.pi / 2, ndim))
+        minimum, convd, (error, its) = iterative_step_minimize(
+            guess,
+            [
+                NewtonStepFinder(f, fjac, fhess)
+            ],
+            # GradientDescentStepFinder(f, fjac),
+            # ConjugateGradientStepFinder(f, fjac),
+            # QuasiNewtonStepFinder(f, fjac),
+            max_displacement=.1,
+            max_iterations=50,
+            unitary=True,
+            tol=1e-15
+        )
+        # if error > 1e-4:
+        #     print(i)
+        #     break
+        print()
+        print(error, its)
+        print(guess, np.linalg.norm(guess, axis=-1))
+        print(minimum, np.linalg.norm(minimum, axis=-1))
 
     @validationTest
     def test_skewRotationMatrix(self):

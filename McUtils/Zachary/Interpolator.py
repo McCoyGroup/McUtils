@@ -1,12 +1,14 @@
 """
 Sets up a general Interpolator class that looks like Mathematica's InterpolatingFunction class
 """
+import typing
 
 import numpy as np, abc, enum, math
 import scipy.interpolate as interpolate
 import scipy.spatial as spat
 from .Mesh import Mesh, MeshType
 
+from .. import Numputils as nput
 from .NeighborBasedInterpolators import *
 
 __all__ = [
@@ -15,7 +17,8 @@ __all__ = [
     "RBFDInterpolator",
     "InverseDistanceWeightedInterpolator",
     "ProductGridInterpolator",
-    "UnstructuredGridInterpolator"
+    "UnstructuredGridInterpolator",
+    "CoordinateInterpolator"
 ]
 
 
@@ -60,9 +63,16 @@ class ProductGridInterpolator(BasicInterpolator):
     on a regular (tensor product) grid
     """
 
-    def __init__(self, grids, vals, caller=None, order=None, extrapolate=True):
+    def __init__(self, grids, vals,
+                 caller=None, order=None,
+                 extrapolate=True,
+                 periodic=False,
+                 boundary_conditions=None
+                 ):
+        #TODO: add richer support for different types of boundary conditions to allow us to
+        #      handler extrapolations easier, e.g. we can fix the linear term in the first derivative
+        #      at the boundary or we can specify that a function is periodic along a given coordinate
         """
-
         :param grids:
         :type grids:
         :param points:
@@ -76,26 +86,53 @@ class ProductGridInterpolator(BasicInterpolator):
         if order is None:
             order = 3
 
+        if nput.is_numeric(grids[0]):
+            grids = [grids]
         self.grids = grids
         self.vals = vals
+        self.periodic = periodic
         if caller is None:
-            if isinstance(grids[0], (int, float, np.integer, np.floating)):
-                grids = [grids]
             ndim = len(grids)
             if ndim == 1:
                 opts = {}
                 if order is not None:
                     opts["k"] = order
-
-                caller = interpolate.PPoly.from_spline(interpolate.splrep(grids[0], vals, k=order),
-                                                      extrapolate=extrapolate
-                                                      )
+                caller = self.get_base_spline(
+                    grids[0], vals, order,
+                    periodic=periodic,
+                    boundary_conditions=boundary_conditions,
+                    extrapolate=extrapolate
+                )
             else:
-                caller = self.construct_ndspline(grids, vals, order, extrapolate=extrapolate)
+                caller = self.construct_ndspline(grids, vals, order, extrapolate=extrapolate,
+                                                 periodic=periodic,
+                                                 boundary_conditions=boundary_conditions
+                                                 )
         self.caller = caller
 
     @classmethod
-    def construct_ndspline(cls, grids, vals, order, extrapolate=True):
+    def get_base_spline(cls, grid, vals, order, periodic=False, boundary_conditions=None, extrapolate=False):
+        base_spline = interpolate.make_interp_spline(
+            grid, vals, k=order,
+            bc_type='periodic' if periodic else boundary_conditions
+        )
+
+        # Adapated from interpolate.PPoly.from_spline
+
+        if vals.ndim > 1:
+            tck = base_spline.tck
+            t, c, k = tck
+            polys = [interpolate.PPoly.from_spline((t, cj, k)) for cj in c.T]
+            cc = np.dstack([p.c for p in polys])
+            return interpolate.PPoly.construct_fast(cc, polys[0].x, extrapolate)
+        else:
+            return interpolate.PPoly.from_spline(base_spline.tck, extrapolate)
+
+    @classmethod
+    def construct_ndspline(cls, grids, vals, order, extrapolate=True,
+                           periodic=False,
+                           boundary_conditions=None
+                           ):
         """
         Builds a tensor product ndspline by constructing a product of 1D splines
 
@@ -116,14 +153,23 @@ class ProductGridInterpolator(BasicInterpolator):
         if isinstance(order, (int, np.integer)):
             order = [order] * ndim
 
+        if periodic is True or periodic is False:
+            periodic = [periodic] * ndim
+        if (
+                boundary_conditions is None
+                or isinstance(boundary_conditions, str)
+                or len(boundary_conditions[0]) == 2 and nput.is_numeric(boundary_conditions[0][0])
+        ):
+            boundary_conditions = [boundary_conditions] * ndim
+
         coeffs = vals
         x = [None]*ndim
-        for i, (g, o) in enumerate(zip(grids, order)):
+        for i, (g, o, p, bcs) in enumerate(zip(grids, order, periodic, boundary_conditions)):
             og_shape = coeffs.shape
             coeffs = coeffs.reshape((len(g), -1)).T
             sub_coeffs = [np.empty(0)]*len(coeffs)
             for e,v in enumerate(coeffs):
-                ppoly = interpolate.PPoly.from_spline(interpolate.splrep(g, v, k=o))
+                ppoly = cls.get_base_spline(g, v, o, periodic=p, boundary_conditions=bcs)
                 x[i] = ppoly.x
                 sub_coeffs[e] = ppoly.c
             coeffs = np.array(sub_coeffs)
@@ -136,7 +182,42 @@ class ProductGridInterpolator(BasicInterpolator):
 
         return interpolate.NdPPoly(coeffs, x, extrapolate=extrapolate)
 
-    def __call__(self, *args, **kwargs):
+    def handle_periodicity(self, coords):
+        if not self.periodic: return coords
+
+        coords = np.asanyarray(coords)
+        ndim = len(self.grids)
+        one_d = coords.ndim == 0
+        if one_d:
+            coords = coords[np.newaxis]
+        smol = coords.ndim == 1
+        if smol:
+            if ndim == 1:
+                coords = coords[:, np.newaxis]
+            else:
+                coords = coords[np.newaxis]
+
+        periodic = self.periodic
+        if periodic is True: periodic = [periodic] * ndim
+        new_coords = coords.copy()
+        for i,(g,p) in enumerate(zip(self.grids, periodic)):
+            if p:
+                ptp = g[-1] - g[0]
+                new_coords[..., i] = np.mod((coords[..., i] - g[0]), ptp) + g[0]
+
+        if smol:
+            if ndim == 1:
+                new_coords = new_coords[:, 0]
+            else:
+                new_coords = new_coords[0]
+
+        if one_d:
+            new_coords = new_coords[0]
+
+        return new_coords
+
+
+    def __call__(self, coords, *etc, **kwargs):
         """
         :param args:
         :type args:
@@ -145,7 +226,8 @@ class ProductGridInterpolator(BasicInterpolator):
         :return:
         :rtype: np.ndarray
         """
-        return self.caller(*args, **kwargs)
+        coords = self.handle_periodicity(coords)
+        return self.caller(coords, *etc, **kwargs)
 
     def derivative(self, order):
         """
@@ -159,7 +241,8 @@ class ProductGridInterpolator(BasicInterpolator):
         return type(self)(
             self.grids,
             self.vals,
-            caller=self.caller.derivative(order)
+            caller=self.caller.derivative(order),
+            periodic=self.periodic
         )
         # elif ndim == 2:
         #     def caller(coords, _og=self.caller, **kwargs):
@@ -553,3 +636,66 @@ class Extrapolator:
 
     def __call__(self, *args, **kwargs):
         return self.apply(*args, **kwargs)
+
+class CoordinateInterpolator:
+
+    default_interpolator_type = Interpolator
+    def __init__(self,
+                 coordinates,
+                 arc_lengths=None,
+                 distance_function=None,
+                 base_interpolator=None,
+                 **interpolator_options
+                 ):
+        coordinates = np.asanyarray(coordinates)
+
+        abcissae = self.get_arc_lengths(
+            coordinates,
+            arc_lengths,
+            distance_function=distance_function
+        )
+
+        self.interpolator = base_interpolator(
+            abcissae,
+            coordinates,
+            **interpolator_options
+        )
+
+    @classmethod
+    def euclidean_coordinate_distance(cls, p1, p2):
+        return np.linalg.norm(p2 - p1)
+
+
+    @classmethod
+    def lookup_distance_function(cls, distance_function):
+        return {
+            'uniform':cls.uniform_distance_function
+        }[distance_function.lower()]
+
+    @classmethod
+    def uniform_distance_function(cls, coords):
+        return np.linspace(0, 1, len(coords))
+
+    @classmethod
+    def get_arc_lengths(cls,
+                        coordinates:np.ndarray,
+                        arc_lengths=None,
+                        distance_function:'typing.Callable[[np.ndarray, np.ndarray], float]'=None
+                        ):
+
+        if arc_lengths is None:
+            if isinstance(distance_function, str):
+                arc_lengths = cls.lookup_distance_function(distance_function)(coordinates)
+            else:
+                if distance_function is None:
+                    distance_function = cls.euclidean_coordinate_distance
+                arc_lengths = np.cumsum([0.] + [
+                    distance_function(p1, p2)
+                    for p1, p2 in zip(coordinates[:-1], coordinates[1:])
+                ])
+        arc_lengths = np.asanyarray(arc_lengths)
+
+        return distance_function, (arc_lengths - np.min(arc_lengths)) / np.ptp(arc_lengths)
+
+    def __call__(self, points, **etc):
+        return self.interpolator(points, **etc)
