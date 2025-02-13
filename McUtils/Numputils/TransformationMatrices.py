@@ -18,8 +18,6 @@ __all__ = [
     "skew_from_rotation_matrix",
     "translation_matrix",
     "affine_matrix",
-    "extract_rotation_angle",
-    "extract_rotation_axis",
     "extract_rotation_angle_axis"
 ]
 
@@ -206,12 +204,16 @@ def rotation_matrix(axis, theta=None):
 
 def skew_symmetric_matrix(upper_tri):
     upper_tri = np.asanyarray(upper_tri)
-    l = len(upper_tri)
-    n = int((1 + np.sqrt(1 + 8*l)) // 2)
-    m = np.zeros((n, n))
+    l = upper_tri.shape[-1]
+    n = (1 + np.sqrt(1 + 8*l)) / 2
+    if int(n) != n:
+        raise ValueError(f"vector of shape {l} doesn't correspond to the upper triangle of a matrix")
+    n = int(n)
+    base_shape = upper_tri.shape[:-1]
+    m = np.zeros(base_shape + (n, n))
     rows, cols = np.triu_indices_from(m, 1)
-    m[rows, cols] =  upper_tri
-    m[cols, rows] = -upper_tri
+    m[..., rows, cols] = upper_tri
+    m[..., cols, rows] = -upper_tri
     return m
 
 def extract_rotation_angle_axis(rot_mat, normalize=True):
@@ -232,11 +234,11 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
     else:
         base_shape = rot_mat.shape[:-2]
         rot_mat = np.reshape(rot_mat, (-1,) + rot_mat.shape[-2:])
-        U, Q = scipy.linalg.schur(rot_mat)
         angles = []
         axes = []
-        for u, q in zip(U, Q):
-            angles.append(youla_angles(u))
+        for r in rot_mat:
+            U, Q = scipy.linalg.schur(r)
+            angles.append(youla_angles(U))
             axes.append(Q)
 
         angles = np.array(angles)
@@ -253,15 +255,13 @@ def youla_skew_decomp(A):
         start = 0
         end = n
     else:  # manage padding for odd dimension
-        if abs(l[0]) < 1e-15:
+        if abs(l[0]) < 1e-7:
             start = 1
             end = n
         else:
             start = 0
             end = n - 1
     l = l[start:end-1:2]
-
-    print(l, n)
 
     return youla_matrix(l, n, axis_pos=0 if start == 0 else n), T
 
@@ -299,7 +299,7 @@ def youla_matrix(angles, n, axis_pos=0):
             np.arange(axis_pos+2, n, 2),
             ])
     else:
-        o = np.arange(0, n, 2),
+        o = np.arange(0, n, 2)
         e = np.arange(1, n, 2)
 
     U[o, o] = cos
@@ -310,13 +310,14 @@ def youla_matrix(angles, n, axis_pos=0):
     return U
 
 def youla_angles(U, axis_pos=None):
-    l = np.arccos(np.diag(U))
+    l = np.arccos(np.round(np.diag(U), 8))
     n = len(U)
     if axis_pos is None:
         if n % 2 == 0:
             axis_pos = -1
         else:  # manage padding for odd dimension
-            axis_pos = np.where(abs(l) < 1e-15)[0][0]
+            axis_pos = np.where(abs(l) < 1e-7)[0]
+            axis_pos = 0 if axis_pos[0] == 0 else axis_pos[-1]
         if axis_pos < 0:
             axis_pos = n + axis_pos
 
@@ -325,15 +326,18 @@ def youla_angles(U, axis_pos=None):
         l[axis_pos+1::2]
     ])
 
-def rotation_matrix_skew(upper_tri):
+def rotation_matrix_skew(upper_tri, create_skew=True):
     upper_tri = np.asanyarray(upper_tri)
-    if upper_tri.shape[-1] == 1:
-        return rotation_matrix_2d(upper_tri[..., 0])
-    else:
-        A = skew_symmetric_matrix(upper_tri)
-        # build Youla matrix
-        U, T = youla_skew_decomp(A)
-        return T@U@T.T
+    if create_skew:
+        if (
+                upper_tri.ndim < 2
+                or upper_tri.shape[-1] != upper_tri.shape[-2]
+                or not np.allclose(upper_tri, -np.moveaxis(upper_tri, -2, -1))
+        ):
+            upper_tri = skew_symmetric_matrix(upper_tri)
+
+    U, T = youla_skew_decomp(upper_tri)
+    return T@U@T.T
 
 def skew_from_rotation_matrix(rot_mat):
     U, Q = sp.linalg.schur(rot_mat)
@@ -348,7 +352,7 @@ def rotation_matrix_from_angles_vectors(l, T):
     if n % 2 == 1 and len(l) == (n // 2) + 1: # the axis is encoded in l
         axis_pos = np.where(np.abs(l) > 2 * np.pi)[0]
         if len(axis_pos) == 0:
-            axis_pos = np.where(np.abs(l) < 1e-15)[0]
+            axis_pos = np.where(np.abs(l) < 1e-7)[0]
             if len(axis_pos) == 0:
                 raise ValueError(f"can't find fixed axis position from angle encoding {l}")
         axis_pos = axis_pos[0]
