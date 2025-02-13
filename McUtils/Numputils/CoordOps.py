@@ -8,6 +8,7 @@ import numpy as np
 from .VectorOps import *
 from . import TensorDerivatives as td
 from . import Misc as misc
+from . import SetOps as setops
 from .Options import Options
 
 __all__ = [
@@ -33,7 +34,10 @@ __all__ = [
     'wag_vec',
     "internal_conversion_function",
     "internal_coordinate_tensors",
-    "inverse_coordinate_solve"
+    "inverse_coordinate_solve",
+    "metric_tensor",
+    "delocalized_internal_coordinate_transformation",
+    "relocalize_coordinate_transformation"
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -1756,3 +1760,97 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         return (tf, errors), opt_internals
     else:
         return tf, errors
+
+def metric_tensor(internals_by_cartesians, masses=None):
+    if misc.is_numeric_array_like(internals_by_cartesians):
+        internals_by_cartesians = [internals_by_cartesians]
+    transformation = np.asanyarray(internals_by_cartesians[0])
+    if masses is not None:
+        g12_base = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        transformation = np.moveaxis(
+            np.tensordot(transformation, g12_base, axes=[-2, 0]),
+            -1, -2
+        )
+    return np.moveaxis(transformation, -1, -2) @ transformation
+
+def delocalized_internal_coordinate_transformation(
+        internals_by_cartesians,
+        untransformed_coordinates=None,
+        masses=None,
+        relocalize=False
+):
+    if misc.is_numeric_array_like(internals_by_cartesians):
+        internals_by_cartesians = [internals_by_cartesians]
+    conv = np.asanyarray(internals_by_cartesians[0])
+    if masses is not None:
+        g12_base = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        conv = np.moveaxis(
+            np.tensordot(conv, g12_base, axes=[-2, 0]),
+            -1, -2
+        )
+
+    if untransformed_coordinates is not None:
+        transformed_coords = np.setdiff1d(np.arange(conv.shape[-1]), untransformed_coordinates)
+        ut_conv = conv[..., untransformed_coordinates]
+        conv = conv[..., transformed_coords]
+
+        # project out contributions along untransformed coordinates to ensure
+        # dimension of space remains unchanged
+        ut_conv_norm = vec_normalize(np.moveaxis(ut_conv, -1, -2))
+        proj = np.moveaxis(ut_conv_norm, -1, -2) @ ut_conv_norm
+        proj = identity_tensors(proj.shape[:-2], proj.shape[-1]) - proj
+
+        conv = np.concatenate([ut_conv, proj @ conv], axis=-1)
+
+    G_internal = np.moveaxis(conv, -1, -2) @ conv
+    redund_vals, redund_tf = np.linalg.eigh(G_internal)
+    redund_pos = np.where(np.abs(redund_vals) > 1e-10)
+    if redund_vals.ndim > 1:
+        redund_tf = setops.take_where_groups(redund_tf, redund_pos)
+    else:
+        redund_tf = redund_tf[:, redund_pos[0]]
+    if isinstance(redund_tf, np.ndarray):
+        redund_tf = np.flip(redund_tf, axis=-1)
+    else:
+        redund_tf = [
+            np.flip(tf, axis=-1)
+            for tf in redund_tf
+        ]
+
+    if relocalize:
+        if untransformed_coordinates is not None:
+            perm = np.concatenate([untransformed_coordinates,
+                                   np.delete(np.arange(redund_tf.shape[-2]), untransformed_coordinates)
+                                   ])
+            perm = np.argsort(perm)
+            if isinstance(redund_tf, np.ndarray):
+                redund_tf = redund_tf[..., perm, :]
+            else:
+                redund_tf = [
+                    redund_tf[..., perm, :]
+                    for tf in redund_tf
+                ]
+
+
+    return redund_tf
+
+def relocalize_coordinate_transformation(redund_tf, untransformed_coordinates=None):
+    n = redund_tf.shape[-1]
+    if untransformed_coordinates is None:
+        ndim = redund_tf.ndim - 2
+        eye = identity_tensors(redund_tf.shape[:-2], n)
+        target = np.pad(eye, ([[0, 0]] * ndim) + [[0, redund_tf.shape[-2] - n], [0, 0]])
+    else:
+        untransformed_coordinates = np.asanyarray(untransformed_coordinates)
+        coords = np.concatenate([
+            untransformed_coordinates,
+            np.delete(np.arange(redund_tf.shape[-2]), untransformed_coordinates)
+        ])[:n]
+        target = np.moveaxis(np.zeros(redund_tf.shape), -1, -2)
+        idx = setops.vector_ix(target.shape[:-1], coords[:, np.newaxis])
+        target[idx] = 1
+        target = np.moveaxis(target, -1, -2)
+    loc = np.linalg.lstsq(redund_tf, target, rcond=None)
+    U, s, V = np.linalg.svd(loc[0])
+    R = U @ V
+    return redund_tf @ R

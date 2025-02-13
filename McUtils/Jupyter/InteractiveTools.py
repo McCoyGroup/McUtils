@@ -355,13 +355,19 @@ class ExamplesManager:
 
     def load_module(self, module, modify_relative_imports=True):
         if modify_relative_imports:
-            if module.startswith(".") and not os.path.isdir(self.root):
+            if module.startswith(".") and (
+                    self.root in sys.modules
+                    or not os.path.isdir(self.root)
+            ):
                 module = self.root + module
         return ModuleReloader.load_module(module)
 
     def import_from(self, module, names, modify_relative_imports=True, globs=None):
         if modify_relative_imports:
-            if module.startswith(".") and not os.path.isdir(self.root):
+            if module.startswith(".") and (
+                    self.root in sys.modules
+                    or not os.path.isdir(self.root)
+            ):
                 module = self.root + module
         if globs is None:
             globs = self.globs
