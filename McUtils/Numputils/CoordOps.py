@@ -1729,6 +1729,7 @@ class _inverse_coordinate_conversion_caller:
         expansion = self.last_call = self.conversion(coords, order=ord)
         internals, expansion = expansion[0], expansion[1:] # dr/dx
         delta = internals - self.target_internals[mask]
+        # print("!", delta)
 
         if self.remove_translation_rotation: # dx/dr
             inverse_expansion = _transrot_invariant_inverse(expansion, coords, self.masses, ord)
@@ -1755,8 +1756,8 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              remove_translation_rotation=False,
                              order=None,
                              solver_order=None,
-                             tol=1e-3, max_iterations=10,
-                             max_displacement=.5,
+                             tol=1e-3, max_iterations=50,
+                             max_displacement=.3,
                              # method='quasi-newton',
                              method='gradient-descent',
                              optimizer_parameters=None,
@@ -1832,8 +1833,8 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         ),
         tol=tol,
         max_displacement=max_displacement,
-        max_iterations=max_iterations,
-        oscillation_damping_factor=None#1.0
+        max_iterations=max_iterations
+        # termination_function=caller.terminate
     )
 
     coords = coords.reshape(coords.shape[:1] + (-1, 3))

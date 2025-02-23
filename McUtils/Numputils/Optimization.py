@@ -76,7 +76,7 @@ def iterative_step_minimize_step(step_predictor,
                                  guess, mask, tol,
                                  orthogonal_projector, orthogonal_projection_generator,
                                  region_constraints, unitary, max_displacement, max_displacement_norm,
-                                 generate_rotation, prev_step, max_gradient_error
+                                 generate_rotation, prev_step, max_gradient_error, termination_function
                                  ):
     if unitary:
         projector = vec_ops.orthogonal_projection_matrix(guess.T)
@@ -120,8 +120,14 @@ def iterative_step_minimize_step(step_predictor,
     else:
         errs = np.linalg.norm(grad, axis=1)
     rem = np.arange(len(mask))
-    if tol > 0:
-        done = np.where(errs < tol)[0]
+    done = np.where(errs < tol)[0]
+    if len(done) > 0:  # easy check
+        rem = np.delete(rem, done)
+        mask = np.delete(mask, done)
+        if len(mask) == 0:
+            return step, errs, [], done
+    if termination_function is not None:
+        done = np.where(termination_function(guess[rem,], step[rem,], mask))
         if len(done) > 0:  # easy check
             rem = np.delete(rem, done)
             mask = np.delete(mask, done)
@@ -176,6 +182,7 @@ def iterative_step_minimize(
         max_displacement=None,
         max_displacement_norm=None,
         oscillation_damping_factor=None,
+        termination_function=None,
         prevent_oscillations=None,
         tol=1e-8,
         use_max_for_error=True,
@@ -215,7 +222,7 @@ def iterative_step_minimize(
             mask, tol,
             orthogonal_directions, orthogonal_projection_generator,
             region_constraints, unitary, max_displacement, max_displacement_norm,
-            generate_rotation, prev_step, use_max_for_error
+            generate_rotation, prev_step, use_max_for_error, termination_function
         )
         if prevent_oscillations:
             if prev_step is None:
@@ -274,10 +281,12 @@ def iterative_chain_minimize(
         prevent_oscillations=None,
         region_constraints=None,
         convergence_metric=None,
+        termination_function=None,
         reparametrizer=None,
         max_displacement=None,
         max_displacement_norm=None,
         tol=1e-8, max_iterations=100,
+        use_max_for_error=True,
         periodic=False
 ):
     step_predictors = [
@@ -349,7 +358,7 @@ def iterative_chain_minimize(
                 (submask, (j, prev_im, next_im)), tol,
                 orthogonal_directions, orthogonal_projection_generator,
                 region_constraints, unitary, max_displacement, max_displacement_norm,
-                generate_rotation, prev_step[submask,][:, j]
+                generate_rotation, prev_step[submask,][:, j], use_max_for_error, termination_function
             )
             if prevent_oscillations:
                 prev_step[new_mask,][:, j] = step
