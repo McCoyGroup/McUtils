@@ -643,7 +643,7 @@ class IncrementalCartesianCoordinateInterpolation:
                  coords,
                  *,
                  coordinate_system,
-                 max_disp_step=.5,
+                 max_displacement_step=1.0,
                  max_refinements=20,
                  reembed=False,
                  embedding_options=None
@@ -654,7 +654,7 @@ class IncrementalCartesianCoordinateInterpolation:
         self.internals = [
             self.converter(c) for c in self.coords
         ]
-        self.max_disp_step = max_disp_step
+        self.max_disp_step = max_displacement_step
         self.max_refinements = max_refinements
         self.reembed=reembed
         self.embedding_options={} if embedding_options is None else embedding_options
@@ -667,7 +667,11 @@ class IncrementalCartesianCoordinateInterpolation:
 
     @classmethod
     def prep_coordinate_system_converter(cls, coordinate_system):
-        if hasattr('coordinate_system', 'convert'):
+        from McUtils.Coordinerds import CartesianCoordinates3D
+
+        if coordinate_system is None:
+            return cls.wrap_convert(CartesianCoordinates3D)
+        elif hasattr('coordinate_system', 'convert'):
             return cls.wrap_convert(coordinate_system)
         else:
             return coordinate_system
@@ -738,7 +742,6 @@ class IncrementalCartesianCoordinateInterpolation:
             d = pct * disp
             md = np.max(np.abs(d))
             n_ref += 1
-            # print("...", n_ref, max_disp, d)
 
         target_internals = CoordinateSet(init_internals + d, init_internals.system)
         new_carts = target_internals.convert(init_coords.system)
@@ -802,8 +805,8 @@ class IncrementalCartesianCoordinateInterpolation:
 
 class CoordinateInterpolator:
 
-    default_interpolator_type = Interpolator
-    default_smoothed_interpolator_type = IncrementalCartesianCoordinateInterpolation
+    default_interpolator_type = IncrementalCartesianCoordinateInterpolation
+    # default_smoothed_interpolator_type = IncrementalCartesianCoordinateInterpolation
     def __init__(self,
                  coordinates,
                  arc_lengths=None,
@@ -821,11 +824,11 @@ class CoordinateInterpolator:
         )
 
         if base_interpolator is None:
-            if coordinate_system is not None:
-                base_interpolator = self.default_smoothed_interpolator_type
-                interpolator_options['coordinate_system'] = coordinate_system
-            else:
-                base_interpolator = self.default_interpolator_type
+            interpolator_options['coordinate_system'] = interpolator_options.get(
+                'coordinate_system',
+                coordinate_system
+            )
+            base_interpolator = self.default_interpolator_type
 
         self.interpolator = base_interpolator(
             abcissae,

@@ -373,12 +373,26 @@ class ExamplesManager:
             globs = self.globs
         return ModuleReloader.import_from(module, names, globs=globs)
 
+
     @classmethod
     def parse_x3d_view_matrix(cls, vs, view_all=True):
         import json, numpy as np
         from .. import Numputils as nput
 
+        # To download the image:
+        """
+(function(){
+  var link = document.createElement('a');
+  let path_array = window.location.pathname.split("/");
+  let base_name = path_array[path_array.length - 1].split('.')[0];
+  link.download = base_name + '.png';
+  link.href = document.getElementsByTagName('canvas')[0].toDataURL()
+  link.click();
+})()
+       """
+
         # vs from JSON.stringify(document.getElementById('x3d').runtime.viewMatrix())
+        # vs from JSON.stringify(document.getElementsByTagName('x3d')[0].runtime.viewMatrix())
         vm = json.loads(vs)
         vm = np.linalg.inv([
             [vm[f"_{i}{j}"] for j in range(4)]
