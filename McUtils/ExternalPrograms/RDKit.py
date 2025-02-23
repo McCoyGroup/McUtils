@@ -6,6 +6,7 @@ __all__ = [
 
 import numpy as np, io, os
 from .. import Numputils as nput
+from ..Misc import OutputRedirect
 
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule
@@ -57,9 +58,12 @@ class RDMolecule(ExternalMolecule):
     def chem_api(cls):
         return RDKitInterface.submodule("Chem")
     @classmethod
-    def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True, sanitize_ops=None):
+    def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True,
+                   add_implicit_hydrogens=False,
+                   sanitize_ops=None):
+        Chem = cls.chem_api() # to get nice errors
+        rdmol = Chem.AddHs(rdmol, explicitOnly=not add_implicit_hydrogens)
         if guess_bonds:
-            Chem = cls.chem_api() # to get nice errors
             rdDetermineBonds = RDKitInterface.submodule("Chem.rdDetermineBonds")
             rdmol = Chem.Mol(rdmol)
             if charge is None:
@@ -67,7 +71,6 @@ class RDMolecule(ExternalMolecule):
             rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
             # return cls.from_rdmol(rdmol, conf_id=conf_id, guess_bonds=False, charge=charge)
         if sanitize:
-            Chem = cls.chem_api() # to get nice errors
             rdmolops = RDKitInterface.submodule("Chem.rdmolops")
             if sanitize_ops is None:
                 sanitize_ops = (
@@ -101,7 +104,7 @@ class RDMolecule(ExternalMolecule):
                     t = Chem.BondType.values[int(t)]
                 else:
                     t = Chem.BondType.names[t]
-                mol.AddBond(i, j, t)
+                mol.AddBond(int(i), int(j), t)
         mol.CommitBatchEdit()
 
         mol = mol.GetMol()
@@ -170,7 +173,8 @@ class RDMolecule(ExternalMolecule):
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
         # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
 
-        conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=cls.get_confgen_opts())
+        with OutputRedirect():
+            conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=cls.get_confgen_opts())
         if optimize:
             rdForceFieldHelpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
             if force_field_type == 'mmff':
@@ -203,6 +207,9 @@ class RDMolecule(ExternalMolecule):
             conf_id = 0
 
         return cls.from_rdmol(mol, conf_id=conf_id)
+    def to_smiles(self):
+        return self.chem_api().MolToSmiles(self.rdmol)
+
     @classmethod
     def from_molblock(cls, molblock):
         Chem = cls.chem_api()

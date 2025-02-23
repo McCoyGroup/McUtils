@@ -53,7 +53,7 @@ class BlockProfiler(metaclass=abc.ABCMeta):
     def stop_profiler(self):
         raise NotImplementedError("abstract class")
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self.inactive and not self._running:
+        if not self.inactive and self._running:
             self._running = False
             self.stop_profiler()
             if self.print_res:

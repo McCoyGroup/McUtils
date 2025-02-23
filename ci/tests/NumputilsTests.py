@@ -161,7 +161,7 @@ class NumputilsTests(TestCase):
 """
         raise Exception(np.linalg.det(U), err)
 
-    @debugTest
+    @validationTest
     def test_NEB(self):
         ndim = 1
 
@@ -1634,24 +1634,49 @@ class NumputilsTests(TestCase):
             )
         )
 
-    @validationTest
+    @debugTest
     def test_DihedralDerivativeComparison(self):
         import Psience as psi
         test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
         from Psience.Molecools import Molecule
 
-        coords = Molecule.from_file(
+        mol = Molecule.from_file(
             os.path.join(test_root, "HOONO_freq.fchk")
-        ).coords
+        )
 
-        coords = Molecule.from_file(
-            os.path.join(test_root, "nh3.fchk")
-        ).coords
+        # mol = Molecule.from_file(
+        #     os.path.join(test_root, "nh3.fchk")
+        # )
+        #
+        # coords = Molecule.from_file(
+        #     os.path.join(test_root, "water_freq.fchk")
+        # ).coords
+        #
+        # coords = Molecule.from_file(
+        #     os.path.join(test_root, "tbhp_180.fchk")
+        # ).coords
 
-        from McUtils.McUtils.Numputils.CoordOps import prep_disp_expansion
+        """
+        ==> [[[ 0.77190252  0.         -0.0719183  ...  0.          0.
+    0.04552509]
+  [-0.16557176  0.         -0.38929849 ...  0.          0.
+   -0.01881451]
+  [ 0.61380168  0.         -0.01456972 ...  0.          0.
+    0.08105092]
+  ...
+  [ 0.          0.          0.         ... -0.55669355  0.40498602
+    0.00877491]
+  [ 0.          0.          0.         ... -0.7321073  -0.24340891
+    0.26671989]
+  [ 0.          0.          0.         ... -0.39257    -0.12036494
+   -0.50985179]]]"""
 
-        A_expansion = prep_disp_expansion(coords, 1, 0)
-        B_expansion = prep_disp_expansion(coords, 2, 0)
+        coords = mol.coords
+
+        # from McUtils.McUtils.Numputils.CoordOps import prep_disp_expansion
+
+        # A_expansion = prep_disp_expansion(coords, 1, 0)
+        # B_expansion = prep_disp_expansion(coords, 2, 0)
         # _, na_da, na_daa = vec_norm_derivs(A_expansion[0], order=2)
         # norms, units = vec_norm_unit_deriv(A_expansion, 2)
         # woof = tensor_reexpand(A_expansion[1:], [na_da, na_daa], 2)
@@ -1720,26 +1745,69 @@ class NumputilsTests(TestCase):
         #     sin_derivs[2][0]
         # )
 
-        new = angle_vec(coords, 0, 1, 2, order=2)
-        old = angle_vec(coords, 0, 1, 2, order=2, method='classic')
+        import McUtils.McUtils.Numputils.CoordOps as coops
+        import itertools
+        # for c in itertools.combinations(range(coords.shape[0]), 3):
+        #     for p in itertools.permutations(c):
+        #         coops.fast_proj = True
+        #         new = angle_vec(coords, *p, order=2)
+        #         coops.fast_proj = False
+        #         old = angle_vec(coords, *p, order=2)#, method='classic')
+        #         if not np.allclose(new[1], old[1]):
+        #             raise ValueError(
+        #                 p, new[1], old[1]
+        #             )
+        # for c in itertools.combinations(range(coords.shape[0]), 2):
+        #     for p in itertools.permutations(c):
+        #         coops.fast_proj = True
+        #         new = dist_vec(coords, *p, order=2)
+        #         coops.fast_proj = False
+        #         old = dist_vec(coords, *p, order=2)#, method='classic')
+        #         if not np.allclose(new[1], old[1]):
+        #             raise ValueError(
+        #                 p, new[1], old[1]
+        #             )
+
+        for c in itertools.combinations(range(coords.shape[0]), 4):
+            for p in itertools.permutations(c):
+                coops.fast_proj = True
+                new = dihed_vec(coords, *p, order=2)
+                coops.fast_proj = False
+                old = dihed_vec(coords, *p, order=2)#, method='classic')
+                if not np.allclose(new[1], old[1]):
+                    print(coords)
+                    raise ValueError(
+                        p, new[1], old[1]
+                    )
+        return
+        # new = dist_vec(coords, 3, 1, order=2)
+        # # coops.fast_proj = False
+        # old = dist_vec(coords, 3, 1, order=2, method='classic')
+        coops.fast_proj = True
+        new = dihed_vec(coords, 3, 0, 2, 1, order=2)
+        coops.fast_proj = False
+        old = dihed_vec(coords, 3, 0, 2, 1, order=2)
         with np.printoptions(linewidth=1e8):
+            print("="*10)
+            print(new[0])
+            print(old[0])
+
             print("="*10)
             print(new[1])
             print(old[1])
 
-            print("-"*10)
-            print(np.round(new[2] - np.moveaxis(new[2], 0, 1), 8))
+            # print("-"*10)
+            # print(np.round(new[2] - np.moveaxis(new[2], 0, 1), 8))
             # print(old[2] - np.moveaxis(old[2], 0, 1))
 
             print("-"*10)
-            print(new[2][0])
-            print(old[2][0])
-        raise Exception(...)
-
-        n = 4
-        print(angle_vec(coords, 0, 1, 2, order=2)[2][:, n])
-        print(angle_vec(coords, 0, 1, 2, order=2, method='classic')[2][:, n])
-        raise Exception(...)
+            print(new[2] - old[2])
+        return
+        #
+        # n = 4
+        # print(angle_vec(coords, 0, 1, 2, order=2)[2][:, n])
+        # print(angle_vec(coords, 0, 1, 2, order=2, method='classic')[2][:, n])
+        # raise Exception(...)
 
         inv_coords = inverse_coordinate_solve(
                 [
@@ -1778,8 +1846,10 @@ class NumputilsTests(TestCase):
             order=2
         )
         raise Exception(
-            [s.shape for s in fwd[1:]],
-            [s.shape for s in rev[1:]]
+            # [s.shape for s in fwd[1:]],
+            # [s.shape for s in rev[1:]]
+            rev[0],
+            coords
         )
 
         coords = Molecule.from_file(

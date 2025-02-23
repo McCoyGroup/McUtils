@@ -1199,11 +1199,54 @@ class HTML(XMLBase):
                 'text/html': wrapper.tostring()
             }
             return data
-        def display(self):
+
+        def _cross_plat_open(self, file, delay=5):
+            import os, sys, subprocess, time
+            if sys.platform.startswith('darwin'):  # macOS
+                subprocess.run(['open', file])
+            elif sys.platform.startswith('win'):  # Windows
+                os.startfile(file, 'open')
+            elif sys.platform.startswith('linux'):  # Linux
+                subprocess.run(['xdg-open', file])
+            else:
+                raise NotImplementedError(f"unsure how to open file on {sys.platform}")
+            time.sleep(delay)
+
+        def display_in_browser(self):
+            import tempfile as tf
+
+            if self.tag.lower() != 'html':
+                if self.tag.lower() != 'body':
+                    wrapper = HTML.Body(self.get_display_element())
+                else:
+                    wrapper = self
+                wrapper = HTML.Html(wrapper)
+            else:
+                wrapper = self
+
+            with tf.NamedTemporaryFile(suffix='.html', prefix=type(self).__name__+"-", mode='w+',
+                                       # delete=False
+                                       ) as tmp_html:
+                tmp_html.write(wrapper.tostring())
+                tmp_html.seek(0)
+                tmp_html.flush()
+                self._cross_plat_open(tmp_html.name)
+
+        def display_ipython(self):
             from .WidgetTools import JupyterAPIs
+
             display = JupyterAPIs.get_display_api()
             wrapper = self.get_display_element()
             return display.display(display.HTML(wrapper.tostring()))
+
+        def display(self):
+            from .WidgetTools import JupyterAPIs
+
+            use_ipython = JupyterAPIs.in_jupyter_environment()
+            if use_ipython:
+                self.display_ipython()
+            else:
+                self.display_in_browser()
         @mixedmethod
         def _ipython_pinfo_(self):
             from ...Docs import jdoc

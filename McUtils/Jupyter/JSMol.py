@@ -16,7 +16,7 @@ class JSMol:
         patch_script = f"""
         if (typeof Jmol._patched === 'undefined') {{
             Jmol._patched = true;
-            jmolInitialize("https://cdn.jsdelivr.net/gh/b3m2a1/jsmol-cdn@{version}/jsmol/");
+            jmolInitialize('https://cdn.jsdelivr.net/gh/b3m2a1/jsmol-cdn@{version}/jsmol/');
         }};
         """
         @classmethod
@@ -24,14 +24,14 @@ class JSMol:
             return HTML.Script(src=cls.jsmol_source,
                                onload=f"""
 (function() {{
-   $.getScript("{cls.jmol2_source}").then(
+   $.getScript('{cls.jmol2_source}').then(
    () => {{
        {cls.patch_script}
        let loaded = false;
         if (!loaded) {{
             loaded = true;
             let applet = {loader};
-             document.getElementById("{id}").innerHTML = applet._code;
+             document.getElementById('{id}').innerHTML = applet._code;
         }}
     }})
 }})();
@@ -42,6 +42,7 @@ class JSMol:
                      animate=False, vibrate=False,
                      load_script=None,
                      suffix=None,
+                     dynamic_loading=None,
                      **attrs):
             if suffix is None:
                 suffix = str(uuid.uuid4())[:6].replace("-", "")
@@ -65,6 +66,12 @@ class JSMol:
             elif vibrate:
                 load_script.append("vibration on")
 
+            if dynamic_loading is None:
+                from ..Jupyter.JHTML import JupyterAPIs
+                dynamic_loading = JupyterAPIs().in_jupyter_environment()
+
+            self.dynamic_loading = dynamic_loading
+
             self.load_script = load_script
             elems = [self.create_applet(model_file)] + list(rest)
             super().__init__(*elems, id=self.id, width=width, height=height, **attrs)
@@ -78,25 +85,33 @@ class JSMol:
             targ = self.applet_target
             load_script = self.prep_load_script()
             if model_file is None:
-                loader = f'jmolApplet(400, "load {model_file}; {load_script}", "{targ}")'
+                loader = f"jmolApplet(400, 'load {model_file}; {load_script}', '{targ}')"
             elif (
                     model_file.startswith("https://")
                     or model_file.startswith("file://")
                     or model_file.startswith("http://")
             ):
-                loader = f'jmolApplet(400, "load {model_file}; {load_script}", "{targ}")'
+                loader = f"jmolApplet(400, 'load {model_file}; {load_script}', '{targ}')"
             else:
-                loader = f'jmolAppletInline(400, `{model_file}`, "{load_script}", "{targ}")'
+                loader = f"jmolAppletInline(400, `{model_file}`, '{load_script}', '{targ}')"
 
             kill_id = "tmp-" + str(uuid.uuid4())[:10]
-            load_script = self.load_applet_script(self.id, loader).tostring().replace("`", "\`")
-            return HTML.Image(
-                    src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-                    id=kill_id,
-                    onload=f"""
-                        (function() {{
-                            document.getElementById("{kill_id}").remove();
-                            const frag = document.createRange().createContextualFragment(`{load_script}`);
-                            document.head.appendChild(frag);
-                        }})()"""
-                )
+            load_script = self.load_applet_script(self.id, loader)
+
+            if self.dynamic_loading:
+                load_script = load_script.tostring().replace("`", "\`")
+                return HTML.Image(
+                        src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                        id=kill_id,
+                        onload=f"""
+                            (function() {{
+                                document.getElementById('{kill_id}').remove();
+                                const frag = document.createRange().createContextualFragment(`{load_script}`);
+                                document.head.appendChild(frag);
+                            }})()"""
+                    )
+            else:
+                return load_script
+
+        def show(self):
+            return self.display()

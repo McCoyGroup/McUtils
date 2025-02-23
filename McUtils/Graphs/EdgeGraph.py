@@ -2,6 +2,7 @@
 import itertools, collections
 import scipy.sparse as sparse, numpy as np
 from .. import Numputils as nput
+from .. import Iterators as itut
 
 __all__ = [
     "EdgeGraph"
@@ -52,12 +53,12 @@ class EdgeGraph:
         return [labels[p] for p in pos], edge_list
     @classmethod
     def _take(cls, pos, labels, adj_mat:sparse.compressed):
-        (rows, cols), _ = sparse.find(adj_mat)
+        rows, cols, _ = sparse.find(adj_mat)
         utri = cols >= rows
         rows = rows[utri]
         cols = cols[utri]
-        row_cont, _ = nput.contained(rows, pos)
-        col_cont, _ = nput.contained(cols, pos)
+        row_cont, _, _ = nput.contained(rows, pos)
+        col_cont, _, _ = nput.contained(cols, pos)
         cont = np.logical_and(row_cont, col_cont)
 
         labels, edge_list = cls._remap(labels, pos, rows[cont], cols[cont])
@@ -193,7 +194,14 @@ class EdgeGraph:
         syms_2 = graph_2.labels
 
         if any(s_1 != s_2 for s_1, s_2 in zip(syms_1, syms_2)):
-            raise ValueError(f"graph labels must agree: {syms_1} != {syms_2}")
+            if len(itut.dict_diff(itut.counts(syms_1), itut.counts(syms_2))) > 0:
+                raise ValueError(f"graph labels must agree: {syms_1} != {syms_2}")
+            ordering_1 = list(sorted(range(len(syms_1)), key=syms_1.__getitem__))
+            ordering_2 = list(sorted(range(len(syms_2)), key=syms_2.__getitem__))
+            perm_0 = np.array(ordering_2)[np.argsort(ordering_1)]
+            graph_2 = graph_2.take(perm_0)
+        else:
+            perm_0 = None
 
         bond_set_1 = {tuple(sorted(e)) for e in graph_1.edges}
         bond_set_2 = {tuple(sorted(e)) for e in graph_2.edges}
@@ -232,8 +240,13 @@ class EdgeGraph:
             if len(new_core) < core_size:
                 perm = reindexing
 
-        return perm
+        if perm_0 is not None:
+            return perm_0[perm]
+        else:
+            return perm
 
+    def get_reindexing(self, other_graph):
+        return self.get_maximum_overlap_permutation(other_graph, self)
     def align_labels(self, other_graph):
-        perm = self.get_maximum_overlap_permutation(other_graph, self)
+        perm = self.get_reindexing(other_graph)
         return self.take(perm)

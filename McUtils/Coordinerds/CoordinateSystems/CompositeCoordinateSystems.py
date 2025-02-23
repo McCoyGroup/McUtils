@@ -1,13 +1,16 @@
 import uuid
+import numpy as np
 
 from .CoordinateSystem import CoordinateSystem
 from .CoordinateSystemConverter import CoordinateSystemConverter
-from ...Numputils import apply_pointwise
+from ... import Numputils as nput
 import weakref
 
 __all__ = [
     "CompositeCoordinateSystem",
-    "CompositeCoordinateSystemConverter"
+    "CompositeCoordinateSystemConverter",
+    # "TransformedCoordinateSystem",
+    # "TransformedCoordinateSystemConverter",
 ]
 
 #TODO: these should all be metaclasses but :shrag:
@@ -18,12 +21,17 @@ class CompositeCoordinateSystem(CoordinateSystem):
     """
 
     _register_cache = weakref.WeakValueDictionary()
-    def __init__(self, base_system, conversion, inverse_conversion=None, name=None, batched=None, pointwise=True, **opts):
+    def __init__(self, base_system,
+                 conversion, inverse_conversion=None,
+                 name=None, batched=None, pointwise=True,
+                 max_expansion_order=0,
+                 **opts):
         self.base_system = base_system
         self.conversion = conversion
         self.inverse_conversion = inverse_conversion
         self.pointwise = pointwise
         self.batched = batched if batched is not None else not pointwise
+        self.max_expansion_order = max_expansion_order
         super().__init__(**opts)
         self.name = self.canonical_name(name, conversion)
     @classmethod
@@ -65,7 +73,7 @@ class CompositeCoordinateSystem(CoordinateSystem):
 
 
 class CompositeCoordinateSystemConverter(CoordinateSystemConverter):
-    def __init__(self, system, direction='forward'):
+    def __init__(self, system:CompositeCoordinateSystem, direction='forward'):
         self.system = system
         self.direction = direction
     @property
@@ -84,14 +92,42 @@ class CompositeCoordinateSystemConverter(CoordinateSystemConverter):
         return convertser
     def convert(self, coords, **kw):
         if self.system.pointwise:
-            return apply_pointwise(self.get_conversion(), coords, **kw)
+            return nput.apply_by_coordinates(self.get_conversion(), coords, **kw)
         else:
             return self.get_conversion()(coords, **kw)
-    def convert_many(self, coords, **kw):
-        if self.system.pointwise:
-            return apply_pointwise(self.get_conversion(), coords, **kw)
-        elif self.system.batched:
-            return self.convert(coords, **kw)
+    def convert_many(self,
+                     coords,
+                     order=0,
+                     derivs=None,
+                     return_derivs=None,
+                     **kw):
+        if self.system.max_expansion_order > 0:
+            raise NotImplementedError(...)
         else:
-            return super().convert_many(coords, **kw)
+            if self.system.pointwise:
+                return nput.apply_by_coordinates(self.get_conversion(), coords, **kw)
+            elif self.system.batched:
+                return self.convert(coords, **kw)
+            else:
+                return super().convert_many(coords, **kw)
 
+# class TransformedCoordinateSystemConverter(CompositeCoordinateSystem):
+#
+#     def __init__(self, base_system, forward_transformation, reverse_transformation=None,
+#                  name=None,
+#                  batched=True, pointwise=False,
+#                  **opts):
+#         self.transformations = self.prep_transformations(forward_transformation, reverse_transformation)
+#         super().__init__(base_system, self.apply_transformation, self.invert_transformation,
+#                          name=name, batched=batched, pointwise=pointwise, **opts
+#                          )
+#
+#     def prep_transformations(self):
+#
+#         if nput.is_numeric_array_like(forward_transformations):
+#             forward_transformations = np.asanyarray(forward_transformations)
+#             if forward_transformations.ndim == 2:
+#                 forward_transformations = [forward_transformations]
+#
+#         if reverse_transformation is None:
+#             reverse_transformation = nput.inverse_transformation(forward_transformations, len(forward_transformations))

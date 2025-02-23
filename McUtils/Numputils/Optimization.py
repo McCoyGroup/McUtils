@@ -36,7 +36,8 @@ def lookup_method_name(method):
 def get_step_finder(spec,
                     method=None,
                     jacobian=None,
-                    hessian=None):
+                    hessian=None,
+                    **extra_init):
     if not isinstance(spec, dict) and (
             jacobian is not None
             or method is not None
@@ -67,15 +68,15 @@ def get_step_finder(spec,
                 raise ValueError(f"can't determine appropriate step finder for '{method}")
             method = test_method
         if hessian is not None and method.supports_hessian:
-            spec = method(func, jacobian, hessian, **spec)
+            spec = method(func, jacobian, hessian, **dict(spec, **extra_init))
         else:
-            spec = method(func, jacobian, **spec)
+            spec = method(func, jacobian, **dict(spec, **extra_init))
     return spec
 def iterative_step_minimize_step(step_predictor,
                                  guess, mask, tol,
                                  orthogonal_projector, orthogonal_projection_generator,
-                                 region_constraints, unitary, max_displacement,
-                                 generate_rotation, prev_step
+                                 region_constraints, unitary, max_displacement, max_displacement_norm,
+                                 generate_rotation, prev_step, max_gradient_error
                                  ):
     if unitary:
         projector = vec_ops.orthogonal_projection_matrix(guess.T)
@@ -98,9 +99,13 @@ def iterative_step_minimize_step(step_predictor,
         grad = (grad[..., np.newaxis, :] @ projector).reshape(step.shape)
 
     if max_displacement is not None:
+        step_sizes = np.max(np.abs(step), axis=1)
+        step *= max_displacement / np.clip(step_sizes, max_displacement, None)
+    if max_displacement_norm is not None:
         step_sizes = np.linalg.norm(step, axis=1)
         step *= max_displacement / np.clip(step_sizes, max_displacement, None)
     if region_constraints is not None:
+        #TODO: introduce this as a scaling
         max_step = region_constraints[np.newaxis, :, 1] - guess
         min_step = region_constraints[np.newaxis, :, 0] - guess
         step = np.array([
@@ -109,11 +114,14 @@ def iterative_step_minimize_step(step_predictor,
         ])
     if isinstance(mask, tuple):
         mask = mask[0]
-    norms = np.linalg.norm(grad, axis=1)
-    errs = norms
+
+    if max_gradient_error:
+        errs = np.max(np.abs(grad), axis=1)
+    else:
+        errs = np.linalg.norm(grad, axis=1)
     rem = np.arange(len(mask))
     if tol > 0:
-        done = np.where(norms < tol)[0]
+        done = np.where(errs < tol)[0]
         if len(done) > 0:  # easy check
             rem = np.delete(rem, done)
             mask = np.delete(mask, done)
@@ -166,8 +174,12 @@ def iterative_step_minimize(
         region_constraints=None,
         convergence_metric=None,
         max_displacement=None,
+        max_displacement_norm=None,
+        oscillation_damping_factor=None,
         prevent_oscillations=None,
-        tol=1e-8, max_iterations=100
+        tol=1e-8,
+        use_max_for_error=True,
+        max_iterations=100
 ):
     step_predictor = get_step_finder(step_predictor,
                                      method=method,
@@ -194,6 +206,7 @@ def iterative_step_minimize(
                 or orthogonal_directions is not None
         )
     prev_step = None
+    prev_errs = None
 
     converged = True
     for i in range(max_iterations):
@@ -201,14 +214,29 @@ def iterative_step_minimize(
             step_predictor, guess[mask,],
             mask, tol,
             orthogonal_directions, orthogonal_projection_generator,
-            region_constraints, unitary, max_displacement,
-            generate_rotation, prev_step
+            region_constraints, unitary, max_displacement, max_displacement_norm,
+            generate_rotation, prev_step, use_max_for_error
         )
         if prevent_oscillations:
             if prev_step is None:
                 prev_step = step
             else:
                 prev_step[new_mask,] = step
+        if oscillation_damping_factor is not None:
+            if prev_errs is None:
+                prev_errs = step_errs
+            else:
+                prev_errs[new_mask,] = step_errs
+
+            inc_err = np.where(step_errs >= prev_errs[new_mask] - 1e-6) # add some flexibility
+            if len(inc_err[0]) > 0:
+                oscillation_damping_factor /= 2
+            else:
+                oscillation_damping_factor = np.min([oscillation_damping_factor * 1.2, 1.0])
+
+            print("~~~~!!!", oscillation_damping_factor, "!!!~~~~")
+            step = step * oscillation_damping_factor
+
         errs[mask,] = step_errs
         if len(new_mask) == 0:
             break
@@ -248,6 +276,7 @@ def iterative_chain_minimize(
         convergence_metric=None,
         reparametrizer=None,
         max_displacement=None,
+        max_displacement_norm=None,
         tol=1e-8, max_iterations=100,
         periodic=False
 ):
@@ -319,7 +348,7 @@ def iterative_chain_minimize(
                 step_predictor, guesses[submask],
                 (submask, (j, prev_im, next_im)), tol,
                 orthogonal_directions, orthogonal_projection_generator,
-                region_constraints, unitary, max_displacement,
+                region_constraints, unitary, max_displacement, max_displacement_norm,
                 generate_rotation, prev_step[submask,][:, j]
             )
             if prevent_oscillations:
@@ -1041,7 +1070,7 @@ class BroydenApproximator(QuasiNetwonHessianApproximator):
                 I, H, dx, dx_T, y, y_T,
                 h_y, h_x, h_norm
             ) = self.take_nonzero_norm_regions([h_norm],
-                                               [I, H, dx, dx_T, y, y_T,
+                                               [I, B, dx, dx_T, y, y_T,
                                                 h_y, h_x, h_norm])
 
             h_step = (dx - h_y) / h_norm
@@ -1505,20 +1534,15 @@ class EigenvalueFollowingStepFinder:
 
         return new_step, new_jacs
 
-class NudgedElasticBandStepFinder:
+class ChainMinimizingStepFinder:
     supports_hessian = True
     def __init__(self,
                  func,
                  jacobian,
                  hessian=None,
-                 spring_constants=.1,
                  step_finder='conjugate-gradient',
-                 distance_function=None,
                  **opts
                  ):
-        self.spring_constants = spring_constants
-        self._spring_constants = None
-        self.distance_function = distance_function
         self.step_finder = get_step_finder({
             'method':step_finder,
             'func':self.wrap_func(func),
@@ -1527,6 +1551,51 @@ class NudgedElasticBandStepFinder:
             **opts
         })
         self._mask_data = None
+
+    @abc.abstractmethod
+    def image_pairwise_contribution(self, guess, cur, prev, next, order=0):
+        raise NotImplementedError("abstract")
+
+    def wrap_func(self, func):
+        @functools.wraps(func)
+        def wrapped_func(guess, mask):
+            j, prev, next = self._mask_data
+            return func(guess[:, j], mask) + self.image_pairwise_contribution(guess, j, prev, next, order=0)
+        return wrapped_func
+
+    def wrap_jac(self, jac):
+        @functools.wraps(jac)
+        def wrapped_jac(guess, mask):
+            j, prev, next = self._mask_data
+            return jac(guess[:, j], mask) + self.image_pairwise_contribution(guess, j, prev, next, order=1)
+        return wrapped_jac
+
+    def wrap_hess(self, hess):
+        if hess is None:
+            return hess
+        @functools.wraps(hess)
+        def wrapped_hess(guess, mask):
+            j, prev, next = self._mask_data
+            return hess(guess[:, j], mask) + self.image_pairwise_contribution(guess, j, prev, next, order=2)
+        return wrapped_hess
+
+    def __call__(self, guess, mask):
+        mask, self._mask_data = mask
+        return self.step_finder(guess, mask)
+
+class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
+    def __init__(self,
+                 func,
+                 jacobian,
+                 hessian=None,
+                 spring_constants=.1,
+                 distance_function=None,
+                 **opts
+                 ):
+        super().__init__(func, jacobian, hessian=hessian, **opts)
+        self.spring_constants = spring_constants
+        self._spring_constants = None
+        self.distance_function = distance_function
 
     def get_dist(self, p1, p2):
         return np.linalg.norm(p1 - p2)
@@ -1552,51 +1621,46 @@ class NudgedElasticBandStepFinder:
             next_const = None
         return (prev_dist, prev_const), (next_dist, next_const)
 
-    def wrap_func(self, func):
-        @functools.wraps(func)
-        def spring_func(guess, mask):
-            j, prev, next = self._mask_data
-            base = func(guess[:, j], mask)
-            (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, j, prev, next)
+    def image_pairwise_contribution(self, guess, cur, prev, next, order=0):
+        if order > 2: return 0
+
+        (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, cur, prev, next)
+        contribution = 0
+        if order == 0:
             if prev_dist is not None:
-                base += (prev_dist**2) * prev_const
+                contribution += (prev_dist ** 2) * prev_const
             if next_dist is not None:
-                base += (next_dist**2) * next_const
-            return base
-        return spring_func
-
-    def wrap_jac(self, jac):
-        @functools.wraps(jac)
-        def spring_jac(guess, mask):
-            j, prev, next = self._mask_data
-            base = jac(guess[:, j], mask)
-            (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, j, prev, next)
+                contribution += (next_dist ** 2) * next_const
+        elif order == 1:
             if prev_dist is not None:
-                base += 2 * prev_const * (guess[:, j] - guess[:, prev])
+                contribution += 2 * prev_const * (guess[:, cur] - guess[:, prev])
             if next_dist is not None:
-                base += 2 * next_const * (guess[:, j] - guess[:, next])
-            return base
-        return spring_jac
-
-    def wrap_hess(self, hess):
-        if hess is None:
-            return hess
-        @functools.wraps(hess)
-        def spring_hess(guess, mask):
-            j, prev, next = self._mask_data
-            base = hess(guess[:, j], mask)
-            (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, j, prev, next)
+                contribution += 2 * next_const * (guess[:, cur] - guess[:, next])
+        elif order == 2:
             if prev_dist is not None:
-                base += 2 * prev_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
+                contribution += 2 * prev_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
             if next_dist is not None:
-                base += 2 * next_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
-            return base
-        return spring_hess
+                contribution += 2 * next_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
+        return contribution
 
-    def __call__(self, guess, mask):
-        mask, self._mask_data = mask
-        return self.step_finder(guess, mask)
+class AdjustedChainStepFinder(ChainMinimizingStepFinder):
+    def __init__(self,
+                 pairwise_image_function,
+                 func,
+                 jacobian,
+                 hessian=None,
+                 **opts
+                 ):
+        super().__init__(
+            func,
+            jacobian,
+            hessian=hessian,
+            **opts
+        )
+        self.pairwise_function = pairwise_image_function
 
+    def image_pairwise_contribution(self, guess, cur, prev, next, order=0):
+        return self.pairwise_function(guess, cur, prev, next, order=order)
 
 def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-8):
     mat = np.asanyarray(initial_matrix).copy()

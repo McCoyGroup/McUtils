@@ -659,6 +659,33 @@ def jacobian_mat_inds(ind_lists, axes=None):
 
     return inds
 
+def jacobian_proj_inds(ind_lists, axes=None):
+    if axes is None:
+        axes = [0, 1, 2]
+    axes = np.asanyarray(axes)
+
+    smol = misc.is_numeric(ind_lists[0][0])
+    ind_lists = [
+        [
+            np.asanyarray([i] if smol else i).reshape(-1),
+            np.asanyarray([a] if smol else a).reshape(-1)
+        ]
+        for i,a in ind_lists
+    ]
+
+    nstruct = ind_lists[0][0].shape[0]
+    struct_inds = np.repeat(np.arange(nstruct), len(axes), axis=0)
+
+    inds = []
+    for i,a in ind_lists:
+        ax = axes + len(axes) * a
+        row_inds = np.repeat(i, len(axes), axis=0)
+        col_inds = np.repeat(axes, len(i), axis=0).flatten()
+        scol_inds = ax
+        inds.append((struct_inds, row_inds, col_inds, scol_inds))
+
+    return inds
+
 def fill_disp_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None):
     ind_lists = [i for i,v in ind_val_pairs]
     vals = [v for i,v in ind_val_pairs]
@@ -693,24 +720,83 @@ def fill_disp_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None):
         mat = mat.reshape(base_shape + mat.shape[-3:])
     return mat
 
-def disp_deriv_mat(coords, i, j, axes=None):
-    mats = np.zeros(coords.shape + (3,))
-    return fill_disp_jacob_atom(
-        mats,
-        [[i, 1], [j, -1]],
-        axes=axes,
-        base_shape=coords.shape[:-2]
-    )
+def fill_proj_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None):
+    ind_lists = [[i,a] for i,a,v in ind_val_pairs]
+    vals = [v for i,a,v in ind_val_pairs]
+    smol = misc.is_numeric(ind_lists[0][0])
+    ind_lists = [
+        [
+            np.asanyarray([i] if smol else i),
+            np.asanyarray([a] if smol else a),
+        ]
+        for i,a in ind_lists
+    ]
 
-def prep_disp_expansion(coords, i, j, fixed_atoms=None, expand=True):
+    i_shape = ind_lists[0][0].shape
+    nnew = len(i_shape)
+    if base_shape is None:
+        base_shape = mat.shape[:-3]
+    target_shape = base_shape + i_shape + mat.shape[-3:]
+    if target_shape != mat.shape:
+        nog = len(base_shape)
+        mat = np.broadcast_to(
+            np.expand_dims(mat, np.arange(nog, nog+nnew).tolist()),
+            target_shape
+        ).copy()
+    else:
+        base_shape = mat.shape[:-(3+nnew)]
+        # target_shape = base_shape + i_shape + mat.shape[-3:]
+
+    mat = np.reshape(mat, base_shape + (np.prod(i_shape, dtype=int),) + mat.shape[-3:])
+    for idx_tup,val in zip(jacobian_proj_inds(ind_lists, axes=axes), vals):
+        idx_tup = (...,) + idx_tup
+        mat[idx_tup] = val
+    mat = mat.reshape(target_shape)
+
+    if smol:
+        mat = mat.reshape(base_shape + mat.shape[-3:])
+    return mat
+
+fast_proj = False
+def disp_deriv_mat(coords, i, j, at_list, axes=None):
+    if not fast_proj:
+        mats = np.zeros(coords.shape + (3,))
+        return None, fill_disp_jacob_atom(
+            mats,
+            [[i, 1], [j, -1]],
+            axes=axes,
+            base_shape=coords.shape[:-2]
+        )
+    else:
+        proj = np.zeros(coords.shape + (3 * len(at_list),))
+        mats = np.zeros(coords[..., at_list, :].shape + (3,))
+        _, (a, b), _ = np.intersect1d(at_list, [i, j], return_indices=True)
+        a, b = np.sort([a,b])
+        mats = fill_disp_jacob_atom(
+            mats,
+            [[a, 1], [b, -1]],
+            axes=axes,
+            base_shape=coords.shape[:-2]
+        )
+        proj = fill_proj_jacob_atom(
+            proj,
+            [[x, n, 1] for n,x in enumerate(at_list)],
+            axes=axes,
+            base_shape=coords.shape[:-2]
+        )
+        proj = proj.reshape(proj.shape[:-3] + (-1, proj.shape[-1]))
+        return proj, mats
+
+def prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
     a = coords[..., j, :] - coords[..., i, :]
 
     if expand:
-        A_d = disp_deriv_mat(coords, j, i)
+        proj, A_d = disp_deriv_mat(coords, j, i, at_list)
         if fixed_atoms is not None:
+            _, fixed_atoms, _ = np.intersect1d(at_list, fixed_atoms, return_indices=True)
             A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
 
-        return [a, misc.flatten_inds(A_d, [-3, -2])]
+        return proj, [a, misc.flatten_inds(A_d, [-3, -2])]
     else:
         return [a]
 
@@ -870,12 +956,10 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, e
     if method == 'expansion':
         a = coords[..., j, :] - coords[..., i, :]
 
-        A_d = disp_deriv_mat(coords, j, i)
-        if fixed_atoms is not None:
-            A_d = fill_disp_jacob_atom(A_d, [[i, 0] for i in fixed_atoms], base_shape=coords.shape[:-2])
-        A_expansion = [a, misc.flatten_inds(A_d, [-3, -2])]
-
-        return td.vec_norm_unit_deriv(A_expansion, order=order)[0]
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], expand=True)
+        base_deriv = td.vec_norm_unit_deriv(A_expansion, order=order)[0]
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
 
         if order > 2:
@@ -927,13 +1011,15 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering=
         if expanded_vectors is None:
             expanded_vectors = [0, 1]
         if angle_ordering == 'ijk':
-            A_expansion = prep_disp_expansion(coords, i, j, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-            B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+            proj, A_expansion = prep_disp_expansion(coords, i, j, [j, i, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+            _, B_expansion = prep_disp_expansion(coords, k, j, [j, i, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
         else:
-            A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-            B_expansion = prep_disp_expansion(coords, k, i, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+            proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+            _, B_expansion = prep_disp_expansion(coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
 
-        return td.vec_angle_deriv(A_expansion, B_expansion, order=order)
+        base_deriv = td.vec_angle_deriv(A_expansion, B_expansion, order=order)
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
 
         if angle_ordering == 'ijk':
@@ -998,15 +1084,17 @@ def rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='
             expanded_vectors = [0, 1]
 
         if angle_ordering == 'ijk':
-            A_expansion = prep_disp_expansion(coords, i, j, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-            B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+            proj, A_expansion = prep_disp_expansion(coords, i, j, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+            _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
         else:
-            A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-            B_expansion = prep_disp_expansion(coords, k, i, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+            proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+            _, B_expansion = prep_disp_expansion(coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
 
         A_deriv = td.vec_angle_deriv(A_expansion, B_expansion[:1], order=order)
         B_deriv = td.vec_angle_deriv(A_expansion[:1], B_expansion, order=order)
-        return [A_deriv[0]] + [ad - bd for ad,bd in zip(A_deriv[1:], B_deriv[1:])]
+        base_deriv = [A_deriv[0]] + [ad - bd for ad,bd in zip(A_deriv[1:], B_deriv[1:])]
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
 
     else:
 
@@ -1067,9 +1155,9 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
     if method == 'expansion':
         if expanded_vectors is None:
             expanded_vectors = [0, 1, 2]
-        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
-        C_expansion = prep_disp_expansion(coords, l, k, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
         # raise Exception(
         #     [a.shape for a in A_expansion],
@@ -1077,28 +1165,10 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         #     [c.shape for c in C_expansion]
         # )
 
-        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
 
-        return td.vec_angle_deriv(A_expansion, B_expansion, order=order)
-        a = coords[..., j, :] - coords[..., i, :]
-        b = coords[..., k, :] - coords[..., j, :]
-        c = coords[..., l, :] - coords[..., k, :]
-
-        A_d = disp_deriv_mat(coords, j, i)
-        B_d = disp_deriv_mat(coords, k, j)
-        C_d = disp_deriv_mat(coords, l, k)
-        if fixed_atoms is not None:
-            A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
-            B_d = fill_disp_jacob_atom(B_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
-            C_d = fill_disp_jacob_atom(C_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
-
-        if expanded_vectors is None:
-            expanded_vectors = [0, 1, 2]
-        A_expansion = [a, misc.flatten_inds(A_d, [-3, -2])] if 0 in expanded_vectors else [a]
-        B_expansion = [b, misc.flatten_inds(B_d, [-3, -2])] if 1 in expanded_vectors else [b]
-        C_expansion = [c, misc.flatten_inds(C_d, [-3, -2])] if 2 in expanded_vectors else [c]
-
-        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
     else:
         if fixed_atoms is not None:
             raise NotImplementedError("direct derivatives with specified fixed atoms not implemented")
@@ -1274,11 +1344,13 @@ def book_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansi
     if method == 'expansion':
         if expanded_vectors is None:
             expanded_vectors = [0, 1, 2]
-        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
-        C_expansion = prep_disp_expansion(coords, l, j, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        _, C_expansion = prep_disp_expansion(coords, l, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
-        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
         raise NotImplementedError("too annoying")
 
@@ -1290,11 +1362,13 @@ def oop_deriv(coords, i, j, k, /, order=1, method='expansion',
         fixed_atoms = list(fixed_atoms) + [j]
         if expanded_vectors is None:
             expanded_vectors = [0, 1]
-        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
-        C_expansion = prep_disp_expansion(coords, i, k, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        _, C_expansion = prep_disp_expansion(coords, i, k, [i, j, k], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
-        return td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
         raise NotImplementedError("too annoying")
 
@@ -1307,12 +1381,14 @@ def plane_angle_deriv(coords, i, j, k, l, m, n, /, order=1,
     if method == 'expansion':
         if expanded_vectors is None:
             expanded_vectors = [0, 1, 2, 3]
-        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
-        C_expansion = prep_disp_expansion(coords, m, l, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
-        D_expansion = prep_disp_expansion(coords, n, m, fixed_atoms=fixed_atoms, expand=3 in expanded_vectors)
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l, m], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k, l, m], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        _, C_expansion = prep_disp_expansion(coords, m, l, [i, j, k, l, m], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        _, D_expansion = prep_disp_expansion(coords, n, m, [i, j, k, l, m], fixed_atoms=fixed_atoms, expand=3 in expanded_vectors)
 
-        return td.vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order=order)
+        base_deriv = td.vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order=order)
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
         raise NotImplementedError("too annoying")
 
@@ -1324,17 +1400,19 @@ def wag_deriv(coords, i, j, k, l=None, m=None, n=None, /, order=1, method='expan
         fixed_atoms = list(fixed_atoms) + [j]
         if expanded_vectors is None:
             expanded_vectors = [0, 1]
-        A_expansion = prep_disp_expansion(coords, j, i, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-        B_expansion = prep_disp_expansion(coords, k, j, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
         if l is None: l = i
         if m is None: m = j
         if n is None: n = k
-        C_expansion = prep_disp_expansion(coords, m, l, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
-        D_expansion = prep_disp_expansion(coords, n, m, fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l, m, n], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
+        _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k, l, m, n], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        _, C_expansion = prep_disp_expansion(coords, m, l, [i, j, k, l, m, n], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
+        _, D_expansion = prep_disp_expansion(coords, n, m, [i, j, k, l, m, n], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
         i_deriv = td.vec_dihed_deriv(A_expansion, B_expansion[:1], C_expansion, order=order)
         k_deriv = td.vec_dihed_deriv(A_expansion[:1], B_expansion, C_expansion, order=order)
-        return [i_deriv[0]] + [ad - bd for ad, bd in zip(i_deriv[1:], k_deriv[1:])]
+        base_deriv = [i_deriv[0]] + [ad - bd for ad, bd in zip(i_deriv[1:], k_deriv[1:])]
+        if proj is None: return base_deriv
+        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
         raise NotImplementedError("too annoying")
 
@@ -1574,7 +1652,7 @@ def internal_conversion_function(specs,
                     reference_internals = np.expand_dims(reference_internals, list(range(internals.ndim - 1)))
                 internals = internals - reference_internals
             if base_transformation is not None:
-                if base_transformation[0].ndim == 2 and expansion[0].ndim > 2:
+                if base_transformation[0].ndim == 2 and len(expansion) > 0 and expansion[0].ndim > 2:
                     base_transformation = [
                         np.broadcast_to(
                             np.expand_dims(b, list(range(expansion[0].ndim - 2))),
@@ -1584,7 +1662,11 @@ def internal_conversion_function(specs,
                 internals = (internals[..., np.newaxis, :] @ base_transformation[0]).reshape(
                     internals.shape[:-1] + base_transformation[0].shape[-1:]
                 )
-                expansion = td.tensor_reexpand(expansion, base_transformation, order=len(expansion))
+                expansion = (
+                    td.tensor_reexpand(expansion, base_transformation, order=len(expansion))
+                        if len(expansion) > 0 else
+                    expansion
+                )
             base = [internals] + expansion
         return base
     return convert
@@ -1621,32 +1703,80 @@ def _transrot_invariant_inverse(expansion, coords, masses, order):
         for j in inverse_tf
     ]
 
+
+class _inverse_coordinate_conversion_caller:
+    def __init__(self, conversion, target_internals,
+                 remove_translation_rotation=True,
+                 masses=None,
+                 order=1
+                 ):
+        self.conversion = conversion
+        self.target_internals = target_internals
+        self.masses = masses
+        self.remove_translation_rotation = remove_translation_rotation
+        self.last_call = None
+        self.caller_order = order
+
+    def func(self, coords, mask):
+        coords = coords.reshape(coords.shape[0], -1, 3)
+        internals = self.conversion(coords, order=0)[0]
+        delta = internals - self.target_internals[mask]
+        return np.sum(delta, axis=1)
+
+    def jacobian(self, coords, mask):
+        ord = self.caller_order
+        coords = coords.reshape(coords.shape[0], -1, 3)
+        expansion = self.last_call = self.conversion(coords, order=ord)
+        internals, expansion = expansion[0], expansion[1:] # dr/dx
+        delta = internals - self.target_internals[mask]
+
+        if self.remove_translation_rotation: # dx/dr
+            inverse_expansion = _transrot_invariant_inverse(expansion, coords, self.masses, ord)
+        else:
+            sqrt_mass = np.repeat(
+                np.diag(np.repeat(1 / np.sqrt(self.masses), 3))[np.newaxis],
+                coords.shape[0],
+                axis=0
+            )
+            expansion = td.tensor_reexpand([sqrt_mass], expansion, len(expansion))
+            inverse_expansion = td.inverse_transformation(expansion, order=ord, allow_pseudoinverse=True)
+            inverse_expansion = td.tensor_reexpand(inverse_expansion, [sqrt_mass], ord)
+
+        nr_change = 0
+        for n, e in enumerate(inverse_expansion):
+            for ax in range(n + 1):
+                e = vec_tensordot(e, delta, axes=[1, -1], shared=1)
+            nr_change += (1 / math.factorial(n + 1)) * e
+        return nr_change
+
 DEFAULT_SOLVER_ORDER = 1
 def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              masses=None,
-                             remove_translation_rotation=True,
+                             remove_translation_rotation=False,
                              order=None,
                              solver_order=None,
-                             tol=1e-8, max_iterations=5,
-                             damping_parameter=None,#.99,
-                             damping_exponent=None,#1.01,
-                             restart_interval=None,#10,
+                             tol=1e-3, max_iterations=10,
+                             max_displacement=.5,
+                             # method='quasi-newton',
+                             method='gradient-descent',
+                             optimizer_parameters=None,
+                             line_search=False,
+                             damping_parameter=None,
+                             damping_exponent=None,
+                             restart_interval=10,
                              raise_on_failure=True,
                              return_internals=True,
                              return_expansions=True,
                              base_transformation=None,
                              reference_internals=None,
                              angle_ordering='jik'):
-    # use Newton-Raphson to solve
 
     from .CoordinateFrames import remove_translation_rotations
-    from .Optimization import Damper
+    from . import Optimization as opt
 
-    damper = Damper(
-        damping_parameter=damping_parameter,
-        damping_exponent=damping_exponent,
-        restart_interval=restart_interval
-    )
+    if method == 'quasi-newton':
+        if optimizer_parameters is None: optimizer_parameters = {}
+        optimizer_parameters['initial_beta'] = optimizer_parameters.get('initial_beta', 70)
 
     if order is None:
         order = DEFAULT_SOLVER_ORDER
@@ -1677,53 +1807,51 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     else:
         coords = initial_cartesians.copy()
     coords = coords.reshape((-1,) + coords.shape[-2:])
+    init_coords = coords
     target_internals = target_internals.reshape((-1,) + target_internals.shape[-1:])
-    errors = np.full(base_shape, -1).reshape(-1)
-    opt_inds = np.arange(len(errors))
-    done_counter = np.prod(base_shape, dtype=int)
-    opt_counter = 0
-    opt_internals = None
-    for it in range(max_iterations):
-        expansion = conversion(coords[opt_inds,], order=order)
-        if opt_internals is None:
-            opt_internals = expansion
-        internals, expansion = expansion[0], expansion[1:]
-        delta = target_internals[opt_inds,] - internals
-        norm = np.linalg.norm(delta, axis=-1)
-        errors[opt_inds] = norm
-        opt_internals[0][opt_inds] = internals
-        for opt_e, e in zip(opt_internals[1:], expansion):
-            opt_e[opt_inds] = e
-        norm_tests = norm > tol
-        rem_pos = np.where(norm_tests)[0]
-        if len(rem_pos) == 0:
-            break
-        opt_counter += len(opt_inds) - len(rem_pos)
-        opt_inds = opt_inds[rem_pos]
-        if opt_counter == done_counter:
-            break
 
-        expansion = [e[rem_pos,] for e in expansion]
-        delta = delta[rem_pos]
-        if remove_translation_rotation:
-            inverse_expansion = _transrot_invariant_inverse(expansion, coords[opt_inds], masses, solver_order)
-        else:
-            inverse_expansion = td.inverse_transformation(expansion, order=solver_order, allow_pseudoinverse=True)
+    remove_translation_rotation = False
+    caller = _inverse_coordinate_conversion_caller(
+        conversion,
+        target_internals,
+        remove_translation_rotation=remove_translation_rotation,
+        masses=masses
+    )
 
-        u = damper.get_damping_factor()
-        if u is not None:
-            delta = delta * u
-        nr_change = 0
-        for n,e in enumerate(inverse_expansion):
-            for ax in range(n+1):
-                e = vec_tensordot(e, delta, axes=[1, -1], shared=1)
-            nr_change += (1/math.factorial(n+1)) * e
-        nr_change = nr_change.reshape(nr_change.shape[:-1] + (-1, 3))
-        coords[opt_inds] += nr_change
-    else:
-        if raise_on_failure:
-            raise ValueError(f"failed to find coordinates after {max_iterations} iterations (residuals: {delta})")
+    coords, converged, (errors, its) = opt.iterative_step_minimize(
+        coords.reshape(coords.shape[:1] + (-1,)),
+        opt.get_step_finder(
+            caller.func,
+            method=method,
+            jacobian=caller.jacobian,
+            damping_parameter=damping_parameter,
+            damping_exponent=damping_exponent,
+            restart_interval=restart_interval,
+            line_search=line_search,
+            **({} if optimizer_parameters is None else optimizer_parameters)
+        ),
+        tol=tol,
+        max_displacement=max_displacement,
+        max_iterations=max_iterations,
+        oscillation_damping_factor=None#1.0
+    )
 
+    coords = coords.reshape(coords.shape[:1] + (-1, 3))
+    opt_internals = conversion(
+        coords,
+        order=0 if not return_expansions else order
+    )
+    if not converged and raise_on_failure:
+        init_internals = conversion(
+            init_coords,
+            order=0 if not return_expansions else order
+        )[0]
+        raise ValueError(
+            f"failed to find coordinates after {max_iterations} iterations"
+            f"\ntarget:{target_internals}\ninitial:{init_internals}"
+            f"\nresidual:{target_internals - opt_internals[0]}"
+            f"\n1-norm error: {errors}"
+        )
     if return_expansions:
         expansion = opt_internals[1:]
         if remove_translation_rotation:
@@ -1763,7 +1891,9 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
 
 def metric_tensor(internals_by_cartesians, masses=None):
     if misc.is_numeric_array_like(internals_by_cartesians):
-        internals_by_cartesians = [internals_by_cartesians]
+        internals_by_cartesians = np.asanyarray(internals_by_cartesians)
+        if internals_by_cartesians.ndim == 2:
+            internals_by_cartesians = [internals_by_cartesians]
     transformation = np.asanyarray(internals_by_cartesians[0])
     if masses is not None:
         g12_base = np.diag(np.repeat(1/np.sqrt(masses), 3))

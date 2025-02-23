@@ -2305,8 +2305,10 @@ class X3DBackend(GraphicsBackend):
 
     def show_figure(self, graphics:X3DFigure, reshow=None):
         if not graphics.shown:
+            from ..Jupyter.JHTML import JupyterAPIs
+            dynamic_loading = JupyterAPIs().in_jupyter_environment()
             graphics.shown = True
-            graphics.to_x3d().to_widget().display()
+            graphics.to_x3d().to_widget(dynamic_loading=dynamic_loading).display()
 
             # from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
             #

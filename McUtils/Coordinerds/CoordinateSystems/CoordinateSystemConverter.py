@@ -5,7 +5,7 @@ Provides the conversion framework between coordinate systems
 from collections import OrderedDict as odict, deque
 import os, abc, numpy as np, weakref
 from ...Extensions import ModuleLoader
-from ...Numputils import apply_pointwise
+from ...Numputils import apply_by_coordinates
 
 __all__ = [
     "CoordinateSystemConverters",

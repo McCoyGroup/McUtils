@@ -423,7 +423,8 @@ class FormattedTable(NoLineWrapFormatter):
 
 
 class OutputCapture:
-    def __init__(self, handles=None,
+    def __init__(self,
+                 handles=None,
                  bind_global=True,
                  # bind_jupyter=None,
                  file_handles=True, autoclose=None, save_output=True):
