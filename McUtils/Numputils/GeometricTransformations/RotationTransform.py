@@ -18,7 +18,7 @@ class RotationTransform(AffineTransform):
 
     """
 
-    def __init__(self, theta, axis="z", center = None):
+    def __init__(self, theta, axis="z", center=None):
         """
 
         :param theta: angle through which to rotate

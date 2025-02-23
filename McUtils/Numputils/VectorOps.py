@@ -34,7 +34,8 @@ __all__ = [
     "affine_multiply",
     "cartesian_from_rad",
     "polar_to_cartesian",
-    "apply_pointwise",
+    "apply_by_coordinates",
+    "apply_by_structures",
     "projection_matrix",
     "orthogonal_projection_matrix",
     "project_onto",
@@ -1081,23 +1082,51 @@ def polar_to_cartesian(center, v, u, r, a, d):
 #
 #       apply_pointwise
 #
-def apply_pointwise(tf, points, reroll=None, **kwargs):
-    roll = np.roll(np.arange(points.ndim), 1)
-    new_points = np.transpose(points, roll)
-    vals = tf(*new_points, **kwargs)
+def apply_by_coordinates(tf, points, reroll=None, ndim=1, **kwargs):
+    points = np.asanyarray(points)
+    for i in range(ndim):
+        points = np.moveaxis(points, -1, 0)
+
+    vals = tf(*points, **kwargs)
+    #TODO: this is a bit of a hack, let's clean it up
     if not isinstance(vals, np.ndarray) and isinstance(vals[0], np.ndarray):
         vals, rest = vals[0], vals[1:]
         if len(rest) == 1:
             rest = rest[0]
     else:
         rest = None
+
     vals = np.asanyarray(vals)
-    if reroll or (reroll is None and vals.shape == new_points.shape):
-        vals = np.transpose(vals, np.roll(roll, -2))
+    if reroll or (reroll is None and vals.shape == points.shape):
+        for i in range(ndim):
+            vals = np.moveaxis(vals, 0, -1)
     if rest is not None:
         return vals, rest
     else:
         return vals
+
+def apply_by_structures(tf, points, ndim=1, **kwargs):
+    points = np.asanyarray(points)
+    base_shape = points.shape[:-ndim]
+    points = points.reshape((-1,) + points.shape[-ndim:])
+
+    vals = [
+        tf(pt, **kwargs)
+        for pt in points
+    ]
+
+
+    if not (util.is_numeric(vals[0]) or util.is_numeric_array_like(vals[0])):
+        vals, rest = np.asanyarray([v[0] for v in vals]), [v[1:] for v in vals]
+    else:
+        vals = np.asanyarray(vals)
+        rest = None
+
+    if rest is not None:
+        return vals, rest
+    else:
+        return vals
+
 
 # ##############################################################################
 # #

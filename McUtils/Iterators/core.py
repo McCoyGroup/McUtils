@@ -8,6 +8,7 @@ __all__ = [
     "split",
     "split_by",
     "counts",
+    "dict_diff",
     "transpose"
 ]
 
@@ -76,9 +77,35 @@ def take_lists(a, splits):
     else:
         for s in splits:
             yield consume(a, s)
-def counts(iterable, test=None):
+def counts(iterable, test=None, hashable=True):
     if test is None: test = lambda x:x
-    return {k:len(g) for k,g in itertools.groupby(iterable, test)}
+    if hashable:
+        counts_dict = {}
+        for v in iterable:
+            k = test(v)
+            counts_dict[k] = counts_dict.get(k, 0) + 1
+        return counts_dict
+    else:
+        keys = []
+        counts = []
+        for v in iterable:
+            k = test(v)
+            try:
+                i = keys.index(k)
+            except ValueError:
+                keys.append(k)
+                counts.append(1)
+            else:
+                counts[i] += 1
+
+        return keys, counts
+
+def dict_diff(iterable1:dict, iterable2):
+    return {
+        k:v
+        for k,v in iterable1.items()
+        if k not in iterable2 or v != iterable2[k]
+    } | {k:iterable2[k] for k in iterable2.keys() - iterable1.keys()}
 
 def transpose_iter(data, default=None):
     sentinel = object()

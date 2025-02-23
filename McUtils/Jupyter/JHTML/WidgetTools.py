@@ -13,6 +13,11 @@ class JupyterAPIs:
     @classmethod
     def load_api(cls):
         try:
+            import IPython as base
+        except ImportError:
+            base = None
+
+        try:
             import IPython.core.interactiveshell as shell
         except ImportError:
             shell = None
@@ -34,15 +39,32 @@ class JupyterAPIs:
             display,
             widgets,
             events,
-            shell
+            shell,
+            base
         )
 
     @classmethod
     def get_shell_api(cls):
+        if cls._apis is None:
+            cls.load_api()
         return cls._apis[3]
     @classmethod
     def get_shell_instance(cls):
         return cls.get_shell_api().InteractiveShell.instance()
+
+    @classmethod
+    def get_base_api(cls):
+        if cls._apis is None:
+            cls.load_api()
+        return cls._apis[4]
+    @classmethod
+    def in_jupyter_environment(cls):
+        base = cls.get_base_api()
+        if base is None:
+            return False
+        else:
+            shell = base.get_ipython().__class__.__name__
+            return 'zmq' in shell.lower()
 
     @classmethod
     def get_display_api(cls):

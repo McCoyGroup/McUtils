@@ -2,6 +2,8 @@
 import itertools, numpy as np, math
 import uuid
 
+from .. import Devutils as dev
+
 from . import VectorOps as vec_ops
 from . import SetOps as sets
 from .Misc import is_numeric, is_zero
@@ -566,12 +568,22 @@ def _broadcast_mul(scalar, other):
         return np.expand_dims(scalar, list(range(scalar.ndim, other.ndim))) * other
     else:
         return scalar * other
-def _scalarinv_deriv(scalar_expansion, o):
+
+_integer_partition_cache = {}
+def get_integer_partitions(o):
     from ..Combinatorics import IntegerPartitioner
+
+    return dev.cached_eval(
+        _integer_partition_cache,
+        o,
+        IntegerPartitioner.partitions,
+        args=(o,)
+    )
+def _scalarinv_deriv(scalar_expansion, o):
 
     shared = scalar_expansion[0].ndim
     term = 0
-    for parts in IntegerPartitioner.partitions(o):
+    for parts in get_integer_partitions(o):
         l = len(parts[0])
         scaling = ((-1) ** l) * math.factorial(l) / (scalar_expansion[0] ** (l + 1))
         term += sum(
@@ -588,11 +600,10 @@ def scalarinv_deriv(scalar_expansion, order):
     )
 
 def _scalarpow_deriv(scalar_expansion, exp, o):
-    from ..Combinatorics import IntegerPartitioner
     shared = scalar_expansion[0].ndim
 
     term = 0
-    for parts in IntegerPartitioner.partitions(o):
+    for parts in get_integer_partitions(o):
         l = len(parts[0])
         factorial_terms = np.prod(exp - np.arange(l))
         if factorial_terms == 0:
@@ -641,19 +652,19 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None):
 
     # reexpand in terms of original vectors
     # raise Exception(vec_expansion)
-    norm_expansion = [base_expansion[0]] + tensor_reexpand(
+    norm_expansion = [base_expansion[0]] + (tensor_reexpand(
         vec_expansion[1:],
         base_expansion[1:],
         order + 1
         # shared=vec_expansion[0].ndim - 1
-    )
+    ) if order > 0 else [])
 
-    unit_expansion = [base_expansion[1]] + tensor_reexpand(
+    unit_expansion = [base_expansion[1]] + (tensor_reexpand(
         vec_expansion[1:],
         base_expansion[2:],
         order
         # shared=vec_expansion[0].ndim - 1
-    )
+    ) if order > 0 else [])
 
     return norm_expansion, unit_expansion
 
@@ -690,8 +701,17 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
     base_shape = A_expansion[0].shape[:-1]
     shared = len(base_shape)
     i3 = np.broadcast_to(np.expand_dims(i3, list(range(shared))), base_shape + (3, 3, 3))
+    signs = np.reshape(
+        np.sign(A_expansion[0][..., np.newaxis, :] @ B_expansion[0][..., :, np.newaxis]),
+        base_shape
+    )
+    B_expansion = [
+        # force parallel
+        np.expand_dims(signs, list(range(-o, 0))) * b
+        for o,b in enumerate(B_expansion)
+    ]
 
-    pseudo_norm_2 = np.sqrt(tensorops_deriv(
+    pseudo_norm = tensorops_deriv(
         B_expansion,
             [-1, -1],
         [i3],
@@ -699,7 +719,8 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
         A_expansion,
         order=0,
         shared=shared
-    )[0])
+    )[0]
+    pseudo_norm_2 = np.sqrt(pseudo_norm)
 
     if is_numeric(order):
         order = np.arange(order+1)
@@ -807,13 +828,13 @@ def vec_angle_deriv(A_expansion, B_expansion, order, unitized=False):
             e = np.moveaxis(e, 0, -1)
         new_expansions.append(e)
     arctan_expansion = new_expansions
-    angle_derivs = [np.arctan2(sin_expansion[0], cos_expansion[0])] + tensor_reexpand(
+    angle_derivs = [np.arctan2(sin_expansion[0], cos_expansion[0])] + (tensor_reexpand(
         cos_sin_expansion[1:],
         arctan_expansion,
         # axes=[-1, -1],
         order=order,
         # shared=arctan_expansion[0].ndim - 1
-    )
+    ) if order > 0 else [])
     return angle_derivs
 
 def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, planar=None, planar_threshold=1e-14):
@@ -874,11 +895,23 @@ def nca_partition_terms(partition):
 
     return np.prod(multinomial_num / full_denom)
 
+max_symm_perm_order = 4
+unique_permutation_cache = {}
+def get_unique_permutations(perm_idx):
+    from ..Combinatorics import UniquePermutations
+    key = tuple(perm_idx) if len(perm_idx) <= max_symm_perm_order else None
+
+    return dev.cached_eval(
+        unique_permutation_cache,
+        key,
+        lambda perm_idx:UniquePermutations(perm_idx).permutations(return_indices=True),
+        condition=lambda k:len(k) <= max_symm_perm_order,
+        args=(perm_idx,)
+    )
 def nca_symmetrize(tensor, partition,
                    shared=None,
                    identical=True,
                    reweight=None):
-    from ..Combinatorics import UniquePermutations
     perm_counter = len(partition)
     perm_idx = []  # to establish the set of necessary permutations to make things symmetric
     for i in partition:
@@ -889,7 +922,7 @@ def nca_symmetrize(tensor, partition,
             perm_idx.append(perm_counter)
 
     # sometimes we overcount, so we factor that out here
-    perm_inds, _ = UniquePermutations(perm_idx).permutations(return_indices=True)
+    perm_inds, _ = get_unique_permutations(perm_idx)
     if reweight or (reweight is None and identical):
         nterms = nca_partition_terms(partition)
         overcount = len(perm_inds) / nterms
@@ -934,6 +967,9 @@ def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=Non
             B = vec_ops.vec_tensordot(A, B, axes=[a_ax, b_ax], shared=shared)
         b_ax = [min(B.ndim - 1, b + A.ndim - 1 - shared) for b in b_ax]
 
+    if symmetrize is not None:
+        symmetrize = len(A_expansion) > 1 and len(B_expansion) > 1
+
     if symmetrize:
         B = nca_symmetrize(B, partition, shared=shared)
     return B
@@ -964,7 +1000,6 @@ def nca_partition_prod(partition, A_expansion, shared=None, symmetrize=True):
     return B
 
 def tensor_reexpand(derivs, vals, order=None, axes=None):
-    from ..Combinatorics import IntegerPartitioner
     terms = []
     if order is None:
         order = len(vals)
@@ -975,7 +1010,7 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
     for o in order:
         term = sum(
             nca_partition_dot(p, derivs, vals, axes=axes, shared=shared)
-            for parts in IntegerPartitioner.partitions(o)
+            for parts in get_integer_partitions(o)
             for p in parts
         )
         terms.append(term)
@@ -1124,18 +1159,43 @@ def _contract(a, b, axes=None, shared=None):
 def _product(a, b, axes=None, shared=None):
     return vec_ops.vec_outer(a, b, axes=axes)
 
+generator_max_caching_order = 4
+term_generator_caches = {}
+class caching_perm_generator:
+    def __init__(self, o):
+        from ..Combinatorics import SymmetricGroupGenerator
+        self.gen = SymmetricGroupGenerator(o)
+        self._term_cache = {}
+
+    def get_terms(self, order):
+        return dev.cached_eval(
+            self._term_cache,
+            order,
+            self.gen.get_terms,
+            args=(order,)
+        )
+
+def get_term_generator(k):
+
+    return dev.cached_eval(
+        term_generator_caches,
+        k,
+        caching_perm_generator,
+        condition=lambda k:k<generator_max_caching_order,
+        args=(k,)
+    )
+
 def tensorops_deriv(
         *expansion_op_pairs,
         order,
         shared=None
 ):
-    from ..Combinatorics import SymmetricGroupGenerator
     expansions, ops = nca_canonicalize_multiops(expansion_op_pairs)
 
     if isinstance(order, int):
         order = list(range(order+1))
 
-    partition_generator = SymmetricGroupGenerator(len(expansions))
+    partition_generator = get_term_generator(len(expansions))
     derivs = [
         nca_multi_op_order_deriv(partition_generator, o, expansions, ops, shared)
         for o in order

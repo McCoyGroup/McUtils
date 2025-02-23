@@ -6,7 +6,7 @@ from collections import namedtuple
 
 ######################################################################################################
 ##
-##                                   CoordinateTransform Class
+##                                   GeometricTransformation Class
 ##
 ######################################################################################################
 
@@ -17,14 +17,14 @@ from .ScalingTransform import ScalingTransform
 from .TranslationTransform import TranslationTransform
 
 __all__ = [
-    "CoordinateTransform"
+    "GeometricTransformation"
 ]
 
 __reload_hook__ = ['.TransformationFunction', ".AffineTransform", ".RotationTransform", ".ScalingTransform", ".TranslationTransform"]
 
-class CoordinateTransform:
+class GeometricTransformation:
     """
-    The CoordinateTransform class provides a simple, general way to represent a
+    The GeometricTransformation class provides a simple, general way to represent a
     compound coordinate transformation.
     In general, it's basically just a wrapper chaining together a number of TransformationFunctions.
     """
@@ -55,7 +55,7 @@ class CoordinateTransform:
         tfunc = self.transformation_function #type: TransformationFunction
         return tfunc.operate(coords, shift=shift)
     def __call__(self, coords, shift=True):
-        if isinstance(coords, (TransformationFunction, CoordinateTransform)):
+        if isinstance(coords, (TransformationFunction, GeometricTransformation)):
             return type(self)(self, coords) # just constructing a new transform...
         else:
             return self.apply(coords)
@@ -81,7 +81,7 @@ class CoordinateTransform:
 
         if isinstance(tf, TransformationFunction) or hasattr(tf, 'operate'):
             return tf
-        elif isinstance(tf, CoordinateTransform) or hasattr(tf, 'transformation_function'):
+        elif isinstance(tf, GeometricTransformation) or hasattr(tf, 'transformation_function'):
             return tf.transformation_function
         elif isinstance(tf, str):
             # we can define some convenient transformation syntax, maybe

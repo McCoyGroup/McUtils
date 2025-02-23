@@ -227,7 +227,7 @@ class CoordinateSystem:
                 return self.converter.convert_many(coords, **self.kwargs)
             else:
                 return self.converter.convert(coords, **self.kwargs)
-    def convert_coords(self, coords, system, converter=None, **kw):
+    def convert_coords(self, coords, system, converter=None, apply_pre_converter=False, **kw):
         """
         Converts coordiantes from the current coordinate system to _system_
 
@@ -240,6 +240,9 @@ class CoordinateSystem:
         :return: the converted coordiantes
         :rtype: tuple(np.ndarray, dict)
         """
+        if apply_pre_converter:
+            self.pre_convert(system)
+            system.pre_convert(self)
 
         converter_opts = self.converter_options
         if converter_opts is None:
@@ -416,14 +419,14 @@ class CoordinateSystem:
 
         def __call__(self, c, *args, **kwargs):
             if self.num_derivs is None:
-                return self.parent.convert_coords(c, self.system, **self.convert_kwargs)[0]
+                return self.parent.convert_coords(c, self.system,  apply_pre_converter=False, **self.convert_kwargs)[0]
             else:
                 parent = self.parent
                 s = self.system
                 num_derivs = self.num_derivs
                 dk = self.deriv_key
                 convert_kwargs = self.convert_kwargs
-                crds, opts = parent.convert_coords(c, s, return_derivs=num_derivs, **convert_kwargs)
+                crds, opts = parent.convert_coords(c, s, return_derivs=num_derivs, apply_pre_converter=False, **convert_kwargs)
                 # we now have to reshape the derivatives because mc_safe_apply is only applied to the coords -_-
                 # should really make that function manage deriv shapes too, but don't know how to _tell_ it that I
                 # want it to
@@ -511,7 +514,7 @@ class CoordinateSystem:
             ret_d_key = self.return_derivs_key
             rd = converter_options.get(ret_d_key)
             converter_options[ret_d_key] = order if analytic_deriv_order is None else analytic_deriv_order
-            test_crd, test_opts = self.convert_coords(coords, system, order=order, **converter_options)
+            test_crd, test_opts = self.convert_coords(coords, system, order=order, apply_pre_converter=False, **converter_options)
             if rd is None:
                 del converter_options[ret_d_key]
             else:

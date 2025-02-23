@@ -6,8 +6,9 @@ code every time a new job type comes up
 
 import os, inspect
 from .Serializers import *
+from ..Devutils import OptionsSet
 
-__all__ = [ "Config", "ParameterManager" ]
+__all__ = [ "Config", "ParameterManager"]
 
 class Config:
     """
@@ -184,91 +185,7 @@ class Config:
     def __getattr__(self, item):
         return self.get_conf_attr(item)
 
-class ParameterManager:
-    """
-    Provides a helpful manager for those cases where
-    there are way too many options and we need to filter
-    them across subclasses and things
-    """
-
-    def __init__(self, *d, **ops):
-        if len(d) > 0:
-            if isinstance(d[0], dict):
-                self.ops = d[0]
-                self.ops.update(ops)
-            else:
-                self.ops = dict(d, **ops)
-        else:
-            self.ops = ops
-    def __getitem__(self, item):
-        return self.ops[item]
-    def __setitem__(self, key, value):
-        self.ops[key] = value
-    def __delitem__(self, item):
-        del self.ops[item]
-    def __getattr__(self, item):
-        return self.ops[item]
-    def __setattr__(self, key, value):
-        if key == "ops":
-            super().__setattr__(key, value)
-        else:
-            self.ops[key] = value
-    def __delattr__(self, item):
-        del self.ops[item]
-    def __hasattr__(self, key):
-        return key in self.ops
-    def update(self, **ops):
-        self.ops.update(**ops)
-
-    def keys(self):
-        return self.ops.keys()
-    def items(self):
-        return self.ops.items()
-
-    def save(self, file, mode=None, attribute=None):
-        self.serialize(file)
-    @classmethod
-    def load(cls, file, mode=None, attribute=None):
-        cls(cls.deserialize(file, mode=mode, attribute=attribute))
-
-    def extract_kwarg_keys(self, obj):
-        args, _, _, defaults, _, _, _  = inspect.getfullargspec(obj)
-        if args is None:
-            return None
-        ndef = len(defaults) if defaults is not None else 0
-        return tuple(args[-ndef:])
-    def get_props(self, obj):
-        if isinstance(obj, (list, tuple)):
-            return sum(
-                (self.get_props(o) for o in obj),
-                ()
-            )
-
-        try:
-            props = obj.__props__
-        except AttributeError:
-            props = self.extract_kwarg_keys(obj)
-
-        if props is None:
-            raise AttributeError("{}: object {} needs props to filter against".format(
-                type(self).__name__,
-                self
-            ))
-        return props
-
-    def bind(self, obj, props=None):
-        for k,v in self.filter(obj, props=props).items():
-            setattr(obj, k, self.ops[k])
-    def filter(self, obj, props=None):
-        if props is None:
-            props = self.get_props(obj)
-        ops = self.ops
-        return {k:ops[k] for k in ops.keys() & set(props)}
-    def exclude(self, obj, props=None):
-        if props is None:
-            props = self.get_props(obj)
-        ops = self.ops
-        return {k:ops[k] for k in ops.keys() - set(props)}
+class ParameterManager(OptionsSet):
 
     def serialize(self, file, mode = None):
         return ModuleSerializer().serialize(file, self.ops, mode = mode)

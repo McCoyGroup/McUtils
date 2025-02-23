@@ -14,13 +14,13 @@ Chained conversions are not _currently_ supported, but might well become support
 """
 
 from .CoordinateSystems import *
-from .CoordinateTransformations import *
+# from .CoordinateTransformations import *
 from .Conveniences import *
 
 __all__ = []
 from .CoordinateSystems import __all__ as exposed
 __all__ += exposed
-from .CoordinateTransformations import __all__ as exposed
-__all__ += exposed
+# from .CoordinateTransformations import __all__ as exposed
+# __all__ += exposed
 from .Conveniences import __all__ as exposed
 __all__ += exposed

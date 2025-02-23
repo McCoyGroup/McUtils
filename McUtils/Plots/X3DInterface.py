@@ -45,11 +45,14 @@ class X3D(X3DObject):
 
     X3DOM_JS = 'http://www.x3dom.org/download/x3dom.js'
     X3DOM_CSS = 'http://www.x3dom.org/download/x3dom.css'
-    def to_widget(self):
+    def to_widget(self, dynamic_loading=None):
         id = self.id
         x3d_embed = self.to_x3d()#.tostring()
 
-        if not self.dynamic_loading:
+        if dynamic_loading is None:
+            dynamic_loading = self.dynamic_loading
+
+        if not dynamic_loading:
             return JHTML.Div(
                 JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
                 JHTML.Script(src=self.X3DOM_JS),
@@ -112,6 +115,11 @@ class X3D(X3DObject):
         )
     def display(self):
         return self.to_widget().display()
+
+    def show(self):
+        from ..Jupyter.JHTML import JupyterAPIs
+        dynamic_loading = JupyterAPIs().in_jupyter_environment()
+        self.to_widget(dynamic_loading=dynamic_loading).display()
 
     def dump(self, file, write_html=True, **opts):
         if write_html:

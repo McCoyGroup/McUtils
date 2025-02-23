@@ -637,23 +637,195 @@ class Extrapolator:
     def __call__(self, *args, **kwargs):
         return self.apply(*args, **kwargs)
 
+class IncrementalCartesianCoordinateInterpolation:
+    def __init__(self,
+                 abcissae,
+                 coords,
+                 *,
+                 coordinate_system,
+                 max_disp_step=.5,
+                 max_refinements=20,
+                 reembed=False,
+                 embedding_options=None
+                 ):
+        self.abcissae = list(abcissae)
+        self.coords = self.prep_cartesians(coords)
+        self.converter = self.prep_coordinate_system_converter(coordinate_system)
+        self.internals = [
+            self.converter(c) for c in self.coords
+        ]
+        self.max_disp_step = max_disp_step
+        self.max_refinements = max_refinements
+        self.reembed=reembed
+        self.embedding_options={} if embedding_options is None else embedding_options
+
+    @classmethod
+    def wrap_convert(cls, system):
+        def convert(coords):
+            return coords.convert(system)
+        return convert
+
+    @classmethod
+    def prep_coordinate_system_converter(cls, coordinate_system):
+        if hasattr('coordinate_system', 'convert'):
+            return cls.wrap_convert(coordinate_system)
+        else:
+            return coordinate_system
+
+    @classmethod
+    def refined_step_conv(cls,
+                          pct,
+                          converter,
+                          init_abc, final_abc,
+                          init_coords, final_coords,
+                          init_internals, final_internals,
+                          max_refinements=None, max_disp=.5,
+                          reembed=False, embedding_options=None
+                          ):
+        from McUtils.Coordinerds import CoordinateSet
+
+        if embedding_options is None:
+            embedding_options = {}
+
+        # d = CoordinateSet(self.internals[start] + disp, self.internals[start].system)
+        # d.convert(self.coords[start].system)
+        if pct > .5:
+            return cls.refined_step_conv(
+                1 - pct,
+                converter,
+                final_abc, init_abc,
+                final_coords, init_coords,
+                final_internals, init_internals,
+                max_refinements=max_refinements, max_disp=max_disp
+            )
+
+        disp = final_coords.convert(init_internals.system) - init_internals
+        step = final_abc - init_abc
+
+        new_abcissae = []
+        new_internals = []
+        new_coords = []
+
+        d = pct * disp
+        md = np.max(np.abs(d))
+        n_ref = 0
+        while md > max_disp and (max_refinements is None or n_ref < max_refinements):
+            scaling = max_disp / md
+            d = d * scaling
+            new_abc = init_abc + (step * pct * scaling)
+            new_step = final_abc - new_abc
+            pct = pct * (1 - scaling) / (1 - pct * scaling) # make sure we end up at the same spot
+            init_abc = new_abc
+            step = new_step
+            target_internals = init_internals + d
+            new_disp = CoordinateSet(target_internals, init_internals.system)
+            # new_disp.converter_options = init_internals.system.converter_options
+            new_carts = new_disp.convert(init_coords.system)
+            if reembed:
+                emb = nput.eckart_embedding(
+                    init_coords,
+                    new_carts,
+                    **embedding_options
+                )
+                new_carts = emb.coordinates
+            init_coords = new_carts
+            init_internals = converter(init_coords)
+            new_abcissae.append(init_abc)
+            new_coords.append(init_coords)
+            new_internals.append(init_internals)
+
+            disp = final_coords.convert(init_internals.system) - init_internals
+            d = pct * disp
+            md = np.max(np.abs(d))
+            n_ref += 1
+            # print("...", n_ref, max_disp, d)
+
+        target_internals = CoordinateSet(init_internals + d, init_internals.system)
+        new_carts = target_internals.convert(init_coords.system)
+        if reembed:
+            emb = nput.eckart_embedding(
+                init_coords,
+                new_carts,
+                **embedding_options
+            )
+            new_carts = emb.coordinates
+        return new_carts, (new_abcissae, new_coords, new_internals)
+
+    def prep_cartesians(self, coords):
+        from ..Coordinerds import CoordinateSet, CartesianCoordinates3D
+        coords = np.asanyarray(coords)
+        if not hasattr(coords, 'system'):
+            coords = CoordinateSet(coords, CartesianCoordinates3D)
+        return list(coords)
+
+    def incremental_interp(self, start, point):
+        b = self.abcissae[start]
+        a = self.abcissae[start+1]
+        width = a - b
+        pct = (point - b) / width
+
+        coords, (new_abcissae, new_coords, new_internals) = self.refined_step_conv(
+            pct,
+            self.converter,
+            b, a,
+            self.coords[start], self.coords[start+1],
+            self.internals[start], self.internals[start+1],
+            max_refinements=self.max_refinements,
+            max_disp=self.max_disp_step
+        )
+
+        self.abcissae = self.abcissae[:start+1] + new_abcissae + self.abcissae[start+1:]
+        self.coords = self.coords[:start+1] + new_coords + self.coords[start+1:]
+        self.internals = self.internals[:start+1] + new_internals + self.internals[start+1:]
+
+        return coords
+
+    def interpolate(self, point):
+        point = np.asanyarray(point)
+        base_shape = point.shape
+        point = point.reshape(-1)
+        ord = np.argsort(point)
+        point = point[ord]
+
+        vals = np.empty(point.shape + self.coords[0].shape, dtype=self.coords[0].dtype)
+        for k,p in enumerate(point):
+            i = np.searchsorted(self.abcissae, p)
+            if i > 0: i = i - 1
+            crds = self.incremental_interp(i, p)
+            vals[k] = crds
+        inv = np.argsort(ord)
+        vals = vals[inv,]
+        return vals.reshape(base_shape + vals.shape[-2:])
+
+    def __call__(self, point):
+        return self.interpolate(point)
+
 class CoordinateInterpolator:
 
     default_interpolator_type = Interpolator
+    default_smoothed_interpolator_type = IncrementalCartesianCoordinateInterpolation
     def __init__(self,
                  coordinates,
                  arc_lengths=None,
                  distance_function=None,
                  base_interpolator=None,
+                 coordinate_system=None,
                  **interpolator_options
                  ):
         coordinates = np.asanyarray(coordinates)
 
-        abcissae = self.get_arc_lengths(
+        self.distance_function, abcissae = self.get_arc_lengths(
             coordinates,
             arc_lengths,
             distance_function=distance_function
         )
+
+        if base_interpolator is None:
+            if coordinate_system is not None:
+                base_interpolator = self.default_smoothed_interpolator_type
+                interpolator_options['coordinate_system'] = coordinate_system
+            else:
+                base_interpolator = self.default_interpolator_type
 
         self.interpolator = base_interpolator(
             abcissae,

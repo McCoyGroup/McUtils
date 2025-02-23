@@ -9,17 +9,18 @@ __all__ = [
     "remove_translation_rotations",
     "translation_rotation_invariant_transformation",
     "eckart_embedding",
-    "rmsd_minimizing_transformation"
+    "rmsd_minimizing_transformation",
+    "eckart_permutation"
 ]
 
-import itertools
+import itertools, collections
 
-import numpy as np
+import numpy as np, scipy.optimize as opt
 from . import VectorOps as vec_ops
 from . import TensorDerivatives as td_ops
-from . import SetOps as set_ops
-from . import Misc as misc
-from . import TransformationMatrices as tf_mats
+# from . import SetOps as set_ops
+# from . import Misc as misc
+# from . import TransformationMatrices as tf_mats
 
 def center_of_mass(coords, masses=None):
     """Gets the center of mass for the coordinates
@@ -387,6 +388,8 @@ def translation_rotation_invariant_transformation(
 
     return tf, inv
 
+EmbeddingData = collections.namedtuple("PrincipleAxisData", ['coords', 'com', 'axes'])
+EckartData = collections.namedtuple('EckartData', ['rotations', 'coordinates', 'reference_data', 'coord_data'])
 def principle_axis_embedded_coords(coords, masses=None):
     """
     Returns coordinate embedded in the principle axis frame
@@ -405,38 +408,15 @@ def principle_axis_embedded_coords(coords, masses=None):
     # pax_axes = np.swapaxes(pax_axes, -2, -1)
     coords = np.matmul(coords, pax_axes)
 
-    return coords, com, pax_axes
+    return EmbeddingData(coords, com, pax_axes)
 
+def _prep_eckart_data(ref, coords, masses, in_paf=False, sel=None):
 
-planar_ref_tolerance=1e-6
-def _eckart_embedding(ref, coords,
-                     masses=None,
-                     sel=None,
-                     in_paf=False,
-                     planar_ref_tolerance=None,
-                     proper_rotation=False
-                     ):
-    """
-    Generates the Eckart rotation that will align ref and coords, assuming initially that `ref` and `coords` are
-    in the principle axis frame
-
-    :param masses:
-    :type masses:
-    :param ref:
-    :type ref:
-    :param coords:
-    :type coords: np.ndarray
-    :return:
-    :rtype:
-    """
     if masses is None:
         masses = np.ones(coords.shape[-2])
 
     if coords.ndim == 2:
         coords = np.broadcast_to(coords, (1,) + coords.shape)
-
-    if planar_ref_tolerance is None:
-        planar_ref_tolerance = planar_ref_tolerance
 
     if not in_paf:
         coords, com, pax_axes = principle_axis_embedded_coords(coords, masses)
@@ -488,75 +468,232 @@ def _eckart_embedding(ref, coords,
             (n_sys,) + ref_com.shape[1:]
         )
 
+    return (ref, ref_com, ref_axes), (coords, com, pax_axes), masses, (og_ref, og_coords)
+
+def _eckart_embedding(ref, coords,
+                      masses=None,
+                      sel=None,
+                      in_paf=False,
+                      planar_ref_tolerance=1e-6,
+                      proper_rotation=False,
+                      permutable_groups=None,
+                      transform_coordinates=True
+                      ):
+    """
+    Generates the Eckart rotation that will align ref and coords, assuming initially that `ref` and `coords` are
+    in the principle axis frame
+
+    :param masses:
+    :type masses:
+    :param ref:
+    :type ref:
+    :param coords:
+    :type coords: np.ndarray
+    :return:
+    :rtype:
+    """
+
+    coords = np.asanyarray(coords)
+    og_og_coords = coords
+    ref = np.asanyarray(ref)
+    og_og_ref = ref
+
+    (ref, ref_com, ref_axes), (coords, com, pax_axes), masses, (og_ref, og_coords) = _prep_eckart_data(
+        ref, coords, masses,
+        sel=sel, in_paf=in_paf
+    )
+
     # needs to be updated for the multiple reference case?
     # TODO: make sure that we broadcast this correctly to check if all or
     #       none of the reference structures are planar
     planar_ref = np.allclose(ref[0][:, 2], 0., atol=planar_ref_tolerance)
 
+    if permutable_groups is not None:
+        if sel is not None:
+            reindexing = {a:i for i,a in enumerate(sel)}
+            permutable_groups = [
+                [reindexing[a] for a in g if a in reindexing]
+                for g in permutable_groups
+            ]
+            permutable_groups = [g for g in permutable_groups if len(g) > 1]
+        rem_atoms = np.delete(np.arange(len(masses)), np.concatenate(permutable_groups))
+        permutable_groups = list(permutable_groups) + rem_atoms[:, np.newaxis].tolist()
     if not planar_ref:
         # generate pair-wise product matrix
-        A = np.tensordot(
-            masses / np.sum(masses),
-            ref[:, :, :, np.newaxis] * coords[:, :, np.newaxis, :],
-            axes=[0, 1]
-        )
+        if permutable_groups is None:
+            A = np.tensordot(
+                masses / np.sum(masses),
+                ref[:, :, :, np.newaxis] * coords[:, :, np.newaxis, :],
+                axes=[0, 1]
+            )
+        else:
+            mw_scaling = np.expand_dims(np.sqrt(masses) / np.sum(masses), [0, 2])
+            mw_ref = ref * mw_scaling
+            mw_coords = coords * mw_scaling
+            A = sum(
+                np.sum(
+                    mw_ref[:, g, :, np.newaxis],
+                    mw_coords[:, g, np.newaxis, :],
+                    axis=1
+                ) for g in permutable_groups
+            )
         # take SVD of this
         U, S, V = np.linalg.svd(A)
         rot = np.matmul(U, V)
+        if proper_rotation:
+            dets = np.linalg.det(rot)
+            inversions = np.where(dets < 0)
+            V[inversions, :, 2] *= -1
+            rot = np.matmul(U, V)
+
     else:
         # generate pair-wise product matrix but only in 2D
-        F = ref[:, :, :2, np.newaxis] * coords[:, :, np.newaxis, :2]
-        A = np.tensordot(masses / np.sum(masses), F, axes=[0, 1])
+        if permutable_groups is None:
+            F = ref[:, :, :2, np.newaxis] * coords[:, :, np.newaxis, :2]
+            A = np.tensordot(masses / np.sum(masses), F, axes=[0, 1])
+        else:
+            mw_scaling = np.expand_dims(np.sqrt(masses) / np.sum(masses), [0, 2])
+            mw_ref = ref * mw_scaling
+            mw_coords = coords * mw_scaling
+            A = sum(
+                np.sum(
+                    mw_ref[:, g, :2, np.newaxis],
+                    mw_coords[:, g, np.newaxis, :2],
+                    axis=1
+                ) for g in permutable_groups
+            )
+
         U, S, V = np.linalg.svd(A)
+        base_rot = np.matmul(U, V)
+        if proper_rotation:
+            dets = np.linalg.det(base_rot)
+            inversions = np.where(dets < 0)
+            V[inversions, :, 1] *= -1
+            base_rot = np.matmul(U, V)
+
         rot = np.broadcast_to(np.eye(3, dtype=float), (len(coords), 3, 3)).copy()
-        rot[..., :2, :2] = np.matmul(U, V)
+        rot[..., :2, :2] = base_rot
 
-    if proper_rotation:
-        a = rot[..., :, 0]
-        b = rot[..., :, 1]
-        c = vec_ops.vec_crosses(a, b, normalize=True)  # force right-handedness because we can
-        rot[..., :, 2] = c  # ensure we have true rotation matrices
-        dets = np.linalg.det(rot)
-        rot[..., :, 2] /= dets[..., np.newaxis]  # ensure we have true rotation matrices
+    if transform_coordinates:
+        # crd is in _its_ principle axis frame, so now we transform it using ek_rot
+        ek_rot = np.swapaxes(rot, -2, -1)
+        coords = og_coords @ ek_rot
+        # now we rotate this back to the reference frame
+        coords = coords @ np.swapaxes(ref_axes if ref_axes.ndim > 2 else ref_axes[np.newaxis], -2, -1)
+        # and then shift so the COM doesn't change
+        coords = coords + (ref_com if ref_com.ndim > 1 else ref_com[np.newaxis, np.newaxis, :])
+    else:
+        coords = None
 
-    # dets = np.linalg.det(rot)
-    # raise ValueError(dets)
-
-    return rot, (og_ref, ref_com, ref_axes), (og_coords, com, pax_axes)
+    base_coord_shape = og_og_coords.shape[:-2]
+    coords = coords.reshape(base_coord_shape + coords.shape[-2:]),
+    og_coords = og_coords.reshape(base_coord_shape + og_coords.shape[-2:])
+    com = com.reshape(base_coord_shape + com.shape[-1:])
+    pax_axes = pax_axes.reshape(base_coord_shape + pax_axes.shape[-2:])
+    rot = rot.reshape(base_coord_shape + rot.shape[-2:])
+    base_ref_shape = og_og_ref.shape[:-2]
+    og_ref = og_ref.reshape(base_ref_shape + og_ref.shape[-2:])
+    ref_com = ref_com.reshape(base_ref_shape + ref_com.shape[-1:])
+    ref_axes = ref_axes.reshape(base_ref_shape + ref_axes.shape[-2:])
+    return EckartData(
+        rot,
+        coords,
+        EmbeddingData(og_ref, ref_com, ref_axes),
+        EmbeddingData(og_coords, com, pax_axes)
+    )
 
 def eckart_embedding(ref, coords,
                      masses=None,
                      sel=None,
                      in_paf=False,
-                     planar_ref_tolerance=None,
+                     planar_ref_tolerance=1e-6,
                      proper_rotation=False,
-                     permutable_groups=None):
-    if permutable_groups is None:
-        return _eckart_embedding(
-            ref, coords,
-            masses=masses,
-            sel=sel,
-            in_paf=in_paf,
-            planar_ref_tolerance=planar_ref_tolerance,
-            proper_rotation=proper_rotation
-        )
-    else:
-        if misc.is_numeric(permutable_groups[0]):
-            permutable_groups = permutable_groups[0]
-
-        if masses is None:
-            masses = np.ones(coords.shape[-2])
-        masses = np.asanyarray(masses)
-
-        # permutes solely based on the first element in coords
-        perm = np.arange(coords.shape[-2])
-        for g in permutable_groups:
-            rotation_angles = []
-            r = ref[..., g, :]
-            m = masses[g,]
-            for p in itertools.permutations(g):
-                c = coords[..., g, :]
-                rot = _eckart_embedding(r, c, masses=m, in_paf=False)
-                angle,axis = tf_mats.extract_rotation_angle_axis(rot)
-
+                     permutable_groups=None,
+                     transform_coordinates=True):
+    # if permutable_groups is None:
+    return _eckart_embedding(
+        ref, coords,
+        masses=masses,
+        sel=sel,
+        in_paf=in_paf,
+        planar_ref_tolerance=planar_ref_tolerance,
+        proper_rotation=proper_rotation,
+        permutable_groups=permutable_groups,
+        transform_coordinates=transform_coordinates
+    )
 rmsd_minimizing_transformation = eckart_embedding
+
+def eckart_permutation(
+        ref, coords,
+        masses=None,
+        sel=None,
+        in_paf=False,
+        prealign=False,
+        planar_ref_tolerance=1e-6,
+        proper_rotation=False,
+        permutable_groups=None
+):
+
+    ref = np.asanyarray(ref)
+    og_og_ref = ref
+    coords = np.asanyarray(coords)
+    og_og_coords = coords
+    if prealign:
+        embedding_data = eckart_embedding(ref, coords,
+                                          masses=masses,
+                                          sel=sel,
+                                          in_paf=in_paf,
+                                          planar_ref_tolerance=planar_ref_tolerance,
+                                          proper_rotation=proper_rotation,
+                                          permutable_groups=permutable_groups)
+        # ref = embedding_data.reference_data.coords
+        coords = embedding_data.coordinates
+
+    (ref, ref_com, ref_axes), (coords, com, pax_axes), masses, (og_ref, og_coords) = _prep_eckart_data(
+        ref, coords, masses,
+        sel=sel, in_paf=True
+    )
+
+    mw_scaling = np.expand_dims(np.sqrt(masses) / np.sum(masses), [0, 2])
+    mw_ref = ref * mw_scaling
+    mw_coords = coords * mw_scaling
+
+    if permutable_groups is not None:
+        if sel is not None:
+            reindexing = {a: i for i, a in enumerate(sel)}
+            permutable_groups = [
+                [reindexing[a] for a in g if a in reindexing]
+                for g in permutable_groups
+            ]
+            permutable_groups = [g for g in permutable_groups if len(g) > 1]
+        rem_atoms = np.delete(np.arange(len(masses)), np.concatenate(permutable_groups))
+        permutable_groups = list(permutable_groups) + rem_atoms[:, np.newaxis].tolist()
+    else:
+        permutable_groups = [np.arange(mw_ref.shape[-2])]
+
+    base_perm = np.repeat(np.arange(og_ref.shape[-2])[np.newaxis], ref.shape[0], axis=0)
+    if sel is not None:
+        perm = base_perm[:, sel]
+    else:
+        perm = base_perm
+    base_shape = ref.shape[:-2]
+    for p in permutable_groups:
+        p = np.asanyarray(p)
+        n = len(p)
+        dists = np.zeros(base_shape + (n, n))
+        rows, cols = np.triu_indices(n, k=0)
+        dist_triu = np.linalg.norm(
+            mw_coords[..., p[rows], :] - mw_ref[..., p[cols], :],
+            axis=-1
+        )
+        dists[..., rows, cols] = dist_triu
+        dists[..., cols, rows] = dist_triu
+
+        for k,cost in enumerate(dists):
+            _, sub_perm = opt.linear_sum_assignment(cost)
+            perm[k][p] = p[sub_perm]
+    if sel is not None:
+        base_perm[:, sel] = perm
+
+    targ_shape = og_og_coords.shape[:-2]
+    return base_perm.reshape(targ_shape + (-1,))

@@ -15,8 +15,9 @@ __all__ = [
 __reload_hook__ = ['.TransformationFunction', "...Numputils"]
 
 class AffineTransform(TransformationFunction):
-    """A simple AffineTranform implementation of the TransformationFunction abstract base class
-
+    #TODO: add support for nonlinear transformations by including a nonlinear expansion contribution
+    """
+    A simple AffineTranform implementation of the TransformationFunction abstract base class
     """
 
     def __init__(self, tmat, shift=None):
