@@ -644,7 +644,9 @@ class IncrementalCartesianCoordinateInterpolation:
                  *,
                  coordinate_system,
                  max_disp_step=.5,
-                 max_refinements=1
+                 max_refinements=20,
+                 reembed=False,
+                 embedding_options=None
                  ):
         self.abcissae = list(abcissae)
         self.coords = self.prep_cartesians(coords)
@@ -654,6 +656,8 @@ class IncrementalCartesianCoordinateInterpolation:
         ]
         self.max_disp_step = max_disp_step
         self.max_refinements = max_refinements
+        self.reembed=reembed
+        self.embedding_options={} if embedding_options is None else embedding_options
 
     @classmethod
     def wrap_convert(cls, system):
@@ -675,9 +679,13 @@ class IncrementalCartesianCoordinateInterpolation:
                           init_abc, final_abc,
                           init_coords, final_coords,
                           init_internals, final_internals,
-                          max_refinements=None, max_disp=.5
+                          max_refinements=None, max_disp=.5,
+                          reembed=False, embedding_options=None
                           ):
         from McUtils.Coordinerds import CoordinateSet
+
+        if embedding_options is None:
+            embedding_options = {}
 
         # d = CoordinateSet(self.internals[start] + disp, self.internals[start].system)
         # d.convert(self.coords[start].system)
@@ -709,11 +717,18 @@ class IncrementalCartesianCoordinateInterpolation:
             pct = pct * (1 - scaling) / (1 - pct * scaling) # make sure we end up at the same spot
             init_abc = new_abc
             step = new_step
-            d[:, :] = 0
             target_internals = init_internals + d
             new_disp = CoordinateSet(target_internals, init_internals.system)
             # new_disp.converter_options = init_internals.system.converter_options
-            init_coords = new_disp.convert(init_coords.system)
+            new_carts = new_disp.convert(init_coords.system)
+            if reembed:
+                emb = nput.eckart_embedding(
+                    init_coords,
+                    new_carts,
+                    **embedding_options
+                )
+                new_carts = emb.coordinates
+            init_coords = new_carts
             init_internals = converter(init_coords)
             new_abcissae.append(init_abc)
             new_coords.append(init_coords)
@@ -726,7 +741,15 @@ class IncrementalCartesianCoordinateInterpolation:
             # print("...", n_ref, max_disp, d)
 
         target_internals = CoordinateSet(init_internals + d, init_internals.system)
-        return target_internals.convert(init_coords.system), (new_abcissae, new_coords, new_internals)
+        new_carts = target_internals.convert(init_coords.system)
+        if reembed:
+            emb = nput.eckart_embedding(
+                init_coords,
+                new_carts,
+                **embedding_options
+            )
+            new_carts = emb.coordinates
+        return new_carts, (new_abcissae, new_coords, new_internals)
 
     def prep_cartesians(self, coords):
         from ..Coordinerds import CoordinateSet, CartesianCoordinates3D

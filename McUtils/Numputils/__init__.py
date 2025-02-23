@@ -26,3 +26,5 @@ from .CoordinateFrames import *; from .CoordinateFrames import __all__ as _all
 __all__ += _all
 from .Optimization import *; from .Optimization import __all__ as _all
 __all__ += _all
+from .GeometricTransformations import *; from .GeometricTransformations import __all__ as _all
+__all__ += _all

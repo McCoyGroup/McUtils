@@ -389,7 +389,7 @@ def translation_rotation_invariant_transformation(
     return tf, inv
 
 EmbeddingData = collections.namedtuple("PrincipleAxisData", ['coords', 'com', 'axes'])
-EckartData = collections.namedtuple('EckartData', ['rotations', 'reference_data', 'coord_data'])
+EckartData = collections.namedtuple('EckartData', ['rotations', 'coordinates', 'reference_data', 'coord_data'])
 def principle_axis_embedded_coords(coords, masses=None):
     """
     Returns coordinate embedded in the principle axis frame
@@ -476,7 +476,8 @@ def _eckart_embedding(ref, coords,
                       in_paf=False,
                       planar_ref_tolerance=1e-6,
                       proper_rotation=False,
-                      permutable_groups=None
+                      permutable_groups=None,
+                      transform_coordinates=True
                       ):
     """
     Generates the Eckart rotation that will align ref and coords, assuming initially that `ref` and `coords` are
@@ -573,7 +574,19 @@ def _eckart_embedding(ref, coords,
         rot = np.broadcast_to(np.eye(3, dtype=float), (len(coords), 3, 3)).copy()
         rot[..., :2, :2] = base_rot
 
+    if transform_coordinates:
+        # crd is in _its_ principle axis frame, so now we transform it using ek_rot
+        ek_rot = np.swapaxes(rot, -2, -1)
+        coords = og_coords @ ek_rot
+        # now we rotate this back to the reference frame
+        coords = coords @ np.swapaxes(ref_axes if ref_axes.ndim > 2 else ref_axes[np.newaxis], -2, -1)
+        # and then shift so the COM doesn't change
+        coords = coords + (ref_com if ref_com.ndim > 1 else ref_com[np.newaxis, np.newaxis, :])
+    else:
+        coords = None
+
     base_coord_shape = og_og_coords.shape[:-2]
+    coords = coords.reshape(base_coord_shape + coords.shape[-2:]),
     og_coords = og_coords.reshape(base_coord_shape + og_coords.shape[-2:])
     com = com.reshape(base_coord_shape + com.shape[-1:])
     pax_axes = pax_axes.reshape(base_coord_shape + pax_axes.shape[-2:])
@@ -584,6 +597,7 @@ def _eckart_embedding(ref, coords,
     ref_axes = ref_axes.reshape(base_ref_shape + ref_axes.shape[-2:])
     return EckartData(
         rot,
+        coords,
         EmbeddingData(og_ref, ref_com, ref_axes),
         EmbeddingData(og_coords, com, pax_axes)
     )
@@ -594,7 +608,8 @@ def eckart_embedding(ref, coords,
                      in_paf=False,
                      planar_ref_tolerance=1e-6,
                      proper_rotation=False,
-                     permutable_groups=None):
+                     permutable_groups=None,
+                     transform_coordinates=True):
     # if permutable_groups is None:
     return _eckart_embedding(
         ref, coords,
@@ -603,49 +618,9 @@ def eckart_embedding(ref, coords,
         in_paf=in_paf,
         planar_ref_tolerance=planar_ref_tolerance,
         proper_rotation=proper_rotation,
-        permutable_groups=permutable_groups
+        permutable_groups=permutable_groups,
+        transform_coordinates=transform_coordinates
     )
-    # else:
-    #     if misc.is_numeric(permutable_groups[0]):
-    #         permutable_groups = permutable_groups[0]
-    #
-    #     if masses is None:
-    #         masses = np.ones(coords.shape[-2])
-    #     masses = np.asanyarray(masses)
-    #
-    #     if sel is not None:
-    #         ref = ref[..., sel, :]
-    #         coords = coords[..., sel, :]
-    #         masses = masses[sel,]
-    #
-    #     # permutes solely based on the first element in coords
-    #     smol = coords.ndim == 2
-    #     if smol:
-    #         coords = coords[np.newaxis]
-    #     test_coords = coords.reshape((-1,) + coords.shape[-2:])[:1]
-    #     full_perm = np.arange(len(masses))
-    #     for g in permutable_groups:
-    #         min_angle = 10
-    #         min_perm = g
-    #         r = ref[..., g, :]
-    #         m = masses[g,]
-    #         for p in itertools.permutations(g):
-    #             c = test_coords[..., p, :]
-    #             rot = _eckart_embedding(r, c, masses=m, in_paf=False)
-    #             angle, axis = tf_mats.extract_rotation_angle_axis(rot)
-    #             if angle < min_angle:
-    #                 min_perm = p
-    #                 min_angle = angle
-    #         full_perm[g] = min_perm
-    #
-    #     return full_perm, _eckart_embedding(
-    #         ref, coords,
-    #         masses=masses,
-    #         # sel=sel,
-    #         in_paf=in_paf,
-    #         planar_ref_tolerance=planar_ref_tolerance,
-    #         proper_rotation=proper_rotation
-    #     )
 rmsd_minimizing_transformation = eckart_embedding
 
 def eckart_permutation(
@@ -671,8 +646,8 @@ def eckart_permutation(
                                           planar_ref_tolerance=planar_ref_tolerance,
                                           proper_rotation=proper_rotation,
                                           permutable_groups=permutable_groups)
-        ref = embedding_data.reference_data.coords
-        coords = embedding_data.coord_data.coords
+        # ref = embedding_data.reference_data.coords
+        coords = embedding_data.coordinates
 
     (ref, ref_com, ref_axes), (coords, com, pax_axes), masses, (og_ref, og_coords) = _prep_eckart_data(
         ref, coords, masses,
@@ -722,5 +697,3 @@ def eckart_permutation(
 
     targ_shape = og_og_coords.shape[:-2]
     return base_perm.reshape(targ_shape + (-1,))
-
-
