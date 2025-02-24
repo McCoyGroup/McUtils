@@ -1753,26 +1753,24 @@ class _inverse_coordinate_conversion_caller:
 DEFAULT_SOLVER_ORDER = 1
 def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              masses=None,
-                             remove_translation_rotation=False,
+                             remove_translation_rotation=True,
                              order=None,
                              solver_order=None,
-                             tol=1e-3, max_iterations=50,
-                             max_displacement=.3,
+                             tol=1e-3, max_iterations=10,
+                             max_displacement=1.0,
                              # method='quasi-newton',
                              method='gradient-descent',
                              optimizer_parameters=None,
                              line_search=False,
-                             damping_parameter=None,
+                             damping_parameter=.95,
                              damping_exponent=None,
-                             restart_interval=10,
-                             raise_on_failure=True,
+                             restart_interval=50,
+                             raise_on_failure=False,
                              return_internals=True,
                              return_expansions=True,
                              base_transformation=None,
                              reference_internals=None,
                              angle_ordering='jik'):
-
-    from .CoordinateFrames import remove_translation_rotations
     from . import Optimization as opt
 
     if method == 'quasi-newton':
@@ -1811,7 +1809,6 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     init_coords = coords
     target_internals = target_internals.reshape((-1,) + target_internals.shape[-1:])
 
-    remove_translation_rotation = False
     caller = _inverse_coordinate_conversion_caller(
         conversion,
         target_internals,
@@ -1833,7 +1830,8 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         ),
         tol=tol,
         max_displacement=max_displacement,
-        max_iterations=max_iterations
+        max_iterations=max_iterations,
+        prevent_oscillations=True
         # termination_function=caller.terminate
     )
 
@@ -1852,6 +1850,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
             f"\ntarget:{target_internals}\ninitial:{init_internals}"
             f"\nresidual:{target_internals - opt_internals[0]}"
             f"\n1-norm error: {errors}"
+            f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
         )
     if return_expansions:
         expansion = opt_internals[1:]

@@ -137,31 +137,41 @@ def iterative_step_minimize_step(step_predictor,
         step = step[rem,]
         norms = np.linalg.norm(step, axis=1)
         # norms = norms[rem,]
-        v = np.linalg.norm(guess, axis=-1)
+        v = np.linalg.norm(guess[rem,], axis=-1)
         r = np.sqrt(norms[rem,] ** 2 + v ** 2)
-        step = guess * (1/r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+        step = guess[rem,] * (1/r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
         if generate_rotation:
             raise NotImplementedError(">3D rotations are complicated")
             axis = vec_ops.vec_crosses(g, guess[mask,])[0]
             ang = np.arctan2(norms / r, v / r)
             rot = tfs.rotation_matrix(axis, ang)
             rotations = rot @ rotations
+    else:
+        step = step[rem,]
 
     if prev_step is not None:
         prev_step = prev_step[mask,]
         cur_norms = np.linalg.norm(step, axis=1)
         pre_norms = np.linalg.norm(prev_step, axis=1)
-        overlaps = (step[:, np.newaxis, :] @ prev_step[:, :, np.newaxis] ) / (
-            cur_norms * pre_norms
-        )
-        if -1.02 < overlaps < -.98:
-            step = step / 2
+        overlaps = np.reshape(
+            (step[:, np.newaxis, :] @ prev_step[:, :, np.newaxis]) / (cur_norms * pre_norms),
+            -1)
+        osc = np.where(
+            np.logical_and(-1.02 < overlaps, overlaps < -.98)
+            # np.logical_or(
+            #     np.logical_and(-1.02 < overlaps, overlaps < -.98),
+            #     np.logical_and(1.02 > overlaps, overlaps > .98, np.abs(cur_norms - pre_norms) < 1e-3)
+            # )
+        )[0]
+
+        if len(osc) > 0:
+            step[osc,] = step[osc,] / 2
             if unitary:
-                norms = np.linalg.norm(step, axis=1)
+                norms = np.linalg.norm(step[osc,], axis=1)
                 # norms = norms[rem,]
-                v = np.linalg.norm(guess, axis=-1)
-                r = np.sqrt(norms[rem,] ** 2 + v ** 2)
-                step = guess * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+                v = np.linalg.norm(guess[rem,], axis=-1)
+                r = np.sqrt(norms ** 2 + v ** 2)
+                step = guess[rem,] * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
 
     return step, errs, mask, done
 
@@ -457,13 +467,13 @@ class Damper:
     def __init__(self, damping_parameter=None, damping_exponent=None, restart_interval=10):
         self.n = 0
         self.u = damping_parameter
-        self.exp = damping_exponent
+        self.exp = 1.0 if damping_exponent is None else damping_exponent
         self.restart = restart_interval
 
     def get_damping_factor(self):
         u = self.u
         if u is not None:
-            if self.exp is not None:
+            if self.exp > 0:
                 u = np.power(u, self.n*self.exp)
                 self.n = (self.n + 1) % self.restart
         return u
@@ -1609,10 +1619,15 @@ class ChainMinimizingStepFinder:
         @functools.wraps(jac)
         def wrapped_jac(guess, mask):
             j, prev, next = self._mask_data
-            return self.adjust_jacobian(
+            base_jac = self.adjust_jacobian(
                 jac(guess[:, j], mask),
                 guess, mask, j, prev, next
-            ) + self.image_pairwise_contribution(guess, mask, j, prev, next, order=1)
+            )
+            new_jac = self.image_pairwise_contribution(guess, mask, j, prev, next, order=1)
+            # print(base_jac)
+            # print(new_jac)
+            # print("-"*20)
+            return base_jac + new_jac
         return wrapped_jac
 
     def wrap_hess(self, hess):
@@ -1638,60 +1653,47 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
                  hessian=None,
                  spring_constants=.1,
                  distance_function=None,
+                 step_finder='gradient-descent',
                  **opts
                  ):
         self.image_potential = func
-        super().__init__(func, jacobian, hessian=hessian, **opts)
+        super().__init__(func, jacobian, hessian=hessian, step_finder=step_finder, **opts)
         self.spring_constants = spring_constants
         self._spring_constants = None
         self.distance_function = distance_function
+        self._last_tangent = None
 
     def get_dist(self, p1, p2):
-        return np.linalg.norm(p1 - p2)
+        return np.linalg.norm(p1 - p2, axis=-1)
 
-    def get_spring_params(self, guess, j, prev, next):
-        if prev is not None:
-            prev_dist = self.get_dist(guess[:, j], guess[:, prev])
-            if misc.is_numeric(self.spring_constants):
-                prev_const = self.spring_constants
-            else:
-                prev_const = self.spring_constants[prev]
-        else:
-            prev_dist = None
-            prev_const = None
-        if next is not None:
-            next_dist = self.get_dist(guess[:, j], guess[:, next])
-            if misc.is_numeric(self.spring_constants):
-                next_const = self.spring_constants
-            else:
-                next_const = self.spring_constants[j]
-        else:
-            next_dist = None
-            next_const = None
-        return (prev_dist, prev_const), (next_dist, next_const)
-
-    def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
-        if prev is None or next is None: return jac
+    def get_tangent(self, guess, mask, cur, prev, next):
 
         cur_geom, prev_geom, next_geom = guess[:, cur], guess[:, prev], guess[:, next]
 
-        # prev_dist = self.get_dist(cur_geom, prev_geom)
-        # next_dist = self.get_dist(cur_geom, next_geom)
-
-        # dist = next_dist - prev_dist
-        # if misc.is_numeric(self.spring_constants):
-        #     const = self.spring_constants
-        # else:
-        #     const = self.spring_constants[cur]
-
         prev_energy = self.image_potential(prev_geom, mask)
+        cur_energy = self.image_potential(cur_geom, mask)
         next_energy = self.image_potential(next_geom, mask)
-        if next_energy > prev_energy:
+        if next_energy > cur_energy and cur_energy > prev_energy:
             tangent = next_geom - cur_geom
-        else:
+        elif next_energy <= cur_energy and cur_energy <= prev_energy:
             tangent = cur_geom - prev_geom
+        else:
+            dnext = abs(next_energy - cur_energy)
+            dprev = abs(cur_energy - prev_energy)
+            vmax = max(dnext, dprev) / (dnext + dprev)
+            vmin = min(dnext, dprev) / (dnext + dprev)
+            if next_energy > prev_energy:
+                tangent = (next_geom - cur_geom) * vmax + (cur_geom - prev_geom) * vmin
+            else:
+                tangent = (next_geom - cur_geom) * vmin + (cur_geom - prev_geom) * vmax
 
-        return vec_ops.project_out(jac, tangent[:, :, np.newaxis])
+        return vec_ops.vec_normalize(tangent)
+
+    def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
+        if prev is None or next is None: return jac
+        self._last_tangent = self.get_tangent(guess, mask, cur, prev, next)
+
+        return vec_ops.project_out(jac, self._last_tangent[:, :, np.newaxis], orthornomal=True)
 
     def image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
         if order > 2: return 0
@@ -1704,7 +1706,7 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
         prev_dist = self.get_dist(cur_geom, prev_geom)
         next_dist = self.get_dist(cur_geom, next_geom)
 
-        dist = next_dist - prev_dist
+        dist = prev_dist - next_dist
         if misc.is_numeric(self.spring_constants):
             const = self.spring_constants
         else:
@@ -1714,13 +1716,8 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
         if order == 0:
             contribution = (const/2) * (dist**2)
         elif order == 1:
-            prev_energy = self.image_potential(prev_geom, mask)
-            next_energy = self.image_potential(next_geom, mask)
-            if next_energy > prev_energy:
-                tangent = next_geom - cur_geom
-            else:
-                tangent = cur_geom - prev_geom
-            contribution = const * dist[..., np.newaxis] * vec_ops.vec_normalize(tangent)
+            tangent = self._last_tangent
+            contribution = const * dist[..., np.newaxis] * tangent
         elif order == 2:
             contribution = const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
         return contribution
