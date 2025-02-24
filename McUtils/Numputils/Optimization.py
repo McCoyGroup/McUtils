@@ -38,7 +38,7 @@ def get_step_finder(spec,
                     jacobian=None,
                     hessian=None,
                     **extra_init):
-    if not isinstance(spec, dict) and (
+    if not (isinstance(spec, dict) or hasattr(spec, 'supports_hessian')) and (
             jacobian is not None
             or method is not None
     ):
@@ -240,8 +240,6 @@ def iterative_step_minimize(
                 oscillation_damping_factor /= 2
             else:
                 oscillation_damping_factor = np.min([oscillation_damping_factor * 1.2, 1.0])
-
-            print("~~~~!!!", oscillation_damping_factor, "!!!~~~~")
             step = step * oscillation_damping_factor
 
         errs[mask,] = step_errs
@@ -287,8 +285,22 @@ def iterative_chain_minimize(
         max_displacement_norm=None,
         tol=1e-8, max_iterations=100,
         use_max_for_error=True,
-        periodic=False
+        periodic=False,
+        reembed=None,
+        embedding_options=None
 ):
+    guesses = np.array(chain_guesses, dtype=dtype)
+    base_shape = guesses.shape[:-2]
+    guesses = guesses.reshape((-1,) + guesses.shape[-2:])
+    if reembed is None:
+        reembed = embedding_options is not None
+    if embedding_options is None:
+        embedding_options = {}
+
+    try:
+        iter(step_predictors)
+    except TypeError:
+        step_predictors = [step_predictors] * guesses.shape[-2]
     step_predictors = [
         get_step_finder(predictor,
                         method=default_chain_step_finder if method is None else method,
@@ -296,10 +308,6 @@ def iterative_chain_minimize(
                         hessian=hessian)
         for predictor in step_predictors
     ]
-
-    guesses = np.array(chain_guesses, dtype=dtype)
-    base_shape = guesses.shape[:-2]
-    guesses = guesses.reshape((-1,) + guesses.shape[-2:])
     its = np.zeros(guesses.shape[0], dtype=int)
     errs = np.zeros(guesses.shape[0], dtype=float)
     submasks = np.full(guesses.shape[:2], True, dtype=bool)
@@ -321,8 +329,7 @@ def iterative_chain_minimize(
         prev_step = np.zeros_like(guesses)
     else:
         prev_step = None
-
-    nimg = guesses.shape[2]
+    nimg = guesses.shape[-2]
     n = nimg - 1
 
     if reparametrizer is not None:
@@ -353,34 +360,54 @@ def iterative_chain_minimize(
 
 
             step_predictor = step_predictors[j]
+            ps = prev_step[submask,][:, j] if prev_step is not None else prev_step
             step, step_errs, new_mask, done = iterative_step_minimize_step(
                 step_predictor, guesses[submask],
                 (submask, (j, prev_im, next_im)), tol,
                 orthogonal_directions, orthogonal_projection_generator,
                 region_constraints, unitary, max_displacement, max_displacement_norm,
-                generate_rotation, prev_step[submask,][:, j], use_max_for_error, termination_function
+                generate_rotation, ps,
+                use_max_for_error, termination_function
             )
             if prevent_oscillations:
-                prev_step[new_mask,][:, j] = step
+               prev_step[new_mask, j] = step
 
             # set which chains are done or not
             done = submask[done]
-            submasks[done,][:, j] = False
-            submasks[new_mask,][:, j] = True
+            submasks[done, j] = False
+            submasks[new_mask, j] = True
             if j == 0:
-                submasks[new_mask,][:, j+1] = True
+                submasks[new_mask, j+1] = True
                 if periodic:
-                    submasks[new_mask,][:, n] = True
+                    submasks[new_mask, n] = True
             elif j == n:
-                submasks[new_mask,][:, j-1] = True
+                submasks[new_mask, j-1] = True
                 if periodic:
-                    submasks[new_mask,][:, 0] = True
+                    submasks[new_mask, 0] = True
             else:
-                submasks[new_mask,][:, j+1] = True
-                submasks[new_mask,][:, j-1] = True
+                submasks[new_mask, j+1] = True
+                submasks[new_mask, j-1] = True
 
             errs[mask,] += step_errs
-            guesses[submask][:, j] += step
+            guesses[submask, j] += step
+            if reembed: # implies Cartesian
+                from .CoordinateFrames import eckart_embedding
+
+                if j == 0:
+                    if periodic:
+                        ref = n
+                    else:
+                        ref = 1
+                else:
+                    ref = j-1
+                ref = guesses[submask, ref]
+                coords = guesses[submask, j]
+                emb = eckart_embedding(
+                    ref.reshape(ref.shape[0], -1, 3),
+                    coords.reshape(coords.shape[0], -1, 3),
+                    **embedding_options
+                )
+                guesses[submask, j] = emb.coordinates.reshape(coords.shape[0], -1)
 
         if reparametrizer is not None:
             # for methods that want to satisfy some density function on
@@ -414,7 +441,7 @@ def iterative_chain_minimize(
         converged = False
         its[mask,] = max_iterations
 
-    guesses = guesses.reshape(base_shape + (guesses.shape[-2:],))
+    guesses = guesses.reshape(base_shape + guesses.shape[-2:])
     errs = errs.reshape(base_shape)
     its = its.reshape(base_shape)
 
@@ -1561,22 +1588,31 @@ class ChainMinimizingStepFinder:
         })
         self._mask_data = None
 
+    def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
+        return jac
+
+    def adjust_hessian(self, hess, guess, mask, cur, prev, next):
+        return hess
+
     @abc.abstractmethod
-    def image_pairwise_contribution(self, guess, cur, prev, next, order=0):
+    def image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
         raise NotImplementedError("abstract")
 
     def wrap_func(self, func):
         @functools.wraps(func)
         def wrapped_func(guess, mask):
             j, prev, next = self._mask_data
-            return func(guess[:, j], mask) + self.image_pairwise_contribution(guess, j, prev, next, order=0)
+            return func(guess[:, j], mask) + self.image_pairwise_contribution(guess, mask, j, prev, next, order=0)
         return wrapped_func
 
     def wrap_jac(self, jac):
         @functools.wraps(jac)
         def wrapped_jac(guess, mask):
             j, prev, next = self._mask_data
-            return jac(guess[:, j], mask) + self.image_pairwise_contribution(guess, j, prev, next, order=1)
+            return self.adjust_jacobian(
+                jac(guess[:, j], mask),
+                guess, mask, j, prev, next
+            ) + self.image_pairwise_contribution(guess, mask, j, prev, next, order=1)
         return wrapped_jac
 
     def wrap_hess(self, hess):
@@ -1585,12 +1621,15 @@ class ChainMinimizingStepFinder:
         @functools.wraps(hess)
         def wrapped_hess(guess, mask):
             j, prev, next = self._mask_data
-            return hess(guess[:, j], mask) + self.image_pairwise_contribution(guess, j, prev, next, order=2)
+            return self.adjust_hessian(
+                hess(guess[:, j], mask),
+                guess, mask, j, prev, next
+            ) + self.image_pairwise_contribution(guess, mask, j, prev, next, order=2)
         return wrapped_hess
 
-    def __call__(self, guess, mask):
+    def __call__(self, guess, mask, projector=None):
         mask, self._mask_data = mask
-        return self.step_finder(guess, mask)
+        return self.step_finder(guess, mask, projector=projector)
 
 class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
     def __init__(self,
@@ -1601,6 +1640,7 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
                  distance_function=None,
                  **opts
                  ):
+        self.image_potential = func
         super().__init__(func, jacobian, hessian=hessian, **opts)
         self.spring_constants = spring_constants
         self._spring_constants = None
@@ -1630,26 +1670,59 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
             next_const = None
         return (prev_dist, prev_const), (next_dist, next_const)
 
-    def image_pairwise_contribution(self, guess, cur, prev, next, order=0):
+    def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
+        if prev is None or next is None: return jac
+
+        cur_geom, prev_geom, next_geom = guess[:, cur], guess[:, prev], guess[:, next]
+
+        # prev_dist = self.get_dist(cur_geom, prev_geom)
+        # next_dist = self.get_dist(cur_geom, next_geom)
+
+        # dist = next_dist - prev_dist
+        # if misc.is_numeric(self.spring_constants):
+        #     const = self.spring_constants
+        # else:
+        #     const = self.spring_constants[cur]
+
+        prev_energy = self.image_potential(prev_geom, mask)
+        next_energy = self.image_potential(next_geom, mask)
+        if next_energy > prev_energy:
+            tangent = next_geom - cur_geom
+        else:
+            tangent = cur_geom - prev_geom
+
+        return vec_ops.project_out(jac, tangent[:, :, np.newaxis])
+
+    def image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
         if order > 2: return 0
 
-        (prev_dist, prev_const), (next_dist, next_const) = self.get_spring_params(guess, cur, prev, next)
+        if prev is None or next is None:
+            return 0
+
+        cur_geom, prev_geom, next_geom = guess[:, cur], guess[:, prev], guess[:, next]
+
+        prev_dist = self.get_dist(cur_geom, prev_geom)
+        next_dist = self.get_dist(cur_geom, next_geom)
+
+        dist = next_dist - prev_dist
+        if misc.is_numeric(self.spring_constants):
+            const = self.spring_constants
+        else:
+            const = self.spring_constants[cur]
+
         contribution = 0
         if order == 0:
-            if prev_dist is not None:
-                contribution += (prev_dist ** 2) * prev_const
-            if next_dist is not None:
-                contribution += (next_dist ** 2) * next_const
+            contribution = (const/2) * (dist**2)
         elif order == 1:
-            if prev_dist is not None:
-                contribution += 2 * prev_const * (guess[:, cur] - guess[:, prev])
-            if next_dist is not None:
-                contribution += 2 * next_const * (guess[:, cur] - guess[:, next])
+            prev_energy = self.image_potential(prev_geom, mask)
+            next_energy = self.image_potential(next_geom, mask)
+            if next_energy > prev_energy:
+                tangent = next_geom - cur_geom
+            else:
+                tangent = cur_geom - prev_geom
+            contribution = const * dist[..., np.newaxis] * vec_ops.vec_normalize(tangent)
         elif order == 2:
-            if prev_dist is not None:
-                contribution += 2 * prev_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
-            if next_dist is not None:
-                contribution += 2 * next_const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
+            contribution = const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
         return contribution
 
 class AdjustedChainStepFinder(ChainMinimizingStepFinder):
@@ -1897,15 +1970,3 @@ def displacement_localizing_rotation_generator(mat, col_i, col_j):
     AB_norm = np.sqrt(A ** 2 + B ** 2)
 
     return A / AB_norm, B / AB_norm, A
-
-
-class ImageChainOptimizer:
-    """
-    Represents a chain of images to be optimized in a conjoined manner
-    """
-
-    def __init__(self,
-                 image_coords,
-                 step_finder
-                 ):
-        ...
