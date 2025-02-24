@@ -724,7 +724,7 @@ class IncrementalCartesianCoordinateInterpolation:
             step = new_step
             target_internals = init_internals + d
             new_disp = CoordinateSet(target_internals, init_internals.system)
-            # new_disp.converter_options = init_internals.system.converter_options
+            new_disp.converter_options = init_internals.system.converter_options
             new_carts = new_disp.convert(init_coords.system)
             if reembed:
                 emb = nput.eckart_embedding(
