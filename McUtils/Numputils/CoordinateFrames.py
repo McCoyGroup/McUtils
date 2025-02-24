@@ -242,48 +242,6 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
     com = center_of_mass(coords, masses)
     com = np.expand_dims(com, 1) # ???
     shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[: np.newaxis, :])
-    # if order > 0:
-    #     # could be more efficient but oh well...
-    #     e = np.broadcast_to(nput.levi_cevita3[np.newaxis], (shift_crds.shape[0], 3, 3, 3))
-    #     n = shift_crds.shape[-2]
-    #     shift_crd_deriv = np.broadcast_to(
-    #         np.eye(3*n).reshape(3*n, n, 3)[np.newaxis],
-    #         (shift_crds.shape[0], 3*n, n, 3)
-    #     )
-    #     shift_crd_expansion = [shift_crds]
-    #     R_expansion = nput.tensorops_deriv(
-    #         shift_crd_expansion,
-    #             [-1, -1],
-    #         [e],
-    #             [-1, -2],
-    #         inv_rot_expansion,
-    #         order=order,
-    #         shared=1
-    #     )
-    #     with np.printoptions(linewidth=1e8):
-    #         print()
-    #         # print(R_expansion[0][0])
-    #         print(R_expansion[1][0].reshape(3*n, 3*n, 3)[:, :, 0])
-    #         print(
-    #             np.moveaxis(
-    #                 np.tensordot(
-    #                     np.tensordot(shift_crds[0], e[0], axes=[-1, 1]),
-    #                     inv_rot_expansion[1][0],
-    #                     axes=[1, -1]
-    #                 ),
-    #                 -2,
-    #                 0
-    #             ).reshape(15, 15, 3)[:, :, 0]
-    #         )
-    #     raise Exception(...)
-    #     R_expansion = [
-    #         r.reshape(r.shape[:-3] + (r.shape[-3]*r.shape[-2], r.shape[-1]))
-    #         for r in R_expansion
-    #     ]
-    #     R = R_expansion[0]
-    #     raise Exception(R_expansion[1][0] - np.moveaxis(R_expansion[1][0], 1, 0))
-    #
-    # else:
     cos_rot = td_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
     R = vec_ops.vec_tensordot(
         shift_crds, cos_rot,
@@ -586,7 +544,7 @@ def _eckart_embedding(ref, coords,
         coords = None
 
     base_coord_shape = og_og_coords.shape[:-2]
-    coords = coords.reshape(base_coord_shape + coords.shape[-2:]),
+    coords = coords.reshape(base_coord_shape + coords.shape[-2:])
     og_coords = og_coords.reshape(base_coord_shape + og_coords.shape[-2:])
     com = com.reshape(base_coord_shape + com.shape[-1:])
     pax_axes = pax_axes.reshape(base_coord_shape + pax_axes.shape[-2:])
