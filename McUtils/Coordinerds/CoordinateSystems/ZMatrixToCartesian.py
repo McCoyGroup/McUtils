@@ -25,8 +25,8 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         return ordering, coordlist
 
     def convert_many(self,
-                     coordlist,
-                     ordering=None, origins=None, axes=None, use_rad=True,
+                     coordlist, *,
+                     ordering, origins=None, axes=None, use_rad=True,
                      return_derivs=False,
                      **kw
                      ):
@@ -60,6 +60,8 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         :return:
         :rtype:
         """
+        #TODO: introduce fast derivs back into this coordinate system by extracting "specs" from the ordering
+        #      and then partially inverting
         if return_derivs: raise NotImplementedError("analytic derivatives need maintenance")
 
         # make sure we have the ordering stuff in hand

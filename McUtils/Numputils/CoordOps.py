@@ -1693,7 +1693,6 @@ def _transrot_invariant_inverse(expansion, coords, masses, order):
     # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
     L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
                                                                 mass_weighted=False, strip_embedding=True)
-
     new_tf = td.tensor_reexpand([L_inv], expansion, order)
     inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
     return [
@@ -1708,12 +1707,16 @@ class _inverse_coordinate_conversion_caller:
     def __init__(self, conversion, target_internals,
                  remove_translation_rotation=True,
                  masses=None,
-                 order=1
+                 order=1,
+                 gradient_function=None,
+                 gradient_scaling=None
                  ):
         self.conversion = conversion
         self.target_internals = target_internals
         self.masses = masses
         self.remove_translation_rotation = remove_translation_rotation
+        self.gradient_function = gradient_function
+        self.gradient_scaling = gradient_scaling
         self.last_call = None
         self.caller_order = order
 
@@ -1729,7 +1732,6 @@ class _inverse_coordinate_conversion_caller:
         expansion = self.last_call = self.conversion(coords, order=ord)
         internals, expansion = expansion[0], expansion[1:] # dr/dx
         delta = internals - self.target_internals[mask]
-        # print("!", delta)
 
         if self.remove_translation_rotation: # dx/dr
             inverse_expansion = _transrot_invariant_inverse(expansion, coords, self.masses, ord)
@@ -1748,6 +1750,11 @@ class _inverse_coordinate_conversion_caller:
             for ax in range(n + 1):
                 e = vec_tensordot(e, delta, axes=[1, -1], shared=1)
             nr_change += (1 / math.factorial(n + 1)) * e
+
+        if self.gradient_function is not None:
+            extra_gradient = -self.gradient_scaling * self.gradient_function(coords, mask)
+            nr_change = nr_change + extra_gradient
+
         return nr_change
 
 DEFAULT_SOLVER_ORDER = 1
@@ -1758,6 +1765,8 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              solver_order=None,
                              tol=1e-3, max_iterations=10,
                              max_displacement=1.0,
+                             gradient_function=None,
+                             gradient_scaling=.1,
                              # method='quasi-newton',
                              method='gradient-descent',
                              optimizer_parameters=None,
@@ -1813,7 +1822,9 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         conversion,
         target_internals,
         remove_translation_rotation=remove_translation_rotation,
-        masses=masses
+        masses=masses,
+        gradient_function=gradient_function,
+        gradient_scaling=gradient_scaling
     )
 
     coords, converged, (errors, its) = opt.iterative_step_minimize(
