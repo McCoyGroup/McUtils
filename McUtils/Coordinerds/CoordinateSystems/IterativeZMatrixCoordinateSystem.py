@@ -94,7 +94,7 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
         if not nput.is_numeric(return_derivs):
             return_derivs = max(return_derivs)
 
-        def conv(carts, order=None):
+        def conv(carts, order=None, sys=coords.system):
             from .CoordinateSet import CoordinateSet
             base_shape = carts.shape[:-2]
             carts = CoordinateSet(carts, CartesianCoordinates3D)
@@ -112,11 +112,11 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
                                     axes_labels=axes_labels
                                     )
             derivs = [
-                d.reshape((d.shape[0] * 3,) * (n + 1) + (d.shape[-2] * d.shape[-1],))
+                d.reshape(base_shape + (carts.shape[-2] * 3,) * (n + 1) + (d.shape[-2] * d.shape[-1],))
                 for n, d in enumerate(derivs)
             ]
 
-            ints = coords.reshape(ints.shape[:-2] + (-1,)).view(np.ndarray)
+            ints = ints.reshape(base_shape + (-1,)).view(np.ndarray)
             ints = np.delete(ints, [1, 2, 5], axis=-1)
 
             derivs = [
@@ -124,7 +124,7 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
                 for d in derivs
             ]
 
-            return [ints.reshape(base_shape + ints.shape)] + [d.reshape(base_shape + d.shape) for d in derivs]
+            return [ints] + derivs
         flat_coords = coords.reshape(coords.shape[:-2] + (-1,)).view(np.ndarray)
         flat_coords = np.delete(flat_coords, [1, 2, 5], axis=-1)
         (expansions, errors), _ = nput.inverse_coordinate_solve(conv,

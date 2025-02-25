@@ -614,7 +614,7 @@ def eckart_permutation(
 
     mw_scaling = np.expand_dims(np.sqrt(masses) / np.sum(masses), [0, 2])
     mw_ref = ref * mw_scaling
-    mw_coords = coords * mw_scaling
+    # mw_coords = coords * mw_scaling
 
     if permutable_groups is not None:
         if sel is not None:
@@ -636,12 +636,21 @@ def eckart_permutation(
         perm = base_perm
     base_shape = ref.shape[:-2]
     for p in permutable_groups:
+        sub_data = eckart_embedding(ref, coords,
+                                    masses=masses,
+                                    sel=p,
+                                    in_paf=in_paf,
+                                    planar_ref_tolerance=planar_ref_tolerance,
+                                    proper_rotation=proper_rotation,
+                                    permutable_groups=[p])
+        mw_coords = sub_data.coordinates * mw_scaling
+
         p = np.asanyarray(p)
         n = len(p)
         dists = np.zeros(base_shape + (n, n))
         rows, cols = np.triu_indices(n, k=0)
         dist_triu = np.linalg.norm(
-            mw_coords[..., p[rows], :] - mw_ref[..., p[cols], :],
+            mw_coords[..., rows, :] - mw_ref[..., p[cols], :],
             axis=-1
         )
         dists[..., rows, cols] = dist_triu
