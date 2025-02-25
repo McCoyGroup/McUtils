@@ -1781,7 +1781,20 @@ class _inverse_coordinate_conversion_caller:
             nr_change += (1 / math.factorial(n + 1)) * e
 
         if self.gradient_function is not None:
-            extra_gradient = -self.gradient_scaling * self.gradient_function(coords, mask)
+            if self.fixed_atoms is not None:
+                subcrd = np.delete(coords, self.fixed_atoms, axis=-2).reshape(coords.shape[0], -1)
+                subgrad = self.gradient_function(subcrd, mask)
+                contrib = np.zeros((coords.shape[0], coords.shape[1]*coords.shape[2]), dtype=subgrad.dtype)
+                atom_pos = np.reshape(
+                    (np.array(self.fixed_atoms) * 3)[:, np.newaxis]
+                    + np.arange(3)[np.newaxis],
+                    -1
+                )
+                rem_pos = np.delete(np.arange(contrib.shape[1]), atom_pos)
+                contrib[..., rem_pos] = subgrad
+            else:
+                contrib = self.gradient_function(coords.reshape(coords.shape[0], -1), mask)
+            extra_gradient = -self.gradient_scaling * contrib
             nr_change = nr_change + extra_gradient
 
         return nr_change
