@@ -162,7 +162,7 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
         super().__init__(dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
         self.jacobian_prep = self.jacobian_prep_coordinates

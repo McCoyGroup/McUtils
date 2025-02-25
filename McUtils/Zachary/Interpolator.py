@@ -644,7 +644,7 @@ class IncrementalCartesianCoordinateInterpolation:
                  *,
                  coordinate_system,
                  max_displacement_step=1.0,
-                 max_refinements=20,
+                 max_refinements=1,
                  reembed=False,
                  embedding_options=None
                  ):
@@ -700,7 +700,8 @@ class IncrementalCartesianCoordinateInterpolation:
                 final_abc, init_abc,
                 final_coords, init_coords,
                 final_internals, init_internals,
-                max_refinements=max_refinements, max_disp=max_disp
+                max_refinements=max_refinements, max_disp=max_disp,
+                reembed=reembed
             )
 
         disp = final_coords.convert(init_internals.system) - init_internals
@@ -731,7 +732,7 @@ class IncrementalCartesianCoordinateInterpolation:
                     new_carts,
                     **embedding_options
                 )
-                new_carts = emb.coordinates
+                new_carts = (new_carts*0) + emb.coordinates
             init_coords = new_carts
             init_internals = converter(init_coords)
             new_abcissae.append(init_abc)
@@ -751,7 +752,7 @@ class IncrementalCartesianCoordinateInterpolation:
                 new_carts,
                 **embedding_options
             )
-            new_carts = emb.coordinates
+            new_carts = (new_carts*0) + emb.coordinates
         return new_carts, (new_abcissae, new_coords, new_internals)
 
     def prep_cartesians(self, coords):
@@ -774,7 +775,8 @@ class IncrementalCartesianCoordinateInterpolation:
             self.coords[start], self.coords[start+1],
             self.internals[start], self.internals[start+1],
             max_refinements=self.max_refinements,
-            max_disp=self.max_disp_step
+            max_disp=self.max_disp_step,
+            reembed=self.reembed
         )
 
         self.abcissae = self.abcissae[:start+1] + new_abcissae + self.abcissae[start+1:]

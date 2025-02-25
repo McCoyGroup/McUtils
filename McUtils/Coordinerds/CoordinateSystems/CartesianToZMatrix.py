@@ -1,6 +1,7 @@
 from .CoordinateSystemConverter import CoordinateSystemConverter
 from .CommonCoordinateSystems import CartesianCoordinates3D, ZMatrixCoordinates
 from ...Numputils import vec_norms, vec_angles, pts_dihedrals, dist_deriv, angle_deriv, dihed_deriv
+from ... import Numputils as nput
 import numpy as np
 # this import gets bound at load time, so unfortunately PyCharm can't know just yet
 # what properties its class will have and will try to claim that the files don't exist
@@ -27,11 +28,13 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
     def get_diheds(points, centers, seconds, thirds):
         return pts_dihedrals(points, centers, seconds, thirds)
 
-    def convert_many(self, coords, ordering=None, use_rad=True, return_derivs=False, **kw):
+    def convert_many(self, coords, *, ordering, use_rad=True, return_derivs=False, **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?
         """
+        #TODO: introduce fast derivs back into this coordinate system by extracting "specs" from the ordering
         if ordering is None:
+            raise NotImplementedError("an ordering must be supplied")
             ordering = range(len(coords[0]))
         base_shape = coords.shape
         new_coords = np.reshape(coords, (np.prod(base_shape[:-1]),) + base_shape[-1:])
@@ -51,7 +54,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                 ops['derivs'] = reshaped_ders
         return new_coords, ops
 
-    def convert(self, coords, ordering=None, use_rad=True, return_derivs=False, **kw):
+    def convert(self, coords, *, ordering, use_rad=True, return_derivs=None, order=None, **kw):
         """The ordering should be specified like:
 
         [
@@ -74,6 +77,11 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         :return: z-matrix coords
         :rtype: np.ndarray
         """
+
+
+        if return_derivs is None and order is not None and order > 0:
+            return_derivs = True
+
         ncoords = len(coords)
         orig_ol = ZMatrixCoordinates.canonicalize_order_list(ncoords, ordering)
         ol = orig_ol
@@ -91,210 +99,253 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
 
         # we define an order map that we'll index into to get the new indices for a
         # given coordinate
-        om = 1+np.argsort(ol[:, 0])
-
-        # need to check against the cases of like 1, 2, 3 atom molecules
-        # annoying but not hard
+        om = 1 + np.argsort(ol[:, 0])
         if return_derivs:
-            derivs = [
-                np.zeros(coords.shape + (nol-1, 3)),
-                np.zeros(coords.shape + (nol, 3) + (nol - 1, 3))
+            if order is None: order = 1
+
+            specs = [
+                p
+                for n,(i, j, k, l) in enumerate(ordering[1:])
+                for p in (
+                        [(i, j), (i, j, k), (i, j, k, l)]
+                            if n > 1 else
+                        [(i, j), (i, j, k)]
+                            if n > 0 else
+                        [(i,j)]
+                )
             ]
-        if not multiconfig:
-            ix = ol[1:, 0]
-            jx = ol[1:, 1]
-            dists = self.get_dists(coords[ix], coords[jx])
-            if return_derivs:
-                _dists, dist_derivs, dist_derivs_2 = dist_deriv(coords, ix, jx, order=2)
-                drang = np.arange(len(ix))
-                derivs[0][ix, :, drang, 0] = dist_derivs[0]
-                derivs[0][jx, :, drang, 0] = dist_derivs[1]
-
-                for i, x1 in enumerate([ix, jx]):
-                    for j, x2 in enumerate([ix, jx]):
-                        # print(i, j, x1, x2,
-                        #       # dist_derivs_2[i, j][0, 0],
-                        #       drang
-                        #       )
-                        derivs[1][x1, :, x2, :, drang, 0] = dist_derivs_2[i, j]
-
-            if len(ol) > 2:
-                ix = ol[2:, 0]
-                jx = ol[2:, 1]
-                kx = ol[2:, 2]
-                angles = np.concatenate( (
-                    [0], self.get_angles(coords[ix], coords[jx], coords[kx])
-                ) )
-                if not use_rad:
-                    angles = np.rad2deg(angles)
-                if return_derivs:
-                    _angles, angle_derivs, angle_derivs_2 = angle_deriv(coords, jx, ix, kx, order=2)
-                    drang = 1+np.arange(len(ix))
-                    # print(">>>>", np.max(np.abs(angle_derivs)))
-                    derivs[0][jx, :, drang, 1] = angle_derivs[0]
-                    derivs[0][ix, :, drang, 1] = angle_derivs[1]
-                    derivs[0][kx, :, drang, 1] = angle_derivs[2]
-
-                    for i, x1 in enumerate([jx, ix, kx]):
-                        for j, x2 in enumerate([jx, ix, kx]):
-                            derivs[1][x1, :, x2, :, drang, 1] = angle_derivs_2[i, j]
+            if len(specs) > 3:
+                ix = np.concatenate([[0, 1], np.arange(3, len(specs), 3)])
+                jx = np.concatenate([[2], np.arange(4, len(specs), 3)])
+                kx = np.arange(5, len(specs), 3)
+            elif len(specs) > 1:
+                ix = [0, 1]
+                jx = [2]
+                kx = None
             else:
-                angles = np.array([0.])
-            if len(ol) > 3:
-                ix = ol[3:, 0]
-                jx = ol[3:, 1]
-                kx = ol[3:, 2]
-                lx = ol[3:, 3]
-                if ol.shape[1] == 5:
-                    raise NotImplementedError("psi angles might be unnecessary")
-                    ix = ix.copy()
-                    jx = jx.copy()
-                    kx = kx.copy()
-                    lx = lx.copy()
-                    fx = ol[3:, 4]
-                    swap_pos = np.where(fx == 1)
-                    swap_i = ix[swap_pos]
-                    swap_j = jx[swap_pos]
-                    swap_k = kx[swap_pos]
-                    swap_l = lx[swap_pos]
-                    ix[swap_pos] = swap_l
-                    jx[swap_pos] = swap_i
-                    kx[swap_pos] = swap_j
-                    lx[swap_pos] = swap_k
+                ix = [0]
+                jx = None
+                kx = None
 
-                diheds = np.concatenate( (
-                    [0, 0],
-                    self.get_diheds(coords[ix], coords[jx], coords[kx], coords[lx])
-                ) )
-                if not use_rad:
-                    diheds = np.rad2deg(diheds)
-                if return_derivs:
-                    _diheds, dihed_derivs, dihed_derivs_2 = dihed_deriv(coords, ix, jx, kx, lx, order=2)
-                    drang = 2+np.arange(len(ix))
-                    derivs[0][ix, :, drang, 2] = dihed_derivs[0]
-                    derivs[0][jx, :, drang, 2] = dihed_derivs[1]
-                    derivs[0][kx, :, drang, 2] = dihed_derivs[2]
-                    derivs[0][lx, :, drang, 2] = dihed_derivs[3]
+            base_conv = nput.internal_coordinate_tensors(coords, specs, order=order, angle_ordering='ijk')
+            dists = base_conv[0][ix,]
+            angles = np.concatenate([[0]] + ([base_conv[0][jx,]] if jx is not None else []))
+            diheds = np.concatenate([[0, 0]] + ([base_conv[0][kx,]] if kx is not None else []))
 
-                    for i, x1 in enumerate([ix, jx, kx, lx]):
-                        for j, x2 in enumerate([ix, jx, kx, lx]):
-                            derivs[1][x1, :, x2, :, drang, 2] = dihed_derivs_2[i, j]
-            else:
-                diheds = np.array([0, 0])
-            ol = ol[1:]
-
-        else: # multiconfig
-
-            # we do all of this stuff with masking operations in the multiconfiguration cases
-            mask = np.repeat(True, ncoords)
-            mask[np.arange(0, ncoords, nol)] = False
-            ix = ol[mask, 0]
-            jx = ol[mask, 1]
-            dists = self.get_dists(coords[ix], coords[jx])
+            base_derivs = base_conv[1:]
+            derivs = []
+            nats = coords.shape[-2]
+            for n,d in enumerate(base_derivs):
+                deriv = np.zeros(coords.shape[:-2] + ((nats)*3,)*(n+1) + ((nats-1) * 3,))
+                deriv[..., np.arange(0, deriv.shape[-1], 3)] = d[..., ix]
+                if jx is not None:
+                    deriv[..., np.arange(1, deriv.shape[-1], 3)] = np.pad(d[..., jx], [[0, 0]] * (d.ndim-1) + [[1, 0]])
+                if kx is not None:
+                    deriv[..., np.arange(2, deriv.shape[-1], 3)] = np.pad(d[..., kx], [[0, 0]] * (d.ndim-1) + [[2, 0]])
+                derivs.append(deriv)
+        else:
+            # need to check against the cases of like 1, 2, 3 atom molecules
+            # annoying but not hard
             if return_derivs:
-                _, dist_derivs, dist_derivs_2 = dist_deriv(coords, ix, jx, order=2)
-                drang = np.arange(nol-1)
-                nreps = int(len(ix)/(nol-1))
-                drang = np.broadcast_to(drang[np.newaxis], (nreps,) + drang.shape).flatten()
-                derivs[0][ix, :, drang, 0] = dist_derivs[0]
-                derivs[0][jx, :, drang, 0] = dist_derivs[1]
+                derivs = [
+                    np.zeros(coords.shape + (nol-1, 3)),
+                    np.zeros(coords.shape + (nol, 3) + (nol - 1, 3))
+                ]
+            if not multiconfig:
+                ix = ol[1:, 0]
+                jx = ol[1:, 1]
+                dists = self.get_dists(coords[ix], coords[jx])
+                if return_derivs:
+                    _dists, dist_derivs, dist_derivs_2 = dist_deriv(coords, ix, jx, order=2)
+                    drang = np.arange(len(ix))
+                    derivs[0][ix, :, drang, 0] = dist_derivs[0]
+                    derivs[0][jx, :, drang, 0] = dist_derivs[1]
 
-                for i, x1 in enumerate([ix, jx]):
-                    for j, x2 in enumerate([ix, jx]):
-                        derivs[1][x1, :, x2 % nol, :, drang, 0] = dist_derivs_2[i, j]
+                    for i, x1 in enumerate([ix, jx]):
+                        for j, x2 in enumerate([ix, jx]):
+                            # print(i, j, x1, x2,
+                            #       # dist_derivs_2[i, j][0, 0],
+                            #       drang
+                            #       )
+                            derivs[1][x1, :, x2, :, drang, 0] = dist_derivs_2[i, j]
 
-            if nol>2:
-                # set up the mask to drop all of the first bits
-                mask[np.arange(1, ncoords, nol)] = False
+                if len(ol) > 2:
+                    ix = ol[2:, 0]
+                    jx = ol[2:, 1]
+                    kx = ol[2:, 2]
+                    angles = np.concatenate( (
+                        [0], self.get_angles(coords[ix], coords[jx], coords[kx])
+                    ) )
+                    if not use_rad:
+                        angles = np.rad2deg(angles)
+                    if return_derivs:
+                        _angles, angle_derivs, angle_derivs_2 = angle_deriv(coords, jx, ix, kx, order=2)
+                        drang = 1+np.arange(len(ix))
+                        # print(">>>>", np.max(np.abs(angle_derivs)))
+                        derivs[0][jx, :, drang, 1] = angle_derivs[0]
+                        derivs[0][ix, :, drang, 1] = angle_derivs[1]
+                        derivs[0][kx, :, drang, 1] = angle_derivs[2]
+
+                        for i, x1 in enumerate([jx, ix, kx]):
+                            for j, x2 in enumerate([jx, ix, kx]):
+                                derivs[1][x1, :, x2, :, drang, 1] = angle_derivs_2[i, j]
+                else:
+                    angles = np.array([0.])
+                if len(ol) > 3:
+                    ix = ol[3:, 0]
+                    jx = ol[3:, 1]
+                    kx = ol[3:, 2]
+                    lx = ol[3:, 3]
+                    if ol.shape[1] == 5:
+                        raise NotImplementedError("psi angles might be unnecessary")
+                        ix = ix.copy()
+                        jx = jx.copy()
+                        kx = kx.copy()
+                        lx = lx.copy()
+                        fx = ol[3:, 4]
+                        swap_pos = np.where(fx == 1)
+                        swap_i = ix[swap_pos]
+                        swap_j = jx[swap_pos]
+                        swap_k = kx[swap_pos]
+                        swap_l = lx[swap_pos]
+                        ix[swap_pos] = swap_l
+                        jx[swap_pos] = swap_i
+                        kx[swap_pos] = swap_j
+                        lx[swap_pos] = swap_k
+
+                    diheds = np.concatenate( (
+                        [0, 0],
+                        self.get_diheds(coords[ix], coords[jx], coords[kx], coords[lx])
+                    ) )
+                    if not use_rad:
+                        diheds = np.rad2deg(diheds)
+                    if return_derivs:
+                        _diheds, dihed_derivs, dihed_derivs_2 = dihed_deriv(coords, ix, jx, kx, lx, order=2)
+                        drang = 2+np.arange(len(ix))
+                        derivs[0][ix, :, drang, 2] = dihed_derivs[0]
+                        derivs[0][jx, :, drang, 2] = dihed_derivs[1]
+                        derivs[0][kx, :, drang, 2] = dihed_derivs[2]
+                        derivs[0][lx, :, drang, 2] = dihed_derivs[3]
+
+                        for i, x1 in enumerate([ix, jx, kx, lx]):
+                            for j, x2 in enumerate([ix, jx, kx, lx]):
+                                derivs[1][x1, :, x2, :, drang, 2] = dihed_derivs_2[i, j]
+                else:
+                    diheds = np.array([0, 0])
+                ol = ol[1:]
+
+            else: # multiconfig
+
+                # we do all of this stuff with masking operations in the multiconfiguration cases
+                mask = np.repeat(True, ncoords)
+                mask[np.arange(0, ncoords, nol)] = False
                 ix = ol[mask, 0]
                 jx = ol[mask, 1]
-                kx = ol[mask, 2]
-                angles = self.get_angles(coords[ix], coords[jx], coords[kx])
-                angles = np.append(angles, np.zeros(steps))
-                insert_pos = np.arange(0, ncoords-1*steps-1, nol-2)
-                angles = np.insert(angles, insert_pos, 0)
-                angles = angles[:ncoords-steps]
-                if not use_rad:
-                    angles = np.rad2deg(angles)
+                dists = self.get_dists(coords[ix], coords[jx])
                 if return_derivs:
-                    # we might need to mess with the masks akin to the insert call...
-                    _, angle_derivs, angle_derivs_2 = angle_deriv(coords, jx, ix, kx, order=2)
-                    drang = 1+np.arange(nol-2)
-                    nreps = int(len(ix)/(nol-2))
+                    _, dist_derivs, dist_derivs_2 = dist_deriv(coords, ix, jx, order=2)
+                    drang = np.arange(nol-1)
+                    nreps = int(len(ix)/(nol-1))
                     drang = np.broadcast_to(drang[np.newaxis], (nreps,) + drang.shape).flatten()
-                    derivs[0][jx, :, drang, 1] = angle_derivs[0]
-                    derivs[0][ix, :, drang, 1] = angle_derivs[1]
-                    derivs[0][kx, :, drang, 1] = angle_derivs[2]
+                    derivs[0][ix, :, drang, 0] = dist_derivs[0]
+                    derivs[0][jx, :, drang, 0] = dist_derivs[1]
 
-                    for i, x1 in enumerate([ix, jx, kx]):
-                        for j, x2 in enumerate([ix, jx, kx]):
-                            derivs[1][x1, :, x2 % nol, :, drang, 0] = angle_derivs_2[i, j]
-            else:
-                angles = np.zeros(ncoords-steps)
+                    for i, x1 in enumerate([ix, jx]):
+                        for j, x2 in enumerate([ix, jx]):
+                            derivs[1][x1, :, x2 % nol, :, drang, 0] = dist_derivs_2[i, j]
 
-            if nol > 3:
-                # set up mask to drop all of the second atom bits (wtf it means 'second')
-                mask[np.arange(2, ncoords, nol)] = False
-                ix = ol[mask, 0]
-                jx = ol[mask, 1]
-                kx = ol[mask, 2]
-                lx = ol[mask, 3]
-                if ol.shape[1] == 5:
-                    raise ValueError("Unclear if there is a difference between tau and psi")
-                    ix = ix.copy()
-                    jx = jx.copy()
-                    kx = kx.copy()
-                    lx = lx.copy()
-                    fx = ol[mask, 4]
-                    swap_pos = np.where(fx == 1)
-                    swap_i = ix[swap_pos]
-                    swap_j = jx[swap_pos]
-                    swap_k = kx[swap_pos]
-                    swap_l = lx[swap_pos]
-                    ix[swap_pos] = swap_l
-                    jx[swap_pos] = swap_i
-                    kx[swap_pos] = swap_j
-                    lx[swap_pos] = swap_k
-                # print(ol)
+                if nol>2:
+                    # set up the mask to drop all of the first bits
+                    mask[np.arange(1, ncoords, nol)] = False
+                    ix = ol[mask, 0]
+                    jx = ol[mask, 1]
+                    kx = ol[mask, 2]
+                    angles = self.get_angles(coords[ix], coords[jx], coords[kx])
+                    angles = np.append(angles, np.zeros(steps))
+                    insert_pos = np.arange(0, ncoords-1*steps-1, nol-2)
+                    angles = np.insert(angles, insert_pos, 0)
+                    angles = angles[:ncoords-steps]
+                    if not use_rad:
+                        angles = np.rad2deg(angles)
+                    if return_derivs:
+                        # we might need to mess with the masks akin to the insert call...
+                        _, angle_derivs, angle_derivs_2 = angle_deriv(coords, jx, ix, kx, order=2)
+                        drang = 1+np.arange(nol-2)
+                        nreps = int(len(ix)/(nol-2))
+                        drang = np.broadcast_to(drang[np.newaxis], (nreps,) + drang.shape).flatten()
+                        derivs[0][jx, :, drang, 1] = angle_derivs[0]
+                        derivs[0][ix, :, drang, 1] = angle_derivs[1]
+                        derivs[0][kx, :, drang, 1] = angle_derivs[2]
 
-                diheds = self.get_diheds(coords[ix], coords[jx], coords[kx], coords[lx])
-                # pad diheds to be the size of ncoords
-                diheds = np.append(diheds, np.zeros(2*steps))
+                        for i, x1 in enumerate([ix, jx, kx]):
+                            for j, x2 in enumerate([ix, jx, kx]):
+                                derivs[1][x1, :, x2 % nol, :, drang, 0] = angle_derivs_2[i, j]
+                else:
+                    angles = np.zeros(ncoords-steps)
 
-                # insert zeros where undefined
-                diheds = np.insert(diheds, np.repeat(np.arange(0, ncoords-2*steps-1, nol-3), 2), 0)
-                # take only as many as actually used
-                diheds = diheds[:ncoords-steps]
-                if not use_rad:
-                    diheds = np.rad2deg(diheds)
-                if return_derivs:
-                    # Negative sign because my dihed_deriv code is for slightly different
-                    # ordering than expected
-                    _, dihed_derivs, dihed_derivs_2 = dihed_deriv(coords, ix, jx, kx, lx, order=2)
-                    drang = 2+np.arange(nol-3)
-                    nreps = int(len(ix)/(nol-3))
-                    drang = np.broadcast_to(drang[np.newaxis], (nreps,) + drang.shape).flatten()
-                    derivs[0][ix, :, drang, 2] = dihed_derivs[0]
-                    derivs[0][jx, :, drang, 2] = dihed_derivs[1]
-                    derivs[0][kx, :, drang, 2] = dihed_derivs[2]
-                    derivs[0][lx, :, drang, 2] = dihed_derivs[3]
+                if nol > 3:
+                    # set up mask to drop all of the second atom bits (wtf it means 'second')
+                    mask[np.arange(2, ncoords, nol)] = False
+                    ix = ol[mask, 0]
+                    jx = ol[mask, 1]
+                    kx = ol[mask, 2]
+                    lx = ol[mask, 3]
+                    if ol.shape[1] == 5:
+                        raise ValueError("Unclear if there is a difference between tau and psi")
+                        ix = ix.copy()
+                        jx = jx.copy()
+                        kx = kx.copy()
+                        lx = lx.copy()
+                        fx = ol[mask, 4]
+                        swap_pos = np.where(fx == 1)
+                        swap_i = ix[swap_pos]
+                        swap_j = jx[swap_pos]
+                        swap_k = kx[swap_pos]
+                        swap_l = lx[swap_pos]
+                        ix[swap_pos] = swap_l
+                        jx[swap_pos] = swap_i
+                        kx[swap_pos] = swap_j
+                        lx[swap_pos] = swap_k
+                    # print(ol)
 
-                    for i, x1 in enumerate([ix, jx, kx, lx]):
-                        for j, x2 in enumerate([ix, jx, kx, lx]):
-                            derivs[1][x1, :, x2 % nol, :, drang, 0] = dihed_derivs_2[i, j]
+                    diheds = self.get_diheds(coords[ix], coords[jx], coords[kx], coords[lx])
+                    # pad diheds to be the size of ncoords
+                    diheds = np.append(diheds, np.zeros(2*steps))
 
-            else:
-                diheds = np.zeros(ncoords-steps)
+                    # insert zeros where undefined
+                    diheds = np.insert(diheds, np.repeat(np.arange(0, ncoords-2*steps-1, nol-3), 2), 0)
+                    # take only as many as actually used
+                    diheds = diheds[:ncoords-steps]
+                    if not use_rad:
+                        diheds = np.rad2deg(diheds)
+                    if return_derivs:
+                        # Negative sign because my dihed_deriv code is for slightly different
+                        # ordering than expected
+                        _, dihed_derivs, dihed_derivs_2 = dihed_deriv(coords, ix, jx, kx, lx, order=2)
+                        drang = 2+np.arange(nol-3)
+                        nreps = int(len(ix)/(nol-3))
+                        drang = np.broadcast_to(drang[np.newaxis], (nreps,) + drang.shape).flatten()
+                        derivs[0][ix, :, drang, 2] = dihed_derivs[0]
+                        derivs[0][jx, :, drang, 2] = dihed_derivs[1]
+                        derivs[0][kx, :, drang, 2] = dihed_derivs[2]
+                        derivs[0][lx, :, drang, 2] = dihed_derivs[3]
 
-            # after the np.insert calls we have the right number of final elements, but too many
-            # ol and om elements and they're generally too large
-            # so we need to shift them down and mask out the elements we don't want
-            mask = np.repeat(True, ncoords)
-            mask[np.arange(0, ncoords, nol)] = False
-            ol = np.reshape(ol[mask], (steps, nol-1, ncol))-np.reshape(np.arange(steps), (steps, 1, 1))
-            ol = np.reshape(ol, (ncoords-steps, ncol))
-            om = np.reshape(om[mask], (steps, nol-1))-nol*np.reshape(np.arange(steps), (steps, 1))-1
-            om = np.reshape(om, (ncoords-steps,))
+                        for i, x1 in enumerate([ix, jx, kx, lx]):
+                            for j, x2 in enumerate([ix, jx, kx, lx]):
+                                derivs[1][x1, :, x2 % nol, :, drang, 0] = dihed_derivs_2[i, j]
+
+                else:
+                    diheds = np.zeros(ncoords-steps)
+
+                # after the np.insert calls we have the right number of final elements, but too many
+                # ol and om elements and they're generally too large
+                # so we need to shift them down and mask out the elements we don't want
+                mask = np.repeat(True, ncoords)
+                mask[np.arange(0, ncoords, nol)] = False
+                ol = np.reshape(ol[mask], (steps, nol-1, ncol))-np.reshape(np.arange(steps), (steps, 1, 1))
+                ol = np.reshape(ol, (ncoords-steps, ncol))
+                om = np.reshape(om[mask], (steps, nol-1))-nol*np.reshape(np.arange(steps), (steps, 1))-1
+                om = np.reshape(om, (ncoords-steps,))
 
         final_coords = np.array(
             [

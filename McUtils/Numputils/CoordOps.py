@@ -1159,12 +1159,6 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
         _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
-        # raise Exception(
-        #     [a.shape for a in A_expansion],
-        #     [b.shape for b in B_expansion],
-        #     [c.shape for c in C_expansion]
-        # )
-
         base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
         if proj is None: return base_deriv
         return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
@@ -1693,7 +1687,6 @@ def _transrot_invariant_inverse(expansion, coords, masses, order):
     # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
     L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
                                                                 mass_weighted=False, strip_embedding=True)
-
     new_tf = td.tensor_reexpand([L_inv], expansion, order)
     inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
     return [
@@ -1708,14 +1701,22 @@ class _inverse_coordinate_conversion_caller:
     def __init__(self, conversion, target_internals,
                  remove_translation_rotation=True,
                  masses=None,
-                 order=1
+                 order=1,
+                 gradient_function=None,
+                 gradient_scaling=None,
+                 fixed_atoms=None,
+                 fixed_coords=None
                  ):
         self.conversion = conversion
         self.target_internals = target_internals
         self.masses = masses
         self.remove_translation_rotation = remove_translation_rotation
+        self.gradient_function = gradient_function
+        self.gradient_scaling = gradient_scaling
         self.last_call = None
         self.caller_order = order
+        self.fixed_atoms = fixed_atoms
+        self.fixed_coords = fixed_coords
 
     def func(self, coords, mask):
         coords = coords.reshape(coords.shape[0], -1, 3)
@@ -1729,25 +1730,73 @@ class _inverse_coordinate_conversion_caller:
         expansion = self.last_call = self.conversion(coords, order=ord)
         internals, expansion = expansion[0], expansion[1:] # dr/dx
         delta = internals - self.target_internals[mask]
-        # print("!", delta)
+        fixed_coords = self.fixed_coords
+
+        if self.fixed_atoms is not None:
+            atom_pos = np.reshape(
+                (np.array(self.fixed_atoms) * 3)[:, np.newaxis]
+                + np.arange(3)[np.newaxis],
+                -1
+            )
+            for n,e in enumerate(expansion):
+                idx = (...,) + np.ix_(*[atom_pos] * (n + 1)) + (slice(None),)
+                e[idx] = 0
+        if fixed_coords is not None:
+            for n,e in enumerate(expansion):
+                e[..., fixed_coords] = 0
 
         if self.remove_translation_rotation: # dx/dr
             inverse_expansion = _transrot_invariant_inverse(expansion, coords, self.masses, ord)
         else:
-            sqrt_mass = np.repeat(
-                np.diag(np.repeat(1 / np.sqrt(self.masses), 3))[np.newaxis],
-                coords.shape[0],
-                axis=0
+            sqrt_mass = np.expand_dims(
+                np.repeat(
+                    np.diag(np.repeat(1 / np.sqrt(self.masses), 3)),
+                    coords.shape[0],
+                    axis=0
+                ),
+                list(range(expansion[0].ndim - 2))
             )
             expansion = td.tensor_reexpand([sqrt_mass], expansion, len(expansion))
             inverse_expansion = td.inverse_transformation(expansion, order=ord, allow_pseudoinverse=True)
             inverse_expansion = td.tensor_reexpand(inverse_expansion, [sqrt_mass], ord)
+
+        if self.fixed_atoms is not None:
+            atom_pos = np.reshape(
+                    (np.array(self.fixed_atoms) * 3)[:, np.newaxis]
+                    + np.arange(3)[np.newaxis],
+                -1
+            )
+            for n,e in enumerate(inverse_expansion):
+                e[..., atom_pos] = 0
+        if fixed_coords is not None:
+            delta[..., fixed_coords] = 0
+            for n,e in enumerate(inverse_expansion):
+                idx = (...,) + np.ix_(*[fixed_coords]*(n+1)) + (slice(None),)
+                e[idx] = 0
 
         nr_change = 0
         for n, e in enumerate(inverse_expansion):
             for ax in range(n + 1):
                 e = vec_tensordot(e, delta, axes=[1, -1], shared=1)
             nr_change += (1 / math.factorial(n + 1)) * e
+
+        if self.gradient_function is not None:
+            if self.fixed_atoms is not None:
+                subcrd = np.delete(coords, self.fixed_atoms, axis=-2).reshape(coords.shape[0], -1)
+                subgrad = self.gradient_function(subcrd, mask)
+                contrib = np.zeros((coords.shape[0], coords.shape[1]*coords.shape[2]), dtype=subgrad.dtype)
+                atom_pos = np.reshape(
+                    (np.array(self.fixed_atoms) * 3)[:, np.newaxis]
+                    + np.arange(3)[np.newaxis],
+                    -1
+                )
+                rem_pos = np.delete(np.arange(contrib.shape[1]), atom_pos)
+                contrib[..., rem_pos] = subgrad
+            else:
+                contrib = self.gradient_function(coords.reshape(coords.shape[0], -1), mask)
+            extra_gradient = -self.gradient_scaling * contrib
+            nr_change = nr_change + extra_gradient
+
         return nr_change
 
 DEFAULT_SOLVER_ORDER = 1
@@ -1756,20 +1805,24 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              remove_translation_rotation=True,
                              order=None,
                              solver_order=None,
-                             tol=1e-3, max_iterations=10,
-                             max_displacement=1.0,
+                             tol=1e-3, max_iterations=15,
+                             max_displacement=.5,
+                             gradient_function=None,
+                             gradient_scaling=.1,
                              # method='quasi-newton',
                              method='gradient-descent',
                              optimizer_parameters=None,
                              line_search=False,
-                             damping_parameter=.95,
+                             damping_parameter=None,
                              damping_exponent=None,
-                             restart_interval=50,
+                             restart_interval=None,
                              raise_on_failure=False,
                              return_internals=True,
                              return_expansions=True,
                              base_transformation=None,
                              reference_internals=None,
+                             fixed_atoms=None,
+                             fixed_coords=None,
                              angle_ordering='jik'):
     from . import Optimization as opt
 
@@ -1787,7 +1840,8 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     if callable(specs):
         conversion = specs
     else:
-        conversion = internal_conversion_function(specs, angle_ordering=angle_ordering,
+        conversion = internal_conversion_function(specs,
+                                                  angle_ordering=angle_ordering,
                                                   base_transformation=base_transformation,
                                                   reference_internals=reference_internals
                                                   )
@@ -1813,7 +1867,11 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         conversion,
         target_internals,
         remove_translation_rotation=remove_translation_rotation,
-        masses=masses
+        masses=masses,
+        gradient_function=gradient_function,
+        gradient_scaling=gradient_scaling,
+        fixed_atoms=fixed_atoms,
+        fixed_coords=fixed_coords
     )
 
     coords, converged, (errors, its) = opt.iterative_step_minimize(
@@ -1840,18 +1898,27 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         coords,
         order=0 if not return_expansions else order
     )
-    if not converged and raise_on_failure:
+    if not converged:
         init_internals = conversion(
             init_coords,
             order=0 if not return_expansions else order
         )[0]
-        raise ValueError(
-            f"failed to find coordinates after {max_iterations} iterations"
-            f"\ntarget:{target_internals}\ninitial:{init_internals}"
-            f"\nresidual:{target_internals - opt_internals[0]}"
-            f"\n1-norm error: {errors}"
-            f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
-        )
+        if raise_on_failure:
+            raise ValueError(
+                f"failed to find coordinates after {max_iterations} iterations"
+                f"\ntarget:{target_internals}\ninitial:{init_internals}"
+                f"\nresidual:{target_internals - opt_internals[0]}"
+                f"\n1-norm error: {errors}"
+                f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
+            )
+        # else:
+        #     print(
+        #         f"failed to find coordinates after {max_iterations} iterations"
+        #         f"\ntarget:{target_internals}\ninitial:{init_internals}"
+        #         f"\nresidual:{target_internals - opt_internals[0]}"
+        #         f"\n1-norm error: {errors}"
+        #         f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
+        #     )
     if return_expansions:
         expansion = opt_internals[1:]
         if remove_translation_rotation:

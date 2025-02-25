@@ -10,3 +10,5 @@ from .SphericalToCartesian import __converters__ as exposed
 __converters__ += exposed
 from .GenericInternalCoordinateSystem import __converters__ as exposed
 __converters__ += exposed
+from .IterativeZMatrixCoordinateSystem import __converters__ as exposed
+__converters__ += exposed

@@ -720,7 +720,7 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
         order=0,
         shared=shared
     )[0]
-    pseudo_norm_2 = np.sqrt(pseudo_norm)
+    pseudo_norm_2 = np.sqrt(np.abs(pseudo_norm))
 
     if is_numeric(order):
         order = np.arange(order+1)
@@ -740,7 +740,9 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
     pseudonorm_expansion = [a-b for a,b in zip(A_exp, B_exp)]
     return pseudonorm_expansion
 
-def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None, planar_threshold=1e-14):
+def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None,
+                       up_vector=None,
+                       planar_threshold=1e-14):
     if is_numeric(order):
         max_order = order
     else:
@@ -758,10 +760,8 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
 
     if np.all(planar):
         expansion = vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order)
-        if return_unit_vectors:
-            return expansion, A_expansion
-        else:
-            return expansion
+        norms = expansion
+        units = A_expansion
     elif np.any(planar):
         # gotta compute planar and nonplanar separately then remerge the tensors
 
@@ -774,6 +774,22 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         planar_units = planar_A
         nonplanar_geoms = [v[nonplanar_pos] for v in vec_cross]
         norms, units = vec_norm_unit_deriv(nonplanar_geoms, order)
+        if up_vector is not None:
+            up_vector = np.asanyarray(up_vector)
+            up_vector = np.expand_dims(
+                up_vector,
+                list(range((nonplanar_geoms[0].ndim - up_vector.ndim)))
+            )
+            signs = np.sign(
+                vec_ops.vec_tensordot(
+                    nonplanar_geoms[0][..., np.newaxis, :],
+                    up_vector[..., :, np.newaxis],
+                    axes=[-1, -2]
+                )
+            )
+            signs = signs.reshape(signs.shape[:-2])
+            norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
+            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(norms)]
 
         final_tensors = [
             np.zeros(base_shape + e.shape[1:])
@@ -791,22 +807,43 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
                 f[planar_pos] = e[planar_pos]
                 f[nonplanar_pos] = n[nonplanar_pos]
 
-            return final_tensors, final_units
+            units = final_units
         else:
-            return final_tensors
+            units = None
+        norms = final_tensors
     else:
         norms, units = vec_norm_unit_deriv(vec_cross, order)
-        if return_unit_vectors:
-            return norms, units
-        else:
-            return norms
+        if up_vector is not None:
+            up_vector = np.asanyarray(up_vector)
+            up_vector = np.expand_dims(
+                up_vector,
+                list(range((vec_cross[0].ndim - up_vector.ndim)))
+            )
+            signs = np.sign(
+                vec_ops.vec_tensordot(
+                    vec_cross[0][..., np.newaxis, :],
+                    up_vector[..., :, np.newaxis],
+                    axes=[-1, -2]
+                )
+            )
+            signs = signs.reshape(signs.shape[:-2])
+            norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
+            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(norms)]
 
-def vec_angle_deriv(A_expansion, B_expansion, order, unitized=False):
+    if return_unit_vectors:
+        return norms, units
+    else:
+        return norms
+
+def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, unitized=False):
     if not unitized:
         units_A, A_expansion = vec_norm_unit_deriv(A_expansion, order)
         units_B, B_expansion = vec_norm_unit_deriv(B_expansion, order)
     cos_expansion = vec_anglecos_deriv(A_expansion, B_expansion, order, unitized=True)
-    sin_expansion = vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=True, return_unit_vectors=False)
+    sin_expansion = vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=True,
+                                       up_vector=up_vector,
+                                       return_unit_vectors=False)
+
     cos_sin_expansion = [
         np.moveaxis(np.array([c, s]), 0, -1)
         for c, s in zip(cos_expansion, sin_expansion)
@@ -837,7 +874,7 @@ def vec_angle_deriv(A_expansion, B_expansion, order, unitized=False):
     ) if order > 0 else [])
     return angle_derivs
 
-def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, planar=None, planar_threshold=1e-14):
+def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, unitized=False, planar=None, planar_threshold=1e-14):
     # quick check
 
     if is_numeric(order):
@@ -845,10 +882,16 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, planar=None, p
     else:
         max_order = max(order)
 
-    axb_expansion = vec_cross_deriv(A_expansion, B_expansion, max_order)
-    bxc_expansion = vec_cross_deriv(B_expansion, C_expansion, max_order)
-
-    return vec_angle_deriv(axb_expansion, bxc_expansion, order, unitized=False)
+    if not unitized:
+        _, B_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
+    _, axb_expansion = vec_norm_unit_deriv(vec_cross_deriv(A_expansion, B_expansion, max_order), order)
+    _, bxc_expansion = vec_norm_unit_deriv(vec_cross_deriv(B_expansion, C_expansion, max_order), order)
+    base_derivs = vec_angle_deriv(axb_expansion, bxc_expansion, order, unitized=True,
+                                  # up_vector=None
+                                  up_vector=-B_expansion[0]
+                                  )
+    return base_derivs
+    # return [-x for x in base_derivs]
 
 def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=1e-14):
     # quick check

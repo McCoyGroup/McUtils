@@ -14,5 +14,7 @@ from .CompositeCoordinateSystems import *; from .CompositeCoordinateSystems impo
 __all__ += exposed
 from .GenericInternalCoordinateSystem import *; from .GenericInternalCoordinateSystem import __all__ as exposed
 __all__ += exposed
+from .IterativeZMatrixCoordinateSystem import *; from .IterativeZMatrixCoordinateSystem import __all__ as exposed
+__all__ += exposed
 from .CoordinateSet import *; from .CoordinateSet import __all__ as exposed
 __all__ += exposed
