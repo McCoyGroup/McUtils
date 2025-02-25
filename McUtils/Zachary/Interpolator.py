@@ -644,7 +644,7 @@ class IncrementalCartesianCoordinateInterpolation:
                  *,
                  coordinate_system,
                  max_displacement_step=1.0,
-                 max_refinements=20,
+                 max_refinements=1,
                  reembed=False,
                  embedding_options=None
                  ):
@@ -715,7 +715,6 @@ class IncrementalCartesianCoordinateInterpolation:
         md = np.max(np.abs(d))
         n_ref = 0
         while md > max_disp and (max_refinements is None or n_ref < max_refinements):
-            print("...?", md)
             scaling = max_disp / md
             d = d * scaling
             new_abc = init_abc + (step * pct * scaling)
@@ -725,7 +724,7 @@ class IncrementalCartesianCoordinateInterpolation:
             step = new_step
             target_internals = init_internals + d
             new_disp = CoordinateSet(target_internals, init_internals.system)
-            new_disp.converter_options = init_internals.system.converter_options
+            # new_disp.converter_options = init_internals.system.converter_options
             new_carts = new_disp.convert(init_coords.system)
             if reembed:
                 emb = nput.eckart_embedding(

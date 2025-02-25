@@ -1,7 +1,7 @@
 import uuid
 
 import numpy as np
-from .CommonCoordinateSystems import InternalCoordinateSystem, CartesianCoordinates3D, ZMatrixCoordinateSystem
+from .CommonCoordinateSystems import InternalCoordinateSystem, CartesianCoordinates3D, ZMatrixCoordinateSystem, ZMatrixCoordinates
 from .CoordinateSystemConverter import CoordinateSystemConverter
 from .ZMatrixToCartesian import ZMatrixToCartesianConverter
 from .CartesianToZMatrix import CartesianToZMatrixConverter
@@ -83,6 +83,8 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
                      embedding_coords=None,
                      jacobian_prep=None,
                      axes_labels=None,
+                     fixed_atoms=None,
+                     use_rad=True,
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?
@@ -94,19 +96,22 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
         if not nput.is_numeric(return_derivs):
             return_derivs = max(return_derivs)
 
+        sub_embedding = [1, 2, 5]
         def conv(carts, order=None, sys=coords.system):
             from .CoordinateSet import CoordinateSet
             base_shape = carts.shape[:-2]
             carts = CoordinateSet(carts, CartesianCoordinates3D)
-            ints = carts.convert(coords.system,
+            ints = carts.convert(sys,
                                  origins=origins, axes=axes, ordering=ordering,
-                                 embedding_coords=embedding_coords
+                                 # embedding_coords=embedding_coords
+                                 use_rad=use_rad
                                  )
-            derivs = carts.jacobian(coords.system,
+            derivs = carts.jacobian(sys,
                                     order=order,
                                     converter_options=dict(
                                         origins=origins, axes=axes, ordering=ordering,
-                                        embedding_coords=embedding_coords
+                                        use_rad=use_rad
+                                        # embedding_coords=embedding_coords
                                     ),
                                     jacobian_prep=jacobian_prep,
                                     axes_labels=axes_labels
@@ -117,16 +122,16 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
             ]
 
             ints = ints.reshape(base_shape + (-1,)).view(np.ndarray)
-            ints = np.delete(ints, [1, 2, 5], axis=-1)
+            ints = np.delete(ints, sub_embedding, axis=-1)
 
             derivs = [
-                np.delete(d, [1, 2, 5], axis=-1)
+                np.delete(d, sub_embedding, axis=-1)
                 for d in derivs
             ]
 
             return [ints] + derivs
         flat_coords = coords.reshape(coords.shape[:-2] + (-1,)).view(np.ndarray)
-        flat_coords = np.delete(flat_coords, [1, 2, 5], axis=-1)
+        flat_coords = np.delete(flat_coords, sub_embedding, axis=-1)
         (expansions, errors), _ = nput.inverse_coordinate_solve(conv,
                                                                 flat_coords,
                                                                 reference_coordinates,
@@ -134,7 +139,8 @@ class IZSystemToCartesianConverter(CoordinateSystemConverter):
                                                                 return_expansions=True,
                                                                 return_internals=True,
                                                                 masses=masses,
-                                                                remove_translation_rotation=remove_translation_rotation,
+                                                                remove_translation_rotation=False,
+                                                                fixed_atoms=fixed_atoms,
                                                                 **kw
                                                                 )
         carts, derivs = expansions[0], expansions[1:]
