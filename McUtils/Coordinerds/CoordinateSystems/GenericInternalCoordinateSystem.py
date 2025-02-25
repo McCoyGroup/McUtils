@@ -93,13 +93,16 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
 
         internals = nput.internal_coordinate_tensors(coords, specs, order=return_derivs, **kw)
         internals, derivs = internals[0], internals[1:]
-        return internals, {
-            'specs':specs,
-            'derivs':derivs,
-            'reference_coordinates':coords,
-            'masses': masses,
+
+        opts = {
+            'specs': specs,
+            'derivs': derivs,
+            'reference_coordinates': coords,
             'remove_translation_rotation': remove_translation_rotation
         }
+        if masses is not None:
+            opts['masses'] = masses
+        return internals, opts
 
     def convert(self, coords, *, specs, order=0, **kw):
         return self.convert_many(coords, specs=specs, order=order, **kw)
@@ -138,12 +141,14 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                                                                 **kw
                                                                 )
         carts, derivs = expansions[0], expansions[1:]
-        return carts, {
+        opts = {
             'specs':specs,
             'derivs': derivs,
-            'masses': masses,
             'remove_translation_rotation': remove_translation_rotation
         }
+        if masses is not None:
+            opts['masses'] = masses
+        return carts, opts
 
     def convert(self, coords, *, reference_coordinates, specs, order=0, **kw):
         return self.convert_many(coords, reference_coordinates=reference_coordinates, specs=specs, order=order, **kw)

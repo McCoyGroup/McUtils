@@ -715,6 +715,7 @@ class IncrementalCartesianCoordinateInterpolation:
         md = np.max(np.abs(d))
         n_ref = 0
         while md > max_disp and (max_refinements is None or n_ref < max_refinements):
+            print("...?", md)
             scaling = max_disp / md
             d = d * scaling
             new_abc = init_abc + (step * pct * scaling)

@@ -1733,13 +1733,17 @@ class _inverse_coordinate_conversion_caller:
         internals, expansion = expansion[0], expansion[1:] # dr/dx
         delta = internals - self.target_internals[mask]
 
+        self.remove_translation_rotation = False
         if self.remove_translation_rotation: # dx/dr
             inverse_expansion = _transrot_invariant_inverse(expansion, coords, self.masses, ord)
         else:
-            sqrt_mass = np.repeat(
-                np.diag(np.repeat(1 / np.sqrt(self.masses), 3))[np.newaxis],
-                coords.shape[0],
-                axis=0
+            sqrt_mass = np.expand_dims(
+                np.repeat(
+                    np.diag(np.repeat(1 / np.sqrt(self.masses), 3)),
+                    coords.shape[0],
+                    axis=0
+                ),
+                list(range(expansion[0].ndim - 2))
             )
             expansion = td.tensor_reexpand([sqrt_mass], expansion, len(expansion))
             inverse_expansion = td.inverse_transformation(expansion, order=ord, allow_pseudoinverse=True)
@@ -1763,17 +1767,17 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              remove_translation_rotation=True,
                              order=None,
                              solver_order=None,
-                             tol=1e-3, max_iterations=10,
-                             max_displacement=1.0,
+                             tol=1e-3, max_iterations=50,
+                             max_displacement=.5,
                              gradient_function=None,
                              gradient_scaling=.1,
                              # method='quasi-newton',
                              method='gradient-descent',
                              optimizer_parameters=None,
                              line_search=False,
-                             damping_parameter=.95,
+                             damping_parameter=None,
                              damping_exponent=None,
-                             restart_interval=50,
+                             restart_interval=None,
                              raise_on_failure=False,
                              return_internals=True,
                              return_expansions=True,
@@ -1851,18 +1855,27 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         coords,
         order=0 if not return_expansions else order
     )
-    if not converged and raise_on_failure:
+    if not converged:
         init_internals = conversion(
             init_coords,
             order=0 if not return_expansions else order
         )[0]
-        raise ValueError(
-            f"failed to find coordinates after {max_iterations} iterations"
-            f"\ntarget:{target_internals}\ninitial:{init_internals}"
-            f"\nresidual:{target_internals - opt_internals[0]}"
-            f"\n1-norm error: {errors}"
-            f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
-        )
+        if raise_on_failure:
+            raise ValueError(
+                f"failed to find coordinates after {max_iterations} iterations"
+                f"\ntarget:{target_internals}\ninitial:{init_internals}"
+                f"\nresidual:{target_internals - opt_internals[0]}"
+                f"\n1-norm error: {errors}"
+                f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
+            )
+        else:
+            print(
+                f"failed to find coordinates after {max_iterations} iterations"
+                f"\ntarget:{target_internals}\ninitial:{init_internals}"
+                f"\nresidual:{target_internals - opt_internals[0]}"
+                f"\n1-norm error: {errors}"
+                f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
+            )
     if return_expansions:
         expansion = opt_internals[1:]
         if remove_translation_rotation:
