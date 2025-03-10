@@ -3,6 +3,7 @@ Provides an abstract base class off of which concrete surface implementations ca
 """
 
 import abc, numpy as np
+from ... import Numputils as nput
 
 __all__ = [
     "BaseSurface",
@@ -42,23 +43,23 @@ class BaseSurface(metaclass=abc.ABCMeta):
         :return:
         :rtype:
         """
-        if isinstance(gridpoints, (int, float, np.floating, np.integer)):
+        if nput.is_numeric(gridpoints):
             gridpoints = np.array([gridpoints])
-        gridpoints = np.asarray(gridpoints)
+        gridpoints = np.asanyarray(gridpoints)
         if self.dimension is not None:
-            if self.dimension == 1:
-                if gridpoints.ndim > 1:
-                    raise ValueError("{}: dimension mismatch in call, surface expects grid points to be 1D".format(
-                        type(self).__name__
-                    ))
-            else:
-                gp_dim = gridpoints.shape[-1]
-                if gp_dim != self.dimension:
-                    raise ValueError("{}: dimension mismatch in call, grid points had dim {} but surface expects dim {}".format(
-                        type(self).__name__,
-                        gp_dim,
-                        self.dimension
-                    ))
+            # if self.dimension == 1:
+            #     if gridpoints.ndim > 1:
+            #         raise ValueError("{}: dimension mismatch in call, surface expects grid points to be 1D".format(
+            #             type(self).__name__
+            #         ))
+            # else:
+            gp_dim = gridpoints.shape[-1]
+            if gp_dim != self.dimension:
+                raise ValueError("{}: dimension mismatch in call, grid points had dim {} but surface expects dim {}".format(
+                    type(self).__name__,
+                    gp_dim,
+                    self.dimension
+                ))
         return self.evaluate(gridpoints, **kwargs)
 
     def minimize(self, initial_guess, function_options=None, **opts):
@@ -74,7 +75,7 @@ class BaseSurface(metaclass=abc.ABCMeta):
         :return:
         :rtype:
         """
-
+    #
         import scipy.optimize as opt
 
         if function_options is None:
@@ -84,6 +85,7 @@ class BaseSurface(metaclass=abc.ABCMeta):
         func = lambda x, f=self.evaluate, o=function_options: f(x, **o)
 
         min = opt.minimize(func, initial_guess, **opts)
+        return min.x
 
 
 
@@ -106,6 +108,17 @@ class TaylorSeriesSurface(BaseSurface):
         self.expansion = FunctionExpansion(derivs, **opts)
         opts["derivs"] = derivs
         super().__init__(opts, dimension)
+
+
+    @property
+    def center(self):
+        return self.expansion.center
+    @property
+    def ref(self):
+        return self.expansion.ref
+    @property
+    def expansion_tensors(self):
+        return self.expansion.expansion_tensors
 
     def evaluate(self, points, **kwargs):
         """

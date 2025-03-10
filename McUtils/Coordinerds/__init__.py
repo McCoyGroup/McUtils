@@ -24,3 +24,5 @@ __all__ += exposed
 # __all__ += exposed
 from .Conveniences import __all__ as exposed
 __all__ += exposed
+from .Redundant import *; from .Redundant import __all__ as exposed
+__all__ += exposed

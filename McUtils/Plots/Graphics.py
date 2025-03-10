@@ -544,7 +544,7 @@ class GraphicsBase(metaclass=ABCMeta):
         parent = self.figure_parent
         figs = {} if figs is None else figs
         if parent is self:
-            if new.figure is self.figure:
+            if new is not None and new.figure is self.figure:
                 figs[self] = self
                 for c in self.children:
                     figs[c] = c

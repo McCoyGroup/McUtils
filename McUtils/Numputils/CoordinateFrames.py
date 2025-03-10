@@ -10,7 +10,9 @@ __all__ = [
     "translation_rotation_invariant_transformation",
     "eckart_embedding",
     "rmsd_minimizing_transformation",
-    "eckart_permutation"
+    "eckart_permutation",
+
+
 ]
 
 import itertools, collections
@@ -664,3 +666,16 @@ def eckart_permutation(
 
     targ_shape = og_og_coords.shape[:-2]
     return base_perm.reshape(targ_shape + (-1,))
+
+
+def eckart_displacement_coords(coords, ref, masses=None, **embedding_parameters):
+    ref_embedding, _ = translation_rotation_invariant_transformation(ref,
+                                                                  masses=masses,
+                                                                  mass_weighted=False
+                                                                  )
+    base_embedding = eckart_embedding(ref, coords, masses=masses, **embedding_parameters)
+    return np.reshape(
+        ref_embedding @ base_embedding.coordinates[..., np.newaxis],
+        base_embedding.coordinates.shape
+    )
+

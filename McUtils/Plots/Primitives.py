@@ -41,22 +41,13 @@ class Disk(GraphicsPrimitive):
         return [(self.pos[0]-self.rad, self.pos[1]-self.rad), (self.pos[0]+self.rad, self.pos[1]+self.rad)]
 
     def plot(self, axes, *args, graphics=None, zdir=None, **kwargs):
-        if isinstance(axes.figure, VTKWindow):
-            self.prim = VTKDisk(self.pos, self.rad, **self.opts)
-            s = self.prim
-            return s.plot(axes.figure)
-        else:
-            if hasattr(axes, 'axes'):
-                axes = axes.axes
-            pt = np.array([self.pos]).T
-            kw = dict(edgecolors=[ [0.]*3 +[.3] ])
-            kw = dict(kw, **self.opts)
-            kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
-            s = axes.scatter(*pt, **kw)
-            # print(pt, axes)
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
 
-        return s
-
+        kw = dict(edgecolors=[ [0.]*3 +[.3] ])
+        kw = dict(kw, **self.opts)
+        kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
+        return axes.draw_disk(self.pos, **kw)
 class Line(GraphicsPrimitive):
     def __init__(self, pos1, pos2, *rest, radius=.1, **opts):
         self.pos1 = pos1
@@ -71,21 +62,13 @@ class Line(GraphicsPrimitive):
         pos = np.array(self.points).T
         return [(np.min(pos[0]), np.min(pos[1])), (np.max(pos[0]), np.max(pos[1]))]
     def plot(self, axes, *args, graphics=None, **kwargs):
-        if isinstance(axes.figure, VTKWindow):
-            if len(self.rest) > 0:
-                raise NotImplementedError("...")
-            self.prim = VTKLine(self.pos1, self.pos2, **self.opts)
-            s = self.prim
-            return s.plot(axes)
-        else:
-            if hasattr(axes, 'axes'):
-                axes = axes.axes
-            pos = np.array(self.points).T
-            kw = dict(self.opts, linewidth = self.rad, **kwargs)
-            line = axes.plot(*pos, **kw)
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
 
-            return line
-
+        kw = dict(edgecolors=[[0.]*3+[.3]])
+        kw = dict(kw, **self.opts)
+        kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
+        return axes.draw_line(self.pos1, self.pos2, **kw)
 
 class Text(GraphicsPrimitive):
     def __init__(self, txt, pos, bbox=((1, 1), (1, 1)), **opts):
@@ -99,12 +82,9 @@ class Text(GraphicsPrimitive):
             (self.pos[0]+self.bbox[0][1], self.pos[1]+self.bbox[1][1])
         ]
     def plot(self, axes, *args, graphics=None, **kwargs):
-        if isinstance(axes.figure, VTKWindow):
-            raise NotImplemented
-        else:
-            if hasattr(axes, 'axes'):
-                axes = axes.axes
-            return axes.text(*self.pos, self.txt, **self.opts)
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.text(*self.pos, self.txt, **self.opts)
 
 class Arrow(GraphicsPrimitive):
     def __init__(self, pos1, pos2, **opts):
@@ -115,12 +95,9 @@ class Arrow(GraphicsPrimitive):
         pos = np.array([self.pos1, self.pos2]).T
         return [(np.min(pos[0]), np.min(pos[1])), (np.max(pos[0]), np.max(pos[1]))]
     def plot(self, axes, *args, graphics=None, **kwargs):
-        if isinstance(axes.figure, VTKWindow):
-            raise NotImplemented
-        else:
-            if hasattr(axes, 'axes'):
-                axes = axes.axes
-            return axes.draw_arrow(*self.pos1, *(self.pos2 - self.pos1), **self.opts)
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_arrow(*self.pos1, *(self.pos2 - self.pos1), **self.opts)
 
 class Sphere(GraphicsPrimitive):
     def __init__(self, position=(0, 0, 0), radius=1, sphere_points=48, **opts):

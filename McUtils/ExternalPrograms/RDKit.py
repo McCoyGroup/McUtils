@@ -53,6 +53,14 @@ class RDMolecule(ExternalMolecule):
         return type(self).from_rdmol(new_mol,
                                      conf_id=conf.GetId(),
                                      charge=self.charge, sanitize=False, guess_bonds=False)
+    @property
+    def charges(self):
+        from rdkit.Chem import AllChem
+        AllChem.ComputeGasteigerCharges(self.rdmol)
+        return [
+            at.GetDoubleProp('_GasteigerCharge')
+            for at in self.rdmol.GetAtoms()
+        ]
 
     @classmethod
     def chem_api(cls):
