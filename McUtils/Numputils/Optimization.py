@@ -297,7 +297,8 @@ def iterative_chain_minimize(
         use_max_for_error=True,
         periodic=False,
         reembed=None,
-        embedding_options=None
+        embedding_options=None,
+        fixed_images=None
 ):
     guesses = np.array(chain_guesses, dtype=dtype)
     base_shape = guesses.shape[:-2]
@@ -321,6 +322,8 @@ def iterative_chain_minimize(
     its = np.zeros(guesses.shape[0], dtype=int)
     errs = np.zeros(guesses.shape[0], dtype=float)
     submasks = np.full(guesses.shape[:2], True, dtype=bool)
+    if fixed_images is not None:
+        submasks[..., fixed_images] = False
     mask = np.arange(guesses.shape[0])
     if orthogonal_directions is not None:
         orthogonal_directions = vec_ops.orthogonal_projection_matrix(orthogonal_directions)
@@ -385,18 +388,23 @@ def iterative_chain_minimize(
             # set which chains are done or not
             done = submask[done]
             submasks[done, j] = False
-            submasks[new_mask, j] = True
+            if j not in fixed_images:
+                submasks[new_mask, j] = True
             if j == 0:
-                submasks[new_mask, j+1] = True
-                if periodic:
+                if j + 1 not in fixed_images:
+                    submasks[new_mask, j+1] = True
+                if periodic and n not in fixed_images: #TODO: add O(1) check
                     submasks[new_mask, n] = True
             elif j == n:
-                submasks[new_mask, j-1] = True
-                if periodic:
+                if j-1 not in fixed_images:
+                    submasks[new_mask, j-1] = True
+                if periodic and 0 not in fixed_images:
                     submasks[new_mask, 0] = True
             else:
-                submasks[new_mask, j+1] = True
-                submasks[new_mask, j-1] = True
+                if j+1 not in fixed_images:
+                    submasks[new_mask, j+1] = True
+                if j-1 not in fixed_images:
+                    submasks[new_mask, j-1] = True
 
             errs[mask,] += step_errs
             guesses[submask, j] += step
@@ -422,17 +430,17 @@ def iterative_chain_minimize(
         if reparametrizer is not None:
             # for methods that want to satisfy some density function on
             # the number of images
-            new_chains, is_static = reparametrizer(guesses[mask,])
+            new_chains, is_static, fixed_images = reparametrizer(guesses[mask,], fixed_images)
             nimg_new = new_chains.shape[1]
             if nimg_new != nimg:
-                guesses = np.pad(guesses,  [ [0, 0], [0, nimg_new-nimg], [0, 0] ])
-                submasks = np.pad(submasks, [ [0, 0], [0, nimg_new-nimg] ])
-                submasks[mask,][:, :] = True
+                guesses = np.pad(guesses,  [[0, 0], [0, nimg_new-nimg], [0, 0]])
+                submasks = np.pad(submasks, [[0, 0], [0, nimg_new-nimg]])
+                submasks[mask, :] = True
                 guesses[mask,] = new_chains
                 image_numbers[mask,] = nimg_new
             else:
-                submasks[mask,][:, :] = np.logical_and(
-                    submasks[mask,][:, :],
+                submasks[mask, :] = np.logical_and(
+                    submasks[mask, :],
                     is_static
                 )
 
@@ -1738,8 +1746,25 @@ class AdjustedChainStepFinder(ChainMinimizingStepFinder):
         )
         self.pairwise_function = pairwise_image_function
 
-    def image_pairwise_contribution(self, guess, cur, prev, next, order=0):
-        return self.pairwise_function(guess, cur, prev, next, order=order)
+    def image_pairwise_contribution(self,guess, mask, cur, prev, next, order=0):
+        return self.pairwise_function(guess, mask, cur, prev, next, order=order)
+
+class ChainReparametrizer:
+    @abc.abstractmethod
+    def __call__(self, *args, **kwargs) -> '(np.ndarray, np.ndarray, np.ndarray)':
+        ...
+
+class InterpolatingReparametrizer(ChainReparametrizer):
+    #TODO: add in some kind of density function
+    def __init__(self, interpolator_type):
+        self.interpolator_type = interpolator_type
+
+    def __call__(self, images, fixed_positions):
+        interp = self.interpolator_type(images)
+        new = interp(np.linspace(len(images)))
+        interp[fixed_positions] = images[fixed_positions]
+        return new
+
 
 def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-8):
     mat = np.asanyarray(initial_matrix).copy()

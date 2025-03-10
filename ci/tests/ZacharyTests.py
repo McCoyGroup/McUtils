@@ -19,6 +19,7 @@ import McUtils.Numputils as nput
 from McUtils.Parallelizers import *
 from McUtils.Scaffolding import Logger
 
+import numpy.testing
 import sys, h5py, math, numpy as np, itertools
 
 class ZacharyTests(TestCase):
@@ -1449,7 +1450,8 @@ class ZacharyTests(TestCase):
 
     #endregion Mesh
 
-    @debugTest
+
+    @validationTest
     def test_ParametricCurveInterpolation(self):
         grid = np.linspace(0, 1, 8)
         vals = np.array([
@@ -1969,18 +1971,19 @@ class ZacharyTests(TestCase):
 
         test_vals = interp(pts, neighbors=15, zero_tol=-1, resiliance_test_options={})
 
-    @validationTest
+    @debugTest
     def test_HigherElementaryDerivs(self):
+
         sym = Symbols('x', 'y')
         fn = sym.morse(sym.x, de=2, a=1) + sym.morse(sym.y, de=2, a=1)
         fexpr = 2*(1-sym.exp(-1*sym.x))**2 + 2*(1-sym.exp(-1*sym.y))**2
 
         # raise Exception(sym.x + (3*sym.x**2)/12)
 
-        self.assertTrue(np.allclose(
+        np.testing.assert_allclose(
             fn.deriv(order=3)([[1, 2], [3, 4]]),
             fexpr.deriv(order=3)([[1, 2], [3, 4]])
-        ))
+        )
 
     @validationTest
     def test_RBFTiming(self):
@@ -2205,7 +2208,7 @@ class ZacharyTests(TestCase):
         # plt.TriContourPlot(*new.T, dinterp(new)-dinterp2(new), colorbar=True).show()
         # raise Exception(dinterp(new) - morse(new))
 
-    @validationTest
+    @debugTest
     def test_Symbolics(self):
 
         from McUtils.Misc import njit
@@ -2232,32 +2235,28 @@ class ZacharyTests(TestCase):
 
         d = e.deriv()
         pts = np.array([1, 2, 3])
-        self.assertTrue(np.allclose(e(pts), np.cos(pts)))
-        self.assertTrue(np.allclose(d(pts), -np.sin(pts)))
+        np.testing.assert_allclose(e(pts), np.cos(pts))
+        np.testing.assert_allclose(d(pts), -np.sin(pts))
 
 
         m = sym.morse(x)
-        self.assertTrue(np.allclose(m(pts), (1-np.exp(-pts))**2))
-        self.assertTrue(np.allclose(m.deriv()(pts), 2*np.exp(-pts)*(1 - np.exp(-pts))))
+        np.testing.assert_allclose(m(pts), (1-np.exp(-pts))**2)
+        np.testing.assert_allclose(m.deriv()(pts), 2*np.exp(-pts)*(1 - np.exp(-pts)))
 
         e = sym.cos(x) + sym.cos(y)
         pts = np.array([[1, 0], [2, 1], [3, 2]])
-        self.assertTrue(
-            np.allclose(
-                e(pts),
-                np.cos(pts[:, 0]) + np.cos(pts[:, 1])
-            )
+        np.testing.assert_allclose(
+            e(pts),
+            np.cos(pts[:, 0]) + np.cos(pts[:, 1])
         )
 
         d = e.deriv()
-        self.assertTrue(
-            np.allclose(
-                d(pts),
-                np.array([
-                    -np.sin(pts[:, 0]),
-                    -np.sin(pts[:, 1])
-                ])
-            )
+        np.testing.assert_allclose(
+            d(pts),
+            np.array([
+                -np.sin(pts[:, 0]),
+                -np.sin(pts[:, 1])
+            ])
         )
 
         import sympy
@@ -2275,34 +2274,31 @@ class ZacharyTests(TestCase):
         #     )
         # )
 
-        self.assertTrue(
-            np.allclose(
-                comp_expr(new_pts),
-                sympy.lambdify([sx, sy], sympy_expr)(
-                    new_pts[:, 0],
-                    new_pts[:, 1]
-                )
+        np.testing.assert_allclose(
+            comp_expr(new_pts),
+            sympy.lambdify([sx, sy], sympy_expr)(
+                new_pts[:, 0],
+                new_pts[:, 1]
             )
         )
 
         # print(comp_expr.functions[0].tree_repr())
 
         comp_dexpr = comp_expr.deriv()
-        self.assertTrue(
-            np.allclose(
-                comp_dexpr(new_pts),
-                np.array([
-                    sympy.lambdify([sx, sy], sympy_expr.diff(sx))(
-                        new_pts[:, 0],
-                        new_pts[:, 1]
-                    ),
+        np.testing.assert_allclose(
+            comp_dexpr(new_pts),
+            np.array([
+                sympy.lambdify([sx, sy], sympy_expr.diff(sx))(
+                    new_pts[:, 0],
+                    new_pts[:, 1]
+                ),
 
-                    sympy.lambdify([sx, sy], sympy_expr.diff(sy))(
-                        new_pts[:, 0],
-                        new_pts[:, 1]
-                    )
-                    ])
-            )
+                sympy.lambdify([sx, sy], sympy_expr.diff(sy))(
+                    new_pts[:, 0],
+                    new_pts[:, 1]
+                )
+            ])
+
         )
 
         new_pts = np.random.rand(1000, 2)

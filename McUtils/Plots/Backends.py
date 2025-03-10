@@ -850,7 +850,7 @@ class MPLAxes(GraphicsAxes):
 
     def draw_disk(self, points, **styles):
         points = np.asanyarray(points)
-        if points.ndim == 2:
+        if points.ndim == 1:
             points = points[np.newaxis]
         return self.get_plotter('scatter')(
             points[:, 0],

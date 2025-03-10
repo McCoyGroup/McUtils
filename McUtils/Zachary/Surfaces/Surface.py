@@ -108,6 +108,16 @@ class Surface:
     def __call__(self, gridpoints, **kwargs):
         return self.base(gridpoints, **kwargs)
 
+    @property
+    def center(self):
+        return self.base.center
+    @property
+    def ref(self):
+        return self.base.ref
+    @property
+    def expansion_tensors(self):
+        return self.base.expansion_tensors
+
 class MultiSurface:
     """
     A _reallly_ simple extension to the Surface infrastructure to handle vector valued functions,
@@ -120,5 +130,12 @@ class MultiSurface:
         :type surfs: Iterable[Surface]
         """
         self.surfs = surfs
-    def __call__(self, gridpoints, **kwargs):
-        return np.column_stack([s(gridpoints, **kwargs) for s in self.surfs])
+    def __call__(self, gridpoints, order=None, **kwargs):
+        subvals = [s(gridpoints, order=order, **kwargs) for s in self.surfs]
+        if order is None:
+            return np.array(subvals)
+        else:
+            return [
+                np.moveaxis(np.array([s[o] for s in subvals]), 0, -1)
+                for o in range(order + 1)
+            ]

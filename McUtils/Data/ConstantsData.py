@@ -27,6 +27,10 @@ class UnitGraph:
     def update(self, iterable):
         for connection in iterable:
             self.add(*connection)
+    def keys(self):
+        return self._graph.keys()
+    def __getitem__(self, item):
+        return self._graph[item]
     def find_path_bfs(self, start, end):
         # we use a little poor-man's Dijkstra to find the shortest unit conversion path
 
@@ -403,6 +407,28 @@ class UnitsDataHandler(DataHandler):
 
         return conv
 
+    def expand_conversions(self, unit_stuff_1):
+        new_unit = []
+        for src_base, src_inv, src_scale, src_pow in unit_stuff_1:
+            for k in self.data.keys():
+                if isinstance(k, tuple) and len(k) == 2:
+                    test_src, test_targ = k
+                    if test_src == src_base and (
+                            (isinstance(test_src, str) and not isinstance(test_targ, str))
+                            or (len(test_src) > len(test_targ))
+                    ):
+                        conv = self.convert(test_src, test_targ)
+                        canon_stuff = self._canonicalize_unit(test_targ)
+                        for o,(new_base, new_inv, new_scale, new_pow) in enumerate(canon_stuff):
+                            if o == 1:
+                                new_unit.append((new_base, src_inv, new_scale * conv * src_scale, src_pow * new_pow))
+                            else:
+                                new_unit.append((new_base, src_inv, new_scale, src_pow * new_pow))
+                        break
+            else:
+                raise NotImplementedError("conversion expansion on inverse not supported...")
+        return new_unit
+
     def find_conversion(self, unit, target):
         """Attempts to find a conversion between two sets of units. Currently only implemented for "plain" units.
 
@@ -415,6 +441,14 @@ class UnitsDataHandler(DataHandler):
         """
         unit_stuff_1 = self._canonicalize_unit(unit)
         unit_stuff_2 = self._canonicalize_unit(target)
+        # we find some conversion that makes them the same length
+        # it might be better to map to a canonical SI form, but I am too lazy for that right now
+        if len(unit_stuff_1) < len(unit_stuff_2):
+            unit_stuff_1 = self.expand_conversions(unit_stuff_1)
+        elif len(unit_stuff_1) > len(unit_stuff_2):
+            unit_stuff_2 = self.expand_conversions(unit_stuff_2)
+        if len(unit_stuff_1) != len(unit_stuff_2):
+            raise ValueError(f"can't convert incompatible units {unit} and {target}, (resolved to {unit_stuff_1}&{unit_stuff_2})")
         convo = 1
         for src, targ in zip(unit_stuff_1, unit_stuff_2):
             conv = self._find_direct_conversion(src, targ)

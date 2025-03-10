@@ -1,8 +1,8 @@
 from ..LazyTensors import Tensor
 from .Derivatives import FiniteDifferenceDerivative
 from ...Coordinerds import CoordinateSet, CoordinateSystem
-from ..Symbolic import TensorDerivativeConverter
-from ...Numputils import vec_tensordot
+# from ..Symbolic import TensorDerivativeConverter
+from ... import Numputils as nput
 import numpy as np, itertools, copy, math
 
 __all__ = [
@@ -44,7 +44,7 @@ class TaylorPoly:
         # raise NotImplementedError("doesn't deal with higher-order expansions properly yet")
         self._derivs = self.FunctionDerivatives(derivatives, weight_coefficients)
         self._center = np.asanyarray(center) if center is not None else center
-        self.ref = np.asanyarray(ref) if not isinstance(ref, (int, float, np.integer, np.floating)) else ref
+        self.ref = np.asanyarray(ref) if not nput.is_numeric(ref) else ref
         if transforms is None:
             self._transf = None
         else:
@@ -78,7 +78,7 @@ class TaylorPoly:
             if self._transf is None:
                 self._tensors = self._derivs
             else:
-                self._tensors = TensorDerivativeConverter(self._transf, self._derivs).convert()
+                self._tensors = nput.tensor_reexpand(self._transf, self._derivs, len(self._derivs))
         return self._tensors
     @expansion_tensors.setter
     def expansion_tensors(self, tensors):
@@ -109,7 +109,7 @@ class TaylorPoly:
     def derivative_tensors(self, derivs):
         self._tensors = derivs
 
-    def get_expansions(self, coords, subexpansions=None, outer=True, squeeze=True):
+    def get_expansions(self, coords, subexpansions=None, outer=True, order=None, squeeze=None):
         """
 
         :param coords: Coordinates to evaluate the expansion at
@@ -127,18 +127,15 @@ class TaylorPoly:
         # doesn't really make sense if we don't have stuff to take the outer product over
 
         coords = np.asanyarray(coords)
-        cshape = coords.shape # so we can squeeze at the end if need be
-        if coords.ndim == 1:
-            coords = coords[np.newaxis]
-            outer = True # again...doesn't make sense _not_ to take an outer product here
-        elif coords.ndim >= 2:
-            if outer:
-                if coords.ndim > 2: # we want to apply each expansion to each point
-                    coords = np.reshape(coords, (-1, cshape[-1]))
-            else:
-                # we assume the first dimension is shared between the
-                # multi-expansion and the coordinates
-                coords = np.reshape(coords, (cshape[0], -1, cshape[-1]))
+        base_shape = coords.shape[:-1]
+        if outer:
+            coords = np.reshape(coords, (-1, coords.shape[-1]))
+        else:
+            if coords.shape[0] != len(self.expansion_tensors):
+                raise ValueError("coords of shape {} can't map onto {} polys".format(
+                    coords.shape, len(self.expansion_tensors)
+                ))
+            coords = np.reshape(coords, (coords.shape[0], -1, coords.shape[-1]))
 
         center = self._center
         if center is None:
@@ -151,11 +148,7 @@ class TaylorPoly:
             # of vectors of points is the same as the numbers of expansions
             # which I think has to map onto the number of centers
             if outer:
-                if center.ndim == 1:
-                    center = center[np.newaxis]
-                else:
-                    center = center[np.newaxis, :, :]
-                    coords = coords[:, np.newaxis]
+                center = center[np.newaxis]
             else:
                 # we need to coerce things into the appropriate form
                 # and by now we _know_ coords is rank three and now we just
@@ -164,15 +157,14 @@ class TaylorPoly:
                 if center.ndim == 1:
                     center = center[np.newaxis, np.newaxis]
                 else:
-                    center = center[:, np.newaxis, :] # need to broadcast along axis 1
-                    # coords = coords[:, np.newaxis]
-
+                    center = center[:, np.newaxis, :]
             disp = coords - center
 
-        if isinstance(subexpansions, (int, np.integer)):
+        if nput.is_numeric(subexpansions):
             subexpansions = [subexpansions]
 
-        expansions=[]
+        if order is None: order = 0
+        expansions = [[] for _ in range(order+1)]
         for i, tensr in enumerate(self.expansion_tensors):
             if subexpansions is not None:
                 tensr = tensr[subexpansions] # I think it's really this simple...?
@@ -183,30 +175,26 @@ class TaylorPoly:
             # contract the tensor by the displacements until it's completely reduced
             if outer:
                 tensr = np.broadcast_to(tensr[np.newaxis], (disp.shape[0],) + tensr.shape)
-            for j in range(i+1):
-                # try:
-                tensr = vec_tensordot(disp, tensr, axes=[[-1], [tensr.ndim-1]])
-                # except:
-                #     raise ValueError(disp.shape, tensr.shape, -1, tensr.ndim)
-            contraction = tensr
-            if squeeze:
-                contraction = contraction.squeeze()
-            expansions.append(contraction)
+            n = i + 1
+            if order == n:
+                scaling = np.prod(np.arange(1, n))
+                expansions[n].append(tensr * scaling)
+            for j in range(n):
+                tensr = nput.vec_tensordot(disp, tensr, axes=[[-1], [-1]], shared=1)
+                o = i - j
+                if o <= order:
+                    scaling = np.prod(np.arange(n-order, n+1))
+                    expansions[o].append(tensr * scaling)
+            # contraction = tensr
+            # expansions[0].append(tensr)
 
-        if len(cshape) == 1:
-            expansions = [np.squeeze(e) for e in expansions]
-        elif len(cshape) > 2:
-            new_shape = cshape[:-1]
-            if outer:
-                # need to reshape including the broadcast shape...
-                # but at each order the contraction should be complete
-                # meaning we lose the final dimension
-                new_shape = (-1) + new_shape
-            expansions = [np.reshape(e, new_shape) for e in expansions]
-
+        expansions = [
+            [e.reshape(base_shape + (e.shape[1:] if outer else e.shape[2:])) for e in ord_exp]
+            for ord_exp in expansions
+        ]
 
         return expansions
-    def expand(self, coords, outer=True, squeeze=True):
+    def expand(self, coords, order=None, outer=True, squeeze=True):
         """Returns a numerical value for the expanded coordinates
 
         :param coords:
@@ -215,8 +203,14 @@ class TaylorPoly:
         :rtype: float | np.ndarray
         """
         ref = self.ref
-        exps = self.get_expansions(coords, outer=outer, squeeze=squeeze)
-        return ref + sum(exps)
+        exps = [
+            sum(e)
+            for e in self.get_expansions(coords, outer=outer, order=order, squeeze=squeeze)
+        ]
+        exps[0] = exps[0] + ref
+        if order is None:
+            exps = exps[0]
+        return exps
 
     def __call__(self, coords, **kw):
         return self.expand(coords, **kw)
@@ -309,7 +303,7 @@ class TaylorPoly:
                     red = red + e[s] # this iteration is how we get the different multiples...?
                     # and even though it seems like it makes off diagonal mat els contribute too much
                     # this is actually correct!
-                derivs.append(red)
+                derivs.append(red * (j+1))
             res.append(cls(
                 derivs[1:],
                 ref=derivs[0],

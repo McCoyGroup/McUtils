@@ -621,6 +621,19 @@ class ConverterTest(TestCase):
         # self.assertAlmostEquals(np.sum(coord_set.jacobian(new)[:, 0].reshape(30, 30) + np.eye(30, 30)), 0.)
 
     @debugTest
+    def test_GenerateZMatrix(self):
+        zmat = [
+                    [0, -1, -1, -1],
+                    [1,  0, -1, -1],
+                    [2,  0,  1, -1],
+                    [3,  1,  2,  0]
+                ]
+        coords = extract_zmatrix_internals(zmat)
+        print(coords)
+        for zm in enumerate_zmatrices(coords): print(zm)
+
+
+    @validationTest
     def test_GenericInternals(self):
         import Psience as psi
         test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
