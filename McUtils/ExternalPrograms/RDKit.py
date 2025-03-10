@@ -264,6 +264,17 @@ class RDMolecule(ExternalMolecule):
 
         return force_field_type(mol, props, confId=conf_id)
 
+    def evaluate_charges(self, coords, model='gasteiger'):
+        if model == 'gasteiger':
+            from rdkit.Chem import AllChem
+            AllChem.ComputeGasteigerCharges(self.rdmol)
+            return [
+                at.GetDoubleProp('_GasteigerCharge')
+                for at in self.rdmol.GetAtoms()
+            ]
+        else:
+            raise ValueError(f"charge model {model} not supported in RDKit")
+
     def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
         if force_field_generator is None:
             force_field_generator = self.get_force_field
