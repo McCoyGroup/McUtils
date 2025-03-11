@@ -11,7 +11,7 @@ __all__ = [
     "Plot", "DataPlot", "ArrayPlot", "TensorPlot",
     "Plot2D", "ListPlot2D",
     "Plot3D", "ListPlot3D",
-    "CompositePlot"
+    "CompositePlot",
 ]
 
 ######################################################################################################
@@ -1023,14 +1023,30 @@ class ListPlot2D(Plot2D):
 
         return (x, y, z)
 
+@Plot.register
 class ListContourPlot(ContourPlot):
     _get_plot_data = ListPlot2D._get_plot_data
+    def __init__(self,*params, interpolate=True, **opts):
+        self.interpolate = interpolate
+        super().__init__(*params, **opts)
+@Plot.register
 class ListDensityPlot(DensityPlot):
     _get_plot_data = ListPlot2D._get_plot_data
+    def __init__(self,*params, interpolate=True, **opts):
+        self.interpolate = interpolate
+        super().__init__(*params, **opts)
+@Plot.register
 class ListTriContourPlot(TriContourPlot):
     _get_plot_data = ListPlot2D._get_plot_data
+    def __init__(self,*params, interpolate=True, **opts):
+        self.interpolate = interpolate
+        super().__init__(*params, **opts)
+@Plot.register
 class ListTriDensityPlot(TriDensityPlot):
     _get_plot_data = ListPlot2D._get_plot_data
+    def __init__(self,*params, interpolate=True, **opts):
+        self.interpolate = interpolate
+        super().__init__(*params, **opts)
 
 
 ######################################################################################################

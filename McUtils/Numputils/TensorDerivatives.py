@@ -345,14 +345,16 @@ def tensorprod_deriv(
         order
     )
 
-def _scalar_prod(a, b):
+def _scalar_prod(a, b, axes=None, shared=None):
     if is_numeric(a) or is_numeric(b):
         if is_zero(a) or is_zero(b):
             return 0
         else:
             return a * b
     else:
-        return vec_ops.vec_outer(a, b, axes=[list(range(a.ndim)), list(range(b.ndim))], order=0)
+        if shared is None:
+            shared = 0
+        return vec_ops.vec_outer(a, b, axes=[list(range(shared, a.ndim)), list(range(shared, b.ndim))], order=0)
 
 def scalarprod_deriv(s_expansion, A_expansion,
                      order,
@@ -1092,7 +1094,7 @@ def optimizing_transformation(expansion, order):
 
     return Q
 
-def apply_nca_multi_ops(partition, expansions, ops, shared):
+def apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2):
     terms = [
         e[p] if len(e) > p else 0
         for e,p in zip(expansions, partition)
@@ -1103,14 +1105,17 @@ def apply_nca_multi_ops(partition, expansions, ops, shared):
 
     A = terms[0]
     # d = partition[0]
-    d = A.ndim - 2 - shared
+    d = A.ndim - root_dim - shared
     scaling = 2 if len(partition) == 3 and tuple(partition) == (1, 0, 1) else 1
     for B,p,(op, axes, contract) in zip(terms[1:], partition[1:], ops):
         a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
         a_ax = [a if a >= 0 else (A.ndim + a - d) for a in a_ax]
         b_ax = [b if b >= 0 else (B.ndim + b - p) for b in b_ax]
         if contract: # axes disappear, so we just account for the shifts
-            axes = [[x+d for x in a_ax], [x+p for x in b_ax]]
+            axes = [
+                [x+d for x in a_ax],
+                [x+p for x in b_ax]
+            ]
             deriv_axis = A.ndim - len(a_ax)
         else: # axes appeared, so we need to include those in the product
               # we _forced_ axes to be at the end of the arrays since it was too hard
@@ -1121,7 +1126,12 @@ def apply_nca_multi_ops(partition, expansions, ops, shared):
                 [shared + i for i in range(d)] + [x+d for x in a_ax],
                 [shared + i for i in range(p)] + [x+p for x in b_ax]
             ]
+            # if B.ndim < A.ndim:
+            #     B = np.expand_dims(B, list(range(B.ndim - A.ndim, 0, 1)))
+            # elif A.ndim < B.ndim:
+            #     A = np.expand_dims(A, list(range(A.ndim - B.ndim, 0, 1)))
             deriv_axis = A.ndim
+        _as = A.shape
         if shared == 0:
             A = op(A, B, axes=axes)
         else:
@@ -1131,15 +1141,15 @@ def apply_nca_multi_ops(partition, expansions, ops, shared):
 
         for i in range(p):
             A = np.moveaxis(A, deriv_axis+i, shared)
-        d += B.ndim - 2 - shared
+        d += B.ndim - root_dim - shared
     partition = [p for p in partition if p > 0]
     if len(partition) > 1:
         A = nca_symmetrize(A, partition, shared=shared, identical=False)
     return A
-def nca_multi_op_order_deriv(partition_generator, order, expansions, ops, shared):
+def nca_multi_op_order_deriv(partition_generator, order, expansions, ops, shared, root_dim):
     full = None
     for part in partition_generator.get_terms(order):
-        term = apply_nca_multi_ops(part, expansions, ops, shared)
+        term = apply_nca_multi_ops(part, expansions, ops, shared, root_dim)
         if full is None:
             full = term
         else:
@@ -1181,8 +1191,12 @@ def nca_canonicalize_multiops(expansion_op_pairs):
                     if contract is None: contract = True
                 elif op in {'x', 'prod', 'product', 'outer'}:
                     op = _product
-                    # if axes is None: axes = None
+                    if axes is None: axes = 'all'
                     if contract is None: contract = False
+                # elif op in {'*', 'sprod', 'scalar_product'}:
+                #     op = _scalar_prod
+                #     if axes is None: axes = 'all'
+                #     if contract is None: contract = False
                 else:
                     raise ValueError(f"can't canonicalize operation {op}")
 
@@ -1234,13 +1248,34 @@ def tensorops_deriv(
         shared=None
 ):
     expansions, ops = nca_canonicalize_multiops(expansion_op_pairs)
+    _ = []
+    for i,(op, axes, contract) in enumerate(ops):
+        if isinstance(axes, str): axes = [axes, axes]
+        a_ax, b_ax = axes
+        A = expansions[i][0]
+        B = expansions[i+1][0]
+        if isinstance(a_ax, str):
+            if a_ax == 'all':
+                a_ax = list(range(shared, A.ndim))
+            else:
+                raise ValueError(f"bad axes spec '{a_ax}'")
+        if isinstance(b_ax, str):
+            if b_ax == 'all':
+                b_ax = list(range(shared, B.ndim))
+            else:
+                raise ValueError(f"bad axes spec '{b_ax}'")
+        _.append([op, [a_ax, b_ax], contract])
+    ops = _
+
 
     if isinstance(order, int):
         order = list(range(order+1))
 
     partition_generator = get_term_generator(len(expansions))
     derivs = [
-        nca_multi_op_order_deriv(partition_generator, o, expansions, ops, shared)
+        nca_multi_op_order_deriv(partition_generator, o, expansions, ops, shared,
+                                 root_dim=expansions[0][0].ndim - (0 if shared is None else shared)
+                                 )
         for o in order
     ]
 

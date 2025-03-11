@@ -25,7 +25,7 @@ class TaylorPoly:
                  derivatives,
                  transforms=None,
                  center=None,
-                 ref=0,
+                 ref=None,
                  weight_coefficients=False
                  ):
         """
@@ -40,6 +40,13 @@ class TaylorPoly:
         :param weight_coefficients: whether the derivative terms need to be weighted or not
         :type weight_coefficients: bool
         """
+
+        if ref is None:
+            if nput.is_numeric(derivatives[0]): #TODO: handle multi-expansion case
+                ref = derivatives[0]
+            else:
+                ref = 0
+
 
         # raise NotImplementedError("doesn't deal with higher-order expansions properly yet")
         self._derivs = self.FunctionDerivatives(derivatives, weight_coefficients)
