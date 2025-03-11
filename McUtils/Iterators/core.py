@@ -9,7 +9,8 @@ __all__ = [
     "split_by",
     "counts",
     "dict_diff",
-    "transpose"
+    "transpose",
+    "riffle"
 ]
 
 def is_fixed_size(iterable):
@@ -134,3 +135,17 @@ def transpose(data, default=None):
            return transpose_iter(data, default=default)
     else:
         return transpose(list(data), default=default) # need to cache results...
+
+def riffle(a, b, *extras):
+    if not is_fixed_size(a):
+        a = list(a)
+    l = len(a)
+    n = -1
+    for n,p in enumerate(zip(a, b, *extras)):
+        if n == l - 1:
+            yield p[0]
+        else:
+            for x in p:
+                yield x
+    for x in a[n+1:]: yield x # exhaust a
+

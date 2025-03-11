@@ -1971,7 +1971,7 @@ class ZacharyTests(TestCase):
 
         test_vals = interp(pts, neighbors=15, zero_tol=-1, resiliance_test_options={})
 
-    @debugTest
+    @validationTest
     def test_HigherElementaryDerivs(self):
 
         sym = Symbols('x', 'y')
@@ -2208,7 +2208,7 @@ class ZacharyTests(TestCase):
         # plt.TriContourPlot(*new.T, dinterp(new)-dinterp2(new), colorbar=True).show()
         # raise Exception(dinterp(new) - morse(new))
 
-    @debugTest
+    @validationTest
     def test_Symbolics(self):
 
         from McUtils.Misc import njit
@@ -2340,6 +2340,48 @@ class ZacharyTests(TestCase):
             np.allclose(dexpr_res, comp_res)
         )
 
+    @debugTest
+    def test_CoordinateFunctions(self):
+
+        fun = (
+                CoordinateFunction.morse((0, 1), re=1.8, a=1, de=10)
+                # + (CoordinateFunction.morse((0, 2), re=1.8, a=1, de=10) / 100)
+        ) * CoordinateFunction.sin((1, 0, 2), n=2)
+
+        test_coords = np.random.normal(0, 1, size=(1000, 5, 3))
+        r, morse_vals = fun(test_coords, reexpress=False, order=2)
+
+        print(r[0].shape, morse_vals[0].shape)
+
+        # base_fig = plt.ScatterPlot(
+        #     r[0][..., 0],
+        #     morse_vals[0],
+        #     plot_range=[None, [-10, 10]]
+        # )
+        # plt.ScatterPlot(
+        #     r[0][..., 0],
+        #     morse_vals[1][..., 0],
+        #     figure=base_fig,
+        #     plot_range=[None, [-10, 10]]
+        # )
+        # base_fig = plt.ScatterPlot(
+        #     r[0][..., 0],
+        #     morse_vals[2][..., 0, 0],
+        #     figure=base_fig,
+        #     plot_range=[None, [-10, 10]]
+        # )
+        # base_fig.show()
+        # return
+
+        base_fig = plt.ListContourPlot(
+            np.concatenate([r[0], morse_vals[0][..., np.newaxis]], axis=1),
+            colorbar=True
+        )
+        plt.ScatterPlot(
+            r[0][..., 0],
+            r[0][..., 1],
+            figure=base_fig
+        ).show()
 
     #endregion
 
