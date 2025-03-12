@@ -24,6 +24,7 @@ class TaylorPoly:
     def __init__(self,
                  derivatives,
                  transforms=None,
+                 transformed_derivatives=False,
                  center=None,
                  ref=None,
                  weight_coefficients=False
@@ -52,11 +53,12 @@ class TaylorPoly:
         self._derivs = self.FunctionDerivatives(derivatives, weight_coefficients)
         self._center = np.asanyarray(center) if center is not None else center
         self.ref = np.asanyarray(ref) if not nput.is_numeric(ref) else ref
+        self._tf_derivs = transformed_derivatives
         if transforms is None:
-            self._transf = None
+            self._transf, self._inv = None, None
         else:
             # transformation matrices from cartesians to internals
-            self._transf = self.CoordinateTransforms(transforms)
+            self._transf, self._inv = self.canonicalize_tfs(transforms)
         self._tensors = None
     @property
     def center(self):
@@ -72,7 +74,19 @@ class TaylorPoly:
             ref=np.asanyarray([e.ref for e in expansions]),
             weight_coefficients=False
         )
-
+    @classmethod
+    def canonicalize_tfs(cls, tfs):
+        if len(tfs) == 2 and (
+                nput.is_numeric_array_like(tfs[0])
+                and nput.is_numeric_array_like(tfs[1])
+                and np.asanyarray(tfs[0]).ndim == np.asanyarray(tfs[1]).ndim
+        ):
+            return [np.asanyarray(t) for t in tfs[0]], [np.asanyarray(t) for t in tfs[1]]
+        else:
+            return [np.asanyarray(t) for t in tfs], None
+    @property
+    def transforms(self):
+        return list(self._transf) if self._transf is not None else None
     @property
     def expansion_tensors(self):
         """
@@ -82,10 +96,10 @@ class TaylorPoly:
         :rtype: Iterable[np.ndarray]
         """
         if self._tensors is None:
-            if self._transf is None:
+            if self._transf is None or self._tf_derivs:
                 self._tensors = self._derivs
             else:
-                self._tensors = nput.tensor_reexpand(self._transf, self._derivs, len(self._derivs))
+                self._tensors = nput.tensor_reexpand(self.transforms, self._derivs, len(self._derivs))
         return self._tensors
     @expansion_tensors.setter
     def expansion_tensors(self, tensors):
@@ -116,7 +130,7 @@ class TaylorPoly:
     def derivative_tensors(self, derivs):
         self._tensors = derivs
 
-    def get_expansions(self, coords, subexpansions=None, outer=True, order=None, squeeze=None):
+    def get_expansions(self, coords, transform_displacements=True, subexpansions=None, outer=True, order=None, squeeze=None):
         """
 
         :param coords: Coordinates to evaluate the expansion at
@@ -167,6 +181,14 @@ class TaylorPoly:
                     center = center[:, np.newaxis, :]
             disp = coords - center
 
+        if transform_displacements and self._transf is not None:
+            if self._inv is not None:
+                inv = self._inv[0]
+            else:
+                tf = self._transf[0]
+                inv = np.linalg.pinv(tf) if tf.shape[-1] != tf.shape[-2] else np.linalg.inv(tf)
+            disp = np.tensordot(disp, inv, axes=[-1, -2])
+
         if nput.is_numeric(subexpansions):
             subexpansions = [subexpansions]
 
@@ -210,10 +232,8 @@ class TaylorPoly:
         :rtype: float | np.ndarray
         """
         ref = self.ref
-        exps = [
-            sum(e)
-            for e in self.get_expansions(coords, outer=outer, order=order, squeeze=squeeze)
-        ]
+        base_exps = self.get_expansions(coords, outer=outer, order=order)
+        exps = [sum(e) for e in base_exps]
         exps[0] = exps[0] + ref
         if order is None:
             exps = exps[0]
