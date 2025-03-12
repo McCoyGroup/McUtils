@@ -33,6 +33,23 @@ class BaseSurface(metaclass=abc.ABCMeta):
         :rtype:
         """
         raise NotImplemented
+    def check_dimension(self, gridpoints):
+        gridpoints = np.asanyarray(gridpoints)
+        if self.dimension is not None:
+            # if self.dimension == 1:
+            #     if gridpoints.ndim > 1:
+            #         raise ValueError("{}: dimension mismatch in call, surface expects grid points to be 1D".format(
+            #             type(self).__name__
+            #         ))
+            # else:
+            gp_dim = gridpoints.shape[-1]
+            if gp_dim != self.dimension:
+                raise ValueError(
+                    "{}: dimension mismatch in call, grid points had dim {} but surface expects dim {}".format(
+                        type(self).__name__,
+                        gp_dim,
+                        self.dimension
+                    ))
     def __call__(self, gridpoints, **kwargs):
         """
 
@@ -45,47 +62,33 @@ class BaseSurface(metaclass=abc.ABCMeta):
         """
         if nput.is_numeric(gridpoints):
             gridpoints = np.array([gridpoints])
-        gridpoints = np.asanyarray(gridpoints)
-        if self.dimension is not None:
-            # if self.dimension == 1:
-            #     if gridpoints.ndim > 1:
-            #         raise ValueError("{}: dimension mismatch in call, surface expects grid points to be 1D".format(
-            #             type(self).__name__
-            #         ))
-            # else:
-            gp_dim = gridpoints.shape[-1]
-            if gp_dim != self.dimension:
-                raise ValueError("{}: dimension mismatch in call, grid points had dim {} but surface expects dim {}".format(
-                    type(self).__name__,
-                    gp_dim,
-                    self.dimension
-                ))
+        self.check_dimension(gridpoints)
         return self.evaluate(gridpoints, **kwargs)
 
-    def minimize(self, initial_guess, function_options=None, **opts):
-        """
-        Just calls into `scipy.optimize.minimize` as the default implementation
-
-        :param initial_guess: starting position for the minimzation
-        :type initial_guess: np.ndarray
-        :param function_options:
-        :type function_options: dict | None
-        :param opts:
-        :type opts:
-        :return:
-        :rtype:
-        """
+    # def minimize(self, initial_guess, function_options=None, **opts):
+    #     """
+    #     Just calls into `scipy.optimize.minimize` as the default implementation
     #
-        import scipy.optimize as opt
-
-        if function_options is None:
-            function_options = {}
-        test_call = self(initial_guess, **function_options) # if this fails the initial guess is bad
-
-        func = lambda x, f=self.evaluate, o=function_options: f(x, **o)
-
-        min = opt.minimize(func, initial_guess, **opts)
-        return min.x
+    #     :param initial_guess: starting position for the minimzation
+    #     :type initial_guess: np.ndarray
+    #     :param function_options:
+    #     :type function_options: dict | None
+    #     :param opts:
+    #     :type opts:
+    #     :return:
+    #     :rtype:
+    #     """
+    # #
+    #     import scipy.optimize as opt
+    #
+    #     if function_options is None:
+    #         function_options = {}
+    #     test_call = self(initial_guess, **function_options) # if this fails the initial guess is bad
+    #
+    #     func = lambda x, f=self.evaluate, o=function_options: f(x, **o)
+    #
+    #     min = opt.minimize(func, initial_guess, **opts)
+    #     return min.x
 
 
 
@@ -119,6 +122,18 @@ class TaylorSeriesSurface(BaseSurface):
     @property
     def expansion_tensors(self):
         return self.expansion.expansion_tensors
+
+    def check_dimension(self, gridpoints):
+        if self.expansion.transforms is not None:
+            dim = self.dimension
+            try:
+                self.dimension = self.expansion.transforms[0].shape[-1]
+                super().check_dimension(gridpoints)
+            finally:
+                self.dimension = dim
+        else:
+            super().check_dimension(gridpoints)
+
 
     def evaluate(self, points, **kwargs):
         """
