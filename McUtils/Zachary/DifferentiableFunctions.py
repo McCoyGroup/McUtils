@@ -455,7 +455,7 @@ class CoordinateFunction:
             )
         )
     @classmethod
-    def morse(cls, coord, *, a, re, de):
+    def morse(cls, coord, *, re, a, de):
         return cls([coord], MorseFunction(a=a, de=de, re=re, inds=[0]))
     @classmethod
     def sin(cls, coord, *, n=1, l=1):

@@ -793,7 +793,8 @@ def prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
     if expand:
         proj, A_d = disp_deriv_mat(coords, j, i, at_list)
         if fixed_atoms is not None:
-            _, fixed_atoms, _ = np.intersect1d(at_list, fixed_atoms, return_indices=True)
+            if fast_proj:
+                _, fixed_atoms, _ = np.intersect1d(at_list, fixed_atoms, return_indices=True)
             A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
 
         return proj, [a, misc.flatten_inds(A_d, [-3, -2])]
@@ -954,9 +955,7 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, e
     """
 
     if method == 'expansion':
-        a = coords[..., j, :] - coords[..., i, :]
-
-        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], expand=True)
+        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True)
         base_deriv = td.vec_norm_unit_deriv(A_expansion, order=order)[0]
         if proj is None: return base_deriv
         return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
@@ -1062,7 +1061,7 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering=
 
         return derivs
 
-def rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='jik', zero_thresh=None, fixed_atoms=None, expanded_vectors=None):
+def rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='ijk', zero_thresh=None, fixed_atoms=None, expanded_vectors=None):
     """
     Gives the derivative of the rocking motion (symmetric bend basically)
 
@@ -1455,7 +1454,7 @@ def dist_vec(coords, i, j, order=None, method='expansion', fixed_atoms=None):
         else:
             return _fill_derivs(coords, (i,j), derivs)
 
-def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='jik', fixed_atoms=None):
+def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='ijk', fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
 
@@ -1590,7 +1589,7 @@ def wag_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
     else:
         raise NotImplementedError("too annoying")
 
-def internal_conversion_specs(specs, angle_ordering='jik', **opts):
+def internal_conversion_specs(specs, angle_ordering='ijk', **opts):
     targets = []
     for idx in specs:
         if isinstance(idx, dict):
@@ -1823,7 +1822,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                              reference_internals=None,
                              fixed_atoms=None,
                              fixed_coords=None,
-                             angle_ordering='jik'):
+                             angle_ordering='ijk'):
     from . import Optimization as opt
 
     if method == 'quasi-newton':

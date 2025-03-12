@@ -389,7 +389,10 @@ class Plot(Graphics):
     #     ...
     @classmethod
     def register(cls, plot_class):
-        cls.plot_classes[plot_class.method] = plot_class
+        if plot_class.method in cls.plot_classes:
+            cls.plot_classes[plot_class.__name__] = plot_class
+        else:
+            cls.plot_classes[plot_class.method] = plot_class
         return plot_class
 Plot.register(Plot)
 
@@ -1152,7 +1155,10 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
     #     ...
     @classmethod
     def register(cls, plot_class):
-        cls.plot_classes[plot_class.method] = plot_class
+        if plot_class.method in cls.plot_classes:
+            cls.plot_classes[plot_class.__name__] = plot_class
+        else:
+            cls.plot_classes[plot_class.method] = plot_class
         return plot_class
 
 @Plot3D.register

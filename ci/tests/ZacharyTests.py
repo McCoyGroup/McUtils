@@ -2340,18 +2340,16 @@ class ZacharyTests(TestCase):
             np.allclose(dexpr_res, comp_res)
         )
 
-    @debugTest
+    @validationTest
     def test_CoordinateFunctions(self):
 
         fun = (
                 CoordinateFunction.morse((0, 1), re=1.8, a=1, de=10)
-                # + (CoordinateFunction.morse((0, 2), re=1.8, a=1, de=10) / 100)
+                + (CoordinateFunction.morse((0, 2), re=1.8, a=1, de=10) / 100)
         ) * CoordinateFunction.sin((1, 0, 2), n=2)
 
         test_coords = np.random.normal(0, 1, size=(1000, 5, 3))
         r, morse_vals = fun(test_coords, reexpress=False, order=2)
-
-        print(r[0].shape, morse_vals[0].shape)
 
         # base_fig = plt.ScatterPlot(
         #     r[0][..., 0],
