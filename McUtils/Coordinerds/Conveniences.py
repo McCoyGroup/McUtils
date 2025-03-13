@@ -16,7 +16,8 @@ __all__ = [
     "zmatrix_to_cartesian",
     "canonicalize_internal",
     "enumerate_zmatrices",
-    "extract_zmatrix_internals"
+    "extract_zmatrix_internals",
+    "parse_zmatrix_string"
 ]
 
 def cartesian_to_zmatrix(coords, ordering=None, use_rad = True):
@@ -228,3 +229,65 @@ def extract_zmatrix_internals(zmat):
         specs.append(tuple(row[:4]))
     return specs
 
+def parse_zmatrix_string(zmat):
+    from ..Data import AtomData, UnitsData
+    # we have to reparse the Gaussian Z-matrix...
+
+    possible_atoms = {d["Symbol"][:2] for d in AtomData.data.values()}
+
+    atoms = []
+    ordering = []
+    coords = []
+    vars = {}
+
+    zmat, vars_block = zmat.split("\n\n", 1)
+    bits = zmat.split()
+
+    coord = []
+    ord = []
+    complete = False
+    last_complete = -1
+    for i, b in enumerate(bits):
+        d = (i - last_complete) - 1
+        m = d % 2
+        if d == 0:
+            atoms.append(b)
+        elif m == 1:
+            b = int(b)
+            if b > 0: b = b - 1
+            ord.append(b)
+        elif m == 0:
+            coord.append(b)
+
+        if i == len(bits) - 1 or bits[i + 1][-1] in possible_atoms:
+            last_complete = i
+            ord = ord + [-1] * (4 - len(ord))
+            coord = coord + [0] * (3 - len(coord))
+            ordering.append(ord)
+            coords.append(coord)
+            ord = []
+            coord = []
+
+    split_pairs = [vb.strip().split() for vb in vars_block.split("\n")]
+    split_pairs = [s for s in split_pairs if len(s) > 0]
+
+    vars = {k: float(v) for k, v in split_pairs}
+    coords = [
+        [vars.get(x, x) for x in c]
+        for c in coords
+    ]
+
+    ordering = [
+        [i] + o
+        for i, o in enumerate(ordering)
+    ]
+    # convert book angles into sensible dihedrals...
+    # actually...I think I don't need to do anything for this?
+    ordering = np.array(ordering)[:, :4]
+
+    coords = np.array(coords)
+    coords[:, 0] *= UnitsData.convert("Angstroms", "BohrRadius")
+    coords[:, 1] = np.deg2rad(coords[:, 1])
+    coords[:, 2] = np.deg2rad(coords[:, 2])
+
+    return (atoms, ordering, coords)
