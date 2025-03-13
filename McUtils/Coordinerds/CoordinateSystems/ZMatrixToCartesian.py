@@ -68,15 +68,20 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         if ordering is None:
            ordering, coordlist = self.default_ordering(coordlist)
         else:
-            ordering = np.array(ordering)
+            ordering = np.asanyarray(ordering)
         coordlist = np.asarray(coordlist)
 
-        if np.min(ordering) > 0:
-            ordering = ordering - 1
-        dim_diff = coordlist.ndim - ordering.ndim
-        if dim_diff > 0:
-            missing = coordlist.shape[:dim_diff]
-            ordering = np.broadcast_to(ordering, missing + ordering.shape )
+        # if np.min(ordering) > 0:
+        #     ordering = ordering - 1
+        # dim_diff = coordlist.ndim - ordering.ndim
+        # if dim_diff > 0:
+        #     missing = coordlist.shape[:dim_diff]
+        #     ordering = np.broadcast_to(ordering, missing + ordering.shape )
+
+        sysnum = len(coordlist)
+        coordnum = len(coordlist[0])
+        if ordering.ndim == 2:
+            ordering = np.repeat(ordering[np.newaxis], sysnum, axis=0)
 
         if ordering.shape[-1] > 3:
             atom_ordering = ordering[:, :, 0]
@@ -84,8 +89,6 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         else:
             atom_ordering = None
 
-        sysnum = len(coordlist)
-        coordnum = len(coordlist[0])
         total_points = np.empty((sysnum, coordnum+1, 3))
         if return_derivs is not True and return_derivs is not False and isinstance(return_derivs, int):
             return_derivs = True
@@ -124,6 +127,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
 
         dists = coordlist[:, 0, 0]
         if return_derivs:
+            raise NotImplementedError('old Z-matrix derivatives disabled for instabilities')
             der_stuff = cartesian_from_rad_derivatives(origins,
                                                        x_pts, y_pts, dists,
                                                        None, None,

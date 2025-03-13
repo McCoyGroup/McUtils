@@ -223,7 +223,7 @@ class TaylorPoly:
         ]
 
         return expansions
-    def expand(self, coords, order=None, outer=True, squeeze=True):
+    def expand(self, coords, order=None, outer=True, transform_displacements=True, squeeze=True):
         """Returns a numerical value for the expanded coordinates
 
         :param coords:
@@ -232,8 +232,13 @@ class TaylorPoly:
         :rtype: float | np.ndarray
         """
         ref = self.ref
-        base_exps = self.get_expansions(coords, outer=outer, order=order)
+        base_exps = self.get_expansions(coords, outer=outer, transform_displacements=transform_displacements, order=order)
         exps = [sum(e) for e in base_exps]
+        if transform_displacements and len(exps) > 1:
+            inv = self._inv
+            if inv is None:
+                inv = nput.inverse_transformation(self._transf, order=len(exps) - 1)
+                exps = exps[1:] + nput.tensor_reexpand(inv, exps)
         exps[0] = exps[0] + ref
         if order is None:
             exps = exps[0]
