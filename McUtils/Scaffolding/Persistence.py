@@ -6,7 +6,7 @@ Two classes of persistence are provided.
  2. File-backed objects: stores objects by making serializing core
     pieces of the data
 """
-
+import json
 import os, shutil, tempfile as tf, weakref
 
 from .Checkpointing import Checkpointer, NumPyCheckpointer
@@ -14,7 +14,8 @@ from .Configurations import Config
 
 __all__ = [
     "PersistenceLocation",
-    "PersistenceManager"
+    "PersistenceManager",
+    "ResourceManager"
 ]
 
 class PersistenceLocation:
@@ -226,3 +227,93 @@ class PersistenceManager:
         key = data['name']
         cfg = self.load_config(key, make_new=True)
         cfg.update(**data)
+
+class ResourceManager:
+    """
+    A very simple framework for writing resources to a given directory
+    Designed to be extended and to support metadata
+    """
+
+    default_resource_name = 'resource'
+    def __init__(self, name=None, location=None, write_metadata=False, temporary=None):
+        self.name = self.default_resource_name if name is None else name
+        self.location = self.get_base_location(temporary=temporary) if location is None else location
+        self.write_metadata = write_metadata
+
+    base_location = None
+    location_env_var = None
+    use_temporary = True
+    @classmethod
+    def resolve_shared_directory(cls):
+        #TODO: make this less Unix specific
+        return os.path.expanduser('~/.local')
+    @classmethod
+    def get_default_base_location(cls, temporary=None):
+        if temporary:
+            return tf.TemporaryDirectory().name
+        else:
+            return cls.resolve_shared_directory()
+    @classmethod
+    def get_base_location(cls, temporary=True):
+        if cls.base_location is None:
+            if cls.location_env_var is not None:
+                cls.base_location = os.environ.get(cls.location_env_var)
+            if cls.base_location is None:
+                cls.base_location = cls.get_default_base_location(temporary=temporary)
+        return cls.base_location
+
+    def get_resource_path(self, *path):
+        return os.path.join(self.location, self.name, *path)
+
+    blacklist_files = ['.DS_Store']
+    def list_resources(self):
+        base_dir = self.get_resource_path()
+        os.makedirs(base_dir, exist_ok=True)
+        return {
+            p:os.path.join(base_dir, p)
+            for p in os.listdir(base_dir)
+            if p not in self.blacklist_files
+        }
+
+    binary_resource = True
+    json_resource = False
+    def save_resource(self, loc, val):
+        with open(loc, 'w+' if not self.binary_resource else 'wb') as res_file:
+            if self.json_resource:
+                json.dump(res_file, val)
+            else:
+                res_file.write(val)
+    def load_resource(self, loc):
+        with open(loc, 'r' if not self.binary_resource else 'rb') as res_file:
+            if self.json_resource:
+                return json.load(res_file)
+            else:
+                return res_file.read()
+
+    def get_metadata_filename(self, name):
+        return name + '.meta.json'
+    def get_resource_metadata(self, loc):
+        return {}
+    def get_resource_filename(self, name):
+        return name
+
+    resource_function = None
+    def get_resource(self, name,
+                     resource_function=None,
+                     load_resource=True):
+        resource_file = self.get_resource_filename(name)
+        loc = self.get_resource_path(resource_file)
+        if not os.path.exists(loc):
+            base_dir = self.get_resource_path()
+            os.makedirs(base_dir, exist_ok=True)
+            if resource_function is None:
+                resource_function = self.resource_function
+            if resource_function is not None:
+                default_val = resource_function(name)
+                self.save_resource(loc, default_val)
+            else:
+                return None
+        if load_resource:
+            return self.load_resource(loc)
+        else:
+            return loc

@@ -4,16 +4,20 @@ import time
 import urllib.parse
 import collections
 import weakref
+from ..Scaffolding import ResourceManager
+import hashlib
 
 __all__ = [
+    "WebRequestHandler",
     "WebAPIConnection",
-    "WebSubAPIConnection"
+    "WebSubAPIConnection",
+    "WebResourceManager"
 ]
 
 class WebAPIError(IOError):
     ...
 
-class request_handler:
+class WebRequestHandler:
 
     @classmethod
     def resolve_handler(cls, handler):
@@ -104,7 +108,10 @@ class request_handler:
             else:
                 raise WebAPIError(response.status_code, response.text, f"({response.url})")
         elif request_handler == 'urllib3':
-            return response.json()
+            if response.status_code < 300:
+                return response.json()
+            else:
+                raise WebAPIError(response.status_code, response.text, f"({response.url})")
         else:
             import json
             data = response.read()
@@ -113,6 +120,40 @@ class request_handler:
             if response.status_code < 300:
                 return json.loads(txt)
             else:
+                raise WebAPIError(response.status_code, txt, f"({response.url})")
+
+    @classmethod
+    def read_response(cls, resp, decode=True):
+        response, request_handler = resp
+        if request_handler == 'requests':
+            import requests
+            response = response  # type: requests.Request
+            if response.status_code < 300:
+                if decode:
+                    return response.text
+                else:
+                    return response.content
+            else:
+                raise WebAPIError(response.status_code, response.text, f"({response.url})")
+        elif request_handler == 'urllib3':
+            if response.status_code < 300:
+                if decode:
+                    return response.text
+                else:
+                    return response.content
+            else:
+                raise WebAPIError(response.status_code, response.text, f"({response.url})")
+        else:
+            data = response.read()
+            if response.status_code < 300:
+                if decode:
+                    encoding = response.info().get_content_charset('utf-8')
+                    return data.decode(encoding)
+                else:
+                    return data
+            else:
+                encoding = response.info().get_content_charset('utf-8')
+                txt = data.decode(encoding)
                 raise WebAPIError(response.status_code, txt, f"({response.url})")
 
 class APIAuthentication(metaclass=abc.ABCMeta):
@@ -230,7 +271,7 @@ class WebAPIConnection:
             headers['Accept'] = return_type
         return headers
 
-    default_request_handler = request_handler
+    default_request_handler = WebRequestHandler
     def do_request(self,
                    method,
                    root,
@@ -343,3 +384,21 @@ class WebSubAPIConnection(WebAPIConnection):
                          )
         self.history = root_api.history
         self.request_base = urllib.parse.urljoin(root_api.request_base.rstrip('/')+"/", path_extension, allow_fragments=True)
+
+class WebResourceManager(ResourceManager):
+    default_resource_name = 'links'
+    default_request_handler = WebRequestHandler
+    def __init__(self, *, request_handler=None, **opts):
+        if request_handler is None:
+            request_handler = self.default_request_handler
+        self.request_handler = request_handler
+        super().__init__(**opts)
+    def get_resource_filename(self, name):
+        basename = urllib.parse.urlsplit(name).path.split('/')[-1]
+        return '{}-{}'.format(basename, hashlib.md5(name.encode()).hexdigest())
+    def download_link(self, link):
+        return self.request_handler.read_response(
+            self.request_handler.request("GET", link),
+            decode=False
+        )
+    resource_function = download_link
