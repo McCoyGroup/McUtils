@@ -155,7 +155,7 @@ class OptionsMethodDispatch:
             opts = {}
         elif core.is_dict_like(method_spec):
             opts = method_spec.copy()
-            method = self._lookup_method(opts.pop(self.method_key), opts)
+            method = self._lookup_method(opts.pop(self.method_key, None), opts)
         elif callable(method_spec):
             method = method_spec
             opts = {}
