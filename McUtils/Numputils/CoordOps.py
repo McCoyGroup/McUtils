@@ -37,7 +37,8 @@ __all__ = [
     "inverse_coordinate_solve",
     "metric_tensor",
     "delocalized_internal_coordinate_transformation",
-    "relocalize_coordinate_transformation"
+    "relocalize_coordinate_transformation",
+    "transform_cartesian_derivatives"
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -2050,3 +2051,43 @@ def relocalize_coordinate_transformation(redund_tf, untransformed_coordinates=No
     U, s, V = np.linalg.svd(loc[0])
     R = U @ V
     return redund_tf @ R
+
+def transform_cartesian_derivatives(
+        derivs,
+        tfs,
+        axes=None
+):
+    if axes is None:
+        axes = -1
+    if misc.is_numeric(axes):
+        axes = [-1, -2]
+    derivs = [
+        np.asanyarray(d) if not misc.is_numeric(d) else d
+        for d in derivs
+    ]
+
+    tfs = np.asanyarray(tfs)
+    d_ax, t_ax = axes
+    if d_ax < 0:
+        d_ax = derivs[0].ndim + d_ax
+    if tfs.ndim > 2:
+        shared = d_ax
+    else:
+        shared = None
+
+    new_derivs = []
+    for i,d in enumerate(derivs):
+        if not misc.is_numeric(d):
+            for j in range(i+1):
+                d_shape = d.shape
+                d = d.reshape(
+                    d.shape[:d_ax+j] + (d.shape[d_ax+j]//3, 3) + d.shape[d_ax+j+1:]
+                )
+                if shared is not None:
+                    d = vec_tensordot(d, tfs, axes=[d_ax+j+1, tfs], shared=shared)
+                else:
+                    d = np.tensordot(d, tfs, axes=[d_ax + j + 1, tfs])
+                d = np.moveaxis(d, -1, d_ax + j + 1).reshape(d_shape)
+            new_derivs.append(d)
+
+    return new_derivs
