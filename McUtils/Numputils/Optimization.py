@@ -3,10 +3,13 @@ import functools
 import numpy as np
 import itertools
 
+from .. import Devutils as dev
+
 # from scipy.optimize.linesearch import line_search_armijo
 from . import VectorOps as vec_ops
 from . import Misc as misc
 from . import TransformationMatrices as tfs
+from . import SetOps as set_ops
 
 __all__ = [
     "iterative_step_minimize",
@@ -72,11 +75,13 @@ def get_step_finder(spec,
         else:
             spec = method(func, jacobian, **dict(spec, **extra_init))
     return spec
+oscillation_overlap_cutoff_min = 0.95
+oscillation_overlap_cutoff_max = 1.05
 def iterative_step_minimize_step(step_predictor,
                                  guess, mask, tol,
                                  orthogonal_projector, orthogonal_projection_generator,
                                  region_constraints, unitary, max_displacement, max_displacement_norm,
-                                 generate_rotation, prev_step, max_gradient_error, termination_function
+                                 generate_rotation, prev_steps, max_gradient_error, termination_function
                                  ):
     if unitary:
         projector = vec_ops.orthogonal_projection_matrix(guess.T)
@@ -149,23 +154,37 @@ def iterative_step_minimize_step(step_predictor,
     else:
         step = step[rem,]
 
-    if prev_step is not None:
-        prev_step = prev_step[mask,]
-        cur_norms = np.linalg.norm(step, axis=1)
-        pre_norms = np.linalg.norm(prev_step, axis=1)
-        overlaps = np.reshape(
-            (step[:, np.newaxis, :] @ prev_step[:, :, np.newaxis]) / (cur_norms * pre_norms),
-            -1)
+    if prev_steps is not None:
+        prev_steps = prev_steps[mask,]
+        cur_norms = np.linalg.norm(step, axis=1)[:, np.newaxis]
+        pre_norms = np.linalg.norm(prev_steps, axis=2)
+        overlaps = vec_ops.vec_tensordot(step, prev_steps, axes=[-1, -1], shared=1) / (cur_norms * pre_norms)
+        overlaps = np.reshape(overlaps, prev_steps.shape[:2])
         osc = np.where(
-            np.logical_and(-1.02 < overlaps, overlaps < -.98)
-            # np.logical_or(
-            #     np.logical_and(-1.02 < overlaps, overlaps < -.98),
-            #     np.logical_and(1.02 > overlaps, overlaps > .98, np.abs(cur_norms - pre_norms) < 1e-3)
-            # )
-        )[0]
+            np.all(
+                np.logical_and(oscillation_overlap_cutoff_min < abs(overlaps), abs(overlaps) < oscillation_overlap_cutoff_max),
+                axis=1
+            )
+        )
 
-        if len(osc) > 0:
-            step[osc,] = step[osc,] / 2
+        if len(osc[0]) > 0:
+            dist = np.reshape(overlaps[osc][:, np.newaxis, :] @ pre_norms[osc][:, :, np.newaxis], cur_norms.shape)
+            osc2 = np.where(dist < 0)[:1]
+            if len(osc2[0]) > 0:
+                osc = osc[0][osc2]
+                scaling = np.min([cur_norms[osc2], -dist[osc2] / 2], axis=0) / cur_norms[osc2]
+                # print(overlaps, dist, cur_norms, scaling)
+                # if max_displacement is not None:
+                #     print("!!!", overlaps, pre_norms.shape, cur_norms.shape, osc[1], osc[0])
+                #     print(cur_norms, pre_norms)
+                #     for o, w in zip(*set_ops.group_by(osc[1], osc[0])[0]):
+                #         cn = cur_norms[o, 0]
+                #         pn = pre_norms[o]
+                #
+                #         scaling = np.min([np.min(pn), cn]) / (2*cn)
+                #         step[o] = step[o] * scaling
+                # else:
+                step[osc,] = step[osc,] * scaling
             if unitary:
                 norms = np.linalg.norm(step[osc,], axis=1)
                 # norms = norms[rem,]
@@ -196,16 +215,26 @@ def iterative_step_minimize(
         prevent_oscillations=None,
         tol=1e-8,
         use_max_for_error=True,
-        max_iterations=100
+        max_iterations=100,
+        track_best=False,
+        logger=None
 ):
+    logger = dev.Logger.lookup(logger)
+
     step_predictor = get_step_finder(step_predictor,
                                      method=method,
                                      jacobian=jacobian,
-                                     hessian=hessian)
-
+                                     hessian=hessian,
+                                     logger=logger)
     guess = np.array(guess, dtype=dtype)
     base_shape = guess.shape[:-1]
     guess = guess.reshape(-1, guess.shape[-1])
+    if track_best:
+        best = guess.copy()
+        best_errs = np.full(guess.shape[0], -1, dtype=float)
+    else:
+        best = None
+        best_errs = None
     its = np.zeros(guess.shape[0], dtype=int)
     errs = np.zeros(guess.shape[0], dtype=float)
     mask = np.arange(guess.shape[0])
@@ -222,46 +251,67 @@ def iterative_step_minimize(
                 or orthogonal_projection_generator is not None
                 or orthogonal_directions is not None
         )
+    if prevent_oscillations is True:
+        prevent_oscillations = 1
     prev_step = None
     prev_errs = None
 
     converged = True
     for i in range(max_iterations):
-        step, step_errs, new_mask, _ = iterative_step_minimize_step(
-            step_predictor, guess[mask,],
-            mask, tol,
-            orthogonal_directions, orthogonal_projection_generator,
-            region_constraints, unitary, max_displacement, max_displacement_norm,
-            generate_rotation, prev_step, use_max_for_error, termination_function
-        )
-        if prevent_oscillations:
-            if prev_step is None:
-                prev_step = step
-            else:
-                prev_step[new_mask,] = step
-        if oscillation_damping_factor is not None:
-            if prev_errs is None:
-                prev_errs = step_errs
-            else:
-                prev_errs[new_mask,] = step_errs
+        with logger.block(tag=f"Iteration {i}"):
+            step, step_errs, new_mask, _ = iterative_step_minimize_step(
+                step_predictor, guess[mask,],
+                mask, tol,
+                orthogonal_directions, orthogonal_projection_generator,
+                region_constraints, unitary, max_displacement, max_displacement_norm,
+                generate_rotation, prev_step, use_max_for_error, termination_function
+            )
+            if best is not None:
+                if i == 0:
+                    best_errs[mask,] = step_errs
+                    best[mask,] = guess[mask,]
+                else:
+                    improved = np.where(step_errs < best_errs[mask,])
+                    if len(improved[0]) > 0:
+                        imp_mask = mask[improved]
+                        best_errs[imp_mask,] = step_errs[improved,]
+                        best[imp_mask,] = guess[imp_mask,]
 
-            inc_err = np.where(step_errs >= prev_errs[new_mask] - 1e-6) # add some flexibility
-            if len(inc_err[0]) > 0:
-                oscillation_damping_factor /= 2
-            else:
-                oscillation_damping_factor = np.min([oscillation_damping_factor * 1.2, 1.0])
-            step = step * oscillation_damping_factor
+            logger.log_print("Predicted steps: {step}", step=step)
+            logger.log_print("Step errors: {errs}", errs=step_errs)
+            if prevent_oscillations:
+                if prev_step is None:
+                    prev_step = np.random.uniform(size=(step.shape[0], prevent_oscillations, step.shape[1])).astype(step.dtype)
+                p = i % prevent_oscillations
+                prev_step[new_mask, p] = step
+            if oscillation_damping_factor is not None:
+                if prev_errs is None:
+                    prev_errs = step_errs
+                else:
+                    prev_errs[new_mask,] = step_errs
 
-        errs[mask,] = step_errs
-        if len(new_mask) == 0:
-            break
+                inc_err = np.where(step_errs >= prev_errs[new_mask] - 1e-6) # add some flexibility
+                if len(inc_err[0]) > 0:
+                    oscillation_damping_factor /= 2
+                else:
+                    oscillation_damping_factor = np.min([oscillation_damping_factor * 1.2, 1.0])
+                step = step * oscillation_damping_factor
+                logger.log_print("Oscillation damping factor: {damp}", damp=oscillation_damping_factor)
 
-        mask = new_mask
-        guess[mask,] += step
-        its[mask,] += 1
+            errs[mask,] = step_errs
+            if len(new_mask) == 0:
+                break
+
+            mask = new_mask
+            guess[mask,] += step
+            its[mask,] += 1
     else:
         converged = False
-        its[mask] = max_iterations
+        its[mask,] = max_iterations
+        if best is not None:
+            print(guess[mask,], best[mask,])
+            guess[mask,] = best[mask,]
+            errs[mask,] = best_errs[mask,]
 
     guess = guess.reshape(base_shape + (guess.shape[-1],))
     errs = errs.reshape(base_shape)
@@ -298,7 +348,8 @@ def iterative_chain_minimize(
         periodic=False,
         reembed=None,
         embedding_options=None,
-        fixed_images=None
+        fixed_images=None,
+        logger=None
 ):
     guesses = np.array(chain_guesses, dtype=dtype)
     base_shape = guesses.shape[:-2]
@@ -509,11 +560,14 @@ class LineSearcher(metaclass=abc.ABCMeta):
                       ):
         raise NotImplementedError("abstract")
 
+    default_alpha = 1e-3
+    def get_default_alpha(self, am):
+        return np.full_like(am, self.default_alpha)
     def scalar_search(self,
                       scalar_func,
                       guess_alpha,
                       min_alpha=None,
-                      max_iterations=100,
+                      max_iterations=15,
                       history_length=1,
                       **opts):
         if min_alpha is None:
@@ -581,6 +635,10 @@ class LineSearcher(metaclass=abc.ABCMeta):
             #     mask = np.delete(mask, problem_alphas)
             #     if len(mask) == 0:
             #         break# alphas, (phi_vals, is_converged)
+        else:
+            am = alphas[mask,]
+            default_alpha = self.get_default_alpha(am, **opts)
+            alphas[mask,] = np.min(np.array([am, default_alpha]), axis=0)
         return alphas, (phi_vals, is_converged)
 
     def prep_search(self, initial_geom, search_dir, guess_alpha=1, **opts):
@@ -606,7 +664,7 @@ class LineSearcher(metaclass=abc.ABCMeta):
 
 class ArmijoSearch(LineSearcher):
 
-    def __init__(self, func, c1=1e-4, min_alpha=None, fixed_step_cutoff=1e-8, der_max=1e6, guess_alpha=1):
+    def __init__(self, func, c1=1e-4, min_alpha=None, fixed_step_cutoff=1e-8, der_max=1e2, guess_alpha=1):
         super().__init__(func, min_alpha=min_alpha, c1=c1)
         self.func = func
         self.der_max = der_max
@@ -616,7 +674,7 @@ class ArmijoSearch(LineSearcher):
     def prep_search(self, initial_geom, search_dir, *, initial_grad, min_alpha=None, **rest):
         mask = np.arange(len(initial_geom))
         derphi0 = np.reshape(initial_grad[:, np.newaxis, :] @ search_dir[:, :, np.newaxis], (-1,))
-        # derphi0 = np.clip(derphi0, -self.der_max, self.der_max)
+        derphi0 = np.clip(derphi0, -self.der_max, self.der_max)
         if min_alpha is None:
             min_alpha = self.min_alpha
 
@@ -639,10 +697,16 @@ class ArmijoSearch(LineSearcher):
         if tol is None:
             tol = self.converged_tolerance
         test = phi0 + c1 * alphas * derphi0
-        return np.logical_or(
-            phi_vals < test,
-            np.allclose(phi_vals, test, rtol=0, atol=tol)
+        return np.logical_and(
+            np.logical_not(np.isnan(phi_vals)),
+            np.logical_or(
+                phi_vals < test,
+                np.allclose(phi_vals, test, rtol=0, atol=tol)
+            )
         )
+
+    def get_default_alpha(self, am, *, phi0, **etc):
+        return np.full_like(am, self.default_alpha / np.abs(phi0))
 
     def update_alphas(self,
                       phi_vals, alphas, iteration,
@@ -654,6 +718,7 @@ class ArmijoSearch(LineSearcher):
                       ):
         phi0 = phi0[mask,]
         derphi0 = derphi0[mask,]
+
         if iteration == 0:
             factor = (phi_vals - phi0 - derphi0 * alphas)
             # alpha1 = alphas.copy()
@@ -662,7 +727,7 @@ class ArmijoSearch(LineSearcher):
             # TODO: ensure stays numerically stable
             # print(".>>", phi0)
             alpha1 = -(derphi0) * alphas ** 2 / 2.0 / factor
-            return alpha1
+            alpha_new = alpha1
         else:
             phi_a0 = old_phi_vals[0]
             phi_a1 = phi_vals
@@ -706,7 +771,11 @@ class ArmijoSearch(LineSearcher):
             )
             alpha2[halved_alphas] = alpha1[halved_alphas] / 2.0
 
-            return alpha2
+            alpha_new = alpha2
+
+        bad_pos = np.where(np.isnan(alpha_new))
+        alpha_new[bad_pos] = alphas[bad_pos] / 2
+        return alpha_new
 
 class _WolfeLineSearch(LineSearcher):
     """
@@ -747,7 +816,7 @@ class GradientDescentStepFinder:
     line_search = ArmijoSearch
 
     def __init__(self, func, jacobian, damping_parameter=None, damping_exponent=None,
-                 line_search=True, restart_interval=10):
+                 line_search=True, restart_interval=10, logger=None):
         self.func = func
         self.jac = jacobian
         self.damper = Damper(
@@ -761,6 +830,7 @@ class GradientDescentStepFinder:
         elif line_search is False:
             line_search = None
         self.searcher = line_search
+        self.logger = logger
 
     def __call__(self, guess, mask, projector=None):
         if isinstance(mask, tuple):  # for chain minimizers
@@ -841,12 +911,13 @@ class NetwonDirectHessianGenerator:
 
 class NewtonStepFinder:
     supports_hessian = True
-    def __init__(self, func, jacobian=None, hessian=None, *, check_generator=True, **generator_opts):
+    def __init__(self, func, jacobian=None, hessian=None, *, check_generator=True, logger=None, **generator_opts):
         if check_generator:
             generator = self._prep_generator(func, jacobian, hessian, generator_opts)
         else:
             generator = jacobian
         self.generator = generator
+        self.logger = logger
 
     @classmethod
     def _prep_generator(cls, func, jac, hess, opts):
@@ -868,7 +939,7 @@ class NewtonStepFinder:
 class QuasiNewtonStepFinder:
     supports_hessian = False
 
-    def __init__(self, func, jacobian, approximation_type='bfgs', **generator_opts):
+    def __init__(self, func, jacobian, approximation_type='bfgs', logger=None, **generator_opts):
         self.hess_appx = self.hessian_approximations[approximation_type.lower()](func, jacobian, **generator_opts)
     @classmethod
     def get_hessian_approximations(cls):
@@ -1339,8 +1410,9 @@ class SchelgelApproximator(BofillApproximator):
 class ConjugateGradientStepFinder:
     supports_hessian = False
 
-    def __init__(self, func, jacobian, approximation_type='fletcher-reeves', **generator_opts):
+    def __init__(self, func, jacobian, approximation_type='fletcher-reeves', logger=None, **generator_opts):
         self.step_appx = self.beta_approximations[approximation_type.lower()](func, jacobian, **generator_opts)
+        self.logger = logger
     @property
     def beta_approximations(self):
         return {
@@ -1358,7 +1430,7 @@ class ConjugateGradientStepApproximator:
 
     def __init__(self, func, jacobian,
                  damping_parameter=None, damping_exponent=None,
-                 restart_interval=50, restart_parameter=.2,
+                 restart_interval=50, restart_parameter=.1,
                  line_search=True):
         self.func = func
         self.jac = jacobian
@@ -1384,12 +1456,13 @@ class ConjugateGradientStepApproximator:
 
     def determine_restart(self, new_jacs, mask):
         if self.n == 0: return True
-        prev_jac = self.prev_jac[mask,]
-        new_norm = np.abs(new_jacs[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis]).flatten()
-        old_norm = (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis]).flatten()
-        return np.any(
-            self.restart_parameter * old_norm < new_norm
-        )
+        if self.restart_parameter is not None:
+            prev_jac = self.prev_jac[mask,]
+            new_norm = np.abs(new_jacs[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis]).flatten()
+            old_norm = (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis]).flatten()
+            return np.any(
+                self.restart_parameter * old_norm < new_norm
+            )
 
     def __call__(self, guess, mask, projector=None):
         new_jacs = self.jac(guess, mask)
@@ -1447,11 +1520,13 @@ class EigenvalueFollowingStepFinder:
                  hessian_approximator='bofill',
                  approximation_mode='direct',
                  target_mode=None,
+                 logger=None
                  # approximation_mode='inverse'
                  ):
         self.base_approximator = QuasiNewtonStepFinder.get_hessian_approximations()[hessian_approximator.lower()](
             func, jacobian
         )
+        self.logger = logger
 
         self.func = func
         self.jac = jacobian
@@ -1595,6 +1670,7 @@ class ChainMinimizingStepFinder:
                  jacobian,
                  hessian=None,
                  step_finder='conjugate-gradient',
+                 logger=None,
                  **opts
                  ):
         self.step_finder = get_step_finder({
@@ -1605,6 +1681,7 @@ class ChainMinimizingStepFinder:
             **opts
         })
         self._mask_data = None
+        self.logger = logger
 
     def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
         return jac
@@ -1662,6 +1739,7 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
                  spring_constants=.1,
                  distance_function=None,
                  step_finder='gradient-descent',
+                 logger=None,
                  **opts
                  ):
         self.image_potential = func
@@ -1670,6 +1748,7 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
         self._spring_constants = None
         self.distance_function = distance_function
         self._last_tangent = None
+        self.logger = logger
 
     def get_dist(self, p1, p2):
         return np.linalg.norm(p1 - p2, axis=-1)
@@ -1736,6 +1815,7 @@ class AdjustedChainStepFinder(ChainMinimizingStepFinder):
                  func,
                  jacobian,
                  hessian=None,
+                 logger=None,
                  **opts
                  ):
         super().__init__(
@@ -1745,6 +1825,7 @@ class AdjustedChainStepFinder(ChainMinimizingStepFinder):
             **opts
         )
         self.pairwise_function = pairwise_image_function
+        self.logger = logger
 
     def image_pairwise_contribution(self,guess, mask, cur, prev, next, order=0):
         return self.pairwise_function(guess, mask, cur, prev, next, order=order)

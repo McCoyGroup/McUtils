@@ -15,6 +15,7 @@ __all__ = [
     "vec_tensordot",
     "vec_tensordiag",
     "vec_tdot",
+    "distance_matrix",
     "identity_tensors",
     "semisparse_tensordot",
     "frac_powh",
@@ -97,6 +98,26 @@ def vec_norms(vecs, axis=-1):
     # if axis != -1:
     #     raise NotImplementedError("Norm along not-the-last axis not there yet...")
     return np.linalg.norm(vecs, axis=axis)
+
+def distance_matrix(pts, axis=-1, axis2=None, return_triu=False):
+    pts = np.asanyarray(pts)
+    if axis2 is None:
+        axis2 = axis-1
+
+    n = pts.shape[axis2]
+    rows, cols = np.triu_indices(n, k=1)
+    vecs_r = np.take(pts, rows, axis=axis2)
+    vecs_c = np.take(pts, cols, axis=axis2)
+
+    dists = vec_norms(vecs_r - vecs_c, axis=axis)
+    if return_triu:
+        return dists
+    else:
+        dist_mats = np.zeros(tuple(np.delete(pts.shape, [axis, axis2])) + (n, n), dtype=dists.dtype)
+        dist_mats[..., rows, cols] = dists
+        dist_mats[..., cols, rows] = dists
+        #TODO: handle transposition
+        return dist_mats
 
 ################################################
 #
