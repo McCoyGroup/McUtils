@@ -709,7 +709,7 @@ def vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order):
     )
     B_expansion = [
         # force parallel
-        np.expand_dims(signs, list(range(-o, 0))) * b
+        np.expand_dims(signs, list(range(-(o+1), 0))) * b
         for o,b in enumerate(B_expansion)
     ]
 
@@ -950,7 +950,7 @@ def get_unique_permutations(perm_idx):
         unique_permutation_cache,
         key,
         lambda perm_idx:UniquePermutations(perm_idx).permutations(return_indices=True),
-        condition=lambda k:len(k) <= max_symm_perm_order,
+        condition=lambda k:k is not None and len(k) <= max_symm_perm_order,
         args=(perm_idx,)
     )
 def nca_symmetrize(tensor, partition,

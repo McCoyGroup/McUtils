@@ -34,6 +34,7 @@ __all__ = [
     'wag_vec',
     "internal_conversion_function",
     "internal_coordinate_tensors",
+    "inverse_internal_coordinate_tensors",
     "inverse_coordinate_solve",
     "metric_tensor",
     "delocalized_internal_coordinate_transformation",
@@ -1675,13 +1676,17 @@ coord_type_map = {
     'oop':oop_vec,
     'wag':wag_vec
 }
-def internal_coordinate_tensors(coords, specs, order=None, **opts):
-    return internal_conversion_function(specs, **opts)(
+def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None, **opts):
+    base_tensors = internal_conversion_function(specs, **opts)(
         coords,
         order=order
     )
+    if return_inverse:
+        return base_tensors, inverse_internal_coordinate_tensors(base_tensors[1:], coords, masses=masses, order=order)
+    else:
+        return base_tensors
 
-def _transrot_invariant_inverse(expansion, coords, masses, order):
+def inverse_internal_coordinate_tensors(expansion, coords, masses, order):
     from .CoordinateFrames import translation_rotation_invariant_transformation
 
     # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
@@ -1695,7 +1700,6 @@ def _transrot_invariant_inverse(expansion, coords, masses, order):
         j
         for j in inverse_tf
     ]
-
 
 class _inverse_coordinate_conversion_caller:
     def __init__(self, conversion, target_internals,
@@ -1746,7 +1750,7 @@ class _inverse_coordinate_conversion_caller:
                 e[..., fixed_coords] = 0
 
         if self.remove_translation_rotation: # dx/dr
-            inverse_expansion = _transrot_invariant_inverse(expansion, coords, self.masses, ord)
+            inverse_expansion = inverse_internal_coordinate_tensors(expansion, coords, self.masses, ord)
         else:
             sqrt_mass = np.expand_dims(
                 np.repeat(
@@ -1922,7 +1926,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     if return_expansions:
         expansion = opt_internals[1:]
         if remove_translation_rotation:
-            opt_expansions = _transrot_invariant_inverse(expansion, coords, masses, order)
+            opt_expansions = inverse_internal_coordinate_tensors(expansion, coords, masses, order)
         else:
             opt_expansions = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
     else:
