@@ -173,17 +173,6 @@ def iterative_step_minimize_step(step_predictor,
             if len(osc2[0]) > 0:
                 osc = osc[0][osc2]
                 scaling = np.min([cur_norms[osc2], -dist[osc2] / 2], axis=0) / cur_norms[osc2]
-                # print(overlaps, dist, cur_norms, scaling)
-                # if max_displacement is not None:
-                #     print("!!!", overlaps, pre_norms.shape, cur_norms.shape, osc[1], osc[0])
-                #     print(cur_norms, pre_norms)
-                #     for o, w in zip(*set_ops.group_by(osc[1], osc[0])[0]):
-                #         cn = cur_norms[o, 0]
-                #         pn = pre_norms[o]
-                #
-                #         scaling = np.min([np.min(pn), cn]) / (2*cn)
-                #         step[o] = step[o] * scaling
-                # else:
                 step[osc,] = step[osc,] * scaling
             if unitary:
                 norms = np.linalg.norm(step[osc,], axis=1)
@@ -309,7 +298,6 @@ def iterative_step_minimize(
         converged = False
         its[mask,] = max_iterations
         if best is not None:
-            print(guess[mask,], best[mask,])
             guess[mask,] = best[mask,]
             errs[mask,] = best_errs[mask,]
 

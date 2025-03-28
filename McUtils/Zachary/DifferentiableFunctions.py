@@ -294,12 +294,48 @@ class UnivariateFunction(DifferentiableFunction):
 
         return expansions
 
+class Poly1D(UnivariateFunction):
+    def __init__(self, coeffs, ref, center, inds=None):
+        super().__init__(self.evaluate_term, inds=inds)
+        self.coeffs = coeffs
+        self.center = center
+        self.ref = ref
+
+    @classmethod
+    def fac_pow(cls, k, n):
+        return np.prod(np.arange(k, k+n+1))
+
+    def evaluate_term(self, r, order=0, previous_terms=None):
+        disp = r - self.center
+        n = order
+
+        if order == 0:
+            return self.ref + sum(
+                d * ( disp**(k+1) )
+                for k,d in enumerate(self.coeffs)
+            )
+        else:
+            return sum(
+                (self.fac_pow(k+1, n)*d) * ( disp**(k+1) )
+                for k,d in enumerate(self.coeffs[n-1:])
+            )
+    def get_children(self):
+        return []
+
 class MorseFunction(UnivariateFunction):
     def __init__(self, *, de, a, re, inds=None):
         super().__init__(self.evaluate_term, inds=inds)
         self.de = de
         self.a = a
         self.re = re
+
+    @classmethod
+    def from_anharmonicity(cls, w, wx, g, re, inds=None):
+        wx = np.abs(wx)
+        de = (w ** 2) / (4 * wx)
+        a = np.sqrt(2 * wx / g)
+
+        return cls(de=de, a=a, re=re, inds=inds)
 
     def evaluate_term(self, r, order=0, previous_terms=None):
         de = self.de
@@ -442,21 +478,27 @@ class CoordinateFunction:
     @classmethod
     def polynomial(cls, coord_spec, *, coeffs, center, ref):
         if nput.is_numeric(coord_spec[0]):
-            coord_spec = [coord_spec]
-            coeffs = [[c] for c in coeffs]
-            center = [center]
-        return cls(
-            coord_spec,
-            PolynomialFunction.from_coefficients(
+            fun = Poly1D(
+                [np.array([c]).flatten()[0] for c in coeffs],
+                ref=np.array([ref]).flatten()[0],
+                center=np.array([center]).flatten()[0]
+            )
+        else:
+            fun = PolynomialFunction.from_coefficients(
                 coeffs=coeffs,
                 center=center,
                 ref=ref,
                 inds=list(range(len(coord_spec)))
             )
-        )
+        return cls(coord_spec, fun)
+
     @classmethod
-    def morse(cls, coord, *, re, a, de):
-        return cls([coord], MorseFunction(a=a, de=de, re=re, inds=[0]))
+    def morse(cls, coord, *, re, a=None, de=None, w=None, wx=None, g=None):
+        if w is not None:
+            fun = MorseFunction.from_anharmonicity(w=w, wx=wx, g=g, re=re, inds=[0])
+        else:
+            fun = MorseFunction(a=a, de=de, re=re, inds=[0])
+        return cls([coord], fun)
     @classmethod
     def sin(cls, coord, *, n=1, l=1):
         return cls([coord], Sin(n=n, l=l, inds=[0]))

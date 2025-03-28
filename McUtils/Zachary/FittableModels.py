@@ -3,194 +3,229 @@ Defines classes for providing different approaches to fitting.
 For the most part, the idea is to use `scipy.optimize` to do the actual fitting process,
 but we layer on conveniences w.r.t. specification of bases and automation of the actual fitting process
 """
+import abc
+
+from .. import Devutils as dev
 
 import numpy as np, scipy.optimize as opt, enum
 from collections import OrderedDict as odict
 
 __all__ = [
-    "FittableModel",
-    "LinearFittableModel",
-    "LinearFitBasis"
+    "FittedModel"
 ]
 
-class FittableModel:
-    """
-    Defines a model that can be fit
-    """
-    def __init__(self, parameters, function, pre_fit = False, covariance = None):
-        if not isinstance(parameters, odict):
-            ...
-        elif isinstance(parameters, np.ndarray) or isinstance(parameters[0], (int, float, np.floating, np.integer)):
-            param_names = ["c"+str(i) for i in range(len(parameters))]
-            parameters = odict(zip(param_names, parameters))
+class FittedModel:
+    def __init__(self,
+                 fit_basis,
+                 expansion_coeffs=None,
+                 basis_parameters=None,
+                 **kwargs
+                 ):
+        self.fit_basis, self.basis_parameters = self.canonicalize_basis(fit_basis, basis_parameters)
+        self.coeffs = expansion_coeffs
+        self.opts = kwargs
+
+    @classmethod
+    def canonicalize_basis(cls, fit_basis, basis_parameters):
+        if callable(fit_basis):
+            fit_basis = [fit_basis]
+        if basis_parameters is None or dev.is_dict_like(basis_parameters):
+            basis_parameters = [basis_parameters] * len(fit_basis)
+
+        return fit_basis, basis_parameters
+
+    def __call__(self, pts, order=None, **opts):
+        opts = dict(self.opts, **opts)
+        return self.evaluate_kernel(
+            self.fit_basis,
+            self.basis_parameters,
+            pts,
+            coeffs=self.coeffs,
+            order=order,
+            **opts
+        )
+
+    @classmethod
+    def evaluate_kernel(cls,
+                        fit_basis,
+                        basis_parameters,
+                        pts,
+                        coeffs=None,
+                        order=None,
+                        **opts
+                        ):
+        if order is None:
+            kernel_expansions = [
+                [
+                    f(pts, **(params if params is not None else {}), **opts)
+                    for f, params in zip(fit_basis, basis_parameters)
+                ]
+            ]
         else:
-            parameters = odict(parameters)
-        self.initial_parameters = parameters
-        self._param_names = list(parameters.keys())
-        if pre_fit:
-            self._parameter_values = np.array(parameters.values())
+            kernel_expansions = [
+                f(pts, order=order, **(params if params is not None else {}), **opts)
+                for f, params in zip(fit_basis, basis_parameters)
+            ]
+            kernel_expansions = [
+                [k[o] for k in kernel_expansions]
+                for o in range(order + 1)
+            ]
+
+        if coeffs is not None:
+            val_expansions = [np.dot(coeffs, k) for k in kernel_expansions]
         else:
-            self._parameter_values = None
-        self.covariance = covariance
-        self.func = function
+            val_expansions = [sum(k) for k in kernel_expansions]
 
-    @property
-    def parameters(self):
-        if not self.fitted:
-            raise ValueError("{}: model hasn't been fitted".format(type(self).__name__))
-        return odict(zip(self._param_names, self._parameter_values))
-    @property
-    def parameter_values(self):
-        return self._parameter_values
-    @property
-    def parameter_names(self):
-        return self._param_names
-    @property
-    def fitted(self):
-        return self._parameter_values is not None
-
-    def fit(self, xdata, ydata=None, fitter=None, **methopts):
-        """
-        Fits the model to the data using scipy.optimize.curve_fit or a function that provides the same interface
-
-        :param points:
-        :type points:
-        :param methopts:
-        :type methopts:
-        :return:
-        :rtype:
-        """
-        if fitter is None:
-            fitter = opt.curve_fit
-
-        if self.fitted:
-            p0 = self._parameter_values
+        if order is None:
+            return val_expansions[0]
         else:
-            p0 = np.array(self.initial_parameters.values())
+            return val_expansions
 
-        if 'p0' not in methopts:
-            methopts['p0'] = p0
-
-        if ydata is None:
-            ydata = xdata[:, -1]
-            xdata = xdata[:, :-1]
-        params, cov = fitter(xdata, ydata, **methopts)
-        self._parameter_values = params
-        self.covariance = cov
-
-    def get_parameter(self, name):
-        """
-        Returns the fitted value of the parameter given by 'name'
-        :param name:
-        :type name:
-        :return:
-        :rtype:
-        """
-        try:
-            ind = self._param_names.index(name)
-        except IndexError:
-            ind = None
-        if ind is None:
-            raise KeyError("{}: model has no parameter '{}'".format(type(self).__name__, name))
-        return self._parameter_values[ind]
-    def __getitem__(self, item):
-        return self.get_parameter(item)
-
-    def evaluate(self, xdata):
-        if not self.fitted:
-            raise ValueError("{}: model hasn't been fitted".format(type(self).__name__))
-        return self.func(xdata, *self._parameter_values)
-    def __call__(self, xdata):
-        return self.evaluate(xdata)
-
-class LinearFittableModel(FittableModel):
-    """
-    Defines a class of models that can be expressed as linear expansions of basis functions.
-    We _could_ define an alternate fit function by explicitly building & fitting a design matrix, but I think we're good on that for now
-    """
-
-    def __init__(self, basis, initial_params=None, pre_fit=False, covariance=None):
-        if isinstance(basis, LinearFitBasis):
-            names = basis.names
-            funcs = basis.functions
-            if initial_params is None:
-                initial_params = odict((n, 1) for n in names)
-        if initial_params is None:
-            initial_params = [1]*len(basis)
-        self.basis = basis
-        func = lambda xdata, *coefs, basis=basis: np.dot(np.array(coefs), np.array([b(xdata) for b in basis]))
-        super().__init__(initial_params, func, pre_fit=pre_fit, covariance=covariance)
-
-    def evaluate(self, xdata):
-        if not self.fitted:
-            raise ValueError("{}: model hasn't been fitted".format(type(self).__name__))
-        return np.dot(self.parameter_values, np.array([b(xdata) for b in self.basis]))
-
-class LinearFitBasis:
-    """
-    Provides a container to build bases of functions for fitting.
-    Asks for a generator for each dimension, which is just a function that takes an integer and returns a basis function at that order.
-    Product functions are taken up to some max order
-    """
-    def __init__(self, *generators, order=3):
-        """
-
-        :param generators: the generating functions for the bases in each dimenion
-        :type generators: Iterable[function]
-        :param order: the maximum order for the basis functions (currently turning off coupling isn't possible, but that could come)
-        :type order: int
-        """
-        self.ndim = len(generators)
-        self.generators = generators
-        self._order = order
-        self._functions = None
-        self._basis_names = None
-
-    @property
-    def functions(self):
-        if self._functions is None:
-            self._functions, self._basis_names = self.construct_basis()
-        return self._functions
-    @property
-    def names(self):
-        if self._basis_names is None:
-            self._functions, self._basis_names = self.construct_basis()
-        return self._basis_names
-    @property
-    def order(self):
-        return self._order
-    @order.setter
-    def order(self, order):
-        if not isinstance(order, int):
-            raise TypeError("{}: basis order must be an int, got '{}'".format(
-                type(self).__name__,
-                order
-            ))
-        self._functions = None
-        self._order = order
-    def construct_basis(self):
-        import itertools as ip
-
-        if self.ndim > 1:
-            inds = ip.product(range(self._order), repeat=self.ndim)
-            funcs = []
-            names = []
-            for i in inds:
-                # filter to only pick up basis functions where the
-                if sum(i) <= self._order:
-                    prods = tuple(f(n) for f,n in zip(self.generators, i))
-                    # build basis function by taking products
-                    funcs.append(lambda xdata, fs=prods: np.prod([f(xdata[..., n]) for n, f in enumerate(fs)]))
-                    names.append("c"+"".join(str(n) for n in i))
+    @classmethod
+    def _handle_nl_fit_params(cls,
+                              params,
+                              kernels,
+                              param_names,
+                              include_expansion_coefficients=True
+                              ):
+        if include_expansion_coefficients:
+            n = len(kernels)
+            coeffs, params = params[-n:], params[:-n]
         else:
-            funcs = [self.generators[0](n) for n in range(self._order)]
-            names = ["c"+str(n) for n in range(self._order)]
+            coeffs = None
 
-        return funcs, names
+        parameter_lists = []
+        k = 0
+        for pl in param_names:
+            e = k+len(pl)
+            parameter_lists.append(
+                zip(pl, params[k:e])
+            )
+            k = e
+        if k < len(params) - 1:
+            raise ValueError(f"params of len {len(params)} don't distribute into names {param_names}")
 
-    # just here for convenience
-    fourier_series = lambda x,k: np.cos(k*x)
-    power_series = lambda x,n: x**n
+        return coeffs, parameter_lists
+
+    @classmethod
+    def get_kernel_and_opts(cls, k):
+        func, opts = k  # TODO: make this more flexible down the line
+        if dev.is_dict_like(opts):
+            names = list(opts.keys())
+            vals = list(opts.values())
+        else:
+            names = list(opts)
+            vals = [None] * len(names)
+        vals = [
+            v
+                if v is not None else
+            np.random.rand()
+            for v in vals
+        ]
+        return func, names, vals
+    @classmethod
+    def parse_kernel_specs(cls, kernels):
+        if dev.is_dict_like(kernels):
+            kernels = [kernels]
+        funcs = []
+        param_names = []
+        param_defaults = []
+        for k in kernels:
+            f, n, d = cls.get_kernel_and_opts(k)
+            funcs.append(f)
+            param_names.append(n)
+            param_defaults.extend(d)
+
+        return funcs, param_names, param_defaults
+
+    @classmethod
+    def nonlinear_fit(cls,
+                      kernel_specs,
+                      pts,
+                      observations,
+                      include_expansion_coefficients=True,
+                      **fit_params
+                      ):
+        kernels, param_names, param_defaults = cls.parse_kernel_specs(kernel_specs)
+        if include_expansion_coefficients:
+            param_defaults = np.concatenate([np.array(param_defaults, dtype=float), np.ones(len(kernels), dtype=float)])
+        def f(x, params):
+            coeffs, basis_parameters = cls._handle_nl_fit_params(
+                params,
+                kernels,
+                param_names,
+                include_expansion_coefficients=include_expansion_coefficients
+            )
+            return cls.evaluate_kernel(
+                kernels,
+                basis_parameters,
+                x,
+                coeffs=coeffs
+            )
+        # def jac():
+
+        opt_params, _ = opt.curve_fit(
+            f,
+            pts,
+            observations,
+            param_defaults,
+            fit_params,
+            full_output=False
+        )
+
+        coeffs, param_dicts = cls._handle_nl_fit_params(
+            opt_params, kernels, param_names,
+            include_expansion_coefficients=include_expansion_coefficients
+        )
+
+        return cls(
+            kernels,
+            expansion_coeffs=coeffs,
+            basis_parameters=param_dicts
+        )
+        # return cls.from_fit(
+        #     kernels,
+        #     param_names,
+        #     fit
+        # )
+
+    @classmethod
+    def get_fit_methods(cls):
+        return {
+            'nonlinear_fit':cls.nonlinear_fit
+        }
+
+    _fit_dispatch = dev.uninitialized
+    default_fit_method = 'nonlinear_fit'
+    @classmethod
+    def get_fit_dispatch(cls):
+        cls._fit_dispatch = dev.handle_uninitialized(
+            cls._fit_dispatch,
+            dev.OptionsMethodDispatch,
+            args=(cls.get_fit_methods,),
+            kwargs=dict(
+                default_method=cls.default_fit_method,
+                # attributes_map=cls.get_evaluators_by_attributes()
+            )
+        )
+        return cls._fit_dispatch
+    @classmethod
+    def fit(cls,
+            kernels,
+            pts,
+            observations,
+            method=None,
+            **opts
+            ):
+
+        fit_method, method_opts = cls.get_fit_dispatch().resolve(method)
+        return fit_method(
+            kernels,
+            pts,
+            observations,
+            **dict(method_opts, **opts)
+        )
+
 
 
 

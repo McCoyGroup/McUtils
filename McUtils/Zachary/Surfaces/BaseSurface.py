@@ -8,8 +8,8 @@ from ... import Numputils as nput
 __all__ = [
     "BaseSurface",
     "TaylorSeriesSurface",
-    "LinearExpansionSurface",
-    "LinearFitSurface",
+    # "LinearExpansionSurface",
+    # "LinearFitSurface",
     "InterpolatedSurface"
 ]
 

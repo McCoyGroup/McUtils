@@ -481,9 +481,8 @@ class StickPlot(Plot):
             lc = plot_style['color']
             del plot_style['color']
         linefmt = ''
-        if 'line_style' in plot_style:
-            ls = plot_style['line_style']
-            del plot_style['line_style']
+        ls = plot_style.pop('line_style', None)
+        if ls is not None:
             if ls == 'dashed':
                 if 'linefmt' in plot_style:
                     raise ValueError("modifying passed linefmt not currently supported")
