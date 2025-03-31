@@ -408,10 +408,14 @@ class CoordinateFunction:
             canon = [coords.canonicalize_internal(c) for c in conv]
             return canon, nput.internal_conversion_function(canon)
 
-    def __call__(self, coords, order=0, reexpress=True):
+    def __call__(self, coords, order=0, preconverted=False, reexpress=True):
         # subexprs that only map to some coordinated need to map correctly!
         # not sure how best to handle that though...
-        coord_expansion = self.coordinate_conversion(coords, order=0 if not reexpress else order)
+        if not preconverted:
+            coord_expansion = self.coordinate_conversion(coords, order=0 if not reexpress else order)
+        else:
+            coord_expansion = [coords]
+            reexpress = False
         base_expr = self.expr(coord_expansion[0], order=order)
         if reexpress:
             expansion_vals = base_expr[:1] + (

@@ -205,7 +205,7 @@ class TaylorPoly:
             if outer:
                 tensr = np.broadcast_to(tensr[np.newaxis], (disp.shape[0],) + tensr.shape)
             n = i + 1
-            if order == n:
+            if order >= n:
                 scaling = np.prod(np.arange(1, n))
                 expansions[n].append(tensr * scaling)
             for j in range(n):
@@ -234,7 +234,7 @@ class TaylorPoly:
         ref = self.ref
         base_exps = self.get_expansions(coords, outer=outer, transform_displacements=transform_displacements, order=order)
         exps = [sum(e) for e in base_exps]
-        if transform_displacements and len(exps) > 1:
+        if transform_displacements and len(exps) > 1 and self._transf is not None:
             inv = self._inv
             if inv is None:
                 inv = nput.inverse_transformation(self._transf, order=len(exps) - 1)

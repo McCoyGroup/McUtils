@@ -228,19 +228,47 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
     #     inv_rot_expansion = nput.matinv_deriv(sqrt_expansion, order=order)
     #     inv_rot_2 = inv_rot_expansion[0]
     # else:
-    inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot))
-    inv_rot_2 = vec_ops.vec_tensordot(
-        ax_rot,
-        vec_ops.vec_tensordot(
+    good_ax = np.abs(mom_rot) > 1e-8
+    nonlinear = good_ax.flatten().all()
+    if nonlinear:
+        inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot))
+        inv_rot_2 = vec_ops.vec_tensordot(
             ax_rot,
-            inv_mom_2,
+            vec_ops.vec_tensordot(
+                ax_rot,
+                inv_mom_2,
+                shared=1,
+                axes=[-1, -1]
+            ),
             shared=1,
             axes=[-1, -1]
-        ),
-        shared=1,
-        axes=[-1, -1]
-    )
-    # inv_rot_expansion = [inv_rot_2]
+        )
+    else:
+        all_linear = len(good_ax)==0 or np.sum(np.abs(np.diff(good_ax, axis=0))) == 0
+        if all_linear:
+            good_ax = good_ax[0]
+            inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot[:, good_ax,]))
+            inv_rot_2 = vec_ops.vec_tensordot(
+                ax_rot[:, :, good_ax],
+                vec_ops.vec_tensordot(
+                    ax_rot[:, :, good_ax],
+                    inv_mom_2,
+                    shared=1,
+                    axes=[-1, -1]
+                ),
+                shared=1,
+                axes=[-1, -1]
+            )
+        else:
+            inv_rot_2 = []
+            for sel,moms,rot in zip(good_ax, mom_rot, ax_rot):
+                inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(moms[sel,]))
+                subinv = rot[:, sel] @ inv_mom_2 @ rot[:, sel].T
+                rem = np.array([0, 1, 2])[np.logical_not(sel)]
+                subinv[:, rem] = rot.T[:, rem]
+                inv_rot_2.append(subinv)
+            inv_rot_2 = np.array(inv_rot_2)
+
     com = center_of_mass(coords, masses)
     com = np.expand_dims(com, 1) # ???
     shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[: np.newaxis, :])
@@ -250,16 +278,35 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
         shared=1,
         axes=[-1, 1]
     ).reshape((coords.shape[0], 3 * n, 3))  # rotations
-    # raise Exception(R)
 
-    freqs = np.concatenate([
-        np.broadcast_to([[1e-14, 1e-14, 1e-14]], mom_rot.shape),
-        (1 / (2 * mom_rot))
-        # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
-        # will be tiny
-    ], axis=-1)
-    M = np.broadcast_to(M[np.newaxis], R.shape)
-    eigs = np.concatenate([M, R], axis=2)
+    if nonlinear:
+        freqs = np.concatenate([
+            np.broadcast_to([[1e-14, 1e-14, 1e-14]], mom_rot.shape),
+            (1 / (2 * mom_rot))
+            # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
+            # will be tiny
+        ], axis=-1)
+        M = np.broadcast_to(M[np.newaxis], R.shape)
+        eigs = np.concatenate([M, R], axis=2)
+    elif all_linear:
+        mom_rot = mom_rot[:, good_ax]
+        freqs = np.concatenate([
+            np.broadcast_to([[1e-14, 1e-14, 1e-14]], R.shape[:1] + (3,)),
+            (1 / (2 * mom_rot))
+            # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
+            # will be tiny
+        ], axis=-1)
+        R = R[:, :, good_ax]
+        M = np.broadcast_to(M[np.newaxis], R.shape[:1] + M.shape)
+        eigs = np.concatenate([M, R], axis=2)
+    else:
+        freqs = []
+        eigs = []
+        for sel, moms, rot in zip(good_ax, mom_rot, R):
+            f = np.concatenate([[1e-14, 1e-14, 1e-14], 1/(2*mom_rot[sel,])])
+            r = rot[:, sel]
+            freqs.append(f)
+            eigs.append(np.concatenate([M, r], axis=1))
 
     if not mass_weighted:
         W = np.diag(np.repeat(1/np.sqrt(masses), 3))
@@ -314,23 +361,17 @@ def translation_rotation_invariant_transformation(
     A = A.reshape((-1,) + A.shape[-2:])
     L_tr = L_tr.reshape((-1,) + L_tr.shape[-2:])
     evals, tf = np.linalg.eigh(A)
-    # zero_pos = np.where(np.abs(evals) < 1e-4) # the rest should be 1
-    # raise Exception(
-    #     evals.shape,
-    #     zero_pos,
-    #     # set_ops.vector_ix(tf.shape, zero_pos)
-    # )
+    zero_pos = np.abs(evals) < 1e-4# the rest should be 1
+    zero_counts = np.sum(zero_pos, axis=1)
+    ucounts = np.min(zero_counts)
 
-    # zero_pos = zero_pos[:-1] + (slice(None),) + zero_pos[-1:]
-    # raise Exception(zero_pos, tf.shape, tf[zero_pos].shape, L_tr.shape)
-    # tf[zero_pos] = np.moveaxis(L_tr)
-    tf[:, :, :6] = L_tr
+    tf[:, :, :ucounts] = L_tr
     if strip_embedding:
         # nzpos = np.where(np.abs(evals) > 1e-4) # the rest should be 1
         # nzpos = nzpos[:-1] + (slice(None),) + nzpos[-1:]
-        tf = tf[:, :, 6:]
+        tf = tf[:, :, ucounts:]
     else:
-        tf[:, :, :6] = L_tr
+        tf[:, :, :ucounts] = L_tr
 
     inv = np.moveaxis(tf, -1, -2)
     if not mass_weighted:

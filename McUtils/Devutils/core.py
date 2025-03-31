@@ -14,7 +14,10 @@ __all__ = [
     "handle_uninitialized",
     "is_interface_like",
     "is_dict_like",
-    "cached_eval"
+    "cached_eval",
+    "str_comp",
+    "str_is",
+    "str_in"
 ]
 
 class SingletonType:
@@ -99,3 +102,10 @@ def cached_eval(cache, key, generator, *,
     cache[key] = val
 
     return val
+
+def str_comp(str_val, test, test_val):
+    return isinstance(str_val, str) and test(str_val, test_val)
+def str_is(str_val, test_val):
+    return isinstance(str_val, str) and str_val == test_val
+def str_in(str_val, test_vals):
+    return isinstance(str_val, str) and str_val in test_vals
