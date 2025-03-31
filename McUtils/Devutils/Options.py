@@ -96,6 +96,10 @@ class OptionsSet:
             props = self.get_props(obj)
         ops = self.ops
         return {k:ops[k] for k in ops.keys() - set(props)}
+    def split(self, obj, props=None):
+        if props is None:
+            props = self.get_props(obj)
+        return self.filter(obj, props=props), self.exclude(obj, props=props)
 
 
 class OptionsMethodDispatch:
