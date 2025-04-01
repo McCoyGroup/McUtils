@@ -163,7 +163,7 @@ class FunctionSum(DifferentiableFunction):
             for i in range(order+1)
         ]
     def get_children(self):
-        return [self.funcs]
+        return self.funcs
 
 class FunctionProduct(DifferentiableFunction):
     def __init__(self, funcs:list[DifferentiableFunction], inds=None):
@@ -205,7 +205,7 @@ class FunctionProduct(DifferentiableFunction):
 
         return finals
     def get_children(self):
-        return [self.funcs]
+        return self.funcs
 
 class FunctionComposition(DifferentiableFunction):
     def __init__(self, outer_func, inner_funcs:list[DifferentiableFunction], inds=None):
@@ -303,7 +303,7 @@ class Poly1D(UnivariateFunction):
 
     @classmethod
     def fac_pow(cls, k, n):
-        return np.prod(np.arange(k, k+n+1))
+        return np.prod(np.arange(k+1, k+n+1))
 
     def evaluate_term(self, r, order=0, previous_terms=None):
         disp = r - self.center
@@ -316,7 +316,7 @@ class Poly1D(UnivariateFunction):
             )
         else:
             return sum(
-                (self.fac_pow(k+1, n)*d) * ( disp**(k+1) )
+                (self.fac_pow(k, n)*d) * ( disp**(k) )
                 for k,d in enumerate(self.coeffs[n-1:])
             )
     def get_children(self):
@@ -485,7 +485,8 @@ class CoordinateFunction:
             fun = Poly1D(
                 [np.array([c]).flatten()[0] for c in coeffs],
                 ref=np.array([ref]).flatten()[0],
-                center=np.array([center]).flatten()[0]
+                center=np.array([center]).flatten()[0],
+                inds=[0]
             )
         else:
             fun = PolynomialFunction.from_coefficients(

@@ -134,7 +134,11 @@ def get_nca_shifts(order, k):
     for i,pos in enumerate(itertools.combinations(range(order), r=k)):
         shifts[i, pos] = permute_pos
     return shifts
-def apply_nca_op(op, order, k, A_expansion, B_expansion, deriv_axis, a, b, contract, shared, identical):
+def apply_nca_op(op, order, k,
+                 A_expansion, B_expansion, deriv_axis,
+                 a, b, contract, shared, identical,
+                 root_dim=2
+                 ):
     s = order - k
     if s >= len(A_expansion) or k >= len(B_expansion):
         return 0
@@ -169,9 +173,10 @@ def apply_nca_op(op, order, k, A_expansion, B_expansion, deriv_axis, a, b, contr
     # next we need to move all of the derivative axes in the second tensor to the beginning
     # so we can symmetrize
     d = deriv_axis + s
+    sa = (A.ndim - len(axes[0]) if contract else A.ndim)
     for i in range(k):
-        base = np.moveaxis(base, d+i, shared)
-    part = [x for x in reversed(sorted([s,k])) if x > 0]
+        base = np.moveaxis(base, d+i, sa)
+    part = [x for x in [s,k] if x > 0]
     if len(part) > 1:
         base = nca_symmetrize(base, part, shared=shared, identical=identical)
     return base
@@ -250,6 +255,18 @@ def _deriv_construct(zero_order_handler, expansion_generator, order):
             n += 1
     return final_expansion
 
+def _clean_vdot(a, b, *, axes, shared=None):
+    return (
+        0
+            if is_zero(a) or is_zero(b) else
+        vec_ops.vec_tensordot(a, b, axes=axes, shared=shared)
+    )
+def _clean_tdot(a, b, *, axes, shared=None):
+    return (
+        0
+            if is_zero(a) or is_zero(b) else
+        np.tensordot(a, b, axes=axes)
+    )
 def tensordot_deriv(A_expansion, B_expansion,
                     order,
                     axes=None,
@@ -262,14 +279,10 @@ def tensordot_deriv(A_expansion, B_expansion,
 
     if axes is None: axes = [-1, 0]
     if shared is not None and shared > 0:
-        base_op = vec_ops.vec_tensordot
+        base_op = _clean_vdot
     else:
-        base_op = lambda a,b,axes=None,shared=None:np.tensordot(a, b, axes=axes)
-    op = lambda a,b,axes=None, shared=None: (
-        0
-            if is_zero(a) or is_zero(b) else
-        base_op(a, b, axes=axes, shared=shared)
-    )
+        base_op = _clean_tdot
+    op = base_op
     return _deriv_construct(
         lambda : op(A_expansion[0], B_expansion[0], axes=axes, shared=shared),
         lambda ords: nca_op_deriv(op,
@@ -303,6 +316,12 @@ def pre_broadcast_prod(A_expansion, B_expansion, axes):
 
     expand_dims = ...
 
+def _clean_outer(left, right, *, axes, shared=None):
+    return (
+        0
+            if is_zero(left) or is_zero(right) else
+        vec_ops.vec_outer(left, right, axes=axes, order=0)
+    )
 def tensorprod_deriv(
         A_expansion, B_expansion,
         order,
@@ -327,11 +346,7 @@ def tensorprod_deriv(
 
     A_expansion = [np.asanyarray(a) for a in A_expansion]
     B_expansion = [np.asanyarray(b) for b in B_expansion]
-    op = lambda left, right, axes=None, shared=None: (
-        0
-            if is_zero(left) or is_zero(right) else
-        vec_ops.vec_outer(left, right, axes=axes, order=0)
-    )
+    op = _clean_outer
     return _deriv_construct(
         lambda: op(A_expansion[0], B_expansion[0], axes=axes, shared=shared),
         lambda ords: nca_op_deriv(op,
@@ -642,18 +657,10 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None):
         order = max(order)
 
     for o in range(len(base_expansion), order+2):
-        # if len(base_expansion) <= o:
         norm_inv_expansion = norm_inv_expansion + scalarinv_deriv(base_expansion, order=[o-1])
         base_expansion = base_expansion + scalarprod_deriv(norm_inv_expansion, a_expansion, order=[o-1])
-        #     norm_expansion = norm_expansion + tensordot_deriv(vec_expansion, unit_expansion, axes=[-1, -1], order=[o],
-        #                                                       shared=vec_expansion[0].ndim-1)
-        #     norm_inv_expansion = norm_inv_expansion + scalarinv_deriv(norm_expansion, order=[o])
-        # if len(unit_expansion) <= o:
-        #     deriv_term = scalarprod_deriv(norm_inv_expansion, vec_expansion, order=[o])
-        #     unit_expansion = unit_expansion + deriv_term
 
     # reexpand in terms of original vectors
-    # raise Exception(vec_expansion)
     norm_expansion = [base_expansion[0]] + (tensor_reexpand(
         vec_expansion[1:],
         base_expansion[1:],
@@ -860,7 +867,6 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, unitized=Fa
             [np.ones_like(sin_expansion[0]),   np.zeros_like(cos_expansion[0])]
         ])
     ]
-    # raise Exception(arctan_expansion)
     new_expansions = []
     for i, e in enumerate(arctan_expansion):
         for _ in range(i + 1):
@@ -1035,11 +1041,11 @@ def nca_partition_prod(partition, A_expansion, shared=None, symmetrize=True):
         if is_numeric(A) and A == 0:
             return 0
         if shared is not None:
-            axes = [list(range(shared, A.ndim)), list(range(shared, B.ndim))]
+            axes = [list(range(shared, B.ndim)), list(range(shared, A.ndim))]
         else:
-            axes = [list(range(A.ndim)), list(range(B.ndim))]
-        B = vec_ops.vec_outer(A, B, axes=axes)
+            axes = [list(range(B.ndim)), list(range(A.ndim))]
 
+        B = vec_ops.vec_outer(B, A, axes=axes, order=0)
     if symmetrize:
         B = nca_symmetrize(B, partition, shared=shared)
     return B
@@ -1104,7 +1110,7 @@ def apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2):
     if shared is None: shared = 0
 
     A = terms[0]
-    # d = partition[0]
+    d0 = expansions[0][0].ndim
     d = A.ndim - root_dim - shared
     scaling = 2 if len(partition) == 3 and tuple(partition) == (1, 0, 1) else 1
     for B,p,(op, axes, contract) in zip(terms[1:], partition[1:], ops):
@@ -1140,7 +1146,7 @@ def apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2):
         # so we can symmetrize
 
         for i in range(p):
-            A = np.moveaxis(A, deriv_axis+i, shared)
+            A = np.moveaxis(A, deriv_axis+i, deriv_axis - root_dim)
         d += B.ndim - root_dim - shared
     partition = [p for p in partition if p > 0]
     if len(partition) > 1:
@@ -1214,7 +1220,7 @@ def _contract(a, b, axes=None, shared=None):
         res = np.tensordot(a, b, axes=axes)
     return res
 def _product(a, b, axes=None, shared=None):
-    return vec_ops.vec_outer(a, b, axes=axes)
+    return vec_ops.vec_outer(a, b, axes=axes, order=0)
 
 generator_max_caching_order = 4
 term_generator_caches = {}
