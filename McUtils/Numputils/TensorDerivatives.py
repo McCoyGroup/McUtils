@@ -857,23 +857,41 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, unitized=Fa
         np.moveaxis(np.array([c, s]), 0, -1)
         for c, s in zip(cos_expansion, sin_expansion)
     ]
-    arctan_expansion = [
-        np.array([
-            -sin_expansion[0],
-            cos_expansion[0]
-        ]),
-        np.array([
-            [np.zeros_like(sin_expansion[0]), -np.ones_like(sin_expansion[0])],
-            [np.ones_like(sin_expansion[0]),   np.zeros_like(cos_expansion[0])]
-        ])
+    c2_s2_expansion = [
+        cos_expansion[0]**2+sin_expansion[0]**2,
+        [2*cos_expansion[0], 2*sin_expansion[0]],
+        [
+            [2*np.ones_like(cos_expansion[0]), np.zeros_like(cos_expansion[0])],
+            [np.zeros_like(cos_expansion[0]), 2*np.ones_like(cos_expansion[0])]
+        ],
     ]
     new_expansions = []
-    for i, e in enumerate(arctan_expansion):
-        for _ in range(i + 1):
+    for i, e in enumerate(c2_s2_expansion):
+        e = np.asanyarray(e)
+        for _ in range(i):
             e = np.moveaxis(e, 0, -1)
         new_expansions.append(e)
-    arctan_expansion = new_expansions
-    angle_derivs = [np.arctan2(sin_expansion[0], cos_expansion[0])] + (tensor_reexpand(
+    c2_s2_expansion = new_expansions
+    norm_expansion = scalarinv_deriv(c2_s2_expansion, order) #TODO: speed this up with better combinatorics
+    base_tan_expansion = [
+        [
+            -sin_expansion[0], cos_expansion[0]
+        ],
+        [
+            [np.zeros_like(cos_expansion[0]), np.ones_like(cos_expansion[0])],
+            [-np.ones_like(cos_expansion[0]), np.zeros_like(cos_expansion[0])]
+        ]
+    ]
+    new_expansions = []
+    for i, e in enumerate(base_tan_expansion):
+        e = np.asanyarray(e)
+        for _ in range(i+1):
+            e = np.moveaxis(e, 0, -1)
+        new_expansions.append(e)
+    base_tan_expansion = new_expansions
+    arctan_expansion = scalarprod_deriv(norm_expansion, base_tan_expansion, order)
+    ang = np.arctan2(sin_expansion[0], cos_expansion[0])
+    angle_derivs = [ang] + (tensor_reexpand(
         cos_sin_expansion[1:],
         arctan_expansion,
         # axes=[-1, -1],
