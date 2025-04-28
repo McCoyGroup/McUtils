@@ -1,3 +1,4 @@
+import itertools
 import math
 import os.path
 
@@ -1634,7 +1635,7 @@ class NumputilsTests(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_DihedralDerivativeComparison(self):
         import Psience as psi
         test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
@@ -1941,4 +1942,237 @@ class NumputilsTests(TestCase):
         print(surf)
         print(surf[1])
 
+    @validationTest
+    def test_NormalFormCommutators(self):
+        # phases, terms, symbols = normalize_commutators([[0, 1], 2])
+        # phases, terms, symbols = normalize_commutators([0, [1, 2]])
+        # phases, terms, symbols = normalize_commutators([[0, 1], [2, 3]])
+        # phases, terms, symbols = normalize_commutators([[[0, 1], 2], [3, 4]])
+        # phases, terms, symbols = normalize_commutators([[[0, 1], [[2, 3], [[4, 5], 6]]], [7, 8]])
+        # phases, terms = normalize_commutators([[[0, 1], 2], [3, 4]])
+        # print(symbols)
+        # for p,t in zip(phases, terms):
+        #     print(p, t)
+        # phases, ct = commutator_terms([0, 1])
+        # print(ct)
+        # phases, ct = commutator_terms([[3, 4], [2, [0, 1]]])
+        # phases, ct = commutator_terms([[0, 1], 2])
+        # print(phases)
+        # print(ct)
+        # return
+        # np.random.seed(123)
+        # expansion = np.random.rand(8, 5, 5)
+        # comm = [2, [[[1, [3, 4]], 5], 0]]
+        # res_0 = commutator_evaluate(comm, expansion, recursive=True)
+        # res_1 = commutator_evaluate(comm, expansion, direct=True)
+        # res_2 = commutator_evaluate(comm, expansion, direct=False)
+        # print(np.round(np.abs(res_1 - res_0), 8))
+        # print(np.round(np.abs(res_1 - res_2), 8))
+
+        def nested_commutator_expansion(k, side='left'):
+            if side == 'left':
+                comm = 0
+                for i in range(1, k):
+                    comm = [comm, i]
+            else:
+                comm = k - 1
+                for i in range(k - 2, -1, -1):
+                    comm = [i, comm]
+            return comm
+
+        c = nested_commutator_expansion(4)
+        print(c)
+        print(commutator_terms(c)[1])
+
+    @debugTest
+    def test_YoungTableaux(self):
+        import McUtils.Iterators as itut
+        import McUtils.Combinatorics as comb
+
+        def standard_young_tableaux_bf(partition, return_perms=False, concatenate=True):
+            # n = len(partition)
+            # perm_list = sum(([n-i]*k for i,k in enumerate(partition)), [])
+            #
+            # perms = comb.UniquePermutations(perm_list[1:]).permutations()
+            # perms = np.concatenate([
+            #     np.full((len(perms),1), n, dtype=perms.dtype),
+            #     perms
+            # ], axis=1)
+            # idx_pos = np.argsort(-perms, axis=1) # "indices" aren't stable-ly sorted and I don't want to deal with it...
+
+            idx_pos = permutation_indices(sum(partition), sum(partition))
+            # p = np.transpose(idx_pos)
+            tableaux = np.array_split(idx_pos, np.cumsum(partition)[:-1], axis=1)
+            valid = np.full(len(idx_pos), True)
+            for i,t in enumerate(zip(*tableaux)):
+                if any(len(tt) > 1 and (np.diff(tt)<0).any() for tt in t):
+                    valid[i] = False
+                if valid[i] and any(len(tt) > 1 and (np.diff(tt) < 0).any() for tt in itut.transpose(t)):
+                    valid[i] = False
+
+            tableaux = [t[valid] for t in tableaux]
+            if concatenate:
+                tableaux = np.concatenate(tableaux, axis=1)
+
+            # if return_perms:
+            #     return perms[valid], tableaux
+            # else:
+            return tableaux
+
+        def populate_sst_frames(partition, frame, segment_lists):
+            frame_list = []
+            for segments in segment_lists:
+                splits = [0] * len(partition)
+                subframe = [np.zeros(k, dtype=int) for k in partition]
+                for s, r in zip(subframe, frame):
+                    k = 0
+                    for n, i in enumerate(r):
+                        j = splits[n]
+                        s[k:k + i] = segments[n][j:j + i]
+                        splits[n] += i
+                        k += i
+                frame_list.append(subframe)
+            return frame_list
+
+        def sst_partitions(partition):
+            n = np.sum(partition)
+            base_partitions = comb.IntegerPartitioner2D.get_partitions(partition, partition)
+
+            chunks = np.arange(n)
+            segments = np.array_split(chunks, np.cumsum(partition)[:-1])
+
+            base_frames = []
+            for p in base_partitions:
+                base_frames.extend(
+                    populate_sst_frames(partition, p, [segments])
+                )
+
+            valid = np.full(len(base_frames), True)
+            for i, t in enumerate(base_frames):
+                if valid[i] and any(len(tt) > 1 and (np.diff(tt) < 0).any() for tt in itut.transpose(t)):
+                    valid[i] = False
+
+            return [p for p,v in zip(base_partitions, valid) if v]
+
+        def sst_2(partition, cache=None, symbols=None):
+            # base case
+            tableaux = None
+            if len(partition) == 1:
+                tableaux = [
+                    [
+                        np.arange(partition[0], dtype=int)
+                    ]
+                ]
+            elif sum(partition) == 2:
+                tableaux = [
+                    [
+                        np.array([0], dtype=int),
+                        np.array([1], dtype=int)
+                    ]
+                ]
+            elif sum(partition) == 3:
+                tableaux = [
+                    [
+                        np.array([0, 1], dtype=int),
+                        np.array([2], dtype=int)
+                    ],
+                    [
+                        np.array([0, 2], dtype=int),
+                        np.array([1], dtype=int)
+                    ]
+                ]
+            if tableaux is not None:
+                if symbols is not None:
+                    symbols = np.asanyarray(symbols)
+                    return [
+                        [
+                            symbols[t]
+                            for t in tab
+                        ]
+                        for tab in tableaux
+                    ]
+
+                return tableaux
+
+            if cache is None:
+                cache = {}
+            partition = tuple(partition)
+            if partition in cache:
+                tableaux = cache[partition]
+                if symbols is not None:
+                    symbols = np.asanyarray(symbols)
+                    return [
+                        [
+                            symbols[t]
+                            for t in tab
+                        ]
+                        for tab in tableaux
+                    ]
+
+                return tableaux
+            else:
+                tableaux = []
+                frames = sst_partitions(partition)
+
+                if symbols is None:
+                    symbols = np.arange(np.sum(partition))
+                segments = np.array_split(symbols, np.cumsum(partition)[:-1])
+
+                tableaux = []
+                m = len(partition)
+                for f in frames:
+                    subpartitions = [
+                        [tt for tt in r if tt > 0]
+                        for r in f.transpose()
+                    ]
+                    subframes = [
+                        sst_2(p, cache=cache, symbols=seg)
+                        for p,seg in zip(subpartitions, segments)
+                    ]
+                    segment_lists = [
+                        [np.concatenate(p) for p in pp]
+                        for pp in itertools.product(*subframes)
+                    ]
+                    tableaux.extend(
+                        populate_sst_frames(partition, f, segment_lists)
+                    )
+
+                cache[partition] = tableaux
+
+                return tableaux
+
+        tabs = sst_2([4, 2])
+        print(len(tabs))
+        for t in sst_2([4, 2]):
+            print("-" * 10)
+            for s in t:
+                print(s)
+
+        print("="*20)
+        bf_tabs = standard_young_tableaux_bf([4, 2], concatenate=False)
+        print(len(bf_tabs[0]))
+        for t in zip(*bf_tabs):
+            print("-" * 10)
+            for s in t:
+                print(s)
+
+        # print(comb.IntegerPartitioner2D.get_partitions([2, 2], [2, 2]))
+        # tabs = standard_young_tableaux([4, 2], return_perms=False, concatenate=False)
+        # for t in zip(*tabs):
+        #     print("-"*10)
+        #     for s in t:
+        #         print(s)
+
+        # for parts in comb.IntegerPartitioner.partitions(4):  # arrays of partitions with the same total order
+        #     good_parts = np.all(parts % 2 == 0, axis=1)  # only even order partitions make sense
+        #     parts = parts[good_parts]
+        #     if len(parts) == 0: continue
+        #
+        #     # find the different numbers of ways to split the terms up
+        #     term_classes = [
+        #         comb.IntegerPartitioner2D.get_partitions((2, 2), terms)  # [:1]
+        #         for terms in parts
+        #     ]
+        #
+        #     print(term_classes)
 

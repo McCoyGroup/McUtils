@@ -384,6 +384,9 @@ def iterative_chain_minimize(
     nimg = guesses.shape[-2]
     n = nimg - 1
 
+    if fixed_images is None:
+        fixed_images = []
+
     if reparametrizer is not None:
         image_numbers = np.full(guesses.shape[0], nimg, dtype=int)
     else:

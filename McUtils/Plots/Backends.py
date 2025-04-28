@@ -176,6 +176,9 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     def get_padding(self):
         ...
 
+    def legend(self, **opts):
+        raise NotImplementedError("legend")
+
     @abc.abstractmethod
     def draw_line(self, points, **styles):
         ...
@@ -837,6 +840,9 @@ class MPLAxes(GraphicsAxes):
                 else:
                     padding[i][j] = 0
         return padding
+
+    def legend(self, **opts):
+        return self.get_plotter('legend')(**opts)
 
     def draw_line(self, points, **styles):
         points = np.asanyarray(points)

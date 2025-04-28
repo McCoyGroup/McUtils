@@ -80,6 +80,8 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
                      reference_coordinates=None,
                      return_derivs=None,
                      derivs=None,
+                     gradient_function=None,
+                     gradient_scaling=None,
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?

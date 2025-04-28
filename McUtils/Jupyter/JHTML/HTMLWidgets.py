@@ -1,7 +1,7 @@
 import os.path, pathlib
 import sys
 import weakref, io, asyncio, threading, time
-from .HTML import CSS, HTML
+from .HTML import CSS, HTML, HTMLManager
 from .WidgetTools import JupyterAPIs, DefaultOutputWidget
 
 __all__ = [
@@ -73,7 +73,7 @@ class ActiveHTMLWrapper:
         else:
             shadow_el = None
 
-        attributes = HTML.manage_attrs(attributes)
+        attributes = HTMLManager.manage_attrs(attributes)
         if tag is None and hasattr(shadow_el, 'tag'):
             tag = shadow_el.tag
         if tag is not None:
@@ -83,7 +83,7 @@ class ActiveHTMLWrapper:
             if 'class' in shadow_el.attrs:
                 cls = shadow_el['class']
         if cls is not None:
-            classList = HTML.manage_class(cls)
+            classList = HTMLManager.manage_class(cls)
             attrs['classList'] = classList
 
         eventPropertiesDict = {}
@@ -162,7 +162,7 @@ class ActiveHTMLWrapper:
         if value is not None:
             attrs['value'] = value
 
-        extra_styles, attributes = HTML.extract_styles(attributes)
+        extra_styles, attributes = HTMLManager.extract_styles(attributes)
         if shadow_el is not None:
             if 'style' in shadow_el.attrs:
                 extra_styles = shadow_el['style']
@@ -177,7 +177,7 @@ class ActiveHTMLWrapper:
                     raise ValueError("style {} given twice".format(k))
                 style[k] = v
         if len(style) > 0:
-            style = HTML.manage_styles(style).props
+            style = HTMLManager.manage_styles(style).props
             # if isinstance(style, str):
             #     style = CSS.parse(style).props
             # elif isinstance(style, CSS):
@@ -493,13 +493,13 @@ class ActiveHTMLWrapper:
         if "javascript_handles" in val:
             self.javascript_handles = val
             del val['javascript_handles']
-        val = HTML.manage_attrs(val)
+        val = HTMLManager.manage_attrs(val)
         if "class" in val:
-            self.elem.classList = HTML.manage_class(val['class'])
+            self.elem.classList = HTMLManager.manage_class(val['class'])
             self.elem.send_state('classList')
             del val['class']
         if "style" in val:
-            self.elem.styleDict = HTML.manage_styles(val["style"]).props
+            self.elem.styleDict = HTMLManager.manage_styles(val["style"]).props
             del val['style']
             self.elem.send_state('styleDict')
         self.elem.elementAttributes = val
@@ -533,7 +533,7 @@ class ActiveHTMLWrapper:
         elif key == "onevents":
             return self.onevents
         else:
-            key = HTML.clean_key(key)
+            key = HTMLManager.clean_key(key)
             if key == "class":
                 return self.class_list
             if key in CSS.known_properties:
@@ -552,10 +552,10 @@ class ActiveHTMLWrapper:
         elif key == "onevents":
             self.onevents = value
         elif key == "style":
-            self.elem.styleDict = HTML.manage_styles(value)
+            self.elem.styleDict = HTMLManager.manage_styles(value)
             self.elem.send_state('styleDict')
         else:
-            key = HTML.clean_key(key)
+            key = HTMLManager.clean_key(key)
             if key == "class":
                 self.class_list = value
             elif key in CSS.known_properties:
@@ -581,7 +581,7 @@ class ActiveHTMLWrapper:
         elif key == "onevents":
             self.onevents = None
         else:
-            key = HTML.clean_key(key)
+            key = HTMLManager.clean_key(key)
             if key == "class":
                 self.elem.classList = []
                 self.elem.send_state('classList')
@@ -729,14 +729,14 @@ class ActiveHTMLWrapper:
         return self.elem.classList
     @class_list.setter
     def class_list(self, cls):
-        self.elem.classList = HTML.manage_class(cls)
+        self.elem.classList = HTMLManager.manage_class(cls)
         self.elem.send_state('classList')
     def add_class(self, *cls):
         cl = self.elem.classList
         cur_len = len(cl)
         proper_classes = []
         for c in cls:
-            proper_classes.extend(HTML.manage_class(c))
+            proper_classes.extend(HTMLManager.manage_class(c))
         for c in proper_classes:
             if c not in cl:
                 cl.append(c)
@@ -749,7 +749,7 @@ class ActiveHTMLWrapper:
         cur_len = len(cl)
         proper_classes = []
         for c in cls:
-            proper_classes.extend(HTML.manage_class(c))
+            proper_classes.extend(HTMLManager.manage_class(c))
         for c in proper_classes:
             if c in cl:
                 cl.remove(c)
@@ -763,7 +763,7 @@ class ActiveHTMLWrapper:
         return self.elem.styleDict
     @style.setter
     def style(self, style):
-        self.elem.classList = HTML.manage_styles(style).props
+        self.elem.classList = HTMLManager.manage_styles(style).props
         self.elem.send_state('styleDict')
     def add_styles(self, **sty):
         sd = self.elem.styleDict

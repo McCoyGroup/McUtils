@@ -5,15 +5,9 @@ import uuid
 from .. import Devutils as dev
 
 from . import VectorOps as vec_ops
-from . import SetOps as sets
 from .Misc import is_numeric, is_zero
 
 __all__ = [
-    "permutation_sign",
-    "levi_cevita_maps",
-    "levi_cevita_tensor",
-    "levi_cevita3",
-    "levi_cevita_dot",
     "nca_op_deriv",
     "tensordot_deriv",
     "tensorprod_deriv",
@@ -35,89 +29,6 @@ __all__ = [
     "vec_dihed_deriv",
     "vec_plane_angle_deriv"
 ]
-
-def permutation_sign(perm, check=True):
-    # essentially a swap sort on perm
-    # https://stackoverflow.com/a/73511014
-    parity = 1
-    perm = np.asanyarray(perm)
-    if check:
-        perm = np.argsort(np.argsort(perm))
-    else:
-        perm = perm.copy()
-    for i in range(len(perm)):
-        while perm[i] != i: # ensure subblock is sorted
-            parity *= -1
-            j = perm[i]
-            perm[i], perm[j] = perm[j], perm[i]
-    return parity
-def levi_cevita_maps(k):
-    perms = sets.permutation_indices(k, k)
-    signs = np.array([permutation_sign(p, check=False) for p in perms])
-    return perms, signs
-def levi_cevita_tensor(k, sparse=False):
-    pos, vals = levi_cevita_maps(k)
-    if sparse:
-        from .Sparse import SparseArray
-        a = SparseArray.from_data(
-            (
-                pos.T,
-                vals
-            ),
-            shape=(k,)*k
-        )
-    else:
-        a = np.zeros((k,)*k, dtype=int)
-        a[tuple(pos.T)] = vals
-    return a
-# levi_cevita3 = levi_cevita_tensor(3)
-levi_cevita3 = np.array([
-    [[0, 0, 0],
-     [0, 0, 1],
-     [0, -1, 0]],
-
-    [[0, 0, -1],
-     [0, 0, 0],
-     [1, 0, 0]],
-
-    [[0, 1, 0],
-     [-1, 0, 0],
-     [0, 0, 0]]
-])
-
-def sylvester_solve(A, B, C):
-    A = np.asanyarray(A)
-    B = np.asanyarray(B)
-    C = np.asanyarray(C)
-    n = A.shape[1]
-    m = B.shape[0]
-    S = np.kron(B.T, np.eye(n)) + np.kron(np.eye(m), A)
-    val = np.linalg.solve(S, C.flatten()) # in case it can be cleverer than I can
-    return val.reshape(m,n)
-
-def levi_cevita_dot(k, a, /, axes, shared=None):
-    pos, vals = levi_cevita_maps(k)
-    return vec_ops.semisparse_tensordot((tuple(pos.T), vals, (k,) * k), a, axes, shared=shared)
-    # a = np.asanyarray(a)
-    # lv_axes = axes[0]
-    # a_axes = axes[1]
-    # if util.is_numeric(lv_axes):
-    #     lv_axes = [lv_axes]
-    # if util.is_numeric(a_axes):
-    #     a_axes = [a_axes]
-    # for ax in reversed(a_axes):
-    #     a = np.moveaxis(a, ax, 0)
-    #
-    # nax = len(lv_axes)
-    # if nax == k:
-    #     new = np.dot(vals, a[tuple(pos.T)])
-    # else:
-    #     new_shape = (k,) * (k-nax) + a.shape[nax:]
-    #     new = np.zeros(new_shape)
-    #     idx = np.setdiff1d(np.arange(k), lv_axes)
-    #     for p, v in zip(pos, vals):
-    #         new[p[lv_axes]] += v*a[p[idx]]
-    # return new
 
 # levi_cevita3.__name__ = "levi_cevita3"
 # levi_cevita3.__doc__ = """

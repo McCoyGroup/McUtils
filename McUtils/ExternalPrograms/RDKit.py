@@ -6,7 +6,7 @@ __all__ = [
 
 import numpy as np, io, os
 from .. import Numputils as nput
-from ..Misc import OutputRedirect
+from ..Devutils import OutputRedirect
 
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule

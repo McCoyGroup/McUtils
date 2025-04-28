@@ -9,3 +9,5 @@ from .Loggers import *; from .Loggers import __all__ as _all
 __all__ += _all
 from .Options import *; from .Options import __all__ as _all
 __all__ += _all
+from .Redirects import *; from .Redirects import __all__ as _all
+__all__ += _all
