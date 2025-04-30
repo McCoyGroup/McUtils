@@ -47,3 +47,5 @@ from .Permutations import *; from .Permutations import __all__ as exposed
 __all__ += exposed
 from .Sequences import *; from .Sequences import __all__ as exposed
 __all__ += exposed
+from .YoungTableaux import *; from .YoungTableaux import __all__ as exposed
+__all__ += exposed
