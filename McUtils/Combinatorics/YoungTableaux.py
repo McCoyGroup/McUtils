@@ -85,6 +85,23 @@ class YoungTableauxGenerator:
         ]
 
     @classmethod
+    def hook_numbers(cls, partition):
+        return [
+            (p - j) + sum(
+                1 if pk >= (j+1) else 0
+                for pk in partition[i + 1:]
+            )
+            for i, p in enumerate(partition)
+            for j in range(p)
+        ]
+
+    @classmethod
+    def count_standard_tableaux(cls, partition):
+        nums = np.arange(1, np.sum(partition)+1)
+        denoms = np.sort(cls.hook_numbers(partition))
+        return np.round(np.prod(nums/denoms)).astype(int)
+
+    @classmethod
     def split_frame(cls, partition, offsets):  # `offsets` is just a vector of offset indices
         frame_list = []
         mp = np.max(partition)
