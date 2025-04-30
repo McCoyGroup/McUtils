@@ -17,7 +17,9 @@ __all__ = [
     "canonicalize_internal",
     "enumerate_zmatrices",
     "extract_zmatrix_internals",
-    "parse_zmatrix_string"
+    "parse_zmatrix_string",
+    "validate_zmatrix",
+    "chain_zmatrix"
 ]
 
 def cartesian_to_zmatrix(coords, ordering=None, use_rad = True):
@@ -291,3 +293,18 @@ def parse_zmatrix_string(zmat):
     coords[:, 2] = np.deg2rad(coords[:, 2])
 
     return (atoms, ordering, coords)
+
+def validate_zmatrix(ordering):
+    proxy_order = [o[0] for o in ordering]
+    if any(p < 0 for p in proxy_order):
+        return False
+    order_sorting = np.argsort(proxy_order)
+    if len(ordering) > 1:
+        ...
+
+        # if ordering[0] < ordering
+
+    return True
+
+def chain_zmatrix(n):
+    ...

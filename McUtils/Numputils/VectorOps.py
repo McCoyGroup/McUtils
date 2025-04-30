@@ -43,8 +43,13 @@ __all__ = [
     "project_out",
     "fractional_power",
     "unitarize_transformation",
-    "maximum_similarity_transformation"
-    # "kron_sum",
+    "maximum_similarity_transformation",
+    "matrix_transform_from_eigs",
+    "symmetric_matrix_exp",
+    "imaginary_symmetric_matrix_exp",
+    "symmetric_matrix_log",
+    "imaginary_symmetric_matrix_log",
+    "sylvester_solve"
 ]
 
 ##
@@ -1247,3 +1252,42 @@ def maximum_similarity_transformation(basis, target, apply_transformation=True):
         return basis @ tf
     else:
         return tf
+
+def matrix_transform_from_eigs(evals, evecs, tf):
+    return np.moveaxis(evecs, -1, -2) @ vec_tensordiag(tf(evals), extra_dims=evals.ndim-1) @ evecs
+
+def symmetric_matrix_exp(mats):
+    evals, evecs = np.linalg.eigh(mats)
+    return matrix_transform_from_eigs(evals, evecs, np.exp)
+
+def imaginary_symmetric_matrix_exp(mats):
+    evals, evecs = np.linalg.eigh(mats)
+    return [
+        matrix_transform_from_eigs(evals, evecs, np.cos),
+        matrix_transform_from_eigs(evals, evecs, np.sin)
+    ]
+
+def symmetric_matrix_log(mats):
+    evals, evecs = np.linalg.eigh(mats)
+    return matrix_transform_from_eigs(evals, evecs, np.log)
+
+def imaginary_symmetric_matrix_log(mats_real, mats_imag):
+    evals_real, evecs = np.linalg.eigh(mats_real)
+    evals_imag = np.diagonal(
+        evecs @ mats_imag @ np.moveaxis(evecs, -1, -2),
+        axis1=-1,
+        axis2=-2
+    )
+    return matrix_transform_from_eigs(
+        np.arccos(evals_real) + np.arcsin(evals_imag), evecs, lambda x: x
+    )
+
+def sylvester_solve(A, B, C):
+    A = np.asanyarray(A)
+    B = np.asanyarray(B)
+    C = np.asanyarray(C)
+    n = A.shape[1]
+    m = B.shape[0]
+    S = np.kron(B.T, np.eye(n)) + np.kron(np.eye(m), A)
+    val = np.linalg.solve(S, C.flatten()) # in case it can be cleverer than I can
+    return val.reshape(m,n)

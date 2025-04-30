@@ -182,7 +182,7 @@ class Plot(Graphics):
         "markeredgewidth", "markeredgecolor", "markerfacecolor", "markerfacecoloralt",
         "fillstyle", "antialiased", "dash_capstyle", "solid_capstyle",
         "dash_joinstyle", "solid_joinstyle", "pickradius", "drawstyle", "markevery",
-        'gid'
+        'gid', "zorder"
     }
     patch_parms = {
         "agg_filter", "alpha", "animated", "antialiased", "capstyle",
@@ -427,7 +427,8 @@ class ScatterPlot(Plot):
     Inherits from `Plot`.
     Plots a bunch of x values against a bunch of y values using the `scatter` method.
     """
-    known_styles = { "s", "c", "marker", "cmap", "norm", "vmin", "vmax", "alpha", "linewidths", "edgecolors", "plotnonfinite", "data"}
+    known_styles = { "s", "c", "marker", "cmap", "norm", "vmin", "vmax", "alpha",
+                     "linewidths", "edgecolors", "plotnonfinite", "data", "zorder"}
     style_mapping = {"color":"c"}
     method = "scatter"
 

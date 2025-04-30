@@ -1,3 +1,5 @@
+import collections
+import itertools
 import math
 import os.path
 
@@ -1634,7 +1636,7 @@ class NumputilsTests(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_DihedralDerivativeComparison(self):
         import Psience as psi
         test_root = os.path.join(os.path.dirname(psi.__file__), "ci", "tests", "TestData")
@@ -1940,5 +1942,99 @@ class NumputilsTests(TestCase):
 
         print(surf)
         print(surf[1])
+
+    @validationTest
+    def test_NormalFormCommutators(self):
+        # phases, terms, symbols = normalize_commutators([[0, 1], 2])
+        # phases, terms, symbols = normalize_commutators([0, [1, 2]])
+        # phases, terms, symbols = normalize_commutators([[0, 1], [2, 3]])
+        # phases, terms, symbols = normalize_commutators([[[0, 1], 2], [3, 4]])
+        # phases, terms, symbols = normalize_commutators([[[0, 1], [[2, 3], [[4, 5], 6]]], [7, 8]])
+        # phases, terms = normalize_commutators([[[0, 1], 2], [3, 4]])
+        # print(symbols)
+        # for p,t in zip(phases, terms):
+        #     print(p, t)
+        # phases, ct = commutator_terms([0, 1])
+        # print(ct)
+        # phases, ct = commutator_terms([[3, 4], [2, [0, 1]]])
+        # phases, ct = commutator_terms([[0, 1], 2])
+        # print(phases)
+        # print(ct)
+        # return
+        # np.random.seed(123)
+        # expansion = np.random.rand(8, 5, 5)
+        # comm = [2, [[[1, [3, 4]], 5], 0]]
+        # res_0 = commutator_evaluate(comm, expansion, recursive=True)
+        # res_1 = commutator_evaluate(comm, expansion, direct=True)
+        # res_2 = commutator_evaluate(comm, expansion, direct=False)
+        # print(np.round(np.abs(res_1 - res_0), 8))
+        # print(np.round(np.abs(res_1 - res_2), 8))
+
+        def nested_commutator_expansion(k, side='left'):
+            if side == 'left':
+                comm = 0
+                for i in range(1, k):
+                    comm = [comm, i]
+            else:
+                comm = k - 1
+                for i in range(k - 2, -1, -1):
+                    comm = [i, comm]
+            return comm
+
+        c = nested_commutator_expansion(4)
+        print(c)
+        print(commutator_terms(c)[1])
+
+    @debugTest
+    def test_YoungTableaux(self):
+        import McUtils.Iterators as itut
+        import McUtils.Combinatorics as comb
+
+
+
+        def populate_sst_frame_from_components(
+                frame_shape,
+                offsets,
+                sub_ssts
+        ):
+            frame = np.zeros(frame_shape, dtype=int)
+            for i,(o,ss) in enumerate(zip(offsets, sub_ssts)):
+                n = len(ss)
+                frame[o:o+n] = ss
+            return frame
+
+
+        # print(
+        #     split_frame(
+        #         np.array([3, 2]),
+        #         np.array([1, 0])
+        #     )
+        # )
+        # return
+
+        def validate_frame(frame):
+            if np.any(np.diff([f[0] for f in frame]) < 0):
+                return False
+
+        # parts = comb.IntegerPartitioner2D.get_partitions([4, 3], [4, 3])
+        # print(offsets)
+        # print(valid)
+
+        yt = comb.YoungTableauxGenerator(6)
+        p = [3, 2, 1]
+        tabs = yt.get_standard_tableaux(partitions=[p])[0]
+        print(len(tabs[0]))
+        for t in zip(*tabs):
+            print("-" * 10)
+            for s in t:
+                print(s)
+
+        print("="*20)
+        bf_tabs = yt.get_standard_tableaux(partitions=[p], brute_force=True)[0]
+        print(len(bf_tabs[0]))
+        for t in zip(*bf_tabs):
+            print("-" * 10)
+            for s in t:
+                print(s)
 
 

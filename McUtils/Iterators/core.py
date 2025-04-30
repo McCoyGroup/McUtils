@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 
 __all__ = [
     "is_fixed_size",
@@ -10,7 +11,8 @@ __all__ = [
     "counts",
     "dict_diff",
     "transpose",
-    "riffle"
+    "riffle",
+    "flatten"
 ]
 
 def is_fixed_size(iterable):
@@ -122,15 +124,21 @@ def transpose_iter(data, default=None):
                 any_full = True
                 sublist.append(new)
         yield sublist
-def transpose(data, default=None):
+def transpose(data, default=None, pad=False):
     if is_fixed_size(data):
         fixed_data = is_fixed_size(data[0])
         if fixed_data:
             max_len = max(len(x) for x in data)
-            return [
-                [d[i] if len(d) > i else default for d in data]
-                for i in range(max_len)
-            ]
+            if pad:
+                return [
+                    [d[i] if len(d) > i else default for d in data]
+                    for i in range(max_len)
+                ]
+            else:
+                return [
+                    [d[i] for d in data if len(d) > i]
+                    for i in range(max_len)
+                ]
         else:
            return transpose_iter(data, default=default)
     else:
@@ -149,3 +157,20 @@ def riffle(a, b, *extras):
                 yield x
     for x in a[n+1:]: yield x # exhaust a
 
+def _is_atomic(atomic_obj, atomic_types):
+    if isinstance(atomic_obj, atomic_types): return True
+    try:
+        for _ in iter(atomic_obj): break
+    except TypeError:
+        return True
+    return False
+
+def flatten(iterable, atomic_types=None):
+    if atomic_types is None:
+        atomic_types = (int,str,float,np.integer,np.float)
+    for o in iterable:
+        if _is_atomic(o, atomic_types):
+            yield o
+        else:
+            for f in flatten(iterable, atomic_types=atomic_types):
+                yield f

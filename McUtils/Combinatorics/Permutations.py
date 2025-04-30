@@ -453,40 +453,78 @@ class UniqueSubsets:
     """
     Provides unique subsets for an integer partition
     """
-    def __init__(self, partition):
-        # self.part = np.flip(np.sort(partition))
-        self.part = partition
-        neg_part = -partition # so we can build ordered partitions
-        sorting = np.argsort(neg_part)
-        sort_part = neg_part[sorting]
-        v, idx, c = np.unique(sort_part, return_index=True, return_counts=True) # could use `nput.unique` to reuse sorting
-        self.idx = np.split(sorting, idx[1:])
-        self.vals = -v
-        self.counts = c
-        self.dim = len(partition)
-        self._vals_dim = len(self.vals)
-        self._num = None
-        self._tree = {}
-        self._otree = {} # cache ordered subsets for efficiency
 
-    def get_subsets(self, targ_len, ordered=False):
-        # TODO: use sparse encodings to speed up
-        if targ_len == 0:
-            return np.zeros((1, self._vals_dim))
-        if targ_len == 1:
-            return np.eye(self._vals_dim)
-        if targ_len not in self._tree:
-            base = self.get_subsets(targ_len-1)[np.newaxis, :, :] + np.eye(self._vals_dim)[:, np.newaxis, :]
-            base = base.reshape(-1, self._vals_dim)
-            valid_sets = np.all(base <= self.counts[np.newaxis], axis=1)
-            self._tree[targ_len] = base[valid_sets,]
+    @classmethod
+    def num_unique_subsets(cls, k, partition):
+        cs = np.cumsum([0] + list(partition))
+        return np.prod([
+            math.comb(k - s, n)
+            for s, n in zip(cs, partition)
+        ])
 
-        subsets = self._tree[targ_len]
-        if ordered: # construct ordered subsets
-            # for each subset we need to
-            raise ValueError("ah fuck")
+    @classmethod
+    def unique_subsets(cls, partition):
+        if len(partition) == 1:
+            return np.array([np.arange(partition[0])])
+        else:
+            k = sum(partition)
+            storage_size = cls.num_unique_subsets(k, partition)
+            storage = np.zeros((storage_size, k), dtype=int)
+            queue = collections.deque()
+            symbols = np.arange(k)
+            queue.append([0, 0, symbols, partition])
+            while queue:
+                bp, cp, symbols, partition = queue.pop()
+                if len(partition) == 1:
+                    n = partition[0]
+                    for i, x in enumerate(itertools.combinations(symbols, n)):
+                        storage[bp + i][cp: cp + n] = x
+                else:
+                    n = partition[0]
+                    subpart = partition[1:]
+                    block_size = cls.num_unique_subsets(len(symbols) - n, subpart)
+                    ce = cp + n
+                    for i, x in enumerate(itertools.combinations(range(len(symbols)), n)):
+                        subsym = np.delete(symbols, x)
+                        storage[bp + i, cp: ce] = symbols[x,]
+                        queue.append([bp + i * block_size, ce, subsym, subpart])
+            return storage
 
-        return subsets
+    # def __init__(self, partition):
+    #     ...
+        # # self.part = np.flip(np.sort(partition))
+        # self.part = partition
+        # neg_part = -partition # so we can build ordered partitions
+        # sorting = np.argsort(neg_part)
+        # sort_part = neg_part[sorting]
+        # v, idx, c = np.unique(sort_part, return_index=True, return_counts=True) # could use `nput.unique` to reuse sorting
+        # self.idx = np.split(sorting, idx[1:])
+        # self.vals = -v
+        # self.counts = c
+        # self.dim = len(partition)
+        # self._vals_dim = len(self.vals)
+        # self._num = None
+        # self._tree = {}
+        # self._otree = {} # cache ordered subsets for efficiency
+
+    # def get_subsets(self, targ_len, ordered=False):
+    #     # TODO: use sparse encodings to speed up
+    #     if targ_len == 0:
+    #         return np.zeros((1, self._vals_dim))
+    #     if targ_len == 1:
+    #         return np.eye(self._vals_dim)
+    #     if targ_len not in self._tree:
+    #         base = self.get_subsets(targ_len-1)[np.newaxis, :, :] + np.eye(self._vals_dim)[:, np.newaxis, :]
+    #         base = base.reshape(-1, self._vals_dim)
+    #         valid_sets = np.all(base <= self.counts[np.newaxis], axis=1)
+    #         self._tree[targ_len] = base[valid_sets,]
+    #
+    #     subsets = self._tree[targ_len]
+    #     if ordered: # construct ordered subsets
+    #         # for each subset we need to
+    #         raise ValueError("ah fuck")
+    #
+    #     return subsets
 
 class UniquePermutations:
     """
