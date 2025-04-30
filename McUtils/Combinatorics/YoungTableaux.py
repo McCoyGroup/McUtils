@@ -3,6 +3,7 @@ import numpy as np
 import itertools
 
 from .. import Numputils as nput
+from .. import Iterators as itut
 from .Permutations import UniquePermutations, UniqueSubsets, IntegerPartitioner, IntegerPartitioner2D
 
 __all__ = [
@@ -73,11 +74,10 @@ class YoungTableauxGenerator:
 
     @classmethod
     def standard_partitions(cls, partition):
-        # n = np.sum(partition)
+        #TODO: make this more efficient
         base_partitions = IntegerPartitioner2D.get_partitions(partition, partition)
-
         offsets = np.cumsum(base_partitions, axis=-1)
-        valid = np.all(np.diff(offsets, axis=-2) <= 0, axis=-1)[:, 0]
+        valid = np.all(np.all(np.diff(offsets, axis=-2) <= 0, axis=-2), axis=-1)
 
         return [
             base_partitions[valid,],
@@ -116,10 +116,17 @@ class YoungTableauxGenerator:
                 np.array([[1]], dtype=int)
             ]
         elif sum(partition) == 3:
-            tableaux = [
-                np.array([[0, 1], [0, 2]], dtype=int),
-                np.array([[2], [1]], dtype=int)
-            ]
+            if partition[0] == 2:
+                tableaux = [
+                    np.array([[0, 1], [0, 2]], dtype=int),
+                    np.array([[2], [1]], dtype=int)
+                ]
+            else:
+                tableaux = [
+                    np.array([[0]], dtype=int),
+                    np.array([[1]], dtype=int),
+                    np.array([[2]], dtype=int),
+                ]
         if tableaux is not None:
             if symbols is not None:
                 symbols = np.asanyarray(symbols)
@@ -215,7 +222,10 @@ class YoungTableauxGenerator:
             return tableaux
     @classmethod
     def standard_partition_tableaux(cls, partition, cache=None, symbols=None, brute_force=False):
-        tableaux = cls._sst_2(partition, cache=cache)
+        if brute_force:
+            tableaux = cls.standard_partition_tableaux_bf(partition, concatenate=False, unique_perms=False)
+        else:
+            tableaux = cls._sst_2(partition, cache=cache)
         if symbols is not None:
             symbols = np.asanyarray(symbols)
             tableaux = [

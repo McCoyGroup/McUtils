@@ -2021,7 +2021,8 @@ class NumputilsTests(TestCase):
         # print(valid)
 
         yt = comb.YoungTableauxGenerator(6)
-        tabs = yt.get_standard_tableaux(partitions=[[4, 2]])[0]
+        p = [3, 2, 1]
+        tabs = yt.get_standard_tableaux(partitions=[p])[0]
         print(len(tabs[0]))
         for t in zip(*tabs):
             print("-" * 10)
@@ -2029,7 +2030,7 @@ class NumputilsTests(TestCase):
                 print(s)
 
         print("="*20)
-        bf_tabs = yt.get_standard_tableaux(partitions=[[4, 2]], brute_force=True)[0]
+        bf_tabs = yt.get_standard_tableaux(partitions=[p], brute_force=True)[0]
         print(len(bf_tabs[0]))
         for t in zip(*bf_tabs):
             print("-" * 10)
