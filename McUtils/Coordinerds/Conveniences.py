@@ -19,7 +19,10 @@ __all__ = [
     "extract_zmatrix_internals",
     "parse_zmatrix_string",
     "validate_zmatrix",
-    "chain_zmatrix"
+    "chain_zmatrix",
+    "attached_zmatrix_fragment",
+    "functionalized_zmatrix",
+    "reindex_zmatrix"
 ]
 
 def cartesian_to_zmatrix(coords, ordering=None, use_rad = True):
@@ -307,4 +310,50 @@ def validate_zmatrix(ordering):
     return True
 
 def chain_zmatrix(n):
-    ...
+    return [
+        list(range(i, i-4, -1))
+        for i in range(n)
+    ]
+
+def attached_zmatrix_fragment(n, fragment, attachment_points):
+    return [
+        [attachment_points[-r-1] if r < 0 else n+r for r in row]
+        for row in fragment
+    ]
+
+def functionalized_zmatrix(
+        base_zm,
+        attachments:dict,
+        single_atoms:list[int]=None # individual components, embedding doesn't matter
+):
+    if nput.is_numeric(base_zm):
+        zm = chain_zmatrix(base_zm)
+    else:
+        zm = [
+            list(x) for x in base_zm
+        ]
+    for attachment_points, fragment in attachments.items():
+        if nput.is_numeric(fragment):
+            fragment = chain_zmatrix(fragment)
+        zm = zm + attached_zmatrix_fragment(
+            len(zm),
+            fragment,
+            attachment_points
+        )
+    if single_atoms is not None:
+        for atom in single_atoms:
+            zm = zm + attached_zmatrix_fragment(
+                len(zm),
+                [[0, -1, -2, -3]],
+                [
+                    (atom - i) if i < 0 else i
+                    for i in range(atom, atom - 4, -1)
+                ]
+            )
+    return zm
+
+def reindex_zmatrix(zm, perm):
+    return [
+        [perm[r] if r >= 0 else r for r in row]
+        for row in zm
+    ]

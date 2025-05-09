@@ -1985,7 +1985,7 @@ class NumputilsTests(TestCase):
         print(c)
         print(commutator_terms(c)[1])
 
-    @debugTest
+    @validationTest
     def test_YoungTableaux(self):
         import McUtils.Iterators as itut
         import McUtils.Combinatorics as comb
