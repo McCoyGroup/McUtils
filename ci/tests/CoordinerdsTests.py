@@ -620,7 +620,7 @@ class ConverterTest(TestCase):
 
         # self.assertAlmostEquals(np.sum(coord_set.jacobian(new)[:, 0].reshape(30, 30) + np.eye(30, 30)), 0.)
 
-    @debugTest
+    @validationTest
     def test_GenerateZMatrix(self):
         zmat = [
                     [0, -1, -1, -1],
@@ -631,6 +631,46 @@ class ConverterTest(TestCase):
         coords = extract_zmatrix_internals(zmat)
         print(coords)
         for zm in enumerate_zmatrices(coords): print(zm)
+
+    @debugTest
+    def test_fragmentZMatrix(self):
+        ome = [
+            [0, -1, -2, -3], # O
+            [1,  0, -1, -2], # C
+            [2,  1,  0, -1], # H
+            [3,  1,  0,  2], # H
+            [4,  1,  0,  2], # H
+        ]
+        ppv = functionalized_zmatrix(
+            [ # Conjugated carbon framework
+                [0, -1, -2, -3],
+                [1,  0, -1, -2],
+                [2,  1,  0, -1],
+                [3,  2,  1,  0],
+                [4,  1,  0,  2],
+                [5,  4,  1,  0],
+                [6,  2,  3,  1],
+                [7,  6,  2,  3]
+            ],
+            {
+                (7, 6, 2):ome,
+                (5, 4, 1):ome,
+            },
+            single_atoms=[0, 3, 4, 6]
+        )
+        print(np.array(ppv))
+        return
+
+        hydrogen_pos = [0, 0, 1, 4, 5, 8, 9, 12, 13, 13]
+        return functionalized_zmatrix(
+            14,
+            {
+                (2, 1, 0):ppv,
+                (2, 1, 0):ppv,
+                (2, 1, 0):ppv,
+            },
+            single_atoms=hydrogen_pos
+        )
 
 
     @validationTest

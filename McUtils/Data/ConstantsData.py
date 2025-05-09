@@ -226,7 +226,7 @@ class UnitsDataHandler(DataHandler):
                     power = u[1]
                     bits.append((base_unit, inverted, scaling, power))
                 else:
-                    bits.append(self._get_unit_modifiers(u))
+                    bits.extend(self._canonicalize_unit(u))
 
         return bits
 
@@ -408,6 +408,7 @@ class UnitsDataHandler(DataHandler):
         return conv
 
     def expand_conversions(self, unit_stuff_1):
+        new_unit_options = []
         new_unit = []
         for src_base, src_inv, src_scale, src_pow in unit_stuff_1:
             for k in self.data.keys():
@@ -424,10 +425,11 @@ class UnitsDataHandler(DataHandler):
                                 new_unit.append((new_base, src_inv, new_scale * conv * src_scale, src_pow * new_pow))
                             else:
                                 new_unit.append((new_base, src_inv, new_scale, src_pow * new_pow))
-                        break
-            else:
-                raise NotImplementedError("conversion expansion on inverse not supported...")
-        return new_unit
+                        new_unit_options.append(new_unit)
+                        new_unit = []
+            # else:
+            #     raise NotImplementedError("conversion expansion on inverse not supported...")
+        return new_unit_options
 
     def find_conversion(self, unit, target):
         """Attempts to find a conversion between two sets of units. Currently only implemented for "plain" units.
@@ -439,24 +441,70 @@ class UnitsDataHandler(DataHandler):
         :return:
         :rtype:
         """
+        unit_stuff_options_1 = None
         unit_stuff_1 = self._canonicalize_unit(unit)
+        unit_stuff_options_2 = None
         unit_stuff_2 = self._canonicalize_unit(target)
         # we find some conversion that makes them the same length
         # it might be better to map to a canonical SI form, but I am too lazy for that right now
         if len(unit_stuff_1) < len(unit_stuff_2):
-            unit_stuff_1 = self.expand_conversions(unit_stuff_1)
+            unit_stuff_options_1 = self.expand_conversions(unit_stuff_1)
         elif len(unit_stuff_1) > len(unit_stuff_2):
-            unit_stuff_2 = self.expand_conversions(unit_stuff_2)
-        if len(unit_stuff_1) != len(unit_stuff_2):
+            unit_stuff_options_2 = self.expand_conversions(unit_stuff_2)
+        try_conversion_list = unit_stuff_options_1 is not None or unit_stuff_options_2 is not None
+        if try_conversion_list:
+            if unit_stuff_options_1 is None:
+                unit_stuff_options_1 = [unit_stuff_1]
+            if unit_stuff_options_2 is None:
+                unit_stuff_options_2 = [unit_stuff_2]
+        if len(unit_stuff_1) != len(unit_stuff_2) and (
+                (not try_conversion_list)
+                or all(
+                    len(us_1) != len(us_2)
+                    for us_1 in unit_stuff_options_1
+                    for us_2 in unit_stuff_options_2
+                )
+        ):
             raise ValueError(f"can't convert incompatible units {unit} and {target}, (resolved to {unit_stuff_1}&{unit_stuff_2})")
-        convo = 1
-        for src, targ in zip(unit_stuff_1, unit_stuff_2):
-            conv = self._find_direct_conversion(src, targ)
-            if conv is None:
-                conv = self._find_path_conversion(src, targ)
-            if conv is None:
-                raise ConversionError("Couldn't find conversion factor between units '{0[0]}' and '{1[0]}'".format(src, targ))
-            convo *= conv
+        if unit_stuff_options_1 is not None or unit_stuff_options_2 is not None:
+            if unit_stuff_options_1 is None:
+                unit_stuff_options_1 = [unit_stuff_1]
+            if unit_stuff_options_2 is None:
+                unit_stuff_options_2 = [unit_stuff_2]
+
+            og_1 = unit_stuff_1
+            og_2 = unit_stuff_2
+            convo = None
+            for unit_stuff_1 in unit_stuff_options_1:
+                if convo is not None:
+                    break
+                for unit_stuff_2 in unit_stuff_options_2:
+                    if len(unit_stuff_2) != len(unit_stuff_1): continue
+                    convo = 1
+                    for src, targ in zip(unit_stuff_1, unit_stuff_2):
+                        conv = self._find_direct_conversion(src, targ)
+                        if conv is None:
+                            conv = self._find_path_conversion(src, targ)
+                        if conv is None:
+                            convo = None
+                            break
+                        convo *= conv
+                    if convo is not None:
+                        break
+            else:
+                raise ConversionError(
+                    "Couldn't find conversion factor between units '{0}' and '{1}' in options {2}x{3}".format(
+                        src, targ, unit_stuff_options_1, unit_stuff_options_2
+                    ))
+        else:
+            convo = 1
+            for src, targ in zip(unit_stuff_1, unit_stuff_2):
+                conv = self._find_direct_conversion(src, targ)
+                if conv is None:
+                    conv = self._find_path_conversion(src, targ)
+                if conv is None:
+                    raise ConversionError("Couldn't find conversion factor between units '{0[0]}' and '{1[0]}'".format(src, targ))
+                convo *= conv
 
         return convo
 
