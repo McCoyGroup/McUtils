@@ -38,7 +38,10 @@ class ExternalProgramInterface:
 
     @classmethod
     def load_library(cls):
-        return __import__(cls.module)
+        if '.' in cls.module:
+            return __import__(cls.module, fromlist=[None])
+        else:
+            return __import__(cls.module)
         # raise NotImplementedError("{} needs to implement `load_library`".format(cls.__name__))
 
     method_table = weakref.WeakValueDictionary()
