@@ -21,6 +21,8 @@ from .X3D import *; from .X3D import __all__ as exposed
 __all__ += exposed
 from .JSMol import *; from .JSMol import __all__ as exposed
 __all__ += exposed
+from .NotebookTools import *; from .NotebookTools import __all__ as exposed
+__all__ += exposed
 del exposed
 
 def _ipython_pinfo_():

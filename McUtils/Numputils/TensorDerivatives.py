@@ -4,6 +4,7 @@ import uuid
 
 from .. import Devutils as dev
 
+from . import PermutationOps as perms
 from . import VectorOps as vec_ops
 from .Misc import is_numeric, is_zero
 
@@ -599,7 +600,7 @@ def vec_cross_deriv(A_expansion, B_expansion, order):
     shared = A_expansion[0].ndim - 1
     base_shape = A_expansion[0].shape[:-1]
     e3 = np.broadcast_to(
-        np.expand_dims(levi_cevita3, list(range(shared))),
+        np.expand_dims(perms.levi_cevita3, list(range(shared))),
         base_shape + (3, 3, 3)
     )
     return tensorops_deriv(

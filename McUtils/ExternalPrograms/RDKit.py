@@ -238,13 +238,13 @@ class RDMolecule(ExternalMolecule):
             if ff_type == 'mmff':
                 ff_type = (AllChem.MMFFGetMoleculeForceField, AllChem.MMFFGetMoleculeProperties)
             elif ff_type == 'uff':
-                ff_type = (AllChem.UFFGetMoleculeForceField, AllChem.UFFGetMoleculeProperties)
+                ff_type = (AllChem.UFFGetMoleculeForceField, None)
             else:
                 raise ValueError(f"can't get RDKit force field type from '{ff_type}")
 
         return ff_type
 
-    def get_force_field(self, force_field_type='mmff', mol=None, conf_id=None):
+    def get_force_field(self, force_field_type='mmff', mol=None, conf_id=None, **extra_props):
         if mol is None:
             mol = self
         if conf_id is None:
@@ -262,7 +262,10 @@ class RDMolecule(ExternalMolecule):
         else:
             props = None
 
-        return force_field_type(mol, props, confId=conf_id)
+        if props is not None:
+            return force_field_type(mol, props, confId=conf_id, **extra_props)
+        else:
+            return force_field_type(mol, confId=conf_id, **extra_props)
 
     def evaluate_charges(self, coords, model='gasteiger'):
         if model == 'gasteiger':

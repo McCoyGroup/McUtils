@@ -74,7 +74,14 @@ class OptionsSet:
         try:
             props = obj.__props__
         except AttributeError:
-            props = self.extract_kwarg_keys(obj)
+            try:
+                annotations = obj.__annotations__
+            except AttributeError:
+                annotations = {}
+            if len(annotations) == 0:
+                props = self.extract_kwarg_keys(obj)
+            else:
+                props = tuple(annotations.keys())
 
         if props is None:
             raise AttributeError("{}: object {} needs props to filter against".format(
