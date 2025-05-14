@@ -8,17 +8,18 @@ The more scientifically-focused `Psience` package makes significant use of `McUt
 been written over the years.
 """
 
-import McUtils.Data
-import McUtils.Parsers
-import McUtils.GaussianInterface
-import McUtils.Misc
-import McUtils.Docs
-import McUtils.Jupyter
-import McUtils.Plots
-import McUtils.Zachary
-import McUtils.Coordinerds
-import McUtils.ExternalPrograms
-import McUtils.Extensions
+# import McUtils.Data
+# import McUtils.Parsers
+# import McUtils.GaussianInterface
+# import McUtils.Misc
+# import McUtils.Docs
+# import McUtils.Jupyter
+# import McUtils.Plots
+# import McUtils.Zachary
+# import McUtils.Coordinerds
+# import McUtils.ExternalPrograms
+# import McUtils.Extensions
+# import McUtils.Devutils
 
 __all__ = [
     "Parsers",
@@ -35,5 +36,6 @@ __all__ = [
     "Jupyter",
     "Misc",
     "Formatters",
-    "Docs"
+    "Docs",
+    "Devutils"
 ]

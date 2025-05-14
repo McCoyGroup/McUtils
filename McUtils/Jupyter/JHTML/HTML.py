@@ -1182,8 +1182,13 @@ class HTML(XMLBase):
                 else:
                     tree.write(file, **base_opts)
             return self.tostring(write_string=write_str, **opts)
+        MAX_REPR_LENGTH = 1000
         def __repr__(self):
-            return "{}({}, {})".format(type(self).__name__, self.elems, self.attrs)
+            base_repr = "{}({}, {})".format(type(self).__name__, self.elems, self.attrs)
+            if len(base_repr) > self.MAX_REPR_LENGTH + 3:
+                split_len = self.MAX_REPR_LENGTH // 2
+                base_repr = base_repr[:split_len] + "..." + base_repr[-split_len:]
+            return base_repr
         def _repr_html_(self):
             return self.tostring()
         def _ipython_display_(self):
