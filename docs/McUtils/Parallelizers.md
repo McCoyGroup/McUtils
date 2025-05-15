@@ -1,4 +1,4 @@
-# <a id="McUtils.Parallelizers">McUtils.Parallelizers</a> 
+# <a id="McUtils.Parallelizers">McUtils.McUtils.Parallelizers</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/__init__.py#L1)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/__init__.py#L1?message=Update%20Docs)]
@@ -241,9 +241,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-251d4d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-251d4d"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-e65547" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e65547"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-251d4d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e65547" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -256,9 +256,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-4a9361" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4a9361"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-d43dbe" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d43dbe"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4a9361" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d43dbe" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

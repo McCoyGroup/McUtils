@@ -1,4 +1,4 @@
-# <a id="McUtils.Data">McUtils.Data</a> 
+# <a id="McUtils.Data">McUtils.McUtils.Data</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/__init__.py#L1)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/__init__.py#L1?message=Update%20Docs)]
@@ -121,9 +121,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-ee9cae" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ee9cae"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-09c0b9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-09c0b9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ee9cae" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-09c0b9" markdown="1">
  - [AtomData](#AtomData)
 - [AtomMasses](#AtomMasses)
 - [Conversions](#Conversions)
@@ -132,9 +132,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-84e55c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-84e55c"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a94eb9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a94eb9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-84e55c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a94eb9" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

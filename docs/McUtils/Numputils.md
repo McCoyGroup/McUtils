@@ -1,4 +1,4 @@
-# <a id="McUtils.Numputils">McUtils.Numputils</a> 
+# <a id="McUtils.Numputils">McUtils.McUtils.Numputils</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/__init__.py#L1)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/__init__.py#L1?message=Update%20Docs)]
@@ -669,9 +669,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-c229a9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c229a9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-159bdc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-159bdc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c229a9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-159bdc" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -700,9 +700,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ae8d6a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ae8d6a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-721532" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-721532"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ae8d6a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-721532" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

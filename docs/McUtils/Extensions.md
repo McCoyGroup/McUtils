@@ -1,4 +1,4 @@
-# <a id="McUtils.Extensions">McUtils.Extensions</a> 
+# <a id="McUtils.Extensions">McUtils.McUtils.Extensions</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/__init__.py#L1)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/__init__.py#L1?message=Update%20Docs)]
@@ -108,9 +108,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6260a7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6260a7"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-65476f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-65476f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6260a7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-65476f" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -120,9 +120,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-67e571" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-67e571"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-7b8942" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7b8942"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-67e571" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7b8942" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

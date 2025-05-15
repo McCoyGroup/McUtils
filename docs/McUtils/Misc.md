@@ -1,4 +1,4 @@
-# <a id="McUtils.Misc">McUtils.Misc</a> 
+# <a id="McUtils.Misc">McUtils.McUtils.Misc</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/__init__.py#L1)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/__init__.py#L1?message=Update%20Docs)]
@@ -74,17 +74,17 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6054b3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6054b3"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-0f3306" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0f3306"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6054b3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0f3306" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-829211" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-829211"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-110f84" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-110f84"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-829211" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-110f84" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

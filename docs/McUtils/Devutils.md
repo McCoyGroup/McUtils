@@ -1,4 +1,4 @@
-# <a id="McUtils.Devutils">McUtils.Devutils</a> 
+# <a id="McUtils.Devutils">McUtils.McUtils.Devutils</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/__init__.py#L1)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/__init__.py#L1?message=Update%20Docs)]
