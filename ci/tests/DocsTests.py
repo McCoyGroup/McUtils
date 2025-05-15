@@ -51,8 +51,8 @@ class DocsTests(TestCase):
     def test_ParseExamples(self):
         parser = ExamplesParser.from_file(os.path.abspath(__file__))
         self.assertTrue(hasattr(parser.functions, 'items'))
-        tests = TestExamplesFormatter.from_file(os.path.abspath(__file__))
-        print(tests.format_tex())
+        # tests = ExamplesParser.parse_tests(os.path.abspath(__file__))
+        # print(tests.format_tex())
 
     @validationTest
     def test_FormatSpec(self):

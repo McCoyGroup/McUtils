@@ -106,7 +106,7 @@ class MarkdownOps:
     @classmethod
     def format_obj_link_grid(self, mems, ncols=3, root=None, boxed=True):
         links = self.split(
-            [self.format_obj_link(l) for l in (mems.values() if hasattr(mems, 'values') else mems)],
+            [self.format_obj_link(l, root=root) for l in (mems.values() if hasattr(mems, 'values') else mems)],
             ncols=ncols
         )
         return self.format_grid(links, boxed=boxed)
@@ -118,15 +118,17 @@ class MarkdownOps:
     @classmethod
     def canonical_link(self, identifier, root=None, formatter=None):
         ups = 0
+        if root is not None and identifier.startswith(root):
+            identifier = identifier[len(root):]
+            if identifier.startswith('.'):
+                identifier = identifier[1:]
         while identifier[0] == ".":
             ups += 1
             identifier = identifier[1:]
-        if root is not None:
-            identifier = identifier.split(root, 1)[-1]
         if ups > 0:
             pad = "../"*ups
         else:
-            pad = "/"
+            pad = ""
         identifier = "/".join(identifier.split("."))
         return pad + identifier + ".md"
 
