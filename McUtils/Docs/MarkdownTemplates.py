@@ -11,8 +11,8 @@ class MarkdownOps:
     def format_link(self, alt, link):
         return '[{}]({})'.format(alt, link)
     @classmethod
-    def format_obj_link(self, spec):
-        return self.format_link(self.canonical_name(spec), self.canonical_link(spec))
+    def format_obj_link(self, spec, root=None):
+        return self.format_link(self.canonical_name(spec), self.canonical_link(spec, root=root))
     @classmethod
     def format_inline_code(self, arg):
         """
@@ -104,9 +104,9 @@ class MarkdownOps:
         )
 
     @classmethod
-    def format_obj_link_grid(self, mems, ncols=3, boxed=True):
+    def format_obj_link_grid(self, mems, ncols=3, root=None, boxed=True):
         links = self.split(
-            [self.format_obj_link(l) for l in mems],
+            [self.format_obj_link(l) for l in (mems.values() if hasattr(mems, 'values') else mems)],
             ncols=ncols
         )
         return self.format_grid(links, boxed=boxed)
@@ -116,11 +116,13 @@ class MarkdownOps:
         return identifier.split(".")[-1]
 
     @classmethod
-    def canonical_link(self, identifier, formatter=None):
+    def canonical_link(self, identifier, root=None, formatter=None):
         ups = 0
         while identifier[0] == ".":
             ups += 1
             identifier = identifier[1:]
+        if root is not None:
+            identifier = identifier.split(root, 1)[-1]
         if ups > 0:
             pad = "../"*ups
         else:
