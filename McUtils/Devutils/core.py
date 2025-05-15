@@ -17,7 +17,8 @@ __all__ = [
     "cached_eval",
     "str_comp",
     "str_is",
-    "str_in"
+    "str_in",
+    "str_elide"
 ]
 
 class SingletonType:
@@ -109,3 +110,11 @@ def str_is(str_val, test_val):
     return isinstance(str_val, str) and str_val == test_val
 def str_in(str_val, test_vals):
     return isinstance(str_val, str) and str_val in test_vals
+def str_elide(long_str, width=80, placeholder='...'):
+    l = len(long_str)
+    if l > width:
+        total_width = width - len(placeholder)
+        l = total_width // 2 + (total_width % 2)
+        r = total_width // 2
+        long_str = long_str[:l] + placeholder + long_str[-r:]
+    return long_str

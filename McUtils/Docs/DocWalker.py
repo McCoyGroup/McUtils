@@ -491,6 +491,10 @@ class DocTemplateHandler(TemplateHandler):
         self.include_line_numbers = include_line_numbers
         super().__init__(obj, out=out, engine=engine, root=root, walker=walker, **extra_fields)
 
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}('{self.identifier}')"
+
     def get_lineno(self):
         # try:
         if self.include_line_numbers:
@@ -1002,6 +1006,10 @@ class DocWalker(TemplateWalker):
 
         super().__init__(engine, out=out, **extra_fields)
 
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}({self.engine})"
+
     def get_engine(self, locator):
         if locator is None:
             locator = InteractiveTemplateEngine()
@@ -1028,20 +1036,21 @@ class DocWalker(TemplateWalker):
 
     def visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
         if tests_directory is None and isinstance(o, dict):
-            tests_directory = o.get('tests_directory', None)
+            tests_directory = o.get('tests_root', None)
         old_tl = self.tests_loader
         if tests_directory is not None:
             self.tests_loader = self.get_tests_loader(tests_directory)
         if examples_directory is None and isinstance(o, dict):
-            examples_directory = o.get('examples_directory', None)
+            examples_directory = o.get('examples_root', None)
         old_el = self.examples_loader
         if examples_directory is not None:
             self.examples_loader = self.get_examples_loader(examples_directory)
         try:
-            return super().visit_root(o, **kwargs)
+            docs = super().visit_root(o, **kwargs)
         finally:
             self.tests_loader = old_tl
             self.examples_loader = old_el
+        return docs
 
     @mixedmethod
     def _ipython_pinfo_(cls):

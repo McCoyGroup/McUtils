@@ -3,6 +3,7 @@ import ast, functools, re, fnmatch, collections
 import typing, itertools, builtins
 from typing import *
 
+from ... import Devutils as dev
 from .ObjectWalker import *
 __reload_hook__ = [".ObjectWalker"]
 
@@ -594,6 +595,10 @@ class TemplateEngine:
         self.formatter = formatter_class(self.templates)
         self.ignore_missing = ignore_missing
         self.ignore_paths = ignore_paths
+    def __repr__(self):
+        cls = type(self)
+        return dev.str_elide(f"{cls.__name__}({self.locator})", width=50)
+
 
     def format_map(self, template, parameters):
         if template in self.templates:
