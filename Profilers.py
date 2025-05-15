@@ -6,3 +6,4 @@ Mostly useful during development
 from .McUtils.Profilers import *
 from .McUtils.Profilers import __all__
 from .McUtils.Profilers import __doc__
+__identifier__ = 'McUtils.McUtils.Profilers'

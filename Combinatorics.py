@@ -6,3 +6,4 @@ Mostly useful during development
 from .McUtils.Combinatorics import *
 from .McUtils.Combinatorics import __all__
 from .McUtils.Combinatorics import __doc__
+__identifier__ = 'McUtils.McUtils.Combinatorics'

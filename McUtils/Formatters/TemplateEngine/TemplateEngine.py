@@ -742,7 +742,7 @@ class TemplateHandler(ObjectHandler):
         return ".".join(self.get_target_extension())
     def get_target_extension(self, identifier=None):
         if identifier is None:
-            identifier=self.identifier
+            identifier = self.identifier
         elif not isinstance(identifier, str):
             identifier = self.get_identifier(identifier)
         base_id = identifier.split(".")

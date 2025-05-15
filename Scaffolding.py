@@ -6,3 +6,4 @@ Mostly useful during development
 from .McUtils.Scaffolding import *
 from .McUtils.Scaffolding import __all__
 from .McUtils.Scaffolding import __doc__
+__identifier__ = 'McUtils.McUtils.Scaffolding'

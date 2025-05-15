@@ -6,3 +6,4 @@ Mostly useful during development
 from .McUtils.Formatters import *
 from .McUtils.Formatters import __all__
 from .McUtils.Formatters import __doc__
+__identifier__ = 'McUtils.McUtils.Formatters'
