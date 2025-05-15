@@ -684,6 +684,7 @@ class ModuleWriter(DocTemplateHandler):
         tests = self.load_tests()
         return dict({
             'id': ident,
+            'root':ident.rsplit('.', 1)[0],
             'description': descr.strip(),
             # 'long_description': long_descr.strip(),
             'name': name,

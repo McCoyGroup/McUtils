@@ -3,7 +3,7 @@
     
 {description}
 
-{$:"### Members\n" + objlink_grid(members) if nonempty(members) else ""}
+{$:"### Members\n" + objlink_grid(members, root=root) if nonempty(members) else ""}
 
 {optional$:'long_description'}
 
