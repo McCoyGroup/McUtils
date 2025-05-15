@@ -11,134 +11,134 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[OptionsBlock](McUtils/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.md)   
+[OptionsBlock](McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.md)   
 </div>
    <div class="col" markdown="1">
-[ExternalProgramJob](McUtils/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.md)   
+[ExternalProgramJob](McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.md)   
 </div>
    <div class="col" markdown="1">
-[GaussianJob](McUtils/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.md)   
+[GaussianJob](McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[OrcaJob](McUtils/McUtils/ExternalPrograms/Jobs/Orca/OrcaJob.md)   
+[OrcaJob](McUtils/ExternalPrograms/Jobs/Orca/OrcaJob.md)   
 </div>
    <div class="col" markdown="1">
-[ElectronicStructureLogReader](McUtils/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.md)   
+[ElectronicStructureLogReader](McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.md)   
 </div>
    <div class="col" markdown="1">
-[OrcaLogReader](McUtils/McUtils/ExternalPrograms/Parsers/Orca/OrcaLogReader.md)   
+[OrcaLogReader](McUtils/ExternalPrograms/Parsers/Orca/OrcaLogReader.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GaussianFChkReader](McUtils/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.md)   
+[GaussianFChkReader](McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.md)   
 </div>
    <div class="col" markdown="1">
-[GaussianLogReader](McUtils/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.md)   
+[GaussianLogReader](McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.md)   
 </div>
    <div class="col" markdown="1">
-[GaussianLogReaderException](McUtils/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReaderException.md)   
+[GaussianLogReaderException](McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReaderException.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GaussianFChkReaderException](McUtils/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReaderException.md)   
+[GaussianFChkReaderException](McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReaderException.md)   
 </div>
    <div class="col" markdown="1">
-[FchkForceConstants](McUtils/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.md)   
+[FchkForceConstants](McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.md)   
 </div>
    <div class="col" markdown="1">
-[FchkForceDerivatives](McUtils/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceDerivatives.md)   
+[FchkForceDerivatives](McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceDerivatives.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FchkDipoleDerivatives](McUtils/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.md)   
+[FchkDipoleDerivatives](McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.md)   
 </div>
    <div class="col" markdown="1">
-[FchkDipoleHigherDerivatives](McUtils/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.md)   
+[FchkDipoleHigherDerivatives](McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.md)   
 </div>
    <div class="col" markdown="1">
-[FchkDipoleNumDerivatives](McUtils/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleNumDerivatives.md)   
+[FchkDipoleNumDerivatives](McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleNumDerivatives.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CIFParser](McUtils/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.md)   
+[CIFParser](McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.md)   
 </div>
    <div class="col" markdown="1">
-[CIFConverter](McUtils/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.md)   
+[CIFConverter](McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.md)   
 </div>
    <div class="col" markdown="1">
-[ExternalProgramRunner](McUtils/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.md)   
+[ExternalProgramRunner](McUtils/ExternalPrograms/Runner/ExternalProgramRunner.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[OpenBabelInterface](McUtils/McUtils/ExternalPrograms/ChemToolkits/OpenBabelInterface.md)   
+[OpenBabelInterface](McUtils/ExternalPrograms/ChemToolkits/OpenBabelInterface.md)   
 </div>
    <div class="col" markdown="1">
-[PybelInterface](McUtils/McUtils/ExternalPrograms/ChemToolkits/PybelInterface.md)   
+[PybelInterface](McUtils/ExternalPrograms/ChemToolkits/PybelInterface.md)   
 </div>
    <div class="col" markdown="1">
-[RDKitInterface](McUtils/McUtils/ExternalPrograms/ChemToolkits/RDKitInterface.md)   
+[RDKitInterface](McUtils/ExternalPrograms/ChemToolkits/RDKitInterface.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ASEInterface](McUtils/McUtils/ExternalPrograms/ChemToolkits/ASEInterface.md)   
+[ASEInterface](McUtils/ExternalPrograms/ChemToolkits/ASEInterface.md)   
 </div>
    <div class="col" markdown="1">
-[OpenChemistryInterface](McUtils/McUtils/ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
+[OpenChemistryInterface](McUtils/ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
 </div>
    <div class="col" markdown="1">
-[CCLibInterface](McUtils/McUtils/ExternalPrograms/ChemToolkits/CCLibInterface.md)   
+[CCLibInterface](McUtils/ExternalPrograms/ChemToolkits/CCLibInterface.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[VPythonInterface](McUtils/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)   
+[VPythonInterface](McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
    <div class="col" markdown="1">
-[VTKInterface](McUtils/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
+[VTKInterface](McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
    <div class="col" markdown="1">
-[RDMolecule](McUtils/McUtils/ExternalPrograms/RDKit/RDMolecule.md)   
+[RDMolecule](McUtils/ExternalPrograms/RDKit/RDMolecule.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ASEMolecule](McUtils/McUtils/ExternalPrograms/ASE/ASEMolecule.md)   
+[ASEMolecule](McUtils/ExternalPrograms/ASE/ASEMolecule.md)   
 </div>
    <div class="col" markdown="1">
-[OBMolecule](McUtils/McUtils/ExternalPrograms/OpenBabel/OBMolecule.md)   
+[OBMolecule](McUtils/ExternalPrograms/OpenBabel/OBMolecule.md)   
 </div>
    <div class="col" markdown="1">
-[WebRequestHandler](McUtils/McUtils/ExternalPrograms/WebAPI/WebRequestHandler.md)   
+[WebRequestHandler](McUtils/ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[WebAPIConnection](McUtils/McUtils/ExternalPrograms/WebAPI/WebAPIConnection.md)   
+[WebAPIConnection](McUtils/ExternalPrograms/WebAPI/WebAPIConnection.md)   
 </div>
    <div class="col" markdown="1">
-[WebSubAPIConnection](McUtils/McUtils/ExternalPrograms/WebAPI/WebSubAPIConnection.md)   
+[WebSubAPIConnection](McUtils/ExternalPrograms/WebAPI/WebSubAPIConnection.md)   
 </div>
    <div class="col" markdown="1">
-[WebResourceManager](McUtils/McUtils/ExternalPrograms/WebAPI/WebResourceManager.md)   
+[WebResourceManager](McUtils/ExternalPrograms/WebAPI/WebResourceManager.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GitHubReleaseManager](McUtils/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
+[GitHubReleaseManager](McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
 </div>
    <div class="col" markdown="1">
-[ReleaseZIPManager](McUtils/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
+[ReleaseZIPManager](McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
 </div>
    <div class="col" markdown="1">
-[ChemSpiderAPI](McUtils/McUtils/ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
+[ChemSpiderAPI](McUtils/ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
 </div>
 </div>
   <div class="row">
@@ -158,8 +158,59 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 
 
+## Examples
 
 
+
+
+
+
+
+
+
+
+
+
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-67a47f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-67a47f"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-67a47f" markdown="1">
+ - [CIFFiles](#CIFFiles)
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ed20a7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ed20a7"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ed20a7" markdown="1">
+ 
+Before we can run our examples we should get a bit of setup out of the way.
+Since these examples were harvested from the unit tests not all pieces
+will be necessary for all situations.
+
+All tests are wrapped in a test class
+```python
+class ExternalProgramsTest(TestCase):
+```
+
+ </div>
+</div>
+
+#### <a name="CIFFiles">CIFFiles</a>
+```python
+    def test_CIFFiles(self):
+        import pprint
+        print()
+        with CIFParser(TestManager.test_data('samp.cif'), ignore_comments=True) as cif:
+            structs = cif.parse()
+            struct = next(iter(structs[0].values()))
+            res = CIFConverter(struct)#.find_all('cell_*', strict=False)
+            pprint.pp(res.cell_properties)
+```
+
+ </div>
+</div>
 
 
 

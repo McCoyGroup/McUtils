@@ -10,40 +10,40 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DocBuilder](McUtils/McUtils/Docs/DocsBuilder/DocBuilder.md)   
+[DocBuilder](McUtils/Docs/DocsBuilder/DocBuilder.md)   
 </div>
    <div class="col" markdown="1">
-[DocWalker](McUtils/McUtils/Docs/DocWalker/DocWalker.md)   
+[DocWalker](McUtils/Docs/DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleWriter](McUtils/McUtils/Docs/DocWalker/ModuleWriter.md)   
+[ModuleWriter](McUtils/Docs/DocWalker/ModuleWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ClassWriter](McUtils/McUtils/Docs/DocWalker/ClassWriter.md)   
+[ClassWriter](McUtils/Docs/DocWalker/ClassWriter.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionWriter](McUtils/McUtils/Docs/DocWalker/FunctionWriter.md)   
+[FunctionWriter](McUtils/Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[MethodWriter](McUtils/McUtils/Docs/DocWalker/MethodWriter.md)   
+[MethodWriter](McUtils/Docs/DocWalker/MethodWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ObjectWriter](McUtils/McUtils/Docs/DocWalker/ObjectWriter.md)   
+[ObjectWriter](McUtils/Docs/DocWalker/ObjectWriter.md)   
 </div>
    <div class="col" markdown="1">
-[IndexWriter](McUtils/McUtils/Docs/DocWalker/IndexWriter.md)   
+[IndexWriter](McUtils/Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[jdoc](McUtils/McUtils/Docs/DocWalker/jdoc.md)   
+[jdoc](McUtils/Docs/DocWalker/jdoc.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ExamplesParser](McUtils/McUtils/Docs/ExamplesParser/ExamplesParser.md)   
+[ExamplesParser](McUtils/Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -58,8 +58,120 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 
 
+## Examples
 
 
+
+
+
+
+
+
+
+
+
+
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-69269f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-69269f"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-69269f" markdown="1">
+ - [PeevesDoc](#PeevesDoc)
+- [ParseExamples](#ParseExamples)
+- [FormatSpec](#FormatSpec)
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e82011" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e82011"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e82011" markdown="1">
+ 
+Before we can run our examples we should get a bit of setup out of the way.
+Since these examples were harvested from the unit tests not all pieces
+will be necessary for all situations.
+
+All tests are wrapped in a test class
+```python
+class DocsTests(TestCase):
+    """
+    Sample documentation generator tests
+    """
+```
+
+ </div>
+</div>
+
+#### <a name="PeevesDoc">PeevesDoc</a>
+```python
+    def test_PeevesDoc(self):
+        """
+        Builds sample documentation for the Peeves package
+
+        :return:
+        :rtype:
+        """
+
+        import os, tempfile
+
+        root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        # with tempfile.TemporaryDirectory() as td:
+        td = '/var/folders/9t/tqc70b7d61v753jkdbjkvd640000gp/T/tmpo3b4ztrq/'
+        target = os.path.join(td, "docs")
+        doc_config = {
+            "config": {
+                "title": "McUtils Dev Branch Documentation",
+                "path": "McUtils",
+                "url": "https://mccoygroup.github.io/McUtils/",
+                "gh_username": "McCoyGroup",
+                "gh_repo": "McUtils",
+                "gh_branch": "master",
+                "footer": "Brought to you by the McCoy Group"
+            },
+            "packages": [
+                {
+                    "id": "McUtils",
+                    'tests_root': os.path.join(root, "ci", "tests")
+                }
+            ],
+            "root": root,
+            "target": target,
+            "readme": os.path.join(root, "README.md"),
+            'templates_directory': os.path.join(root, 'ci', 'docs', 'templates'),
+            'examples_directory': os.path.join(root, 'ci', 'docs', 'examples')
+        }
+        DocBuilder(**doc_config).build()
+```
+
+#### <a name="ParseExamples">ParseExamples</a>
+```python
+    def test_ParseExamples(self):
+        parser = ExamplesParser.from_file(os.path.abspath(__file__))
+        self.assertTrue(hasattr(parser.functions, 'items'))
+        tests = TestExamplesFormatter.from_file(os.path.abspath(__file__))
+        print(tests.format_tex())
+```
+
+#### <a name="FormatSpec">FormatSpec</a>
+```python
+    def test_FormatSpec(self):
+        fmt = inspect.cleandoc("""
+        ### My Data
+
+        {$:b=loop(add_temp, l1, l2, slots=['l1', 'l2'])}
+        {$:len(b) ** 2}
+
+
+        """)
+
+        print("",
+              TemplateFormatter().format(fmt, param=2, l1=[1, 2, 3], l2=[4, 5, 6], add_temp='{l1} + {l2}', p1=1, p2=0),
+              sep="\n"
+              )
+```
+
+ </div>
+</div>
 
 
 

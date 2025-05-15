@@ -22,153 +22,153 @@ using a streamer to match chunks and a parser to extract data from the matched c
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[FileStreamReader](McUtils/McUtils/Parsers/FileStreamer/FileStreamReader.md)   
+[FileStreamReader](McUtils/Parsers/FileStreamer/FileStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[FileStreamCheckPoint](McUtils/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)   
+[FileStreamCheckPoint](McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)   
 </div>
    <div class="col" markdown="1">
-[FileStreamerTag](McUtils/McUtils/Parsers/FileStreamer/FileStreamerTag.md)   
+[FileStreamerTag](McUtils/Parsers/FileStreamer/FileStreamerTag.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FileStreamReaderException](McUtils/McUtils/Parsers/FileStreamer/FileStreamReaderException.md)   
+[FileStreamReaderException](McUtils/Parsers/FileStreamer/FileStreamReaderException.md)   
 </div>
    <div class="col" markdown="1">
-[StringStreamReader](McUtils/McUtils/Parsers/FileStreamer/StringStreamReader.md)   
+[StringStreamReader](McUtils/Parsers/FileStreamer/StringStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[FileLineByLineReader](McUtils/McUtils/Parsers/FileStreamer/FileLineByLineReader.md)   
+[FileLineByLineReader](McUtils/Parsers/FileStreamer/FileLineByLineReader.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StringLineByLineReader](McUtils/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
+[StringLineByLineReader](McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
 </div>
    <div class="col" markdown="1">
-[RegexPattern](McUtils/McUtils/Parsers/RegexPatterns/RegexPattern.md)   
+[RegexPattern](McUtils/Parsers/RegexPatterns/RegexPattern.md)   
 </div>
    <div class="col" markdown="1">
-[Capturing](McUtils/McUtils/Parsers/RegexPatterns/Capturing.md)   
+[Capturing](McUtils/Parsers/RegexPatterns/Capturing.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[NonCapturing](McUtils/McUtils/Parsers/RegexPatterns/NonCapturing.md)   
+[NonCapturing](McUtils/Parsers/RegexPatterns/NonCapturing.md)   
 </div>
    <div class="col" markdown="1">
-[Optional](McUtils/McUtils/Parsers/RegexPatterns/Optional.md)   
+[Optional](McUtils/Parsers/RegexPatterns/Optional.md)   
 </div>
    <div class="col" markdown="1">
-[Alternatives](McUtils/McUtils/Parsers/RegexPatterns/Alternatives.md)   
+[Alternatives](McUtils/Parsers/RegexPatterns/Alternatives.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Longest](McUtils/McUtils/Parsers/RegexPatterns/Longest.md)   
+[Longest](McUtils/Parsers/RegexPatterns/Longest.md)   
 </div>
    <div class="col" markdown="1">
-[Shortest](McUtils/McUtils/Parsers/RegexPatterns/Shortest.md)   
+[Shortest](McUtils/Parsers/RegexPatterns/Shortest.md)   
 </div>
    <div class="col" markdown="1">
-[Repeating](McUtils/McUtils/Parsers/RegexPatterns/Repeating.md)   
+[Repeating](McUtils/Parsers/RegexPatterns/Repeating.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Duplicated](McUtils/McUtils/Parsers/RegexPatterns/Duplicated.md)   
+[Duplicated](McUtils/Parsers/RegexPatterns/Duplicated.md)   
 </div>
    <div class="col" markdown="1">
-[PatternClass](McUtils/McUtils/Parsers/RegexPatterns/PatternClass.md)   
+[PatternClass](McUtils/Parsers/RegexPatterns/PatternClass.md)   
 </div>
    <div class="col" markdown="1">
-[Parenthesized](McUtils/McUtils/Parsers/RegexPatterns/Parenthesized.md)   
+[Parenthesized](McUtils/Parsers/RegexPatterns/Parenthesized.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Named](McUtils/McUtils/Parsers/RegexPatterns/Named.md)   
+[Named](McUtils/Parsers/RegexPatterns/Named.md)   
 </div>
    <div class="col" markdown="1">
-[Any](McUtils/McUtils/Parsers/RegexPatterns/Any.md)   
+[Any](McUtils/Parsers/RegexPatterns/Any.md)   
 </div>
    <div class="col" markdown="1">
-[Sign](McUtils/McUtils/Parsers/RegexPatterns/Sign.md)   
+[Sign](McUtils/Parsers/RegexPatterns/Sign.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Number](McUtils/McUtils/Parsers/RegexPatterns/Number.md)   
+[Number](McUtils/Parsers/RegexPatterns/Number.md)   
 </div>
    <div class="col" markdown="1">
-[Integer](McUtils/McUtils/Parsers/RegexPatterns/Integer.md)   
+[Integer](McUtils/Parsers/RegexPatterns/Integer.md)   
 </div>
    <div class="col" markdown="1">
-[PositiveInteger](McUtils/McUtils/Parsers/RegexPatterns/PositiveInteger.md)   
+[PositiveInteger](McUtils/Parsers/RegexPatterns/PositiveInteger.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ASCIILetter](McUtils/McUtils/Parsers/RegexPatterns/ASCIILetter.md)   
+[ASCIILetter](McUtils/Parsers/RegexPatterns/ASCIILetter.md)   
 </div>
    <div class="col" markdown="1">
-[AtomName](McUtils/McUtils/Parsers/RegexPatterns/AtomName.md)   
+[AtomName](McUtils/Parsers/RegexPatterns/AtomName.md)   
 </div>
    <div class="col" markdown="1">
-[WhitespaceCharacter](McUtils/McUtils/Parsers/RegexPatterns/WhitespaceCharacter.md)   
+[WhitespaceCharacter](McUtils/Parsers/RegexPatterns/WhitespaceCharacter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Word](McUtils/McUtils/Parsers/RegexPatterns/Word.md)   
+[Word](McUtils/Parsers/RegexPatterns/Word.md)   
 </div>
    <div class="col" markdown="1">
-[WordCharacter](McUtils/McUtils/Parsers/RegexPatterns/WordCharacter.md)   
+[WordCharacter](McUtils/Parsers/RegexPatterns/WordCharacter.md)   
 </div>
    <div class="col" markdown="1">
-[VariableName](McUtils/McUtils/Parsers/RegexPatterns/VariableName.md)   
+[VariableName](McUtils/Parsers/RegexPatterns/VariableName.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CartesianPoint](McUtils/McUtils/Parsers/RegexPatterns/CartesianPoint.md)   
+[CartesianPoint](McUtils/Parsers/RegexPatterns/CartesianPoint.md)   
 </div>
    <div class="col" markdown="1">
-[IntXYZLine](McUtils/McUtils/Parsers/RegexPatterns/IntXYZLine.md)   
+[IntXYZLine](McUtils/Parsers/RegexPatterns/IntXYZLine.md)   
 </div>
    <div class="col" markdown="1">
-[XYZLine](McUtils/McUtils/Parsers/RegexPatterns/XYZLine.md)   
+[XYZLine](McUtils/Parsers/RegexPatterns/XYZLine.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Empty](McUtils/McUtils/Parsers/RegexPatterns/Empty.md)   
+[Empty](McUtils/Parsers/RegexPatterns/Empty.md)   
 </div>
    <div class="col" markdown="1">
-[Newline](McUtils/McUtils/Parsers/RegexPatterns/Newline.md)   
+[Newline](McUtils/Parsers/RegexPatterns/Newline.md)   
 </div>
    <div class="col" markdown="1">
-[ZMatPattern](McUtils/McUtils/Parsers/RegexPatterns/ZMatPattern.md)   
+[ZMatPattern](McUtils/Parsers/RegexPatterns/ZMatPattern.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StringParser](McUtils/McUtils/Parsers/StringParser/StringParser.md)   
+[StringParser](McUtils/Parsers/StringParser/StringParser.md)   
 </div>
    <div class="col" markdown="1">
-[StringParserException](McUtils/McUtils/Parsers/StringParser/StringParserException.md)   
+[StringParserException](McUtils/Parsers/StringParser/StringParserException.md)   
 </div>
    <div class="col" markdown="1">
-[StructuredType](McUtils/McUtils/Parsers/StructuredType/StructuredType.md)   
+[StructuredType](McUtils/Parsers/StructuredType/StructuredType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StructuredTypeArray](McUtils/McUtils/Parsers/StructuredType/StructuredTypeArray.md)   
+[StructuredTypeArray](McUtils/Parsers/StructuredType/StructuredTypeArray.md)   
 </div>
    <div class="col" markdown="1">
-[DisappearingType](McUtils/McUtils/Parsers/StructuredType/DisappearingType.md)   
+[DisappearingType](McUtils/Parsers/StructuredType/DisappearingType.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -317,6 +317,173 @@ Named(
 
 Here `StringParser.array_handler(dtype=float)` provides efficient parsing of data through `np.loadtxt` with a `float` as the target `dtype`.
 We also see the `prefix` and `joiner` options to `RegexPattern` in action.
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-03aee9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-03aee9"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-03aee9" markdown="1">
+ - [RegexGroups](#RegexGroups)
+- [OptScan](#OptScan)
+- [XYZ](#XYZ)
+- [BasicParse](#BasicParse)
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-45f413" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-45f413"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-45f413" markdown="1">
+ 
+Before we can run our examples we should get a bit of setup out of the way.
+Since these examples were harvested from the unit tests not all pieces
+will be necessary for all situations.
+
+All tests are wrapped in a test class
+```python
+class ParserTests(TestCase):
+```
+
+ </div>
+</div>
+
+#### <a name="RegexGroups">RegexGroups</a>
+```python
+    def test_RegexGroups(self):
+        # tests whether we capture subgroups or not (by default _not_)
+
+        test_str = "1 2 3 4 a b c d "
+        pattern = RegexPattern(
+            (
+                Capturing(
+                    Repeating(
+                        Capturing(Repeating(PositiveInteger, 2, 2, suffix=Optional(Whitespace)))
+                    )
+                ),
+                Repeating(Capturing(ASCIILetter), suffix=Whitespace)
+            )
+        )
+        self.assertEquals(len(pattern.search(test_str).groups()), 2)
+```
+
+#### <a name="OptScan">OptScan</a>
+```python
+    def test_OptScan(self):
+
+        eigsPattern = RegexPattern(
+            (
+                "Eigenvalues --",
+                Repeating(Capturing(Number), suffix=Optional(Whitespace))
+            ),
+            joiner=Whitespace
+        )
+
+        coordsPattern = RegexPattern(
+            (
+                Capturing(VariableName),
+                Repeating(Capturing(Number), suffix=Optional(Whitespace))
+            ),
+            prefix=Whitespace,
+            joiner=Whitespace
+        )
+
+        full_pattern = RegexPattern(
+            (
+                Named(eigsPattern,
+                      "Eigenvalues"
+                      #parser=lambda t: np.array(Number.findall(t), 'float')
+                      ),
+                Named(Repeating(coordsPattern, suffix=Optional(Newline)), "Coordinates")
+            ),
+            joiner=Newline
+        )
+
+        with open(TestManager.test_data('scan_params_test.txt')) as test:
+            test_str = test.read()
+
+        parser = StringParser(full_pattern)
+        parse_res = parser.parse_all(test_str)
+        parse_single = parser.parse(test_str)
+        parse_its = list(parser.parse_iter(test_str))
+
+        self.assertEquals(parse_res.shape, [(4, 5), [(4, 32), (4, 32, 5)]])
+        self.assertIsInstance(parse_res["Coordinates"][1].array, np.ndarray)
+        self.assertEquals(int(parse_res["Coordinates"][1, 0].sum()), 3230)
+```
+
+#### <a name="XYZ">XYZ</a>
+```python
+    def test_XYZ(self):
+
+        with open(TestManager.test_data('test_100.xyz')) as test:
+            test_str = test.read()
+
+        # print(
+        #     "\n".join(test_str.splitlines()[:15]),
+        #     "\n",
+        #     XYZParser.regex.search(test_str),
+        #     file=sys.stderr
+        # )
+
+        res = XYZParser.parse_all(
+            test_str
+        )
+        # print(
+        #     res["Atoms"],
+        #     file=sys.stderr
+        # )
+
+        atom_coords = res["Atoms"].array[1].array
+        self.assertIsInstance(atom_coords, np.ndarray)
+        self.assertEquals(atom_coords.shape, (100, 13, 3))
+```
+
+#### <a name="BasicParse">BasicParse</a>
+```python
+    def test_BasicParse(self):
+        regex = RegexPattern(
+            (
+                Named(PositiveInteger, "NumAtoms"),
+                Named(
+                    Repeating(Any, min = None), "Comment", dtype=str
+                ),
+                Named(
+                    Repeating(
+                        Capturing(
+                            Repeating(Capturing(Number), 3, 3, prefix = Whitespace, suffix = Optional(Whitespace)),
+                            handler= StringParser.array_handler(shape = (None, 3))
+                        ),
+                        suffix = Optional(Newline)
+                    ),
+                    "Atoms"
+                )
+            ),
+            "XYZ",
+            joiner=Newline
+        )
+
+        with open(TestManager.test_data('coord_parse.txt')) as test:
+            test_str = test.read()
+
+        res = StringParser(regex).parse(test_str)
+
+        comment_string = res["Comment"].array[0]
+        self.assertTrue('comment' in comment_string)
+        self.assertEquals(res['Atoms'].array.shape, (4, 3))
+```
+
+ </div>
+</div>
 
 
 

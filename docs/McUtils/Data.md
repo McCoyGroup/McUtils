@@ -14,43 +14,43 @@ A slightly more involved example is in `ConstantsData.UnitsData`.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DataHandler](McUtils/McUtils/Data/CommonData/DataHandler.md)   
+[DataHandler](McUtils/Data/CommonData/DataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[DataError](McUtils/McUtils/Data/CommonData/DataError.md)   
+[DataError](McUtils/Data/CommonData/DataError.md)   
 </div>
    <div class="col" markdown="1">
-[DataRecord](McUtils/McUtils/Data/CommonData/DataRecord.md)   
+[DataRecord](McUtils/Data/CommonData/DataRecord.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[AtomData](McUtils/McUtils/Data/AtomData/AtomData.md)   
+[AtomData](McUtils/Data/AtomData/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[AtomDataHandler](McUtils/McUtils/Data/AtomData/AtomDataHandler.md)   
+[AtomDataHandler](McUtils/Data/AtomData/AtomDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[UnitsData](McUtils/McUtils/Data/ConstantsData/UnitsData.md)   
+[UnitsData](McUtils/Data/ConstantsData/UnitsData.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UnitsDataHandler](McUtils/McUtils/Data/ConstantsData/UnitsDataHandler.md)   
+[UnitsDataHandler](McUtils/Data/ConstantsData/UnitsDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[BondData](McUtils/McUtils/Data/BondData/BondData.md)   
+[BondData](McUtils/Data/BondData/BondData.md)   
 </div>
    <div class="col" markdown="1">
-[BondDataHandler](McUtils/McUtils/Data/BondData/BondDataHandler.md)   
+[BondDataHandler](McUtils/Data/BondData/BondDataHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[WavefunctionData](McUtils/McUtils/Data/WavefunctionData/WavefunctionData.md)   
+[WavefunctionData](McUtils/Data/WavefunctionData/WavefunctionData.md)   
 </div>
    <div class="col" markdown="1">
-[PotentialData](McUtils/McUtils/Data/PotentialData/PotentialData.md)   
+[PotentialData](McUtils/Data/PotentialData/PotentialData.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -107,6 +107,99 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-52279b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-52279b"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-52279b" markdown="1">
+ - [AtomData](#AtomData)
+- [AtomMasses](#AtomMasses)
+- [Conversions](#Conversions)
+- [AtomicUnits](#AtomicUnits)
+- [BondData](#BondData)
+
+<div class="collapsible-section">
+ <div class="collapsible-section collapsible-section-header" markdown="1">
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-92a2d8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-92a2d8"><i class="fa fa-chevron-down"></i></a>
+ </div>
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-92a2d8" markdown="1">
+ 
+Before we can run our examples we should get a bit of setup out of the way.
+Since these examples were harvested from the unit tests not all pieces
+will be necessary for all situations.
+
+All tests are wrapped in a test class
+```python
+class DataTests(TestCase):
+```
+
+ </div>
+</div>
+
+#### <a name="AtomData">AtomData</a>
+```python
+    def test_AtomData(self):
+        self.assertIsInstance(AtomData["H"], DataRecord)
+        self.assertIsInstance(AtomData["Hydrogen"], DataRecord)
+        self.assertIsInstance(AtomData["Helium3"], DataRecord)
+        self.assertIs(AtomData["Hydrogen2"], AtomData["Deuterium"])
+        self.assertIs(AtomData["H2"], AtomData["Deuterium"])
+        self.assertIs(AtomData["H1"], AtomData["Hydrogen"])
+        self.assertIs(AtomData[8], AtomData["Oxygen"])
+```
+
+#### <a name="AtomMasses">AtomMasses</a>
+```python
+    def test_AtomMasses(self):
+        self.assertLess(AtomData["Helium3", "Mass"], AtomData["T"]["Mass"])
+```
+
+#### <a name="Conversions">Conversions</a>
+```python
+    def test_Conversions(self):
+        # print(AtomData["T"]["Mass"]-AtomData["Helium3", "Mass"], file=sys.stderr)
+        self.assertGreater(UnitsData.data[("Hartrees", "InverseMeters")]["Value"], 21947463.13)
+        self.assertLess(UnitsData.data[("Hartrees", "InverseMeters")]["Value"], 21947463.14)
+        self.assertAlmostEqual(
+            UnitsData.convert("Hartrees", "Wavenumbers"),
+            UnitsData.convert("Hartrees", "InverseMeters") / 100
+        )
+        self.assertAlmostEqual(
+            UnitsData.convert("Hartrees", "Wavenumbers"),
+            UnitsData.convert("Centihartrees", "InverseMeters")
+        )
+```
+
+#### <a name="AtomicUnits">AtomicUnits</a>
+```python
+    def test_AtomicUnits(self):
+        # print(UnitsData["AtomicUnitOfMass"])
+        self.assertAlmostEqual(UnitsData.convert("AtomicMassUnits", "AtomicUnitOfMass"), 1822.888486217313)
+```
+
+#### <a name="BondData">BondData</a>
+```python
+    def test_BondData(self):
+        self.assertIsInstance(BondData["H"], dict)
+        self.assertLess(BondData["H", "H", 1], 1)
+        self.assertLess(BondData["H", "O", 1], 1)
+        self.assertGreater(BondData["H", "C", 1], 1)
+```
+
+ </div>
+</div>
 
 
 

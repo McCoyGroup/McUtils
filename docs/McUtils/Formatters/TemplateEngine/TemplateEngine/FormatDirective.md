@@ -1,8 +1,8 @@
 ## <a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.FormatDirective">FormatDirective</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L95)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L95?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L96)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L96?message=Update%20Docs)]
 </div>
 
 Base class for directives -- shouldn't be an enum really...
@@ -24,8 +24,8 @@ Base class for directives -- shouldn't be an enum really...
 __init__(self, name, callback=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.py#L99)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.py#L99?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.py#L100?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, name, callback=None):
 extend(cls, *others): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L121?message=Update%20Docs)]
 </div>
 
 
@@ -94,7 +94,7 @@ extend(cls, *others):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L95?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L96?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
