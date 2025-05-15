@@ -1,20 +1,13 @@
 # GitHub Actions container to support doing CI
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && apt-get purge -y --auto-remove \
     && rm -rf /var/lib/apt/lists/*
 
-# installs python packages we'd want for unit testing
-RUN pip install \
-              numpy \
-              matplotlib \
-              scipy \
-              h5py
-
 LABEL "name"="McCoyGroup/McUtilsCI"
-LABEL "maintainer"="Mark Boyer <b3m2a1uw.edu>"
+LABEL "maintainer"="Mark Boyer <maboyer@tamu.edu>"
 LABEL "version"="0.0.1"
 
 LABEL "com.github.actions.name"="McUtils Continuous Integration"
@@ -23,12 +16,12 @@ LABEL "com.github.actions.icon"="git"
 LABEL "com.github.actions.color"="orange"
 
 RUN \
-    cd /home && \
-    git config --system --add safe.directory /github/workspace && \
-    git clone https://github.com/McCoyGroup/Peeves.git && \
-    git clone https://github.com/McCoyGroup/McUtils.git
+    pip install --upgrade pip && \
+    pip install git+https://github.com/McCoyGroup/McUtils.git
 
 RUN \
-    cd /home/McUtils
+    cd /home && \
+    git config --system --add safe.directory /github/workspace && \
+    git clone https://github.com/McCoyGroup/McUtils.git
 
 ENTRYPOINT ["/bin/bash", "/home/McUtils/ci/run_ci.sh"]

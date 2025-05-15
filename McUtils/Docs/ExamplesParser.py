@@ -118,6 +118,8 @@ class ExamplesParser:
                 else:
                     mapping[f].append(k)
         return mapping
+
+    IGNORE_UNHANDLED_STATEMENTS = False
     def _handle_stmt(self, stmt, all_fns):
         if hasattr(stmt, 'body'):
             all_fns.update(self.get_examples_functions(stmt))
@@ -169,13 +171,17 @@ class ExamplesParser:
             # for v in stmt.elts:
             #     self._handle_stmt(v, all_fns)
         elif (
-            hasattr(stmt, 'generators')
+            stmt is None
+            or hasattr(stmt, 'generators')
             or hasattr(stmt, 'exc')
             or hasattr(stmt, 'targets')
         ):
             pass # for now at least...
         else:
-            raise Exception(stmt, stmt._fields)
+            if self.IGNORE_UNHANDLED_STATEMENTS:
+                print("IGNORING:", stmt)
+            else:
+                raise ValueError(f"don't know what to do with statement {stmt}")
     def get_examples_functions(self, node):
         all_fns = set()
         try:

@@ -13,3 +13,5 @@ from .GaussianImporter import *; from .GaussianImporter import __all__ as expose
 __all__ += exposed
 from .FChkDerivatives import *; from .FChkDerivatives import __all__ as exposed
 __all__ += exposed
+from .CIFParser import *; from .CIFParser import __all__ as exposed
+__all__ += exposed
