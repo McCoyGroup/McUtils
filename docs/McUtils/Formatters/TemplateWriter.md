@@ -10,10 +10,10 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[TemplateWriter](/Formatters/TemplateWriter/TemplateWriter.md)   
+[TemplateWriter](Formatters/TemplateWriter/TemplateWriter.md)   
 </div>
    <div class="col" markdown="1">
-[OptionalTemplate](/Formatters/TemplateWriter/OptionalTemplate.md)   
+[OptionalTemplate](Formatters/TemplateWriter/OptionalTemplate.md)   
 </div>
    <div class="col" markdown="1">
    

@@ -10,10 +10,10 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[StringParser](/Parsers/StringParser/StringParser.md)   
+[StringParser](Parsers/StringParser/StringParser.md)   
 </div>
    <div class="col" markdown="1">
-[StringParserException](/Parsers/StringParser/StringParserException.md)   
+[StringParserException](Parsers/StringParser/StringParserException.md)   
 </div>
    <div class="col" markdown="1">
    

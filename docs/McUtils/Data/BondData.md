@@ -10,10 +10,10 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[BondData](/Data/BondData/BondData.md)   
+[BondData](Data/BondData/BondData.md)   
 </div>
    <div class="col" markdown="1">
-[BondDataHandler](/Data/BondData/BondDataHandler.md)   
+[BondDataHandler](Data/BondData/BondDataHandler.md)   
 </div>
    <div class="col" markdown="1">
    

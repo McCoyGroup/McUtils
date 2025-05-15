@@ -27,381 +27,381 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsBase](/McUtils/Plots/Graphics/GraphicsBase.md)   
+[GraphicsBase](Plots/Graphics/GraphicsBase.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics](/McUtils/Plots/Graphics/Graphics.md)   
+[Graphics](Plots/Graphics/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics3D](/McUtils/Plots/Graphics/Graphics3D.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[GraphicsGrid](/McUtils/Plots/Graphics/GraphicsGrid.md)   
-</div>
-   <div class="col" markdown="1">
-[Plot](/McUtils/Plots/Plots/Plot.md)   
-</div>
-   <div class="col" markdown="1">
-[DataPlot](/McUtils/Plots/Plots/DataPlot.md)   
+[Graphics3D](Plots/Graphics/Graphics3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ArrayPlot](/McUtils/Plots/Plots/ArrayPlot.md)   
+[GraphicsGrid](Plots/Graphics/GraphicsGrid.md)   
 </div>
    <div class="col" markdown="1">
-[TensorPlot](/McUtils/Plots/Plots/TensorPlot.md)   
+[Plot](Plots/Plots/Plot.md)   
 </div>
    <div class="col" markdown="1">
-[Plot2D](/McUtils/Plots/Plots/Plot2D.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[ListPlot2D](/McUtils/Plots/Plots/ListPlot2D.md)   
-</div>
-   <div class="col" markdown="1">
-[Plot3D](/McUtils/Plots/Plots/Plot3D.md)   
-</div>
-   <div class="col" markdown="1">
-[ListPlot3D](/McUtils/Plots/Plots/ListPlot3D.md)   
+[DataPlot](Plots/Plots/DataPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CompositePlot](/McUtils/Plots/Plots/CompositePlot.md)   
+[ArrayPlot](Plots/Plots/ArrayPlot.md)   
 </div>
    <div class="col" markdown="1">
-[FilledPlot](/McUtils/Plots/Plots/FilledPlot.md)   
+[TensorPlot](Plots/Plots/TensorPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ScatterPlot](/McUtils/Plots/Plots/ScatterPlot.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[ErrorBarPlot](/McUtils/Plots/Plots/ErrorBarPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[StickPlot](/McUtils/Plots/Plots/StickPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[DatePlot](/McUtils/Plots/Plots/DatePlot.md)   
+[Plot2D](Plots/Plots/Plot2D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StepPlot](/McUtils/Plots/Plots/StepPlot.md)   
+[ListPlot2D](Plots/Plots/ListPlot2D.md)   
 </div>
    <div class="col" markdown="1">
-[LogLogPlot](/McUtils/Plots/Plots/LogLogPlot.md)   
+[Plot3D](Plots/Plots/Plot3D.md)   
 </div>
    <div class="col" markdown="1">
-[SemiLogXPlot](/McUtils/Plots/Plots/SemiLogXPlot.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[SemilogYPlot](/McUtils/Plots/Plots/SemilogYPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[HorizontalFilledPlot](/McUtils/Plots/Plots/HorizontalFilledPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[BarPlot](/McUtils/Plots/Plots/BarPlot.md)   
+[ListPlot3D](Plots/Plots/ListPlot3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[HorizontalBarPlot](/McUtils/Plots/Plots/HorizontalBarPlot.md)   
+[CompositePlot](Plots/Plots/CompositePlot.md)   
 </div>
    <div class="col" markdown="1">
-[EventPlot](/McUtils/Plots/Plots/EventPlot.md)   
+[FilledPlot](Plots/Plots/FilledPlot.md)   
 </div>
    <div class="col" markdown="1">
-[PiePlot](/McUtils/Plots/Plots/PiePlot.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[StackPlot](/McUtils/Plots/Plots/StackPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[BrokenHorizontalBarPlot](/McUtils/Plots/Plots/BrokenHorizontalBarPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[VerticalLinePlot](/McUtils/Plots/Plots/VerticalLinePlot.md)   
+[ScatterPlot](Plots/Plots/ScatterPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[HorizontalLinePlot](/McUtils/Plots/Plots/HorizontalLinePlot.md)   
+[ErrorBarPlot](Plots/Plots/ErrorBarPlot.md)   
 </div>
    <div class="col" markdown="1">
-[PolygonPlot](/McUtils/Plots/Plots/PolygonPlot.md)   
+[StickPlot](Plots/Plots/StickPlot.md)   
 </div>
    <div class="col" markdown="1">
-[AxisHorizontalLinePlot](/McUtils/Plots/Plots/AxisHorizontalLinePlot.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[AxisHorizontalSpanPlot](/McUtils/Plots/Plots/AxisHorizontalSpanPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[AxisVerticalLinePlot](/McUtils/Plots/Plots/AxisVerticalLinePlot.md)   
-</div>
-   <div class="col" markdown="1">
-[AxisVeticalSpanPlot](/McUtils/Plots/Plots/AxisVeticalSpanPlot.md)   
+[DatePlot](Plots/Plots/DatePlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[AxisLinePlot](/McUtils/Plots/Plots/AxisLinePlot.md)   
+[StepPlot](Plots/Plots/StepPlot.md)   
 </div>
    <div class="col" markdown="1">
-[StairsPlot](/McUtils/Plots/Plots/StairsPlot.md)   
+[LogLogPlot](Plots/Plots/LogLogPlot.md)   
 </div>
    <div class="col" markdown="1">
-[HistogramPlot](/McUtils/Plots/Plots/HistogramPlot.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[HistogramPlot2D](/McUtils/Plots/Plots/HistogramPlot2D.md)   
-</div>
-   <div class="col" markdown="1">
-[SpectrogramPlot](/McUtils/Plots/Plots/SpectrogramPlot.md)   
-</div>
-   <div class="col" markdown="1">
-[AutocorrelationPlot](/McUtils/Plots/Plots/AutocorrelationPlot.md)   
+[SemiLogXPlot](Plots/Plots/SemiLogXPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[AngleSpectrumPlot](/McUtils/Plots/Plots/AngleSpectrumPlot.md)   
+[SemilogYPlot](Plots/Plots/SemilogYPlot.md)   
 </div>
    <div class="col" markdown="1">
-[CoherencePlot](/McUtils/Plots/Plots/CoherencePlot.md)   
+[HorizontalFilledPlot](Plots/Plots/HorizontalFilledPlot.md)   
 </div>
    <div class="col" markdown="1">
-[CrossSpectralDensityPlot](/McUtils/Plots/Plots/CrossSpectralDensityPlot.md)   
+[BarPlot](Plots/Plots/BarPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[MagnitudeSpectrumPlot](/McUtils/Plots/Plots/MagnitudeSpectrumPlot.md)   
+[HorizontalBarPlot](Plots/Plots/HorizontalBarPlot.md)   
 </div>
    <div class="col" markdown="1">
-[PhaseSpectrumPlot](/McUtils/Plots/Plots/PhaseSpectrumPlot.md)   
+[EventPlot](Plots/Plots/EventPlot.md)   
 </div>
    <div class="col" markdown="1">
-[PowerSpectralDensityPlot](/McUtils/Plots/Plots/PowerSpectralDensityPlot.md)   
+[PiePlot](Plots/Plots/PiePlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CrossCorrelationPlot](/McUtils/Plots/Plots/CrossCorrelationPlot.md)   
+[StackPlot](Plots/Plots/StackPlot.md)   
 </div>
    <div class="col" markdown="1">
-[BoxPlot](/McUtils/Plots/Plots/BoxPlot.md)   
+[BrokenHorizontalBarPlot](Plots/Plots/BrokenHorizontalBarPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ViolinPlot](/McUtils/Plots/Plots/ViolinPlot.md)   
+[VerticalLinePlot](Plots/Plots/VerticalLinePlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[BoxAndWhiskerPlot](/McUtils/Plots/Plots/BoxAndWhiskerPlot.md)   
+[HorizontalLinePlot](Plots/Plots/HorizontalLinePlot.md)   
 </div>
    <div class="col" markdown="1">
-[HexagonalHistogramPlot](/McUtils/Plots/Plots/HexagonalHistogramPlot.md)   
+[PolygonPlot](Plots/Plots/PolygonPlot.md)   
 </div>
    <div class="col" markdown="1">
-[QuiverPlot](/McUtils/Plots/Plots/QuiverPlot.md)   
+[AxisHorizontalLinePlot](Plots/Plots/AxisHorizontalLinePlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StreamPlot](/McUtils/Plots/Plots/StreamPlot.md)   
+[AxisHorizontalSpanPlot](Plots/Plots/AxisHorizontalSpanPlot.md)   
 </div>
    <div class="col" markdown="1">
-[MatrixPlot](/McUtils/Plots/Plots/MatrixPlot.md)   
+[AxisVerticalLinePlot](Plots/Plots/AxisVerticalLinePlot.md)   
 </div>
    <div class="col" markdown="1">
-[SparsityPlot](/McUtils/Plots/Plots/SparsityPlot.md)   
+[AxisVeticalSpanPlot](Plots/Plots/AxisVeticalSpanPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ContourPlot](/McUtils/Plots/Plots/ContourPlot.md)   
+[AxisLinePlot](Plots/Plots/AxisLinePlot.md)   
 </div>
    <div class="col" markdown="1">
-[DensityPlot](/McUtils/Plots/Plots/DensityPlot.md)   
+[StairsPlot](Plots/Plots/StairsPlot.md)   
 </div>
    <div class="col" markdown="1">
-[HeatmapPlot](/McUtils/Plots/Plots/HeatmapPlot.md)   
+[HistogramPlot](Plots/Plots/HistogramPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TriPlot](/McUtils/Plots/Plots/TriPlot.md)   
+[HistogramPlot2D](Plots/Plots/HistogramPlot2D.md)   
 </div>
    <div class="col" markdown="1">
-[TriDensityPlot](/McUtils/Plots/Plots/TriDensityPlot.md)   
+[SpectrogramPlot](Plots/Plots/SpectrogramPlot.md)   
 </div>
    <div class="col" markdown="1">
-[TriContourLinesPlot](/McUtils/Plots/Plots/TriContourLinesPlot.md)   
+[AutocorrelationPlot](Plots/Plots/AutocorrelationPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TriContourPlot](/McUtils/Plots/Plots/TriContourPlot.md)   
+[AngleSpectrumPlot](Plots/Plots/AngleSpectrumPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ListContourPlot](/McUtils/Plots/Plots/ListContourPlot.md)   
+[CoherencePlot](Plots/Plots/CoherencePlot.md)   
 </div>
    <div class="col" markdown="1">
-[ListDensityPlot](/McUtils/Plots/Plots/ListDensityPlot.md)   
+[CrossSpectralDensityPlot](Plots/Plots/CrossSpectralDensityPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ListTriContourPlot](/McUtils/Plots/Plots/ListTriContourPlot.md)   
+[MagnitudeSpectrumPlot](Plots/Plots/MagnitudeSpectrumPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ListTriDensityPlot](/McUtils/Plots/Plots/ListTriDensityPlot.md)   
+[PhaseSpectrumPlot](Plots/Plots/PhaseSpectrumPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ScatterPlot3D](/McUtils/Plots/Plots/ScatterPlot3D.md)   
+[PowerSpectralDensityPlot](Plots/Plots/PowerSpectralDensityPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[WireframePlot3D](/McUtils/Plots/Plots/WireframePlot3D.md)   
+[CrossCorrelationPlot](Plots/Plots/CrossCorrelationPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ContourPlot3D](/McUtils/Plots/Plots/ContourPlot3D.md)   
+[BoxPlot](Plots/Plots/BoxPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ListTriPlot3D](/McUtils/Plots/Plots/ListTriPlot3D.md)   
+[ViolinPlot](Plots/Plots/ViolinPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsPrimitive](/McUtils/Plots/Primitives/GraphicsPrimitive.md)   
+[BoxAndWhiskerPlot](Plots/Plots/BoxAndWhiskerPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Sphere](/McUtils/Plots/Primitives/Sphere.md)   
+[HexagonalHistogramPlot](Plots/Plots/HexagonalHistogramPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Cylinder](/McUtils/Plots/Primitives/Cylinder.md)   
+[QuiverPlot](Plots/Plots/QuiverPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Disk](/McUtils/Plots/Primitives/Disk.md)   
+[StreamPlot](Plots/Plots/StreamPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Line](/McUtils/Plots/Primitives/Line.md)   
+[MatrixPlot](Plots/Plots/MatrixPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Text](/McUtils/Plots/Primitives/Text.md)   
+[SparsityPlot](Plots/Plots/SparsityPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Arrow](/McUtils/Plots/Primitives/Arrow.md)   
+[ContourPlot](Plots/Plots/ContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Inset](/McUtils/Plots/Primitives/Inset.md)   
+[DensityPlot](Plots/Plots/DensityPlot.md)   
 </div>
    <div class="col" markdown="1">
-[EventHandler](/McUtils/Plots/Interactive/EventHandler.md)   
+[HeatmapPlot](Plots/Plots/HeatmapPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Animator](/McUtils/Plots/Interactive/Animator.md)   
+[TriPlot](Plots/Plots/TriPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Styled](/McUtils/Plots/Styling/Styled.md)   
+[TriDensityPlot](Plots/Plots/TriDensityPlot.md)   
 </div>
    <div class="col" markdown="1">
-[ThemeManager](/McUtils/Plots/Styling/ThemeManager.md)   
+[TriContourLinesPlot](Plots/Plots/TriContourLinesPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[PlotLegend](/McUtils/Plots/Styling/PlotLegend.md)   
+[TriContourPlot](Plots/Plots/TriContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Image](/McUtils/Plots/Image/Image.md)   
+[ListContourPlot](Plots/Plots/ListContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[GraphicsPropertyManager](/McUtils/Plots/Properties/GraphicsPropertyManager.md)   
+[ListDensityPlot](Plots/Plots/ListDensityPlot.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsPropertyManager3D](/McUtils/Plots/Properties/GraphicsPropertyManager3D.md)   
+[ListTriContourPlot](Plots/Plots/ListTriContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[SceneJSON](/McUtils/Plots/SceneJSON/SceneJSON.md)   
+[ListTriDensityPlot](Plots/Plots/ListTriDensityPlot.md)   
 </div>
    <div class="col" markdown="1">
-[X3D](/McUtils/Plots/X3DInterface/X3D.md)   
+[ScatterPlot3D](Plots/Plots/ScatterPlot3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DPrimitive](/McUtils/Plots/X3DInterface/X3DPrimitive.md)   
+[WireframePlot3D](Plots/Plots/WireframePlot3D.md)   
 </div>
    <div class="col" markdown="1">
-[X3DGeometryObject](/McUtils/Plots/X3DInterface/X3DGeometryObject.md)   
+[ContourPlot3D](Plots/Plots/ContourPlot3D.md)   
 </div>
    <div class="col" markdown="1">
-[X3DGeometryGroup](/McUtils/Plots/X3DInterface/X3DGeometryGroup.md)   
+[ListTriPlot3D](Plots/Plots/ListTriPlot3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DGroup](/McUtils/Plots/X3DInterface/X3DGroup.md)   
+[GraphicsPrimitive](Plots/Primitives/GraphicsPrimitive.md)   
 </div>
    <div class="col" markdown="1">
-[X3DScene](/McUtils/Plots/X3DInterface/X3DScene.md)   
+[Sphere](Plots/Primitives/Sphere.md)   
 </div>
    <div class="col" markdown="1">
-[X3DMaterial](/McUtils/Plots/X3DInterface/X3DMaterial.md)   
+[Cylinder](Plots/Primitives/Cylinder.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DLine](/McUtils/Plots/X3DInterface/X3DLine.md)   
+[Disk](Plots/Primitives/Disk.md)   
 </div>
    <div class="col" markdown="1">
-[X3DSphere](/McUtils/Plots/X3DInterface/X3DSphere.md)   
+[Line](Plots/Primitives/Line.md)   
 </div>
    <div class="col" markdown="1">
-[X3DCone](/McUtils/Plots/X3DInterface/X3DCone.md)   
+[Text](Plots/Primitives/Text.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DCylinder](/McUtils/Plots/X3DInterface/X3DCylinder.md)   
+[Arrow](Plots/Primitives/Arrow.md)   
 </div>
    <div class="col" markdown="1">
-[X3DTorus](/McUtils/Plots/X3DInterface/X3DTorus.md)   
+[Inset](Plots/Primitives/Inset.md)   
 </div>
    <div class="col" markdown="1">
-[X3DSwitch](/McUtils/Plots/X3DInterface/X3DSwitch.md)   
+[EventHandler](Plots/Interactive/EventHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DListAnimator](/McUtils/Plots/X3DInterface/X3DListAnimator.md)   
+[Animator](Plots/Interactive/Animator.md)   
+</div>
+   <div class="col" markdown="1">
+[Styled](Plots/Styling/Styled.md)   
+</div>
+   <div class="col" markdown="1">
+[ThemeManager](Plots/Styling/ThemeManager.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[PlotLegend](Plots/Styling/PlotLegend.md)   
+</div>
+   <div class="col" markdown="1">
+[Image](Plots/Image/Image.md)   
+</div>
+   <div class="col" markdown="1">
+[GraphicsPropertyManager](Plots/Properties/GraphicsPropertyManager.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[GraphicsPropertyManager3D](Plots/Properties/GraphicsPropertyManager3D.md)   
+</div>
+   <div class="col" markdown="1">
+[SceneJSON](Plots/SceneJSON/SceneJSON.md)   
+</div>
+   <div class="col" markdown="1">
+[X3D](Plots/X3DInterface/X3D.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DPrimitive](Plots/X3DInterface/X3DPrimitive.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DGeometryObject](Plots/X3DInterface/X3DGeometryObject.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DGeometryGroup](Plots/X3DInterface/X3DGeometryGroup.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DGroup](Plots/X3DInterface/X3DGroup.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DScene](Plots/X3DInterface/X3DScene.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DMaterial](Plots/X3DInterface/X3DMaterial.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DLine](Plots/X3DInterface/X3DLine.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DSphere](Plots/X3DInterface/X3DSphere.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DCone](Plots/X3DInterface/X3DCone.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DCylinder](Plots/X3DInterface/X3DCylinder.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DTorus](Plots/X3DInterface/X3DTorus.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DSwitch](Plots/X3DInterface/X3DSwitch.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -432,9 +432,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-cdf8c6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cdf8c6"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-e24541" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e24541"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cdf8c6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e24541" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -452,9 +452,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-46cf59" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-46cf59"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-d832a9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d832a9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-46cf59" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d832a9" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

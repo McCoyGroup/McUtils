@@ -17,62 +17,62 @@ been written over the years.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Data](/McUtils/McUtils/Data.md)   
+[Data](McUtils/Data.md)   
 </div>
    <div class="col" markdown="1">
-[Numputils](/McUtils/McUtils/Numputils.md)   
+[Numputils](McUtils/Numputils.md)   
 </div>
    <div class="col" markdown="1">
-[ExternalPrograms](/McUtils/McUtils/ExternalPrograms.md)   
+[ExternalPrograms](McUtils/ExternalPrograms.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Plots](/McUtils/McUtils/Plots.md)   
+[Plots](McUtils/Plots.md)   
 </div>
    <div class="col" markdown="1">
-[Jupyter](/McUtils/McUtils/Jupyter.md)   
+[Jupyter](McUtils/Jupyter.md)   
 </div>
    <div class="col" markdown="1">
-[Parsers](/McUtils/McUtils/Parsers.md)   
+[Parsers](McUtils/Parsers.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Formatters](/McUtils/McUtils/Formatters.md)   
+[Formatters](McUtils/Formatters.md)   
 </div>
    <div class="col" markdown="1">
-[Coordinerds](/McUtils/McUtils/Coordinerds.md)   
+[Coordinerds](McUtils/Coordinerds.md)   
 </div>
    <div class="col" markdown="1">
-[Zachary](/McUtils/McUtils/Zachary.md)   
+[Zachary](McUtils/Zachary.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GaussianInterface](/McUtils/McUtils/GaussianInterface.md)   
+[GaussianInterface](McUtils/GaussianInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Extensions](/McUtils/McUtils/Extensions.md)   
+[Extensions](McUtils/Extensions.md)   
 </div>
    <div class="col" markdown="1">
-[Scaffolding](/McUtils/McUtils/Scaffolding.md)   
+[Scaffolding](McUtils/Scaffolding.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Parallelizers](/McUtils/McUtils/Parallelizers.md)   
+[Parallelizers](McUtils/Parallelizers.md)   
 </div>
    <div class="col" markdown="1">
-[Devutils](/McUtils/McUtils/Devutils.md)   
+[Devutils](McUtils/Devutils.md)   
 </div>
    <div class="col" markdown="1">
-[Docs](/McUtils/McUtils/Docs.md)   
+[Docs](McUtils/Docs.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Misc](/McUtils/McUtils/Misc.md)   
+[Misc](McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
    

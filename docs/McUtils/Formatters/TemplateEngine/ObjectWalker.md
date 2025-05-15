@@ -11,13 +11,13 @@ and call appropriate handlers for each
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[ObjectWalker](/TemplateEngine/ObjectWalker/ObjectWalker.md)   
+[ObjectWalker](TemplateEngine/ObjectWalker/ObjectWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectHandler](/TemplateEngine/ObjectWalker/ObjectHandler.md)   
+[ObjectHandler](TemplateEngine/ObjectWalker/ObjectHandler.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectSpec](/TemplateEngine/ObjectWalker/ObjectSpec.md)   
+[ObjectSpec](TemplateEngine/ObjectWalker/ObjectSpec.md)   
 </div>
 </div>
   <div class="row">

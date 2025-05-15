@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Bootstrap5Widgets](/JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
+[Bootstrap5Widgets](JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
 </div>
    <div class="col" markdown="1">
    

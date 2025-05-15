@@ -11,161 +11,161 @@ Deals with anything tensor, Taylor expansion, or interpolation related
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifferenceFunction](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.md)   
+[FiniteDifferenceFunction](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.md)   
 </div>
    <div class="col" markdown="1">
-[FiniteDifferenceError](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceError.md)   
+[FiniteDifferenceError](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceError.md)   
 </div>
    <div class="col" markdown="1">
-[finite_difference](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/finite_difference.md)   
+[finite_difference](Zachary/Taylor/FiniteDifferenceFunction/finite_difference.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifference1D](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.md)   
+[FiniteDifference1D](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.md)   
 </div>
    <div class="col" markdown="1">
-[RegularGridFiniteDifference](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
+[RegularGridFiniteDifference](Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
 </div>
    <div class="col" markdown="1">
-[IrregularGridFiniteDifference](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/IrregularGridFiniteDifference.md)   
+[IrregularGridFiniteDifference](Zachary/Taylor/FiniteDifferenceFunction/IrregularGridFiniteDifference.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifferenceData](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)   
+[FiniteDifferenceData](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)   
 </div>
    <div class="col" markdown="1">
-[FiniteDifferenceMatrix](/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceMatrix.md)   
+[FiniteDifferenceMatrix](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceMatrix.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionExpansion](/McUtils/Zachary/Taylor/FunctionExpansions/FunctionExpansion.md)   
+[FunctionExpansion](Zachary/Taylor/FunctionExpansions/FunctionExpansion.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifferenceDerivative](/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
+[FiniteDifferenceDerivative](Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
 </div>
    <div class="col" markdown="1">
-[Mesh](/McUtils/Zachary/Mesh/Mesh.md)   
+[Mesh](Zachary/Mesh/Mesh.md)   
 </div>
    <div class="col" markdown="1">
-[MeshType](/McUtils/Zachary/Mesh/MeshType.md)   
+[MeshType](Zachary/Mesh/MeshType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[BaseSurface](/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.md)   
+[BaseSurface](Zachary/Surfaces/BaseSurface/BaseSurface.md)   
 </div>
    <div class="col" markdown="1">
-[TaylorSeriesSurface](/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)   
+[TaylorSeriesSurface](Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)   
 </div>
    <div class="col" markdown="1">
-[InterpolatedSurface](/McUtils/Zachary/Surfaces/BaseSurface/InterpolatedSurface.md)   
+[InterpolatedSurface](Zachary/Surfaces/BaseSurface/InterpolatedSurface.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Surface](/McUtils/Zachary/Surfaces/Surface/Surface.md)   
+[Surface](Zachary/Surfaces/Surface/Surface.md)   
 </div>
    <div class="col" markdown="1">
-[MultiSurface](/McUtils/Zachary/Surfaces/Surface/MultiSurface.md)   
+[MultiSurface](Zachary/Surfaces/Surface/MultiSurface.md)   
 </div>
    <div class="col" markdown="1">
-[FittedModel](/McUtils/Zachary/FittableModels/FittedModel.md)   
+[FittedModel](Zachary/FittableModels/FittedModel.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Interpolator](/McUtils/Zachary/Interpolator/Interpolator.md)   
+[Interpolator](Zachary/Interpolator/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Extrapolator](/McUtils/Zachary/Interpolator/Extrapolator.md)   
+[Extrapolator](Zachary/Interpolator/Extrapolator.md)   
 </div>
    <div class="col" markdown="1">
-[RBFDInterpolator](/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)   
+[RBFDInterpolator](Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[InverseDistanceWeightedInterpolator](/McUtils/Zachary/NeighborBasedInterpolators/InverseDistanceWeightedInterpolator.md)   
+[InverseDistanceWeightedInterpolator](Zachary/NeighborBasedInterpolators/InverseDistanceWeightedInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[ProductGridInterpolator](/McUtils/Zachary/Interpolator/ProductGridInterpolator.md)   
+[ProductGridInterpolator](Zachary/Interpolator/ProductGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[UnstructuredGridInterpolator](/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
+[UnstructuredGridInterpolator](Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CoordinateInterpolator](/McUtils/Zachary/Interpolator/CoordinateInterpolator.md)   
+[CoordinateInterpolator](Zachary/Interpolator/CoordinateInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Tensor](/McUtils/Zachary/LazyTensors/Tensor.md)   
+[Tensor](Zachary/LazyTensors/Tensor.md)   
 </div>
    <div class="col" markdown="1">
-[TensorOp](/McUtils/Zachary/LazyTensors/TensorOp.md)   
+[TensorOp](Zachary/LazyTensors/TensorOp.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LazyOperatorTensor](/McUtils/Zachary/LazyTensors/LazyOperatorTensor.md)   
+[LazyOperatorTensor](Zachary/LazyTensors/LazyOperatorTensor.md)   
 </div>
    <div class="col" markdown="1">
-[SparseTensor](/McUtils/Zachary/LazyTensors/SparseTensor.md)   
+[SparseTensor](Zachary/LazyTensors/SparseTensor.md)   
 </div>
    <div class="col" markdown="1">
-[TensorDerivativeConverter](/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)   
+[TensorDerivativeConverter](Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TensorExpansionTerms](/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)   
+[TensorExpansionTerms](Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)   
 </div>
    <div class="col" markdown="1">
-[TensorExpression](/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.md)   
+[TensorExpression](Zachary/Symbolic/TensorExpressions/TensorExpression.md)   
 </div>
    <div class="col" markdown="1">
-[Symbols](/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
+[Symbols](Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SymPyFunction](/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)   
+[SymPyFunction](Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)   
 </div>
    <div class="col" markdown="1">
-[AbstractPolynomial](/McUtils/Zachary/Polynomials/AbstractPolynomial.md)   
+[AbstractPolynomial](Zachary/Polynomials/AbstractPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[DensePolynomial](/McUtils/Zachary/Polynomials/DensePolynomial.md)   
+[DensePolynomial](Zachary/Polynomials/DensePolynomial.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SparsePolynomial](/McUtils/Zachary/Polynomials/SparsePolynomial.md)   
+[SparsePolynomial](Zachary/Polynomials/SparsePolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[PureMonicPolynomial](/McUtils/Zachary/Polynomials/PureMonicPolynomial.md)   
+[PureMonicPolynomial](Zachary/Polynomials/PureMonicPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[TensorCoefficientPoly](/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
+[TensorCoefficientPoly](Zachary/Polynomials/TensorCoefficientPoly.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[DifferentiableFunction](/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.md)   
+[DifferentiableFunction](Zachary/DifferentiableFunctions/DifferentiableFunction.md)   
 </div>
    <div class="col" markdown="1">
-[PolynomialFunction](/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.md)   
+[PolynomialFunction](Zachary/DifferentiableFunctions/PolynomialFunction.md)   
 </div>
    <div class="col" markdown="1">
-[MorseFunction](/McUtils/Zachary/DifferentiableFunctions/MorseFunction.md)   
+[MorseFunction](Zachary/DifferentiableFunctions/MorseFunction.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CoordinateFunction](/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.md)   
+[CoordinateFunction](Zachary/DifferentiableFunctions/CoordinateFunction.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -302,9 +302,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-989480" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-989480"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-4e4f2d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-4e4f2d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-989480" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-4e4f2d" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -357,9 +357,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-efa7ab" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-efa7ab"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-719ffd" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-719ffd"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-efa7ab" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-719ffd" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

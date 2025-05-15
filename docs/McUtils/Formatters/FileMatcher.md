@@ -10,13 +10,13 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[StringMatcher](/Formatters/FileMatcher/StringMatcher.md)   
+[StringMatcher](Formatters/FileMatcher/StringMatcher.md)   
 </div>
    <div class="col" markdown="1">
-[MatchList](/Formatters/FileMatcher/MatchList.md)   
+[MatchList](Formatters/FileMatcher/MatchList.md)   
 </div>
    <div class="col" markdown="1">
-[FileMatcher](/Formatters/FileMatcher/FileMatcher.md)   
+[FileMatcher](Formatters/FileMatcher/FileMatcher.md)   
 </div>
 </div>
   <div class="row">

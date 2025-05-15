@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[ChemSpiderAPI](/ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
+[ChemSpiderAPI](ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
 </div>
    <div class="col" markdown="1">
    

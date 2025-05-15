@@ -10,10 +10,10 @@ Provides a class for handling a compiled set of atomic data
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[AtomData](/Data/AtomData/AtomData.md)   
+[AtomData](Data/AtomData/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[AtomDataHandler](/Data/AtomData/AtomDataHandler.md)   
+[AtomDataHandler](Data/AtomData/AtomDataHandler.md)   
 </div>
    <div class="col" markdown="1">
    

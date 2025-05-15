@@ -10,101 +10,101 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DefaultType](/McUtils/Devutils/core/DefaultType.md)   
+[DefaultType](Devutils/core/DefaultType.md)   
 </div>
    <div class="col" markdown="1">
-[is_default](/McUtils/Devutils/core/is_default.md)   
+[is_default](Devutils/core/is_default.md)   
 </div>
    <div class="col" markdown="1">
-[handle_default](/McUtils/Devutils/core/handle_default.md)   
+[handle_default](Devutils/core/handle_default.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UninitializedType](/McUtils/Devutils/core/UninitializedType.md)   
+[UninitializedType](Devutils/core/UninitializedType.md)   
 </div>
    <div class="col" markdown="1">
-[is_uninitialized](/McUtils/Devutils/core/is_uninitialized.md)   
+[is_uninitialized](Devutils/core/is_uninitialized.md)   
 </div>
    <div class="col" markdown="1">
-[handle_uninitialized](/McUtils/Devutils/core/handle_uninitialized.md)   
+[handle_uninitialized](Devutils/core/handle_uninitialized.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[is_interface_like](/McUtils/Devutils/core/is_interface_like.md)   
+[is_interface_like](Devutils/core/is_interface_like.md)   
 </div>
    <div class="col" markdown="1">
-[is_dict_like](/McUtils/Devutils/core/is_dict_like.md)   
+[is_dict_like](Devutils/core/is_dict_like.md)   
 </div>
    <div class="col" markdown="1">
-[cached_eval](/McUtils/Devutils/core/cached_eval.md)   
+[cached_eval](Devutils/core/cached_eval.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[str_comp](/McUtils/Devutils/core/str_comp.md)   
+[str_comp](Devutils/core/str_comp.md)   
 </div>
    <div class="col" markdown="1">
-[str_is](/McUtils/Devutils/core/str_is.md)   
+[str_is](Devutils/core/str_is.md)   
 </div>
    <div class="col" markdown="1">
-[str_in](/McUtils/Devutils/core/str_in.md)   
+[str_in](Devutils/core/str_in.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[str_elide](/McUtils/Devutils/core/str_elide.md)   
+[str_elide](Devutils/core/str_elide.md)   
 </div>
    <div class="col" markdown="1">
-[is_filepath_like](/McUtils/Devutils/FileHelpers/is_filepath_like.md)   
+[is_filepath_like](Devutils/FileHelpers/is_filepath_like.md)   
 </div>
    <div class="col" markdown="1">
-[safe_open](/McUtils/Devutils/FileHelpers/safe_open.md)   
+[safe_open](Devutils/FileHelpers/safe_open.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[write_file](/McUtils/Devutils/FileHelpers/write_file.md)   
+[write_file](Devutils/FileHelpers/write_file.md)   
 </div>
    <div class="col" markdown="1">
-[read_file](/McUtils/Devutils/FileHelpers/read_file.md)   
+[read_file](Devutils/FileHelpers/read_file.md)   
 </div>
    <div class="col" markdown="1">
-[read_json](/McUtils/Devutils/FileHelpers/read_json.md)   
+[read_json](Devutils/FileHelpers/read_json.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[write_json](/McUtils/Devutils/FileHelpers/write_json.md)   
+[write_json](Devutils/FileHelpers/write_json.md)   
 </div>
    <div class="col" markdown="1">
-[Logger](/McUtils/Devutils/Loggers/Logger.md)   
+[Logger](Devutils/Loggers/Logger.md)   
 </div>
    <div class="col" markdown="1">
-[NullLogger](/McUtils/Devutils/Loggers/NullLogger.md)   
+[NullLogger](Devutils/Loggers/NullLogger.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LogLevel](/McUtils/Devutils/Loggers/LogLevel.md)   
+[LogLevel](Devutils/Loggers/LogLevel.md)   
 </div>
    <div class="col" markdown="1">
-[LoggingBlock](/McUtils/Devutils/Loggers/LoggingBlock.md)   
+[LoggingBlock](Devutils/Loggers/LoggingBlock.md)   
 </div>
    <div class="col" markdown="1">
-[OptionsSet](/McUtils/Devutils/Options/OptionsSet.md)   
+[OptionsSet](Devutils/Options/OptionsSet.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[OptionsMethodDispatch](/McUtils/Devutils/Options/OptionsMethodDispatch.md)   
+[OptionsMethodDispatch](Devutils/Options/OptionsMethodDispatch.md)   
 </div>
    <div class="col" markdown="1">
-[OutputRedirect](/McUtils/Devutils/Redirects/OutputRedirect.md)   
+[OutputRedirect](Devutils/Redirects/OutputRedirect.md)   
 </div>
    <div class="col" markdown="1">
-[DefaultDirectory](/McUtils/Devutils/Redirects/DefaultDirectory.md)   
+[DefaultDirectory](Devutils/Redirects/DefaultDirectory.md)   
 </div>
 </div>
   <div class="row">

@@ -10,13 +10,13 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[HTML](/JHTML/HTML/HTML.md)   
+[HTML](JHTML/HTML/HTML.md)   
 </div>
    <div class="col" markdown="1">
-[CSS](/JHTML/HTML/CSS.md)   
+[CSS](JHTML/HTML/CSS.md)   
 </div>
    <div class="col" markdown="1">
-[ContentXML](/JHTML/HTML/ContentXML.md)   
+[ContentXML](JHTML/HTML/ContentXML.md)   
 </div>
 </div>
   <div class="row">

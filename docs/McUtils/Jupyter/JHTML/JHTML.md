@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[JHTML](/JHTML/JHTML/JHTML.md)   
+[JHTML](JHTML/JHTML/JHTML.md)   
 </div>
    <div class="col" markdown="1">
    

@@ -11,32 +11,32 @@ The actual object Markdown is written by the things in the `Writers` module.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DocWalker](/Docs/DocWalker/DocWalker.md)   
+[DocWalker](Docs/DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleWriter](/Docs/DocWalker/ModuleWriter.md)   
+[ModuleWriter](Docs/DocWalker/ModuleWriter.md)   
 </div>
    <div class="col" markdown="1">
-[ClassWriter](/Docs/DocWalker/ClassWriter.md)   
+[ClassWriter](Docs/DocWalker/ClassWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FunctionWriter](/Docs/DocWalker/FunctionWriter.md)   
+[FunctionWriter](Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[MethodWriter](/Docs/DocWalker/MethodWriter.md)   
+[MethodWriter](Docs/DocWalker/MethodWriter.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectWriter](/Docs/DocWalker/ObjectWriter.md)   
+[ObjectWriter](Docs/DocWalker/ObjectWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[IndexWriter](/Docs/DocWalker/IndexWriter.md)   
+[IndexWriter](Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[jdoc](/Docs/DocWalker/jdoc.md)   
+[jdoc](Docs/DocWalker/jdoc.md)   
 </div>
    <div class="col" markdown="1">
    

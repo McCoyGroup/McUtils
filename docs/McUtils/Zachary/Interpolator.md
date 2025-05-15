@@ -10,21 +10,21 @@ Sets up a general Interpolator class that looks like Mathematica's Interpolating
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Interpolator](/Zachary/Interpolator/Interpolator.md)   
+[Interpolator](Zachary/Interpolator/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Extrapolator](/Zachary/Interpolator/Extrapolator.md)   
+[Extrapolator](Zachary/Interpolator/Extrapolator.md)   
 </div>
    <div class="col" markdown="1">
-[ProductGridInterpolator](/Zachary/Interpolator/ProductGridInterpolator.md)   
+[ProductGridInterpolator](Zachary/Interpolator/ProductGridInterpolator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UnstructuredGridInterpolator](/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
+[UnstructuredGridInterpolator](Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[CoordinateInterpolator](/Zachary/Interpolator/CoordinateInterpolator.md)   
+[CoordinateInterpolator](Zachary/Interpolator/CoordinateInterpolator.md)   
 </div>
    <div class="col" markdown="1">
    

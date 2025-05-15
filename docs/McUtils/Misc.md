@@ -10,40 +10,40 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[SBatchJob](/McUtils/Misc/SBatchHelper/SBatchJob.md)   
+[SBatchJob](Misc/SBatchHelper/SBatchJob.md)   
 </div>
    <div class="col" markdown="1">
-[njit](/McUtils/Misc/NumbaTools/njit.md)   
+[njit](Misc/NumbaTools/njit.md)   
 </div>
    <div class="col" markdown="1">
-[jit](/McUtils/Misc/NumbaTools/jit.md)   
+[jit](Misc/NumbaTools/jit.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[type_spec](/McUtils/Misc/NumbaTools/type_spec.md)   
+[type_spec](Misc/NumbaTools/type_spec.md)   
 </div>
    <div class="col" markdown="1">
-[without_numba](/McUtils/Misc/NumbaTools/without_numba.md)   
+[without_numba](Misc/NumbaTools/without_numba.md)   
 </div>
    <div class="col" markdown="1">
-[numba_decorator](/McUtils/Misc/NumbaTools/numba_decorator.md)   
+[numba_decorator](Misc/NumbaTools/numba_decorator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[import_from_numba](/McUtils/Misc/NumbaTools/import_from_numba.md)   
+[import_from_numba](Misc/NumbaTools/import_from_numba.md)   
 </div>
    <div class="col" markdown="1">
-[ModificationTracker](/McUtils/Misc/DebugTools/ModificationTracker.md)   
+[ModificationTracker](Misc/DebugTools/ModificationTracker.md)   
 </div>
    <div class="col" markdown="1">
-[mixedmethod](/McUtils/Misc/Decorators/mixedmethod.md)   
+[mixedmethod](Misc/Decorators/mixedmethod.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Abstract](/McUtils/Misc/Symbolics/Abstract.md)   
+[Abstract](Misc/Symbolics/Abstract.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -74,17 +74,17 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-be976b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-be976b"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-6054b3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6054b3"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-be976b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6054b3" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-c5a78a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c5a78a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-829211" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-829211"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c5a78a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-829211" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[PotentialData](/Data/PotentialData/PotentialData.md)   
+[PotentialData](Data/PotentialData/PotentialData.md)   
 </div>
    <div class="col" markdown="1">
    

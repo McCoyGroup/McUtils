@@ -11,68 +11,68 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[CLoader](/McUtils/Extensions/CLoader/CLoader.md)   
+[CLoader](Extensions/CLoader/CLoader.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleLoader](/McUtils/Extensions/ModuleLoader/ModuleLoader.md)   
+[ModuleLoader](Extensions/ModuleLoader/ModuleLoader.md)   
 </div>
    <div class="col" markdown="1">
-[ArgumentType](/McUtils/Extensions/ArgumentSignature/ArgumentType.md)   
+[ArgumentType](Extensions/ArgumentSignature/ArgumentType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ArrayType](/McUtils/Extensions/ArgumentSignature/ArrayType.md)   
+[ArrayType](Extensions/ArgumentSignature/ArrayType.md)   
 </div>
    <div class="col" markdown="1">
-[PointerType](/McUtils/Extensions/ArgumentSignature/PointerType.md)   
+[PointerType](Extensions/ArgumentSignature/PointerType.md)   
 </div>
    <div class="col" markdown="1">
-[PrimitiveType](/McUtils/Extensions/ArgumentSignature/PrimitiveType.md)   
+[PrimitiveType](Extensions/ArgumentSignature/PrimitiveType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Argument](/McUtils/Extensions/ArgumentSignature/Argument.md)   
+[Argument](Extensions/ArgumentSignature/Argument.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionSignature](/McUtils/Extensions/ArgumentSignature/FunctionSignature.md)   
+[FunctionSignature](Extensions/ArgumentSignature/FunctionSignature.md)   
 </div>
    <div class="col" markdown="1">
-[SharedLibrary](/McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)   
+[SharedLibrary](Extensions/SharedLibraryManager/SharedLibrary.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SharedLibraryFunction](/McUtils/Extensions/SharedLibraryManager/SharedLibraryFunction.md)   
+[SharedLibraryFunction](Extensions/SharedLibraryManager/SharedLibraryFunction.md)   
 </div>
    <div class="col" markdown="1">
-[FFIModule](/McUtils/Extensions/FFI/Module/FFIModule.md)   
+[FFIModule](Extensions/FFI/Module/FFIModule.md)   
 </div>
    <div class="col" markdown="1">
-[FFIMethod](/McUtils/Extensions/FFI/Module/FFIMethod.md)   
+[FFIMethod](Extensions/FFI/Module/FFIMethod.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FFIArgument](/McUtils/Extensions/FFI/Module/FFIArgument.md)   
+[FFIArgument](Extensions/FFI/Module/FFIArgument.md)   
 </div>
    <div class="col" markdown="1">
-[FFIType](/McUtils/Extensions/FFI/Module/FFIType.md)   
+[FFIType](Extensions/FFI/Module/FFIType.md)   
 </div>
    <div class="col" markdown="1">
-[FFILoader](/McUtils/Extensions/FFI/Loader/FFILoader.md)   
+[FFILoader](Extensions/FFI/Loader/FFILoader.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[DynamicFFIFunctionLoader](/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunctionLoader.md)   
+[DynamicFFIFunctionLoader](Extensions/FFI/DynamicFFILibrary/DynamicFFIFunctionLoader.md)   
 </div>
    <div class="col" markdown="1">
-[DynamicFFIFunction](/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.md)   
+[DynamicFFIFunction](Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.md)   
 </div>
    <div class="col" markdown="1">
-[DynamicFFILibrary](/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)   
+[DynamicFFILibrary](Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)   
 </div>
 </div>
   <div class="row">
@@ -108,9 +108,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-47e6de" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-47e6de"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-6260a7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6260a7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-47e6de" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6260a7" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -120,9 +120,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-3db0e4" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3db0e4"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-67e571" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-67e571"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3db0e4" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-67e571" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

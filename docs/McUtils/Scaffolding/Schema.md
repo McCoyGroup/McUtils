@@ -10,7 +10,7 @@ Basic layer for Schema validation that provides a superset of JSON schema valida
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Schema](/Scaffolding/Schema/Schema.md)   
+[Schema](Scaffolding/Schema/Schema.md)   
 </div>
    <div class="col" markdown="1">
    

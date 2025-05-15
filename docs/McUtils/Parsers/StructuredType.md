@@ -10,13 +10,13 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[StructuredType](/Parsers/StructuredType/StructuredType.md)   
+[StructuredType](Parsers/StructuredType/StructuredType.md)   
 </div>
    <div class="col" markdown="1">
-[StructuredTypeArray](/Parsers/StructuredType/StructuredTypeArray.md)   
+[StructuredTypeArray](Parsers/StructuredType/StructuredTypeArray.md)   
 </div>
    <div class="col" markdown="1">
-[DisappearingType](/Parsers/StructuredType/DisappearingType.md)   
+[DisappearingType](Parsers/StructuredType/DisappearingType.md)   
 </div>
 </div>
   <div class="row">

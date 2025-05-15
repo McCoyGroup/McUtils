@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[WavefunctionData](/Data/WavefunctionData/WavefunctionData.md)   
+[WavefunctionData](Data/WavefunctionData/WavefunctionData.md)   
 </div>
    <div class="col" markdown="1">
    

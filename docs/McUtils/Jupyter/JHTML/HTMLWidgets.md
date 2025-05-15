@@ -10,10 +10,10 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[HTMLWidgets](/JHTML/HTMLWidgets/HTMLWidgets.md)   
+[HTMLWidgets](JHTML/HTMLWidgets/HTMLWidgets.md)   
 </div>
    <div class="col" markdown="1">
-[ActiveHTMLWrapper](/JHTML/HTMLWidgets/ActiveHTMLWrapper.md)   
+[ActiveHTMLWrapper](JHTML/HTMLWidgets/ActiveHTMLWrapper.md)   
 </div>
    <div class="col" markdown="1">
    

@@ -11,343 +11,343 @@ for working in Jupyter (primarily JupterLab) environments
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[ModuleReloader](/McUtils/Jupyter/InteractiveTools/ModuleReloader.md)   
+[ModuleReloader](Jupyter/InteractiveTools/ModuleReloader.md)   
 </div>
    <div class="col" markdown="1">
-[ExamplesManager](/McUtils/Jupyter/InteractiveTools/ExamplesManager.md)   
+[ExamplesManager](Jupyter/InteractiveTools/ExamplesManager.md)   
 </div>
    <div class="col" markdown="1">
-[NotebookExporter](/McUtils/Jupyter/InteractiveTools/NotebookExporter.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[FormattedTable](/McUtils/Jupyter/InteractiveTools/FormattedTable.md)   
-</div>
-   <div class="col" markdown="1">
-[NoLineWrapFormatter](/McUtils/Jupyter/InteractiveTools/NoLineWrapFormatter.md)   
-</div>
-   <div class="col" markdown="1">
-[OutputCapture](/McUtils/Jupyter/InteractiveTools/OutputCapture.md)   
+[NotebookExporter](Jupyter/InteractiveTools/NotebookExporter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[patch_pinfo](/McUtils/Jupyter/InteractiveTools/patch_pinfo.md)   
+[FormattedTable](Jupyter/InteractiveTools/FormattedTable.md)   
 </div>
    <div class="col" markdown="1">
-[JHTML](/McUtils/Jupyter/JHTML/JHTML/JHTML.md)   
+[NoLineWrapFormatter](Jupyter/InteractiveTools/NoLineWrapFormatter.md)   
 </div>
    <div class="col" markdown="1">
-[Var](/McUtils/Jupyter/Apps/Variables/Var.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[DefaultVars](/McUtils/Jupyter/Apps/Variables/DefaultVars.md)   
-</div>
-   <div class="col" markdown="1">
-[InterfaceVars](/McUtils/Jupyter/Apps/Variables/InterfaceVars.md)   
-</div>
-   <div class="col" markdown="1">
-[VariableSynchronizer](/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.md)   
+[OutputCapture](Jupyter/InteractiveTools/OutputCapture.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[VariableNamespace](/McUtils/Jupyter/Apps/Variables/VariableNamespace.md)   
+[patch_pinfo](Jupyter/InteractiveTools/patch_pinfo.md)   
 </div>
    <div class="col" markdown="1">
-[WidgetControl](/McUtils/Jupyter/Apps/Variables/WidgetControl.md)   
+[JHTML](Jupyter/JHTML/JHTML/JHTML.md)   
 </div>
    <div class="col" markdown="1">
-[WidgetInterface](/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[GenericDisplay](/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.md)   
-</div>
-   <div class="col" markdown="1">
-[DelayedResult](/McUtils/Jupyter/Apps/Interfaces/DelayedResult.md)   
-</div>
-   <div class="col" markdown="1">
-[Component](/McUtils/Jupyter/Apps/Interfaces/Component.md)   
+[Var](Jupyter/Apps/Variables/Var.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[WrapperComponent](/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.md)   
+[DefaultVars](Jupyter/Apps/Variables/DefaultVars.md)   
 </div>
    <div class="col" markdown="1">
-[Container](/McUtils/Jupyter/Apps/Interfaces/Container.md)   
+[InterfaceVars](Jupyter/Apps/Variables/InterfaceVars.md)   
 </div>
    <div class="col" markdown="1">
-[MenuComponent](/McUtils/Jupyter/Apps/Interfaces/MenuComponent.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[ListGroup](/McUtils/Jupyter/Apps/Interfaces/ListGroup.md)   
-</div>
-   <div class="col" markdown="1">
-[Button](/McUtils/Jupyter/Apps/Interfaces/Button.md)   
-</div>
-   <div class="col" markdown="1">
-[LinkButton](/McUtils/Jupyter/Apps/Interfaces/LinkButton.md)   
+[VariableSynchronizer](Jupyter/Apps/Variables/VariableSynchronizer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Spinner](/McUtils/Jupyter/Apps/Interfaces/Spinner.md)   
+[VariableNamespace](Jupyter/Apps/Variables/VariableNamespace.md)   
 </div>
    <div class="col" markdown="1">
-[Progress](/McUtils/Jupyter/Apps/Interfaces/Progress.md)   
+[WidgetControl](Jupyter/Apps/Variables/WidgetControl.md)   
 </div>
    <div class="col" markdown="1">
-[ButtonGroup](/McUtils/Jupyter/Apps/Interfaces/ButtonGroup.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[Navbar](/McUtils/Jupyter/Apps/Interfaces/Navbar.md)   
-</div>
-   <div class="col" markdown="1">
-[Carousel](/McUtils/Jupyter/Apps/Interfaces/Carousel.md)   
-</div>
-   <div class="col" markdown="1">
-[Pagination](/McUtils/Jupyter/Apps/Interfaces/Pagination.md)   
+[WidgetInterface](Jupyter/Apps/Interfaces/WidgetInterface.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Sidebar](/McUtils/Jupyter/Apps/Interfaces/Sidebar.md)   
+[GenericDisplay](Jupyter/Apps/Interfaces/GenericDisplay.md)   
 </div>
    <div class="col" markdown="1">
-[Dropdown](/McUtils/Jupyter/Apps/Interfaces/Dropdown.md)   
+[DelayedResult](Jupyter/Apps/Interfaces/DelayedResult.md)   
 </div>
    <div class="col" markdown="1">
-[DropdownList](/McUtils/Jupyter/Apps/Interfaces/DropdownList.md)   
+[Component](Jupyter/Apps/Interfaces/Component.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Tabs](/McUtils/Jupyter/Apps/Interfaces/Tabs.md)   
+[WrapperComponent](Jupyter/Apps/Interfaces/WrapperComponent.md)   
 </div>
    <div class="col" markdown="1">
-[TabPane](/McUtils/Jupyter/Apps/Interfaces/TabPane.md)   
+[Container](Jupyter/Apps/Interfaces/Container.md)   
 </div>
    <div class="col" markdown="1">
-[TabList](/McUtils/Jupyter/Apps/Interfaces/TabList.md)   
+[MenuComponent](Jupyter/Apps/Interfaces/MenuComponent.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Accordion](/McUtils/Jupyter/Apps/Interfaces/Accordion.md)   
+[ListGroup](Jupyter/Apps/Interfaces/ListGroup.md)   
 </div>
    <div class="col" markdown="1">
-[AccordionHeader](/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)   
+[Button](Jupyter/Apps/Interfaces/Button.md)   
 </div>
    <div class="col" markdown="1">
-[AccordionBody](/McUtils/Jupyter/Apps/Interfaces/AccordionBody.md)   
+[LinkButton](Jupyter/Apps/Interfaces/LinkButton.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Opener](/McUtils/Jupyter/Apps/Interfaces/Opener.md)   
+[Spinner](Jupyter/Apps/Interfaces/Spinner.md)   
 </div>
    <div class="col" markdown="1">
-[OpenerHeader](/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.md)   
+[Progress](Jupyter/Apps/Interfaces/Progress.md)   
 </div>
    <div class="col" markdown="1">
-[OpenerBody](/McUtils/Jupyter/Apps/Interfaces/OpenerBody.md)   
+[ButtonGroup](Jupyter/Apps/Interfaces/ButtonGroup.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CardOpener](/McUtils/Jupyter/Apps/Interfaces/CardOpener.md)   
+[Navbar](Jupyter/Apps/Interfaces/Navbar.md)   
 </div>
    <div class="col" markdown="1">
-[Modal](/McUtils/Jupyter/Apps/Interfaces/Modal.md)   
+[Carousel](Jupyter/Apps/Interfaces/Carousel.md)   
 </div>
    <div class="col" markdown="1">
-[ModalHeader](/McUtils/Jupyter/Apps/Interfaces/ModalHeader.md)   
+[Pagination](Jupyter/Apps/Interfaces/Pagination.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ModalBody](/McUtils/Jupyter/Apps/Interfaces/ModalBody.md)   
+[Sidebar](Jupyter/Apps/Interfaces/Sidebar.md)   
 </div>
    <div class="col" markdown="1">
-[ModalFooter](/McUtils/Jupyter/Apps/Interfaces/ModalFooter.md)   
+[Dropdown](Jupyter/Apps/Interfaces/Dropdown.md)   
 </div>
    <div class="col" markdown="1">
-[Offcanvas](/McUtils/Jupyter/Apps/Interfaces/Offcanvas.md)   
+[DropdownList](Jupyter/Apps/Interfaces/DropdownList.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[OffcanvasHeader](/McUtils/Jupyter/Apps/Interfaces/OffcanvasHeader.md)   
+[Tabs](Jupyter/Apps/Interfaces/Tabs.md)   
 </div>
    <div class="col" markdown="1">
-[OffcanvasBody](/McUtils/Jupyter/Apps/Interfaces/OffcanvasBody.md)   
+[TabPane](Jupyter/Apps/Interfaces/TabPane.md)   
 </div>
    <div class="col" markdown="1">
-[Toast](/McUtils/Jupyter/Apps/Interfaces/Toast.md)   
+[TabList](Jupyter/Apps/Interfaces/TabList.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ToastBody](/McUtils/Jupyter/Apps/Interfaces/ToastBody.md)   
+[Accordion](Jupyter/Apps/Interfaces/Accordion.md)   
 </div>
    <div class="col" markdown="1">
-[ToastHeader](/McUtils/Jupyter/Apps/Interfaces/ToastHeader.md)   
+[AccordionHeader](Jupyter/Apps/Interfaces/AccordionHeader.md)   
 </div>
    <div class="col" markdown="1">
-[ToastContainer](/McUtils/Jupyter/Apps/Interfaces/ToastContainer.md)   
+[AccordionBody](Jupyter/Apps/Interfaces/AccordionBody.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Spacer](/McUtils/Jupyter/Apps/Interfaces/Spacer.md)   
+[Opener](Jupyter/Apps/Interfaces/Opener.md)   
 </div>
    <div class="col" markdown="1">
-[Breadcrumb](/McUtils/Jupyter/Apps/Interfaces/Breadcrumb.md)   
+[OpenerHeader](Jupyter/Apps/Interfaces/OpenerHeader.md)   
 </div>
    <div class="col" markdown="1">
-[Card](/McUtils/Jupyter/Apps/Interfaces/Card.md)   
+[OpenerBody](Jupyter/Apps/Interfaces/OpenerBody.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CardHeader](/McUtils/Jupyter/Apps/Interfaces/CardHeader.md)   
+[CardOpener](Jupyter/Apps/Interfaces/CardOpener.md)   
 </div>
    <div class="col" markdown="1">
-[CardBody](/McUtils/Jupyter/Apps/Interfaces/CardBody.md)   
+[Modal](Jupyter/Apps/Interfaces/Modal.md)   
 </div>
    <div class="col" markdown="1">
-[CardFooter](/McUtils/Jupyter/Apps/Interfaces/CardFooter.md)   
+[ModalHeader](Jupyter/Apps/Interfaces/ModalHeader.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ModifierComponent](/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.md)   
+[ModalBody](Jupyter/Apps/Interfaces/ModalBody.md)   
 </div>
    <div class="col" markdown="1">
-[Tooltip](/McUtils/Jupyter/Apps/Interfaces/Tooltip.md)   
+[ModalFooter](Jupyter/Apps/Interfaces/ModalFooter.md)   
 </div>
    <div class="col" markdown="1">
-[Popover](/McUtils/Jupyter/Apps/Interfaces/Popover.md)   
+[Offcanvas](Jupyter/Apps/Interfaces/Offcanvas.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Layout](/McUtils/Jupyter/Apps/Interfaces/Layout.md)   
+[OffcanvasHeader](Jupyter/Apps/Interfaces/OffcanvasHeader.md)   
 </div>
    <div class="col" markdown="1">
-[Grid](/McUtils/Jupyter/Apps/Interfaces/Grid.md)   
+[OffcanvasBody](Jupyter/Apps/Interfaces/OffcanvasBody.md)   
 </div>
    <div class="col" markdown="1">
-[Table](/McUtils/Jupyter/Apps/Interfaces/Table.md)   
+[Toast](Jupyter/Apps/Interfaces/Toast.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Flex](/McUtils/Jupyter/Apps/Interfaces/Flex.md)   
+[ToastBody](Jupyter/Apps/Interfaces/ToastBody.md)   
 </div>
    <div class="col" markdown="1">
-[Control](/McUtils/Jupyter/Apps/Controls/Control.md)   
+[ToastHeader](Jupyter/Apps/Interfaces/ToastHeader.md)   
 </div>
    <div class="col" markdown="1">
-[InputField](/McUtils/Jupyter/Apps/Controls/InputField.md)   
+[ToastContainer](Jupyter/Apps/Interfaces/ToastContainer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StringField](/McUtils/Jupyter/Apps/Controls/StringField.md)   
+[Spacer](Jupyter/Apps/Interfaces/Spacer.md)   
 </div>
    <div class="col" markdown="1">
-[Slider](/McUtils/Jupyter/Apps/Controls/Slider.md)   
+[Breadcrumb](Jupyter/Apps/Interfaces/Breadcrumb.md)   
 </div>
    <div class="col" markdown="1">
-[Checkbox](/McUtils/Jupyter/Apps/Controls/Checkbox.md)   
+[Card](Jupyter/Apps/Interfaces/Card.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[RadioButton](/McUtils/Jupyter/Apps/Controls/RadioButton.md)   
+[CardHeader](Jupyter/Apps/Interfaces/CardHeader.md)   
 </div>
    <div class="col" markdown="1">
-[Switch](/McUtils/Jupyter/Apps/Controls/Switch.md)   
+[CardBody](Jupyter/Apps/Interfaces/CardBody.md)   
 </div>
    <div class="col" markdown="1">
-[TextArea](/McUtils/Jupyter/Apps/Controls/TextArea.md)   
+[CardFooter](Jupyter/Apps/Interfaces/CardFooter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Selector](/McUtils/Jupyter/Apps/Controls/Selector.md)   
+[ModifierComponent](Jupyter/Apps/Interfaces/ModifierComponent.md)   
 </div>
    <div class="col" markdown="1">
-[VariableDisplay](/McUtils/Jupyter/Apps/Controls/VariableDisplay.md)   
+[Tooltip](Jupyter/Apps/Interfaces/Tooltip.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionDisplay](/McUtils/Jupyter/Apps/Controls/FunctionDisplay.md)   
+[Popover](Jupyter/Apps/Interfaces/Popover.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[MenuSelect](/McUtils/Jupyter/Apps/Controls/MenuSelect.md)   
+[Layout](Jupyter/Apps/Interfaces/Layout.md)   
 </div>
    <div class="col" markdown="1">
-[DropdownSelect](/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)   
+[Grid](Jupyter/Apps/Interfaces/Grid.md)   
 </div>
    <div class="col" markdown="1">
-[ProgressBar](/McUtils/Jupyter/Apps/Controls/ProgressBar.md)   
+[Table](Jupyter/Apps/Interfaces/Table.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[App](/McUtils/Jupyter/Apps/Apps/App.md)   
+[Flex](Jupyter/Apps/Interfaces/Flex.md)   
 </div>
    <div class="col" markdown="1">
-[SettingsPane](/McUtils/Jupyter/Apps/Apps/SettingsPane.md)   
+[Control](Jupyter/Apps/Controls/Control.md)   
 </div>
    <div class="col" markdown="1">
-[Manipulator](/McUtils/Jupyter/Apps/Apps/Manipulator.md)   
+[InputField](Jupyter/Apps/Controls/InputField.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[D3](/McUtils/Jupyter/APIs/d3/D3.md)   
+[StringField](Jupyter/Apps/Controls/StringField.md)   
 </div>
    <div class="col" markdown="1">
-[RendererD3](/McUtils/Jupyter/APIs/d3_backend/RendererD3.md)   
+[Slider](Jupyter/Apps/Controls/Slider.md)   
 </div>
    <div class="col" markdown="1">
-[FigureManagerD3](/McUtils/Jupyter/APIs/d3_backend/FigureManagerD3.md)   
+[Checkbox](Jupyter/Apps/Controls/Checkbox.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FigureCanvasD3](/McUtils/Jupyter/APIs/d3_backend/FigureCanvasD3.md)   
+[RadioButton](Jupyter/Apps/Controls/RadioButton.md)   
 </div>
    <div class="col" markdown="1">
-[_BackendD3](/McUtils/Jupyter/APIs/d3_backend/_BackendD3.md)   
+[Switch](Jupyter/Apps/Controls/Switch.md)   
 </div>
    <div class="col" markdown="1">
-[MoleculeGraphics](/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)   
+[TextArea](Jupyter/Apps/Controls/TextArea.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DHTML](/McUtils/Jupyter/X3D/X3DHTML.md)   
+[Selector](Jupyter/Apps/Controls/Selector.md)   
 </div>
    <div class="col" markdown="1">
-[JSMol](/McUtils/Jupyter/JSMol/JSMol.md)   
+[VariableDisplay](Jupyter/Apps/Controls/VariableDisplay.md)   
 </div>
    <div class="col" markdown="1">
-[NotebookReader](/McUtils/Jupyter/NotebookTools/NotebookReader.md)   
+[FunctionDisplay](Jupyter/Apps/Controls/FunctionDisplay.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[MenuSelect](Jupyter/Apps/Controls/MenuSelect.md)   
+</div>
+   <div class="col" markdown="1">
+[DropdownSelect](Jupyter/Apps/Controls/DropdownSelect.md)   
+</div>
+   <div class="col" markdown="1">
+[ProgressBar](Jupyter/Apps/Controls/ProgressBar.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[App](Jupyter/Apps/Apps/App.md)   
+</div>
+   <div class="col" markdown="1">
+[SettingsPane](Jupyter/Apps/Apps/SettingsPane.md)   
+</div>
+   <div class="col" markdown="1">
+[Manipulator](Jupyter/Apps/Apps/Manipulator.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[D3](Jupyter/APIs/d3/D3.md)   
+</div>
+   <div class="col" markdown="1">
+[RendererD3](Jupyter/APIs/d3_backend/RendererD3.md)   
+</div>
+   <div class="col" markdown="1">
+[FigureManagerD3](Jupyter/APIs/d3_backend/FigureManagerD3.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[FigureCanvasD3](Jupyter/APIs/d3_backend/FigureCanvasD3.md)   
+</div>
+   <div class="col" markdown="1">
+[_BackendD3](Jupyter/APIs/d3_backend/_BackendD3.md)   
+</div>
+   <div class="col" markdown="1">
+[MoleculeGraphics](Jupyter/MoleculeGraphics/MoleculeGraphics.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DHTML](Jupyter/X3D/X3DHTML.md)   
+</div>
+   <div class="col" markdown="1">
+[JSMol](Jupyter/JSMol/JSMol.md)   
+</div>
+   <div class="col" markdown="1">
+[NotebookReader](Jupyter/NotebookTools/NotebookReader.md)   
 </div>
 </div>
   <div class="row">
@@ -383,17 +383,17 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-8de783" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-8de783"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-2959c7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2959c7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-8de783" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2959c7" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-76994c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-76994c"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-80aa5e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-80aa5e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-76994c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-80aa5e" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

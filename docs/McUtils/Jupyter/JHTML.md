@@ -10,40 +10,40 @@ Provides access to the JHTML interface for building quality Jupyter interfaces
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[JHTML](/Jupyter/JHTML/JHTML/JHTML.md)   
+[JHTML](Jupyter/JHTML/JHTML/JHTML.md)   
 </div>
    <div class="col" markdown="1">
-[JupyterAPIs](/Jupyter/JHTML/WidgetTools/JupyterAPIs.md)   
+[JupyterAPIs](Jupyter/JHTML/WidgetTools/JupyterAPIs.md)   
 </div>
    <div class="col" markdown="1">
-[DefaultOutputWidget](/Jupyter/JHTML/WidgetTools/DefaultOutputWidget.md)   
+[DefaultOutputWidget](Jupyter/JHTML/WidgetTools/DefaultOutputWidget.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[HTML](/Jupyter/JHTML/HTML/HTML.md)   
+[HTML](Jupyter/JHTML/HTML/HTML.md)   
 </div>
    <div class="col" markdown="1">
-[CSS](/Jupyter/JHTML/HTML/CSS.md)   
+[CSS](Jupyter/JHTML/HTML/CSS.md)   
 </div>
    <div class="col" markdown="1">
-[ContentXML](/Jupyter/JHTML/HTML/ContentXML.md)   
+[ContentXML](Jupyter/JHTML/HTML/ContentXML.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Bootstrap5](/Jupyter/JHTML/Bootstrap/Bootstrap5.md)   
+[Bootstrap5](Jupyter/JHTML/Bootstrap/Bootstrap5.md)   
 </div>
    <div class="col" markdown="1">
-[HTMLWidgets](/Jupyter/JHTML/HTMLWidgets/HTMLWidgets.md)   
+[HTMLWidgets](Jupyter/JHTML/HTMLWidgets/HTMLWidgets.md)   
 </div>
    <div class="col" markdown="1">
-[ActiveHTMLWrapper](/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.md)   
+[ActiveHTMLWrapper](Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Bootstrap5Widgets](/Jupyter/JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
+[Bootstrap5Widgets](Jupyter/JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
 </div>
    <div class="col" markdown="1">
    

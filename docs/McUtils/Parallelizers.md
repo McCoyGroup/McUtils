@@ -19,35 +19,35 @@ the `Parallelizer` object itself.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Parallelizer](/McUtils/Parallelizers/Parallelizers/Parallelizer.md)   
+[Parallelizer](Parallelizers/Parallelizers/Parallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[MultiprocessingParallelizer](/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.md)   
+[MultiprocessingParallelizer](Parallelizers/Parallelizers/MultiprocessingParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[MPIParallelizer](/McUtils/Parallelizers/Parallelizers/MPIParallelizer.md)   
+[MPIParallelizer](Parallelizers/Parallelizers/MPIParallelizer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SerialNonParallelizer](/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.md)   
+[SerialNonParallelizer](Parallelizers/Parallelizers/SerialNonParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[SendRecieveParallelizer](/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
+[SendRecieveParallelizer](Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[ClientServerRunner](/McUtils/Parallelizers/Runner/ClientServerRunner.md)   
+[ClientServerRunner](Parallelizers/Runner/ClientServerRunner.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SharedObjectManager](/McUtils/Parallelizers/SharedMemory/SharedObjectManager.md)   
+[SharedObjectManager](Parallelizers/SharedMemory/SharedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[SharedMemoryDict](/McUtils/Parallelizers/SharedMemory/SharedMemoryDict.md)   
+[SharedMemoryDict](Parallelizers/SharedMemory/SharedMemoryDict.md)   
 </div>
    <div class="col" markdown="1">
-[SharedMemoryList](/McUtils/Parallelizers/SharedMemory/SharedMemoryList.md)   
+[SharedMemoryList](Parallelizers/SharedMemory/SharedMemoryList.md)   
 </div>
 </div>
   <div class="row">
@@ -241,9 +241,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a74222" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a74222"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-251d4d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-251d4d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a74222" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-251d4d" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -256,9 +256,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-bce3fc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bce3fc"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4a9361" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4a9361"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bce3fc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4a9361" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -10,65 +10,65 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[TemplateFormatter](/TemplateEngine/TemplateEngine/TemplateFormatter.md)   
+[TemplateFormatter](TemplateEngine/TemplateEngine/TemplateFormatter.md)   
 </div>
    <div class="col" markdown="1">
-[FormatDirective](/TemplateEngine/TemplateEngine/FormatDirective.md)   
+[FormatDirective](TemplateEngine/TemplateEngine/FormatDirective.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateFormatDirective](/TemplateEngine/TemplateEngine/TemplateFormatDirective.md)   
+[TemplateFormatDirective](TemplateEngine/TemplateEngine/TemplateFormatDirective.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TemplateOps](/TemplateEngine/TemplateEngine/TemplateOps.md)   
+[TemplateOps](TemplateEngine/TemplateEngine/TemplateOps.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateEngine](/TemplateEngine/TemplateEngine/TemplateEngine.md)   
+[TemplateEngine](TemplateEngine/TemplateEngine/TemplateEngine.md)   
 </div>
    <div class="col" markdown="1">
-[ResourceLocator](/TemplateEngine/TemplateEngine/ResourceLocator.md)   
+[ResourceLocator](TemplateEngine/TemplateEngine/ResourceLocator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TemplateResourceExtractor](/TemplateEngine/TemplateEngine/TemplateResourceExtractor.md)   
+[TemplateResourceExtractor](TemplateEngine/TemplateEngine/TemplateResourceExtractor.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateWalker](/TemplateEngine/TemplateEngine/TemplateWalker.md)   
+[TemplateWalker](TemplateEngine/TemplateEngine/TemplateWalker.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateHandler](/TemplateEngine/TemplateEngine/TemplateHandler.md)   
+[TemplateHandler](TemplateEngine/TemplateEngine/TemplateHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ModuleTemplateHandler](/TemplateEngine/TemplateEngine/ModuleTemplateHandler.md)   
+[ModuleTemplateHandler](TemplateEngine/TemplateEngine/ModuleTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[ClassTemplateHandler](/TemplateEngine/TemplateEngine/ClassTemplateHandler.md)   
+[ClassTemplateHandler](TemplateEngine/TemplateEngine/ClassTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionTemplateHandler](/TemplateEngine/TemplateEngine/FunctionTemplateHandler.md)   
+[FunctionTemplateHandler](TemplateEngine/TemplateEngine/FunctionTemplateHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[MethodTemplateHandler](/TemplateEngine/TemplateEngine/MethodTemplateHandler.md)   
+[MethodTemplateHandler](TemplateEngine/TemplateEngine/MethodTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectTemplateHandler](/TemplateEngine/TemplateEngine/ObjectTemplateHandler.md)   
+[ObjectTemplateHandler](TemplateEngine/TemplateEngine/ObjectTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[IndexTemplateHandler](/TemplateEngine/TemplateEngine/IndexTemplateHandler.md)   
+[IndexTemplateHandler](TemplateEngine/TemplateEngine/IndexTemplateHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TemplateInterfaceEngine](/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.md)   
+[TemplateInterfaceEngine](TemplateEngine/TemplateEngine/TemplateInterfaceEngine.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateInterfaceFormatter](/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.md)   
+[TemplateInterfaceFormatter](TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.md)   
 </div>
    <div class="col" markdown="1">
    

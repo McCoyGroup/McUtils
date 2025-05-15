@@ -11,10 +11,10 @@ know what kind of data is fed in
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Mesh](/Zachary/Mesh/Mesh.md)   
+[Mesh](Zachary/Mesh/Mesh.md)   
 </div>
    <div class="col" markdown="1">
-[MeshType](/Zachary/Mesh/MeshType.md)   
+[MeshType](Zachary/Mesh/MeshType.md)   
 </div>
    <div class="col" markdown="1">
    

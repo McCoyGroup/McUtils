@@ -19,123 +19,123 @@ to file and allows for easy checkpoint loading
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Cache](/McUtils/Scaffolding/Caches/Cache.md)   
+[Cache](Scaffolding/Caches/Cache.md)   
 </div>
    <div class="col" markdown="1">
-[MaxSizeCache](/McUtils/Scaffolding/Caches/MaxSizeCache.md)   
+[MaxSizeCache](Scaffolding/Caches/MaxSizeCache.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectRegistry](/McUtils/Scaffolding/Caches/ObjectRegistry.md)   
+[ObjectRegistry](Scaffolding/Caches/ObjectRegistry.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[PseudoPickler](/McUtils/Scaffolding/Serializers/PseudoPickler.md)   
+[PseudoPickler](Scaffolding/Serializers/PseudoPickler.md)   
 </div>
    <div class="col" markdown="1">
-[BaseSerializer](/McUtils/Scaffolding/Serializers/BaseSerializer.md)   
+[BaseSerializer](Scaffolding/Serializers/BaseSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[JSONSerializer](/McUtils/Scaffolding/Serializers/JSONSerializer.md)   
+[JSONSerializer](Scaffolding/Serializers/JSONSerializer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[NumPySerializer](/McUtils/Scaffolding/Serializers/NumPySerializer.md)   
+[NumPySerializer](Scaffolding/Serializers/NumPySerializer.md)   
 </div>
    <div class="col" markdown="1">
-[NDarrayMarshaller](/McUtils/Scaffolding/Serializers/NDarrayMarshaller.md)   
+[NDarrayMarshaller](Scaffolding/Serializers/NDarrayMarshaller.md)   
 </div>
    <div class="col" markdown="1">
-[HDF5Serializer](/McUtils/Scaffolding/Serializers/HDF5Serializer.md)   
+[HDF5Serializer](Scaffolding/Serializers/HDF5Serializer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[YAMLSerializer](/McUtils/Scaffolding/Serializers/YAMLSerializer.md)   
+[YAMLSerializer](Scaffolding/Serializers/YAMLSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleSerializer](/McUtils/Scaffolding/Serializers/ModuleSerializer.md)   
+[ModuleSerializer](Scaffolding/Serializers/ModuleSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Schema](/McUtils/Scaffolding/Schema/Schema.md)   
+[Schema](Scaffolding/Schema/Schema.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LogParser](/McUtils/Scaffolding/Logging/LogParser.md)   
+[LogParser](Scaffolding/Logging/LogParser.md)   
 </div>
    <div class="col" markdown="1">
-[Checkpointer](/McUtils/Scaffolding/Checkpointing/Checkpointer.md)   
+[Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
-[CheckpointerKeyError](/McUtils/Scaffolding/Checkpointing/CheckpointerKeyError.md)   
+[CheckpointerKeyError](Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[DumpCheckpointer](/McUtils/Scaffolding/Checkpointing/DumpCheckpointer.md)   
+[DumpCheckpointer](Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[JSONCheckpointer](/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.md)   
+[JSONCheckpointer](Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[NumPyCheckpointer](/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.md)   
+[NumPyCheckpointer](Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[HDF5Checkpointer](/McUtils/Scaffolding/Checkpointing/HDF5Checkpointer.md)   
+[HDF5Checkpointer](Scaffolding/Checkpointing/HDF5Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
-[DictCheckpointer](/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)   
+[DictCheckpointer](Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[NullCheckpointer](/McUtils/Scaffolding/Checkpointing/NullCheckpointer.md)   
+[NullCheckpointer](Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[PersistenceLocation](/McUtils/Scaffolding/Persistence/PersistenceLocation.md)   
+[PersistenceLocation](Scaffolding/Persistence/PersistenceLocation.md)   
 </div>
    <div class="col" markdown="1">
-[PersistenceManager](/McUtils/Scaffolding/Persistence/PersistenceManager.md)   
+[PersistenceManager](Scaffolding/Persistence/PersistenceManager.md)   
 </div>
    <div class="col" markdown="1">
-[ResourceManager](/McUtils/Scaffolding/Persistence/ResourceManager.md)   
+[ResourceManager](Scaffolding/Persistence/ResourceManager.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[BaseObjectManager](/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.md)   
+[BaseObjectManager](Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[FileBackedObjectManager](/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
+[FileBackedObjectManager](Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[Config](/McUtils/Scaffolding/Configurations/Config.md)   
+[Config](Scaffolding/Configurations/Config.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ParameterManager](/McUtils/Scaffolding/Configurations/ParameterManager.md)   
+[ParameterManager](Scaffolding/Configurations/ParameterManager.md)   
 </div>
    <div class="col" markdown="1">
-[Job](/McUtils/Scaffolding/Jobs/Job.md)   
+[Job](Scaffolding/Jobs/Job.md)   
 </div>
    <div class="col" markdown="1">
-[JobManager](/McUtils/Scaffolding/Jobs/JobManager.md)   
+[JobManager](Scaffolding/Jobs/JobManager.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CLI](/McUtils/Scaffolding/CLIs/CLI.md)   
+[CLI](Scaffolding/CLIs/CLI.md)   
 </div>
    <div class="col" markdown="1">
-[CommandGroup](/McUtils/Scaffolding/CLIs/CommandGroup.md)   
+[CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
-[Command](/McUtils/Scaffolding/CLIs/Command.md)   
+[Command](Scaffolding/CLIs/Command.md)   
 </div>
 </div>
   <div class="row">
@@ -171,9 +171,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-fbec05" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fbec05"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c27939" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c27939"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fbec05" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c27939" markdown="1">
  - [Pseudopickle](#Pseudopickle)
 - [HDF5Serialization](#HDF5Serialization)
 - [JSONSerialization](#JSONSerialization)
@@ -198,9 +198,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-7070f7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7070f7"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-86056b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-86056b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7070f7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-86056b" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

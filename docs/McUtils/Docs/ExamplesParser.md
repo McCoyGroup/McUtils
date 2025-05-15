@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[ExamplesParser](/Docs/ExamplesParser/ExamplesParser.md)   
+[ExamplesParser](Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
    

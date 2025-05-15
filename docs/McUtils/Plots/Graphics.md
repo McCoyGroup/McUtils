@@ -10,18 +10,18 @@ Provides Graphics base classes that can be extended upon
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsBase](/Plots/Graphics/GraphicsBase.md)   
+[GraphicsBase](Plots/Graphics/GraphicsBase.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics](/Plots/Graphics/Graphics.md)   
+[Graphics](Plots/Graphics/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics3D](/Plots/Graphics/Graphics3D.md)   
+[Graphics3D](Plots/Graphics/Graphics3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsGrid](/Plots/Graphics/GraphicsGrid.md)   
+[GraphicsGrid](Plots/Graphics/GraphicsGrid.md)   
 </div>
    <div class="col" markdown="1">
    

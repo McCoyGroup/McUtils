@@ -10,7 +10,7 @@ Provides hooks for viewing images, mostly through the Matplotlib Image interface
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Image](/Plots/Image/Image.md)   
+[Image](Plots/Image/Image.md)   
 </div>
    <div class="col" markdown="1">
    

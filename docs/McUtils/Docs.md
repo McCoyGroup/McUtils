@@ -10,40 +10,40 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DocBuilder](/McUtils/Docs/DocsBuilder/DocBuilder.md)   
+[DocBuilder](Docs/DocsBuilder/DocBuilder.md)   
 </div>
    <div class="col" markdown="1">
-[DocWalker](/McUtils/Docs/DocWalker/DocWalker.md)   
+[DocWalker](Docs/DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleWriter](/McUtils/Docs/DocWalker/ModuleWriter.md)   
+[ModuleWriter](Docs/DocWalker/ModuleWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ClassWriter](/McUtils/Docs/DocWalker/ClassWriter.md)   
+[ClassWriter](Docs/DocWalker/ClassWriter.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionWriter](/McUtils/Docs/DocWalker/FunctionWriter.md)   
+[FunctionWriter](Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[MethodWriter](/McUtils/Docs/DocWalker/MethodWriter.md)   
+[MethodWriter](Docs/DocWalker/MethodWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ObjectWriter](/McUtils/Docs/DocWalker/ObjectWriter.md)   
+[ObjectWriter](Docs/DocWalker/ObjectWriter.md)   
 </div>
    <div class="col" markdown="1">
-[IndexWriter](/McUtils/Docs/DocWalker/IndexWriter.md)   
+[IndexWriter](Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[jdoc](/McUtils/Docs/DocWalker/jdoc.md)   
+[jdoc](Docs/DocWalker/jdoc.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ExamplesParser](/McUtils/Docs/ExamplesParser/ExamplesParser.md)   
+[ExamplesParser](Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -74,18 +74,18 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-66711d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-66711d"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-89f1c6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-89f1c6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-66711d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-89f1c6" markdown="1">
  - [PeevesDoc](#PeevesDoc)
 - [ParseExamples](#ParseExamples)
 - [FormatSpec](#FormatSpec)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-464504" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-464504"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-be6c2d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-be6c2d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-464504" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-be6c2d" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -148,8 +148,6 @@ class DocsTests(TestCase):
     def test_ParseExamples(self):
         parser = ExamplesParser.from_file(os.path.abspath(__file__))
         self.assertTrue(hasattr(parser.functions, 'items'))
-        tests = TestExamplesFormatter.from_file(os.path.abspath(__file__))
-        print(tests.format_tex())
 ```
 
 #### <a name="FormatSpec">FormatSpec</a>

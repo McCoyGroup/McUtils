@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[CLoader](/Extensions/CLoader/CLoader.md)   
+[CLoader](Extensions/CLoader/CLoader.md)   
 </div>
    <div class="col" markdown="1">
    

@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[SceneJSON](/Plots/SceneJSON/SceneJSON.md)   
+[SceneJSON](Plots/SceneJSON/SceneJSON.md)   
 </div>
    <div class="col" markdown="1">
    
