@@ -54,4 +54,3 @@ if [[ "$build_docs" == "true" ]]; then
     git push -u $repo gh-pages
   fi
 fi
-

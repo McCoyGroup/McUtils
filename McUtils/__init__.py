@@ -11,35 +11,35 @@ been written over the years.
 
 __all__ = []
 
-import McUtils.Data as Data
+from . import Data
 __all__ += ["Data"]
-import McUtils.Numputils as Numputils
+from . import Numputils
 __all__ += ["Numputils"]
-import McUtils.ExternalPrograms as ExternalPrograms
+from . import ExternalPrograms
 __all__ += ["ExternalPrograms"]
-import McUtils.Plots as Plots
+from . import Plots
 __all__ += ["Plots"]
-import McUtils.Jupyter as Jupyter
+from . import Jupyter
 __all__ += ["Jupyter"]
-import McUtils.Parsers as Parsers
+from . import Parsers
 __all__ += ["Parsers"]
-import McUtils.Formatters as Formatters
+from . import Formatters
 __all__ += ["Formatters"]
-import McUtils.Coordinerds as Coordinerds
+from . import Coordinerds
 __all__ += ["Coordinerds"]
-import McUtils.Zachary as Zachary
+from . import Zachary
 __all__ += ["Zachary"]
-import McUtils.GaussianInterface as GaussianInterface
+from . import GaussianInterface
 __all__ += ["GaussianInterface"]
-import McUtils.Extensions as Extensions
+from . import Extensions
 __all__ += ["Extensions"]
-import McUtils.Scaffolding as Scaffolding
+from . import Scaffolding
 __all__ += ["Scaffolding"]
-import McUtils.Parallelizers as Parallelizers
+from . import Parallelizers
 __all__ += ["Parallelizers"]
-import McUtils.Devutils as Devutils
+from . import Devutils
 __all__ += ["Devutils"]
-import McUtils.Docs as Docs
+from . import Docs
 __all__ += ["Docs"]
-import McUtils.Misc as Misc
+from . import Misc
 __all__ += ["Misc"]
