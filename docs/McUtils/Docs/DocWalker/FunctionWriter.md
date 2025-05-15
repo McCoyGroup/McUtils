@@ -52,7 +52,7 @@ get_template_params(self, **kwargs):
 
 
 ## See Also
-[`DocWalker`](DocWalker.md)
+[`DocWalker`](/DocWalker.md)
 
 ---
 

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.JHTML.Bootstrap.Bootstrap5">Bootstrap5</a> 
+## <a id="McUtils.McUtils.Jupyter.JHTML.HTML.ContentXML">ContentXML</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/Bootstrap.py#L215)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/Bootstrap.py#L215?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L1586)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L1586?message=Update%20Docs)]
 </div>
 
 
@@ -19,21 +19,12 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
-Icon: BoostrapIcon
-Pill: Pill
-Accordion: Accordion
-AccordionItem: AccordionItem
-AccordionCollapse: AccordionCollapse
-AccordionBody: AccordionBody
-Carousel: Carousel
-CarouselInner: CarouselInner
-CarouselItem: CarouselItem
-Collapse: Collapse
-CardBody: CardBody
-CardHeader: CardHeader
-CardFooter: CardFooter
-CardImage: CardImage
-Card: Card
+Element: Element
+base_element: Element
+TagElement: TagElement
+DeclarativeElement: DeclarativeElement
+Comment: Comment
+PrefixedElement: PrefixedElement
 ```
 
  </div>
@@ -83,13 +74,13 @@ Card: Card
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Jupyter/JHTML/Bootstrap/Bootstrap5.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Jupyter/JHTML/Bootstrap/Bootstrap5.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Jupyter/JHTML/HTML/ContentXML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Jupyter/JHTML/HTML/ContentXML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/Bootstrap/Bootstrap5.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/Bootstrap/Bootstrap5.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/ContentXML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/ContentXML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/Bootstrap.py#L215?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L1586?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

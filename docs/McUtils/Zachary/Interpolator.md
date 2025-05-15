@@ -1,7 +1,7 @@
-# <a id="McUtils.Zachary.Interpolator">McUtils.Zachary.Interpolator</a> 
+# <a id="McUtils.Zachary.Interpolator">McUtils.McUtils.Zachary.Interpolator</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Sets up a general Interpolator class that looks like Mathematica's InterpolatingFunction class
@@ -10,21 +10,21 @@ Sets up a general Interpolator class that looks like Mathematica's Interpolating
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Interpolator](Interpolator/Interpolator.md)   
+[Interpolator](/Zachary/Interpolator/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Extrapolator](Interpolator/Extrapolator.md)   
+[Extrapolator](/Zachary/Interpolator/Extrapolator.md)   
 </div>
    <div class="col" markdown="1">
-[ProductGridInterpolator](Interpolator/ProductGridInterpolator.md)   
+[ProductGridInterpolator](/Zachary/Interpolator/ProductGridInterpolator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UnstructuredGridInterpolator](Interpolator/UnstructuredGridInterpolator.md)   
+[UnstructuredGridInterpolator](/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-   
+[CoordinateInterpolator](/Zachary/Interpolator/CoordinateInterpolator.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -77,13 +77,13 @@ Sets up a general Interpolator class that looks like Mathematica's Interpolating
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Interpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Interpolator.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/Interpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Interpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Interpolator.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Interpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

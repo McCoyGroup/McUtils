@@ -1,7 +1,7 @@
 # <a id="McUtils.Extensions">McUtils.Extensions</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 A package for managing extension modules.
@@ -11,68 +11,68 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[CLoader](McUtils/Extensions/CLoader/CLoader.md)   
+[CLoader](/McUtils/Extensions/CLoader/CLoader.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleLoader](McUtils/Extensions/ModuleLoader/ModuleLoader.md)   
+[ModuleLoader](/McUtils/Extensions/ModuleLoader/ModuleLoader.md)   
 </div>
    <div class="col" markdown="1">
-[ArgumentType](McUtils/Extensions/ArgumentSignature/ArgumentType.md)   
+[ArgumentType](/McUtils/Extensions/ArgumentSignature/ArgumentType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ArrayType](McUtils/Extensions/ArgumentSignature/ArrayType.md)   
+[ArrayType](/McUtils/Extensions/ArgumentSignature/ArrayType.md)   
 </div>
    <div class="col" markdown="1">
-[PointerType](McUtils/Extensions/ArgumentSignature/PointerType.md)   
+[PointerType](/McUtils/Extensions/ArgumentSignature/PointerType.md)   
 </div>
    <div class="col" markdown="1">
-[PrimitiveType](McUtils/Extensions/ArgumentSignature/PrimitiveType.md)   
+[PrimitiveType](/McUtils/Extensions/ArgumentSignature/PrimitiveType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Argument](McUtils/Extensions/ArgumentSignature/Argument.md)   
+[Argument](/McUtils/Extensions/ArgumentSignature/Argument.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionSignature](McUtils/Extensions/ArgumentSignature/FunctionSignature.md)   
+[FunctionSignature](/McUtils/Extensions/ArgumentSignature/FunctionSignature.md)   
 </div>
    <div class="col" markdown="1">
-[SharedLibrary](McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)   
+[SharedLibrary](/McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SharedLibraryFunction](McUtils/Extensions/SharedLibraryManager/SharedLibraryFunction.md)   
+[SharedLibraryFunction](/McUtils/Extensions/SharedLibraryManager/SharedLibraryFunction.md)   
 </div>
    <div class="col" markdown="1">
-[FFIModule](McUtils/Extensions/FFI/Module/FFIModule.md)   
+[FFIModule](/McUtils/Extensions/FFI/Module/FFIModule.md)   
 </div>
    <div class="col" markdown="1">
-[FFIMethod](McUtils/Extensions/FFI/Module/FFIMethod.md)   
+[FFIMethod](/McUtils/Extensions/FFI/Module/FFIMethod.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FFIArgument](McUtils/Extensions/FFI/Module/FFIArgument.md)   
+[FFIArgument](/McUtils/Extensions/FFI/Module/FFIArgument.md)   
 </div>
    <div class="col" markdown="1">
-[FFIType](McUtils/Extensions/FFI/Module/FFIType.md)   
+[FFIType](/McUtils/Extensions/FFI/Module/FFIType.md)   
 </div>
    <div class="col" markdown="1">
-[FFILoader](McUtils/Extensions/FFI/Loader/FFILoader.md)   
+[FFILoader](/McUtils/Extensions/FFI/Loader/FFILoader.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[DynamicFFIFunctionLoader](McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunctionLoader.md)   
+[DynamicFFIFunctionLoader](/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunctionLoader.md)   
 </div>
    <div class="col" markdown="1">
-[DynamicFFIFunction](McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.md)   
+[DynamicFFIFunction](/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.md)   
 </div>
    <div class="col" markdown="1">
-[DynamicFFILibrary](McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)   
+[DynamicFFILibrary](/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)   
 </div>
 </div>
   <div class="row">
@@ -108,9 +108,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6a4845" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6a4845"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-47e6de" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-47e6de"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6a4845" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-47e6de" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -120,9 +120,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-56f5e8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-56f5e8"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-3db0e4" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3db0e4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-56f5e8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3db0e4" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -390,7 +390,7 @@ class ExtensionsTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

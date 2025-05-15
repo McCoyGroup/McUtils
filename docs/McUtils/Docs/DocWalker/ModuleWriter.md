@@ -66,7 +66,7 @@ get_members(cls, mod):
 
 
 ## See Also
-[`DocWalker`](DocWalker.md)
+[`DocWalker`](/DocWalker.md)
 
 ---
 

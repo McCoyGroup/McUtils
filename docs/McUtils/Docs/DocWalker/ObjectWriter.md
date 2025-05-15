@@ -69,7 +69,7 @@ get_template_params(self):
 
 
 ## See Also
-[`DocWalker`](DocWalker.md)
+[`DocWalker`](/DocWalker.md)
 
 ---
 

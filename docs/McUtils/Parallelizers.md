@@ -1,7 +1,7 @@
 # <a id="McUtils.Parallelizers">McUtils.Parallelizers</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides utilities for setting up platform-independent parallelism
@@ -19,35 +19,35 @@ the `Parallelizer` object itself.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Parallelizer](McUtils/Parallelizers/Parallelizers/Parallelizer.md)   
+[Parallelizer](/McUtils/Parallelizers/Parallelizers/Parallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[MultiprocessingParallelizer](McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.md)   
+[MultiprocessingParallelizer](/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[MPIParallelizer](McUtils/Parallelizers/Parallelizers/MPIParallelizer.md)   
+[MPIParallelizer](/McUtils/Parallelizers/Parallelizers/MPIParallelizer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SerialNonParallelizer](McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.md)   
+[SerialNonParallelizer](/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[SendRecieveParallelizer](McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
+[SendRecieveParallelizer](/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[ClientServerRunner](McUtils/Parallelizers/Runner/ClientServerRunner.md)   
+[ClientServerRunner](/McUtils/Parallelizers/Runner/ClientServerRunner.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SharedObjectManager](McUtils/Parallelizers/SharedMemory/SharedObjectManager.md)   
+[SharedObjectManager](/McUtils/Parallelizers/SharedMemory/SharedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[SharedMemoryDict](McUtils/Parallelizers/SharedMemory/SharedMemoryDict.md)   
+[SharedMemoryDict](/McUtils/Parallelizers/SharedMemory/SharedMemoryDict.md)   
 </div>
    <div class="col" markdown="1">
-[SharedMemoryList](McUtils/Parallelizers/SharedMemory/SharedMemoryList.md)   
+[SharedMemoryList](/McUtils/Parallelizers/SharedMemory/SharedMemoryList.md)   
 </div>
 </div>
   <div class="row">
@@ -241,9 +241,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a27bde" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a27bde"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-a74222" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a74222"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a27bde" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a74222" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -256,9 +256,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-be91f1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-be91f1"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-bce3fc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bce3fc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-be91f1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bce3fc" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -467,7 +467,7 @@ class ParallelizerTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

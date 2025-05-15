@@ -1,7 +1,7 @@
 # <a id="McUtils.Formatters">McUtils.Formatters</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Defines a set of formatting utilities
@@ -10,101 +10,101 @@ Defines a set of formatting utilities
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[TemplateWriter](McUtils/Formatters/TemplateWriter/TemplateWriter.md)   
+[TemplateWriter](/McUtils/Formatters/TemplateWriter/TemplateWriter.md)   
 </div>
    <div class="col" markdown="1">
-[OptionalTemplate](McUtils/Formatters/TemplateWriter/OptionalTemplate.md)   
+[OptionalTemplate](/McUtils/Formatters/TemplateWriter/OptionalTemplate.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectWalker](McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.md)   
+[ObjectWalker](/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ObjectHandler](McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.md)   
+[ObjectHandler](/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectSpec](McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectSpec.md)   
+[ObjectSpec](/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectSpec.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateFormatter](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.md)   
+[TemplateFormatter](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FormatDirective](McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.md)   
+[FormatDirective](/McUtils/Formatters/TemplateEngine/TemplateEngine/FormatDirective.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateFormatDirective](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatDirective.md)   
+[TemplateFormatDirective](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatDirective.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateOps](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
+[TemplateOps](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TemplateEngine](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.md)   
+[TemplateEngine](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.md)   
 </div>
    <div class="col" markdown="1">
-[ResourceLocator](McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.md)   
+[ResourceLocator](/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateResourceExtractor](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.md)   
+[TemplateResourceExtractor](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TemplateWalker](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.md)   
+[TemplateWalker](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.md)   
+[TemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleTemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/ModuleTemplateHandler.md)   
+[ModuleTemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/ModuleTemplateHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ClassTemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/ClassTemplateHandler.md)   
+[ClassTemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/ClassTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionTemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/FunctionTemplateHandler.md)   
+[FunctionTemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/FunctionTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[MethodTemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/MethodTemplateHandler.md)   
+[MethodTemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/MethodTemplateHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ObjectTemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/ObjectTemplateHandler.md)   
+[ObjectTemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/ObjectTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[IndexTemplateHandler](McUtils/Formatters/TemplateEngine/TemplateEngine/IndexTemplateHandler.md)   
+[IndexTemplateHandler](/McUtils/Formatters/TemplateEngine/TemplateEngine/IndexTemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[TemplateInterfaceEngine](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.md)   
+[TemplateInterfaceEngine](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TemplateInterfaceFormatter](McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.md)   
+[TemplateInterfaceFormatter](/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.md)   
 </div>
    <div class="col" markdown="1">
-[TeX](McUtils/Formatters/TeXWriter/TeX.md)   
+[TeX](/McUtils/Formatters/TeXWriter/TeX.md)   
 </div>
    <div class="col" markdown="1">
-[StringMatcher](McUtils/Formatters/FileMatcher/StringMatcher.md)   
+[StringMatcher](/McUtils/Formatters/FileMatcher/StringMatcher.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[MatchList](McUtils/Formatters/FileMatcher/MatchList.md)   
+[MatchList](/McUtils/Formatters/FileMatcher/MatchList.md)   
 </div>
    <div class="col" markdown="1">
-[FileMatcher](McUtils/Formatters/FileMatcher/FileMatcher.md)   
+[FileMatcher](/McUtils/Formatters/FileMatcher/FileMatcher.md)   
 </div>
    <div class="col" markdown="1">
-[TableFormatter](McUtils/Formatters/TableFormatters/TableFormatter.md)   
+[TableFormatter](/McUtils/Formatters/TableFormatters/TableFormatter.md)   
 </div>
 </div>
   <div class="row">
@@ -171,7 +171,7 @@ Defines a set of formatting utilities
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

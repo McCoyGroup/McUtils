@@ -1,7 +1,7 @@
 # <a id="McUtils.Data">McUtils.Data</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides a small data framework for wrapping up datasets into classes for access and loading.
@@ -14,43 +14,43 @@ A slightly more involved example is in `ConstantsData.UnitsData`.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DataHandler](McUtils/Data/CommonData/DataHandler.md)   
+[DataHandler](/McUtils/Data/CommonData/DataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[DataError](McUtils/Data/CommonData/DataError.md)   
+[DataError](/McUtils/Data/CommonData/DataError.md)   
 </div>
    <div class="col" markdown="1">
-[DataRecord](McUtils/Data/CommonData/DataRecord.md)   
+[DataRecord](/McUtils/Data/CommonData/DataRecord.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[AtomData](McUtils/Data/AtomData/AtomData.md)   
+[AtomData](/McUtils/Data/AtomData/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[AtomDataHandler](McUtils/Data/AtomData/AtomDataHandler.md)   
+[AtomDataHandler](/McUtils/Data/AtomData/AtomDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[UnitsData](McUtils/Data/ConstantsData/UnitsData.md)   
+[UnitsData](/McUtils/Data/ConstantsData/UnitsData.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UnitsDataHandler](McUtils/Data/ConstantsData/UnitsDataHandler.md)   
+[UnitsDataHandler](/McUtils/Data/ConstantsData/UnitsDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[BondData](McUtils/Data/BondData/BondData.md)   
+[BondData](/McUtils/Data/BondData/BondData.md)   
 </div>
    <div class="col" markdown="1">
-[BondDataHandler](McUtils/Data/BondData/BondDataHandler.md)   
+[BondDataHandler](/McUtils/Data/BondData/BondDataHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[WavefunctionData](McUtils/Data/WavefunctionData/WavefunctionData.md)   
+[WavefunctionData](/McUtils/Data/WavefunctionData/WavefunctionData.md)   
 </div>
    <div class="col" markdown="1">
-[PotentialData](McUtils/Data/PotentialData/PotentialData.md)   
+[PotentialData](/McUtils/Data/PotentialData/PotentialData.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -121,9 +121,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-52279b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-52279b"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-537d81" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-537d81"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-52279b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-537d81" markdown="1">
  - [AtomData](#AtomData)
 - [AtomMasses](#AtomMasses)
 - [Conversions](#Conversions)
@@ -132,9 +132,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-92a2d8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-92a2d8"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-9b140e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-9b140e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-92a2d8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-9b140e" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -245,7 +245,7 @@ class DataTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

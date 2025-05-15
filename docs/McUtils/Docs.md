@@ -1,7 +1,7 @@
 # <a id="McUtils.Docs">McUtils.Docs</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Adapted from the Peeves documentation system but tailored for more interactive usage.
@@ -10,40 +10,40 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DocBuilder](McUtils/Docs/DocsBuilder/DocBuilder.md)   
+[DocBuilder](/McUtils/Docs/DocsBuilder/DocBuilder.md)   
 </div>
    <div class="col" markdown="1">
-[DocWalker](McUtils/Docs/DocWalker/DocWalker.md)   
+[DocWalker](/McUtils/Docs/DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleWriter](McUtils/Docs/DocWalker/ModuleWriter.md)   
+[ModuleWriter](/McUtils/Docs/DocWalker/ModuleWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ClassWriter](McUtils/Docs/DocWalker/ClassWriter.md)   
+[ClassWriter](/McUtils/Docs/DocWalker/ClassWriter.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionWriter](McUtils/Docs/DocWalker/FunctionWriter.md)   
+[FunctionWriter](/McUtils/Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[MethodWriter](McUtils/Docs/DocWalker/MethodWriter.md)   
+[MethodWriter](/McUtils/Docs/DocWalker/MethodWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ObjectWriter](McUtils/Docs/DocWalker/ObjectWriter.md)   
+[ObjectWriter](/McUtils/Docs/DocWalker/ObjectWriter.md)   
 </div>
    <div class="col" markdown="1">
-[IndexWriter](McUtils/Docs/DocWalker/IndexWriter.md)   
+[IndexWriter](/McUtils/Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[jdoc](McUtils/Docs/DocWalker/jdoc.md)   
+[jdoc](/McUtils/Docs/DocWalker/jdoc.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ExamplesParser](McUtils/Docs/ExamplesParser/ExamplesParser.md)   
+[ExamplesParser](/McUtils/Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -74,18 +74,18 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-69269f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-69269f"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-66711d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-66711d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-69269f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-66711d" markdown="1">
  - [PeevesDoc](#PeevesDoc)
 - [ParseExamples](#ParseExamples)
 - [FormatSpec](#FormatSpec)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e82011" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e82011"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-464504" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-464504"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e82011" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-464504" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -217,7 +217,7 @@ class DocsTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

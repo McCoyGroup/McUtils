@@ -1,7 +1,7 @@
-# <a id="McUtils.Plots.Graphics">McUtils.Plots.Graphics</a> 
+# <a id="McUtils.Plots.Graphics">McUtils.McUtils.Plots.Graphics</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides Graphics base classes that can be extended upon
@@ -10,18 +10,18 @@ Provides Graphics base classes that can be extended upon
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsBase](Graphics/GraphicsBase.md)   
+[GraphicsBase](/Plots/Graphics/GraphicsBase.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics](Graphics/Graphics.md)   
+[Graphics](/Plots/Graphics/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics3D](Graphics/Graphics3D.md)   
+[Graphics3D](/Plots/Graphics/Graphics3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsGrid](Graphics/GraphicsGrid.md)   
+[GraphicsGrid](/Plots/Graphics/GraphicsGrid.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -77,13 +77,13 @@ Provides Graphics base classes that can be extended upon
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Graphics.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Graphics.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

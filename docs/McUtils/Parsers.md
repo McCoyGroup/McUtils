@@ -1,7 +1,7 @@
 # <a id="McUtils.Parsers">McUtils.Parsers</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Utilities for writing parsers of structured text.
@@ -22,153 +22,153 @@ using a streamer to match chunks and a parser to extract data from the matched c
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[FileStreamReader](McUtils/Parsers/FileStreamer/FileStreamReader.md)   
+[FileStreamReader](/McUtils/Parsers/FileStreamer/FileStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[FileStreamCheckPoint](McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)   
+[FileStreamCheckPoint](/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)   
 </div>
    <div class="col" markdown="1">
-[FileStreamerTag](McUtils/Parsers/FileStreamer/FileStreamerTag.md)   
+[FileStreamerTag](/McUtils/Parsers/FileStreamer/FileStreamerTag.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FileStreamReaderException](McUtils/Parsers/FileStreamer/FileStreamReaderException.md)   
+[FileStreamReaderException](/McUtils/Parsers/FileStreamer/FileStreamReaderException.md)   
 </div>
    <div class="col" markdown="1">
-[StringStreamReader](McUtils/Parsers/FileStreamer/StringStreamReader.md)   
+[StringStreamReader](/McUtils/Parsers/FileStreamer/StringStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[FileLineByLineReader](McUtils/Parsers/FileStreamer/FileLineByLineReader.md)   
+[FileLineByLineReader](/McUtils/Parsers/FileStreamer/FileLineByLineReader.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StringLineByLineReader](McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
+[StringLineByLineReader](/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
 </div>
    <div class="col" markdown="1">
-[RegexPattern](McUtils/Parsers/RegexPatterns/RegexPattern.md)   
+[RegexPattern](/McUtils/Parsers/RegexPatterns/RegexPattern.md)   
 </div>
    <div class="col" markdown="1">
-[Capturing](McUtils/Parsers/RegexPatterns/Capturing.md)   
+[Capturing](/McUtils/Parsers/RegexPatterns/Capturing.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[NonCapturing](McUtils/Parsers/RegexPatterns/NonCapturing.md)   
+[NonCapturing](/McUtils/Parsers/RegexPatterns/NonCapturing.md)   
 </div>
    <div class="col" markdown="1">
-[Optional](McUtils/Parsers/RegexPatterns/Optional.md)   
+[Optional](/McUtils/Parsers/RegexPatterns/Optional.md)   
 </div>
    <div class="col" markdown="1">
-[Alternatives](McUtils/Parsers/RegexPatterns/Alternatives.md)   
+[Alternatives](/McUtils/Parsers/RegexPatterns/Alternatives.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Longest](McUtils/Parsers/RegexPatterns/Longest.md)   
+[Longest](/McUtils/Parsers/RegexPatterns/Longest.md)   
 </div>
    <div class="col" markdown="1">
-[Shortest](McUtils/Parsers/RegexPatterns/Shortest.md)   
+[Shortest](/McUtils/Parsers/RegexPatterns/Shortest.md)   
 </div>
    <div class="col" markdown="1">
-[Repeating](McUtils/Parsers/RegexPatterns/Repeating.md)   
+[Repeating](/McUtils/Parsers/RegexPatterns/Repeating.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Duplicated](McUtils/Parsers/RegexPatterns/Duplicated.md)   
+[Duplicated](/McUtils/Parsers/RegexPatterns/Duplicated.md)   
 </div>
    <div class="col" markdown="1">
-[PatternClass](McUtils/Parsers/RegexPatterns/PatternClass.md)   
+[PatternClass](/McUtils/Parsers/RegexPatterns/PatternClass.md)   
 </div>
    <div class="col" markdown="1">
-[Parenthesized](McUtils/Parsers/RegexPatterns/Parenthesized.md)   
+[Parenthesized](/McUtils/Parsers/RegexPatterns/Parenthesized.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Named](McUtils/Parsers/RegexPatterns/Named.md)   
+[Named](/McUtils/Parsers/RegexPatterns/Named.md)   
 </div>
    <div class="col" markdown="1">
-[Any](McUtils/Parsers/RegexPatterns/Any.md)   
+[Any](/McUtils/Parsers/RegexPatterns/Any.md)   
 </div>
    <div class="col" markdown="1">
-[Sign](McUtils/Parsers/RegexPatterns/Sign.md)   
+[Sign](/McUtils/Parsers/RegexPatterns/Sign.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Number](McUtils/Parsers/RegexPatterns/Number.md)   
+[Number](/McUtils/Parsers/RegexPatterns/Number.md)   
 </div>
    <div class="col" markdown="1">
-[Integer](McUtils/Parsers/RegexPatterns/Integer.md)   
+[Integer](/McUtils/Parsers/RegexPatterns/Integer.md)   
 </div>
    <div class="col" markdown="1">
-[PositiveInteger](McUtils/Parsers/RegexPatterns/PositiveInteger.md)   
+[PositiveInteger](/McUtils/Parsers/RegexPatterns/PositiveInteger.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ASCIILetter](McUtils/Parsers/RegexPatterns/ASCIILetter.md)   
+[ASCIILetter](/McUtils/Parsers/RegexPatterns/ASCIILetter.md)   
 </div>
    <div class="col" markdown="1">
-[AtomName](McUtils/Parsers/RegexPatterns/AtomName.md)   
+[AtomName](/McUtils/Parsers/RegexPatterns/AtomName.md)   
 </div>
    <div class="col" markdown="1">
-[WhitespaceCharacter](McUtils/Parsers/RegexPatterns/WhitespaceCharacter.md)   
+[WhitespaceCharacter](/McUtils/Parsers/RegexPatterns/WhitespaceCharacter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Word](McUtils/Parsers/RegexPatterns/Word.md)   
+[Word](/McUtils/Parsers/RegexPatterns/Word.md)   
 </div>
    <div class="col" markdown="1">
-[WordCharacter](McUtils/Parsers/RegexPatterns/WordCharacter.md)   
+[WordCharacter](/McUtils/Parsers/RegexPatterns/WordCharacter.md)   
 </div>
    <div class="col" markdown="1">
-[VariableName](McUtils/Parsers/RegexPatterns/VariableName.md)   
+[VariableName](/McUtils/Parsers/RegexPatterns/VariableName.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CartesianPoint](McUtils/Parsers/RegexPatterns/CartesianPoint.md)   
+[CartesianPoint](/McUtils/Parsers/RegexPatterns/CartesianPoint.md)   
 </div>
    <div class="col" markdown="1">
-[IntXYZLine](McUtils/Parsers/RegexPatterns/IntXYZLine.md)   
+[IntXYZLine](/McUtils/Parsers/RegexPatterns/IntXYZLine.md)   
 </div>
    <div class="col" markdown="1">
-[XYZLine](McUtils/Parsers/RegexPatterns/XYZLine.md)   
+[XYZLine](/McUtils/Parsers/RegexPatterns/XYZLine.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Empty](McUtils/Parsers/RegexPatterns/Empty.md)   
+[Empty](/McUtils/Parsers/RegexPatterns/Empty.md)   
 </div>
    <div class="col" markdown="1">
-[Newline](McUtils/Parsers/RegexPatterns/Newline.md)   
+[Newline](/McUtils/Parsers/RegexPatterns/Newline.md)   
 </div>
    <div class="col" markdown="1">
-[ZMatPattern](McUtils/Parsers/RegexPatterns/ZMatPattern.md)   
+[ZMatPattern](/McUtils/Parsers/RegexPatterns/ZMatPattern.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StringParser](McUtils/Parsers/StringParser/StringParser.md)   
+[StringParser](/McUtils/Parsers/StringParser/StringParser.md)   
 </div>
    <div class="col" markdown="1">
-[StringParserException](McUtils/Parsers/StringParser/StringParserException.md)   
+[StringParserException](/McUtils/Parsers/StringParser/StringParserException.md)   
 </div>
    <div class="col" markdown="1">
-[StructuredType](McUtils/Parsers/StructuredType/StructuredType.md)   
+[StructuredType](/McUtils/Parsers/StructuredType/StructuredType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[StructuredTypeArray](McUtils/Parsers/StructuredType/StructuredTypeArray.md)   
+[StructuredTypeArray](/McUtils/Parsers/StructuredType/StructuredTypeArray.md)   
 </div>
    <div class="col" markdown="1">
-[DisappearingType](McUtils/Parsers/StructuredType/DisappearingType.md)   
+[DisappearingType](/McUtils/Parsers/StructuredType/DisappearingType.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -331,9 +331,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-03aee9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-03aee9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-1525c5" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-1525c5"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-03aee9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-1525c5" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
@@ -341,9 +341,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-45f413" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-45f413"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c22449" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c22449"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-45f413" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c22449" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -529,7 +529,7 @@ class ParserTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

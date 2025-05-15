@@ -1,7 +1,7 @@
-# <a id="McUtils.Formatters.TemplateWriter">McUtils.Formatters.TemplateWriter</a> 
+# <a id="McUtils.Formatters.TemplateWriter">McUtils.McUtils.Formatters.TemplateWriter</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateWriter/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateWriter/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -10,10 +10,10 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[TemplateWriter](TemplateWriter/TemplateWriter.md)   
+[TemplateWriter](/Formatters/TemplateWriter/TemplateWriter.md)   
 </div>
    <div class="col" markdown="1">
-   
+[OptionalTemplate](/Formatters/TemplateWriter/OptionalTemplate.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -66,13 +66,13 @@
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Formatters/TemplateWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Formatters/TemplateWriter.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Formatters/TemplateWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Formatters/TemplateWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Formatters/TemplateWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Formatters/TemplateWriter.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateWriter/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

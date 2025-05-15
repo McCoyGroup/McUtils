@@ -1,7 +1,7 @@
 # <a id="McUtils.Misc">McUtils.Misc</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Defines a set of miscellaneous helper utilities that are commonly used across projects.
@@ -10,40 +10,40 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[SBatchJob](McUtils/Misc/SBatchHelper/SBatchJob.md)   
+[SBatchJob](/McUtils/Misc/SBatchHelper/SBatchJob.md)   
 </div>
    <div class="col" markdown="1">
-[njit](McUtils/Misc/NumbaTools/njit.md)   
+[njit](/McUtils/Misc/NumbaTools/njit.md)   
 </div>
    <div class="col" markdown="1">
-[jit](McUtils/Misc/NumbaTools/jit.md)   
+[jit](/McUtils/Misc/NumbaTools/jit.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[type_spec](McUtils/Misc/NumbaTools/type_spec.md)   
+[type_spec](/McUtils/Misc/NumbaTools/type_spec.md)   
 </div>
    <div class="col" markdown="1">
-[without_numba](McUtils/Misc/NumbaTools/without_numba.md)   
+[without_numba](/McUtils/Misc/NumbaTools/without_numba.md)   
 </div>
    <div class="col" markdown="1">
-[numba_decorator](McUtils/Misc/NumbaTools/numba_decorator.md)   
+[numba_decorator](/McUtils/Misc/NumbaTools/numba_decorator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[import_from_numba](McUtils/Misc/NumbaTools/import_from_numba.md)   
+[import_from_numba](/McUtils/Misc/NumbaTools/import_from_numba.md)   
 </div>
    <div class="col" markdown="1">
-[ModificationTracker](McUtils/Misc/DebugTools/ModificationTracker.md)   
+[ModificationTracker](/McUtils/Misc/DebugTools/ModificationTracker.md)   
 </div>
    <div class="col" markdown="1">
-[mixedmethod](McUtils/Misc/Decorators/mixedmethod.md)   
+[mixedmethod](/McUtils/Misc/Decorators/mixedmethod.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Abstract](McUtils/Misc/Symbolics/Abstract.md)   
+[Abstract](/McUtils/Misc/Symbolics/Abstract.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -74,17 +74,17 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-4bd890" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-4bd890"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-be976b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-be976b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-4bd890" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-be976b" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-1f71f8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1f71f8"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c5a78a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c5a78a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1f71f8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c5a78a" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -201,7 +201,7 @@ class MiscTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

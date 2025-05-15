@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds">McUtils.Coordinerds</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 The Coordinerds package implements stuff for dealing with coordinates and generalized coordinate systems
@@ -21,150 +21,150 @@ Chained conversions are not _currently_ supported, but might well become support
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[CoordinateSystemConverters](McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverters.md)   
+[CoordinateSystemConverters](/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverters.md)   
 </div>
    <div class="col" markdown="1">
-[CoordinateSystemConverter](McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverter.md)   
+[CoordinateSystemConverter](/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverter.md)   
 </div>
    <div class="col" markdown="1">
-[SimpleCoordinateSystemConverter](McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.md)   
+[SimpleCoordinateSystemConverter](/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CartesianCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem.md)   
+[CartesianCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[InternalCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/InternalCoordinateSystem.md)   
+[InternalCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/InternalCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[CartesianCoordinateSystem3D](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.md)   
+[CartesianCoordinateSystem3D](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CartesianCoordinates3D](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinates3D.md)   
+[CartesianCoordinates3D](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinates3D.md)   
 </div>
    <div class="col" markdown="1">
-[CartesianCoordinates1D](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinates1D.md)   
+[CartesianCoordinates1D](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinates1D.md)   
 </div>
    <div class="col" markdown="1">
-[CartesianCoordinates2D](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinates2D.md)   
+[CartesianCoordinates2D](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinates2D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SphericalCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/SphericalCoordinateSystem.md)   
+[SphericalCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/SphericalCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[SphericalCoordinates](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/SphericalCoordinates.md)   
+[SphericalCoordinates](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/SphericalCoordinates.md)   
 </div>
    <div class="col" markdown="1">
-[ZMatrixCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinateSystem.md)   
+[ZMatrixCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinateSystem.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ZMatrixCoordinates](McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinates.md)   
+[ZMatrixCoordinates](/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinates.md)   
 </div>
    <div class="col" markdown="1">
-[CoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.md)   
+[CoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[BaseCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/BaseCoordinateSystem.md)   
+[BaseCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/BaseCoordinateSystem.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CoordinateSystemError](McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystemError.md)   
+[CoordinateSystemError](/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystemError.md)   
 </div>
    <div class="col" markdown="1">
-[CompositeCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.md)   
+[CompositeCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[CompositeCoordinateSystemConverter](McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.md)   
+[CompositeCoordinateSystemConverter](/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GenericInternalCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.md)   
+[GenericInternalCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[ZMatrixCoordinates](McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/ZMatrixCoordinates.md)   
+[ZMatrixCoordinates](/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/ZMatrixCoordinates.md)   
 </div>
    <div class="col" markdown="1">
-[CartesianToGICSystemConverter](McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.md)   
+[CartesianToGICSystemConverter](/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GICSystemToCartesianConverter](McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.md)   
+[GICSystemToCartesianConverter](/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.md)   
 </div>
    <div class="col" markdown="1">
-[IterativeZMatrixCoordinateSystem](McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IterativeZMatrixCoordinateSystem.md)   
+[IterativeZMatrixCoordinateSystem](/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IterativeZMatrixCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[IterativeZMatrixCoordinates](McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IterativeZMatrixCoordinates.md)   
+[IterativeZMatrixCoordinates](/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IterativeZMatrixCoordinates.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CartesianToIZSystemConverter](McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/CartesianToIZSystemConverter.md)   
+[CartesianToIZSystemConverter](/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/CartesianToIZSystemConverter.md)   
 </div>
    <div class="col" markdown="1">
-[IZSystemToCartesianConverter](McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IZSystemToCartesianConverter.md)   
+[IZSystemToCartesianConverter](/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IZSystemToCartesianConverter.md)   
 </div>
    <div class="col" markdown="1">
-[CoordinateSet](McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.md)   
+[CoordinateSet](/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[cartesian_to_zmatrix](McUtils/Coordinerds/Conveniences/cartesian_to_zmatrix.md)   
+[cartesian_to_zmatrix](/McUtils/Coordinerds/Conveniences/cartesian_to_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[zmatrix_to_cartesian](McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
+[zmatrix_to_cartesian](/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
 </div>
    <div class="col" markdown="1">
-[canonicalize_internal](McUtils/Coordinerds/Conveniences/canonicalize_internal.md)   
+[canonicalize_internal](/McUtils/Coordinerds/Conveniences/canonicalize_internal.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[enumerate_zmatrices](McUtils/Coordinerds/Conveniences/enumerate_zmatrices.md)   
+[enumerate_zmatrices](/McUtils/Coordinerds/Conveniences/enumerate_zmatrices.md)   
 </div>
    <div class="col" markdown="1">
-[extract_zmatrix_internals](McUtils/Coordinerds/Conveniences/extract_zmatrix_internals.md)   
+[extract_zmatrix_internals](/McUtils/Coordinerds/Conveniences/extract_zmatrix_internals.md)   
 </div>
    <div class="col" markdown="1">
-[parse_zmatrix_string](McUtils/Coordinerds/Conveniences/parse_zmatrix_string.md)   
+[parse_zmatrix_string](/McUtils/Coordinerds/Conveniences/parse_zmatrix_string.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[validate_zmatrix](McUtils/Coordinerds/Conveniences/validate_zmatrix.md)   
+[validate_zmatrix](/McUtils/Coordinerds/Conveniences/validate_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[chain_zmatrix](McUtils/Coordinerds/Conveniences/chain_zmatrix.md)   
+[chain_zmatrix](/McUtils/Coordinerds/Conveniences/chain_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[attached_zmatrix_fragment](McUtils/Coordinerds/Conveniences/attached_zmatrix_fragment.md)   
+[attached_zmatrix_fragment](/McUtils/Coordinerds/Conveniences/attached_zmatrix_fragment.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[functionalized_zmatrix](McUtils/Coordinerds/Conveniences/functionalized_zmatrix.md)   
+[functionalized_zmatrix](/McUtils/Coordinerds/Conveniences/functionalized_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[reindex_zmatrix](McUtils/Coordinerds/Conveniences/reindex_zmatrix.md)   
+[reindex_zmatrix](/McUtils/Coordinerds/Conveniences/reindex_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[PrimitiveCoordinatePicker](McUtils/Coordinerds/Redundant/PrimitiveCoordinatePicker.md)   
+[PrimitiveCoordinatePicker](/McUtils/Coordinerds/Redundant/PrimitiveCoordinatePicker.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[RedundantCoordinateGenerator](McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
+[RedundantCoordinateGenerator](/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -195,9 +195,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e79062" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e79062"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-0ce03b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0ce03b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e79062" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0ce03b" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -233,9 +233,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-5320c7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-5320c7"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c5d439" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c5d439"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-5320c7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c5d439" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1033,7 +1033,7 @@ class ConverterTest(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

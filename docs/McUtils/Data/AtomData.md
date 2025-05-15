@@ -1,7 +1,7 @@
-# <a id="McUtils.Data.AtomData">McUtils.Data.AtomData</a> 
+# <a id="McUtils.Data.AtomData">McUtils.McUtils.Data.AtomData</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/AtomData/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/AtomData/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides a class for handling a compiled set of atomic data
@@ -10,10 +10,10 @@ Provides a class for handling a compiled set of atomic data
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[AtomData](AtomData/AtomData.md)   
+[AtomData](/Data/AtomData/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[AtomDataHandler](AtomData/AtomDataHandler.md)   
+[AtomDataHandler](/Data/AtomData/AtomDataHandler.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -66,13 +66,13 @@ Provides a class for handling a compiled set of atomic data
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Data/AtomData.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Data/AtomData.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Data/AtomData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Data/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Data/AtomData.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Data/AtomData.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/AtomData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

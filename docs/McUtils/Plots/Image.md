@@ -1,7 +1,7 @@
-# <a id="McUtils.Plots.Image">McUtils.Plots.Image</a> 
+# <a id="McUtils.Plots.Image">McUtils.McUtils.Plots.Image</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Image/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Image/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Image/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Image/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides hooks for viewing images, mostly through the Matplotlib Image interface
@@ -10,7 +10,7 @@ Provides hooks for viewing images, mostly through the Matplotlib Image interface
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Image](Image/Image.md)   
+[Image](/Plots/Image/Image.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -66,13 +66,13 @@ Provides hooks for viewing images, mostly through the Matplotlib Image interface
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Image.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Image.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Image.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Image.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Image.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Image.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Image.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Image.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Image/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Image/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

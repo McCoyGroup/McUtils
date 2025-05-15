@@ -97,8 +97,8 @@ get_identifier(cls, o):
 identifier(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L210?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ identifier(self):
 parent(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L213)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L213?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L216)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L216?message=Update%20Docs)]
 </div>
 Returns the parent object for docs purposes
   - `:returns`: `_`
@@ -121,8 +121,8 @@ Returns the parent object for docs purposes
 resolve_parent(self, check_tree=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L224)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L224?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L227)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L227?message=Update%20Docs)]
 </div>
 Resolves the "parent" of obj.
 By default, just the module in which it is contained.
@@ -142,8 +142,8 @@ Also can be subclassed to provide more fine grained behavior.
 resolve_relative_obj(self, spec: str): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L271)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L271?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L274)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L274?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ resolve_relative_obj(self, spec: str):
 children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L302)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L302?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L305?message=Update%20Docs)]
 </div>
 Returns the child objects for docs purposes
   - `:returns`: `_`
@@ -166,8 +166,8 @@ Returns the child objects for docs purposes
 resolve_children(self, check_tree=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L316)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L316?message=Update%20Docs)]
 </div>
 Resolves the "children" of obj.
 First tries to use any info supplied by the docs tree
@@ -185,8 +185,8 @@ or a passed object spec, then that failing looks for an
 tree_spec(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L342)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L342?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L345)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L345?message=Update%20Docs)]
 </div>
 Provides info that gets added to the `written` dict and which allows
 for a doc tree to be built out.
@@ -199,8 +199,8 @@ for a doc tree to be built out.
 handle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L363)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L363?message=Update%20Docs)]
 </div>
 
 
@@ -209,8 +209,8 @@ handle(self):
 stop_traversal(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L363)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L363?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L366)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectHandler.py#L366?message=Update%20Docs)]
 </div>
  </div>
 </div>
