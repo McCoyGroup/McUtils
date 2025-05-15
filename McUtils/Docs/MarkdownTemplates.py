@@ -126,7 +126,7 @@ class MarkdownOps:
         if ups > 0:
             pad = "../"*ups
         else:
-            pad = ""
+            pad = "/"
         identifier = "/".join(identifier.split("."))
         return pad + identifier + ".md"
 

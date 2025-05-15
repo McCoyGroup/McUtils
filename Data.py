@@ -6,3 +6,4 @@ Mostly useful during development
 from .McUtils.Data import *
 from .McUtils.Data import __all__
 from .McUtils.Data import __doc__
+__identifier__ = 'McUtils.McUtils.Data'

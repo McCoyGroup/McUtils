@@ -6,3 +6,4 @@ Mostly useful during development
 from .McUtils.Parallelizers import *
 from .McUtils.Parallelizers import __all__
 from .McUtils.Parallelizers import __doc__
+__identifier__ = 'McUtils.McUtils.Parallelizers'
