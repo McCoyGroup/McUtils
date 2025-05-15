@@ -1,12 +1,17 @@
+import enum
 from mmap import mmap
 import abc, io
+import sys
+import textwrap
 
 __all__ = [
     "FileStreamReader",
     "FileStreamCheckPoint",
     "FileStreamerTag",
     "FileStreamReaderException",
-    "StringStreamReader"
+    "StringStreamReader",
+    "FileLineByLineReader",
+    "StringLineByLineReader"
 ]
 
 ########################################################################################################################
@@ -60,6 +65,9 @@ class SearchStream(metaclass=abc.ABCMeta):
     def tag_size(self, tag):
         raise NotImplementedError("SearchStream is a base class")
 
+    @abc.abstractmethod
+    def __iter__(self):
+        ...
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -88,6 +96,16 @@ class ByteSearchStream(SearchStream):
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._stream.close()
+    def __repr__(self):
+        cls = type(self)
+        stream = textwrap.shorten(repr(
+            self._data
+                if self._stream is None else
+            self._stream
+        ), 100)
+        return f"{cls.__name__}({stream})"
+    def __iter__(self):
+        return iter(self._stream)
     def read(self, n=-1):
         return self._stream.read(n).decode(self._encoding)
     def readline(self):
@@ -124,13 +142,20 @@ class FileSearchStream(SearchStream):
     """
     A stream that is implemented for searching in mmap-ed files
     """
-    def __init__(self, file, mode="r", encoding="utf-8", **kw):
+    def __init__(self, file, mode="r", binary=True, encoding="utf-8", **kw):
         self._file = file
-        self._mode = mode.strip("+b") + "+b"
+        if binary:
+            mode = mode.strip("+b") + "+b"
+        else:
+            mode = mode.strip('+') + '+'
+        self._mode = mode
         self._encoding = encoding
         self._kw = kw
         self._stream = None
         self._wasopen = None
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}({self._file}, {self._mode!r})"
     def __enter__(self):
         if isinstance(self._file, str):
             self._wasopen = False
@@ -144,6 +169,16 @@ class FileSearchStream(SearchStream):
         self._stream.close()
         if not self._wasopen:
             self._fstream.close()
+    def __iter__(self):
+        new_pos = self._stream.tell()
+        not_exhausted = True
+        while not_exhausted:
+            line = self._stream.readline()
+            old_pos = new_pos
+            new_pos = self._stream.tell()
+            not_exhausted = new_pos > old_pos
+            if not_exhausted:
+                yield line
     def read(self, n=-1):
         return self._stream.read(n).decode(self._encoding)
     def readline(self):
@@ -193,6 +228,8 @@ class StringSearchStream(SearchStream):
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._stream.close()
+    def __iter__(self):
+        return iter(self._stream)
 
     def read(self, n=-1):
         return self._stream.read(n)
@@ -236,6 +273,9 @@ class SearchStreamReader:
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stream.__exit__(exc_type, exc_val, exc_tb)
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}({self.stream})"
 
     def _find_tag(self, tag,
                   skip_tag=True,
@@ -494,3 +534,194 @@ class FileStreamerTag:
         self.direction = direction
         self.skip_tag = skip_tag
         self.seek = seek
+
+class LineByLineParser(metaclass=abc.ABCMeta):
+    def __init__(self, stream, binary=True, encoding='utf-8', max_nesting_depth=-1, ignore_comments=False):
+        """
+        :param stream:
+        :type stream: SearchStream
+        """
+        self.stream = stream
+        self.binary = binary
+        self.encoding = encoding
+        self.max_nesting_depth = max_nesting_depth
+        self.ignore_comments = ignore_comments
+
+    def __enter__(self):
+        self.stream.__enter__()
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stream.__exit__(exc_type, exc_val, exc_tb)
+    @abc.abstractmethod
+    def check_tag(self, line, depth:int=0, active_tag=None, label:str=None, history:list[str]=None):
+        ...
+    def handle_block_line(self, label, line, depth=0, history:list[str]=None):
+        return line
+    def handle_block(self, label, block, depth=0):
+        return block
+    class LineReaderTags(enum.Enum):
+        RESETTING_BLOCK_END = 'implict_end'
+        BLOCK_END = 'end'
+        BLOCK_START = 'block'
+        COMMENT = "comment"
+        SKIP = "skip"
+        VALUE = "value"
+    def read_stream_line(self, binary=None):
+        if binary is None:
+            binary = self.binary
+        data = next(iter(self.stream))
+        if not binary and hasattr(data, 'decode'):
+            data = data.decode(self.encoding)
+        return data
+    def stream_iter(self, binary=None):
+        if binary is None:
+            binary = self.binary
+        line_iter = iter(self.stream)
+        try:
+            data = next(line_iter)
+        except StopIteration:
+            yield None
+        test = not binary and hasattr(data, 'decode')
+        if test:
+            data = data.decode(self.encoding)
+        yield data
+        if test:
+            for data in line_iter:
+                data = data.decode(self.encoding)
+                yield data
+        else:
+            for line in line_iter:
+                yield line
+
+    def find_next_block(self, binary=None, ignore_comments=None, max_nesting_depth=None,
+                        aggregate_values=True, depth=0):
+        if ignore_comments is None:
+            ignore_comments = self.ignore_comments
+        if max_nesting_depth is None:
+            max_nesting_depth = self.max_nesting_depth
+
+        stream_pos = self.stream.tell()
+        block_data = []
+        empty = True
+        active_tag = None
+        label = None
+        try:
+            for i,line in enumerate(self.stream_iter(binary=binary)):
+                if line is None: break
+                empty = False
+                next_tag = self.check_tag(line, depth, active_tag=active_tag, label=label, history=block_data)
+                tag_label = tag_body = None
+                if not isinstance(next_tag, self.LineReaderTags) and next_tag is not None:
+                    if isinstance(next_tag, (str, bytes)):
+                        tag_label = next_tag
+                        next_tag = None
+                    elif len(next_tag) == 2:
+                        next_tag, tag_body = next_tag
+                    else:
+                        next_tag, tag_label, tag_body = next_tag
+                if next_tag == self.LineReaderTags.SKIP:
+                    stream_pos = self.stream.tell()
+                    continue
+                if ignore_comments and next_tag == self.LineReaderTags.COMMENT:
+                    stream_pos = self.stream.tell()
+                    continue
+                if next_tag is self.LineReaderTags.VALUE:
+                    if not aggregate_values:
+                        next_tag = self.LineReaderTags.BLOCK_START
+                    else:
+                        if tag_label is not None:
+                            val = self.handle_block_line(tag_label, line, depth)
+                        elif tag_body is None:
+                            raise ValueError("got {} tag but no associated `(key,value)` pair")
+                        else:
+                            val = self.handle_block_line(label, line, depth)
+                        block_data.append(val)
+                        stream_pos = self.stream.tell()
+                        continue
+
+                if next_tag is self.LineReaderTags.BLOCK_END:
+                    if tag_body is not None: block_data.append(tag_body)
+                    stream_pos = None
+                    break
+                elif next_tag is self.LineReaderTags.BLOCK_START:
+                    if active_tag is None:
+                        label = tag_label
+                        if tag_body is not None: block_data.append(tag_body)
+                    else:
+                        if max_nesting_depth < 0 or depth < max_nesting_depth:
+                            self.stream.seek(stream_pos)
+                            sub_block = self.find_next_block(binary=binary, ignore_comments=ignore_comments,
+                                                             max_nesting_depth=max_nesting_depth, depth=depth+1)
+                            block_data.append(sub_block)
+                        else:
+                            break
+                elif next_tag is self.LineReaderTags.RESETTING_BLOCK_END:
+                    break
+                elif active_tag is not None and next_tag is not None and next_tag != active_tag:
+                    if depth == 0 or (max_nesting_depth > 0 and depth >= max_nesting_depth):
+                        break
+                    else:
+                        self.stream.seek(stream_pos)
+                        sub_block = self.find_next_block(binary=binary, ignore_comments=ignore_comments,
+                                                         max_nesting_depth=max_nesting_depth, depth=depth + 1)
+                        block_data.append(sub_block)
+                else:
+                    if tag_body is not None: block_data.append(tag_body)
+                    if next_tag is not None and active_tag is None:
+                        active_tag = next_tag
+                        stream_pos = None
+                        break
+                    block_data.append(self.handle_block_line(label, line, depth))
+                stream_pos = self.stream.tell()
+                if active_tag is None and next_tag is not None:
+                    active_tag = next_tag
+        except StopIteration:
+            pass
+        finally:
+            if stream_pos is not None:
+                self.stream.seek(stream_pos)
+
+        if empty:
+            return None
+        else:
+            if label is None:
+                return self.handle_block(None, block_data)
+            else:
+                return {label:self.handle_block(label, block_data)}
+
+    MAX_BLOCKS = sys.maxsize # a debug tool
+    def __iter__(self):
+        block = self.find_next_block()
+        for i in range(self.MAX_BLOCKS):
+            if block is None: break
+            yield block
+            block = self.find_next_block()
+
+class FileLineByLineReader(LineByLineParser):
+    """
+    Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
+    """
+    def __init__(self, file,
+                 mode="r", binary=False, encoding="utf-8",
+                 ignore_comments=False, max_nesting_depth=-1, **kw):
+        stream = FileSearchStream(file, binary=binary, mode=mode, encoding=encoding, **kw)
+        super().__init__(stream,
+                         binary='b' in stream._mode, encoding=encoding,
+                         ignore_comments=ignore_comments, max_nesting_depth=max_nesting_depth
+                         )
+class StringLineByLineReader(LineByLineParser):
+    """
+    Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
+    """
+    def __init__(self, string, ignore_comments=False, max_nesting_depth=-1):
+        stream = StringSearchStream(string)
+        super().__init__(stream, binary=False, ignore_comments=ignore_comments, max_nesting_depth=max_nesting_depth)
+class ByteLineByLineReader(LineByLineParser):
+    """
+    Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
+    """
+    def __init__(self, string, encoding="utf-8", ignore_comments=False, max_nesting_depth=-1, **kw):
+        stream = ByteSearchStream(string, encoding=encoding, **kw)
+        super().__init__(stream, binary=True, encoding=encoding,
+                         ignore_comments=ignore_comments,
+                         max_nesting_depth=max_nesting_depth)

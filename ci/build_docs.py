@@ -1,4 +1,4 @@
-from Peeves.Doc import *
+from McUtils.Docs import *
 import os, sys
 
 root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -26,4 +26,5 @@ doc_config = {
     'templates_directory': os.path.join(root, 'ci', 'docs', 'templates'),
     'examples_directory': os.path.join(root, 'ci',  'docs', 'examples')
 }
+ExamplesParser.IGNORE_UNHANDLED_STATEMENTS = True
 DocBuilder(**doc_config).build()
