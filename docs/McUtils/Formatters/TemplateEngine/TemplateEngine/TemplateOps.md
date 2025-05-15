@@ -1,8 +1,8 @@
-## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps">TemplateOps</a> 
+## <a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps">TemplateOps</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L29)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L29?message=Update%20Docs)]
 </div>
 
 
@@ -19,113 +19,124 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop" class="docs-object-method">&nbsp;</a> 
 ```python
+@staticmethod
 loop(caller: Callable, *args, joiner='', formatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L30?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop_template" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop_template" class="docs-object-method">&nbsp;</a> 
 ```python
-loop_template(template: str, *args, joiner='', formatter=None, **kwargs): 
+@classmethod
+loop_template(cls, template: str, *args, joiner='', formatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L47?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.join" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.join" class="docs-object-method">&nbsp;</a> 
 ```python
+@staticmethod
 join(*args, joiner=' ', formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L56)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L56?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L56)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L56?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.load" class="docs-object-method">&nbsp;</a> 
 ```python
-load(template, formatter=None): 
+@classmethod
+load(cls, template, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L61?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.include" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.include" class="docs-object-method">&nbsp;</a> 
 ```python
-include(template, formatter=None): 
+@classmethod
+include(cls, template, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L64?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.apply" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.apply" class="docs-object-method">&nbsp;</a> 
 ```python
-apply(template, *args, formatter=None, **kwargs): 
+@classmethod
+apply(cls, template, *args, formatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L67)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L67?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.nonempty" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.nonempty" class="docs-object-method">&nbsp;</a> 
 ```python
-nonempty(data, formatter=None): 
+@classmethod
+nonempty(cls, data, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L72)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L72?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap" class="docs-object-method">&nbsp;</a> 
 ```python
-wrap(fn): 
+@classmethod
+wrap(cls, fn): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L75)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L75?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.cleandoc" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.cleandoc" class="docs-object-method">&nbsp;</a> 
 ```python
+@staticmethod
 cleandoc(txt, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L81?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap_str" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap_str" class="docs-object-method">&nbsp;</a> 
 ```python
+@staticmethod
 wrap_str(obj, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L84?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.optional" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.optional" class="docs-object-method">&nbsp;</a> 
 ```python
+@staticmethod
 optional(key, default='', formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L91)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateOps.py#L91?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L91?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -174,13 +185,13 @@ optional(key, default='', formatter=None):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L29?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L29?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -19,53 +19,7 @@ There are already direct hooks into (1.) in `Psience.Data` through the `DipoleSu
 These are still in the prototype stage, but hopefully will allow us to unify strands of our Gaussian support,
 and also make it easy to unify support for Psi4 and NWChem data, once we have the basic interface down.
 
-### Members
-<div class="container alert alert-secondary bg-light">
-  <div class="row">
-   <div class="col" markdown="1">
-[GaussianFChkReader](GaussianInterface/GaussianImporter/GaussianFChkReader.md)   
-</div>
-   <div class="col" markdown="1">
-[GaussianLogReader](GaussianInterface/GaussianImporter/GaussianLogReader.md)   
-</div>
-   <div class="col" markdown="1">
-[GaussianLogReaderException](GaussianInterface/GaussianImporter/GaussianLogReaderException.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[GaussianFChkReaderException](GaussianInterface/GaussianImporter/GaussianFChkReaderException.md)   
-</div>
-   <div class="col" markdown="1">
-[GaussianJob](GaussianInterface/GaussianJob/GaussianJob.md)   
-</div>
-   <div class="col" markdown="1">
-[GaussianJobArray](GaussianInterface/GaussianJob/GaussianJobArray.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[FchkForceConstants](GaussianInterface/FChkDerivatives/FchkForceConstants.md)   
-</div>
-   <div class="col" markdown="1">
-[FchkForceDerivatives](GaussianInterface/FChkDerivatives/FchkForceDerivatives.md)   
-</div>
-   <div class="col" markdown="1">
-[FchkDipoleDerivatives](GaussianInterface/FChkDerivatives/FchkDipoleDerivatives.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[FchkDipoleHigherDerivatives](GaussianInterface/FChkDerivatives/FchkDipoleHigherDerivatives.md)   
-</div>
-   <div class="col" markdown="1">
-[FchkDipoleNumDerivatives](GaussianInterface/FChkDerivatives/FchkDipoleNumDerivatives.md)   
-</div>
-   <div class="col" markdown="1">
-   
-</div>
-</div>
-</div>
+
 
 
 
@@ -399,10 +353,10 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/GaussianInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/GaussianInterface.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/GaussianInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/GaussianInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/GaussianInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/GaussianInterface.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/GaussianInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/GaussianInterface.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/__init__.py#L1?message=Update%20Docs)   

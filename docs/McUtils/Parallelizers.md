@@ -19,35 +19,35 @@ the `Parallelizer` object itself.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Parallelizer](Parallelizers/Parallelizers/Parallelizer.md)   
+[Parallelizer](McUtils/McUtils/Parallelizers/Parallelizers/Parallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[MultiprocessingParallelizer](Parallelizers/Parallelizers/MultiprocessingParallelizer.md)   
+[MultiprocessingParallelizer](McUtils/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[MPIParallelizer](Parallelizers/Parallelizers/MPIParallelizer.md)   
+[MPIParallelizer](McUtils/McUtils/Parallelizers/Parallelizers/MPIParallelizer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SerialNonParallelizer](Parallelizers/Parallelizers/SerialNonParallelizer.md)   
+[SerialNonParallelizer](McUtils/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[SendRecieveParallelizer](Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
+[SendRecieveParallelizer](McUtils/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[ClientServerRunner](Parallelizers/Runner/ClientServerRunner.md)   
+[ClientServerRunner](McUtils/McUtils/Parallelizers/Runner/ClientServerRunner.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SharedObjectManager](Parallelizers/SharedMemory/SharedObjectManager.md)   
+[SharedObjectManager](McUtils/McUtils/Parallelizers/SharedMemory/SharedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[SharedMemoryDict](Parallelizers/SharedMemory/SharedMemoryDict.md)   
+[SharedMemoryDict](McUtils/McUtils/Parallelizers/SharedMemory/SharedMemoryDict.md)   
 </div>
    <div class="col" markdown="1">
-[SharedMemoryList](Parallelizers/SharedMemory/SharedMemoryList.md)   
+[SharedMemoryList](McUtils/McUtils/Parallelizers/SharedMemory/SharedMemoryList.md)   
 </div>
 </div>
   <div class="row">
@@ -266,10 +266,10 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Parallelizers.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Parallelizers.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Parallelizers.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Parallelizers.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Parallelizers.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Parallelizers.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/__init__.py#L1?message=Update%20Docs)   

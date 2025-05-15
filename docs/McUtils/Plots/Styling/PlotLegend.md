@@ -1,8 +1,8 @@
-## <a id="McUtils.Plots.Styling.PlotLegend">PlotLegend</a> 
+## <a id="McUtils.McUtils.Plots.Styling.PlotLegend">PlotLegend</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L32?message=Update%20Docs)]
 </div>
 
 
@@ -23,93 +23,100 @@ known_styles: set
 default_styles: dict
 marker_synonyms: dict
 ```
-<a id="McUtils.Plots.Styling.PlotLegend.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, components, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/PlotLegend.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/PlotLegend.py#L40?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.check_styles" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.check_styles" class="docs-object-method">&nbsp;</a> 
 ```python
-check_styles(styles): 
+@classmethod
+check_styles(cls, styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L49)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L49?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L49?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.could_be_legend" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.could_be_legend" class="docs-object-method">&nbsp;</a> 
 ```python
-could_be_legend(bits): 
+@classmethod
+could_be_legend(cls, bits): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L54)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L54?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.construct" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.construct" class="docs-object-method">&nbsp;</a> 
 ```python
-construct(bits): 
+@classmethod
+construct(cls, bits): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L63?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.construct_line_marker" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.construct_line_marker" class="docs-object-method">&nbsp;</a> 
 ```python
-construct_line_marker(lw=4, **opts): 
+@classmethod
+construct_line_marker(cls, lw=4, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L73?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.construct_dot_marker" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.construct_dot_marker" class="docs-object-method">&nbsp;</a> 
 ```python
-construct_dot_marker(**opts): 
+@classmethod
+construct_dot_marker(cls, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L77)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L77?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L77)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L77?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.load_constructors" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.load_constructors" class="docs-object-method">&nbsp;</a> 
 ```python
-load_constructors(): 
+@classmethod
+load_constructors(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L81?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.canonicalize_bit" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.canonicalize_bit" class="docs-object-method">&nbsp;</a> 
 ```python
-canonicalize_bit(marker='-', **opts): 
+@classmethod
+canonicalize_bit(cls, marker='-', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L88)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L88?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L88)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L88?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.PlotLegend.__repr__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.PlotLegend.__repr__" class="docs-object-method">&nbsp;</a> 
 ```python
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/PlotLegend.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/PlotLegend.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/PlotLegend.py#L96)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/PlotLegend.py#L96?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -158,13 +165,13 @@ __repr__(self):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Styling/PlotLegend.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Styling/PlotLegend.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Styling/PlotLegend.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Styling/PlotLegend.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Styling/PlotLegend.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Styling/PlotLegend.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Styling/PlotLegend.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Styling/PlotLegend.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L32?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L32?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

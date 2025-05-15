@@ -1,8 +1,8 @@
-## <a id="McUtils.Scaffolding.Jobs.JobManager">JobManager</a> 
+## <a id="McUtils.McUtils.Scaffolding.Jobs.JobManager">JobManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L173)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L173?message=Update%20Docs)]
 </div>
 
 A class to manage job instances.
@@ -22,23 +22,23 @@ Thin layer on a `PersistenceManager`
  ```python
 default_job_type: Job
 ```
-<a id="McUtils.Scaffolding.Jobs.JobManager.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Jobs.JobManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, job_dir, job_type=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/JobManager.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/JobManager.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/JobManager.py#L179)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/JobManager.py#L179?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Scaffolding.Jobs.JobManager.job" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Jobs.JobManager.job" class="docs-object-method">&nbsp;</a> 
 ```python
 job(self, name, timestamp=False, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/JobManager.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/JobManager.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/JobManager.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/JobManager.py#L184?message=Update%20Docs)]
 </div>
 Returns a loaded or new job with the given name and settings
   - `name`: `str`
@@ -51,13 +51,14 @@ Returns a loaded or new job with the given name and settings
     >
 
 
-<a id="McUtils.Scaffolding.Jobs.JobManager.job_from_folder" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Jobs.JobManager.job_from_folder" class="docs-object-method">&nbsp;</a> 
 ```python
-job_from_folder(folder, job_type=None, make_config=True, **opts): 
+@classmethod
+job_from_folder(cls, folder, job_type=None, make_config=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/JobManager.py#L204)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/JobManager.py#L204?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L204?message=Update%20Docs)]
 </div>
 A special case convenience function that goes
 directly to starting a job from a folder
@@ -65,13 +66,14 @@ directly to starting a job from a folder
     >
 
 
-<a id="McUtils.Scaffolding.Jobs.JobManager.current_job" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Jobs.JobManager.current_job" class="docs-object-method">&nbsp;</a> 
 ```python
-current_job(job_type=None, make_config=True, **opts): 
+@classmethod
+current_job(cls, job_type=None, make_config=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/JobManager.py#L223)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/JobManager.py#L223?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L223)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L223?message=Update%20Docs)]
 </div>
 A special case convenience function that starts a
 JobManager one directory up from the current
@@ -126,13 +128,13 @@ current working directory
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Scaffolding/Jobs/JobManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Scaffolding/Jobs/JobManager.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Scaffolding/Jobs/JobManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Scaffolding/Jobs/JobManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/Jobs/JobManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/Jobs/JobManager.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Jobs/JobManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Jobs/JobManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs.py#L173?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L173?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

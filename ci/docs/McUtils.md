@@ -7,7 +7,8 @@
 A growing package of assorted functionality that finds use across many different packages, but doesn't attempt to
 provide a single unified interface for doing certain types of projects.
 
-All of the McUtils packages stand mostly on their own, but there will be little calls into one another here and there.
+All of the McUtils packages stand mostly on their own, but there will be little calls into one another here and there,
+especially pieces using `Numputils`
 
 The more scientifically-focused `Psience` package makes significant use of `McUtils` as do various packages that have
 been written over the years.
@@ -16,54 +17,54 @@ been written over the years.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
+[Data](McUtils/Data.md)   
+</div>
+   <div class="col" markdown="1">
+[Numputils](McUtils/Numputils.md)   
+</div>
+   <div class="col" markdown="1">
+[ExternalPrograms](McUtils/ExternalPrograms.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[Plots](McUtils/Plots.md)   
+</div>
+   <div class="col" markdown="1">
+[Jupyter](McUtils/Jupyter.md)   
+</div>
+   <div class="col" markdown="1">
 [Parsers](McUtils/Parsers.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[Formatters](McUtils/Formatters.md)   
+</div>
+   <div class="col" markdown="1">
+[Coordinerds](McUtils/Coordinerds.md)   
+</div>
+   <div class="col" markdown="1">
+[Zachary](McUtils/Zachary.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[GaussianInterface](McUtils/GaussianInterface.md)   
 </div>
    <div class="col" markdown="1">
 [Extensions](McUtils/Extensions.md)   
 </div>
    <div class="col" markdown="1">
-[Plots](McUtils/Plots.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[ExternalPrograms](McUtils/ExternalPrograms.md)   
-</div>
-   <div class="col" markdown="1">
-[Zachary](McUtils/Zachary.md)   
-</div>
-   <div class="col" markdown="1">
-[Data](McUtils/Data.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[Coordinerds](McUtils/Coordinerds.md)   
-</div>
-   <div class="col" markdown="1">
-[GaussianInterface](McUtils/GaussianInterface.md)   
-</div>
-   <div class="col" markdown="1">
-[Numputils](McUtils/Numputils.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
 [Scaffolding](McUtils/Scaffolding.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Parallelizers](McUtils/Parallelizers.md)   
 </div>
    <div class="col" markdown="1">
-[Jupyter](McUtils/Jupyter.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[Misc](McUtils/Misc.md)   
-</div>
-   <div class="col" markdown="1">
-[Formatters](McUtils/Formatters.md)   
+[Devutils](McUtils/Devutils.md)   
 </div>
    <div class="col" markdown="1">
 [Docs](McUtils/Docs.md)   
@@ -71,7 +72,7 @@ been written over the years.
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[Misc](McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -471,10 +472,10 @@ Also supported: `Mesh` operations, automatic differentiation, tensor derivative 
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1?message=Update%20Docs)   

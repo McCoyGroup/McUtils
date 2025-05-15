@@ -1,8 +1,8 @@
-## <a id="McUtils.Plots.Plots.StickPlot">StickPlot</a> 
+## <a id="McUtils.McUtils.Plots.Plots.StickPlot">StickPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L454)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L454?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L457)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L457?message=Update%20Docs)]
 </div>
 
 A Plot object that plots sticks
@@ -23,13 +23,13 @@ default_plot_style: dict
 known_styles: set
 method: str
 ```
-<a id="McUtils.Plots.Plots.StickPlot.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Plots.StickPlot.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, *params, insert_default_styles=True, **plot_style): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/StickPlot.py#L460)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/StickPlot.py#L460?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/StickPlot.py#L464)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/StickPlot.py#L464?message=Update%20Docs)]
 </div>
 Plots a set of data | stores the result
   - `:returns`: `_`
@@ -113,13 +113,13 @@ e
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Plots/StickPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Plots/StickPlot.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Plots/StickPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Plots/StickPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Plots/StickPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Plots/StickPlot.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/StickPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/StickPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L454?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L457?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

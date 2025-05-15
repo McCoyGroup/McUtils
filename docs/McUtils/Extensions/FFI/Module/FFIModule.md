@@ -1,8 +1,8 @@
-## <a id="McUtils.Extensions.FFI.Module.FFIModule">FFIModule</a> 
+## <a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule">FFIModule</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module.py#L419)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L419?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L419)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L419?message=Update%20Docs)]
 </div>
 
 Provides a layer to ingest a Python module containing an '_FFIModule' capsule.
@@ -20,95 +20,99 @@ The capsule is expected to point to a `plzffi::FFIModule` object and can be call
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Extensions.FFI.Module.FFIModule.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, name=None, methods=None, module=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L425?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.captup" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.captup" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 captup(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L433)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L433?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.from_lib" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.from_lib" class="docs-object-method">&nbsp;</a> 
 ```python
-from_lib(name, src=None, threaded=None, extra_compile_args=None, extra_link_args=None, linked_libs=None, **compile_kwargs): 
+@classmethod
+from_lib(cls, name, src=None, threaded=None, extra_compile_args=None, extra_link_args=None, linked_libs=None, **compile_kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L437)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L437?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L437)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L437?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.from_signature" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.from_signature" class="docs-object-method">&nbsp;</a> 
 ```python
-from_signature(sig, module=None): 
+@classmethod
+from_signature(cls, sig, module=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L457)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L457?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L457)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L457?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.get_debug_level" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.get_debug_level" class="docs-object-method">&nbsp;</a> 
 ```python
-get_debug_level(debug): 
+@classmethod
+get_debug_level(cls, debug): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L465)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L465?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L465)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L465?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.from_module" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.from_module" class="docs-object-method">&nbsp;</a> 
 ```python
-from_module(module, debug=False): 
+@classmethod
+from_module(cls, module, debug=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L478)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L478?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L478)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L478?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.method_names" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.method_names" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 method_names(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L483)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L483?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L483)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L483?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.get_method" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.get_method" class="docs-object-method">&nbsp;</a> 
 ```python
 get_method(self, name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L487)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L487?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L487)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L487?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.call_method" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.call_method" class="docs-object-method">&nbsp;</a> 
 ```python
 call_method(self, name, params, debug=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L498)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L498?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L498)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L498?message=Update%20Docs)]
 </div>
 Calls a method
   - `name`: `Any`
@@ -119,13 +123,13 @@ Calls a method
     >
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.call_method_threaded" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.call_method_threaded" class="docs-object-method">&nbsp;</a> 
 ```python
 call_method_threaded(self, name, params, thread_var, mode='serial', debug=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L516)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L516?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L516)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L516?message=Update%20Docs)]
 </div>
 Calls a method with threading enabled
   - `name`: `Any`
@@ -140,23 +144,23 @@ Calls a method with threading enabled
     >
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.__getattr__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.__getattr__" class="docs-object-method">&nbsp;</a> 
 ```python
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L542)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L542?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L542)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L542?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIModule.__repr__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIModule.__repr__" class="docs-object-method">&nbsp;</a> 
 ```python
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIModule.py#L545)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIModule.py#L545?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIModule.py#L545)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIModule.py#L545?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -205,13 +209,13 @@ __repr__(self):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Extensions/FFI/Module/FFIModule.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Extensions/FFI/Module/FFIModule.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Extensions/FFI/Module/FFIModule.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Extensions/FFI/Module/FFIModule.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Extensions/FFI/Module/FFIModule.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIModule.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIModule.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIModule.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L419?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L419?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

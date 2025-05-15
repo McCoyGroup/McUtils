@@ -1,8 +1,8 @@
-## <a id="McUtils.Jupyter.Apps.Interfaces.AccordionHeader">AccordionHeader</a> 
+## <a id="McUtils.McUtils.Jupyter.Apps.Interfaces.AccordionHeader">AccordionHeader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces.py#L897)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L897?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L901)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L901?message=Update%20Docs)]
 </div>
 
 
@@ -22,33 +22,33 @@
 wrapper_classes: list
 item_classes: list
 ```
-<a id="McUtils.Jupyter.JHTML.JHTML.JHTML.Button" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.JHTML.JHTML.JHTML.Button" class="docs-object-method">&nbsp;</a> 
 ```python
 item(*elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L272)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L272?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L283?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.Apps.Interfaces.AccordionHeader.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.AccordionHeader.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, key, base_name=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/AccordionHeader.py#L901)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/AccordionHeader.py#L901?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.py#L905)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.py#L905?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.Apps.Interfaces.AccordionHeader.create_item" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.AccordionHeader.create_item" class="docs-object-method">&nbsp;</a> 
 ```python
 create_item(self, i, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/AccordionHeader.py#L904)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/AccordionHeader.py#L904?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.py#L908)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.py#L908?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -97,13 +97,13 @@ create_item(self, i, **kw):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/AccordionHeader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L897?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L901?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

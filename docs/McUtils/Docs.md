@@ -10,40 +10,40 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DocBuilder](Docs/DocsBuilder/DocBuilder.md)   
+[DocBuilder](McUtils/McUtils/Docs/DocsBuilder/DocBuilder.md)   
 </div>
    <div class="col" markdown="1">
-[DocWalker](Docs/DocWalker/DocWalker.md)   
+[DocWalker](McUtils/McUtils/Docs/DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleWriter](Docs/DocWalker/ModuleWriter.md)   
+[ModuleWriter](McUtils/McUtils/Docs/DocWalker/ModuleWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ClassWriter](Docs/DocWalker/ClassWriter.md)   
+[ClassWriter](McUtils/McUtils/Docs/DocWalker/ClassWriter.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionWriter](Docs/DocWalker/FunctionWriter.md)   
+[FunctionWriter](McUtils/McUtils/Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[MethodWriter](Docs/DocWalker/MethodWriter.md)   
+[MethodWriter](McUtils/McUtils/Docs/DocWalker/MethodWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ObjectWriter](Docs/DocWalker/ObjectWriter.md)   
+[ObjectWriter](McUtils/McUtils/Docs/DocWalker/ObjectWriter.md)   
 </div>
    <div class="col" markdown="1">
-[IndexWriter](Docs/DocWalker/IndexWriter.md)   
+[IndexWriter](McUtils/McUtils/Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[jdoc](Docs/DocWalker/jdoc.md)   
+[jdoc](McUtils/McUtils/Docs/DocWalker/jdoc.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ExamplesParser](Docs/ExamplesParser/ExamplesParser.md)   
+[ExamplesParser](McUtils/McUtils/Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -99,10 +99,10 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Docs.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Docs.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Docs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Docs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Docs.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Docs.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/__init__.py#L1?message=Update%20Docs)   

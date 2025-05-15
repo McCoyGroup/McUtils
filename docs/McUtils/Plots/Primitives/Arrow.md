@@ -1,8 +1,8 @@
-## <a id="McUtils.Plots.Primitives.Arrow">Arrow</a> 
+## <a id="McUtils.McUtils.Plots.Primitives.Arrow">Arrow</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives.py#L109)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L109?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L89?message=Update%20Docs)]
 </div>
 
 
@@ -19,33 +19,33 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Plots.Primitives.Arrow.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Primitives.Arrow.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, pos1, pos2, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Arrow.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Arrow.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L90?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Primitives.Arrow.get_bbox" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Primitives.Arrow.get_bbox" class="docs-object-method">&nbsp;</a> 
 ```python
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Arrow.py#L114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Arrow.py#L114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L94?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Primitives.Arrow.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Primitives.Arrow.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Arrow.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Arrow.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L97?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -94,13 +94,13 @@ plot(self, axes, *args, graphics=None, **kwargs):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Primitives/Arrow.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Primitives/Arrow.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Primitives/Arrow.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Primitives/Arrow.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Primitives/Arrow.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Primitives/Arrow.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Arrow.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Arrow.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L109?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L89?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

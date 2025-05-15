@@ -10,43 +10,43 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[SBatchJob](Misc/SBatchHelper/SBatchJob.md)   
+[SBatchJob](McUtils/McUtils/Misc/SBatchHelper/SBatchJob.md)   
 </div>
    <div class="col" markdown="1">
-[njit](Misc/NumbaTools/njit.md)   
+[njit](McUtils/McUtils/Misc/NumbaTools/njit.md)   
 </div>
    <div class="col" markdown="1">
-[jit](Misc/NumbaTools/jit.md)   
+[jit](McUtils/McUtils/Misc/NumbaTools/jit.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[type_spec](Misc/NumbaTools/type_spec.md)   
+[type_spec](McUtils/McUtils/Misc/NumbaTools/type_spec.md)   
 </div>
    <div class="col" markdown="1">
-[without_numba](Misc/NumbaTools/without_numba.md)   
+[without_numba](McUtils/McUtils/Misc/NumbaTools/without_numba.md)   
 </div>
    <div class="col" markdown="1">
-[numba_decorator](Misc/NumbaTools/numba_decorator.md)   
+[numba_decorator](McUtils/McUtils/Misc/NumbaTools/numba_decorator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[import_from_numba](Misc/NumbaTools/import_from_numba.md)   
+[import_from_numba](McUtils/McUtils/Misc/NumbaTools/import_from_numba.md)   
 </div>
    <div class="col" markdown="1">
-[_noop_context](Misc/NumbaTools/_noop_context.md)   
+[ModificationTracker](McUtils/McUtils/Misc/DebugTools/ModificationTracker.md)   
 </div>
    <div class="col" markdown="1">
-[ModificationTracker](Misc/DebugTools/ModificationTracker.md)   
+[mixedmethod](McUtils/McUtils/Misc/Decorators/mixedmethod.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[mixedmethod](Misc/Decorators/mixedmethod.md)   
+[Abstract](McUtils/McUtils/Misc/Symbolics/Abstract.md)   
 </div>
    <div class="col" markdown="1">
-[Abstract](Misc/Symbolics/Abstract.md)   
+   
 </div>
    <div class="col" markdown="1">
    
@@ -99,10 +99,10 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Misc.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Misc.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Misc.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Misc.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Misc.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/__init__.py#L1?message=Update%20Docs)   

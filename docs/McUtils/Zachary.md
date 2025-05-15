@@ -4,168 +4,168 @@
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/__init__.py#L1?message=Update%20Docs)]
 </div>
     
-Handles much of the "numerical math" stuff inside Mcutils which has made it balloon a little bit
+Handles much of the higher-order "numerical math" stuff inside Mcutils which has made it balloon a little bit
 Deals with anything tensor, Taylor expansion, or interpolation related
 
 ### Members
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifferenceFunction](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.md)   
+[FiniteDifferenceFunction](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.md)   
 </div>
    <div class="col" markdown="1">
-[FiniteDifferenceError](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceError.md)   
+[FiniteDifferenceError](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceError.md)   
 </div>
    <div class="col" markdown="1">
-[finite_difference](Zachary/Taylor/FiniteDifferenceFunction/finite_difference.md)   
+[finite_difference](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/finite_difference.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifference1D](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.md)   
+[FiniteDifference1D](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.md)   
 </div>
    <div class="col" markdown="1">
-[RegularGridFiniteDifference](Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
+[RegularGridFiniteDifference](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
 </div>
    <div class="col" markdown="1">
-[IrregularGridFiniteDifference](Zachary/Taylor/FiniteDifferenceFunction/IrregularGridFiniteDifference.md)   
+[IrregularGridFiniteDifference](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/IrregularGridFiniteDifference.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifferenceData](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)   
+[FiniteDifferenceData](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)   
 </div>
    <div class="col" markdown="1">
-[FiniteDifferenceMatrix](Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceMatrix.md)   
+[FiniteDifferenceMatrix](McUtils/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceMatrix.md)   
 </div>
    <div class="col" markdown="1">
-[FunctionExpansion](Zachary/Taylor/FunctionExpansions/FunctionExpansion.md)   
+[FunctionExpansion](McUtils/McUtils/Zachary/Taylor/FunctionExpansions/FunctionExpansion.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FiniteDifferenceDerivative](Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
+[FiniteDifferenceDerivative](McUtils/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
 </div>
    <div class="col" markdown="1">
-[Mesh](Zachary/Mesh/Mesh.md)   
+[Mesh](McUtils/McUtils/Zachary/Mesh/Mesh.md)   
 </div>
    <div class="col" markdown="1">
-[MeshType](Zachary/Mesh/MeshType.md)   
+[MeshType](McUtils/McUtils/Zachary/Mesh/MeshType.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[BaseSurface](Zachary/Surfaces/BaseSurface/BaseSurface.md)   
+[BaseSurface](McUtils/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.md)   
 </div>
    <div class="col" markdown="1">
-[TaylorSeriesSurface](Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)   
+[TaylorSeriesSurface](McUtils/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)   
 </div>
    <div class="col" markdown="1">
-[LinearExpansionSurface](Zachary/Surfaces/BaseSurface/LinearExpansionSurface.md)   
+[InterpolatedSurface](McUtils/McUtils/Zachary/Surfaces/BaseSurface/InterpolatedSurface.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LinearFitSurface](Zachary/Surfaces/BaseSurface/LinearFitSurface.md)   
+[Surface](McUtils/McUtils/Zachary/Surfaces/Surface/Surface.md)   
 </div>
    <div class="col" markdown="1">
-[InterpolatedSurface](Zachary/Surfaces/BaseSurface/InterpolatedSurface.md)   
+[MultiSurface](McUtils/McUtils/Zachary/Surfaces/Surface/MultiSurface.md)   
 </div>
    <div class="col" markdown="1">
-[Surface](Zachary/Surfaces/Surface/Surface.md)   
+[FittedModel](McUtils/McUtils/Zachary/FittableModels/FittedModel.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[MultiSurface](Zachary/Surfaces/Surface/MultiSurface.md)   
+[Interpolator](McUtils/McUtils/Zachary/Interpolator/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[FittableModel](Zachary/FittableModels/FittableModel.md)   
+[Extrapolator](McUtils/McUtils/Zachary/Interpolator/Extrapolator.md)   
 </div>
    <div class="col" markdown="1">
-[LinearFittableModel](Zachary/FittableModels/LinearFittableModel.md)   
+[RBFDInterpolator](McUtils/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LinearFitBasis](Zachary/FittableModels/LinearFitBasis.md)   
+[InverseDistanceWeightedInterpolator](McUtils/McUtils/Zachary/NeighborBasedInterpolators/InverseDistanceWeightedInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Interpolator](Zachary/Interpolator/Interpolator.md)   
+[ProductGridInterpolator](McUtils/McUtils/Zachary/Interpolator/ProductGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Extrapolator](Zachary/Interpolator/Extrapolator.md)   
+[UnstructuredGridInterpolator](McUtils/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[RBFDInterpolator](Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)   
+[CoordinateInterpolator](McUtils/McUtils/Zachary/Interpolator/CoordinateInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[InverseDistanceWeightedInterpolator](Zachary/NeighborBasedInterpolators/InverseDistanceWeightedInterpolator.md)   
+[Tensor](McUtils/McUtils/Zachary/LazyTensors/Tensor.md)   
 </div>
    <div class="col" markdown="1">
-[ProductGridInterpolator](Zachary/Interpolator/ProductGridInterpolator.md)   
+[TensorOp](McUtils/McUtils/Zachary/LazyTensors/TensorOp.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UnstructuredGridInterpolator](Zachary/Interpolator/UnstructuredGridInterpolator.md)   
+[LazyOperatorTensor](McUtils/McUtils/Zachary/LazyTensors/LazyOperatorTensor.md)   
 </div>
    <div class="col" markdown="1">
-[Tensor](Zachary/LazyTensors/Tensor.md)   
+[SparseTensor](McUtils/McUtils/Zachary/LazyTensors/SparseTensor.md)   
 </div>
    <div class="col" markdown="1">
-[TensorOp](Zachary/LazyTensors/TensorOp.md)   
+[TensorDerivativeConverter](McUtils/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LazyOperatorTensor](Zachary/LazyTensors/LazyOperatorTensor.md)   
+[TensorExpansionTerms](McUtils/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)   
 </div>
    <div class="col" markdown="1">
-[SparseTensor](Zachary/LazyTensors/SparseTensor.md)   
+[TensorExpression](McUtils/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.md)   
 </div>
    <div class="col" markdown="1">
-[TensorDerivativeConverter](Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)   
+[Symbols](McUtils/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[TensorExpansionTerms](Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)   
+[SymPyFunction](McUtils/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)   
 </div>
    <div class="col" markdown="1">
-[TensorExpression](Zachary/Symbolic/TensorExpressions/TensorExpression.md)   
+[AbstractPolynomial](McUtils/McUtils/Zachary/Polynomials/AbstractPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[Symbols](Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
+[DensePolynomial](McUtils/McUtils/Zachary/Polynomials/DensePolynomial.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SymPyFunction](Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)   
+[SparsePolynomial](McUtils/McUtils/Zachary/Polynomials/SparsePolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[AbstractPolynomial](Zachary/Polynomials/AbstractPolynomial.md)   
+[PureMonicPolynomial](McUtils/McUtils/Zachary/Polynomials/PureMonicPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[DensePolynomial](Zachary/Polynomials/DensePolynomial.md)   
+[TensorCoefficientPoly](McUtils/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[SparsePolynomial](Zachary/Polynomials/SparsePolynomial.md)   
+[DifferentiableFunction](McUtils/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.md)   
 </div>
    <div class="col" markdown="1">
-[PureMonicPolynomial](Zachary/Polynomials/PureMonicPolynomial.md)   
+[PolynomialFunction](McUtils/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.md)   
 </div>
    <div class="col" markdown="1">
-[TensorCoefficientPoly](Zachary/Polynomials/TensorCoefficientPoly.md)   
+[MorseFunction](McUtils/McUtils/Zachary/DifferentiableFunctions/MorseFunction.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[CoordinateFunction](McUtils/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -327,10 +327,10 @@ gg2[1, 2] = ContourPlot(*mesh,
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/__init__.py#L1?message=Update%20Docs)   

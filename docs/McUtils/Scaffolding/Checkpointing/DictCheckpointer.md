@@ -1,8 +1,8 @@
-## <a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer">DictCheckpointer</a> 
+## <a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer">DictCheckpointer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing.py#L493)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L493?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L493)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L493?message=Update%20Docs)]
 </div>
 
 A checkpointer that doesn't actually do anything, but which is provided
@@ -20,23 +20,23 @@ so that programs can turn off checkpointing without changing their layout
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, checkpoint_file=None, allowed_keys=None, omitted_keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DictCheckpointer.py#L498)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DictCheckpointer.py#L498?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L498)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L498?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer.open_checkpoint_file" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer.open_checkpoint_file" class="docs-object-method">&nbsp;</a> 
 ```python
 open_checkpoint_file(self, chk): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DictCheckpointer.py#L505)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DictCheckpointer.py#L505?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L505)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L505?message=Update%20Docs)]
 </div>
 Opens the passed `checkpoint_file` (if not already open)
   - `chk`: `str | file-like`
@@ -45,13 +45,13 @@ Opens the passed `checkpoint_file` (if not already open)
     >
 
 
-<a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer.close_checkpoint_file" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer.close_checkpoint_file" class="docs-object-method">&nbsp;</a> 
 ```python
 close_checkpoint_file(self, stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DictCheckpointer.py#L515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DictCheckpointer.py#L515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L515)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L515?message=Update%20Docs)]
 </div>
 Opens the passed `checkpoint_file` (if not already open)
   - `chk`: `Any`
@@ -60,13 +60,13 @@ Opens the passed `checkpoint_file` (if not already open)
     >
 
 
-<a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer.save_parameter" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer.save_parameter" class="docs-object-method">&nbsp;</a> 
 ```python
 save_parameter(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DictCheckpointer.py#L525)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DictCheckpointer.py#L525?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L525)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L525?message=Update%20Docs)]
 </div>
 Saves a parameter to the checkpoint file
   - `key`: `Any`
@@ -77,13 +77,13 @@ Saves a parameter to the checkpoint file
     >
 
 
-<a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer.load_parameter" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer.load_parameter" class="docs-object-method">&nbsp;</a> 
 ```python
 load_parameter(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DictCheckpointer.py#L537)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DictCheckpointer.py#L537?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L537)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L537?message=Update%20Docs)]
 </div>
 Loads a parameter from the checkpoint file
   - `key`: `Any`
@@ -92,13 +92,13 @@ Loads a parameter from the checkpoint file
     >
 
 
-<a id="McUtils.Scaffolding.Checkpointing.DictCheckpointer.keys" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Checkpointing.DictCheckpointer.keys" class="docs-object-method">&nbsp;</a> 
 ```python
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/DictCheckpointer.py#L547)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/DictCheckpointer.py#L547?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L547)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/DictCheckpointer.py#L547?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -147,13 +147,13 @@ keys(self):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L493?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L493?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

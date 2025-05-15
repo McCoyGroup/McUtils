@@ -1,7 +1,7 @@
-# <a id="McUtils.Numputils.EulerSystem.euler_angles">euler_angles</a>
+# <a id="McUtils.McUtils.Numputils.EulerSystem.euler_angles">euler_angles</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/EulerSystem.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/EulerSystem.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/EulerSystem.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/EulerSystem.py#L102?message=Update%20Docs)]
 </div>
 
 ```python
@@ -54,13 +54,13 @@ Calculates the Euler angles for the basis
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Numputils/EulerSystem/euler_angles.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Numputils/EulerSystem/euler_angles.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/EulerSystem/euler_angles.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/EulerSystem/euler_angles.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Numputils/EulerSystem/euler_angles.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Numputils/EulerSystem/euler_angles.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/EulerSystem/euler_angles.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/EulerSystem/euler_angles.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/EulerSystem.py#L102?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/EulerSystem.py#L102?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

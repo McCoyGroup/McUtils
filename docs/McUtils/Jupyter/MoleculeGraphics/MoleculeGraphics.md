@@ -1,8 +1,8 @@
-## <a id="McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics">MoleculeGraphics</a> 
+## <a id="McUtils.McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics">MoleculeGraphics</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/MoleculeGraphics.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/MoleculeGraphics.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/MoleculeGraphics.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/MoleculeGraphics.py#L9?message=Update%20Docs)]
 </div>
 
 
@@ -19,33 +19,33 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, atoms, coords, bonds=None, displacements=None, displacement_range=(-1, 1), displacement_steps=5, name='Molecule', program='Python', comment='', metadata=None, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L10?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics.to_widget" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics.to_widget" class="docs-object-method">&nbsp;</a> 
 ```python
 to_widget(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L41)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L41?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L41)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L41?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics.show" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.MoleculeGraphics.MoleculeGraphics.show" class="docs-object-method">&nbsp;</a> 
 ```python
 show(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.py#L45?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -94,13 +94,13 @@ show(self):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/MoleculeGraphics/MoleculeGraphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/MoleculeGraphics.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/MoleculeGraphics.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

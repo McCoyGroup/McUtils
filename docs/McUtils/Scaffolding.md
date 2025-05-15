@@ -19,131 +19,131 @@ to file and allows for easy checkpoint loading
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Cache](Scaffolding/Caches/Cache.md)   
+[Cache](McUtils/McUtils/Scaffolding/Caches/Cache.md)   
 </div>
    <div class="col" markdown="1">
-[MaxSizeCache](Scaffolding/Caches/MaxSizeCache.md)   
+[MaxSizeCache](McUtils/McUtils/Scaffolding/Caches/MaxSizeCache.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectRegistry](Scaffolding/Caches/ObjectRegistry.md)   
+[ObjectRegistry](McUtils/McUtils/Scaffolding/Caches/ObjectRegistry.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[PseudoPickler](Scaffolding/Serializers/PseudoPickler.md)   
+[PseudoPickler](McUtils/McUtils/Scaffolding/Serializers/PseudoPickler.md)   
 </div>
    <div class="col" markdown="1">
-[BaseSerializer](Scaffolding/Serializers/BaseSerializer.md)   
+[BaseSerializer](McUtils/McUtils/Scaffolding/Serializers/BaseSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[JSONSerializer](Scaffolding/Serializers/JSONSerializer.md)   
+[JSONSerializer](McUtils/McUtils/Scaffolding/Serializers/JSONSerializer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[NumPySerializer](Scaffolding/Serializers/NumPySerializer.md)   
+[NumPySerializer](McUtils/McUtils/Scaffolding/Serializers/NumPySerializer.md)   
 </div>
    <div class="col" markdown="1">
-[NDarrayMarshaller](Scaffolding/Serializers/NDarrayMarshaller.md)   
+[NDarrayMarshaller](McUtils/McUtils/Scaffolding/Serializers/NDarrayMarshaller.md)   
 </div>
    <div class="col" markdown="1">
-[HDF5Serializer](Scaffolding/Serializers/HDF5Serializer.md)   
+[HDF5Serializer](McUtils/McUtils/Scaffolding/Serializers/HDF5Serializer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[YAMLSerializer](Scaffolding/Serializers/YAMLSerializer.md)   
+[YAMLSerializer](McUtils/McUtils/Scaffolding/Serializers/YAMLSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleSerializer](Scaffolding/Serializers/ModuleSerializer.md)   
+[ModuleSerializer](McUtils/McUtils/Scaffolding/Serializers/ModuleSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Schema](Scaffolding/Schema/Schema.md)   
+[Schema](McUtils/McUtils/Scaffolding/Schema/Schema.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Logger](Scaffolding/Logging/Logger.md)   
+[LogParser](McUtils/McUtils/Scaffolding/Logging/LogParser.md)   
 </div>
    <div class="col" markdown="1">
-[NullLogger](Scaffolding/Logging/NullLogger.md)   
+[Checkpointer](McUtils/McUtils/Scaffolding/Checkpointing/Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
-[LogLevel](Scaffolding/Logging/LogLevel.md)   
+[CheckpointerKeyError](McUtils/McUtils/Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[LogParser](Scaffolding/Logging/LogParser.md)   
+[DumpCheckpointer](McUtils/McUtils/Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
+[JSONCheckpointer](McUtils/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[CheckpointerKeyError](Scaffolding/Checkpointing/CheckpointerKeyError.md)   
+[NumPyCheckpointer](McUtils/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[DumpCheckpointer](Scaffolding/Checkpointing/DumpCheckpointer.md)   
+[HDF5Checkpointer](McUtils/McUtils/Scaffolding/Checkpointing/HDF5Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
-[JSONCheckpointer](Scaffolding/Checkpointing/JSONCheckpointer.md)   
+[DictCheckpointer](McUtils/McUtils/Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[NumPyCheckpointer](Scaffolding/Checkpointing/NumPyCheckpointer.md)   
+[NullCheckpointer](McUtils/McUtils/Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[HDF5Checkpointer](Scaffolding/Checkpointing/HDF5Checkpointer.md)   
+[PersistenceLocation](McUtils/McUtils/Scaffolding/Persistence/PersistenceLocation.md)   
 </div>
    <div class="col" markdown="1">
-[DictCheckpointer](Scaffolding/Checkpointing/DictCheckpointer.md)   
+[PersistenceManager](McUtils/McUtils/Scaffolding/Persistence/PersistenceManager.md)   
 </div>
    <div class="col" markdown="1">
-[NullCheckpointer](Scaffolding/Checkpointing/NullCheckpointer.md)   
+[ResourceManager](McUtils/McUtils/Scaffolding/Persistence/ResourceManager.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[PersistenceLocation](Scaffolding/Persistence/PersistenceLocation.md)   
+[BaseObjectManager](McUtils/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[PersistenceManager](Scaffolding/Persistence/PersistenceManager.md)   
+[FileBackedObjectManager](McUtils/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[BaseObjectManager](Scaffolding/ObjectBackers/BaseObjectManager.md)   
+[Config](McUtils/McUtils/Scaffolding/Configurations/Config.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FileBackedObjectManager](Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
+[ParameterManager](McUtils/McUtils/Scaffolding/Configurations/ParameterManager.md)   
 </div>
    <div class="col" markdown="1">
-[Config](Scaffolding/Configurations/Config.md)   
+[Job](McUtils/McUtils/Scaffolding/Jobs/Job.md)   
 </div>
    <div class="col" markdown="1">
-[ParameterManager](Scaffolding/Configurations/ParameterManager.md)   
+[JobManager](McUtils/McUtils/Scaffolding/Jobs/JobManager.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Job](Scaffolding/Jobs/Job.md)   
+[CLI](McUtils/McUtils/Scaffolding/CLIs/CLI.md)   
 </div>
    <div class="col" markdown="1">
-[JobManager](Scaffolding/Jobs/JobManager.md)   
+[CommandGroup](McUtils/McUtils/Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
-[CLI](Scaffolding/CLIs/CLI.md)   
+[Command](McUtils/McUtils/Scaffolding/CLIs/Command.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
+   
 </div>
    <div class="col" markdown="1">
-[Command](Scaffolding/CLIs/Command.md)   
+   
 </div>
    <div class="col" markdown="1">
    
@@ -196,10 +196,10 @@ to file and allows for easy checkpoint loading
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Scaffolding.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Scaffolding.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Scaffolding.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Scaffolding.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/__init__.py#L1?message=Update%20Docs)   

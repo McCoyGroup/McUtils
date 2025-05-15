@@ -1,8 +1,8 @@
-## <a id="McUtils.Extensions.FFI.Module.FFIType">FFIType</a> 
+## <a id="McUtils.McUtils.Extensions.FFI.Module.FFIType">FFIType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L16?message=Update%20Docs)]
 </div>
 
 The set of supported enum types.
@@ -58,23 +58,25 @@ NUMPY_Float64: FFIType
 NUMPY_Float128: FFIType
 NUMPY_Bool: FFIType
 ```
-<a id="McUtils.Extensions.FFI.Module.FFIType.type_data" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIType.type_data" class="docs-object-method">&nbsp;</a> 
 ```python
-type_data(val): 
+@classmethod
+type_data(cls, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIType.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIType.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L112)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L112?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Extensions.FFI.Module.FFIType.resolve_ffi_type" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Extensions.FFI.Module.FFIType.resolve_ffi_type" class="docs-object-method">&nbsp;</a> 
 ```python
-resolve_ffi_type(val): 
+@classmethod
+resolve_ffi_type(cls, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIType.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIType.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L120?message=Update%20Docs)]
 </div>
 
 
@@ -126,13 +128,13 @@ resolve_ffi_type(val):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Extensions/FFI/Module/FFIType.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Extensions/FFI/Module/FFIType.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Extensions/FFI/Module/FFIType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Extensions/FFI/Module/FFIType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Extensions/FFI/Module/FFIType.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIType.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

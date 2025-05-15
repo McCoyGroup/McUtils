@@ -1,7 +1,7 @@
-# <a id="McUtils.Coordinerds.Conveniences.zmatrix_to_cartesian">zmatrix_to_cartesian</a>
+# <a id="McUtils.McUtils.Coordinerds.Conveniences.zmatrix_to_cartesian">zmatrix_to_cartesian</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/Conveniences.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Conveniences.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L44?message=Update%20Docs)]
 </div>
 
 ```python
@@ -64,13 +64,13 @@ Converts Z-maztrix coords to Cartesians
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Conveniences.py#L30?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L44?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

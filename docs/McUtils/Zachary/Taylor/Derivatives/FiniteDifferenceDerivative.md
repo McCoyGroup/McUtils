@@ -1,8 +1,8 @@
-## <a id="McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative">FiniteDifferenceDerivative</a> 
+## <a id="McUtils.McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative">FiniteDifferenceDerivative</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/Derivatives.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/Derivatives.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives.py#L14?message=Update%20Docs)]
 </div>
 
 Provides derivatives for a function (scalar or vector valued).
@@ -22,13 +22,13 @@ Robustification needs to be done, but is currently used in `CoordinateSystem.jac
  </div>
  <div class="collapsible-section collapsible-section-body collapse " id="methods" markdown="1">
  
-<a id="McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, f, function_shape=(0, 0), parallelizer=None, logger=None, **fd_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L33?message=Update%20Docs)]
 </div>
 
   - `f`: `FunctionSpec | callable`
@@ -39,23 +39,23 @@ __init__(self, f, function_shape=(0, 0), parallelizer=None, logger=None, **fd_op
     > the options to pass to the finite difference function
 
 
-<a id="McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, *args, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L57?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.derivatives" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.derivatives" class="docs-object-method">&nbsp;</a> 
 ```python
 derivatives(self, center, displacement_function=None, prep=None, lazy=None, mesh_spacing=None, **fd_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L60?message=Update%20Docs)]
 </div>
 Generates a differencer object that can be used to get derivs however your little heart desires
   - `center`: `np.ndarray`
@@ -168,13 +168,13 @@ ___
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/Derivatives.py#L14?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives.py#L14?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

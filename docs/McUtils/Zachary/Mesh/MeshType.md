@@ -1,8 +1,8 @@
-## <a id="McUtils.Zachary.Mesh.MeshType">MeshType</a> 
+## <a id="McUtils.McUtils.Zachary.Mesh.MeshType">MeshType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Mesh.py#L12)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Mesh.py#L12?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh.py#L12)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh.py#L12?message=Update%20Docs)]
 </div>
 
 An enumeration.
@@ -73,13 +73,13 @@ Indeterminate: MeshType
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Mesh/MeshType.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Mesh/MeshType.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/Mesh/MeshType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/Mesh/MeshType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Mesh/MeshType.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Mesh/MeshType.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Mesh/MeshType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Mesh/MeshType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Mesh.py#L12?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh.py#L12?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

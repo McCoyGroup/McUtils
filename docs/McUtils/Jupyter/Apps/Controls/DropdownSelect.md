@@ -1,8 +1,8 @@
-## <a id="McUtils.Jupyter.Apps.Controls.DropdownSelect">DropdownSelect</a> 
+## <a id="McUtils.McUtils.Jupyter.Apps.Controls.DropdownSelect">DropdownSelect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L473)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L473?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L473)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L473?message=Update%20Docs)]
 </div>
 
 
@@ -21,53 +21,53 @@
  ```python
 menu_type: Dropdown
 ```
-<a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Controls.DropdownSelect.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, var, options, name=None, menu_type=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/DropdownSelect.py#L475)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/DropdownSelect.py#L475?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L475)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L475?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.get_value" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Controls.DropdownSelect.get_value" class="docs-object-method">&nbsp;</a> 
 ```python
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/DropdownSelect.py#L485)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/DropdownSelect.py#L485?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L485)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L485?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.set_value" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Controls.DropdownSelect.set_value" class="docs-object-method">&nbsp;</a> 
 ```python
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/DropdownSelect.py#L487)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/DropdownSelect.py#L487?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L487)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L487?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.update" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Controls.DropdownSelect.update" class="docs-object-method">&nbsp;</a> 
 ```python
 update(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/DropdownSelect.py#L489)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/DropdownSelect.py#L489?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L489)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L489?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.to_jhtml" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Jupyter.Apps.Controls.DropdownSelect.to_jhtml" class="docs-object-method">&nbsp;</a> 
 ```python
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/DropdownSelect.py#L491)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/DropdownSelect.py#L491?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L491)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L491?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -116,13 +116,13 @@ to_jhtml(self):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L473?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L473?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.ExternalPrograms.Visualizers.VTKInterface">VTKInterface</a> 
+## <a id="McUtils.McUtils.ExternalPrograms.Visualizers.VTKInterface">VTKInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Visualizers.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Visualizers.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)]
 </div>
 
 A simple class to support operations that make use of the VPython visualization toolkit
@@ -22,23 +22,25 @@ A simple class to support operations that make use of the VPython visualization 
 name: str
 module: str
 ```
-<a id="McUtils.ExternalPrograms.Visualizers.VTKInterface.graphics_object" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.ExternalPrograms.Visualizers.VTKInterface.graphics_object" class="docs-object-method">&nbsp;</a> 
 ```python
-graphics_object(obj): 
+@classmethod
+graphics_object(cls, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Visualizers/VTKInterface.py#L22)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers/VTKInterface.py#L22?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L30?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.ExternalPrograms.Visualizers.VTKInterface.named_colors" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.ExternalPrograms.Visualizers.VTKInterface.named_colors" class="docs-object-method">&nbsp;</a> 
 ```python
-named_colors(): 
+@classmethod
+named_colors(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Visualizers/VTKInterface.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers/VTKInterface.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L33?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -87,13 +89,13 @@ named_colors():
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L15?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

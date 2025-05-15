@@ -1,8 +1,8 @@
-## <a id="McUtils.Zachary.LazyTensors.SparseTensor">SparseTensor</a> 
+## <a id="McUtils.McUtils.Zachary.LazyTensors.SparseTensor">SparseTensor</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors.py#L112)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L112?message=Update%20Docs)]
 </div>
 
 Tensor class that uses SparseArray
@@ -19,24 +19,24 @@ Tensor class that uses SparseArray
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Zachary.LazyTensors.SparseTensor.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.LazyTensors.SparseTensor.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, a, shape=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/SparseTensor.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/SparseTensor.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/SparseTensor.py#L117)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/SparseTensor.py#L117?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Zachary.LazyTensors.SparseTensor.array" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.LazyTensors.SparseTensor.array" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/SparseTensor.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/SparseTensor.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/SparseTensor.py#L120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/SparseTensor.py#L120?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -85,13 +85,13 @@ array(self):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/LazyTensors/SparseTensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/LazyTensors/SparseTensor.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/LazyTensors/SparseTensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/LazyTensors/SparseTensor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/LazyTensors/SparseTensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/LazyTensors/SparseTensor.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/LazyTensors/SparseTensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/LazyTensors/SparseTensor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors.py#L112?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L112?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.Scaffolding.CLIs.CommandGroup">CommandGroup</a> 
+## <a id="McUtils.McUtils.Scaffolding.CLIs.CommandGroup">CommandGroup</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs.py#L189)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs.py#L189?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs.py#L189)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs.py#L189?message=Update%20Docs)]
 </div>
 
 Generic interface that defines an available set of commands
@@ -69,13 +69,13 @@ Basically just exists to be ingested by a CLI.
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Scaffolding/CLIs/CommandGroup.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Scaffolding/CLIs/CommandGroup.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Scaffolding/CLIs/CommandGroup.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/CLIs/CommandGroup.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/CLIs/CommandGroup.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/CLIs/CommandGroup.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs.py#L189?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs.py#L189?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

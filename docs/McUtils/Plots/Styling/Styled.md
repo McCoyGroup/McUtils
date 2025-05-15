@@ -1,8 +1,8 @@
-## <a id="McUtils.Plots.Styling.Styled">Styled</a> 
+## <a id="McUtils.McUtils.Plots.Styling.Styled">Styled</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L15?message=Update%20Docs)]
 </div>
 
 Simple styling class
@@ -19,33 +19,35 @@ Simple styling class
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Plots.Styling.Styled.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.Styled.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *str, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/Styled.py#L19)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/Styled.py#L19?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.Styled.could_be" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.Styled.could_be" class="docs-object-method">&nbsp;</a> 
 ```python
-could_be(data): 
+@classmethod
+could_be(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L25?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Plots.Styling.Styled.construct" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Styling.Styled.construct" class="docs-object-method">&nbsp;</a> 
 ```python
-construct(data): 
+@classmethod
+construct(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Styling/Styled.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling/Styled.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L28)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L28?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -94,13 +96,13 @@ construct(data):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Styling/Styled.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Styling/Styled.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Styling/Styled.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Styling/Styled.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Styling/Styled.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Styling/Styled.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Styling/Styled.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Styling/Styled.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Styling.py#L15?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L15?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

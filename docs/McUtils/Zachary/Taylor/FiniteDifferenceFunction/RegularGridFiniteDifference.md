@@ -1,8 +1,8 @@
-## <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference">RegularGridFiniteDifference</a> 
+## <a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference">RegularGridFiniteDifference</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction.py#L433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction.py#L433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L433)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L433?message=Update%20Docs)]
 </div>
 
 Defines a 1D finite difference over a regular grid
@@ -19,13 +19,13 @@ Defines a 1D finite difference over a regular grid
  </div>
  <div class="collapsible-section collapsible-section-body collapse " id="methods" markdown="1">
  
-<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, order, stencil=None, accuracy=4, end_point_accuracy=2, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L437)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L437?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L437)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L437?message=Update%20Docs)]
 </div>
 
   - `order`: `int`
@@ -40,13 +40,14 @@ __init__(self, order, stencil=None, accuracy=4, end_point_accuracy=2, **kw):
     > options passed through to the `FiniteDifferenceMatrix`
 
 
-<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference.finite_difference_data" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference.finite_difference_data" class="docs-object-method">&nbsp;</a> 
 ```python
-finite_difference_data(order, stencil, end_point_precision): 
+@classmethod
+finite_difference_data(cls, order, stencil, end_point_precision): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L462)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L462?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L462)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L462?message=Update%20Docs)]
 </div>
 Builds a FiniteDifferenceData object from an order, stencil, and end_point_precision
   - `order`: `Any`
@@ -59,13 +60,14 @@ Builds a FiniteDifferenceData object from an order, stencil, and end_point_preci
     >
 
 
-<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference.get_weights" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference.get_weights" class="docs-object-method">&nbsp;</a> 
 ```python
+@staticmethod
 get_weights(m, s, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L491)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.py#L491?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L491)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L491?message=Update%20Docs)]
 </div>
 Extracts the weights for an evenly spaced grid
   - `m`: `Any`
@@ -169,13 +171,13 @@ ___
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Taylor/FiniteDifferenceFunction/RegularGridFiniteDifference.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction.py#L433?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L433?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

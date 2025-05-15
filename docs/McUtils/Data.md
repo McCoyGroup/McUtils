@@ -14,43 +14,43 @@ A slightly more involved example is in `ConstantsData.UnitsData`.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DataHandler](Data/CommonData/DataHandler.md)   
+[DataHandler](McUtils/McUtils/Data/CommonData/DataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[DataError](Data/CommonData/DataError.md)   
+[DataError](McUtils/McUtils/Data/CommonData/DataError.md)   
 </div>
    <div class="col" markdown="1">
-[DataRecord](Data/CommonData/DataRecord.md)   
+[DataRecord](McUtils/McUtils/Data/CommonData/DataRecord.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[AtomData](Data/AtomData/AtomData.md)   
+[AtomData](McUtils/McUtils/Data/AtomData/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[AtomDataHandler](Data/AtomData/AtomDataHandler.md)   
+[AtomDataHandler](McUtils/McUtils/Data/AtomData/AtomDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[UnitsData](Data/ConstantsData/UnitsData.md)   
+[UnitsData](McUtils/McUtils/Data/ConstantsData/UnitsData.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[UnitsDataHandler](Data/ConstantsData/UnitsDataHandler.md)   
+[UnitsDataHandler](McUtils/McUtils/Data/ConstantsData/UnitsDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[BondData](Data/BondData/BondData.md)   
+[BondData](McUtils/McUtils/Data/BondData/BondData.md)   
 </div>
    <div class="col" markdown="1">
-[BondDataHandler](Data/BondData/BondDataHandler.md)   
+[BondDataHandler](McUtils/McUtils/Data/BondData/BondDataHandler.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[WavefunctionData](Data/WavefunctionData/WavefunctionData.md)   
+[WavefunctionData](McUtils/McUtils/Data/WavefunctionData/WavefunctionData.md)   
 </div>
    <div class="col" markdown="1">
-[PotentialData](Data/PotentialData/PotentialData.md)   
+[PotentialData](McUtils/McUtils/Data/PotentialData/PotentialData.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -146,10 +146,10 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Data.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Data.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Data.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Data.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Data.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Data.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/__init__.py#L1?message=Update%20Docs)   

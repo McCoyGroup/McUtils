@@ -1,8 +1,8 @@
-## <a id="McUtils.Scaffolding.Caches.Cache">Cache</a> 
+## <a id="McUtils.McUtils.Scaffolding.Caches.Cache">Cache</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L10?message=Update%20Docs)]
 </div>
 
 Simple cache base class
@@ -19,33 +19,33 @@ Simple cache base class
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Scaffolding.Caches.Cache.__getitem__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Caches.Cache.__getitem__" class="docs-object-method">&nbsp;</a> 
 ```python
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/Cache.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/Cache.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L14?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Scaffolding.Caches.Cache.__contains__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Caches.Cache.__contains__" class="docs-object-method">&nbsp;</a> 
 ```python
 __contains__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/Cache.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/Cache.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L17?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Scaffolding.Caches.Cache.__setitem__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Scaffolding.Caches.Cache.__setitem__" class="docs-object-method">&nbsp;</a> 
 ```python
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/Cache.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/Cache.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L20?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -94,13 +94,13 @@ __setitem__(self, key, value):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Scaffolding/Caches/Cache.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Scaffolding/Caches/Cache.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Scaffolding/Caches/Cache.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Scaffolding/Caches/Cache.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Scaffolding/Caches/Cache.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Scaffolding/Caches/Cache.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Caches/Cache.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Caches/Cache.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches.py#L10?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L10?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

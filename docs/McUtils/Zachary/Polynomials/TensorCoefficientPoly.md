@@ -1,8 +1,8 @@
-## <a id="McUtils.Zachary.Polynomials.TensorCoefficientPoly">TensorCoefficientPoly</a> 
+## <a id="McUtils.McUtils.Zachary.Polynomials.TensorCoefficientPoly">TensorCoefficientPoly</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L1129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L1129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L1129)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L1129?message=Update%20Docs)]
 </div>
 
 Represents a polynomial constructed using tensor elements as monomials
@@ -20,13 +20,14 @@ by tracking sets of indices
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Zachary.Polynomials.TensorCoefficientPoly.canonical_key" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Polynomials.TensorCoefficientPoly.canonical_key" class="docs-object-method">&nbsp;</a> 
 ```python
-canonical_key(monomial_tuple): 
+@classmethod
+canonical_key(cls, monomial_tuple): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/TensorCoefficientPoly.py#L1135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/TensorCoefficientPoly.py#L1135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1135?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -75,13 +76,13 @@ canonical_key(monomial_tuple):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L1129?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L1129?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

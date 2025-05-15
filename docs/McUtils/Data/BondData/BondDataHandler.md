@@ -1,8 +1,8 @@
-## <a id="McUtils.Data.BondData.BondDataHandler">BondDataHandler</a> 
+## <a id="McUtils.McUtils.Data.BondData.BondDataHandler">BondDataHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/BondData.py#L6)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData.py#L6?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/BondData.py#L6)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData.py#L6?message=Update%20Docs)]
 </div>
 
 A DataHandler that's built for use with the bond data we've collected.
@@ -20,34 +20,49 @@ Usually used through the `BondData` object.
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.Data.BondData.BondDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Data.BondData.BondDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/BondData/BondDataHandler.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData/BondDataHandler.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/BondData/BondDataHandler.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData/BondDataHandler.py#L11?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Data.BondData.BondDataHandler.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Data.BondData.BondDataHandler.load" class="docs-object-method">&nbsp;</a> 
 ```python
 load(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/BondData/BondDataHandler.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData/BondDataHandler.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/BondData/BondDataHandler.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData/BondDataHandler.py#L13?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Data.BondData.BondDataHandler.get_distance" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Data.BondData.BondDataHandler.get_distance" class="docs-object-method">&nbsp;</a> 
 ```python
 get_distance(self, key, default=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/BondData/BondDataHandler.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData/BondDataHandler.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/BondData/BondDataHandler.py#L27)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData/BondDataHandler.py#L27?message=Update%20Docs)]
 </div>
+
+
+<a id="McUtils.McUtils.Data.BondData.BondDataHandler.__getitem__" class="docs-object-method">&nbsp;</a> 
+```python
+__getitem__(self, item): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/BondData/BondDataHandler.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData/BondDataHandler.py#L100?message=Update%20Docs)]
+</div>
+Special cases the default getitem so tuples are mapped
+  - `item`: `Any`
+    > 
+  - `:returns`: `_`
+    >
  </div>
 </div>
 
@@ -95,13 +110,13 @@ get_distance(self, key, default=None):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Data/BondData/BondDataHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Data/BondData/BondDataHandler.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Data/BondData/BondDataHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Data/BondData/BondDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Data/BondData/BondDataHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Data/BondData/BondDataHandler.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/BondData/BondDataHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/BondData/BondDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData.py#L6?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData.py#L6?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.Zachary.Interpolator.UnstructuredGridInterpolator">UnstructuredGridInterpolator</a> 
+## <a id="McUtils.McUtils.Zachary.Interpolator.UnstructuredGridInterpolator">UnstructuredGridInterpolator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L259)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L259?message=Update%20Docs)]
 </div>
 
 Defines an interpolator appropriate for totally unstructured grids by
@@ -22,13 +22,13 @@ delegating to the scipy `RBF` interpolators
  ```python
 default_neighbors: int
 ```
-<a id="McUtils.Zachary.Interpolator.UnstructuredGridInterpolator.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Interpolator.UnstructuredGridInterpolator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, grid, values, order=None, neighbors=None, extrapolate=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/UnstructuredGridInterpolator.py#L183)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/UnstructuredGridInterpolator.py#L183?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.py#L266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.py#L266?message=Update%20Docs)]
 </div>
 
   - `grid`: `np.ndarray`
@@ -45,23 +45,23 @@ __init__(self, grid, values, order=None, neighbors=None, extrapolate=True, **opt
     >
 
 
-<a id="McUtils.Zachary.Interpolator.UnstructuredGridInterpolator.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Interpolator.UnstructuredGridInterpolator.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, points): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/UnstructuredGridInterpolator.py#L236)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/UnstructuredGridInterpolator.py#L236?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.py#L319?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Zachary.Interpolator.UnstructuredGridInterpolator.derivative" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Zachary.Interpolator.UnstructuredGridInterpolator.derivative" class="docs-object-method">&nbsp;</a> 
 ```python
 derivative(self, order): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/UnstructuredGridInterpolator.py#L245)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/UnstructuredGridInterpolator.py#L245?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.py#L328)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.py#L328?message=Update%20Docs)]
 </div>
 Constructs the derivatives of the interpolator at the given order
   - `order`: `Any`
@@ -115,13 +115,13 @@ Constructs the derivatives of the interpolator at the given order
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator.py#L176?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L259?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

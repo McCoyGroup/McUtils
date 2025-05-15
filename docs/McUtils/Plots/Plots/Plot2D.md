@@ -1,8 +1,8 @@
-## <a id="McUtils.Plots.Plots.Plot2D">Plot2D</a> 
+## <a id="McUtils.McUtils.Plots.Plots.Plot2D">Plot2D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L887)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L887?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L890)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L890?message=Update%20Docs)]
 </div>
 
 A base class for plots of 3D data but plotted on 2D axes
@@ -22,13 +22,13 @@ A base class for plots of 3D data but plotted on 2D axes
 known_styles: set
 method: str
 ```
-<a id="McUtils.Plots.Plots.Plot2D.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.McUtils.Plots.Plots.Plot2D.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *params, plot_style=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/Plot2D.py#L895)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/Plot2D.py#L895?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot2D.py#L898)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot2D.py#L898?message=Update%20Docs)]
 </div>
 
   - `params`: `Any`
@@ -94,13 +94,13 @@ __init__(self, *params, plot_style=None, colorbar=None, figure=None, axes=None, 
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/Plots/Plots/Plot2D.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/Plots/Plots/Plot2D.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/Plots/Plot2D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/Plots/Plot2D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/Plots/Plots/Plot2D.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/Plots/Plots/Plot2D.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/Plot2D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/Plot2D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L887?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L890?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

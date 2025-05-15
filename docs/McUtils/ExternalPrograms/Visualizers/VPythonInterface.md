@@ -1,8 +1,8 @@
-## <a id="McUtils.ExternalPrograms.Visualizers.VPythonInterface">VPythonInterface</a> 
+## <a id="McUtils.McUtils.ExternalPrograms.Visualizers.VPythonInterface">VPythonInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Visualizers.py#L8)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L8?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Visualizers.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L9?message=Update%20Docs)]
 </div>
 
 A simple class to support operations that make use of the VPython visualization toolkit
@@ -70,13 +70,13 @@ module: str
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/examples/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/examples/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ci/docs/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/master/?filename=ci/docs/templates/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L8?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
