@@ -5,7 +5,7 @@ include setup.py
 # include tsconfig.json
 # include package.json
 # include webpack.config.js
-gradt McUtils/Jupyter/JHTML/ActiveHTMLWidget
+graft McUtils/Jupyter/JHTML/ActiveHTMLWidget
 
 # Documentation
 # graft docs
@@ -13,6 +13,16 @@ gradt McUtils/Jupyter/JHTML/ActiveHTMLWidget
 # prune docs/build
 # prune docs/gh-pages
 # prune docs/dist
+recursive-include McUtils/Docs *.html
+recursive-include McUtils/Docs *.md
+recursive-include McUtils/Docs *.yml
+recursive-include McUtils/Docs Gemfile
+
+# FFI libs
+recursive-include McUtils/Extensions/FFI *.hpp
+recursive-include McUtils/Extensions/FFI *.cpp
+recursive-include McUtils/Extensions/FFI *.h
+recursive-include McUtils/Extensions/FFI *.c
 
 # Examples
 # graft examples
@@ -30,5 +40,6 @@ gradt McUtils/Jupyter/JHTML/ActiveHTMLWidget
 global-exclude *~
 global-exclude *.pyc
 global-exclude *.pyo
+global-exclude *.so
 global-exclude .git
 global-exclude .ipynb_checkpoints
