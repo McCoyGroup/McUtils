@@ -50,8 +50,8 @@ Provides module specific parameters
 get_members(cls, mod): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L697)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L697?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L704)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L704?message=Update%20Docs)]
 </div>
  </div>
 </div>
