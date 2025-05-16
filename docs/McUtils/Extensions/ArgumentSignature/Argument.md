@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.ArgumentSignature.Argument">Argument</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature.py#L311)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature.py#L311?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L311)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L311?message=Update%20Docs)]
 </div>
 
 Defines a single Argument for a C-level caller to support default values, etc.
@@ -27,8 +27,8 @@ arg_types: list
 __init__(self, name, dtype, default=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L324)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L324?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L324)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L324?message=Update%20Docs)]
 </div>
 
   - `name`: `str`
@@ -45,8 +45,8 @@ __init__(self, name, dtype, default=None):
 infer_type(cls, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L338)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L338?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L338)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L338?message=Update%20Docs)]
 </div>
 Infers the type of an argument
   - `arg`: `ArgumentType | str | type | ctypes type`
@@ -61,8 +61,8 @@ Infers the type of an argument
 infer_type_type(cls, type_key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L384)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L384?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L384)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L384?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ infer_type_type(cls, type_key):
 infer_type_str(cls, argstr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L389)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L389?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L389)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L389?message=Update%20Docs)]
 </div>
 
 
@@ -83,8 +83,8 @@ infer_type_str(cls, argstr):
 inferred_type_string(cls, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L405)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L405?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L405)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L405?message=Update%20Docs)]
 </div>
 returns a type string for the inferred type
 
@@ -94,8 +94,8 @@ returns a type string for the inferred type
 prep_value(self, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L412)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L412?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L412)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L412?message=Update%20Docs)]
 </div>
 
 
@@ -104,8 +104,8 @@ prep_value(self, val):
 is_pointer(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L415)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L415?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L415)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L415?message=Update%20Docs)]
 </div>
 
 
@@ -114,8 +114,8 @@ is_pointer(self):
 is_array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L417)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L417?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L417)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L417?message=Update%20Docs)]
 </div>
 
 
@@ -125,8 +125,8 @@ is_array(self):
 dtypes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L419)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L419?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L419)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L419?message=Update%20Docs)]
 </div>
 
 
@@ -136,8 +136,8 @@ dtypes(self):
 typechar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L422)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L422?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L422)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L422?message=Update%20Docs)]
 </div>
 
 
@@ -147,8 +147,8 @@ typechar(self):
 cpp_signature(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L425?message=Update%20Docs)]
 </div>
 
 
@@ -157,8 +157,8 @@ cpp_signature(self):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/Argument.py#L431)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/Argument.py#L431?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/Argument.py#L431)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/Argument.py#L431?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -213,7 +213,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/ArgumentSignature/Argument.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/ArgumentSignature/Argument.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature.py#L311?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L311?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

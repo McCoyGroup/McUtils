@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction">CoordinateFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions.py#L395)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions.py#L395?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L395)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L395?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, conversion, expr: McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L396)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L396?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, conversion, expr: McUtils.Zachary.DifferentiableFunctions.Differe
 canonicalize_conversion(cls, conv): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L401)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L401?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L401)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L401?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ canonicalize_conversion(cls, conv):
 __call__(self, coords, order=0, preconverted=False, reexpress=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L411)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L411?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ __call__(self, coords, order=0, preconverted=False, reexpress=True):
 merge_conversion_functions(cls, conv_1, conv_2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L430)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L430?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L430)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L430?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ merge_conversion_functions(cls, conv_1, conv_2):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L446)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L446?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L446)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L446?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ __add__(self, other):
 __radd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L455)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L455?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L455)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L455?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ __radd__(self, other):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L457)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L457?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L457)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L457?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ __mul__(self, other):
 __rmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L466)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L466?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L466)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L466?message=Update%20Docs)]
 </div>
 
 
@@ -106,8 +106,8 @@ __rmul__(self, other):
 __truediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L468)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L468?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L468)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L468?message=Update%20Docs)]
 </div>
 
 
@@ -116,8 +116,8 @@ __truediv__(self, other):
 __rtruediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L477)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L477?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L477)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L477?message=Update%20Docs)]
 </div>
 
 
@@ -126,8 +126,8 @@ __rtruediv__(self, other):
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L479)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/CoordinateFunction.py#L479?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L479)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L479?message=Update%20Docs)]
 </div>
 
 
@@ -137,8 +137,8 @@ __neg__(self):
 polynomial(cls, coord_spec, *, coeffs, center, ref): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L482)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L482?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L482)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L482?message=Update%20Docs)]
 </div>
 
 
@@ -148,8 +148,8 @@ polynomial(cls, coord_spec, *, coeffs, center, ref):
 morse(cls, coord, *, re, a=None, de=None, w=None, wx=None, g=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L500?message=Update%20Docs)]
 </div>
 
 
@@ -159,8 +159,8 @@ morse(cls, coord, *, re, a=None, de=None, w=None, wx=None, g=None):
 sin(cls, coord, *, n=1, l=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L507)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L507?message=Update%20Docs)]
 </div>
 
 
@@ -170,8 +170,8 @@ sin(cls, coord, *, n=1, l=1):
 cos(cls, coord, *, n=1, l=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L510)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L510?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L510)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L510?message=Update%20Docs)]
 </div>
 
 
@@ -181,8 +181,8 @@ cos(cls, coord, *, n=1, l=1):
 exp(cls, coord, *, s=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L513)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L513?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L513)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L513?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -237,7 +237,7 @@ exp(cls, coord, *, s=1):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions.py#L395?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L395?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

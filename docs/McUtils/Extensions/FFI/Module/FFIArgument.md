@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.Module.FFIArgument">FFIArgument</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L168)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L168?message=Update%20Docs)]
 </div>
 
 An argument spec for data to be passed to an FFIMethod
@@ -24,8 +24,8 @@ An argument spec for data to be passed to an FFIMethod
 __init__(self, name=None, dtype=None, shape=None, container_type=None, value=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIArgument.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIArgument.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L173)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L173?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, name=None, dtype=None, shape=None, container_type=None, value=Non
 infer_dtype(cls, dtype): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ infer_dtype(cls, dtype):
 infer_ctype(cls, container_type): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L207)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L207?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ infer_ctype(cls, container_type):
 from_arg_sig(cls, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L215)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L215?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L215)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L215?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ from_arg_sig(cls, arg):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIArgument.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIArgument.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L225)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L225?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ __repr__(self):
 cast(self, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module/FFIArgument.py#L233)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module/FFIArgument.py#L233?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L233)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L233?message=Update%20Docs)]
 </div>
 
   - `val`: `Any`
@@ -138,7 +138,7 @@ cast(self, val):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIArgument.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIArgument.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L168?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L168?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

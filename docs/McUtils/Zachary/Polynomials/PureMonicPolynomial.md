@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Polynomials.PureMonicPolynomial">PureMonicPolynomial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L975)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L975?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L975)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L975?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, terms: dict, prefactor=1, canonicalize=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L976)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L976?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L976)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L976?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, terms: dict, prefactor=1, canonicalize=True):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L985)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L985?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L985)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L985?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ shape(self):
 as_dense(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L988)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L988?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L988)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L988?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ as_dense(self):
 shift(self, shift) -> McUtils.Zachary.Polynomials.DensePolynomial: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L990)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L990?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L990)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L990?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ shift(self, shift) -> McUtils.Zachary.Polynomials.DensePolynomial:
 monomial(cls, idx, value=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L993)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L993?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L993)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L993?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ monomial(cls, idx, value=1):
 key_hash(cls, monomial_tuple): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L997)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L997?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L997)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L997?message=Update%20Docs)]
 </div>
 
 
@@ -88,8 +88,8 @@ key_hash(cls, monomial_tuple):
 canonical_key(cls, monomial_tuple): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1003)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1003?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1003)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1003?message=Update%20Docs)]
 </div>
 
 
@@ -98,8 +98,8 @@ canonical_key(cls, monomial_tuple):
 direct_multiproduct(self, other, key_value_generator): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L1008)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L1008?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1008)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1008?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ direct_multiproduct(self, other, key_value_generator):
 direct_product(self, other, key_func=None, mul=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L1036)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L1036?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1036)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1036?message=Update%20Docs)]
 </div>
 
 
@@ -118,8 +118,8 @@ direct_product(self, other, key_func=None, mul=None):
 rebuild(self, new_terms, prefactor=None, canonicalize=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L1071)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L1071?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1071)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1071?message=Update%20Docs)]
 </div>
 
 
@@ -128,8 +128,8 @@ rebuild(self, new_terms, prefactor=None, canonicalize=None):
 filter(self, keys, mode='match'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L1077)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L1077?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1077)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1077?message=Update%20Docs)]
 </div>
 
 
@@ -138,8 +138,8 @@ filter(self, keys, mode='match'):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/PureMonicPolynomial.py#L1127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/PureMonicPolynomial.py#L1127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/PureMonicPolynomial.py#L1127?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -194,7 +194,7 @@ __mul__(self, other):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/PureMonicPolynomial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/PureMonicPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L975?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L975?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

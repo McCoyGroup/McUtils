@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Variables.DefaultVars">DefaultVars</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L116?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, vars: McUtils.Jupyter.Apps.Variables.InterfaceVars = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/DefaultVars.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/DefaultVars.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L118)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L118?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, vars: McUtils.Jupyter.Apps.Variables.InterfaceVars = None):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/DefaultVars.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/DefaultVars.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L120?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/DefaultVars.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/DefaultVars.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L124)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L124?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 resolve(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L127?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -111,7 +111,7 @@ resolve(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Variables/DefaultVars.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Variables/DefaultVars.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables.py#L116?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L116?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

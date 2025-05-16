@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser">CIFParser</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L64?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ custom_handlers: dict
 __init__(self, file, fields=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L78)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L78?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L78?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, file, fields=None, **kw):
 check_tag(self, line: str, depth: int = 0, active_tag=None, label: str = None, history: list[str] = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L81?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ check_tag(self, line: str, depth: int = 0, active_tag=None, label: str = None, h
 get_block_handlers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L108)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L108?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ get_block_handlers(self):
 resolve_handler(self, label: 'str|None'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L139?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ resolve_handler(self, label: 'str|None'):
 handle_block(self, label: 'str|None', block_data, join=True, depth=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L146)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L146?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L146)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L146?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ handle_block(self, label: 'str|None', block_data, join=True, depth=0):
 parse(self, target_fields=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L176)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L176?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -132,7 +132,7 @@ parse(self, target_fields=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser.py#L64?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L64?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

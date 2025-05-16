@@ -1,7 +1,7 @@
 # <a id="McUtils.Devutils.core.is_default">is_default</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/core.py#L56)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/core.py#L56?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L56)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L56?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ is_default(obj, allow_None=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_default.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_default.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/core.py#L56?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L56?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

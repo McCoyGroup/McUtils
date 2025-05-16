@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceEngine">TemplateInterfaceEngine</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L1104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L1104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1123?message=Update%20Docs)]
 </div>
 
 A variant on a template engine designed for more interactive use.
@@ -30,8 +30,8 @@ formatter_class: TemplateInterfaceFormatter
 __init__(self, templates: 'TemplateInterfaceList|dict', ignore_missing=False, formatter_class=None, ignore_paths=()): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1133?message=Update%20Docs)]
 </div>
 
 
@@ -40,8 +40,8 @@ __init__(self, templates: 'TemplateInterfaceList|dict', ignore_missing=False, fo
 format_map(self, template, parameters): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1149)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1149?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +50,8 @@ format_map(self, template, parameters):
 apply(self, template, target, **template_params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1158)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.py#L1158?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -106,7 +106,7 @@ apply(self, template, target, **template_params):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceEngine.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L1104?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1123?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

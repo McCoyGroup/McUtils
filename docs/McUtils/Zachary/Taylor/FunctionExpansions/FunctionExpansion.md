@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Taylor.FunctionExpansions.FunctionExpansion">FunctionExpansion</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FunctionExpansions.py#L507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FunctionExpansions.py#L507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FunctionExpansions.py#L507)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FunctionExpansions.py#L507?message=Update%20Docs)]
 </div>
 
 Specifically for expanding functions
@@ -25,8 +25,8 @@ Specifically for expanding functions
 expand_function(cls, f, point, order=4, basis=None, function_shape=None, transforms=None, weight_coefficients=True, **fd_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L512)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L512?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L512)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L512?message=Update%20Docs)]
 </div>
 Expands a function about a point up to the given order
   - `f`: `function`
@@ -170,7 +170,7 @@ ___
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Taylor/FunctionExpansions/FunctionExpansion.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Taylor/FunctionExpansions/FunctionExpansion.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FunctionExpansions.py#L507?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FunctionExpansions.py#L507?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

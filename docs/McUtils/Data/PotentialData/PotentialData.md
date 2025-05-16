@@ -1,7 +1,7 @@
 ### <a id="McUtils.Data.PotentialData.PotentialData">PotentialData</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/PotentialData.py#L6)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/PotentialData.py#L6?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/PotentialData.py#L6)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/PotentialData.py#L6?message=Update%20Docs)]
 </div>
 An instance of PotentialDataHandler that can be used for looking up data on potentials
 
@@ -54,7 +54,7 @@ An instance of PotentialDataHandler that can be used for looking up data on pote
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/PotentialData/PotentialData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/PotentialData/PotentialData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/PotentialData.py#L6?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/PotentialData.py#L6?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

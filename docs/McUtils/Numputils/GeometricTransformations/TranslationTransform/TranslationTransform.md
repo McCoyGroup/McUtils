@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.GeometricTransformations.TranslationTransform.TranslationTransform">TranslationTransform</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TranslationTransform.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TranslationTransform.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TranslationTransform.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TranslationTransform.py#L15?message=Update%20Docs)]
 </div>
 
 A simple TranslationTransform from the basic AffineTransformation class
@@ -24,8 +24,8 @@ A simple TranslationTransform from the basic AffineTransformation class
 __init__(self, shift): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TranslationTransform.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TranslationTransform.py#L20?message=Update%20Docs)]
 </div>
 
   - `shift`: `np.ndarray`
@@ -83,7 +83,7 @@ __init__(self, shift):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TranslationTransform.py#L15?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TranslationTransform.py#L15?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

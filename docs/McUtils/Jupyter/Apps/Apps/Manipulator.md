@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Apps.Manipulator">Manipulator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L52)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L52?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ theme: dict
 __init__(self, func, *controls, debounce=None, autoclear=True, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/Manipulator.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/Manipulator.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L61?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, func, *controls, debounce=None, autoclear=True, **etc):
 canonicalize_control(cls, settings): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L74?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ canonicalize_control(cls, settings):
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/Manipulator.py#L91)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/Manipulator.py#L91?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L91?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -103,7 +103,7 @@ initialize(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Apps/Manipulator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Apps/Manipulator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps.py#L52?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L52?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 ### <a id="McUtils.Data.BondData.BondData">BondData</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/BondData.py#L6)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData.py#L6?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/BondData.py#L6)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData.py#L6?message=Update%20Docs)]
 </div>
 An instance of BondDataHandler that can be used for looking up bond distances
 
@@ -54,7 +54,7 @@ An instance of BondDataHandler that can be used for looking up bond distances
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/BondData/BondData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/BondData/BondData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/BondData.py#L6?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/BondData.py#L6?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

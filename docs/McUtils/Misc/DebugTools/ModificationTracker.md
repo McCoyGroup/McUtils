@@ -1,8 +1,8 @@
 ## <a id="McUtils.Misc.DebugTools.ModificationTracker">ModificationTracker</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools.py#L27)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools.py#L27?message=Update%20Docs)]
 </div>
 
 A simple class to wrap an object to track when it is accessed or
@@ -25,8 +25,8 @@ modified
 __init__(self, obj, handlers=<ModificationTypeHandler.Log: 'log'>, logger=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools.py#L32?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, obj, handlers=<ModificationTypeHandler.Log: 'log'>, logger=None):
 handler_dispatch(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L44?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ handler_dispatch(self):
 log_modification(self, obj, handler_type, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L51?message=Update%20Docs)]
 </div>
 Logs on modification
   - `obj`: `Any`
@@ -67,8 +67,8 @@ Logs on modification
 raise_modification(self, obj, handler_type, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L81?message=Update%20Docs)]
 </div>
 Raises an error on modification
   - `obj`: `Any`
@@ -88,8 +88,8 @@ Raises an error on modification
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L125)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L125?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L125)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L125?message=Update%20Docs)]
 </div>
 Handler to intercept `getattr` requests
   - `item`: `Any`
@@ -103,8 +103,8 @@ Handler to intercept `getattr` requests
 __setattr__(self, item, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L137?message=Update%20Docs)]
 </div>
 Handler to intercept `setattr` requests
   - `item`: `Any`
@@ -120,8 +120,8 @@ Handler to intercept `setattr` requests
 __iadd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L152)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L152?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L152?message=Update%20Docs)]
 </div>
 Handler to intercept `add` requests
   - `item`: `Any`
@@ -137,8 +137,8 @@ Handler to intercept `add` requests
 __isub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L167)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L167?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L167)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L167?message=Update%20Docs)]
 </div>
 Handler to intercept `sub` requests
   - `item`: `Any`
@@ -154,8 +154,8 @@ Handler to intercept `sub` requests
 __imul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L182?message=Update%20Docs)]
 </div>
 Handler to intercept `div` requests
   - `item`: `Any`
@@ -171,8 +171,8 @@ Handler to intercept `div` requests
 __idiv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L197?message=Update%20Docs)]
 </div>
 Handler to intercept `div` requests
   - `item`: `Any`
@@ -188,8 +188,8 @@ Handler to intercept `div` requests
 __imatmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/DebugTools/ModificationTracker.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools/ModificationTracker.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/DebugTools/ModificationTracker.py#L212)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools/ModificationTracker.py#L212?message=Update%20Docs)]
 </div>
 Handler to intercept `matmul` requests
   - `item`: `Any`
@@ -251,7 +251,7 @@ Handler to intercept `matmul` requests
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc/DebugTools/ModificationTracker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc/DebugTools/ModificationTracker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/DebugTools.py#L27?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/DebugTools.py#L27?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

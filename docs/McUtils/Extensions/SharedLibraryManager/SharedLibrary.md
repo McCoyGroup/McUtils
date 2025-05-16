@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.SharedLibraryManager.SharedLibrary">SharedLibrary</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/SharedLibraryManager.py#L191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager.py#L191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L191?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ method_type: SharedLibraryFunction
 __init__(self, library, **functions): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/SharedLibraryManager/SharedLibrary.py#L194)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager/SharedLibrary.py#L194?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager.py#L194)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L194?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, library, **functions):
 register(self, tag, name=None, docstring=None, defaults=None, return_handler=None, prep_args=None, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/SharedLibraryManager/SharedLibrary.py#L205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager/SharedLibrary.py#L205?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L205)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L205?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ register(self, tag, name=None, docstring=None, defaults=None, return_handler=Non
 get_function(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/SharedLibraryManager/SharedLibrary.py#L219)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager/SharedLibrary.py#L219?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L219)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L219?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ get_function(self, item):
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/SharedLibraryManager/SharedLibrary.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager/SharedLibrary.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L225)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L225?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ __getattr__(self, item):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/SharedLibraryManager/SharedLibrary.py#L228)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager/SharedLibrary.py#L228?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L228)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L228?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -122,7 +122,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/SharedLibraryManager.py#L191?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L191?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

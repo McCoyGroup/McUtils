@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateFormatter">TemplateFormatter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L360)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L360?message=Update%20Docs)]
 </div>
 
 Provides a formatter for fields that allows for
@@ -30,8 +30,8 @@ frozendict: frozendict
 __init__(self, templates): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L371)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L371?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L371)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L371?message=Update%20Docs)]
 </div>
 
 
@@ -41,8 +41,8 @@ __init__(self, templates):
 format_parameters(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L374)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L374?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L374)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L374?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +52,8 @@ format_parameters(self):
 templates(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L377)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L377?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L377)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L377?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ templates(self):
 special_callbacks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L380)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L380?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L380)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L380?message=Update%20Docs)]
 </div>
 
 
@@ -74,8 +74,8 @@ special_callbacks(self):
 callback_map(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L383)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L383?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L383?message=Update%20Docs)]
 </div>
 
 
@@ -84,8 +84,8 @@ callback_map(self):
 apply_eval_tree(self, _, spec) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L390)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L390?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L390)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L390?message=Update%20Docs)]
 </div>
 
 
@@ -94,8 +94,8 @@ apply_eval_tree(self, _, spec) -> str:
 apply_directive_tree(self, _, spec) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L396)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L396?message=Update%20Docs)]
 </div>
 
 
@@ -104,8 +104,8 @@ apply_directive_tree(self, _, spec) -> str:
 apply_assignment(self, key, spec) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L398)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L398?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L398)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L398?message=Update%20Docs)]
 </div>
 
 
@@ -114,8 +114,8 @@ apply_assignment(self, key, spec) -> str:
 apply_raw(self, key, spec) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L402)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L402?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L402)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L402?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ apply_raw(self, key, spec) -> str:
 apply_comment(self, key, spec) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L404)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L404?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L404)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L404?message=Update%20Docs)]
 </div>
 
 
@@ -134,8 +134,8 @@ apply_comment(self, key, spec) -> str:
 apply_directive(self, key, spec) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L406)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L406?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L406)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L406?message=Update%20Docs)]
 </div>
 
 
@@ -144,8 +144,8 @@ apply_directive(self, key, spec) -> str:
 format_field(self, value: Any, format_spec: str) -> str: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L411)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L411?message=Update%20Docs)]
 </div>
 
 
@@ -154,8 +154,8 @@ format_field(self, value: Any, format_spec: str) -> str:
 load_template(self, template): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L428)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L428?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L428)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L428?message=Update%20Docs)]
 </div>
 
 
@@ -164,8 +164,8 @@ load_template(self, template):
 vformat(self, format_string: str, args: Sequence[Any], kwargs: Mapping[str, Any]): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L452)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L452?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L452)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.py#L452?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -220,7 +220,7 @@ vformat(self, format_string: str, args: Sequence[Any], kwargs: Mapping[str, Any]
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateFormatter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L360?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L360?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

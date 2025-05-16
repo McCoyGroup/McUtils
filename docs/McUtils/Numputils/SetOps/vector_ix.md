@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.SetOps.vector_ix">vector_ix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L612)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L612?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L612)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L612?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ vector_ix(shape, inds, return_shape=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/vector_ix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/vector_ix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L612?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L612?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

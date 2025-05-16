@@ -1,7 +1,7 @@
 ### <a id="McUtils.Data.WavefunctionData.WavefunctionData">WavefunctionData</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/WavefunctionData.py#L6)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/WavefunctionData.py#L6?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/WavefunctionData.py#L6)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/WavefunctionData.py#L6?message=Update%20Docs)]
 </div>
 An instance of WavefunctionDataHandler that can be used for looking up data on wavefunctions
 
@@ -54,7 +54,7 @@ An instance of WavefunctionDataHandler that can be used for looking up data on w
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/WavefunctionData/WavefunctionData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/WavefunctionData/WavefunctionData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/WavefunctionData.py#L6?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/WavefunctionData.py#L6?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

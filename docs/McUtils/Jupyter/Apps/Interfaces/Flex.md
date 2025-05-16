@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Flex">Flex</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces.py#L1892)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1892?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1892)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1892?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ Item: FlexItem
 __init__(self, elements, direction=None, wrap=None, alignment=None, justification=None, content_alignment=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Flex.py#L1894)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Flex.py#L1894?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1894)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1894?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, elements, direction=None, wrap=None, alignment=None, justificatio
 get_flex_styles(cls, direction=None, wrap=None, alignment=None, justification=None, content_alignment=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1907)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1907?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1907)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1907?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ get_flex_styles(cls, direction=None, wrap=None, alignment=None, justification=No
 get_layout_styles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Flex.py#L1925)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Flex.py#L1925?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Flex.py#L1925)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Flex.py#L1925?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -103,7 +103,7 @@ get_layout_styles(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Flex.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Flex.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1892?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1892?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

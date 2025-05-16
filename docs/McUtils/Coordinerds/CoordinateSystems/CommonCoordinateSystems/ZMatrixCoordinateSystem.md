@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.ZMatrixCoordinateSystem">ZMatrixCoordinateSystem</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L145)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L145?message=Update%20Docs)]
 </div>
 
 Represents ZMatrix coordinates generally
@@ -26,8 +26,8 @@ name: str
 __init__(self, converter_options=None, dimension=(None, None), coordinate_shape=(None, 3), **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinateSystem.py#L150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinateSystem.py#L150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L150)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L150?message=Update%20Docs)]
 </div>
 
   - `converter_options`: `None | dict`
@@ -46,8 +46,8 @@ __init__(self, converter_options=None, dimension=(None, None), coordinate_shape=
 jacobian_prep_coordinates(coord, displacements, values, dihedral_cutoff=6): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L169?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ jacobian_prep_coordinates(coord, displacements, values, dihedral_cutoff=6):
 canonicalize_order_list(self, ncoords, order_list): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L206)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L206?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L206)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L206?message=Update%20Docs)]
 </div>
 Normalizes the way the ZMatrix coordinates are built out
   - `ncoords`: `Any`
@@ -75,8 +75,8 @@ Normalizes the way the ZMatrix coordinates are built out
 tile_order_list(self, ol, ncoords): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L292)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L292?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L292?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -131,7 +131,7 @@ tile_order_list(self, ol, ncoords):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinateSystem.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/ZMatrixCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L145?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L145?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

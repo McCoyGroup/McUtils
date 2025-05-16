@@ -1,7 +1,7 @@
 # <a id="McUtils.Jupyter.JHTML.Bootstrap">McUtils.Jupyter.JHTML.Bootstrap</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/Bootstrap/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/Bootstrap/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/Bootstrap.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/Bootstrap.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -72,7 +72,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/Bootstrap.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/Bootstrap.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/Bootstrap/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/Bootstrap.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.WidgetTools.JupyterAPIs">JupyterAPIs</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/WidgetTools.py#L7)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/WidgetTools.py#L7?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/WidgetTools.py#L7)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/WidgetTools.py#L7?message=Update%20Docs)]
 </div>
 
 Provides access to the various Jupyter APIs
@@ -25,8 +25,8 @@ Provides access to the various Jupyter APIs
 load_api(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L13?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ load_api(cls):
 get_shell_api(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L46?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ get_shell_api(cls):
 get_shell_instance(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L51?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ get_shell_instance(cls):
 get_base_api(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L55)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L55?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L55)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L55?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ get_base_api(cls):
 in_jupyter_environment(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L60?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ in_jupyter_environment(cls):
 get_display_api(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L69)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L69?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L69?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +91,8 @@ get_display_api(cls):
 display_api(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L75)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L75?message=Update%20Docs)]
 </div>
 
 
@@ -102,8 +102,8 @@ display_api(self):
 get_widgets_api(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L79)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L79?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ get_widgets_api(self):
 widgets_api(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L85?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ widgets_api(self):
 get_events_api(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L89?message=Update%20Docs)]
 </div>
 
 
@@ -135,8 +135,8 @@ get_events_api(self):
 events_api(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L95)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L95?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L95)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.py#L95?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -191,7 +191,7 @@ events_api(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/WidgetTools/JupyterAPIs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/WidgetTools.py#L7?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/WidgetTools.py#L7?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

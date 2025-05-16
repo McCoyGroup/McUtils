@@ -1,7 +1,7 @@
 # <a id="McUtils.Misc.NumbaTools.type_spec">type_spec</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/NumbaTools.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/NumbaTools.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/NumbaTools.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L60?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ type_spec(t, warn=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc/NumbaTools/type_spec.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc/NumbaTools/type_spec.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/NumbaTools.py#L60?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L60?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

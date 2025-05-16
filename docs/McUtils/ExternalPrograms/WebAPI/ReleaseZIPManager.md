@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.WebAPI.ReleaseZIPManager">ReleaseZIPManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI.py#L411)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L411?message=Update%20Docs)]
 </div>
 
 
@@ -29,8 +29,8 @@ use_temporary: bool
 parse_semver(cls, version_string): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L416)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L416?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L416)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L416?message=Update%20Docs)]
 </div>
 
 
@@ -40,8 +40,8 @@ parse_semver(cls, version_string):
 make_semver(cls, version): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L423)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L423?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L423)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L423?message=Update%20Docs)]
 </div>
 
 
@@ -51,8 +51,8 @@ make_semver(cls, version):
 parse_name_version(cls, filename): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L427)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L427?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L427)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L427?message=Update%20Docs)]
 </div>
 
 
@@ -61,8 +61,8 @@ parse_name_version(cls, filename):
 list_resources(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L432)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L432?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L432)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L432?message=Update%20Docs)]
 </div>
 
 
@@ -71,8 +71,8 @@ list_resources(self):
 save_resource(self, loc, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L444)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L444?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L444)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.py#L444?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -127,7 +127,7 @@ save_resource(self, loc, val):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L411?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L411?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

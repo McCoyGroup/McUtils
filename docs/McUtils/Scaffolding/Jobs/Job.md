@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Jobs.Job">Job</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs.py#L18)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs.py#L18?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L18)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L18?message=Update%20Docs)]
 </div>
 
 A job object to support simplified run scripting.
@@ -30,8 +30,8 @@ default_log_file: str
 __init__(self, job_dir, job_file=None, logger=None, parallelizer=None, job_parameters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L27)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L27?message=Update%20Docs)]
 </div>
 
 
@@ -41,8 +41,8 @@ __init__(self, job_dir, job_file=None, logger=None, parallelizer=None, job_param
 from_config(cls, config_location=None, job_file=None, logger=None, parallelizer=None, job_parameters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L45?message=Update%20Docs)]
 </div>
 
 
@@ -51,8 +51,8 @@ from_config(cls, config_location=None, job_file=None, logger=None, parallelizer=
 load_checkpoint(self, job_file): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L60?message=Update%20Docs)]
 </div>
 Loads the checkpoint we'll use to dump params
   - `job_file`: `Any`
@@ -66,8 +66,8 @@ Loads the checkpoint we'll use to dump params
 load_logger(self, log_spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L74?message=Update%20Docs)]
 </div>
 Loads the appropriate logger
   - `log_spec`: `str | dict`
@@ -81,8 +81,8 @@ Loads the appropriate logger
 load_parallelizer(self, par_spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L104)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L104?message=Update%20Docs)]
 </div>
 Loads the appropriate parallelizer.
 If something other than a dict is passed,
@@ -98,8 +98,8 @@ tries out multiple specs sequentially until it finds one that works
 path(self, *parts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L130?message=Update%20Docs)]
 </div>
 
   - `parts`: `str`
@@ -114,8 +114,8 @@ path(self, *parts):
 working_directory(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L139?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ working_directory(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L151)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L151?message=Update%20Docs)]
 </div>
 
 
@@ -134,8 +134,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Jobs/Job.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs/Job.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L166?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -190,7 +190,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Jobs/Job.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Jobs/Job.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Jobs.py#L18?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L18?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

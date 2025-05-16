@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.StringParser.StringParser">StringParser</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/StringParser.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StringParser.py#L79)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser.py#L79?message=Update%20Docs)]
 </div>
 
 A convenience class that makes it easy to pull blocks out of strings and whatnot
@@ -26,8 +26,8 @@ MatchIterator: MatchIterator
 __init__(self, regex: McUtils.Parsers.RegexPatterns.RegexPattern): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/StringParser/StringParser.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser/StringParser.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StringParser.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser.py#L84?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, regex: McUtils.Parsers.RegexPatterns.RegexPattern):
 parse(self, txt, regex=None, block_handlers=None, dtypes=None, out=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/StringParser/StringParser.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser/StringParser.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StringParser/StringParser.py#L87)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser/StringParser.py#L87?message=Update%20Docs)]
 </div>
 Finds a single match for the and applies parsers for the specified regex in txt
   - `txt`: `str`
@@ -59,8 +59,8 @@ Finds a single match for the and applies parsers for the specified regex in txt
 parse_all(self, txt, regex=None, num_results=None, block_handlers=None, dtypes=None, out=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/StringParser/StringParser.py#L217)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser/StringParser.py#L217?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StringParser/StringParser.py#L217)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser/StringParser.py#L217?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ parse_all(self, txt, regex=None, num_results=None, block_handlers=None, dtypes=N
 parse_iter(self, txt, regex=None, num_results=None, block_handlers=None, dtypes=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/StringParser/StringParser.py#L315)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser/StringParser.py#L315?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StringParser/StringParser.py#L315)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser/StringParser.py#L315?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ parse_iter(self, txt, regex=None, num_results=None, block_handlers=None, dtypes=
 get_regex_block_handlers(cls, regex): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L339)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L339?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L339)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L339?message=Update%20Docs)]
 </div>
 Uses the uncompiled RegexPattern to determine what blocks exist and what handlers they should use
   - `regex`: `RegexPattern`
@@ -96,8 +96,8 @@ Uses the uncompiled RegexPattern to determine what blocks exist and what handler
 get_regex_dtypes(cls, regex): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L383)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L383?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L383?message=Update%20Docs)]
 </div>
 Uses the uncompiled RegexPattern to determine which StructuredTypes to return
   - `regex`: `RegexPattern`
@@ -112,8 +112,8 @@ Uses the uncompiled RegexPattern to determine which StructuredTypes to return
 handler_method(cls, method): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L868)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L868?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L868)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L868?message=Update%20Docs)]
 </div>
 Turns a regular function into a handler method by adding in (and ignoring) the array argument
   - `method`: `Any`
@@ -128,8 +128,8 @@ Turns a regular function into a handler method by adding in (and ignoring) the a
 load_array(data, dtype='float'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L883)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L883?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L883)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L883?message=Update%20Docs)]
 </div>
 
 
@@ -139,8 +139,8 @@ load_array(data, dtype='float'):
 to_array(cls, data, array=None, append=False, dtype='float', shape=None, pre=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L887)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L887?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L887)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L887?message=Update%20Docs)]
 </div>
 A method to take a string or iterable of strings and quickly dump it to a NumPy array of the right dtype (if it can be cast as one)
   - `data`: `Any`
@@ -157,8 +157,8 @@ A method to take a string or iterable of strings and quickly dump it to a NumPy 
 array_handler(cls, array=None, append=False, dtype='float', shape=None, pre=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L957)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L957?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L957)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L957?message=Update%20Docs)]
 </div>
 Returns a handler that uses to_array
   - `dtype`: `Any`
@@ -222,7 +222,7 @@ Returns a handler that uses to_array
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/StringParser/StringParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/StringParser/StringParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser.py#L79?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser.py#L79?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

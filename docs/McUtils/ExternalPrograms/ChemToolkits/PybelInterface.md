@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ChemToolkits.PybelInterface">PybelInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/ChemToolkits.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/ChemToolkits.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemToolkits.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemToolkits.py#L23?message=Update%20Docs)]
 </div>
 
 A simple class to support operations that make use of the OpenBabel toolkit (which is installed with anaconda)
@@ -76,7 +76,7 @@ module: str
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ChemToolkits/PybelInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ChemToolkits/PybelInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/ChemToolkits.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemToolkits.py#L23?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

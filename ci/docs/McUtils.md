@@ -1,7 +1,7 @@
 # <a id="McUtils">McUtils</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 A growing package of assorted functionality that finds use across many different packages, but doesn't attempt to
@@ -478,7 +478,7 @@ Also supported: `Mesh` operations, automatic differentiation, tensor derivative 
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

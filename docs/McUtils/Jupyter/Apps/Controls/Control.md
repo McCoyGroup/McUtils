@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.Control">Control</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L31?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ control_types: dict
 __init__(self, var, namespace=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Control.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Control.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L33?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, var, namespace=None):
 to_widget(self, parent=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Control.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Control.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Control.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Control.py#L37?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ to_widget(self, parent=None):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Control.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Control.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Control.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Control.py#L46?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ set_value(self):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Control.py#L49)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Control.py#L49?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Control.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Control.py#L49?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ get_value(self):
 value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Control.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Control.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Control.py#L52)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Control.py#L52?message=Update%20Docs)]
 </div>
 
 
@@ -78,8 +78,8 @@ value(self):
 observe(self, fn, names=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Control.py#L59)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Control.py#L59?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Control.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Control.py#L59?message=Update%20Docs)]
 </div>
 
 
@@ -89,8 +89,8 @@ observe(self, fn, names=None):
 construct(cls, var, control_type=None, field_type=None, value=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L65?message=Update%20Docs)]
 </div>
 
 
@@ -100,8 +100,8 @@ construct(cls, var, control_type=None, field_type=None, value=None, **attrs):
 infer_control(cls, field_type=None, value=None, **ignored): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L74?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -156,7 +156,7 @@ infer_control(cls, field_type=None, value=None, **ignored):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Control.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Control.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L31?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L31?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.NeighborBasedInterpolators.RBFDInterpolator">RBFDInterpolator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators.py#L885)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators.py#L885?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators.py#L885)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators.py#L885?message=Update%20Docs)]
 </div>
 
 Provides a flexible RBF interpolator that also allows
@@ -30,8 +30,8 @@ Interpolator: Interpolator
 __init__(self, pts, values, *derivatives, kernel: Union[<built-in function callable>, dict] = 'thin_plate_spline', kernel_options=None, auxiliary_basis=None, auxiliary_basis_options=None, extra_degree=0, clustering_radius=None, monomial_basis=True, multicenter_monomials=True, neighborhood_size=15, neighborhood_merge_threshold=None, neighborhood_max_merge_size=100, neighborhood_clustering_radius=None, solve_method='svd', max_condition_number=inf, error_threshold=0.01, bad_interpolation_retries=3, coordinate_transform=None, logger=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L891)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L891?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators.py#L891)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators.py#L891?message=Update%20Docs)]
 </div>
 
 
@@ -41,8 +41,8 @@ __init__(self, pts, values, *derivatives, kernel: Union[<built-in function calla
 gaussian(r, e=1, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1010)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1010?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1010)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1010?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +52,8 @@ gaussian(r, e=1, inds=None):
 gaussian_derivative(n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1015)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1015?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1015)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1015?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ gaussian_derivative(n: int, inds=None):
 gaussian_singularity_handler(n: int, ndim: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1026)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1026?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1026)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1026?message=Update%20Docs)]
 </div>
 
 
@@ -74,8 +74,8 @@ gaussian_singularity_handler(n: int, ndim: int, inds=None):
 thin_plate_spline(r, o=3, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1053)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1053?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1053)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1053?message=Update%20Docs)]
 </div>
 
 
@@ -85,8 +85,8 @@ thin_plate_spline(r, o=3, inds=None):
 thin_plate_spline_derivative(n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1056)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1056?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1056)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1056?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ thin_plate_spline_derivative(n: int, inds=None):
 thin_plate_spline_singularity_handler(n: int, ndim: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1071)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1071?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1071)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1071?message=Update%20Docs)]
 </div>
 
 
@@ -107,8 +107,8 @@ thin_plate_spline_singularity_handler(n: int, ndim: int, inds=None):
 wendland_coefficient(cls, l, j, k): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1081)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1081?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1081)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1081?message=Update%20Docs)]
 </div>
 
 
@@ -118,8 +118,8 @@ wendland_coefficient(cls, l, j, k):
 wendland_polynomial(cls, r, d=None, k=3, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1103)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1103?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1103?message=Update%20Docs)]
 </div>
 
 
@@ -129,8 +129,8 @@ wendland_polynomial(cls, r, d=None, k=3, inds=None):
 wendland_polynomial_derivative(cls, n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1115?message=Update%20Docs)]
 </div>
 
 
@@ -140,8 +140,8 @@ wendland_polynomial_derivative(cls, n: int, inds=None):
 wendland_polynomial_singularity_handler(n: int, ndim: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1128?message=Update%20Docs)]
 </div>
 
 
@@ -151,8 +151,8 @@ wendland_polynomial_singularity_handler(n: int, ndim: int, inds=None):
 zeros(r, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1137?message=Update%20Docs)]
 </div>
 
 
@@ -162,8 +162,8 @@ zeros(r, inds=None):
 zeros_derivative(n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1140)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1140?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1140?message=Update%20Docs)]
 </div>
 
 
@@ -173,8 +173,8 @@ zeros_derivative(n: int, inds=None):
 zeros_singularity_handler(n: int, ndim: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1145)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1145?message=Update%20Docs)]
 </div>
 
 
@@ -184,8 +184,8 @@ zeros_singularity_handler(n: int, ndim: int, inds=None):
 default_kernels(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1152)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1152?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1152?message=Update%20Docs)]
 </div>
 
 
@@ -195,8 +195,8 @@ default_kernels(self):
 morse(r, a=1, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1180)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1180?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1180)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1180?message=Update%20Docs)]
 </div>
 
 
@@ -206,8 +206,8 @@ morse(r, a=1, inds=None):
 morse_derivative(n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1186?message=Update%20Docs)]
 </div>
 
 
@@ -217,8 +217,8 @@ morse_derivative(n: int, inds=None):
 even_powers(r, o=1, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1197?message=Update%20Docs)]
 </div>
 
 
@@ -228,8 +228,8 @@ even_powers(r, o=1, inds=None):
 even_powers_deriv(n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1200)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1200?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1200)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1200?message=Update%20Docs)]
 </div>
 
 
@@ -239,8 +239,8 @@ even_powers_deriv(n: int, inds=None):
 laguerre(r, k=3, shift=2.29428, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1210)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1210?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1210?message=Update%20Docs)]
 </div>
 
 
@@ -250,8 +250,8 @@ laguerre(r, k=3, shift=2.29428, inds=None):
 laguerre_deriv(n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1213)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1213?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1213?message=Update%20Docs)]
 </div>
 (-1)^n LaguerreL[k - n, n, x]
 
@@ -262,8 +262,8 @@ laguerre_deriv(n: int, inds=None):
 compact_laguerre(cls, r, e=1, k=3, shift=2.29428, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1221)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1221?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1221)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1221?message=Update%20Docs)]
 </div>
 
 
@@ -273,8 +273,8 @@ compact_laguerre(cls, r, e=1, k=3, shift=2.29428, inds=None):
 compact_laguerre_deriv(cls, n: int, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1224)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1224?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1224?message=Update%20Docs)]
 </div>
 
 
@@ -284,8 +284,8 @@ compact_laguerre_deriv(cls, n: int, inds=None):
 default_auxiliary_bases(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1243)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1243?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1243)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1243?message=Update%20Docs)]
 </div>
 
 
@@ -294,8 +294,8 @@ default_auxiliary_bases(self):
 evaluate_poly_matrix(self, pts, degree, deriv_order=0, poly_origin=0.5, include_constant_term=True, monomials=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1288)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1288?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1288)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1288?message=Update%20Docs)]
 </div>
 
 
@@ -304,8 +304,8 @@ evaluate_poly_matrix(self, pts, degree, deriv_order=0, poly_origin=0.5, include_
 evaluate_rbf_matrix(self, pts, centers, inds, deriv_order=0, zero_tol=1e-08): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1415)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1415?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1415)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1415?message=Update%20Docs)]
 </div>
 
 
@@ -314,8 +314,8 @@ evaluate_rbf_matrix(self, pts, centers, inds, deriv_order=0, zero_tol=1e-08):
 construct_matrix(self, pts, centers, inds, degree=0, deriv_order=0, zero_tol=1e-08, poly_origin=None, include_constant_term=True, force_square=False, monomials=True, multicentered_polys=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1482)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1482?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1482)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1482?message=Update%20Docs)]
 </div>
 
 
@@ -325,8 +325,8 @@ construct_matrix(self, pts, centers, inds, degree=0, deriv_order=0, zero_tol=1e-
 svd_solve(a, b, svd_cutoff=1e-12): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1517)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1517?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1517)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1517?message=Update%20Docs)]
 </div>
 
 
@@ -335,8 +335,8 @@ svd_solve(a, b, svd_cutoff=1e-12):
 solve_system(self, centers, vals, derivs: list, inds, solver=None, return_data=False, error_threshold=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1523)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1523?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1523)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1523?message=Update%20Docs)]
 </div>
 
 
@@ -345,8 +345,8 @@ solve_system(self, centers, vals, derivs: list, inds, solver=None, return_data=F
 construct_evaluation_matrix(self, pts, data, deriv_order=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1655)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1655?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1655?message=Update%20Docs)]
 </div>
 
   - `pts`: `Any`
@@ -364,8 +364,8 @@ construct_evaluation_matrix(self, pts, data, deriv_order=0):
 apply_interpolation(self, pts, data, inds, reshape_derivatives=True, return_data=False, deriv_order=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1676)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1676?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1676)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1676?message=Update%20Docs)]
 </div>
 
   - `pts`: `Any`
@@ -383,8 +383,8 @@ apply_interpolation(self, pts, data, inds, reshape_derivatives=True, return_data
 construct_interpolation(self, inds, solver_data=False, return_error=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1722)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1722?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1722)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.py#L1722?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -439,7 +439,7 @@ construct_interpolation(self, inds, solver_data=False, return_error=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/NeighborBasedInterpolators.py#L885?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/NeighborBasedInterpolators.py#L885?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

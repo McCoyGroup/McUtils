@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.CoordinateSystemConverters">CoordinateSystemConverters</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L87)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L87?message=Update%20Docs)]
 </div>
 
 A coordinate converter class. It's a singleton so can't be instantiated.
@@ -30,8 +30,8 @@ converter_type: CoordinateSystemConverter
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverters.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverters.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L102?message=Update%20Docs)]
 </div>
 
 
@@ -41,8 +41,8 @@ __init__(self):
 get_coordinates(self, coordinate_set): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L105)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L105?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L105)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L105?message=Update%20Docs)]
 </div>
 Extracts coordinates from a coordinate_set
 
@@ -53,8 +53,8 @@ Extracts coordinates from a coordinate_set
 load_converter(self, converter): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L119?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ load_converter(self, converter):
 get_converter(cls, system1, system2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L159)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L159?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L159)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L159?message=Update%20Docs)]
 </div>
 Gets the appropriate converter for two CoordinateSystem objects
   - `system1`: `CoordinateSystem`
@@ -82,8 +82,8 @@ Gets the appropriate converter for two CoordinateSystem objects
 register_converter(cls, system1, system2, converter, check=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L221)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L221?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L221)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L221?message=Update%20Docs)]
 </div>
 Registers a converter between two coordinate systems
   - `system1`: `CoordinateSystem`
@@ -145,7 +145,7 @@ Registers a converter between two coordinate systems
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverters.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/CoordinateSystemConverters.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L87?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L87?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler">TemplateHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L656)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L656?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L656)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L656?message=Update%20Docs)]
 </div>
 
 
@@ -26,11 +26,11 @@ blacklist_packages: set
 ```
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, obj, *, out=None, engine: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine = None, root=None, squash_repeat_packages=True, **extra_fields): 
+__init__(self, obj, *, out=None, engine: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine = None, root=None, squash_repeat_packages=True, is_package_root=False, **extra_fields): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L660)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L660?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L660)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L660?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ __init__(self, obj, *, out=None, engine: McUtils.Formatters.TemplateEngine.Templ
 template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L687)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L687?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L689)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L689?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ template_params(self, **kwargs):
 get_template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L693)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L693?message=Update%20Docs)]
 </div>
 Returns the parameters that should be inserted into the template
   - `:returns`: `dict`
@@ -63,8 +63,8 @@ Returns the parameters that should be inserted into the template
 package_path(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L701)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L701?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L703)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L703?message=Update%20Docs)]
 </div>
 
 
@@ -73,8 +73,8 @@ package_path(self):
 get_package_and_url(self, include_url_base=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L704)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L704?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L706)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L706?message=Update%20Docs)]
 </div>
 Returns package name and corresponding URL for the object
 being documented
@@ -88,8 +88,19 @@ being documented
 target_identifier(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L740)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L740?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L749)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L749?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler.squash_reps" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+squash_reps(cls, ident): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L752)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L752?message=Update%20Docs)]
 </div>
 
 
@@ -98,8 +109,8 @@ target_identifier(self):
 get_target_extension(self, identifier=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L743)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L743?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L762)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L762?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +119,8 @@ get_target_extension(self, identifier=None):
 get_output_file(self, out): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L757)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L757?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L776)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L776?message=Update%20Docs)]
 </div>
 Returns package name and corresponding URL for the object
 being documented
@@ -122,8 +133,8 @@ being documented
 handle(self, template=None, target=None, write=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L777)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L777?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L796)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L796?message=Update%20Docs)]
 </div>
 Formats the documentation Markdown from the supplied template
   - `template`: `Any`
@@ -137,8 +148,8 @@ Formats the documentation Markdown from the supplied template
 check_should_write(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L839)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L839?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L858)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L858?message=Update%20Docs)]
 </div>
 Determines whether the object really actually should be
 documented (quite permissive)
@@ -197,7 +208,7 @@ documented (quite permissive)
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L656?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L656?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

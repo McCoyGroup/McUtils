@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Apps.App">App</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L94?message=Update%20Docs)]
 </div>
 
 Provides a framework for making Jupyter Apps with the
@@ -28,8 +28,8 @@ themes: dict
 merge_themes(cls, theme_1, theme_2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L127?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ merge_themes(cls, theme_1, theme_2):
 __init__(self, body=None, header=None, footer=None, sidebar=None, toolbar=None, theme='primary', layout='grid', cls='app border', output=None, capture_output=None, vars=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L138?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ __init__(self, body=None, header=None, footer=None, sidebar=None, toolbar=None, 
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L169?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L178)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L178?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 body(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ body(self):
 header(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L196)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L196?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L196)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L196?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +91,8 @@ header(self):
 sidebar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L206)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L206?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L206)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L206?message=Update%20Docs)]
 </div>
 
 
@@ -102,8 +102,8 @@ sidebar(self):
 toolbar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L216)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L216?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ toolbar(self):
 footer(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L226)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L226?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ footer(self):
 prep_head_item(cls, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L236)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L236?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L236)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L236?message=Update%20Docs)]
 </div>
 
 
@@ -135,8 +135,8 @@ prep_head_item(cls, item):
 construct_navbar_item(cls, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L245)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L245?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L245)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L245?message=Update%20Docs)]
 </div>
 
 
@@ -145,8 +145,8 @@ construct_navbar_item(cls, item):
 construct_header(self, header, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L258)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L258?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L258)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L258?message=Update%20Docs)]
 </div>
 
 
@@ -155,8 +155,8 @@ construct_header(self, header, **opts):
 construct_footer(self, footer, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L280)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L280?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L280)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L280?message=Update%20Docs)]
 </div>
 
 
@@ -165,8 +165,8 @@ construct_footer(self, footer, **opts):
 construct_sidebar_item(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L298)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L298?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L298)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L298?message=Update%20Docs)]
 </div>
 
 
@@ -175,8 +175,8 @@ construct_sidebar_item(self, item):
 construct_sidebar(self, sidebar, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L313)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L313?message=Update%20Docs)]
 </div>
 
 
@@ -185,8 +185,8 @@ construct_sidebar(self, sidebar, **opts):
 construct_toolbar_item(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L332)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L332?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L332)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L332?message=Update%20Docs)]
 </div>
 
 
@@ -195,8 +195,8 @@ construct_toolbar_item(self, item):
 construct_toolbar(self, toolbar, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L339)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L339?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L339)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L339?message=Update%20Docs)]
 </div>
 
 
@@ -205,8 +205,8 @@ construct_toolbar(self, toolbar, **opts):
 wrap_body(self, fn, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L355)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L355?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L355)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L355?message=Update%20Docs)]
 </div>
 
 
@@ -215,8 +215,8 @@ wrap_body(self, fn, **styles):
 construct_body_item(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L360)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L360?message=Update%20Docs)]
 </div>
 
 
@@ -225,8 +225,8 @@ construct_body_item(self, item):
 construct_body(self, body): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L374)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L374?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L374)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L374?message=Update%20Docs)]
 </div>
 
 
@@ -235,8 +235,8 @@ construct_body(self, body):
 construct_layout(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L383)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L383?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L383?message=Update%20Docs)]
 </div>
 
 
@@ -245,8 +245,8 @@ construct_layout(self):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/App.py#L469)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/App.py#L469?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/App.py#L469)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/App.py#L469?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -301,7 +301,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Apps/App.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Apps/App.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps.py#L94?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L94?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Graphics.Graphics">Graphics</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics.py#L845)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics.py#L845?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L845)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L845?message=Update%20Docs)]
 </div>
 
 
@@ -31,8 +31,8 @@ inset_options: dict
 set_options(self, axes_labels=None, plot_label=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, **parent_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L881)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L881?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L881)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L881?message=Update%20Docs)]
 </div>
 
 
@@ -42,8 +42,8 @@ set_options(self, axes_labels=None, plot_label=None, plot_range=None, plot_legen
 artists(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L933)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L933?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L933)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L933?message=Update%20Docs)]
 </div>
 
 
@@ -53,8 +53,8 @@ artists(self):
 plot_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L938)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L938?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L938)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L938?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ plot_label(self):
 plot_legend(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L946)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L946?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L946)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L946?message=Update%20Docs)]
 </div>
 
 
@@ -75,8 +75,8 @@ plot_legend(self):
 legend_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L954)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L954?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L954)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L954?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ legend_style(self):
 axes_labels(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L962)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L962?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L962)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L962?message=Update%20Docs)]
 </div>
 
 
@@ -97,8 +97,8 @@ axes_labels(self):
 frame(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L970)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L970?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L970)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L970?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ frame(self):
 frame_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L978)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L978?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L978)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L978?message=Update%20Docs)]
 </div>
 
 
@@ -119,8 +119,8 @@ frame_style(self):
 plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L986)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L986?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L986)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L986?message=Update%20Docs)]
 </div>
 
 
@@ -130,8 +130,8 @@ plot_range(self):
 ticks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L994)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L994?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L994)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L994?message=Update%20Docs)]
 </div>
 
 
@@ -141,8 +141,8 @@ ticks(self):
 ticks_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1002)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1002?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1002)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1002?message=Update%20Docs)]
 </div>
 
 
@@ -152,8 +152,8 @@ ticks_style(self):
 ticks_label_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1010)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1010?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1010)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1010?message=Update%20Docs)]
 </div>
 
 
@@ -163,8 +163,8 @@ ticks_label_style(self):
 scale(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1018)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1018?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1018)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1018?message=Update%20Docs)]
 </div>
 
 
@@ -174,8 +174,8 @@ scale(self):
 axes_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1026)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1026?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1026)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1026?message=Update%20Docs)]
 </div>
 
 
@@ -185,8 +185,8 @@ axes_bbox(self):
 aspect_ratio(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1034)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1034?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1034)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1034?message=Update%20Docs)]
 </div>
 
 
@@ -196,8 +196,8 @@ aspect_ratio(self):
 image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1042)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1042?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1042)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1042?message=Update%20Docs)]
 </div>
 
 
@@ -207,8 +207,8 @@ image_size(self):
 figure_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1050)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1050?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1050)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1050?message=Update%20Docs)]
 </div>
 
 
@@ -218,8 +218,8 @@ figure_label(self):
 padding(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1058)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1058?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1058)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1058?message=Update%20Docs)]
 </div>
 
 
@@ -229,8 +229,8 @@ padding(self):
 padding_left(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1065)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1065?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1065)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1065?message=Update%20Docs)]
 </div>
 
 
@@ -240,8 +240,8 @@ padding_left(self):
 padding_right(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1072)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1072?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1072)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1072?message=Update%20Docs)]
 </div>
 
 
@@ -251,8 +251,8 @@ padding_right(self):
 padding_top(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1079)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1079?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1079)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1079?message=Update%20Docs)]
 </div>
 
 
@@ -262,8 +262,8 @@ padding_top(self):
 padding_bottom(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1086)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1086?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1086)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1086?message=Update%20Docs)]
 </div>
 
 
@@ -273,8 +273,8 @@ padding_bottom(self):
 spacings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1094)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1094?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1094)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1094?message=Update%20Docs)]
 </div>
 
 
@@ -284,8 +284,8 @@ spacings(self):
 background(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1102?message=Update%20Docs)]
 </div>
 
 
@@ -295,8 +295,8 @@ background(self):
 colorbar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1110?message=Update%20Docs)]
 </div>
 
 
@@ -305,8 +305,8 @@ colorbar(self):
 get_padding_offsets(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1132)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1132?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1132)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1132?message=Update%20Docs)]
 </div>
 
 
@@ -315,8 +315,8 @@ get_padding_offsets(self):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1146)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1146?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1146)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1146?message=Update%20Docs)]
 </div>
 
 
@@ -325,8 +325,8 @@ get_bbox(self):
 create_inset(self, bbox, coordinates='absolute', graphics_class=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/Graphics.py#L1164)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/Graphics.py#L1164?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1164)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1164?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -408,7 +408,7 @@ other plotting functions, such as `Plot` or `ContourPlot` to create a
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Graphics/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Graphics/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics.py#L845?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L845?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

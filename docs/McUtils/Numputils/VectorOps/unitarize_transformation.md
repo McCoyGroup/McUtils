@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.VectorOps.unitarize_transformation">unitarize_transformation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L1243)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L1243?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1243)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1243?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ unitarize_transformation(tf):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/unitarize_transformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/unitarize_transformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L1243?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1243?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

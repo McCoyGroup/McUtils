@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.CartesianCoordinateSystem">CartesianCoordinateSystem</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L23?message=Update%20Docs)]
 </div>
 
 Represents Cartesian coordinates generally
@@ -26,8 +26,8 @@ name: str
 __init__(self, dimension=None, converter_options=None, coordinate_shape=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L28)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L28?message=Update%20Docs)]
 </div>
 
   - `converter_options`: `None | dict`
@@ -89,7 +89,7 @@ __init__(self, dimension=None, converter_options=None, coordinate_shape=None, **
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L23?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

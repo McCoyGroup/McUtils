@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateResourceExtractor">TemplateResourceExtractor</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L857)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L857?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L876)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L876?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,8 @@ resource_attrs: list
 path_extension(self, handler: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L859)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L859?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L878)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L878?message=Update%20Docs)]
 </div>
 Provides the default examples path for the object
   - `:returns`: `_`
@@ -41,8 +41,8 @@ Provides the default examples path for the object
 get_resource(self, handler: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler, keys=None, attrs=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L868)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L868?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L887)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L887?message=Update%20Docs)]
 </div>
 
 
@@ -51,8 +51,8 @@ get_resource(self, handler: McUtils.Formatters.TemplateEngine.TemplateEngine.Tem
 load(self, handler: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L900)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L900?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L919)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.py#L919?message=Update%20Docs)]
 </div>
 Loads examples for the stored object if provided
   - `:returns`: `_`
@@ -113,7 +113,7 @@ Loads examples for the stored object if provided
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateResourceExtractor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L857?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L876?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds.Conveniences.extract_zmatrix_internals">extract_zmatrix_internals</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/Conveniences.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Conveniences.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L226)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L226?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ extract_zmatrix_internals(zmat):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Conveniences/extract_zmatrix_internals.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/extract_zmatrix_internals.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Conveniences.py#L226?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L226?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

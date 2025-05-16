@@ -1,7 +1,7 @@
 # <a id="McUtils.Extensions">McUtils.Extensions</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 A package for managing extension modules.
@@ -108,9 +108,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-7ba9c4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7ba9c4"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-43ce4d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-43ce4d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7ba9c4" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-43ce4d" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -120,9 +120,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-be7ee9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-be7ee9"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-fa706d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fa706d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-be7ee9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fa706d" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -390,7 +390,7 @@ class ExtensionsTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

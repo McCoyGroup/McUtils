@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.Orca.OrcaJob">OrcaJob</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Orca.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Orca.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L168)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L168?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ blocks: list
 __init__(self, *strs, basis_set=None, level_of_theory=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Orca/OrcaJob.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Orca/OrcaJob.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L177?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ __init__(self, *strs, basis_set=None, level_of_theory=None, **opts):
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L199)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L199?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L199?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ get_block_types(cls):
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L203)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L203?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L203?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -105,7 +105,7 @@ load_template(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Orca/OrcaJob.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Orca/OrcaJob.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Orca.py#L168?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L168?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Polynomials.TensorCoefficientPoly">TensorCoefficientPoly</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L1129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L1129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L1129)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L1129?message=Update%20Docs)]
 </div>
 
 Represents a polynomial constructed using tensor elements as monomials
@@ -26,8 +26,8 @@ by tracking sets of indices
 canonical_key(cls, monomial_tuple): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1135?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +82,7 @@ canonical_key(cls, monomial_tuple):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/TensorCoefficientPoly.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L1129?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L1129?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

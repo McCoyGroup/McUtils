@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.GeometricTransformations.GeometricTransformation.GeometricTransformation">GeometricTransformation</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation.py#L25?message=Update%20Docs)]
 </div>
 
 The GeometricTransformation class provides a simple, general way to represent a
@@ -26,8 +26,8 @@ In general, it's basically just a wrapper chaining together a number of Transfor
 __init__(self, *transforms): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation.py#L32?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, *transforms):
 is_affine(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L39?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ is_affine(self):
 transformation_function(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L42?message=Update%20Docs)]
 </div>
 
   - `:returns`: `TransformationFunction`
@@ -62,8 +62,8 @@ transformation_function(self):
 transforms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L50?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ transforms(self):
 apply(self, coords, shift=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L54)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L54?message=Update%20Docs)]
 </div>
 
 
@@ -82,8 +82,8 @@ apply(self, coords, shift=True):
 __call__(self, coords, shift=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L57?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +92,8 @@ __call__(self, coords, shift=True):
 condense_transforms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L63?message=Update%20Docs)]
 </div>
 
 
@@ -103,8 +103,8 @@ condense_transforms(self):
 inverse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L68)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.py#L68?message=Update%20Docs)]
 </div>
 
 
@@ -114,8 +114,8 @@ inverse(self):
 parse_transform(tf): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L72)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L72?message=Update%20Docs)]
 </div>
 Provides a way to "tag" a transformation
   - `tf`: `Any`
@@ -175,7 +175,7 @@ Provides a way to "tag" a transformation
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/GeometricTransformation.py#L25?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/GeometricTransformation.py#L25?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

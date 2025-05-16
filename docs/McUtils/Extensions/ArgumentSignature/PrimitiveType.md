@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.ArgumentSignature.PrimitiveType">PrimitiveType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L64?message=Update%20Docs)]
 </div>
 
 Defines a general purpose ArgumentType so that we can easily manage complicated type specs
@@ -29,8 +29,8 @@ typeset: dict
 __init__(self, name, ctypes_spec, cpp_spec, capi_spec, python_types, numpy_dtypes, serializer, deserializer): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L73?message=Update%20Docs)]
 </div>
 
   - `name`: `str`
@@ -57,8 +57,8 @@ __init__(self, name, ctypes_spec, cpp_spec, capi_spec, python_types, numpy_dtype
 name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L112)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L112?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ name(self):
 ctypes_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L115?message=Update%20Docs)]
 </div>
 
 
@@ -79,8 +79,8 @@ ctypes_type(self):
 cpp_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L118)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L118?message=Update%20Docs)]
 </div>
 
 
@@ -90,8 +90,8 @@ cpp_type(self):
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L121)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L121?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L121?message=Update%20Docs)]
 </div>
 
 
@@ -101,8 +101,8 @@ types(self):
 dtypes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L124)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L124?message=Update%20Docs)]
 </div>
 
 
@@ -112,8 +112,8 @@ dtypes(self):
 typechar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L127?message=Update%20Docs)]
 </div>
 
 
@@ -122,8 +122,8 @@ typechar(self):
 isinstance(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L130?message=Update%20Docs)]
 </div>
 
 
@@ -132,8 +132,8 @@ isinstance(self, arg):
 cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L132)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L132?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L132)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L132?message=Update%20Docs)]
 </div>
 
 
@@ -142,8 +142,8 @@ cast(self, arg):
 c_cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L134)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L134?message=Update%20Docs)]
 </div>
 
 
@@ -152,8 +152,8 @@ c_cast(self, arg):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/PrimitiveType.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/PrimitiveType.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/PrimitiveType.py#L137?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -208,7 +208,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/ArgumentSignature/PrimitiveType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/ArgumentSignature/PrimitiveType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature.py#L64?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L64?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

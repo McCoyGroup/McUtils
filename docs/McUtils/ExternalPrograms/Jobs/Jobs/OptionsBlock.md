@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock">OptionsBlock</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Jobs.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ require_value: NoneType
 __init__(self, canonicalize_opts=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L37?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, canonicalize_opts=True, **opts):
 get_props(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L43?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ get_props(cls):
 get_aliases(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L46?message=Update%20Docs)]
 </div>
 
 
@@ -59,8 +59,8 @@ get_aliases(cls):
 get_canonical_opts_map(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L49)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L49?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L49?message=Update%20Docs)]
 </div>
 
 
@@ -70,8 +70,8 @@ get_canonical_opts_map(cls):
 get_props_set(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L57?message=Update%20Docs)]
 </div>
 
 
@@ -81,8 +81,8 @@ get_props_set(cls):
 get_inverse_alias_map(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L63?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +92,8 @@ get_inverse_alias_map(cls):
 check_canon(cls, opt, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L74?message=Update%20Docs)]
 </div>
 
 
@@ -103,8 +103,8 @@ check_canon(cls, opt, val):
 canonicalize_opt_name(cls, opt): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L89?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ canonicalize_opt_name(cls, opt):
 check_opts(self, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ check_opts(self, opts):
 prep_opts(cls, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L115?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -180,7 +180,7 @@ prep_opts(cls, opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

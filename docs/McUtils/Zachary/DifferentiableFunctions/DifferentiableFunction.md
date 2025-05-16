@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction">DifferentiableFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L19)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L19?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L20?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, inds=None):
 reindex(self, idx_perm): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L23?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ reindex(self, idx_perm):
 get_consistent_inds(self, funcs: 'list[DifferentiableFunction]'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L31?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ get_consistent_inds(self, funcs: 'list[DifferentiableFunction]'):
 __call__(self, coords, order=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L38)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L38?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ __call__(self, coords, order=0):
 evaluate(self, coords, order=0) -> list[numpy.ndarray]: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L57?message=Update%20Docs)]
 </div>
 
 
@@ -74,8 +74,8 @@ evaluate(self, coords, order=0) -> list[numpy.ndarray]:
 get_children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L61?message=Update%20Docs)]
 </div>
 
 
@@ -84,8 +84,8 @@ get_children(self):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L65?message=Update%20Docs)]
 </div>
 
 
@@ -94,8 +94,8 @@ __add__(self, other):
 __radd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L78)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L78?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L78?message=Update%20Docs)]
 </div>
 
 
@@ -104,8 +104,8 @@ __radd__(self, other):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L80)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L80?message=Update%20Docs)]
 </div>
 
 
@@ -114,8 +114,8 @@ __mul__(self, other):
 __truediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L93?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ __truediv__(self, other):
 __rtruediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L106?message=Update%20Docs)]
 </div>
 
 
@@ -134,8 +134,8 @@ __rtruediv__(self, other):
 __rmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L108)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L108?message=Update%20Docs)]
 </div>
 
 
@@ -144,8 +144,8 @@ __rmul__(self, other):
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L110?message=Update%20Docs)]
 </div>
 
 
@@ -154,8 +154,8 @@ __neg__(self):
 flip(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L116?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -210,7 +210,7 @@ flip(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions.py#L19?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L19?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

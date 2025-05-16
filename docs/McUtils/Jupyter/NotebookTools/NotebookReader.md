@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.NotebookTools.NotebookReader">NotebookReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools.py#L11?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ CellList: CellList
 __init__(self, json_or_fp): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L12)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L12?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools.py#L12)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools.py#L12?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, json_or_fp):
 cell(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L69)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L69?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L69?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ cell(self, data):
 get_mime_image_loader(self, img_type): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L71?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ get_mime_image_loader(self, img_type):
 get_mime_type_loader(self, mime_type): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L75)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L75?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ get_mime_type_loader(self, mime_type):
 cell_list(self, cells=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L149)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L149?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L149)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L149?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ cell_list(self, cells=None):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L156)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L156?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L156)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L156?message=Update%20Docs)]
 </div>
 
 
@@ -87,8 +87,8 @@ __repr__(self):
 load_notebook(self, nb_js): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L160)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L160?message=Update%20Docs)]
 </div>
 
 
@@ -97,8 +97,8 @@ load_notebook(self, nb_js):
 get_notebook_name(self, nb_js=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L170)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L170?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L170)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L170?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ get_notebook_name(self, nb_js=None):
 file_name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L182?message=Update%20Docs)]
 </div>
 
 
@@ -119,8 +119,8 @@ file_name(self):
 nb_json(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/NotebookTools/NotebookReader.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools/NotebookReader.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools/NotebookReader.py#L188?message=Update%20Docs)]
 </div>
 
 
@@ -130,8 +130,8 @@ nb_json(self):
 get_notebook_files(cls, directory='.'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L195)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L195?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L195?message=Update%20Docs)]
 </div>
 
 
@@ -141,8 +141,8 @@ get_notebook_files(cls, directory='.'):
 sort_by_evaluation_time(cls, file_list, directory='.'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L201)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L201?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L201?message=Update%20Docs)]
 </div>
 
 
@@ -152,8 +152,8 @@ sort_by_evaluation_time(cls, file_list, directory='.'):
 active_notebook(cls, directory='.'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L207)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L207?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -208,7 +208,7 @@ active_notebook(cls, directory='.'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/NotebookTools/NotebookReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/NotebookTools/NotebookReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/NotebookTools.py#L11?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/NotebookTools.py#L11?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

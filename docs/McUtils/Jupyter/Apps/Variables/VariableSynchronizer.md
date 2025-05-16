@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Variables.VariableSynchronizer">VariableSynchronizer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables.py#L172)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables.py#L172?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L172?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ current_namespace: VariableNamespace
 __init__(self, name, namespace=None, value=None, callbacks=(), output_pane=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L174)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L174?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L174)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L174?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, name, namespace=None, value=None, callbacks=(), output_pane=None)
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L181)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L181?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L181?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ __repr__(self):
 create_var(cls, var): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L187)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L187?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L187)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L187?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ create_var(cls, var):
 name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L201)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L201?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L201?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ name(self):
 value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L204)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L204?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L204?message=Update%20Docs)]
 </div>
 
 
@@ -79,8 +79,8 @@ value(self):
 set_value(self, v, caller=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L210)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L210?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L210?message=Update%20Docs)]
 </div>
 
 
@@ -89,8 +89,8 @@ set_value(self, v, caller=None):
 link(self, widget): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L224)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables/VariableSynchronizer.py#L224?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.py#L224?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -145,7 +145,7 @@ link(self, widget):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Variables/VariableSynchronizer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Variables.py#L172?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L172?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

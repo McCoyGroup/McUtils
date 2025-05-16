@@ -1,7 +1,7 @@
 # <a id="McUtils.Jupyter">McUtils.Jupyter</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Defines a set of useful interactive tools
@@ -383,17 +383,17 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-94f4ee" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-94f4ee"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-aa593c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-aa593c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-94f4ee" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-aa593c" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-d052fe" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d052fe"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-91b1ae" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-91b1ae"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d052fe" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-91b1ae" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -475,7 +475,7 @@ a {
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

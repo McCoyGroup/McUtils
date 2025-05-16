@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Logging.LogParser">LogParser</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging.py#L13?message=Update%20Docs)]
 </div>
 
 A parser that will take a log file and stream it as a series of blocks
@@ -26,8 +26,8 @@ LogBlockParser: LogBlockParser
 __init__(self, file, block_settings=None, block_level_padding=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/LogParser.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/LogParser.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging.py#L17?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, file, block_settings=None, block_level_padding=None, **kwargs):
 get_block_settings(self, block_level): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/LogParser.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/LogParser.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L26?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ get_block_settings(self, block_level):
 get_block(self, level=0, tag=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/LogParser.py#L155)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/LogParser.py#L155?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L155?message=Update%20Docs)]
 </div>
 
   - `level`: `Any`
@@ -63,8 +63,8 @@ get_block(self, level=0, tag=None):
 get_line(self, level=0, tag=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/LogParser.py#L190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/LogParser.py#L190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L190?message=Update%20Docs)]
 </div>
 
   - `level`: `Any`
@@ -80,8 +80,8 @@ get_line(self, level=0, tag=None):
 get_blocks(self, tag=None, level=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/LogParser.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/LogParser.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L212)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L212?message=Update%20Docs)]
 </div>
 
 
@@ -90,8 +90,8 @@ get_blocks(self, tag=None, level=0):
 get_lines(self, tag=None, level=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Logging/LogParser.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging/LogParser.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L226)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L226?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -146,7 +146,7 @@ get_lines(self, tag=None, level=0):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Logging/LogParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Logging/LogParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Logging.py#L13?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging.py#L13?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

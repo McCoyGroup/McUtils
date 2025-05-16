@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Apps.SettingsPane">SettingsPane</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps.py#L471)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps.py#L471?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L471)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L471?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ themes: dict
 __init__(self, settings, cls=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Apps/SettingsPane.py#L478)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps/SettingsPane.py#L478?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L478)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L478?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +82,7 @@ __init__(self, settings, cls=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Apps/SettingsPane.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Apps/SettingsPane.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Apps.py#L471?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L471?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

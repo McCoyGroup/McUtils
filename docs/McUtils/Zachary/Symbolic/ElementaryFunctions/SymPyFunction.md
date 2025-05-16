@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Symbolic.ElementaryFunctions.SymPyFunction">SymPyFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions.py#L1532)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions.py#L1532?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1532)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1532?message=Update%20Docs)]
 </div>
 
 A function suitable for symbolic manipulation
@@ -26,8 +26,8 @@ with derivatives and evlauation
 get_sympy(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1538)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1538?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1538)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1538?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ get_sympy(cls):
 sympy(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1542)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1542?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1542)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1542?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ sympy(self):
 __init__(self, expr, vars=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1546)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1546?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1546)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1546?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ __init__(self, expr, vars=None):
 sort_vars(self, vars): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1562)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1562?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1562)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1562?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ sort_vars(self, vars):
 merge_vars(self, v1, v2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1564)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1564?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1564)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1564?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ merge_vars(self, v1, v2):
 compile(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1569)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1569?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1569)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1569?message=Update%20Docs)]
 </div>
 
 
@@ -87,8 +87,8 @@ compile(self):
 eval(self, r: numpy.ndarray) -> 'np.ndarray': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1574)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1574?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1574)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1574?message=Update%20Docs)]
 </div>
 
 
@@ -97,8 +97,8 @@ eval(self, r: numpy.ndarray) -> 'np.ndarray':
 deriv(self, *which, order=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1585)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1585?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1585)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1585?message=Update%20Docs)]
 </div>
 
 
@@ -107,8 +107,8 @@ deriv(self, *which, order=1):
 __call__(self, r): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1621)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1621?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1621)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1621?message=Update%20Docs)]
 </div>
 
 
@@ -117,8 +117,8 @@ __call__(self, r):
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1628)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1628?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1628)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1628?message=Update%20Docs)]
 </div>
 
 
@@ -127,8 +127,8 @@ __neg__(self):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1631)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1631?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1631)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1631?message=Update%20Docs)]
 </div>
 
 
@@ -137,8 +137,8 @@ __mul__(self, other):
 __rmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1638)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1638?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1638)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1638?message=Update%20Docs)]
 </div>
 
 
@@ -147,8 +147,8 @@ __rmul__(self, other):
 __truediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1640)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1640?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1640)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1640?message=Update%20Docs)]
 </div>
 
 
@@ -157,8 +157,8 @@ __truediv__(self, other):
 __rtruediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1647)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1647?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1647)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1647?message=Update%20Docs)]
 </div>
 
 
@@ -167,8 +167,8 @@ __rtruediv__(self, other):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1655)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1655?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1655?message=Update%20Docs)]
 </div>
 
 
@@ -177,8 +177,8 @@ __add__(self, other):
 __radd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1662)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1662?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1662)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1662?message=Update%20Docs)]
 </div>
 
 
@@ -187,8 +187,8 @@ __radd__(self, other):
 __sub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1670)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1670?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1670)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1670?message=Update%20Docs)]
 </div>
 
 
@@ -197,8 +197,8 @@ __sub__(self, other):
 __rsub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1677)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1677?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1677)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1677?message=Update%20Docs)]
 </div>
 
 
@@ -207,8 +207,8 @@ __rsub__(self, other):
 __pow__(self, power, modulo=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1685)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1685?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1685)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1685?message=Update%20Docs)]
 </div>
 
 
@@ -217,8 +217,8 @@ __pow__(self, power, modulo=None):
 invert(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1693)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1693?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1693)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1693?message=Update%20Docs)]
 </div>
 
 
@@ -227,8 +227,8 @@ invert(self):
 __invert__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1695)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1695?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1695)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1695?message=Update%20Docs)]
 </div>
 
 
@@ -237,8 +237,8 @@ __invert__(self):
 copy(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1697)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1697?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1697)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1697?message=Update%20Docs)]
 </div>
 
 
@@ -247,8 +247,8 @@ copy(self):
 compose(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1699)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1699?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1699)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1699?message=Update%20Docs)]
 </div>
 
 
@@ -258,8 +258,8 @@ compose(self, other):
 symbols(cls, *syms): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1710)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1710?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1710)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1710?message=Update%20Docs)]
 </div>
 
 
@@ -269,8 +269,8 @@ symbols(cls, *syms):
 exp(cls, fn): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1714)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1714?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1714)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1714?message=Update%20Docs)]
 </div>
 
 
@@ -280,8 +280,8 @@ exp(cls, fn):
 morse(cls, var, de=10, a=1, re=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1717)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1717?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1717)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1717?message=Update%20Docs)]
 </div>
 
 
@@ -290,8 +290,8 @@ morse(cls, var, de=10, a=1, re=0):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1723)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1723?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1723)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.py#L1723?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -346,7 +346,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions.py#L1532?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1532?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

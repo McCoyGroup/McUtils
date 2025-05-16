@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Polynomials.DensePolynomial">DensePolynomial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L54)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L54?message=Update%20Docs)]
 </div>
 
 A straightforward dense n-dimensional polynomial data structure with
@@ -25,8 +25,8 @@ multiplications and shifts
 __init__(self, coeffs, prefactor=None, shift=None, stack_dim=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L59)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L59?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L59?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, coeffs, prefactor=None, shift=None, stack_dim=0):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L71?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ __repr__(self):
 from_tensors(cls, tensors, prefactor=None, shift=None, rescale=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L73?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ from_tensors(cls, tensors, prefactor=None, shift=None, rescale=True):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L79)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L79?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ shape(self):
 scaling(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L83)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L83?message=Update%20Docs)]
 </div>
 
 
@@ -79,8 +79,8 @@ scaling(self):
 coeffs(self) -> 'np.ndarray|SparseArray': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L90?message=Update%20Docs)]
 </div>
 
 
@@ -90,8 +90,8 @@ coeffs(self) -> 'np.ndarray|SparseArray':
 coordinate_dim(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L103)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L103?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L103?message=Update%20Docs)]
 </div>
 
 
@@ -100,8 +100,8 @@ coordinate_dim(self):
 __mul__(self, other) -> 'DensePolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L244)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L244?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L244)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L244?message=Update%20Docs)]
 </div>
 
 
@@ -110,8 +110,8 @@ __mul__(self, other) -> 'DensePolynomial':
 __add__(self, other) -> 'DensePolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L331)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L331?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L331)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L331?message=Update%20Docs)]
 </div>
 
 
@@ -120,8 +120,8 @@ __add__(self, other) -> 'DensePolynomial':
 shift(self, shift) -> 'DensePolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L378)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L378?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L378)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L378?message=Update%20Docs)]
 </div>
 
 
@@ -131,8 +131,8 @@ shift(self, shift) -> 'DensePolynomial':
 compute_shifted_coeffs(cls, poly_coeffs, shift, stack_dim=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L387)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L387?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L387)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L387?message=Update%20Docs)]
 </div>
 
 
@@ -142,8 +142,8 @@ compute_shifted_coeffs(cls, poly_coeffs, shift, stack_dim=0):
 fill_tensors(self, tensors, idx, value, stack_dim, pcache, permute, rescale): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L480)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L480?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L480)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L480?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ fill_tensors(self, tensors, idx, value, stack_dim, pcache, permute, rescale):
 extract_tensors(cls, coeffs, stack_dim=None, permute=True, rescale=True, cutoff=1e-15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L517)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L517?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L517)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L517?message=Update%20Docs)]
 </div>
 
 
@@ -164,8 +164,8 @@ extract_tensors(cls, coeffs, stack_dim=None, permute=True, rescale=True, cutoff=
 condense_tensors(cls, tensors, rescale=True, allow_sparse=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L554)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L554?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L554)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L554?message=Update%20Docs)]
 </div>
 
 
@@ -175,8 +175,8 @@ condense_tensors(cls, tensors, rescale=True, allow_sparse=True):
 coefficient_tensors(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L619)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L619?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L619)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L619?message=Update%20Docs)]
 </div>
 
 
@@ -186,8 +186,8 @@ coefficient_tensors(self):
 unscaled_coefficient_tensors(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L624)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L624?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L624)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L624?message=Update%20Docs)]
 </div>
 
 
@@ -196,8 +196,8 @@ unscaled_coefficient_tensors(self):
 transform(self, lin_transf): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L629)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L629?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L629)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L629?message=Update%20Docs)]
 </div>
 Applies (for now) a linear transformation to the polynomial
 
@@ -207,8 +207,8 @@ Applies (for now) a linear transformation to the polynomial
 outer(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L646)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L646?message=Update%20Docs)]
 </div>
 
 
@@ -217,8 +217,8 @@ outer(self, other):
 deriv(self, coord): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L664)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L664?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L664)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L664?message=Update%20Docs)]
 </div>
 
 
@@ -227,8 +227,8 @@ deriv(self, coord):
 grad(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L770)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L770?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L770)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L770?message=Update%20Docs)]
 </div>
 
 
@@ -237,8 +237,8 @@ grad(self):
 clip(self, threshold=1e-15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L778)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L778?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L778)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L778?message=Update%20Docs)]
 </div>
 
 
@@ -247,8 +247,8 @@ clip(self, threshold=1e-15):
 make_sparse_backed(self, threshold=1e-15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/DensePolynomial.py#L791)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/DensePolynomial.py#L791?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L791)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/DensePolynomial.py#L791?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -303,7 +303,7 @@ make_sparse_backed(self, threshold=1e-15):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/DensePolynomial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/DensePolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L54?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L54?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

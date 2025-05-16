@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Interactive.Animator">Animator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive.py#L265)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive.py#L265?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive.py#L265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive.py#L265?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, figure, data_generator, plot_method=None, events=True, update=False, **anim_ops): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L266)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L266?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive.py#L266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive.py#L266?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, figure, data_generator, plot_method=None, events=True, update=Fal
 active(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L325)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L325?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L325)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L325?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ active(self):
 start(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L334)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L334?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L334)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L334?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ start(self):
 stop(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L338)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L338?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L338)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L338?message=Update%20Docs)]
 </div>
 
 
@@ -65,8 +65,8 @@ stop(self):
 toggle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L342)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L342?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L342)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L342?message=Update%20Docs)]
 </div>
 
 
@@ -75,8 +75,8 @@ toggle(self):
 show(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L347)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L347?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L347)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L347?message=Update%20Docs)]
 </div>
 
 
@@ -85,8 +85,8 @@ show(self):
 to_jshtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L350)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L350?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L350)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L350?message=Update%20Docs)]
 </div>
 Delegates to the underlying animation
   - `:returns`: `_`
@@ -98,8 +98,8 @@ Delegates to the underlying animation
 to_html5_video(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L357)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L357?message=Update%20Docs)]
 </div>
 Delegates to the underlying animation
   - `:returns`: `_`
@@ -111,8 +111,8 @@ Delegates to the underlying animation
 as_jupyter_animation(self, mode='javascript'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/Animator.py#L365)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/Animator.py#L365?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/Animator.py#L365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/Animator.py#L365?message=Update%20Docs)]
 </div>
 Chains some stuff to make Jupyter animations work
   - `:returns`: `_`
@@ -170,7 +170,7 @@ Chains some stuff to make Jupyter animations work
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Interactive/Animator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Interactive/Animator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive.py#L265?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive.py#L265?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

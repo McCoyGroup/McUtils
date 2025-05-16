@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Visualizers.VTKInterface">VTKInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Visualizers.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Visualizers.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)]
 </div>
 
 A simple class to support operations that make use of the VPython visualization toolkit
@@ -28,8 +28,8 @@ module: str
 graphics_object(cls, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L30?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ graphics_object(cls, obj):
 named_colors(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L33?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -95,7 +95,7 @@ named_colors(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

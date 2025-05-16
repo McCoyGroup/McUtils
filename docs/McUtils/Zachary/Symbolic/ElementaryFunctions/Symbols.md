@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols">Symbols</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions.py#L1498)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1498)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, *vars): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/Symbols.py#L1500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/Symbols.py#L1500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1500?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, *vars):
 scalar(cls, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1507)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1507?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ scalar(cls, v):
 log(cls, v, base=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1511)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1511?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1511)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1511?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ log(cls, v, base=None):
 exp(cls, v, base=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1515)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1515?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ exp(cls, v, base=None):
 cos(cls, x): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1519)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1519?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1519)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1519?message=Update%20Docs)]
 </div>
 
 
@@ -79,8 +79,8 @@ cos(cls, x):
 sin(cls, x): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1523)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1523?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1523)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1523?message=Update%20Docs)]
 </div>
 
 
@@ -90,8 +90,8 @@ sin(cls, x):
 morse(cls, r, de=1, a=1, re=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1527)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1527?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1527)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1527?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -146,7 +146,7 @@ morse(cls, r, de=1, a=1, re=0):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

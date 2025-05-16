@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler">WebRequestHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI.py#L24)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)]
 </div>
 
 
@@ -25,8 +25,8 @@
 resolve_handler(cls, handler): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L26?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ resolve_handler(cls, handler):
 request(cls, method, url, json=None, handler=None, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L40?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ request(cls, method, url, json=None, handler=None, **params):
 requests_request(cls, method, url, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L69)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L69?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L69?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ requests_request(cls, method, url, **params):
 urllib3_request(cls, method, url, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L75)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L75?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ urllib3_request(cls, method, url, **params):
 default_request(cls, method, url, data=None, headers=None, origin_req_host=None, unverifiable=False, json=None, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L81?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ default_request(cls, method, url, data=None, headers=None, origin_req_host=None,
 handle_response(cls, resp, headers): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L104)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L104?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +91,8 @@ handle_response(cls, resp, headers):
 read_response(cls, resp, decode=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L129)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L129?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -147,7 +147,7 @@ read_response(cls, resp, decode=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/WebAPI/WebRequestHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

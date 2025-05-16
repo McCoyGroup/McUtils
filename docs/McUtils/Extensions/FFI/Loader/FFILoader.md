@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.Loader.FFILoader">FFILoader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Loader.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Loader.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Loader.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Loader.py#L15?message=Update%20Docs)]
 </div>
 
 Provides a standardized way to load and compile a potential using a potential template
@@ -27,8 +27,8 @@ cpp_std: str
 __init__(self, name, src=None, src_ext='src', load_path=None, description='A compiled potential', version='1.0.0', include_dirs=None, linked_libs=None, runtime_dirs=None, macros=None, source_files=None, build_script=None, requires_make=True, out_dir=None, cleanup_build=True, pointer_name=None, build_kwargs=None, nodebug=False, threaded=False, extra_compile_args=None, extra_link_args=None, recompile=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Loader/FFILoader.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Loader/FFILoader.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Loader.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Loader.py#L42?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ __init__(self, name, src=None, src_ext='src', load_path=None, description='A com
 lib(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Loader/FFILoader.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Loader/FFILoader.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Loader/FFILoader.py#L117)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Loader/FFILoader.py#L117?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ lib(self):
 caller_api_version(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Loader/FFILoader.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Loader/FFILoader.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Loader/FFILoader.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Loader/FFILoader.py#L122?message=Update%20Docs)]
 </div>
 
 
@@ -60,8 +60,8 @@ caller_api_version(self):
 call_obj(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Loader/FFILoader.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Loader/FFILoader.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Loader/FFILoader.py#L128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Loader/FFILoader.py#L128?message=Update%20Docs)]
 </div>
 The object that defines how to call the potential.
 Can either be a pure python function, an FFIModule, or a PyCapsule
@@ -120,7 +120,7 @@ Can either be a pure python function, an FFIModule, or a PyCapsule
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Loader/FFILoader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Loader/FFILoader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Loader.py#L15?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Loader.py#L15?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

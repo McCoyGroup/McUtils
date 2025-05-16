@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps">TemplateOps</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)]
 </div>
 
 
@@ -25,8 +25,8 @@
 loop(caller: Callable, *args, joiner='', formatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L31?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ loop(caller: Callable, *args, joiner='', formatter=None, **kwargs):
 loop_template(cls, template: str, *args, joiner='', formatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L48?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ loop_template(cls, template: str, *args, joiner='', formatter=None, **kwargs):
 join(*args, joiner=' ', formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L57?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ join(*args, joiner=' ', formatter=None):
 load(cls, template, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L62)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L62?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L62)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L62?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ load(cls, template, formatter=None):
 include(cls, template, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L65?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ include(cls, template, formatter=None):
 apply(cls, template, *args, formatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L68)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L68?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +91,8 @@ apply(cls, template, *args, formatter=None, **kwargs):
 nonempty(cls, data, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L73?message=Update%20Docs)]
 </div>
 
 
@@ -102,8 +102,8 @@ nonempty(cls, data, formatter=None):
 wrap(cls, fn): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L76)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L76?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L76?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ wrap(cls, fn):
 cleandoc(txt, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L82)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L82?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L82)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L82?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ cleandoc(txt, formatter=None):
 wrap_str(obj, formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L85?message=Update%20Docs)]
 </div>
 
 
@@ -135,8 +135,8 @@ wrap_str(obj, formatter=None):
 optional(key, default='', formatter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L92)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L92?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L92)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L92?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -191,7 +191,7 @@ optional(key, default='', formatter=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

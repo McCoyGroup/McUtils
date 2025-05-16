@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.ModuleLoader.ModuleLoader">ModuleLoader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ModuleLoader.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ModuleLoader.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ModuleLoader.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ModuleLoader.py#L102?message=Update%20Docs)]
 </div>
 
 Provides a way to load dynamic modules.
@@ -26,8 +26,8 @@ depending on how much customization is needed.
 __init__(self, rootdir='', rootpkg=None, retag=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ModuleLoader/ModuleLoader.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ModuleLoader/ModuleLoader.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ModuleLoader.py#L108)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ModuleLoader.py#L108?message=Update%20Docs)]
 </div>
 
   - `rootdir`: `str`
@@ -41,8 +41,8 @@ __init__(self, rootdir='', rootpkg=None, retag=False):
 load(self, file, pkg=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ModuleLoader/ModuleLoader.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ModuleLoader/ModuleLoader.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ModuleLoader/ModuleLoader.py#L124)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ModuleLoader/ModuleLoader.py#L124?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -97,7 +97,7 @@ load(self, file, pkg=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/ModuleLoader/ModuleLoader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/ModuleLoader/ModuleLoader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ModuleLoader.py#L102?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ModuleLoader.py#L102?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

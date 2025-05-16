@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Loggers.LoggingBlock">LoggingBlock</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L44?message=Update%20Docs)]
 </div>
 
 A class that extends the utility of a logger by automatically setting up a
@@ -29,8 +29,8 @@ block_level_padding: str
 __init__(self, logger, log_level=None, block_level=0, block_level_padding=None, tag=None, opener=None, prompt=None, closer=None, printoptions=None, **tag_vars): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers/LoggingBlock.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers/LoggingBlock.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L63?message=Update%20Docs)]
 </div>
 
 
@@ -40,8 +40,8 @@ __init__(self, logger, log_level=None, block_level=0, block_level_padding=None, 
 tag(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers/LoggingBlock.py#L99)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers/LoggingBlock.py#L99?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L99?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +50,8 @@ tag(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers/LoggingBlock.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers/LoggingBlock.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L118)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L118?message=Update%20Docs)]
 </div>
 
 
@@ -60,8 +60,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers/LoggingBlock.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers/LoggingBlock.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L133?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -116,7 +116,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Loggers/LoggingBlock.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Loggers/LoggingBlock.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers.py#L44?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L44?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

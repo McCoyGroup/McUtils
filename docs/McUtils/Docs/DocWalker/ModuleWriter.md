@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.ModuleWriter">ModuleWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L646)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L646?message=Update%20Docs)]
 </div>
 
 A writer targeted to a module object. Just needs to write the Module metadata.
@@ -24,22 +24,11 @@ DROP_MODULE_NAMES: bool
 ```
 <a id="McUtils.Docs.DocWalker.ModuleWriter.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, obj, **kwargs): 
+__init__(self, obj, is_package_root=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/ModuleWriter.py#L653)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/ModuleWriter.py#L653?message=Update%20Docs)]
-</div>
-
-
-<a id="McUtils.Docs.DocWalker.ModuleWriter.squash_reps" class="docs-object-method">&nbsp;</a> 
-```python
-@classmethod
-squash_reps(cls, ident): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L659)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L659?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L653)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L653?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +37,8 @@ squash_reps(cls, ident):
 get_template_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/ModuleWriter.py#L669)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/ModuleWriter.py#L669?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ModuleWriter.py#L661)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ModuleWriter.py#L661?message=Update%20Docs)]
 </div>
 Provides module specific parameters
   - `:returns`: `_`
@@ -62,8 +51,8 @@ Provides module specific parameters
 get_members(cls, mod): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L733)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L733?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L725)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L725?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -119,7 +108,7 @@ get_members(cls, mod):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/ModuleWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/ModuleWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L646?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L646?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

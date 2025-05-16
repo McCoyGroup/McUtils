@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.CLoader.CLoader">CLoader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader.py#L13?message=Update%20Docs)]
 </div>
 
 A general loader for C++ extensions to python, based off of the kind of thing that I have had to do multiple times
@@ -24,8 +24,8 @@ A general loader for C++ extensions to python, based off of the kind of thing th
 __init__(self, lib_name, lib_dir=None, load_path=None, src_ext='src', libs_ext='libs', description='An extension module', version='1.0.0', include_dirs=None, runtime_dirs=None, linked_libs=None, macros=None, extra_link_args=None, extra_compile_args=None, extra_objects=None, source_files=None, build_script=None, requires_make=True, out_dir=None, cleanup_build=True, recompile=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L18)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L18?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader.py#L18)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader.py#L18?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, lib_name, lib_dir=None, load_path=None, src_ext='src', libs_ext='
 load(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L71?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ load(self):
 find_extension(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L90?message=Update%20Docs)]
 </div>
 Tries to find the extension in the top-level directory
   - `:returns`: `_`
@@ -57,8 +57,8 @@ Tries to find the extension in the top-level directory
 compile_extension(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L103)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L103?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L103?message=Update%20Docs)]
 </div>
 Compiles and loads a C++ extension
   - `:returns`: `_`
@@ -71,8 +71,8 @@ Compiles and loads a C++ extension
 src_dir(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L116?message=Update%20Docs)]
 </div>
 
 
@@ -82,8 +82,8 @@ src_dir(self):
 lib_lib_dir(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L119?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +92,8 @@ lib_lib_dir(self):
 get_extension(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L123)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L123?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L123?message=Update%20Docs)]
 </div>
 Gets the Extension module to be compiled
   - `:returns`: `_`
@@ -105,8 +105,8 @@ Gets the Extension module to be compiled
 configure_make_command(self, make_file): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L163)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L163?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L163)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L163?message=Update%20Docs)]
 </div>
 
 
@@ -115,8 +115,8 @@ configure_make_command(self, make_file):
 custom_make(self, make_file, make_dir): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L217)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L217?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L217)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L217?message=Update%20Docs)]
 </div>
 A way to call a custom make file either for building the helper lib or for building the proper lib
   - `make_file`: `Any`
@@ -132,8 +132,8 @@ A way to call a custom make file either for building the helper lib or for build
 make_required_libs(self, library_types=('.so', '.pyd', '.dll')): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L270)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L270?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L270)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L270?message=Update%20Docs)]
 </div>
 Makes any libs required by the current one
   - `:returns`: `_`
@@ -145,8 +145,8 @@ Makes any libs required by the current one
 build_lib(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L305)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L305?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L305?message=Update%20Docs)]
 </div>
 
 
@@ -156,8 +156,8 @@ build_lib(self):
 locate_library(cls, libname, roots, extensions, library_types=('.so', '.pyd', '.dll')): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L337)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L337?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L337)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L337?message=Update%20Docs)]
 </div>
 Tries to locate the library file (if it exists)
   - `:returns`: `_`
@@ -169,8 +169,8 @@ Tries to locate the library file (if it exists)
 locate_lib(self, name=None, roots=None, extensions=None, library_types=('.so', '.pyd', '.dll')): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L384)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L384?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L384)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L384?message=Update%20Docs)]
 </div>
 Tries to locate the build library file (if it exists)
   - `:returns`: `_`
@@ -182,8 +182,8 @@ Tries to locate the build library file (if it exists)
 cleanup(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/CLoader/CLoader.py#L406)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader/CLoader.py#L406?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/CLoader/CLoader.py#L406)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader/CLoader.py#L406?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -238,7 +238,7 @@ cleanup(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/CLoader/CLoader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/CLoader/CLoader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/CLoader.py#L13?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/CLoader.py#L13?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

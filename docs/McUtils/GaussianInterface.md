@@ -1,7 +1,7 @@
 # <a id="McUtils.GaussianInterface">McUtils.GaussianInterface</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/GaussianInterface/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/GaussianInterface/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/GaussianInterface/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 A module for making use of the results of calculations run by the Gaussian electronic structure package.
@@ -328,9 +328,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-9ee306" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9ee306"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-7f11c7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7f11c7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9ee306" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7f11c7" markdown="1">
  - [GetLogInfo](#GetLogInfo)
 - [DefaultLogParse](#DefaultLogParse)
 - [GetDipoles](#GetDipoles)
@@ -352,9 +352,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ba1729" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ba1729"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-538efb" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-538efb"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ba1729" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-538efb" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -635,7 +635,7 @@ class GaussianInterfaceTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/GaussianInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/GaussianInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/GaussianInterface/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/GaussianInterface/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

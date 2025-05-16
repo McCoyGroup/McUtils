@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets">HTMLWidgets</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTMLWidgets.py#L1037)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets.py#L1037)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ OutputArea: OutputArea
 get_exec_prefix(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1039)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1039?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1039)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1039?message=Update%20Docs)]
 </div>
 
 
@@ -164,8 +164,8 @@ get_exec_prefix(cls):
 load(cls, exec_prefix=None, overwrite=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1056)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1056?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1056)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1056?message=Update%20Docs)]
 </div>
 
 
@@ -175,8 +175,8 @@ load(cls, exec_prefix=None, overwrite=False):
 get_class_map(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1074)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1074?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1074)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1074?message=Update%20Docs)]
 </div>
 
 
@@ -186,8 +186,8 @@ get_class_map(cls):
 from_HTML(cls, html: McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_handlers=None, debug_pane=None, **props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1082)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L1082?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1082)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1082?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -242,7 +242,7 @@ from_HTML(cls, html: McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_handlers=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTMLWidgets/HTMLWidgets.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTMLWidgets/HTMLWidgets.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

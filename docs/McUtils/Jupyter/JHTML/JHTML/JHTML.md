@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.JHTML.JHTML">JHTML</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML.py#L14?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ Compound: Compound
 manage_class(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTML/HTMLManager.py#L352)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTML/HTMLManager.py#L352?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L352)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L352?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ manage_class(cls):
 manage_style(styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTML/HTMLManager.py#L367)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTML/HTMLManager.py#L367?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L367)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L367?message=Update%20Docs)]
 </div>
 
 
@@ -59,8 +59,8 @@ manage_style(styles):
 extract_styles(attrs, style_props=None, ignored_styles=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTML/HTMLManager.py#L407)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTML/HTMLManager.py#L407?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L407)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L407?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ extract_styles(attrs, style_props=None, ignored_styles=None):
 manage_attrs(attrs, sanitize=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTML/HTMLManager.py#L396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTML/HTMLManager.py#L396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L396)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L396?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ manage_attrs(attrs, sanitize=True):
 load(cls, exec_prefix=None, overwrite=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L33?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +91,8 @@ load(cls, exec_prefix=None, overwrite=False):
 Markdown(cls, text): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L44?message=Update%20Docs)]
 </div>
 
 
@@ -101,8 +101,8 @@ Markdown(cls, text):
 __init__(self, context=None, include_bootstrap=False, expose_classes=False, output_pane=True, callbacks=None, widgets=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML.py#L51?message=Update%20Docs)]
 </div>
 
 
@@ -111,8 +111,8 @@ __init__(self, context=None, include_bootstrap=False, expose_classes=False, outp
 insert_vars(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L76)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L76?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L76?message=Update%20Docs)]
 </div>
 
 
@@ -121,8 +121,8 @@ insert_vars(self):
 wrap_callbacks(self, c): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L91)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L91?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L91?message=Update%20Docs)]
 </div>
 
 
@@ -131,8 +131,8 @@ wrap_callbacks(self, c):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L106?message=Update%20Docs)]
 </div>
 To make writing HTML interactively a bit nicer
   - `:returns`: `_`
@@ -145,8 +145,8 @@ To make writing HTML interactively a bit nicer
 out(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L134)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L134?message=Update%20Docs)]
 </div>
 
 
@@ -155,8 +155,8 @@ out(self):
 prune_vars(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L138?message=Update%20Docs)]
 </div>
 
 
@@ -165,8 +165,8 @@ prune_vars(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML.py#L147)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML.py#L147?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L147)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML.py#L147?message=Update%20Docs)]
 </div>
 
 
@@ -176,8 +176,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 parse_handlers(cls, handler_string): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L160)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L160?message=Update%20Docs)]
 </div>
 
 
@@ -187,8 +187,8 @@ parse_handlers(cls, handler_string):
 parse_widget(cls, uuid): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L176)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L176?message=Update%20Docs)]
 </div>
 
 
@@ -198,8 +198,8 @@ parse_widget(cls, uuid):
 convert(cls, etree, strip=True, converter=None, **extra_attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
 </div>
 
 
@@ -209,8 +209,8 @@ convert(cls, etree, strip=True, converter=None, **extra_attrs):
 parse(cls, src, event_handlers=None, dynamic=None, track_value=None, strict=True, fallback=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L213)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L213?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L213?message=Update%20Docs)]
 </div>
 
 
@@ -220,8 +220,8 @@ parse(cls, src, event_handlers=None, dynamic=None, track_value=None, strict=True
 Abbr(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -231,8 +231,8 @@ Abbr(jhtml, *elements, **styles):
 Address(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -242,8 +242,8 @@ Address(jhtml, *elements, **styles):
 Anchor(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -253,8 +253,8 @@ Anchor(jhtml, *elements, **styles):
 A(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -264,8 +264,8 @@ A(jhtml, *elements, **styles):
 Area(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -275,8 +275,8 @@ Area(jhtml, *elements, **styles):
 Article(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -286,8 +286,8 @@ Article(jhtml, *elements, **styles):
 Aside(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -297,8 +297,8 @@ Aside(jhtml, *elements, **styles):
 Audio(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -308,8 +308,8 @@ Audio(jhtml, *elements, **styles):
 B(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -319,8 +319,8 @@ B(jhtml, *elements, **styles):
 Base(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -330,8 +330,8 @@ Base(jhtml, *elements, **styles):
 Bdi(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -341,8 +341,8 @@ Bdi(jhtml, *elements, **styles):
 Bdo(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -352,8 +352,8 @@ Bdo(jhtml, *elements, **styles):
 Blockquote(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -363,8 +363,8 @@ Blockquote(jhtml, *elements, **styles):
 Body(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -374,8 +374,8 @@ Body(jhtml, *elements, **styles):
 Bold(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -385,8 +385,8 @@ Bold(jhtml, *elements, **styles):
 Br(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -396,8 +396,8 @@ Br(jhtml, *elements, **styles):
 Button(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -407,8 +407,8 @@ Button(jhtml, *elements, **styles):
 Canvas(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -418,8 +418,8 @@ Canvas(jhtml, *elements, **styles):
 Caption(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -429,8 +429,8 @@ Caption(jhtml, *elements, **styles):
 Cite(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -440,8 +440,8 @@ Cite(jhtml, *elements, **styles):
 Code(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -451,8 +451,8 @@ Code(jhtml, *elements, **styles):
 Col(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -462,8 +462,8 @@ Col(jhtml, *elements, **styles):
 Colgroup(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -473,8 +473,8 @@ Colgroup(jhtml, *elements, **styles):
 Data(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -484,8 +484,8 @@ Data(jhtml, *elements, **styles):
 Datalist(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -495,8 +495,8 @@ Datalist(jhtml, *elements, **styles):
 Dd(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -506,8 +506,8 @@ Dd(jhtml, *elements, **styles):
 Del(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -517,8 +517,8 @@ Del(jhtml, *elements, **styles):
 Details(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -528,8 +528,8 @@ Details(jhtml, *elements, **styles):
 Dfn(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -539,8 +539,8 @@ Dfn(jhtml, *elements, **styles):
 Dialog(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -550,8 +550,8 @@ Dialog(jhtml, *elements, **styles):
 Div(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -561,8 +561,8 @@ Div(jhtml, *elements, **styles):
 Dl(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -572,8 +572,8 @@ Dl(jhtml, *elements, **styles):
 Dt(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -583,8 +583,8 @@ Dt(jhtml, *elements, **styles):
 Em(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -594,8 +594,8 @@ Em(jhtml, *elements, **styles):
 Embed(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -605,8 +605,8 @@ Embed(jhtml, *elements, **styles):
 Fieldset(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -616,8 +616,8 @@ Fieldset(jhtml, *elements, **styles):
 Figcaption(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -627,8 +627,8 @@ Figcaption(jhtml, *elements, **styles):
 Figure(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -638,8 +638,8 @@ Figure(jhtml, *elements, **styles):
 Footer(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -649,8 +649,8 @@ Footer(jhtml, *elements, **styles):
 Form(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -660,8 +660,8 @@ Form(jhtml, *elements, **styles):
 Head(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -671,8 +671,8 @@ Head(jhtml, *elements, **styles):
 Header(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -682,8 +682,8 @@ Header(jhtml, *elements, **styles):
 Heading(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -693,8 +693,8 @@ Heading(jhtml, *elements, **styles):
 Hr(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -704,8 +704,8 @@ Hr(jhtml, *elements, **styles):
 Html(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -715,8 +715,8 @@ Html(jhtml, *elements, **styles):
 Iframe(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -726,8 +726,8 @@ Iframe(jhtml, *elements, **styles):
 Image(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -737,8 +737,8 @@ Image(jhtml, *elements, **styles):
 Img(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -748,8 +748,8 @@ Img(jhtml, *elements, **styles):
 Input(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -759,8 +759,8 @@ Input(jhtml, *elements, **styles):
 Ins(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -770,8 +770,8 @@ Ins(jhtml, *elements, **styles):
 Italic(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -781,8 +781,8 @@ Italic(jhtml, *elements, **styles):
 I(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -792,8 +792,8 @@ I(jhtml, *elements, **styles):
 Kbd(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -803,8 +803,8 @@ Kbd(jhtml, *elements, **styles):
 Label(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -814,8 +814,8 @@ Label(jhtml, *elements, **styles):
 Legend(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -825,8 +825,8 @@ Legend(jhtml, *elements, **styles):
 Link(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -836,8 +836,8 @@ Link(jhtml, *elements, **styles):
 List(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -847,8 +847,8 @@ List(jhtml, *elements, **styles):
 Ul(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -858,8 +858,8 @@ Ul(jhtml, *elements, **styles):
 ListItem(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -869,8 +869,8 @@ ListItem(jhtml, *elements, **styles):
 Li(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -880,8 +880,8 @@ Li(jhtml, *elements, **styles):
 Main(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -891,8 +891,8 @@ Main(jhtml, *elements, **styles):
 Map(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -902,8 +902,8 @@ Map(jhtml, *elements, **styles):
 Mark(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -913,8 +913,8 @@ Mark(jhtml, *elements, **styles):
 Meta(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -924,8 +924,8 @@ Meta(jhtml, *elements, **styles):
 Meter(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -935,8 +935,8 @@ Meter(jhtml, *elements, **styles):
 Nav(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -946,8 +946,8 @@ Nav(jhtml, *elements, **styles):
 Noscript(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -957,8 +957,8 @@ Noscript(jhtml, *elements, **styles):
 NumberedList(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -968,8 +968,8 @@ NumberedList(jhtml, *elements, **styles):
 Ol(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -979,8 +979,8 @@ Ol(jhtml, *elements, **styles):
 Object(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -990,8 +990,8 @@ Object(jhtml, *elements, **styles):
 Optgroup(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1001,8 +1001,8 @@ Optgroup(jhtml, *elements, **styles):
 Option(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1012,8 +1012,8 @@ Option(jhtml, *elements, **styles):
 Output(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1023,8 +1023,8 @@ Output(jhtml, *elements, **styles):
 Param(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1034,8 +1034,8 @@ Param(jhtml, *elements, **styles):
 Picture(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1045,8 +1045,8 @@ Picture(jhtml, *elements, **styles):
 Pre(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1056,8 +1056,8 @@ Pre(jhtml, *elements, **styles):
 Progress(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1067,8 +1067,8 @@ Progress(jhtml, *elements, **styles):
 Q(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1078,8 +1078,8 @@ Q(jhtml, *elements, **styles):
 Rp(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1089,8 +1089,8 @@ Rp(jhtml, *elements, **styles):
 Rt(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1100,8 +1100,8 @@ Rt(jhtml, *elements, **styles):
 Ruby(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1111,8 +1111,8 @@ Ruby(jhtml, *elements, **styles):
 S(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1122,8 +1122,8 @@ S(jhtml, *elements, **styles):
 Samp(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1133,8 +1133,8 @@ Samp(jhtml, *elements, **styles):
 Script(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1144,8 +1144,8 @@ Script(jhtml, *elements, **styles):
 Section(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1155,8 +1155,8 @@ Section(jhtml, *elements, **styles):
 Select(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1166,8 +1166,8 @@ Select(jhtml, *elements, **styles):
 Small(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1177,8 +1177,8 @@ Small(jhtml, *elements, **styles):
 Source(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1188,8 +1188,8 @@ Source(jhtml, *elements, **styles):
 Span(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1199,8 +1199,8 @@ Span(jhtml, *elements, **styles):
 Strong(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1210,8 +1210,8 @@ Strong(jhtml, *elements, **styles):
 Style(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1221,8 +1221,8 @@ Style(jhtml, *elements, **styles):
 Sub(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1232,8 +1232,8 @@ Sub(jhtml, *elements, **styles):
 SubHeading(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1243,8 +1243,8 @@ SubHeading(jhtml, *elements, **styles):
 SubsubHeading(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1254,8 +1254,8 @@ SubsubHeading(jhtml, *elements, **styles):
 SubsubsubHeading(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1265,8 +1265,8 @@ SubsubsubHeading(jhtml, *elements, **styles):
 SubHeading5(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1276,8 +1276,8 @@ SubHeading5(jhtml, *elements, **styles):
 SubHeading6(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1287,8 +1287,8 @@ SubHeading6(jhtml, *elements, **styles):
 Summary(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1298,8 +1298,8 @@ Summary(jhtml, *elements, **styles):
 Sup(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1309,8 +1309,8 @@ Sup(jhtml, *elements, **styles):
 Svg(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1320,8 +1320,8 @@ Svg(jhtml, *elements, **styles):
 Table(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1331,8 +1331,8 @@ Table(jhtml, *elements, **styles):
 TableBody(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1342,8 +1342,8 @@ TableBody(jhtml, *elements, **styles):
 Tbody(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1353,8 +1353,8 @@ Tbody(jhtml, *elements, **styles):
 TableFooter(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1364,8 +1364,8 @@ TableFooter(jhtml, *elements, **styles):
 Tfoot(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1375,8 +1375,8 @@ Tfoot(jhtml, *elements, **styles):
 TableHeader(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1386,8 +1386,8 @@ TableHeader(jhtml, *elements, **styles):
 Thead(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1397,8 +1397,8 @@ Thead(jhtml, *elements, **styles):
 TableHeading(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1408,8 +1408,8 @@ TableHeading(jhtml, *elements, **styles):
 Th(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1419,8 +1419,8 @@ Th(jhtml, *elements, **styles):
 TableItem(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1430,8 +1430,8 @@ TableItem(jhtml, *elements, **styles):
 Td(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1441,8 +1441,8 @@ Td(jhtml, *elements, **styles):
 TableRow(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1452,8 +1452,8 @@ TableRow(jhtml, *elements, **styles):
 Tr(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1463,8 +1463,8 @@ Tr(jhtml, *elements, **styles):
 Template(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1474,8 +1474,8 @@ Template(jhtml, *elements, **styles):
 Text(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1485,8 +1485,8 @@ Text(jhtml, *elements, **styles):
 P(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1496,8 +1496,8 @@ P(jhtml, *elements, **styles):
 Textarea(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1507,8 +1507,8 @@ Textarea(jhtml, *elements, **styles):
 Time(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1518,8 +1518,8 @@ Time(jhtml, *elements, **styles):
 Title(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1529,8 +1529,8 @@ Title(jhtml, *elements, **styles):
 Track(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1540,8 +1540,8 @@ Track(jhtml, *elements, **styles):
 U(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1551,8 +1551,8 @@ U(jhtml, *elements, **styles):
 Var(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1562,8 +1562,8 @@ Var(jhtml, *elements, **styles):
 Video(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
 
 
@@ -1573,8 +1573,8 @@ Video(jhtml, *elements, **styles):
 Wbr(jhtml, *elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L283)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L283?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -1629,7 +1629,7 @@ Wbr(jhtml, *elements, **styles):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/JHTML/JHTML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/JHTML/JHTML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML.py#L14?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML.py#L14?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

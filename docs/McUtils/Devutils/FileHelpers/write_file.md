@@ -1,7 +1,7 @@
 # <a id="McUtils.Devutils.FileHelpers.write_file">write_file</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/FileHelpers.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/FileHelpers.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L50?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ write_file(file, data, mode='w+', **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/write_file.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/write_file.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/FileHelpers.py#L50?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L50?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

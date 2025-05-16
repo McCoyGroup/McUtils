@@ -1,7 +1,7 @@
 # <a id="McUtils.Zachary.Interpolator">McUtils.Zachary.Interpolator</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L1?message=Update%20Docs)]
 </div>
     
 Sets up a general Interpolator class that looks like Mathematica's InterpolatingFunction class
@@ -83,7 +83,7 @@ Sets up a general Interpolator class that looks like Mathematica's Interpolating
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Interpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

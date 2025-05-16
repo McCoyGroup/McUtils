@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.CLIs.CLI">CLI</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs.py#L259)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs.py#L259?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs.py#L259)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs.py#L259?message=Update%20Docs)]
 </div>
 
 A representation of a command line interface
@@ -28,8 +28,8 @@ extra_commands: dict
 __init__(self, name, description, *groups, cmd_name=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L265)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L265?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs.py#L265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs.py#L265?message=Update%20Docs)]
 </div>
 
   - `name`: `str`
@@ -47,8 +47,8 @@ __init__(self, name, description, *groups, cmd_name=None):
 parse_group_command(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L284)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L284?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L284)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L284?message=Update%20Docs)]
 </div>
 Parses a group and command argument (if possible) and prunes `sys.argv`
   - `group`: `Any`
@@ -64,8 +64,8 @@ Parses a group and command argument (if possible) and prunes `sys.argv`
 get_command(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L305)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L305?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L305?message=Update%20Docs)]
 </div>
 
 
@@ -74,8 +74,8 @@ get_command(self):
 get_group(self, grp): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L314)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L314?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L314)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L314?message=Update%20Docs)]
 </div>
 
 
@@ -84,8 +84,8 @@ get_group(self, grp):
 run_command(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L322)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L322?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L322)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L322?message=Update%20Docs)]
 </div>
 
 
@@ -94,8 +94,8 @@ run_command(self):
 get_help(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L332)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L332?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L332)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L332?message=Update%20Docs)]
 </div>
 Gets the help string for the CLI
   - `:returns`: `_`
@@ -107,8 +107,8 @@ Gets the help string for the CLI
 help(self, print_help=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L348)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L348?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L348)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L348?message=Update%20Docs)]
 </div>
 
 
@@ -117,8 +117,8 @@ help(self, print_help=True):
 run_parse(self, parse, unknown): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L355)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L355?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L355)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L355?message=Update%20Docs)]
 </div>
 Provides a standard entry point to running stuff using the default CLI
   - `parse`: `Any`
@@ -134,8 +134,8 @@ Provides a standard entry point to running stuff using the default CLI
 parse_toplevel_args(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L425?message=Update%20Docs)]
 </div>
 Parses out the top level flags that the program supports
   - `:returns`: `_`
@@ -147,8 +147,8 @@ Parses out the top level flags that the program supports
 run(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/CLIs/CLI.py#L448)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs/CLI.py#L448?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/CLI.py#L448)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/CLI.py#L448?message=Update%20Docs)]
 </div>
 Parses the arguments in `sys.argv` and dispatches to the approriate action.
 By default supports interactive sessions, running scripts, and abbreviated tracebacks.
@@ -207,7 +207,7 @@ By default supports interactive sessions, running scripts, and abbreviated trace
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/CLIs/CLI.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/CLIs/CLI.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/CLIs.py#L259?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs.py#L259?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunction">DynamicFFIFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L38)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L38?message=Update%20Docs)]
 </div>
 
 Specialization of base `SharedLibraryFunction` to call
@@ -27,8 +27,8 @@ LibFFIMethodData: LibFFIMethodData
 __init__(self, shared_library, signature, defaults=None, docstring=None, call_directory=None, return_handler=None, prep_args=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L50?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, shared_library, signature, defaults=None, docstring=None, call_di
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L68)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L68?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ initialize(self):
 function_data(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L84?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ function_data(self):
 __call__(self, *args, debug=False, threading_vars=None, threading_mode=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.py#L127?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -114,7 +114,7 @@ __call__(self, *args, debug=False, threading_vars=None, threading_mode=None, **k
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary.py#L38?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L38?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

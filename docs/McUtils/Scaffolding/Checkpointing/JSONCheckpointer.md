@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Checkpointing.JSONCheckpointer">JSONCheckpointer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing.py#L322)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L322?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L322)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L322?message=Update%20Docs)]
 </div>
 
 A checkpointer that uses JSON as a backend
@@ -26,8 +26,8 @@ default_extension: str
 __init__(self, file, cache=None, serializer=None, open_kwargs=None, allowed_keys=None, omitted_keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/JSONCheckpointer.py#L328)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/JSONCheckpointer.py#L328?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L328)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L328?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, file, cache=None, serializer=None, open_kwargs=None, allowed_keys
 load_cache(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/JSONCheckpointer.py#L337)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/JSONCheckpointer.py#L337?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.py#L337)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.py#L337?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ load_cache(self):
 dump(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/JSONCheckpointer.py#L351)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/JSONCheckpointer.py#L351?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.py#L351)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.py#L351?message=Update%20Docs)]
 </div>
 Writes the entire data structure
   - `:returns`: `_`
@@ -105,7 +105,7 @@ Writes the entire data structure
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L322?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L322?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

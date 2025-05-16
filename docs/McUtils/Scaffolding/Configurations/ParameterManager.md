@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Configurations.ParameterManager">ParameterManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Configurations.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Configurations.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L188?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 serialize(self, file, mode=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Configurations/ParameterManager.py#L190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Configurations/ParameterManager.py#L190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L190?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ serialize(self, file, mode=None):
 deserialize(cls, file, mode=None, attribute=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L193)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L193?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L193?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -91,7 +91,7 @@ deserialize(cls, file, mode=None, attribute=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Configurations/ParameterManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Configurations/ParameterManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Configurations.py#L188?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L188?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

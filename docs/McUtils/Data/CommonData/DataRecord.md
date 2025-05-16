@@ -1,8 +1,8 @@
 ## <a id="McUtils.Data.CommonData.DataRecord">DataRecord</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData.py#L171)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData.py#L171?message=Update%20Docs)]
 </div>
 
 Represents an individual record that might be accessed from a `DataHandler`.
@@ -26,8 +26,8 @@ pickling, is not implemented as a proper subclass of `dict`.
 __init__(self, data_handler, key, records): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData.py#L177?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, data_handler, key, records):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L182?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ keys(self):
 values(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L184?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ values(self):
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ items(self):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L189)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L189?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L189)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L189?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ __getitem__(self, item):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L192)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L192?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ __repr__(self):
 __getstate__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L200)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L200?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L200)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L200?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ __getstate__(self):
 __setstate__(self, state): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/CommonData/DataRecord.py#L205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData/DataRecord.py#L205?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/CommonData/DataRecord.py#L205)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData/DataRecord.py#L205?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -152,7 +152,7 @@ __setstate__(self, state):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/CommonData/DataRecord.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/CommonData/DataRecord.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/CommonData.py#L171?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/CommonData.py#L171?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

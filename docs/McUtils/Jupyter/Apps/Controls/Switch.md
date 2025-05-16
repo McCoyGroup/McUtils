@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.Switch">Switch</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L195)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L195?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L195?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ base_cls: list
 __init__(self, var, type='checkbox', role='switch', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Switch.py#L197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Switch.py#L197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L197?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, var, type='checkbox', role='switch', **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Switch.py#L199)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Switch.py#L199?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L199?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Switch.py#L203)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Switch.py#L203?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L203?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ set_value(self):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Switch.py#L209)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Switch.py#L209?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L209)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L209?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -112,7 +112,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Switch.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Switch.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L195?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L195?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

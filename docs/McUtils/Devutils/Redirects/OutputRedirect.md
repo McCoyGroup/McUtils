@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Redirects.OutputRedirect">OutputRedirect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L9?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, redirect=True, stdout=None, stderr=None, capture_output=False, capture_errors=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects/OutputRedirect.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects/OutputRedirect.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L10?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, redirect=True, stdout=None, stderr=None, capture_output=False, ca
 get_handle(cls, handles=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L33?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ get_handle(cls, handles=None, file_handles=False):
 get_temp_stream(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L42?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ get_temp_stream(cls):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects/OutputRedirect.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects/OutputRedirect.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L46?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects/OutputRedirect.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects/OutputRedirect.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L84?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -122,7 +122,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/OutputRedirect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/OutputRedirect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

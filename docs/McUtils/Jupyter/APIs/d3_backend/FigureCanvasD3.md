@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.APIs.d3_backend.FigureCanvasD3">FigureCanvasD3</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/APIs/d3_backend.py#L837)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/APIs/d3_backend.py#L837?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/APIs/d3_backend.py#L837)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/APIs/d3_backend.py#L837?message=Update%20Docs)]
 </div>
 
 The canvas the figure renders into.  Calls the draw and print fig
@@ -38,8 +38,8 @@ manager_class: FigureManagerD3
 __init__(self, figure=None, manager=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/APIs/d3_backend/FigureCanvasD3.py#L859)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/APIs/d3_backend/FigureCanvasD3.py#L859?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/APIs/d3_backend.py#L859)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/APIs/d3_backend.py#L859?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ __init__(self, figure=None, manager=None):
 draw(self, clear=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/APIs/d3_backend/FigureCanvasD3.py#L864)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/APIs/d3_backend/FigureCanvasD3.py#L864?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/APIs/d3_backend/FigureCanvasD3.py#L864)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/APIs/d3_backend/FigureCanvasD3.py#L864?message=Update%20Docs)]
 </div>
 Draw the figure using the renderer.
 
@@ -65,8 +65,8 @@ values) that users may want access to before saving to disk.
 render_objects(cls, figure, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L882)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L882?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L882)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L882?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -121,7 +121,7 @@ render_objects(cls, figure, obj):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/APIs/d3_backend/FigureCanvasD3.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/APIs/d3_backend/FigureCanvasD3.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/APIs/d3_backend.py#L837?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/APIs/d3_backend.py#L837?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

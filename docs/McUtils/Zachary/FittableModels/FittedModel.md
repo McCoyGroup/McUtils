@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.FittableModels.FittedModel">FittedModel</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/FittableModels.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/FittableModels.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels.py#L17?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ default_fit_method: str
 __init__(self, fit_basis, expansion_coeffs=None, basis_parameters=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/FittableModels/FittedModel.py#L18)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels/FittedModel.py#L18?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/FittableModels.py#L18)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels.py#L18?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, fit_basis, expansion_coeffs=None, basis_parameters=None, **kwargs
 canonicalize_basis(cls, fit_basis, basis_parameters): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L28)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L28?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ canonicalize_basis(cls, fit_basis, basis_parameters):
 __call__(self, pts, order=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/FittableModels/FittedModel.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels/FittedModel.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/FittableModels/FittedModel.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels/FittedModel.py#L37?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ __call__(self, pts, order=None, **opts):
 evaluate_kernel(cls, fit_basis, basis_parameters, pts, coeffs=None, order=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L48?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ evaluate_kernel(cls, fit_basis, basis_parameters, pts, coeffs=None, order=None, 
 get_kernel_and_opts(cls, k): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L110?message=Update%20Docs)]
 </div>
 
 
@@ -80,8 +80,8 @@ get_kernel_and_opts(cls, k):
 parse_kernel_specs(cls, kernels): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L126?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +91,8 @@ parse_kernel_specs(cls, kernels):
 nonlinear_fit(cls, kernel_specs, pts, observations, include_expansion_coefficients=True, **fit_params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L141)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L141?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L141)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L141?message=Update%20Docs)]
 </div>
 
 
@@ -102,8 +102,8 @@ nonlinear_fit(cls, kernel_specs, pts, observations, include_expansion_coefficien
 get_fit_methods(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L192)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L192?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ get_fit_methods(cls):
 get_fit_dispatch(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L200)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L200?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L200)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L200?message=Update%20Docs)]
 </div>
 
 
@@ -124,8 +124,8 @@ get_fit_dispatch(cls):
 fit(cls, kernels, pts, observations, method=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L212)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L212?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -180,7 +180,7 @@ fit(cls, kernels, pts, observations, method=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/FittableModels/FittedModel.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/FittableModels/FittedModel.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels.py#L17?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

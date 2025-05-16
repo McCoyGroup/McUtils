@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.FunctionWriter">FunctionWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L822)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L822?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L814)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L814?message=Update%20Docs)]
 </div>
 
 Writer to dump functions to file
@@ -26,8 +26,8 @@ template: str
 get_signature(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/FunctionWriter.py#L832)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/FunctionWriter.py#L832?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L824)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L824?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ get_signature(self):
 get_template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/FunctionWriter.py#L835)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/FunctionWriter.py#L835?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L827)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L827?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -93,7 +93,7 @@ get_template_params(self, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/FunctionWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L822?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L814?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 # <a id="McUtils.Scaffolding.Schema">McUtils.Scaffolding.Schema</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Schema/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Schema/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Schema.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Schema.py#L1?message=Update%20Docs)]
 </div>
     
 Basic layer for Schema validation that provides a superset of JSON schema validation
@@ -72,7 +72,7 @@ Basic layer for Schema validation that provides a superset of JSON schema valida
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Schema.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Schema.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Schema/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Schema.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

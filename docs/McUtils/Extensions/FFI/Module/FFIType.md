@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.Module.FFIType">FFIType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L16?message=Update%20Docs)]
 </div>
 
 The set of supported enum types.
@@ -64,8 +64,8 @@ NUMPY_Bool: FFIType
 type_data(cls, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L112)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L112?message=Update%20Docs)]
 </div>
 
 
@@ -75,8 +75,8 @@ type_data(cls, val):
 resolve_ffi_type(cls, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L120?message=Update%20Docs)]
 </div>
 
 
@@ -134,7 +134,7 @@ resolve_ffi_type(cls, val):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

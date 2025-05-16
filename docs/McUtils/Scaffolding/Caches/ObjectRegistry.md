@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Caches.ObjectRegistry">ObjectRegistry</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L60?message=Update%20Docs)]
 </div>
 
 Provides a simple interface to global object registries
@@ -26,8 +26,8 @@ or parallelizers through every step of the code
 __init__(self, default='raise'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L67)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L67?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, default='raise'):
 temp_default(self, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L71?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ temp_default(self, val):
 __contains__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L74?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ __contains__(self, item):
 lookup(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L77)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L77?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L77)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L77?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ lookup(self, key):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L85?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ __getitem__(self, item):
 register(self, key, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L88)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L88?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L88)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L88?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ register(self, key, val):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L90?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ __setitem__(self, key, value):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L93?message=Update%20Docs)]
 </div>
 
 
@@ -106,8 +106,8 @@ keys(self):
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L95)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L95?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L95)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L95?message=Update%20Docs)]
 </div>
 
 
@@ -116,8 +116,8 @@ items(self):
 values(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Caches/ObjectRegistry.py#L97)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches/ObjectRegistry.py#L97?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L97?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -172,7 +172,7 @@ values(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Caches/ObjectRegistry.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Caches/ObjectRegistry.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Caches.py#L60?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L60?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

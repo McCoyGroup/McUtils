@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFConverter">CIFConverter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L184?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, parsed_cif): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L185)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L185?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L185)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L185?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, parsed_cif):
 cell_properties(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L188?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ cell_properties(self):
 atom_properties(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L193)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L193?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L193?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ atom_properties(self):
 symmetry_properties(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L198)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L198?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ symmetry_properties(self):
 prep_property_dict(self, res): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L203)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L203?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L203?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ prep_property_dict(self, res):
 find(self, item, strict=True, cache=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L209)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L209?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L209)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L209?message=Update%20Docs)]
 </div>
 
 
@@ -87,8 +87,8 @@ find(self, item, strict=True, cache=False):
 find_all(self, item, strict=True, cache=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L231)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L231?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L231)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L231?message=Update%20Docs)]
 </div>
 
 
@@ -98,8 +98,8 @@ find_all(self, item, strict=True, cache=False):
 atoms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L250)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L250?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L250)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L250?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ atoms(self):
 construct_base_atom_coords(self, property_dict): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L256)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L256?message=Update%20Docs)]
 </div>
 
 
@@ -118,8 +118,8 @@ construct_base_atom_coords(self, property_dict):
 construct_atom_coords(self, atom_properties, symmetry_properties): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L272)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L272?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L272)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.py#L272?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -174,7 +174,7 @@ construct_atom_coords(self, atom_properties, symmetry_properties):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/CIFParser/CIFConverter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/CIFParser.py#L184?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L184?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

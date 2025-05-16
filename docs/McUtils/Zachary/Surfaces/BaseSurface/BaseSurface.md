@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Surfaces.BaseSurface.BaseSurface">BaseSurface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L16?message=Update%20Docs)]
 </div>
 
 Surface base class which can be subclassed for relevant cases
@@ -24,8 +24,8 @@ Surface base class which can be subclassed for relevant cases
 __init__(self, data, dimension): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L20?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, data, dimension):
 evaluate(self, points, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L25?message=Update%20Docs)]
 </div>
 Evaluates the function at the points based off of "data"
   - `points`: `Any`
@@ -49,8 +49,8 @@ Evaluates the function at the points based off of "data"
 check_dimension(self, gridpoints): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L36?message=Update%20Docs)]
 </div>
 
 
@@ -59,8 +59,8 @@ check_dimension(self, gridpoints):
 __call__(self, gridpoints, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L53)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/BaseSurface.py#L53?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L53)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L53?message=Update%20Docs)]
 </div>
 
   - `gridpoints`: `np.ndarray`
@@ -122,7 +122,7 @@ __call__(self, gridpoints, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

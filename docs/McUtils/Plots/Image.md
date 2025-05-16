@@ -1,7 +1,7 @@
 # <a id="McUtils.Plots.Image">McUtils.Plots.Image</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Image/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Image/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Image.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Image.py#L1?message=Update%20Docs)]
 </div>
     
 Provides hooks for viewing images, mostly through the Matplotlib Image interface
@@ -72,7 +72,7 @@ Provides hooks for viewing images, mostly through the Matplotlib Image interface
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Image.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Image.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Image/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Image.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

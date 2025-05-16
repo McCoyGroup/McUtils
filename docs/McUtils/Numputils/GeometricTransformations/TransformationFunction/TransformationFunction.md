@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.GeometricTransformations.TransformationFunction.TransformationFunction">TransformationFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TransformationFunction.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TransformationFunction.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TransformationFunction.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TransformationFunction.py#L13?message=Update%20Docs)]
 </div>
 
 The TransformationFunction class is an abstract class
@@ -25,8 +25,8 @@ It provides the scaffolding for representing a single transformation operation
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TransformationFunction.py#L19)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TransformationFunction.py#L19?message=Update%20Docs)]
 </div>
 Initializes a transformation function based on the transfdata
   - `transfdata`: `Any`
@@ -39,8 +39,8 @@ Initializes a transformation function based on the transfdata
 inverse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L27)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L27?message=Update%20Docs)]
 </div>
 Returns the inverse of the transformation
   - `:returns`: `_`
@@ -52,8 +52,8 @@ Returns the inverse of the transformation
 merge(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L36?message=Update%20Docs)]
 </div>
 Tries to merge with another TransformationFunction
   - `other`: `TransformationFunction`
@@ -71,8 +71,8 @@ c
 operate(self, coords, shift=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.py#L47?message=Update%20Docs)]
 </div>
 Operates on the coords. *Must* be able to deal with a list of coordinates, optimally in an efficient manner
   - `coords`: `np.ndarry`
@@ -130,7 +130,7 @@ Operates on the coords. *Must* be able to deal with a list of coordinates, optim
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/TransformationFunction.py#L13?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/TransformationFunction.py#L13?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

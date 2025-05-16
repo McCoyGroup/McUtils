@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.MenuSelect">MenuSelect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L402)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L402?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L402)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L402?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ menu_type: ListGroup
 __init__(self, var, options, menu_type=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L404)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L404?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L404)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L404?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, var, options, menu_type=None, **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L411)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L411?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L414)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L414?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L414)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L414?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ set_value(self):
 update(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L416)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L416?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L416)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L416?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ update(self, e):
 set_active(self, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L418)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L418?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L418)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L418?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ set_active(self, v):
 set_active_key(self, k): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L426)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L426?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L426)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L426?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ set_active_key(self, k):
 onclick(self, e, i, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L439)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L439?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L439)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L439?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ onclick(self, e, i, v):
 canonicalize_options(self, options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L444)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L444?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L444)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L444?message=Update%20Docs)]
 </div>
 
 
@@ -106,8 +106,8 @@ canonicalize_options(self, options):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/MenuSelect.py#L467)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/MenuSelect.py#L467?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L467)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L467?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -162,7 +162,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/MenuSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/MenuSelect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L402?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L402?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Options.OptionsSet">OptionsSet</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options.py#L14?message=Update%20Docs)]
 </div>
 
 Provides a helpful manager for those cases where
@@ -26,8 +26,8 @@ them across subclasses and things
 __init__(self, *d, **ops): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options.py#L21)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options.py#L21?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, *d, **ops):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L30?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ __getitem__(self, item):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L32?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ __setitem__(self, key, value):
 __delitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L34?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ __delitem__(self, item):
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L36?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ __getattr__(self, item):
 __setattr__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L38)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L38?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ __setattr__(self, key, value):
 __delattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L43?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ __delattr__(self, item):
 __hasattr__(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L45?message=Update%20Docs)]
 </div>
 
 
@@ -106,8 +106,8 @@ __hasattr__(self, key):
 update(self, **ops): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L47?message=Update%20Docs)]
 </div>
 
 
@@ -116,8 +116,8 @@ update(self, **ops):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L50?message=Update%20Docs)]
 </div>
 
 
@@ -126,8 +126,8 @@ keys(self):
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L52)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L52?message=Update%20Docs)]
 </div>
 
 
@@ -136,8 +136,8 @@ items(self):
 save(self, file, mode=None, attribute=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L55)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L55?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L55)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L55?message=Update%20Docs)]
 </div>
 
 
@@ -147,8 +147,8 @@ save(self, file, mode=None, attribute=None):
 load(cls, file, mode=None, attribute=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L57?message=Update%20Docs)]
 </div>
 
 
@@ -157,8 +157,8 @@ load(cls, file, mode=None, attribute=None):
 extract_kwarg_keys(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L61?message=Update%20Docs)]
 </div>
 
 
@@ -167,8 +167,8 @@ extract_kwarg_keys(self, obj):
 get_props(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L67)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L67?message=Update%20Docs)]
 </div>
 
 
@@ -177,8 +177,8 @@ get_props(self, obj):
 bind(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L93?message=Update%20Docs)]
 </div>
 
 
@@ -187,8 +187,8 @@ bind(self, obj, props=None):
 filter(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L96)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L96?message=Update%20Docs)]
 </div>
 
 
@@ -197,8 +197,8 @@ filter(self, obj, props=None):
 exclude(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L101)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L101?message=Update%20Docs)]
 </div>
 
 
@@ -207,8 +207,8 @@ exclude(self, obj, props=None):
 split(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Options/OptionsSet.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options/OptionsSet.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L106?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -263,7 +263,7 @@ split(self, obj, props=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Options/OptionsSet.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Options/OptionsSet.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Options.py#L14?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options.py#L14?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

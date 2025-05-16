@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.ListPlot3D">ListPlot3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L1185)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L1185?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1185)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1185?message=Update%20Docs)]
 </div>
 
 Convenience 3D plotting class that handles the interpolation first
@@ -26,8 +26,8 @@ method: str
 __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None, axes=None, subplot_kw=None, interpolate=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/ListPlot3D.py#L1190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/ListPlot3D.py#L1190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1190?message=Update%20Docs)]
 </div>
 
   - `params`: `Any`
@@ -101,7 +101,7 @@ __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ListPlot3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ListPlot3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L1185?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1185?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

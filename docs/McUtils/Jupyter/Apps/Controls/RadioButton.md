@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.RadioButton">RadioButton</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L190?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ base_cls: list
 __init__(self, var, type='radio', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/RadioButton.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/RadioButton.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L192)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L192?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +82,7 @@ __init__(self, var, type='radio', **attrs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/RadioButton.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/RadioButton.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L190?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L190?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

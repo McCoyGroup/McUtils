@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.FileMatcher.StringMatcher">StringMatcher</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/FileMatcher.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L9?message=Update%20Docs)]
 </div>
 
 Defines a simple filter that applies to a file and determines whether or not it matches the pattern
@@ -24,8 +24,8 @@ Defines a simple filter that applies to a file and determines whether or not it 
 __init__(self, match_patterns, negative_match=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/FileMatcher/StringMatcher.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher/StringMatcher.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L14?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, match_patterns, negative_match=False):
 matches(self, f): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/FileMatcher/StringMatcher.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher/StringMatcher.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher/StringMatcher.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher/StringMatcher.py#L33?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -90,7 +90,7 @@ matches(self, f):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/FileMatcher/StringMatcher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/FileMatcher/StringMatcher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

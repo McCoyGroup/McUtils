@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.MethodWriter">MethodWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L857)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L857?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L849)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L849?message=Update%20Docs)]
 </div>
 
 Writes class methods to file
@@ -27,8 +27,8 @@ template: str
 get_template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/MethodWriter.py#L865)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/MethodWriter.py#L865?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L857)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L857?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ get_template_params(self, **kwargs):
 get_signature(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/MethodWriter.py#L888)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/MethodWriter.py#L888?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L880)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L880?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ get_signature(self):
 identifier(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/MethodWriter.py#L895)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/MethodWriter.py#L895?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L887)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L887?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -104,7 +104,7 @@ identifier(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/MethodWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/MethodWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L857?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L849?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

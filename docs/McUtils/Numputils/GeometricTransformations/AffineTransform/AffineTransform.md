@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.GeometricTransformations.AffineTransform.AffineTransform">AffineTransform</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform.py#L17?message=Update%20Docs)]
 </div>
 
 A simple AffineTranform implementation of the TransformationFunction abstract base class
@@ -24,8 +24,8 @@ A simple AffineTranform implementation of the TransformationFunction abstract ba
 __init__(self, tmat, shift=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform.py#L23?message=Update%20Docs)]
 </div>
 tmat must be a transformation matrix to work properly
   - `shift`: `np.ndarray | None`
@@ -40,8 +40,8 @@ tmat must be a transformation matrix to work properly
 transform(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L35?message=Update%20Docs)]
 </div>
 
 
@@ -51,8 +51,8 @@ transform(self):
 inverse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L39?message=Update%20Docs)]
 </div>
 Returns the inverse of the transformation
   - `:returns`: `_`
@@ -65,8 +65,8 @@ Returns the inverse of the transformation
 shift(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L48?message=Update%20Docs)]
 </div>
 
 
@@ -75,8 +75,8 @@ shift(self):
 merge(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L58)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L58?message=Update%20Docs)]
 </div>
 
   - `other`: `np.ndarray or AffineTransform`
@@ -88,8 +88,8 @@ merge(self, other):
 reverse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L74?message=Update%20Docs)]
 </div>
 Inverts the matrix
   - `:returns`: `_`
@@ -101,8 +101,8 @@ Inverts the matrix
 operate(self, coords, shift=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L85?message=Update%20Docs)]
 </div>
 
   - `coords`: `np.ndarry`
@@ -114,8 +114,8 @@ operate(self, coords, shift=True):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.py#L120?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -170,7 +170,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/GeometricTransformations/AffineTransform/AffineTransform.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/AffineTransform.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/AffineTransform.py#L17?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

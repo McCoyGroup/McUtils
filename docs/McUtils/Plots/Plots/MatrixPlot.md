@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.MatrixPlot">MatrixPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L827)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L827?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L827)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L827?message=Update%20Docs)]
 </div>
 
 
@@ -75,7 +75,7 @@ method: str
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/MatrixPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/MatrixPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L827?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L827?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

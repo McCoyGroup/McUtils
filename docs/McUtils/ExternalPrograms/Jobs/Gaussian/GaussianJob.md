@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.Gaussian.GaussianJob">GaussianJob</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Gaussian.py#L277)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Gaussian.py#L277?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L277)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L277?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,8 @@ non_blank_line_terminated: set
 __init__(self, *strs, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L287)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L287?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L287)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L287?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ __init__(self, *strs, **opts):
 get_extra_keys(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L296)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L296?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L296)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L296?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +50,8 @@ get_extra_keys(cls):
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L302)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L302?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L302)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L302?message=Update%20Docs)]
 </div>
 
 
@@ -61,8 +61,8 @@ get_block_types(cls):
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L306)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L306?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L306)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L306?message=Update%20Docs)]
 </div>
 
 
@@ -71,8 +71,8 @@ load_template(cls):
 get_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L311)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L311?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L311)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L311?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -96,17 +96,17 @@ get_params(self):
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-376164" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-376164"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-00683e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-00683e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-376164" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-00683e" markdown="1">
  - [GaussianJobWriter](#GaussianJobWriter)
 - [LinkedModeScan](#LinkedModeScan)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-78a49d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-78a49d"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-2809c7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2809c7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-78a49d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2809c7" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -280,7 +280,7 @@ class GaussianJobTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Gaussian.py#L277?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L277?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

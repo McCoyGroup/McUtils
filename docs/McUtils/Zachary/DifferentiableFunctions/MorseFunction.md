@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.DifferentiableFunctions.MorseFunction">MorseFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions.py#L325)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions.py#L325?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L325)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L325?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, *, de, a, re, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/MorseFunction.py#L326)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/MorseFunction.py#L326?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L326)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L326?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, *, de, a, re, inds=None):
 from_anharmonicity(cls, w, wx, g, re, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L332)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L332?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L332)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L332?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ from_anharmonicity(cls, w, wx, g, re, inds=None):
 evaluate_term(self, r, order=0, previous_terms=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/MorseFunction.py#L340)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/MorseFunction.py#L340?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/MorseFunction.py#L340)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/MorseFunction.py#L340?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ evaluate_term(self, r, order=0, previous_terms=None):
 get_children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/DifferentiableFunctions/MorseFunction.py#L355)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions/MorseFunction.py#L355?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/MorseFunction.py#L355)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/MorseFunction.py#L355?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -111,7 +111,7 @@ get_children(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/DifferentiableFunctions/MorseFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/DifferentiableFunctions/MorseFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/DifferentiableFunctions.py#L325?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L325?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

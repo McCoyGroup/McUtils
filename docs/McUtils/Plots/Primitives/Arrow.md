@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Arrow">Arrow</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L89?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, pos1, pos2, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Arrow.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Arrow.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L90?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, pos1, pos2, **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Arrow.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Arrow.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L94?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ get_bbox(self):
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Arrow.py#L97)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Arrow.py#L97?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L97?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -100,7 +100,7 @@ plot(self, axes, *args, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Arrow.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Arrow.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L89?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L89?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

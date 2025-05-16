@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parallelizers.SharedMemory.SharedObjectManager">SharedObjectManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory.py#L616)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory.py#L616?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory.py#L616)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory.py#L616?message=Update%20Docs)]
 </div>
 
 Provides a high-level interface to create a manager
@@ -29,8 +29,8 @@ primitive_types: tuple
 __init__(self, obj, base_dict=None, parallelizer=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L624)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L624?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory.py#L624)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory.py#L624?message=Update%20Docs)]
 </div>
 
   - `mem_manager`: `Any`
@@ -47,8 +47,8 @@ __init__(self, obj, base_dict=None, parallelizer=None):
 is_primitive(cls, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L648)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L648?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L648)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L648?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ is_primitive(cls, val):
 save_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L652)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L652?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L652)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L652?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ save_attr(self, attr):
 del_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L660)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L660?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L660)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L660?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ del_attr(self, attr):
 load_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L666)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L666?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L666)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L666?message=Update%20Docs)]
 </div>
 
 
@@ -87,8 +87,8 @@ load_attr(self, attr):
 get_saved_keys(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L673)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L673?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L673)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L673?message=Update%20Docs)]
 </div>
 
 
@@ -97,8 +97,8 @@ get_saved_keys(self, obj):
 save_keys(self, keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L676)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L676?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L676)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L676?message=Update%20Docs)]
 </div>
 
 
@@ -107,8 +107,8 @@ save_keys(self, keys=None):
 share(self, keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L682)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L682?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L682)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L682?message=Update%20Docs)]
 </div>
 
 
@@ -117,8 +117,8 @@ share(self, keys=None):
 load_keys(self, keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L694)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L694?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L694)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L694?message=Update%20Docs)]
 </div>
 
 
@@ -127,8 +127,8 @@ load_keys(self, keys=None):
 unshare(self, keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L700)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L700?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L700)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L700?message=Update%20Docs)]
 </div>
 
 
@@ -137,8 +137,8 @@ unshare(self, keys=None):
 __del__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L724)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L724?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L724)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L724?message=Update%20Docs)]
 </div>
 
 
@@ -147,8 +147,8 @@ __del__(self):
 list(self, *l): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L731)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L731?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L731)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L731?message=Update%20Docs)]
 </div>
 
 
@@ -157,8 +157,8 @@ list(self, *l):
 dict(self, *d): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L738)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L738?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L738)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L738?message=Update%20Docs)]
 </div>
 
 
@@ -167,8 +167,8 @@ dict(self, *d):
 array(self, a): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/SharedMemory/SharedObjectManager.py#L745)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory/SharedObjectManager.py#L745?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L745)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory/SharedObjectManager.py#L745?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -223,7 +223,7 @@ array(self, a):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers/SharedMemory/SharedObjectManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers/SharedMemory/SharedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/SharedMemory.py#L616?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/SharedMemory.py#L616?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

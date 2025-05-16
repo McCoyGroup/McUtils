@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.FileStreamCheckPoint">FileStreamCheckPoint</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L21)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L21?message=Update%20Docs)]
 </div>
 
 A checkpoint for a file that can be returned to when parsing
@@ -24,8 +24,8 @@ A checkpoint for a file that can be returned to when parsing
 __init__(self, parent, revert=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L25?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, parent, revert=True):
 revert(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L29)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L29?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ revert(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L31?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer/FileStreamCheckPoint.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L33?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -110,7 +110,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L21?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L21?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

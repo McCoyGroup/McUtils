@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DPrimitive">X3DPrimitive</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface.py#L165)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L165?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L165)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L165?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ tag_class: NoneType
 __init__(self, *children, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DPrimitive.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DPrimitive.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L168)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L168?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, *children, **opts):
 split_opts(self, opts: dict): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DPrimitive.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DPrimitive.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L173)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L173?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ split_opts(self, opts: dict):
 get_appearance(self, material_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DPrimitive.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DPrimitive.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L177?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ get_appearance(self, material_opts):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DPrimitive.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DPrimitive.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L182?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -113,7 +113,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DPrimitive.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DPrimitive.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L165?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L165?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

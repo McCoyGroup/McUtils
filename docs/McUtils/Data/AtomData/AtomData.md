@@ -1,7 +1,7 @@
 ### <a id="McUtils.Data.AtomData.AtomData">AtomData</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/AtomData.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/AtomData.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData.py#L9?message=Update%20Docs)]
 </div>
 An instance of AtomDataHandler that can be used for looking up atom data
 
@@ -54,7 +54,7 @@ An instance of AtomDataHandler that can be used for looking up atom data
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/AtomData/AtomData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/AtomData/AtomData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

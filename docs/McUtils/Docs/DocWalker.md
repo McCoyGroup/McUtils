@@ -1,7 +1,7 @@
 # <a id="McUtils.Docs.DocWalker">McUtils.Docs.DocWalker</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1?message=Update%20Docs)]
 </div>
     
 Provides a class that will walk through a set of objects & their children, as loaded into memory, and will generate Markdown for each.
@@ -95,7 +95,7 @@ The actual object Markdown is written by the things in the `Writers` module.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

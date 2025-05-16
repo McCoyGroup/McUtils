@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReaderException">GaussianLogReaderException</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/GaussianImporter.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/GaussianImporter.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L17?message=Update%20Docs)]
 </div>
 
 A class for holding exceptions that occur in the course of reading from a log file
@@ -73,7 +73,7 @@ A class for holding exceptions that occur in the course of reading from a log fi
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReaderException.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReaderException.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/GaussianImporter.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L17?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

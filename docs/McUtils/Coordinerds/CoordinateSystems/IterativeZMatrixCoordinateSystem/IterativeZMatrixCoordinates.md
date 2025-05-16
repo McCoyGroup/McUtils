@@ -1,7 +1,7 @@
 ### <a id="McUtils.Coordinerds.CoordinateSystems.IterativeZMatrixCoordinateSystem.IterativeZMatrixCoordinates">IterativeZMatrixCoordinates</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem.py#L19)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem.py#L19?message=Update%20Docs)]
 </div>
 Iterative Z-matrix internals
 
@@ -54,7 +54,7 @@ Iterative Z-matrix internals
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IterativeZMatrixCoordinates.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem/IterativeZMatrixCoordinates.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem.py#L19?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/IterativeZMatrixCoordinateSystem.py#L19?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

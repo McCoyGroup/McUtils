@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Polynomials.AbstractPolynomial">AbstractPolynomial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L14?message=Update%20Docs)]
 </div>
 
 Provides the general interface an abstract polynomial needs ot support, including
@@ -26,8 +26,8 @@ multiplication, addition, shifting, access of coefficients, and evaluation
 scaling(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L20?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ scaling(self):
 __mul__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L25?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ __mul__(self, other) -> 'AbstractPolynomial':
 __add__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L28)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L28?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ __add__(self, other) -> 'AbstractPolynomial':
 shift(self, shift) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L32?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ shift(self, shift) -> 'AbstractPolynomial':
 __rmul__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L36?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ __rmul__(self, other) -> 'AbstractPolynomial':
 __radd__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L38)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L38?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ __radd__(self, other) -> 'AbstractPolynomial':
 __truediv__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L40?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ __truediv__(self, other) -> 'AbstractPolynomial':
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L42?message=Update%20Docs)]
 </div>
 
 
@@ -106,8 +106,8 @@ __neg__(self):
 __sub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L44?message=Update%20Docs)]
 </div>
 
 
@@ -116,8 +116,8 @@ __sub__(self, other):
 __rsub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/AbstractPolynomial.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/AbstractPolynomial.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L46?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -172,7 +172,7 @@ __rsub__(self, other):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/AbstractPolynomial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/AbstractPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L14?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L14?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

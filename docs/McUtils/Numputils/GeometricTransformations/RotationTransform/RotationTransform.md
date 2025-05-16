@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.GeometricTransformations.RotationTransform.RotationTransform">RotationTransform</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/RotationTransform.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/RotationTransform.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/RotationTransform.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/RotationTransform.py#L16?message=Update%20Docs)]
 </div>
 
 A simple AffineTransform implementation of the TransformationFunction abstract base class
@@ -24,8 +24,8 @@ A simple AffineTransform implementation of the TransformationFunction abstract b
 __init__(self, theta, axis='z', center=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/RotationTransform/RotationTransform.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/RotationTransform/RotationTransform.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/RotationTransform.py#L21)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/RotationTransform.py#L21?message=Update%20Docs)]
 </div>
 
   - `theta`: `float`
@@ -41,8 +41,8 @@ __init__(self, theta, axis='z', center=None):
 reverse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/GeometricTransformations/RotationTransform/RotationTransform.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/RotationTransform/RotationTransform.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/GeometricTransformations/RotationTransform/RotationTransform.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/RotationTransform/RotationTransform.py#L42?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -97,7 +97,7 @@ reverse(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/GeometricTransformations/RotationTransform/RotationTransform.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/GeometricTransformations/RotationTransform/RotationTransform.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/GeometricTransformations/RotationTransform.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/GeometricTransformations/RotationTransform.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

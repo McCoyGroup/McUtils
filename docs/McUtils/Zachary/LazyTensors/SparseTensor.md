@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.LazyTensors.SparseTensor">SparseTensor</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors.py#L112)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L112?message=Update%20Docs)]
 </div>
 
 Tensor class that uses SparseArray
@@ -24,8 +24,8 @@ Tensor class that uses SparseArray
 __init__(self, a, shape=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/SparseTensor.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/SparseTensor.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors.py#L117)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L117?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, a, shape=None):
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/SparseTensor.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/SparseTensor.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/SparseTensor.py#L120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/SparseTensor.py#L120?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -91,7 +91,7 @@ array(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/LazyTensors/SparseTensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/LazyTensors/SparseTensor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors.py#L112?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L112?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

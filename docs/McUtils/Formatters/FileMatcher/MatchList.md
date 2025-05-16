@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.FileMatcher.MatchList">MatchList</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/FileMatcher.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L39?message=Update%20Docs)]
 </div>
 
 Defines a set of matches that must be matched directly (uses `set` to make this basically a constant time check)
@@ -24,8 +24,8 @@ Defines a set of matches that must be matched directly (uses `set` to make this 
 __init__(self, *matches, negative_match=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/FileMatcher/MatchList.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher/MatchList.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L44?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, *matches, negative_match=False):
 test_match(self, f): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/FileMatcher/MatchList.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher/MatchList.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher/MatchList.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher/MatchList.py#L47?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -90,7 +90,7 @@ test_match(self, f):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/FileMatcher/MatchList.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/FileMatcher/MatchList.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/FileMatcher.py#L39?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L39?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

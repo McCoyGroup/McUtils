@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.DocWalker">DocWalker</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L1006)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L1006?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L998)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L998?message=Update%20Docs)]
 </div>
 
 A class that walks a module structure, generating `.md` files for every class inside it as well as for global functions,
@@ -35,8 +35,8 @@ spec: DocSpec
 __init__(self, out=None, engine=None, verbose=True, template_locator=None, examples_directory=None, tests_directory=None, **extra_fields): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1024)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1024?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1016)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1016?message=Update%20Docs)]
 </div>
 
   - `objects`: `Iterable[Any]`
@@ -52,8 +52,8 @@ __init__(self, out=None, engine=None, verbose=True, template_locator=None, examp
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1050)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1050?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1042)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/DocWalker.py#L1042?message=Update%20Docs)]
 </div>
 
 
@@ -62,8 +62,8 @@ __repr__(self):
 get_engine(self, locator): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1054)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1054?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1046)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/DocWalker.py#L1046?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ get_engine(self, locator):
 get_examples_loader(self, examples_directory): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1060)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1060?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1052)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/DocWalker.py#L1052?message=Update%20Docs)]
 </div>
 
 
@@ -82,8 +82,8 @@ get_examples_loader(self, examples_directory):
 get_tests_loader(self, tests_directory): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1065)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1065?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1057)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/DocWalker.py#L1057?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +92,8 @@ get_tests_loader(self, tests_directory):
 get_handler(self, *args, examples_loader=None, tests_loader=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1070)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1070?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1062)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/DocWalker.py#L1062?message=Update%20Docs)]
 </div>
 
 
@@ -102,8 +102,8 @@ get_handler(self, *args, examples_loader=None, tests_loader=None, **kwargs):
 visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/DocWalker.py#L1078)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/DocWalker.py#L1078?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1070)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/DocWalker.py#L1070?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -112,9 +112,9 @@ visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Details-974df7" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-974df7"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Details-b53744" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-b53744"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Details-974df7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Details-b53744" markdown="1">
  A `DocWalker` object is a light subclass of a `TemplateWalker`, but specialized for documentation & with specialized handlers
  </div>
 </div>
@@ -168,7 +168,7 @@ visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/DocWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L1006?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L998?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

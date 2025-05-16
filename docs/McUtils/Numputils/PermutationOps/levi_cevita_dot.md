@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.PermutationOps.levi_cevita_dot">levi_cevita_dot</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/PermutationOps.py#L69)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/PermutationOps.py#L69?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/PermutationOps.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L69?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ levi_cevita_dot(k, a, /, axes, shared=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/PermutationOps/levi_cevita_dot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/PermutationOps/levi_cevita_dot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/PermutationOps.py#L69?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L69?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

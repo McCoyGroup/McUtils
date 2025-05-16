@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.LazyTensors.Tensor">Tensor</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors.py#L19)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L19?message=Update%20Docs)]
 </div>
 
 A semi-symbolic representation of a tensor. Allows for lazy processing of tensor operations.
@@ -24,8 +24,8 @@ A semi-symbolic representation of a tensor. Allows for lazy processing of tensor
 __init__(self, a, shape=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors.py#L21)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L21?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, a, shape=None):
 from_array(cls, a, shape=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/__init__.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L24)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L24?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ from_array(cls, a, shape=None):
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L30?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ array(self):
 get_shape(self, a): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L37?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ get_shape(self, a):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L39?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ shape(self):
 get_dim(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L42?message=Update%20Docs)]
 </div>
 
 
@@ -88,8 +88,8 @@ get_dim(self):
 dim(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L44?message=Update%20Docs)]
 </div>
 
 
@@ -98,8 +98,8 @@ dim(self):
 add(self, other, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L48?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ add(self, other, **kw):
 mul(self, other, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L50?message=Update%20Docs)]
 </div>
 
 
@@ -118,8 +118,8 @@ mul(self, other, **kw):
 dot(self, other, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L52)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L52?message=Update%20Docs)]
 </div>
 
 
@@ -128,8 +128,8 @@ dot(self, other, **kw):
 transpose(self, axes, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L54)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L54?message=Update%20Docs)]
 </div>
 
 
@@ -138,8 +138,8 @@ transpose(self, axes, **kw):
 pow(self, other, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L56)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L56?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L56)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L56?message=Update%20Docs)]
 </div>
 
 
@@ -148,8 +148,8 @@ pow(self, other, **kw):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L59)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L59?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L59?message=Update%20Docs)]
 </div>
 
 
@@ -158,8 +158,8 @@ __mul__(self, other):
 __rmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L64?message=Update%20Docs)]
 </div>
 
 
@@ -168,8 +168,8 @@ __rmul__(self, other):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L69)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L69?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L69?message=Update%20Docs)]
 </div>
 
 
@@ -178,8 +178,8 @@ __add__(self, other):
 __pow__(self, power, modulo=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L71?message=Update%20Docs)]
 </div>
 
 
@@ -188,8 +188,8 @@ __pow__(self, power, modulo=None):
 handle_missing_indices(self, missing, extant): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L74?message=Update%20Docs)]
 </div>
 
 
@@ -198,8 +198,8 @@ handle_missing_indices(self, missing, extant):
 pull_index(self, *idx): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L77)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L77?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L77)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L77?message=Update%20Docs)]
 </div>
 Defines custom logic for handling how we pull indices
   - `idx`: `Any`
@@ -213,8 +213,8 @@ Defines custom logic for handling how we pull indices
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L103)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L103?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L103?message=Update%20Docs)]
 </div>
 
 
@@ -223,8 +223,8 @@ __getitem__(self, item):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/LazyTensors/Tensor.py#L109)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors/Tensor.py#L109?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/LazyTensors/Tensor.py#L109)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors/Tensor.py#L109?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -279,7 +279,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/LazyTensors/Tensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/LazyTensors/Tensor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/LazyTensors.py#L19?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/LazyTensors.py#L19?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

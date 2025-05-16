@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Interactive.EventHandler">EventHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive.py#L12)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive.py#L12?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive.py#L12)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive.py#L12?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ Event: Event
 __init__(self, figure, on_click=None, on_release=None, on_draw=None, on_key_press=None, on_key_release=None, on_move=None, on_select=None, on_resize=None, on_scroll=None, on_figure_entered=None, on_figure_left=None, on_axes_entered=None, on_axes_left=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive.py#L13?message=Update%20Docs)]
 </div>
 Creates an EventHandler on a Figure that handles most interactivity stuff
   - `figure`: `GraphicsBase`
@@ -65,8 +65,8 @@ Creates an EventHandler on a Figure that handles most interactivity stuff
 bind(self, **handlers): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L105)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L105?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L105)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L105?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ bind(self, **handlers):
 handlers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L110?message=Update%20Docs)]
 </div>
 
 
@@ -86,8 +86,8 @@ handlers(self):
 ButtonPressedEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L158)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L158?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L158)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L158?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ ButtonPressedEvent(self, handler, **kw):
 ButtonReleasedEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L166?message=Update%20Docs)]
 </div>
 
 
@@ -106,8 +106,8 @@ ButtonReleasedEvent(self, handler, **kw):
 DrawEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L174)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L174?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L174)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L174?message=Update%20Docs)]
 </div>
 
 
@@ -116,8 +116,8 @@ DrawEvent(self, handler, **kw):
 KeyPressedEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L182?message=Update%20Docs)]
 </div>
 
 
@@ -126,8 +126,8 @@ KeyPressedEvent(self, handler, **kw):
 KeyReleasedEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L195)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L195?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L195?message=Update%20Docs)]
 </div>
 
 
@@ -136,8 +136,8 @@ KeyReleasedEvent(self, handler, **kw):
 MoveEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L208)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L208?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L208)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L208?message=Update%20Docs)]
 </div>
 
 
@@ -146,8 +146,8 @@ MoveEvent(self, handler, **kw):
 SelectEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L216)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L216?message=Update%20Docs)]
 </div>
 
 
@@ -156,8 +156,8 @@ SelectEvent(self, handler, **kw):
 ScrollEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L224)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L224?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L224?message=Update%20Docs)]
 </div>
 
 
@@ -166,8 +166,8 @@ ScrollEvent(self, handler, **kw):
 FigureEnterEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L232)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L232?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L232)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L232?message=Update%20Docs)]
 </div>
 
 
@@ -176,8 +176,8 @@ FigureEnterEvent(self, handler, **kw):
 FigureLeaveEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L240)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L240?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L240)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L240?message=Update%20Docs)]
 </div>
 
 
@@ -186,8 +186,8 @@ FigureLeaveEvent(self, handler, **kw):
 AxesEnterEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L248)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L248?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L248)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L248?message=Update%20Docs)]
 </div>
 
 
@@ -196,8 +196,8 @@ AxesEnterEvent(self, handler, **kw):
 AxesLeaveEvent(self, handler, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Interactive/EventHandler.py#L256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive/EventHandler.py#L256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Interactive/EventHandler.py#L256)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive/EventHandler.py#L256?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -252,7 +252,7 @@ AxesLeaveEvent(self, handler, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Interactive/EventHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Interactive/EventHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Interactive.py#L12?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Interactive.py#L12?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 # <a id="McUtils.Formatters.TemplateEngine.ObjectWalker">McUtils.Formatters.TemplateEngine.ObjectWalker</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/ObjectWalker/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/ObjectWalker/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L1?message=Update%20Docs)]
 </div>
     
 Provides a class that will walk through a set of objects & their children, as loaded into memory,
@@ -84,7 +84,7 @@ and call appropriate handlers for each
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/ObjectWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/ObjectWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/ObjectWalker/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
