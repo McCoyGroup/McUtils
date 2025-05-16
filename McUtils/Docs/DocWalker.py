@@ -682,6 +682,13 @@ class ModuleWriter(DocTemplateHandler):
 
         ex = self.load_examples()
         tests = self.load_tests()
+
+        print(
+            f'documenting module {self.identifier}:',
+            f'source: {self.obj}',
+            f'members: {idents}',
+            sep='\n'
+        )
         return dict({
             'id': ident,
             'root':ident.rsplit('.', 1)[0],
@@ -1036,6 +1043,7 @@ class DocWalker(TemplateWalker):
         )
 
     def visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
+        print('documenting root package', o)
         if tests_directory is None and isinstance(o, dict):
             tests_directory = o.get('tests_root', None)
         old_tl = self.tests_loader
