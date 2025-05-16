@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Dropdown">Dropdown</a> 
+## <a id="McUtils.Jupyter.Apps.Interfaces.Dropdown">Dropdown</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L701)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L701?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces.py#L701)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L701?message=Update%20Docs)]
 </div>
 
 
@@ -22,23 +22,23 @@
 components: dict
 theme: dict
 ```
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Dropdown.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.Dropdown.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, header: Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType], Mapping], NoneType, Iterable[Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType], Mapping]]]], actions: Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType], Mapping], NoneType, Iterable[Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.McUtils.Jupyter.Apps.types.HTMLableType, McUtils.McUtils.Jupyter.Apps.types.WidgetableType], Mapping]]]], **attrs): 
+__init__(self, header: Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType], Mapping], NoneType, Iterable[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType], Mapping]]]], actions: Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType], Mapping], NoneType, Iterable[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType], Mapping]]]], **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Dropdown.py#L710)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Dropdown.py#L710?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Dropdown.py#L710)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Dropdown.py#L710?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Dropdown.prep_actions" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.Dropdown.prep_actions" class="docs-object-method">&nbsp;</a> 
 ```python
 prep_actions(self, actions): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Dropdown.py#L718)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Dropdown.py#L718?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Dropdown.py#L718)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Dropdown.py#L718?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -93,7 +93,7 @@ prep_actions(self, actions):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Dropdown.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Dropdown.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L701?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L701?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

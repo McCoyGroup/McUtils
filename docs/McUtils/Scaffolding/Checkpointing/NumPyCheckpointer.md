@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.Checkpointing.NumPyCheckpointer">NumPyCheckpointer</a> 
+## <a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer">NumPyCheckpointer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L359)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L359?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing.py#L359)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L359?message=Update%20Docs)]
 </div>
 
 A checkpointer that uses NumPy as a backend
@@ -21,33 +21,33 @@ A checkpointer that uses NumPy as a backend
  ```python
 default_extension: str
 ```
-<a id="McUtils.McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, file, cache=None, serializer=None, open_kwargs=None, allowed_keys=None, omitted_keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L365)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L365?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/NumPyCheckpointer.py#L365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/NumPyCheckpointer.py#L365?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.load_cache" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.load_cache" class="docs-object-method">&nbsp;</a> 
 ```python
 load_cache(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L386)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L386?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/NumPyCheckpointer.py#L386)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/NumPyCheckpointer.py#L386?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.dump" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.dump" class="docs-object-method">&nbsp;</a> 
 ```python
 dump(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L400)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L400?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing/NumPyCheckpointer.py#L400)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing/NumPyCheckpointer.py#L400?message=Update%20Docs)]
 </div>
 Writes the entire data structure
   - `:returns`: `_`
@@ -105,7 +105,7 @@ Writes the entire data structure
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L359?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L359?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

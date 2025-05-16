@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType">ArgumentType</a> 
+## <a id="McUtils.Extensions.ArgumentSignature.ArgumentType">ArgumentType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature.py#L24)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature.py#L24?message=Update%20Docs)]
 </div>
 
 Defines a general purpose `ArgumentType` so that we can easily manage complicated type specs
@@ -25,88 +25,88 @@ I'd really live to be integrate with what's in the `typing` module to be able to
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.ctypes_type" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.ctypes_type" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 ctypes_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L35?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.cpp_type" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.cpp_type" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 cpp_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L39?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.types" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.types" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L43?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.dtypes" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.dtypes" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 dtypes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L47?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.typechar" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.typechar" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 typechar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L51?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.isinstance" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.isinstance" class="docs-object-method">&nbsp;</a> 
 ```python
 isinstance(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L55)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L55?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L55)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L55?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.cast" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.cast" class="docs-object-method">&nbsp;</a> 
 ```python
 cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L58)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L58?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.ArgumentSignature.ArgumentType.c_cast" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.ArgumentSignature.ArgumentType.c_cast" class="docs-object-method">&nbsp;</a> 
 ```python
 c_cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ArgumentSignature/ArgumentType.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature/ArgumentType.py#L61?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -161,7 +161,7 @@ c_cast(self, arg):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/ArgumentSignature/ArgumentType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/ArgumentSignature/ArgumentType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L24?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ArgumentSignature.py#L24?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

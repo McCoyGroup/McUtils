@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface">TaylorSeriesSurface</a> 
+## <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface">TaylorSeriesSurface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface.py#L96)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface.py#L96?message=Update%20Docs)]
 </div>
 
 A surface with an evaluator built off of a Taylor series expansion
@@ -19,13 +19,13 @@ A surface with an evaluator built off of a Taylor series expansion
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *derivs, dimension=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L100?message=Update%20Docs)]
 </div>
 
   - `data`: `Any`
@@ -34,56 +34,56 @@ __init__(self, *derivs, dimension=None, **opts):
     >
 
 
-<a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.center" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.center" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 center(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L116?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.ref" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.ref" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 ref(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L119?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.expansion_tensors" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.expansion_tensors" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 expansion_tensors(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L122?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.check_dimension" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.check_dimension" class="docs-object-method">&nbsp;</a> 
 ```python
 check_dimension(self, gridpoints): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.evaluate" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.evaluate" class="docs-object-method">&nbsp;</a> 
 ```python
 evaluate(self, points, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L138?message=Update%20Docs)]
 </div>
 Since the Taylor expansion stuff is already built out this is super easy
   - `points`: `Any`
@@ -145,7 +145,7 @@ Since the Taylor expansion stuff is already built out this is super easy
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L96?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/BaseSurface.py#L96?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

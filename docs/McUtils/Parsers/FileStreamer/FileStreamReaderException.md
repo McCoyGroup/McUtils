@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Parsers.FileStreamer.FileStreamReaderException">FileStreamReaderException</a> 
+## <a id="McUtils.Parsers.FileStreamer.FileStreamReaderException">FileStreamReaderException</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/FileStreamer.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L37?message=Update%20Docs)]
 </div>
 
 
@@ -73,7 +73,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/FileStreamReaderException.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileStreamReaderException.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L37?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/FileStreamer.py#L37?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Devutils.Loggers.NullLogger">NullLogger</a> 
+## <a id="McUtils.Devutils.Loggers.NullLogger">NullLogger</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L416)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L416?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers.py#L416)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers.py#L416?message=Update%20Docs)]
 </div>
 
 A logger that implements the interface, but doesn't ever print.
@@ -20,23 +20,23 @@ Allows code to avoid a bunch of "if logger is not None" blocks
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Devutils.Loggers.NullLogger.log_print" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Loggers.NullLogger.log_print" class="docs-object-method">&nbsp;</a> 
 ```python
 log_print(self, message, *params, print_options=None, padding=None, newline=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/NullLogger.py#L421)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/NullLogger.py#L421?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers/NullLogger.py#L421)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers/NullLogger.py#L421?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Devutils.Loggers.NullLogger.__bool__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Loggers.NullLogger.__bool__" class="docs-object-method">&nbsp;</a> 
 ```python
 __bool__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/NullLogger.py#L423)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/NullLogger.py#L423?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Loggers/NullLogger.py#L423)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers/NullLogger.py#L423?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -91,7 +91,7 @@ __bool__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Loggers/NullLogger.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Loggers/NullLogger.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L416?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Loggers.py#L416?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

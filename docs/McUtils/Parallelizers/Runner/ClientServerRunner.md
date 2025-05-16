@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Parallelizers.Runner.ClientServerRunner">ClientServerRunner</a> 
+## <a id="McUtils.Parallelizers.Runner.ClientServerRunner">ClientServerRunner</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Runner.py#L8)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner.py#L8?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/Runner.py#L8)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/Runner.py#L8?message=Update%20Docs)]
 </div>
 
 Provides a framework for running MPI-like scripts in a client/server
@@ -20,23 +20,23 @@ model
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Parallelizers.Runner.ClientServerRunner.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Parallelizers.Runner.ClientServerRunner.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, client_runner: Callable, server_runner: Callable, parallelizer: McUtils.McUtils.Parallelizers.Parallelizers.Parallelizer): 
+__init__(self, client_runner: Callable, server_runner: Callable, parallelizer: McUtils.Parallelizers.Parallelizers.Parallelizer): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/Runner/ClientServerRunner.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/Runner/ClientServerRunner.py#L14?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Parallelizers.Runner.ClientServerRunner.run" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Parallelizers.Runner.ClientServerRunner.run" class="docs-object-method">&nbsp;</a> 
 ```python
 run(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parallelizers/Runner/ClientServerRunner.py#L19)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/Runner/ClientServerRunner.py#L19?message=Update%20Docs)]
 </div>
 Runs the client/server processes depending on if the parallelizer
 is on the main or server processes
@@ -95,7 +95,7 @@ is on the main or server processes
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers/Runner/ClientServerRunner.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers/Runner/ClientServerRunner.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner.py#L8?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parallelizers/Runner.py#L8?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.CoordinateFrames.inertial_frame_derivatives">inertial_frame_derivatives</a>
+# <a id="McUtils.Numputils.CoordinateFrames.inertial_frame_derivatives">inertial_frame_derivatives</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L77)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L77?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/CoordinateFrames.py#L77)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/CoordinateFrames.py#L77?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ inertial_frame_derivatives(coords, masses=None, sel=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/inertial_frame_derivatives.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/inertial_frame_derivatives.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L77?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/CoordinateFrames.py#L77?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

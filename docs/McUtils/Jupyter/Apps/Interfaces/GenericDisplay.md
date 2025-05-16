@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Interfaces.GenericDisplay">GenericDisplay</a> 
+## <a id="McUtils.Jupyter.Apps.Interfaces.GenericDisplay">GenericDisplay</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1935)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1935?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces.py#L1935)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1935?message=Update%20Docs)]
 </div>
 
 
@@ -19,23 +19,23 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.GenericDisplay.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.GenericDisplay.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.py#L1936)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.py#L1936?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/GenericDisplay.py#L1936)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/GenericDisplay.py#L1936?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.GenericDisplay.to_widget" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.GenericDisplay.to_widget" class="docs-object-method">&nbsp;</a> 
 ```python
 to_widget(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.py#L1938)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.py#L1938?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/GenericDisplay.py#L1938)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/GenericDisplay.py#L1938?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -90,7 +90,7 @@ to_widget(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/GenericDisplay.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1935?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1935?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

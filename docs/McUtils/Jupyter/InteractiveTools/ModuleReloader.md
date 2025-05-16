@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader">ModuleReloader</a> 
+## <a id="McUtils.Jupyter.InteractiveTools.ModuleReloader">ModuleReloader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools.py#L20?message=Update%20Docs)]
 </div>
 
 Reloads a module & recursively descends its 'all' tree
@@ -22,62 +22,62 @@ to make sure that all submodules are also reloaded
  ```python
 blacklist_keys: list
 ```
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, modspec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ModuleReloader.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ModuleReloader.py#L26?message=Update%20Docs)]
 </div>
 
   - `modspec`: `str | types.ModuleType`
     >
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.get_parents" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.get_parents" class="docs-object-method">&nbsp;</a> 
 ```python
 get_parents(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ModuleReloader.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ModuleReloader.py#L35?message=Update%20Docs)]
 </div>
 Returns module parents
   - `:returns`: `_`
     >
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.get_members" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.get_members" class="docs-object-method">&nbsp;</a> 
 ```python
 get_members(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ModuleReloader.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ModuleReloader.py#L44?message=Update%20Docs)]
 </div>
 Returns module members
   - `:returns`: `_`
     >
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.reload_member" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.reload_member" class="docs-object-method">&nbsp;</a> 
 ```python
 reload_member(self, member, stack=None, reloaded=None, blacklist=None, reload_parents=True, verbose=False, print_indent=''): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ModuleReloader.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ModuleReloader.py#L61?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.reload" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.reload" class="docs-object-method">&nbsp;</a> 
 ```python
 reload(self, stack=None, reloaded=None, blacklist=None, reload_parents=True, verbose=False, print_indent=''): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ModuleReloader.py#L114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ModuleReloader.py#L114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ModuleReloader.py#L114?message=Update%20Docs)]
 </div>
 Recursively searches for modules to reload and then reloads them.
 Uses a cache to break cyclic dependencies of any sort.
@@ -87,7 +87,7 @@ load depth-first, while never jumping too far back...
     >
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.load_module" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.load_module" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 load_module(cls, module): 
@@ -98,7 +98,7 @@ load_module(cls, module):
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ModuleReloader.import_from" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ModuleReloader.import_from" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 import_from(cls, module, names, globs=None): 
@@ -160,7 +160,7 @@ import_from(cls, module, names, globs=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/ModuleReloader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/ModuleReloader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L20?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools.py#L20?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

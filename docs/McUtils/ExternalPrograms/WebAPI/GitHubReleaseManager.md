@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager">GitHubReleaseManager</a> 
+## <a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager">GitHubReleaseManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI.py#L463)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L463?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI.py#L463)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L463?message=Update%20Docs)]
 </div>
 
 
@@ -25,57 +25,57 @@ release_manager_class: ReleaseZIPManager
 blacklist_repos: list
 release_cache: dict
 ```
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, token=None, request_delay_time=None, release_manager=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L468)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L468?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L468)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L468?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.list_repos" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.list_repos" class="docs-object-method">&nbsp;</a> 
 ```python
 list_repos(self, owner): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L479)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L479?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L479)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L479?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.list_releases" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.list_releases" class="docs-object-method">&nbsp;</a> 
 ```python
 list_releases(self, owner, repo): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L486)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L486?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L486)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L486?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.latest_release" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.latest_release" class="docs-object-method">&nbsp;</a> 
 ```python
 latest_release(self, owner, repo): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L491)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L491?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L491)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L491?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.update_existing_releases" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.update_existing_releases" class="docs-object-method">&nbsp;</a> 
 ```python
 update_existing_releases(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L500?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.format_repo_key" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.format_repo_key" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 format_repo_key(cls, owner, name): 
@@ -86,23 +86,23 @@ format_repo_key(cls, owner, name):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.resolve_resource_url" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.resolve_resource_url" class="docs-object-method">&nbsp;</a> 
 ```python
 resolve_resource_url(self, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L509)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L509?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L509)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L509?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.get_release_list" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.GitHubReleaseManager.get_release_list" class="docs-object-method">&nbsp;</a> 
 ```python
 get_release_list(self, owner, name, update=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L511)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L511?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L511)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/GitHubReleaseManager.py#L511?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -157,7 +157,7 @@ get_release_list(self, owner, name, update=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L463?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L463?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

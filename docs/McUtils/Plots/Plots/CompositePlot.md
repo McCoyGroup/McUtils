@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Plots.CompositePlot">CompositePlot</a> 
+## <a id="McUtils.Plots.Plots.CompositePlot">CompositePlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L399)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L399?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L399)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L399?message=Update%20Docs)]
 </div>
 
 
@@ -19,33 +19,33 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.Plots.CompositePlot.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.CompositePlot.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, main, other, *rest, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L400)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L400?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/CompositePlot.py#L400)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/CompositePlot.py#L400?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Plots.CompositePlot.merge" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.CompositePlot.merge" class="docs-object-method">&nbsp;</a> 
 ```python
 merge(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L403)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L403?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/CompositePlot.py#L403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/CompositePlot.py#L403?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Plots.CompositePlot.show" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.CompositePlot.show" class="docs-object-method">&nbsp;</a> 
 ```python
 show(self, interactive=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L408)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L408?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/CompositePlot.py#L408)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/CompositePlot.py#L408?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -100,7 +100,7 @@ show(self, interactive=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/CompositePlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/CompositePlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L399?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L399?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

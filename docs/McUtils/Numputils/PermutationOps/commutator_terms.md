@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.PermutationOps.commutator_terms">commutator_terms</a>
+# <a id="McUtils.Numputils.PermutationOps.commutator_terms">commutator_terms</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/PermutationOps.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/PermutationOps.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/PermutationOps.py#L184?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ commutator_terms(commutator_strings):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/PermutationOps/commutator_terms.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/PermutationOps/commutator_terms.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L184?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/PermutationOps.py#L184?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Extensions.FFI.Module.FFIType">FFIType</a> 
+## <a id="McUtils.Extensions.FFI.Module.FFIType">FFIType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/Module.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L16?message=Update%20Docs)]
 </div>
 
 The set of supported enum types.
@@ -58,7 +58,7 @@ NUMPY_Float64: FFIType
 NUMPY_Float128: FFIType
 NUMPY_Bool: FFIType
 ```
-<a id="McUtils.McUtils.Extensions.FFI.Module.FFIType.type_data" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.Module.FFIType.type_data" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 type_data(cls, val): 
@@ -69,7 +69,7 @@ type_data(cls, val):
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.FFI.Module.FFIType.resolve_ffi_type" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.Module.FFIType.resolve_ffi_type" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 resolve_ffi_type(cls, val): 
@@ -134,7 +134,7 @@ resolve_ffi_type(cls, val):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/Module.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.SetOps.take_where_groups">take_where_groups</a>
+# <a id="McUtils.Numputils.SetOps.take_where_groups">take_where_groups</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L698)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L698?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/SetOps.py#L698)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L698?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ take_where_groups(arr, where, presorted=True, return_rows=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/take_where_groups.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/take_where_groups.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L698?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/SetOps.py#L698?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Tooltip">Tooltip</a> 
+## <a id="McUtils.Jupyter.Apps.Interfaces.Tooltip">Tooltip</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1305)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1305?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces.py#L1305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1305?message=Update%20Docs)]
 </div>
 
 
@@ -21,13 +21,13 @@
  ```python
 modifiers: dict
 ```
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Tooltip.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.Tooltip.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, base=None, title='tooltip', data_bs_html=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Tooltip.py#L1380)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Tooltip.py#L1380?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Tooltip.py#L1380)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Tooltip.py#L1380?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +82,7 @@ __init__(self, base=None, title='tooltip', data_bs_html=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Tooltip.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Tooltip.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1305?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1305?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

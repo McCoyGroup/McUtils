@@ -1,7 +1,7 @@
-# <a id="McUtils.Scaffolding">McUtils.McUtils.Scaffolding</a> 
+# <a id="McUtils.Scaffolding">McUtils.Scaffolding</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides development utilities.
@@ -171,9 +171,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-22e8f4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-22e8f4"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-bf572a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-bf572a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-22e8f4" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-bf572a" markdown="1">
  - [Pseudopickle](#Pseudopickle)
 - [HDF5Serialization](#HDF5Serialization)
 - [JSONSerialization](#JSONSerialization)
@@ -198,9 +198,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-433984" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-433984"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-0edee9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-0edee9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-433984" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-0edee9" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -901,7 +901,7 @@ class ScaffoldingTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

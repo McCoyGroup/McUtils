@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter">TensorDerivativeConverter</a> 
+## <a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter">TensorDerivativeConverter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L1691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L1691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions.py#L1691)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions.py#L1691?message=Update%20Docs)]
 </div>
 
 A class that makes it possible to convert expressions
@@ -22,13 +22,13 @@ involving derivatives in one coordinate system in another
  ```python
 TensorExpansionError: TensorExpansionError
 ```
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, jacobians, derivatives=None, mixed_terms=None, jacobians_name='Q', values_name='V'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1700)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1700?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1700)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1700?message=Update%20Docs)]
 </div>
 
   - `jacobians`: `Iterable[np.ndarray]`
@@ -39,17 +39,17 @@ __init__(self, jacobians, derivatives=None, mixed_terms=None, jacobians_name='Q'
     > Mixed derivatives of some quantity involving the new and old coordinates
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, order=None, print_transformations=False, check_arrays=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1739)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1739?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1739)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.py#L1739?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.compute_partition_terms" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.compute_partition_terms" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 compute_partition_terms(cls, partition): 
@@ -60,7 +60,7 @@ compute_partition_terms(cls, partition):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert_partition" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert_partition" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 convert_partition(cls, partition, derivs, vals, val_axis=0): 
@@ -71,7 +71,7 @@ convert_partition(cls, partition, derivs, vals, val_axis=0):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert_fast" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter.convert_fast" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 convert_fast(cls, derivs, vals, val_axis=-1, order=None): 
@@ -133,7 +133,7 @@ convert_fast(cls, derivs, vals, val_axis=-1, order=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L1691?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions.py#L1691?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

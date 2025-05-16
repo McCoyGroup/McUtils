@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Data.AtomData.AtomDataHandler">AtomDataHandler</a> 
+## <a id="McUtils.Data.AtomData.AtomDataHandler">AtomDataHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/AtomData.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/AtomData.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData.py#L9?message=Update%20Docs)]
 </div>
 
 A DataHandler that's built for use with the atomic data we've collected.
@@ -20,23 +20,23 @@ Usually used through the `AtomData` object.
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Data.AtomData.AtomDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.AtomData.AtomDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/AtomData/AtomDataHandler.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData/AtomDataHandler.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/AtomData/AtomDataHandler.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData/AtomDataHandler.py#L14?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.AtomData.AtomDataHandler.__getitem__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.AtomData.AtomDataHandler.__getitem__" class="docs-object-method">&nbsp;</a> 
 ```python
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/AtomData/AtomDataHandler.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData/AtomDataHandler.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/AtomData/AtomDataHandler.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData/AtomDataHandler.py#L16?message=Update%20Docs)]
 </div>
 Special cases the default getitem so tuples are mapped
   - `item`: `Any`
@@ -45,13 +45,13 @@ Special cases the default getitem so tuples are mapped
     >
 
 
-<a id="McUtils.McUtils.Data.AtomData.AtomDataHandler.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.AtomData.AtomDataHandler.load" class="docs-object-method">&nbsp;</a> 
 ```python
 load(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/AtomData/AtomDataHandler.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData/AtomDataHandler.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/AtomData/AtomDataHandler.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData/AtomDataHandler.py#L31?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -106,7 +106,7 @@ load(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/AtomData/AtomDataHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/AtomData/AtomDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/AtomData.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/AtomData.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

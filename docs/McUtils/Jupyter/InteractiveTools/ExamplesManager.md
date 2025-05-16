@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.InteractiveTools.ExamplesManager">ExamplesManager</a> 
+## <a id="McUtils.Jupyter.InteractiveTools.ExamplesManager">ExamplesManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L333)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L333?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools.py#L333)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools.py#L333?message=Update%20Docs)]
 </div>
 
 
@@ -21,47 +21,47 @@
  ```python
 data_path: tuple
 ```
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ExamplesManager.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ExamplesManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, root, data_path=None, globs=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L335)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L335?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ExamplesManager.py#L335)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ExamplesManager.py#L335?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ExamplesManager.test_data" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ExamplesManager.test_data" class="docs-object-method">&nbsp;</a> 
 ```python
 test_data(cls, *path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L353)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L353?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ExamplesManager.py#L353)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ExamplesManager.py#L353?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ExamplesManager.load_module" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ExamplesManager.load_module" class="docs-object-method">&nbsp;</a> 
 ```python
 load_module(self, module, modify_relative_imports=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L356)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L356?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ExamplesManager.py#L356)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ExamplesManager.py#L356?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ExamplesManager.import_from" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ExamplesManager.import_from" class="docs-object-method">&nbsp;</a> 
 ```python
 import_from(self, module, names, modify_relative_imports=True, globs=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L365)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L365?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/ExamplesManager.py#L365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/ExamplesManager.py#L365?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.ExamplesManager.parse_x3d_view_matrix" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.ExamplesManager.parse_x3d_view_matrix" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 parse_x3d_view_matrix(cls, vs, view_all=True): 
@@ -123,7 +123,7 @@ parse_x3d_view_matrix(cls, vs, view_all=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/ExamplesManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/ExamplesManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L333?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools.py#L333?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

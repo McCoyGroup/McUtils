@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Coordinerds.Conveniences.chain_zmatrix">chain_zmatrix</a>
+# <a id="McUtils.Coordinerds.Conveniences.chain_zmatrix">chain_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L312)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L312?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/Conveniences.py#L312)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Conveniences.py#L312?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ chain_zmatrix(n):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Conveniences/chain_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/chain_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L312?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Conveniences.py#L312?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

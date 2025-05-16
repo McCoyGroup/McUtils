@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Controls.Checkbox">Checkbox</a> 
+## <a id="McUtils.Jupyter.Apps.Controls.Checkbox">Checkbox</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L175)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L175?message=Update%20Docs)]
 </div>
 
 
@@ -21,33 +21,33 @@
  ```python
 base_cls: list
 ```
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.Checkbox.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.Checkbox.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, var, type='checkbox', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Checkbox.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Checkbox.py#L177?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.Checkbox.get_value" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.Checkbox.get_value" class="docs-object-method">&nbsp;</a> 
 ```python
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Checkbox.py#L179)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Checkbox.py#L179?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.Checkbox.set_value" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.Checkbox.set_value" class="docs-object-method">&nbsp;</a> 
 ```python
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L183)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L183?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/Checkbox.py#L183)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/Checkbox.py#L183?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -102,7 +102,7 @@ set_value(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Checkbox.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Checkbox.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L175?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L175?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader">DynamicFFIFunctionLoader</a> 
+## <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader">DynamicFFIFunctionLoader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary.py#L11?message=Update%20Docs)]
 </div>
 
 This is a singleton class that can be set to define the global
@@ -20,7 +20,7 @@ linkage to the DynamicLibrary extension module
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader.configure" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader.configure" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 configure(cls, **compile_args): 
@@ -31,7 +31,7 @@ configure(cls, **compile_args):
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader.load" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 load(cls): 
@@ -93,7 +93,7 @@ load(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunctionLoader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFIFunctionLoader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L11?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary.py#L11?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

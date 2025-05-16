@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Surfaces.Surface.MultiSurface">MultiSurface</a> 
+## <a id="McUtils.Zachary.Surfaces.Surface.MultiSurface">MultiSurface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface.py#L121)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L121?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/Surface.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/Surface.py#L121?message=Update%20Docs)]
 </div>
 
 A _reallly_ simple extension to the Surface infrastructure to handle vector valued functions,
@@ -20,26 +20,26 @@ assuming each vector value corresponds to a different Surfaces
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Zachary.Surfaces.Surface.MultiSurface.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.Surface.MultiSurface.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *surfs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/MultiSurface.py#L126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/MultiSurface.py#L126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/Surface/MultiSurface.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/Surface/MultiSurface.py#L126?message=Update%20Docs)]
 </div>
 
   - `surfs`: `Iterable[Surface]`
     > a set of Surface objects to use when evaluating
 
 
-<a id="McUtils.McUtils.Zachary.Surfaces.Surface.MultiSurface.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.Surface.MultiSurface.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, gridpoints, order=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/MultiSurface.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/MultiSurface.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Surfaces/Surface/MultiSurface.py#L133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/Surface/MultiSurface.py#L133?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -94,7 +94,7 @@ __call__(self, gridpoints, order=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/Surface/MultiSurface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/Surface/MultiSurface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L121?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Surfaces/Surface.py#L121?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

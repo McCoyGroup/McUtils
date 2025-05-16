@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler">UnitsDataHandler</a> 
+## <a id="McUtils.Data.ConstantsData.UnitsDataHandler">UnitsDataHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData.py#L65?message=Update%20Docs)]
 </div>
 
 A DataHandler that's built for use with the units data we've collected.
@@ -29,43 +29,43 @@ BohrRadius: str
 ElectronMass: str
 AtomicMassUnits: str
 ```
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L89?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.load" class="docs-object-method">&nbsp;</a> 
 ```python
 load(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L93?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.expand_conversions" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.expand_conversions" class="docs-object-method">&nbsp;</a> 
 ```python
 expand_conversions(self, unit_stuff_1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L410)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L410?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L410)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L410?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.find_conversion" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.find_conversion" class="docs-object-method">&nbsp;</a> 
 ```python
 find_conversion(self, unit, target): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L434)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L434?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L434)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L434?message=Update%20Docs)]
 </div>
 Attempts to find a conversion between two sets of units. Currently only implemented for "plain" units.
   - `unit`: `Any`
@@ -76,23 +76,23 @@ Attempts to find a conversion between two sets of units. Currently only implemen
     >
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.add_conversion" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.add_conversion" class="docs-object-method">&nbsp;</a> 
 ```python
 add_conversion(self, unit, target, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L511)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L511?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L511)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L511?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.convert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, unit, target): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L515)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L515?message=Update%20Docs)]
 </div>
 Converts base unit into target using the scraped NIST data
   - `unit`: `Any`
@@ -103,24 +103,24 @@ Converts base unit into target using the scraped NIST data
     >
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.constants" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.constants" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 constants(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L541)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L541?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L541)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L541?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.constant" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.constant" class="docs-object-method">&nbsp;</a> 
 ```python
 constant(self, const): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L544)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L544?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L544)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L544?message=Update%20Docs)]
 </div>
 Converts base unit into target using the scraped NIST data
   - `unit`: `Any`
@@ -131,47 +131,47 @@ Converts base unit into target using the scraped NIST data
     >
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.hartrees_to_wavenumbers" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.hartrees_to_wavenumbers" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 hartrees_to_wavenumbers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L563)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L563?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L563)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L563?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.bohr_to_angstroms" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.bohr_to_angstroms" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 bohr_to_angstroms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L566)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L566?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L566)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L566?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.amu_to_me" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.amu_to_me" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 amu_to_me(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L569)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L569?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L569)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L569?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Data.ConstantsData.UnitsDataHandler.moles" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Data.ConstantsData.UnitsDataHandler.moles" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 moles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L572)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L572?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData/UnitsDataHandler.py#L572)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData/UnitsDataHandler.py#L572?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -226,7 +226,7 @@ moles(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/ConstantsData/UnitsDataHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/ConstantsData/UnitsDataHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData.py#L65?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData.py#L65?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

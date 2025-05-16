@@ -1,7 +1,7 @@
-# <a id="McUtils.Zachary.Mesh">McUtils.McUtils.Zachary.Mesh</a> 
+# <a id="McUtils.Zachary.Mesh">McUtils.Zachary.Mesh</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Mesh/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Mesh/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Represents an n-dimensional grid, used by Interpolator and (eventually) FiniteDifferenceFunction to automatically
@@ -11,10 +11,10 @@ know what kind of data is fed in
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Mesh](Zachary/Mesh/Mesh.md)   
+[Mesh](Mesh/Mesh.md)   
 </div>
    <div class="col" markdown="1">
-[MeshType](Zachary/Mesh/MeshType.md)   
+[MeshType](Mesh/MeshType.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -73,7 +73,7 @@ know what kind of data is fed in
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Mesh.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Mesh.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Mesh/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

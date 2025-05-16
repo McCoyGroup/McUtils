@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker">TemplateWalker</a> 
+## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker">TemplateWalker</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L926)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L926?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L926)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L926?message=Update%20Docs)]
 </div>
 
 
@@ -26,54 +26,54 @@ method_handler: MethodTemplateHandler
 object_handler: ObjectTemplateHandler
 index_handler: IndexTemplateHandler
 ```
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, engine: McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine, out=None, description=None, **extra_fields): 
+__init__(self, engine: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine, out=None, description=None, **extra_fields): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L933)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L933?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L933)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L933?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.default_handlers" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.default_handlers" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 default_handlers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L939)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L939?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L939)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L939?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.get_handler" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.get_handler" class="docs-object-method">&nbsp;</a> 
 ```python
 get_handler(self, obj, *, out=None, engine=None, tree=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L948)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L948?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L948)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L948?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.visit_root" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.visit_root" class="docs-object-method">&nbsp;</a> 
 ```python
 visit_root(self, o, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L957)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L957?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L957)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L957?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.write" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.write" class="docs-object-method">&nbsp;</a> 
 ```python
 write(self, objects, max_depth=-1, index='index.md'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L960)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L960?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L960)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L960?message=Update%20Docs)]
 </div>
 Walks through the objects supplied and applies the appropriate templates
   - `:returns`: `str`
@@ -152,7 +152,7 @@ s
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L926?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L926?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

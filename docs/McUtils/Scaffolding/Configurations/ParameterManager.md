@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.Configurations.ParameterManager">ParameterManager</a> 
+## <a id="McUtils.Scaffolding.Configurations.ParameterManager">ParameterManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Configurations.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Configurations.py#L188?message=Update%20Docs)]
 </div>
 
 
@@ -19,17 +19,17 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Scaffolding.Configurations.ParameterManager.serialize" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Configurations.ParameterManager.serialize" class="docs-object-method">&nbsp;</a> 
 ```python
 serialize(self, file, mode=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Configurations/ParameterManager.py#L190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Configurations/ParameterManager.py#L190?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Configurations.ParameterManager.deserialize" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Configurations.ParameterManager.deserialize" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 deserialize(cls, file, mode=None, attribute=None): 
@@ -91,7 +91,7 @@ deserialize(cls, file, mode=None, attribute=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Configurations/ParameterManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Configurations/ParameterManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L188?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Configurations.py#L188?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

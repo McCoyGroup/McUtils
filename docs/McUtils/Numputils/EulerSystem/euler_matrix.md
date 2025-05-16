@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.EulerSystem.euler_matrix">euler_matrix</a>
+# <a id="McUtils.Numputils.EulerSystem.euler_matrix">euler_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/EulerSystem.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/EulerSystem.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/EulerSystem.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/EulerSystem.py#L85?message=Update%20Docs)]
 </div>
 
 ```python
@@ -62,7 +62,7 @@ Returns the Euler matrix for the specified angles
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/EulerSystem/euler_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/EulerSystem/euler_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/EulerSystem.py#L85?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/EulerSystem.py#L85?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

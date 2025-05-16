@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Plots.ErrorBarPlot">ErrorBarPlot</a> 
+## <a id="McUtils.Plots.Plots.ErrorBarPlot">ErrorBarPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L443)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L443?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L443)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L443?message=Update%20Docs)]
 </div>
 
 Inherits from `Plot`.
@@ -77,7 +77,7 @@ method: str
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ErrorBarPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ErrorBarPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L443?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L443?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

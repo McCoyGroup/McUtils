@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.FittableModels.FittedModel">FittedModel</a> 
+## <a id="McUtils.Zachary.FittableModels.FittedModel">FittedModel</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/FittableModels.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/FittableModels.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels.py#L17?message=Update%20Docs)]
 </div>
 
 
@@ -21,17 +21,17 @@
  ```python
 default_fit_method: str
 ```
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, fit_basis, expansion_coeffs=None, basis_parameters=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/FittableModels/FittedModel.py#L18)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels/FittedModel.py#L18?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/FittableModels/FittedModel.py#L18)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels/FittedModel.py#L18?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.canonicalize_basis" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.canonicalize_basis" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 canonicalize_basis(cls, fit_basis, basis_parameters): 
@@ -42,17 +42,17 @@ canonicalize_basis(cls, fit_basis, basis_parameters):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, pts, order=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/FittableModels/FittedModel.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels/FittedModel.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/FittableModels/FittedModel.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels/FittedModel.py#L37?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.evaluate_kernel" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.evaluate_kernel" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 evaluate_kernel(cls, fit_basis, basis_parameters, pts, coeffs=None, order=None, **opts): 
@@ -63,7 +63,7 @@ evaluate_kernel(cls, fit_basis, basis_parameters, pts, coeffs=None, order=None, 
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.get_kernel_and_opts" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.get_kernel_and_opts" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_kernel_and_opts(cls, k): 
@@ -74,7 +74,7 @@ get_kernel_and_opts(cls, k):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.parse_kernel_specs" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.parse_kernel_specs" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 parse_kernel_specs(cls, kernels): 
@@ -85,7 +85,7 @@ parse_kernel_specs(cls, kernels):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.nonlinear_fit" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.nonlinear_fit" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 nonlinear_fit(cls, kernel_specs, pts, observations, include_expansion_coefficients=True, **fit_params): 
@@ -96,7 +96,7 @@ nonlinear_fit(cls, kernel_specs, pts, observations, include_expansion_coefficien
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.get_fit_methods" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.get_fit_methods" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_fit_methods(cls): 
@@ -107,7 +107,7 @@ get_fit_methods(cls):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.get_fit_dispatch" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.get_fit_dispatch" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_fit_dispatch(cls): 
@@ -118,7 +118,7 @@ get_fit_dispatch(cls):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.FittableModels.FittedModel.fit" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.FittableModels.FittedModel.fit" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 fit(cls, kernels, pts, observations, method=None, **opts): 
@@ -180,7 +180,7 @@ fit(cls, kernels, pts, observations, method=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/FittableModels/FittedModel.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/FittableModels/FittedModel.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/FittableModels.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/FittableModels.py#L17?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

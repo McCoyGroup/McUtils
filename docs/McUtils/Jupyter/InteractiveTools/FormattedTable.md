@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.InteractiveTools.FormattedTable">FormattedTable</a> 
+## <a id="McUtils.Jupyter.InteractiveTools.FormattedTable">FormattedTable</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L431)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L431?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools.py#L431)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools.py#L431?message=Update%20Docs)]
 </div>
 
 
@@ -19,13 +19,13 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Jupyter.InteractiveTools.FormattedTable.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.InteractiveTools.FormattedTable.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, table_data, column_formats='8.3f', **format_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/FormattedTable.py#L432)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/FormattedTable.py#L432?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/InteractiveTools/FormattedTable.py#L432)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools/FormattedTable.py#L432?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -80,7 +80,7 @@ __init__(self, table_data, column_formats='8.3f', **format_opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/FormattedTable.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/FormattedTable.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L431?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/InteractiveTools.py#L431?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.JHTML.BootstrapWidgets.Bootstrap5Widgets">Bootstrap5Widgets</a> 
+## <a id="McUtils.Jupyter.JHTML.BootstrapWidgets.Bootstrap5Widgets">Bootstrap5Widgets</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/BootstrapWidgets.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/BootstrapWidgets.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/BootstrapWidgets.py#L133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/BootstrapWidgets.py#L133?message=Update%20Docs)]
 </div>
 
 
@@ -112,7 +112,7 @@ Collapse: Collapse
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/BootstrapWidgets/Bootstrap5Widgets.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/BootstrapWidgets.py#L133?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/BootstrapWidgets.py#L133?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

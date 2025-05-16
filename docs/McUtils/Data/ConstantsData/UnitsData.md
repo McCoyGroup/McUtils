@@ -1,7 +1,7 @@
-### <a id="McUtils.McUtils.Data.ConstantsData.UnitsData">UnitsData</a> 
+### <a id="McUtils.Data.ConstantsData.UnitsData">UnitsData</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Data/ConstantsData.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData.py#L65?message=Update%20Docs)]
 </div>
 An instance of UnitsDataHandler that can be used for unit conversion and fundamental constant lookups
 
@@ -54,7 +54,7 @@ An instance of UnitsDataHandler that can be used for unit conversion and fundame
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Data/ConstantsData/UnitsData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Data/ConstantsData/UnitsData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData.py#L65?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Data/ConstantsData.py#L65?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

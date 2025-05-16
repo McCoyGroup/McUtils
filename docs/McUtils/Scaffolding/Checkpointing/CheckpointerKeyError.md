@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.Checkpointing.CheckpointerKeyError">CheckpointerKeyError</a> 
+## <a id="McUtils.Scaffolding.Checkpointing.CheckpointerKeyError">CheckpointerKeyError</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Checkpointing.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L17?message=Update%20Docs)]
 </div>
 
 
@@ -73,7 +73,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Checkpointing/CheckpointerKeyError.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Checkpointing.py#L17?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

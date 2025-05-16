@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.SceneJSON.SceneJSON">SceneJSON</a> 
+## <a id="McUtils.Plots.SceneJSON.SceneJSON">SceneJSON</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SceneJSON.py#L7)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SceneJSON.py#L7?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/SceneJSON.py#L7)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/SceneJSON.py#L7?message=Update%20Docs)]
 </div>
 
 JSON interchange format to use with Mathematica
@@ -90,7 +90,7 @@ Text: Text
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/SceneJSON/SceneJSON.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/SceneJSON/SceneJSON.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SceneJSON.py#L7?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/SceneJSON.py#L7?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

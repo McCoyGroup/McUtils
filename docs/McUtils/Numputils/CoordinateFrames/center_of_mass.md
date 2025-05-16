@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.CoordinateFrames.center_of_mass">center_of_mass</a>
+# <a id="McUtils.Numputils.CoordinateFrames.center_of_mass">center_of_mass</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/CoordinateFrames.py#L27)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/CoordinateFrames.py#L27?message=Update%20Docs)]
 </div>
 
 ```python
@@ -64,7 +64,7 @@ Gets the center of mass for the coordinates
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/center_of_mass.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/center_of_mass.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L27?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/CoordinateFrames.py#L27?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

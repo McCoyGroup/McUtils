@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary">DynamicFFILibrary</a> 
+## <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary">DynamicFFILibrary</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary.py#L136)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary.py#L136?message=Update%20Docs)]
 </div>
 
 Directly analogous to a regular shared library but it uses
@@ -22,27 +22,27 @@ Directly analogous to a regular shared library but it uses
  ```python
 method_type: DynamicFFIFunction
 ```
-<a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, library, compiler_options=None, **functions): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L143?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.get_function" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.get_function" class="docs-object-method">&nbsp;</a> 
 ```python
 get_function(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L153)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L153?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.configure_loader" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.configure_loader" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 configure_loader(cls, **compile_opts): 
@@ -104,7 +104,7 @@ configure_loader(cls, **compile_opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L136?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/FFI/DynamicFFILibrary.py#L136?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

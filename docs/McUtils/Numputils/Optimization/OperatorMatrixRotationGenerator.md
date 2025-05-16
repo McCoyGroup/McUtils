@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator">OperatorMatrixRotationGenerator</a> 
+## <a id="McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator">OperatorMatrixRotationGenerator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2007)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2007?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Optimization.py#L2007)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization.py#L2007?message=Update%20Docs)]
 </div>
 
 
@@ -19,23 +19,23 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, one_e_func, matrix_func): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2008)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2008?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2008)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2008?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, mat, col_i, col_j): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2011)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2011?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2011)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2011?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -90,7 +90,7 @@ __call__(self, mat, col_i, col_j):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2007?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization.py#L2007?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Controls.InputField">InputField</a> 
+## <a id="McUtils.Jupyter.Apps.Controls.InputField">InputField</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L111?message=Update%20Docs)]
 </div>
 
 
@@ -21,23 +21,23 @@
  ```python
 base_cls: list
 ```
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.InputField.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.InputField.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, var, value=None, tag='input', track_value=True, continuous_update=False, base_cls=None, cls=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/InputField.py#L113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/InputField.py#L113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/InputField.py#L113)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/InputField.py#L113?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.InputField.to_jhtml" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.InputField.to_jhtml" class="docs-object-method">&nbsp;</a> 
 ```python
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/InputField.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/InputField.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/InputField.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/InputField.py#L122?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -92,7 +92,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/InputField.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/InputField.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L111?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L111?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

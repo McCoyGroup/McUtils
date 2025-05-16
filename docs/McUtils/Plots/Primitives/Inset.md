@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Primitives.Inset">Inset</a> 
+## <a id="McUtils.Plots.Primitives.Inset">Inset</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives.py#L137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L137?message=Update%20Docs)]
 </div>
 
 
@@ -19,75 +19,75 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.Primitives.Inset.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, prims, position, offset=(0.5, 0.5), dimensions=None, plot_range=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L138?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Inset.plot_range" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.plot_range" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L147)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L147?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L147)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L147?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Inset.get_plot_range" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.get_plot_range" class="docs-object-method">&nbsp;</a> 
 ```python
 get_plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L157)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L157?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Inset.dimensions" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.dimensions" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 dimensions(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L169?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Inset.get_bbox" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.get_bbox" class="docs-object-method">&nbsp;</a> 
 ```python
 get_bbox(self, graphics=None, preserve_aspect=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L185)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L185?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L185)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L185?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Inset.get_axes" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.get_axes" class="docs-object-method">&nbsp;</a> 
 ```python
 get_axes(self, graphics, bbox=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L213)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L213?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L213?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Inset.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Inset.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Inset.py#L221)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Inset.py#L221?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Inset.py#L221)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Inset.py#L221?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -142,7 +142,7 @@ plot(self, axes, *args, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Inset.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Inset.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L137?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L137?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

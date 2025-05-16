@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Docs.DocWalker.FunctionWriter">FunctionWriter</a> 
+## <a id="McUtils.Docs.DocWalker.FunctionWriter">FunctionWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L793)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L793?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L822)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L822?message=Update%20Docs)]
 </div>
 
 Writer to dump functions to file
@@ -21,23 +21,23 @@ Writer to dump functions to file
  ```python
 template: str
 ```
-<a id="McUtils.McUtils.Docs.DocWalker.FunctionWriter.get_signature" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.FunctionWriter.get_signature" class="docs-object-method">&nbsp;</a> 
 ```python
 get_signature(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L803)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L803?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/FunctionWriter.py#L832)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/FunctionWriter.py#L832?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.FunctionWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.FunctionWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
 ```python
 get_template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L806)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L806?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/FunctionWriter.py#L835)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/FunctionWriter.py#L835?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -93,7 +93,7 @@ get_template_params(self, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/FunctionWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L793?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L822?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

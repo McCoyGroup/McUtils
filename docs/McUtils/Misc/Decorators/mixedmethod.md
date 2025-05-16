@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Misc.Decorators.mixedmethod">mixedmethod</a> 
+## <a id="McUtils.Misc.Decorators.mixedmethod">mixedmethod</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/Decorators.py#L7)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/Decorators.py#L7?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/Decorators.py#L7)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/Decorators.py#L7?message=Update%20Docs)]
 </div>
 
 
@@ -19,23 +19,23 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Misc.Decorators.mixedmethod.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Misc.Decorators.mixedmethod.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, wrapped_fn): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/Decorators/mixedmethod.py#L8)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/Decorators/mixedmethod.py#L8?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/Decorators/mixedmethod.py#L8)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/Decorators/mixedmethod.py#L8?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Misc.Decorators.mixedmethod.__get__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Misc.Decorators.mixedmethod.__get__" class="docs-object-method">&nbsp;</a> 
 ```python
 __get__(self, obj, obj_type=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/Decorators/mixedmethod.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/Decorators/mixedmethod.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/Decorators/mixedmethod.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/Decorators/mixedmethod.py#L10?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -90,7 +90,7 @@ __get__(self, obj, obj_type=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc/Decorators/mixedmethod.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc/Decorators/mixedmethod.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/Decorators.py#L7?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/Decorators.py#L7?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.Plots.Graphics">McUtils.McUtils.Plots.Graphics</a> 
+# <a id="McUtils.Plots.Graphics">McUtils.Plots.Graphics</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Graphics/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides Graphics base classes that can be extended upon
@@ -10,18 +10,18 @@ Provides Graphics base classes that can be extended upon
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsBase](Plots/Graphics/GraphicsBase.md)   
+[GraphicsBase](Graphics/GraphicsBase.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics](Plots/Graphics/Graphics.md)   
+[Graphics](Graphics/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Graphics3D](Plots/Graphics/Graphics3D.md)   
+[Graphics3D](Graphics/Graphics3D.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[GraphicsGrid](Plots/Graphics/GraphicsGrid.md)   
+[GraphicsGrid](Graphics/GraphicsGrid.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -83,7 +83,7 @@ Provides Graphics base classes that can be extended upon
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Graphics/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

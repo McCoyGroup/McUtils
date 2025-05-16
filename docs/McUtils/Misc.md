@@ -1,7 +1,7 @@
-# <a id="McUtils.Misc">McUtils.McUtils.Misc</a> 
+# <a id="McUtils.Misc">McUtils.Misc</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Defines a set of miscellaneous helper utilities that are commonly used across projects.
@@ -74,17 +74,17 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-2a88b1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2a88b1"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-e52474" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e52474"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2a88b1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e52474" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-3898a8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3898a8"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-d427ee" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d427ee"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3898a8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d427ee" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -201,7 +201,7 @@ class MiscTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

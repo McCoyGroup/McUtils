@@ -1,7 +1,7 @@
-# <a id="McUtils.Jupyter.JHTML.BootstrapWidgets">McUtils.McUtils.Jupyter.JHTML.BootstrapWidgets</a> 
+# <a id="McUtils.Jupyter.JHTML.BootstrapWidgets">McUtils.Jupyter.JHTML.BootstrapWidgets</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/BootstrapWidgets/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/BootstrapWidgets/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/BootstrapWidgets/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/BootstrapWidgets/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[Bootstrap5Widgets](JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
+[Bootstrap5Widgets](BootstrapWidgets/Bootstrap5Widgets.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -72,7 +72,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/BootstrapWidgets.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/BootstrapWidgets.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/BootstrapWidgets/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/BootstrapWidgets/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

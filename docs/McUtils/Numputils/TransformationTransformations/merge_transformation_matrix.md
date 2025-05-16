@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.TransformationTransformations.merge_transformation_matrix">merge_transformation_matrix</a>
+# <a id="McUtils.Numputils.TransformationTransformations.merge_transformation_matrix">merge_transformation_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationTransformations.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationTransformations.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/TransformationTransformations.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TransformationTransformations.py#L26?message=Update%20Docs)]
 </div>
 
 ```python
@@ -64,7 +64,7 @@ Merges two transformation matrices
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationTransformations/merge_transformation_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationTransformations/merge_transformation_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationTransformations.py#L26?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/TransformationTransformations.py#L26?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

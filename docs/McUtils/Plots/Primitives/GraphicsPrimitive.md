@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Primitives.GraphicsPrimitive">GraphicsPrimitive</a> 
+## <a id="McUtils.Plots.Primitives.GraphicsPrimitive">GraphicsPrimitive</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives.py#L13)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L13?message=Update%20Docs)]
 </div>
 
 
@@ -19,13 +19,13 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.Primitives.GraphicsPrimitive.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.GraphicsPrimitive.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/GraphicsPrimitive.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/GraphicsPrimitive.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/GraphicsPrimitive.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/GraphicsPrimitive.py#L14?message=Update%20Docs)]
 </div>
 The one method that needs to be implemented, which takes the graphics and actually puts stuff on its axes
   - `axes`: `Any`
@@ -38,13 +38,13 @@ The one method that needs to be implemented, which takes the graphics and actual
     >
 
 
-<a id="McUtils.McUtils.Plots.Primitives.GraphicsPrimitive.get_bbox" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.GraphicsPrimitive.get_bbox" class="docs-object-method">&nbsp;</a> 
 ```python
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/GraphicsPrimitive.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/GraphicsPrimitive.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/GraphicsPrimitive.py#L29)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/GraphicsPrimitive.py#L29?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -99,7 +99,7 @@ get_bbox(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/GraphicsPrimitive.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/GraphicsPrimitive.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L13?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L13?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

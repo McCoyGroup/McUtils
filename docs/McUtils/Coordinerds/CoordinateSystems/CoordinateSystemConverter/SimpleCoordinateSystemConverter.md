@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter">SimpleCoordinateSystemConverter</a> 
+## <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter">SimpleCoordinateSystemConverter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L338)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L338?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L338)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L338?message=Update%20Docs)]
 </div>
 
 
@@ -19,44 +19,44 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, types, conversion, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L339)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L339?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L339)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L339?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.types" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.types" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L343)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L343?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L343)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L343?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.convert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, coords, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L346)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L346?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L346)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L346?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.convert_many" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.SimpleCoordinateSystemConverter.convert_many" class="docs-object-method">&nbsp;</a> 
 ```python
 convert_many(self, coords, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L348)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L348?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L348)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.py#L348?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -111,7 +111,7 @@ convert_many(self, coords, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter/SimpleCoordinateSystemConverter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L338?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CoordinateSystemConverter.py#L338?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

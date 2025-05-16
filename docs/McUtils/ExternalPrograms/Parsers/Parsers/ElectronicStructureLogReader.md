@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader">ElectronicStructureLogReader</a> 
+## <a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader">ElectronicStructureLogReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/Parsers.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/Parsers.py#L9?message=Update%20Docs)]
 </div>
 
 Implements a stream based reader for a generic electronic structure .log file.
@@ -26,7 +26,7 @@ The goal is to move toward wrapping all returned data in a `QuantityArray` so as
 components_name: NoneType
 components_package: str
 ```
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.load_components" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.load_components" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 load_components(cls): 
@@ -37,46 +37,46 @@ load_components(cls):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.registered_components" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.registered_components" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 registered_components(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L29)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L29?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.default_keys" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.default_keys" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 default_keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L32?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.default_ordering" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.default_ordering" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 default_ordering(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L35?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.parse" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.parse" class="docs-object-method">&nbsp;</a> 
 ```python
 parse(self, keys, num=None, reset=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L39?message=Update%20Docs)]
 </div>
 The main function we'll actually use. Parses bits out of a .log file.
   - `keys`: `str or list(str)`
@@ -172,7 +172,7 @@ s
 _
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.read_props" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.read_props" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 read_props(cls, file, keys): 
@@ -234,7 +234,7 @@ read_props(cls, file, keys):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/Parsers.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

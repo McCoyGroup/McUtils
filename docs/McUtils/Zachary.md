@@ -1,7 +1,7 @@
-# <a id="McUtils.Zachary">McUtils.McUtils.Zachary</a> 
+# <a id="McUtils.Zachary">McUtils.Zachary</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Handles much of the higher-order "numerical math" stuff inside Mcutils which has made it balloon a little bit
@@ -302,9 +302,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-874f33" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-874f33"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c3a8f7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c3a8f7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-874f33" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c3a8f7" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -357,9 +357,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-53fcf3" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-53fcf3"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-af1665" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-af1665"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-53fcf3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-af1665" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -2750,7 +2750,7 @@ class ZacharyTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

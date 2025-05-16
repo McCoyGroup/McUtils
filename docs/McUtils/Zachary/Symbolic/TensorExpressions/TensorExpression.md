@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression">TensorExpression</a> 
+## <a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression">TensorExpression</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions.py#L15?message=Update%20Docs)]
 </div>
 
 
@@ -42,64 +42,64 @@ CoordinateVector: CoordinateVector
 CoordinateTerm: CoordinateTerm
 PolynomialTerm: PolynomialTerm
 ```
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, expr: 'TensorExpression.Term|List', **vars): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L16?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.eval" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.eval" class="docs-object-method">&nbsp;</a> 
 ```python
 eval(self, subs: dict = None, print_terms=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L20?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.primitives" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.primitives" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 primitives(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L82)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L82?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L82)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L82?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.walk" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.walk" class="docs-object-method">&nbsp;</a> 
 ```python
 walk(self, callback): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L87)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L87?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.get_prims" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.get_prims" class="docs-object-method">&nbsp;</a> 
 ```python
 get_prims(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L99)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L99?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L99?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.__repr__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression.__repr__" class="docs-object-method">&nbsp;</a> 
 ```python
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpression.py#L106?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -154,7 +154,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpression.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L15?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions.py#L15?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

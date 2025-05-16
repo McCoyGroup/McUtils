@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Docs.DocWalker.ObjectWriter">ObjectWriter</a> 
+## <a id="McUtils.Docs.DocWalker.ObjectWriter">ObjectWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L873)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L873?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L902)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L902?message=Update%20Docs)]
 </div>
 
 Writes general objects to file.
@@ -23,24 +23,24 @@ of that nature.
  ```python
 template: str
 ```
-<a id="McUtils.McUtils.Docs.DocWalker.ObjectWriter.identifier" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.ObjectWriter.identifier" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 identifier(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L885)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L885?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/ObjectWriter.py#L914)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/ObjectWriter.py#L914?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.ObjectWriter.check_should_write" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.ObjectWriter.check_should_write" class="docs-object-method">&nbsp;</a> 
 ```python
 check_should_write(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L895)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L895?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/ObjectWriter.py#L924)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/ObjectWriter.py#L924?message=Update%20Docs)]
 </div>
 Determines whether the object really actually should be
 documented (quite permissive)
@@ -48,13 +48,13 @@ documented (quite permissive)
     >
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.ObjectWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.ObjectWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
 ```python
 get_template_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L908)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L908?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/ObjectWriter.py#L937)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/ObjectWriter.py#L937?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -110,7 +110,7 @@ get_template_params(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/ObjectWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/ObjectWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L873?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L902?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.Coordinerds">McUtils.McUtils.Coordinerds</a> 
+# <a id="McUtils.Coordinerds">McUtils.Coordinerds</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 The Coordinerds package implements stuff for dealing with coordinates and generalized coordinate systems
@@ -195,9 +195,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-5d00f7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-5d00f7"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-a1d62f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a1d62f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-5d00f7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a1d62f" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -233,9 +233,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-a44b99" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a44b99"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-41b606" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-41b606"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a44b99" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-41b606" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1033,7 +1033,7 @@ class ConverterTest(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

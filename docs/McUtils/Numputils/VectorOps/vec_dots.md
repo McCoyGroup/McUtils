@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.VectorOps.vec_dots">vec_dots</a>
+# <a id="McUtils.Numputils.VectorOps.vec_dots">vec_dots</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L67)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L67?message=Update%20Docs)]
 </div>
 
 ```python
@@ -62,7 +62,7 @@ Computes the pair-wise dot product of two lists of vecs using np.matmul
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/vec_dots.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/vec_dots.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L67?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L67?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.Docs.DocWalker">McUtils.McUtils.Docs.DocWalker</a> 
+# <a id="McUtils.Docs.DocWalker">McUtils.Docs.DocWalker</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides a class that will walk through a set of objects & their children, as loaded into memory, and will generate Markdown for each.
@@ -11,32 +11,32 @@ The actual object Markdown is written by the things in the `Writers` module.
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[DocWalker](Docs/DocWalker/DocWalker.md)   
+[DocWalker](DocWalker/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[ModuleWriter](Docs/DocWalker/ModuleWriter.md)   
+[ModuleWriter](DocWalker/ModuleWriter.md)   
 </div>
    <div class="col" markdown="1">
-[ClassWriter](Docs/DocWalker/ClassWriter.md)   
+[ClassWriter](DocWalker/ClassWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[FunctionWriter](Docs/DocWalker/FunctionWriter.md)   
+[FunctionWriter](DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[MethodWriter](Docs/DocWalker/MethodWriter.md)   
+[MethodWriter](DocWalker/MethodWriter.md)   
 </div>
    <div class="col" markdown="1">
-[ObjectWriter](Docs/DocWalker/ObjectWriter.md)   
+[ObjectWriter](DocWalker/ObjectWriter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[IndexWriter](Docs/DocWalker/IndexWriter.md)   
+[IndexWriter](DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[jdoc](Docs/DocWalker/jdoc.md)   
+[jdoc](DocWalker/jdoc.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -95,7 +95,7 @@ The actual object Markdown is written by the things in the `Writers` module.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

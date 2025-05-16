@@ -1,7 +1,7 @@
-# <a id="McUtils.ExternalPrograms">McUtils.McUtils.ExternalPrograms</a> 
+# <a id="McUtils.ExternalPrograms">McUtils.ExternalPrograms</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Provides some support for working with the python bindings for external programs, like OpenBabel
@@ -174,16 +174,16 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-9096fb" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9096fb"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c1a1c1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c1a1c1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9096fb" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c1a1c1" markdown="1">
  - [CIFFiles](#CIFFiles)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-70735a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-70735a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-daefaf" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-daefaf"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-70735a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-daefaf" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -256,7 +256,7 @@ class ExternalProgramsTest(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

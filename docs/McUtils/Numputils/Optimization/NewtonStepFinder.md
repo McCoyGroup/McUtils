@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Numputils.Optimization.NewtonStepFinder">NewtonStepFinder</a> 
+## <a id="McUtils.Numputils.Optimization.NewtonStepFinder">NewtonStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L903)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L903?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Optimization.py#L903)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization.py#L903?message=Update%20Docs)]
 </div>
 
 
@@ -21,23 +21,23 @@
  ```python
 supports_hessian: bool
 ```
-<a id="McUtils.McUtils.Numputils.Optimization.NewtonStepFinder.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Numputils.Optimization.NewtonStepFinder.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, func, jacobian=None, hessian=None, *, check_generator=True, logger=None, **generator_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NewtonStepFinder.py#L905)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NewtonStepFinder.py#L905?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Optimization/NewtonStepFinder.py#L905)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization/NewtonStepFinder.py#L905?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Numputils.Optimization.NewtonStepFinder.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Numputils.Optimization.NewtonStepFinder.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, guess, mask, projector=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NewtonStepFinder.py#L924)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NewtonStepFinder.py#L924?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/Optimization/NewtonStepFinder.py#L924)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization/NewtonStepFinder.py#L924?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -92,7 +92,7 @@ __call__(self, guess, mask, projector=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/NewtonStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/NewtonStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L903?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/Optimization.py#L903?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.Runner.ExternalProgramRunner">ExternalProgramRunner</a> 
+## <a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner">ExternalProgramRunner</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner.py#L8)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner.py#L8?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Runner.py#L8)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Runner.py#L8?message=Update%20Docs)]
 </div>
 
 
@@ -23,27 +23,27 @@ default_opts: dict
 text_file_extensions: list
 blacklist_files: list
 ```
-<a id="McUtils.McUtils.ExternalPrograms.Runner.ExternalProgramRunner.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, binary, parser=None, prefix=None, suffix=None, delete=True, **runtime_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Runner/ExternalProgramRunner.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Runner/ExternalProgramRunner.py#L11?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Runner.ExternalProgramRunner.prep_dir" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.prep_dir" class="docs-object-method">&nbsp;</a> 
 ```python
 prep_dir(self, dir): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Runner/ExternalProgramRunner.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Runner/ExternalProgramRunner.py#L39?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Runner.ExternalProgramRunner.subprocess_run" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.subprocess_run" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 subprocess_run(cls, binary, input_file, **subprocess_opts): 
@@ -54,7 +54,7 @@ subprocess_run(cls, binary, input_file, **subprocess_opts):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Runner.ExternalProgramRunner.run_job" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.run_job" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 run_job(cls, binary, job, dir=None, dir_prefix=None, dir_suffix=None, mode='w', runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=True, prefix=None, suffix=None, delete=True, raise_errors=True, **subprocess_opts): 
@@ -65,13 +65,13 @@ run_job(cls, binary, job, dir=None, dir_prefix=None, dir_suffix=None, mode='w', 
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Runner.ExternalProgramRunner.run" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.run" class="docs-object-method">&nbsp;</a> 
 ```python
 run(self, job, dir=None, dir_prefix=None, dir_suffix=None, mode=None, runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=None, prefix=None, suffix=None, delete=None, raise_errors=None, **job_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Runner/ExternalProgramRunner.py#L135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Runner/ExternalProgramRunner.py#L135?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -126,7 +126,7 @@ run(self, job, dir=None, dir_prefix=None, dir_suffix=None, mode=None, runner=Non
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner.py#L8?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Runner.py#L8?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

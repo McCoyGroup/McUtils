@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager">ResourceManager</a> 
+## <a id="McUtils.Scaffolding.Persistence.ResourceManager">ResourceManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence.py#L231)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence.py#L231?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence.py#L231)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence.py#L231?message=Update%20Docs)]
 </div>
 
 A very simple framework for writing resources to a given directory
@@ -29,17 +29,17 @@ binary_resource: bool
 json_resource: bool
 resource_function: NoneType
 ```
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, name=None, location=None, write_metadata=False, temporary=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L238)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L238?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L238)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L238?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.resolve_shared_directory" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.resolve_shared_directory" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 resolve_shared_directory(cls): 
@@ -50,7 +50,7 @@ resolve_shared_directory(cls):
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_default_base_location" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_default_base_location" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_default_base_location(cls, temporary=None): 
@@ -61,7 +61,7 @@ get_default_base_location(cls, temporary=None):
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_base_location" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_base_location" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_base_location(cls, temporary=True): 
@@ -72,83 +72,83 @@ get_base_location(cls, temporary=True):
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_resource_path" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_resource_path" class="docs-object-method">&nbsp;</a> 
 ```python
 get_resource_path(self, *path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L265)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L265?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L265?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.list_resources" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.list_resources" class="docs-object-method">&nbsp;</a> 
 ```python
 list_resources(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L269)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L269?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L269)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L269?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.save_resource" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.save_resource" class="docs-object-method">&nbsp;</a> 
 ```python
 save_resource(self, loc, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L280)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L280?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L280)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L280?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.load_resource" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.load_resource" class="docs-object-method">&nbsp;</a> 
 ```python
 load_resource(self, loc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L286)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L286?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L286)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L286?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_metadata_filename" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_metadata_filename" class="docs-object-method">&nbsp;</a> 
 ```python
 get_metadata_filename(self, name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L293)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L293?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L293?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_resource_metadata" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_resource_metadata" class="docs-object-method">&nbsp;</a> 
 ```python
 get_resource_metadata(self, loc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L295)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L295?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L295)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L295?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_resource_filename" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_resource_filename" class="docs-object-method">&nbsp;</a> 
 ```python
 get_resource_filename(self, name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L297)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L297?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L297)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L297?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Persistence.ResourceManager.get_resource" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Persistence.ResourceManager.get_resource" class="docs-object-method">&nbsp;</a> 
 ```python
 get_resource(self, name, resource_function=None, load_resource=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L301)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/ResourceManager.py#L301?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Persistence/ResourceManager.py#L301)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence/ResourceManager.py#L301?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -203,7 +203,7 @@ get_resource(self, name, resource_function=None, load_resource=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Persistence/ResourceManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Persistence/ResourceManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence.py#L231?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Persistence.py#L231?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

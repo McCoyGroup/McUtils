@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.X3DInterface.X3DListAnimator">X3DListAnimator</a> 
+## <a id="McUtils.Plots.X3DInterface.X3DListAnimator">X3DListAnimator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L363)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L363?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface.py#L363)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L363?message=Update%20Docs)]
 </div>
 
 
@@ -19,13 +19,13 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.X3DInterface.X3DListAnimator.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.X3DInterface.X3DListAnimator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *frames, id=None, animation_duration=2, running=True, slider=False, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DListAnimator.py#L364)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DListAnimator.py#L364?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DListAnimator.py#L364)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DListAnimator.py#L364?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -80,7 +80,7 @@ __init__(self, *frames, id=None, animation_duration=2, running=True, slider=Fals
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DListAnimator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DListAnimator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L363?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L363?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

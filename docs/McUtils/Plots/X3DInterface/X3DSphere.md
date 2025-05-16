@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.X3DInterface.X3DSphere">X3DSphere</a> 
+## <a id="McUtils.Plots.X3DInterface.X3DSphere">X3DSphere</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L309)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L309?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface.py#L309)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L309?message=Update%20Docs)]
 </div>
 
 
@@ -21,13 +21,13 @@
  ```python
 tag_class: Sphere
 ```
-<a id="McUtils.McUtils.Plots.X3DInterface.X3DSphere.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.X3DInterface.X3DSphere.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
 ```python
 prep_geometry_opts(self, centers, radius=1, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DSphere.py#L312)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DSphere.py#L312?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DSphere.py#L312)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DSphere.py#L312?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +82,7 @@ prep_geometry_opts(self, centers, radius=1, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DSphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DSphere.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L309?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L309?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

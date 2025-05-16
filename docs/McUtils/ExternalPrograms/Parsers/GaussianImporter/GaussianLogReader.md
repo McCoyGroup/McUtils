@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader">GaussianLogReader</a> 
+## <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader">GaussianLogReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/GaussianImporter.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/GaussianImporter.py#L23?message=Update%20Docs)]
 </div>
 
 Implements a stream based reader for a Gaussian .log file.
@@ -49,13 +49,13 @@ default_keys: tuple
 default_ordering: dict
 job_default_keys: dict
 ```
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.parse" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.parse" class="docs-object-method">&nbsp;</a> 
 ```python
 parse(self, keys=None, num=None, reset=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L58)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L58?message=Update%20Docs)]
 </div>
 The main function we'll actually use. Parses bits out of a .log file.
   - `keys`: `str or list(str)`
@@ -151,13 +151,13 @@ s
 _
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.get_default_keys" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.get_default_keys" class="docs-object-method">&nbsp;</a> 
 ```python
 get_default_keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L107)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L107?message=Update%20Docs)]
 </div>
 Tries to get the default keys one might be expected to want depending on the type of job as determined from the Header
 Currently only supports 'opt', 'scan', and 'popt' as job types.
@@ -175,7 +175,7 @@ n
 g
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.read_props" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.read_props" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 read_props(cls, file, keys): 
@@ -237,7 +237,7 @@ read_props(cls, file, keys):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Parsers/GaussianImporter.py#L23?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer">NumPySerializer</a> 
+## <a id="McUtils.Scaffolding.Serializers.NumPySerializer">NumPySerializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L915)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L915?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers.py#L915)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L915?message=Update%20Docs)]
 </div>
 
 A serializer that implements NPZ dumps
@@ -24,7 +24,7 @@ atomic_types: tuple
 converter_dispatch: NoneType
 dict_key_sep: str
 ```
-<a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer.get_default_converters" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.NumPySerializer.get_default_converters" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_default_converters(self): 
@@ -35,7 +35,7 @@ get_default_converters(self):
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer.get_converters" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.NumPySerializer.get_converters" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_converters(self): 
@@ -46,23 +46,23 @@ get_converters(self):
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer.convert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.NumPySerializer.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1010)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1010?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NumPySerializer.py#L1010)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NumPySerializer.py#L1010?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer.deconvert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.NumPySerializer.deconvert" class="docs-object-method">&nbsp;</a> 
 ```python
 deconvert(self, data, sep=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1034)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1034?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NumPySerializer.py#L1034)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NumPySerializer.py#L1034?message=Update%20Docs)]
 </div>
 Unflattens nested dictionary structures so that the original data
 can be recovered
@@ -74,23 +74,23 @@ can be recovered
     >
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer.serialize" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.NumPySerializer.serialize" class="docs-object-method">&nbsp;</a> 
 ```python
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1066)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1066?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NumPySerializer.py#L1066)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NumPySerializer.py#L1066?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.NumPySerializer.deserialize" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.NumPySerializer.deserialize" class="docs-object-method">&nbsp;</a> 
 ```python
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1074)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1074?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/NumPySerializer.py#L1074)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/NumPySerializer.py#L1074?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -145,7 +145,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/NumPySerializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/NumPySerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L915?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L915?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

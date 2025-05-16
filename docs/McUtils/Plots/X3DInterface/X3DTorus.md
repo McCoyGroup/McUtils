@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.X3DInterface.X3DTorus">X3DTorus</a> 
+## <a id="McUtils.Plots.X3DInterface.X3DTorus">X3DTorus</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L350)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L350?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface.py#L350)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L350?message=Update%20Docs)]
 </div>
 
 
@@ -21,13 +21,13 @@
  ```python
 tag_class: Torus
 ```
-<a id="McUtils.McUtils.Plots.X3DInterface.X3DTorus.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.X3DInterface.X3DTorus.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
 ```python
 prep_geometry_opts(self, centers, radius=1, inner_radius=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DTorus.py#L353)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DTorus.py#L353?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DTorus.py#L353)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DTorus.py#L353?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +82,7 @@ prep_geometry_opts(self, centers, radius=1, inner_radius=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DTorus.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DTorus.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L350?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L350?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

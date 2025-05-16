@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder">DocBuilder</a> 
+## <a id="McUtils.Docs.DocsBuilder.DocBuilder">DocBuilder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder.py#L11?message=Update%20Docs)]
 </div>
 
 A documentation builder class that uses a `DocWalker`
@@ -28,13 +28,13 @@ default_template_extension: str
 default_repo_extension: str
 config_defaults: dict
 ```
-<a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocsBuilder.DocBuilder.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, packages=None, config=None, target=None, root=None, config_file=None, templates_directory=None, examples_directory=None, tests_directory=None, readme=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder/DocBuilder.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder/DocBuilder.py#L26?message=Update%20Docs)]
 </div>
 
   - `packages`: `Iterable[str|dict]`
@@ -48,36 +48,36 @@ __init__(self, packages=None, config=None, target=None, root=None, config_file=N
 root directory
 
 
-<a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder.get_template_locator" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocsBuilder.DocBuilder.get_template_locator" class="docs-object-method">&nbsp;</a> 
 ```python
 get_template_locator(self, template_directory, use_repo_templates=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L66)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L66?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder/DocBuilder.py#L66)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder/DocBuilder.py#L66?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder.load_config" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocsBuilder.DocBuilder.load_config" class="docs-object-method">&nbsp;</a> 
 ```python
 load_config(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder/DocBuilder.py#L87)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder/DocBuilder.py#L87?message=Update%20Docs)]
 </div>
 Loads the config file to be used and fills in template parameters
   - `:returns`: `_`
     >
 
 
-<a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder.create_layout" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocsBuilder.DocBuilder.create_layout" class="docs-object-method">&nbsp;</a> 
 ```python
 create_layout(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder/DocBuilder.py#L111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder/DocBuilder.py#L111?message=Update%20Docs)]
 </div>
 Creates the documentation layout that will be expanded upon by
 a `DocWalker`
@@ -85,13 +85,13 @@ a `DocWalker`
     >
 
 
-<a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder.load_walker" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocsBuilder.DocBuilder.load_walker" class="docs-object-method">&nbsp;</a> 
 ```python
 load_walker(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder/DocBuilder.py#L145)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder/DocBuilder.py#L145?message=Update%20Docs)]
 </div>
 Loads the `DocWalker` used to write docs.
 A hook that can be overriden to sub in different walkers.
@@ -99,13 +99,13 @@ A hook that can be overriden to sub in different walkers.
     >
 
 
-<a id="McUtils.McUtils.Docs.DocsBuilder.DocBuilder.build" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocsBuilder.DocBuilder.build" class="docs-object-method">&nbsp;</a> 
 ```python
 build(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L162)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L162?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocsBuilder/DocBuilder.py#L162)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder/DocBuilder.py#L162?message=Update%20Docs)]
 </div>
 Writes documentation layout to `self.target`
   - `:returns`: `_`
@@ -164,7 +164,7 @@ Writes documentation layout to `self.target`
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocsBuilder/DocBuilder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocsBuilder/DocBuilder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder.py#L11?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocsBuilder.py#L11?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

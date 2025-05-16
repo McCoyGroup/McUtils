@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.CoordinateFrames.translation_rotation_eigenvectors">translation_rotation_eigenvectors</a>
+# <a id="McUtils.Numputils.CoordinateFrames.translation_rotation_eigenvectors">translation_rotation_eigenvectors</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/CoordinateFrames.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/CoordinateFrames.py#L186?message=Update%20Docs)]
 </div>
 
 ```python
@@ -65,7 +65,7 @@ in the system
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/translation_rotation_eigenvectors.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/translation_rotation_eigenvectors.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L186?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/CoordinateFrames.py#L186?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

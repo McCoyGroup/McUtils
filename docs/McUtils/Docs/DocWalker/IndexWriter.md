@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Docs.DocWalker.IndexWriter">IndexWriter</a> 
+## <a id="McUtils.Docs.DocWalker.IndexWriter">IndexWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L932)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L932?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker.py#L961)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L961?message=Update%20Docs)]
 </div>
 
 Writes an index file with all of the
@@ -23,53 +23,53 @@ Needs some work to provide more useful info by default.
  ```python
 template: str
 ```
-<a id="McUtils.McUtils.Docs.DocWalker.IndexWriter.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.IndexWriter.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *args, description=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L943)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L943?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/IndexWriter.py#L972)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/IndexWriter.py#L972?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.IndexWriter.get_identifier" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.IndexWriter.get_identifier" class="docs-object-method">&nbsp;</a> 
 ```python
 get_identifier(cls, o): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L947)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L947?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/IndexWriter.py#L976)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/IndexWriter.py#L976?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.IndexWriter.get_file_paths" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.IndexWriter.get_file_paths" class="docs-object-method">&nbsp;</a> 
 ```python
 get_file_paths(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L950)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L950?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/IndexWriter.py#L979)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/IndexWriter.py#L979?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.IndexWriter.get_index_files" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.IndexWriter.get_index_files" class="docs-object-method">&nbsp;</a> 
 ```python
 get_index_files(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L954)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L954?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/IndexWriter.py#L987)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/IndexWriter.py#L987?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Docs.DocWalker.IndexWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Docs.DocWalker.IndexWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
 ```python
 get_template_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L965)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L965?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/DocWalker/IndexWriter.py#L998)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker/IndexWriter.py#L998?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -125,7 +125,7 @@ get_template_params(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/IndexWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L932?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/DocWalker.py#L961?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

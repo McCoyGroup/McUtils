@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter">GICSystemToCartesianConverter</a> 
+## <a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter">GICSystemToCartesianConverter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L110?message=Update%20Docs)]
 </div>
 
 A converter class for going from Cartesian coordinates to internals coordinates
@@ -19,35 +19,35 @@ A converter class for going from Cartesian coordinates to internals coordinates
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.types" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.types" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L115?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.convert_many" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.convert_many" class="docs-object-method">&nbsp;</a> 
 ```python
 convert_many(self, coords, *, reference_coordinates, specs, order=0, masses=None, remove_translation_rotation=True, derivs=None, return_derivs=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L119?message=Update%20Docs)]
 </div>
 We'll implement this by having the ordering arg wrap around in coords?
 
 
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.convert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, coords, *, reference_coordinates, specs, order=0, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L150)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L150?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -102,7 +102,7 @@ convert(self, coords, *, reference_coordinates, specs, order=0, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L110?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L110?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

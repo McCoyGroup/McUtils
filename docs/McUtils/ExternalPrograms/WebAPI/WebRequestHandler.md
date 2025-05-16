@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler">WebRequestHandler</a> 
+## <a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler">WebRequestHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI.py#L24)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)]
 </div>
 
 
@@ -19,7 +19,7 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.resolve_handler" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.resolve_handler" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 resolve_handler(cls, handler): 
@@ -30,7 +30,7 @@ resolve_handler(cls, handler):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.request" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.request" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 request(cls, method, url, json=None, handler=None, **params): 
@@ -41,7 +41,7 @@ request(cls, method, url, json=None, handler=None, **params):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.requests_request" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.requests_request" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 requests_request(cls, method, url, **params): 
@@ -52,7 +52,7 @@ requests_request(cls, method, url, **params):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.urllib3_request" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.urllib3_request" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 urllib3_request(cls, method, url, **params): 
@@ -63,7 +63,7 @@ urllib3_request(cls, method, url, **params):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.default_request" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.default_request" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 default_request(cls, method, url, data=None, headers=None, origin_req_host=None, unverifiable=False, json=None, **params): 
@@ -74,7 +74,7 @@ default_request(cls, method, url, data=None, headers=None, origin_req_host=None,
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.handle_response" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.handle_response" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 handle_response(cls, resp, headers): 
@@ -85,7 +85,7 @@ handle_response(cls, resp, headers):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebRequestHandler.read_response" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebRequestHandler.read_response" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 read_response(cls, resp, decode=True): 
@@ -147,7 +147,7 @@ read_response(cls, resp, decode=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/WebAPI/WebRequestHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L24?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

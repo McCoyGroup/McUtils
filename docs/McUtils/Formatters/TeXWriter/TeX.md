@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Formatters.TeXWriter.TeX">TeX</a> 
+## <a id="McUtils.Formatters.TeXWriter.TeX">TeX</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L542)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L542?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TeXWriter.py#L542)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TeXWriter.py#L542?message=Update%20Docs)]
 </div>
 
 Namespace for TeX-related utilities, someday might help with document prep from templates
@@ -28,27 +28,27 @@ Equation: TeXEquation
 wrap_parens: TeXParenthesized
 bold: TeXBold
 ```
-<a id="McUtils.McUtils.Formatters.TeXWriter.TeXExpr.name" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TeXWriter.TeXExpr.name" class="docs-object-method">&nbsp;</a> 
 ```python
 Symbol(s): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TeXWriter/TeXExpr.py#L313)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TeXWriter/TeXExpr.py#L313?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TeXWriter.TeXExpr.symbol" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TeXWriter.TeXExpr.symbol" class="docs-object-method">&nbsp;</a> 
 ```python
 Function(s): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L318)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L318?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TeXWriter/TeXExpr.py#L318)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TeXWriter/TeXExpr.py#L318?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TeXWriter.TeX.Matrix" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TeXWriter.TeX.Matrix" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 Matrix(cls, mat, **kwargs): 
@@ -110,7 +110,7 @@ Matrix(cls, mat, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TeXWriter/TeX.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TeXWriter/TeX.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L542?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TeXWriter.py#L542?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

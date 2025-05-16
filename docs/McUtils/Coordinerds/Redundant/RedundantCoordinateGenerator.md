@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator">RedundantCoordinateGenerator</a> 
+## <a id="McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator">RedundantCoordinateGenerator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Redundant.py#L425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Redundant.py#L425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/Redundant.py#L425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Redundant.py#L425?message=Update%20Docs)]
 </div>
 
 
@@ -19,17 +19,17 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, coordinate_specs, angle_ordering='ijk', untransformed_coordinates=None, masses=None, relocalize=False, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L427)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L427?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L427)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L427?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.base_redundant_transformation" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.base_redundant_transformation" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 base_redundant_transformation(cls, expansion, untransformed_coordinates=None, masses=None, relocalize=False): 
@@ -40,7 +40,7 @@ base_redundant_transformation(cls, expansion, untransformed_coordinates=None, ma
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.get_redundant_transformation" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.get_redundant_transformation" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_redundant_transformation(cls, base_expansions, untransformed_coordinates=None, masses=None, relocalize=False): 
@@ -51,17 +51,17 @@ get_redundant_transformation(cls, base_expansions, untransformed_coordinates=Non
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.compute_redundant_expansions" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.compute_redundant_expansions" class="docs-object-method">&nbsp;</a> 
 ```python
 compute_redundant_expansions(self, coords, order=None, untransformed_coordinates=None, relocalize=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L581)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L581?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L581)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Redundant/RedundantCoordinateGenerator.py#L581?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.prune_coordinate_specs" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.Redundant.RedundantCoordinateGenerator.prune_coordinate_specs" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 prune_coordinate_specs(cls, expansion, masses=None, untransformed_coordinates=None, pruning_mode='loc', **opts): 
@@ -123,7 +123,7 @@ prune_coordinate_specs(cls, expansion, masses=None, untransformed_coordinates=No
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Redundant.py#L425?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/Redundant.py#L425?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

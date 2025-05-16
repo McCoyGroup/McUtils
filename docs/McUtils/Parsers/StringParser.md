@@ -1,7 +1,7 @@
-# <a id="McUtils.Parsers.StringParser">McUtils.McUtils.Parsers.StringParser</a> 
+# <a id="McUtils.Parsers.StringParser">McUtils.Parsers.StringParser</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StringParser/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Parsers/StringParser/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -10,10 +10,10 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[StringParser](Parsers/StringParser/StringParser.md)   
+[StringParser](StringParser/StringParser.md)   
 </div>
    <div class="col" markdown="1">
-[StringParserException](Parsers/StringParser/StringParserException.md)   
+[StringParserException](StringParser/StringParserException.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -72,7 +72,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/StringParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/StringParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StringParser/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Parsers/StringParser/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

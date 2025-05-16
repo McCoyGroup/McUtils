@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial">SparsePolynomial</a> 
+## <a id="McUtils.Zachary.Polynomials.SparsePolynomial">SparsePolynomial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L799)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L799?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials.py#L799)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L799?message=Update%20Docs)]
 </div>
 
 A semi-symbolic representation of a polynomial of tensor
@@ -20,38 +20,38 @@ coefficients
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, terms: dict, prefactor=1, ndim=None, canonicalize=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L804)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L804?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L804)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L804?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.scaling" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.scaling" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 scaling(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L810)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L810?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L810)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L810?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.expand" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.expand" class="docs-object-method">&nbsp;</a> 
 ```python
 expand(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L817)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L817?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L817)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L817?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.monomial" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.monomial" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 monomial(cls, idx, value=1): 
@@ -62,64 +62,64 @@ monomial(cls, idx, value=1):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.__repr__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.__repr__" class="docs-object-method">&nbsp;</a> 
 ```python
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L826)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L826?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L826)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L826?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.__mul__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.__mul__" class="docs-object-method">&nbsp;</a> 
 ```python
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L829)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L829?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L829)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L829?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.__add__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.__add__" class="docs-object-method">&nbsp;</a> 
 ```python
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L850)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L850?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L850)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L850?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.shape" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.shape" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L895)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L895?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L895)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L895?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.as_dense" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.as_dense" class="docs-object-method">&nbsp;</a> 
 ```python
-as_dense(self) -> McUtils.McUtils.Zachary.Polynomials.DensePolynomial: 
+as_dense(self) -> McUtils.Zachary.Polynomials.DensePolynomial: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L908)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L908?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L908)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L908?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Polynomials.SparsePolynomial.shift" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Polynomials.SparsePolynomial.shift" class="docs-object-method">&nbsp;</a> 
 ```python
 shift(self, shift) -> 'SparsePolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L947)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/SparsePolynomial.py#L947?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Polynomials/SparsePolynomial.py#L947)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials/SparsePolynomial.py#L947?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -174,7 +174,7 @@ shift(self, shift) -> 'SparsePolynomial':
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/SparsePolynomial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/SparsePolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L799?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Polynomials.py#L799?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D">GraphicsPropertyManager3D</a> 
+## <a id="McUtils.Plots.Properties.GraphicsPropertyManager3D">GraphicsPropertyManager3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties.py#L641)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L641?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties.py#L641)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties.py#L641?message=Update%20Docs)]
 </div>
 
 
@@ -19,68 +19,68 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Properties.GraphicsPropertyManager3D.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, graphics, figure, axes, managed=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L642)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L642?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties/GraphicsPropertyManager3D.py#L642)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties/GraphicsPropertyManager3D.py#L642?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D.axes_labels" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Properties.GraphicsPropertyManager3D.axes_labels" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 axes_labels(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties/GraphicsPropertyManager3D.py#L646)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties/GraphicsPropertyManager3D.py#L646?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D.plot_range" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Properties.GraphicsPropertyManager3D.plot_range" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L689)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L689?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties/GraphicsPropertyManager3D.py#L689)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties/GraphicsPropertyManager3D.py#L689?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D.ticks" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Properties.GraphicsPropertyManager3D.ticks" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 ticks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L757)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L757?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties/GraphicsPropertyManager3D.py#L757)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties/GraphicsPropertyManager3D.py#L757?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D.ticks_style" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Properties.GraphicsPropertyManager3D.ticks_style" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 ticks_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L776)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L776?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties/GraphicsPropertyManager3D.py#L776)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties/GraphicsPropertyManager3D.py#L776?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Properties.GraphicsPropertyManager3D.view_settings" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Properties.GraphicsPropertyManager3D.view_settings" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 view_settings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L801)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L801?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Properties/GraphicsPropertyManager3D.py#L801)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties/GraphicsPropertyManager3D.py#L801?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -135,7 +135,7 @@ view_settings(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Properties/GraphicsPropertyManager3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Properties/GraphicsPropertyManager3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L641?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Properties.py#L641?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

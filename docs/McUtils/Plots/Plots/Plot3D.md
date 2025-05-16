@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Plots.Plot3D">Plot3D</a> 
+## <a id="McUtils.Plots.Plots.Plot3D">Plot3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1060)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1060?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L1060)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L1060?message=Update%20Docs)]
 </div>
 
 A base class for 3D plots
@@ -25,13 +25,13 @@ known_styles: set
 method: str
 plot_classes: dict
 ```
-<a id="McUtils.McUtils.Plots.Plots.Plot3D.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.Plot3D.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1067)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1067?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/Plot3D.py#L1067)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/Plot3D.py#L1067?message=Update%20Docs)]
 </div>
 
   - `params`: `Any`
@@ -52,27 +52,27 @@ __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None
     > options to be fed in when initializing the Graphics
 
 
-<a id="McUtils.McUtils.Plots.Plots.Plot3D.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.Plot3D.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, *params, **plot_style): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/Plot3D.py#L1136)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/Plot3D.py#L1136?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Plots.Plot3D.add_colorbar" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.Plot3D.add_colorbar" class="docs-object-method">&nbsp;</a> 
 ```python
 add_colorbar(self, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1142)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1142?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots/Plot3D.py#L1142)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots/Plot3D.py#L1142?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Plots.Plot3D.resolve_method" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.Plot3D.resolve_method" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 resolve_method(cls, mpl_name): 
@@ -83,7 +83,7 @@ resolve_method(cls, mpl_name):
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Plots.Plot3D.register" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Plots.Plot3D.register" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 register(cls, plot_class): 
@@ -145,7 +145,7 @@ register(cls, plot_class):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/Plot3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/Plot3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1060?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L1060?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

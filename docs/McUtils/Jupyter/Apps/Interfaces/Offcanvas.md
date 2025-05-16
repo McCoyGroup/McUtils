@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Offcanvas">Offcanvas</a> 
+## <a id="McUtils.Jupyter.Apps.Interfaces.Offcanvas">Offcanvas</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces.py#L1133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1133?message=Update%20Docs)]
 </div>
 
 
@@ -21,37 +21,37 @@
  ```python
 wrapper_classes: list
 ```
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Offcanvas.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.Offcanvas.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, header=None, body=None, id=None, tabindex=-1, cls=None, placement='start', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Offcanvas.py#L1135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Offcanvas.py#L1135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Offcanvas.py#L1135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Offcanvas.py#L1135?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.JHTML.JHTML.JHTML.Bootstrap.Button" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.JHTML.JHTML.JHTML.Bootstrap.Button" class="docs-object-method">&nbsp;</a> 
 ```python
 trigger_class(*elements, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/JHTML/JHTML/Bootstrap.py#L652)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/JHTML/JHTML/Bootstrap.py#L652?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/JHTML/JHTML/Bootstrap.py#L652)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/JHTML/JHTML/Bootstrap.py#L652?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Offcanvas.get_trigger" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.Offcanvas.get_trigger" class="docs-object-method">&nbsp;</a> 
 ```python
 get_trigger(self, *items, trigger_class=None, data_bs_toggle='offcanvas', data_bs_target=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Offcanvas.py#L1161)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Offcanvas.py#L1161?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Interfaces/Offcanvas.py#L1161)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces/Offcanvas.py#L1161?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Interfaces.Offcanvas.close_button" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Interfaces.Offcanvas.close_button" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 close_button(self): 
@@ -113,7 +113,7 @@ close_button(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Offcanvas.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Offcanvas.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1133?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Interfaces.py#L1133?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

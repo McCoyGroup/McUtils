@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.ChemToolkits.ASEInterface">ASEInterface</a> 
+## <a id="McUtils.ExternalPrograms.ChemToolkits.ASEInterface">ASEInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemToolkits.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemToolkits.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/ChemToolkits.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/ChemToolkits.py#L34?message=Update%20Docs)]
 </div>
 
 
@@ -22,7 +22,7 @@
 name: str
 module: str
 ```
-<a id="McUtils.McUtils.ExternalPrograms.ChemToolkits.ASEInterface.Atoms" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.ChemToolkits.ASEInterface.Atoms" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 Atoms(cls, symbols: list[str] = None, positions: list[tuple[float, float, float]] = None, numbers: list[int] = None, masses: list[float] = None, charges: list[float] = None, **etc): 
@@ -84,7 +84,7 @@ Atoms(cls, symbols: list[str] = None, positions: list[tuple[float, float, float]
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ChemToolkits/ASEInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ChemToolkits/ASEInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemToolkits.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/ChemToolkits.py#L34?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

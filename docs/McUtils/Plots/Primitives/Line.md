@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Primitives.Line">Line</a> 
+## <a id="McUtils.Plots.Primitives.Line">Line</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L51?message=Update%20Docs)]
 </div>
 
 
@@ -19,44 +19,44 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.Primitives.Line.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Line.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, pos1, pos2, *rest, radius=0.1, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Line.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Line.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Line.py#L52)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Line.py#L52?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Line.points" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Line.points" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 points(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Line.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Line.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Line.py#L58)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Line.py#L58?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Line.get_bbox" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Line.get_bbox" class="docs-object-method">&nbsp;</a> 
 ```python
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Line.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Line.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Line.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Line.py#L61?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Line.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Line.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Line.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Line.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Line.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Line.py#L64?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -111,7 +111,7 @@ plot(self, axes, *args, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Line.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Line.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L51?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L51?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

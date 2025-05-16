@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols">Symbols</a> 
+## <a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols">Symbols</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1498)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions.py#L1498)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)]
 </div>
 
 
@@ -19,17 +19,17 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *vars): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.py#L1500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.py#L1500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/ElementaryFunctions/Symbols.py#L1500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions/Symbols.py#L1500?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.scalar" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.scalar" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 scalar(cls, v): 
@@ -40,7 +40,7 @@ scalar(cls, v):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.log" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.log" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 log(cls, v, base=None): 
@@ -51,7 +51,7 @@ log(cls, v, base=None):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.exp" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.exp" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 exp(cls, v, base=None): 
@@ -62,7 +62,7 @@ exp(cls, v, base=None):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.cos" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.cos" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 cos(cls, x): 
@@ -73,7 +73,7 @@ cos(cls, x):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.sin" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.sin" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 sin(cls, x): 
@@ -84,7 +84,7 @@ sin(cls, x):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.morse" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols.morse" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 morse(cls, r, de=1, a=1, re=0): 
@@ -146,7 +146,7 @@ morse(cls, r, de=1, a=1, re=0):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/ElementaryFunctions.py#L1498?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

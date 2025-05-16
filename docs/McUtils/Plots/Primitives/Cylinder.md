@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Primitives.Cylinder">Cylinder</a> 
+## <a id="McUtils.Plots.Primitives.Cylinder">Cylinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L116?message=Update%20Docs)]
 </div>
 
 
@@ -19,33 +19,33 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Plots.Primitives.Cylinder.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Cylinder.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, p1, p2, radius, circle_points=32, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Cylinder.py#L117)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Cylinder.py#L117?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Cylinder.get_bbox" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Cylinder.get_bbox" class="docs-object-method">&nbsp;</a> 
 ```python
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Cylinder.py#L124)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Cylinder.py#L124?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Plots.Primitives.Cylinder.plot" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.Primitives.Cylinder.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, axes, *args, circle_points=None, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Primitives/Cylinder.py#L127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives/Cylinder.py#L127?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -100,7 +100,7 @@ plot(self, axes, *args, circle_points=None, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Cylinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Cylinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L116?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Primitives.py#L116?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

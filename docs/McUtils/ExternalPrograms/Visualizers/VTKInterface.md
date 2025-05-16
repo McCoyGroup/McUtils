@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.Visualizers.VTKInterface">VTKInterface</a> 
+## <a id="McUtils.ExternalPrograms.Visualizers.VTKInterface">VTKInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Visualizers.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Visualizers.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)]
 </div>
 
 A simple class to support operations that make use of the VPython visualization toolkit
@@ -22,7 +22,7 @@ A simple class to support operations that make use of the VPython visualization 
 name: str
 module: str
 ```
-<a id="McUtils.McUtils.ExternalPrograms.Visualizers.VTKInterface.graphics_object" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Visualizers.VTKInterface.graphics_object" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 graphics_object(cls, obj): 
@@ -33,7 +33,7 @@ graphics_object(cls, obj):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Visualizers.VTKInterface.named_colors" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Visualizers.VTKInterface.named_colors" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 named_colors(cls): 
@@ -95,7 +95,7 @@ named_colors(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Visualizers.py#L23?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps">TemplateOps</a> 
+## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps">TemplateOps</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)]
 </div>
 
 
@@ -19,7 +19,7 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop" class="docs-object-method">&nbsp;</a> 
 ```python
 @staticmethod
 loop(caller: Callable, *args, joiner='', formatter=None, **kwargs): 
@@ -30,7 +30,7 @@ loop(caller: Callable, *args, joiner='', formatter=None, **kwargs):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop_template" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.loop_template" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 loop_template(cls, template: str, *args, joiner='', formatter=None, **kwargs): 
@@ -41,7 +41,7 @@ loop_template(cls, template: str, *args, joiner='', formatter=None, **kwargs):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.join" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.join" class="docs-object-method">&nbsp;</a> 
 ```python
 @staticmethod
 join(*args, joiner=' ', formatter=None): 
@@ -52,7 +52,7 @@ join(*args, joiner=' ', formatter=None):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.load" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 load(cls, template, formatter=None): 
@@ -63,7 +63,7 @@ load(cls, template, formatter=None):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.include" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.include" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 include(cls, template, formatter=None): 
@@ -74,7 +74,7 @@ include(cls, template, formatter=None):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.apply" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.apply" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 apply(cls, template, *args, formatter=None, **kwargs): 
@@ -85,7 +85,7 @@ apply(cls, template, *args, formatter=None, **kwargs):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.nonempty" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.nonempty" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 nonempty(cls, data, formatter=None): 
@@ -96,7 +96,7 @@ nonempty(cls, data, formatter=None):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 wrap(cls, fn): 
@@ -107,7 +107,7 @@ wrap(cls, fn):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.cleandoc" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.cleandoc" class="docs-object-method">&nbsp;</a> 
 ```python
 @staticmethod
 cleandoc(txt, formatter=None): 
@@ -118,7 +118,7 @@ cleandoc(txt, formatter=None):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap_str" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.wrap_str" class="docs-object-method">&nbsp;</a> 
 ```python
 @staticmethod
 wrap_str(obj, formatter=None): 
@@ -129,7 +129,7 @@ wrap_str(obj, formatter=None):
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.optional" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateOps.optional" class="docs-object-method">&nbsp;</a> 
 ```python
 @staticmethod
 optional(key, default='', formatter=None): 
@@ -191,7 +191,7 @@ optional(key, default='', formatter=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateOps.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L30?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

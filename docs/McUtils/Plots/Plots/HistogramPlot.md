@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.Plots.HistogramPlot">HistogramPlot</a> 
+## <a id="McUtils.Plots.Plots.HistogramPlot">HistogramPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L705)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L705?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/Plots.py#L705)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L705?message=Update%20Docs)]
 </div>
 
 Makes a Histogram of data
@@ -76,7 +76,7 @@ known_styles: set
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/HistogramPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/HistogramPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L705?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/Plots.py#L705?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

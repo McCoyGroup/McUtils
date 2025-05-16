@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator">ResourceLocator</a> 
+## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator">ResourceLocator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L534)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L534?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L534)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L534?message=Update%20Docs)]
 </div>
 
 
@@ -19,53 +19,53 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, locators: Iterable[Union[McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourcePathLocator, Iterable[str], Tuple[Iterable[str], Union[str, Iterable[str]]]]]): 
+__init__(self, locators: Iterable[Union[McUtils.Formatters.TemplateEngine.TemplateEngine.ResourcePathLocator, Iterable[str], Tuple[Iterable[str], Union[str, Iterable[str]]]]]): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L535)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L535?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L535)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L535?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.locate" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.locate" class="docs-object-method">&nbsp;</a> 
 ```python
 locate(self, identifier): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L551)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L551?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L551)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L551?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.paths" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.paths" class="docs-object-method">&nbsp;</a> 
 ```python
 paths(self, filter_pattern=None, **_): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L556)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L556?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L556)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L556?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.directories" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.directories" class="docs-object-method">&nbsp;</a> 
 ```python
 directories(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L566)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L566?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L566)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L566?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.__repr__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.__repr__" class="docs-object-method">&nbsp;</a> 
 ```python
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L568)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L568?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L568)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L568?message=Update%20Docs)]
 </div>
 
 
@@ -123,7 +123,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L534?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L534?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

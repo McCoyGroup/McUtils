@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets">HTMLWidgets</a> 
+## <a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets">HTMLWidgets</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets.py#L1037)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTMLWidgets.py#L1037)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)]
 </div>
 
 
@@ -147,7 +147,7 @@ Video: Video
 Wbr: Wbr
 OutputArea: OutputArea
 ```
-<a id="McUtils.McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.get_exec_prefix" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.get_exec_prefix" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_exec_prefix(cls): 
@@ -158,7 +158,7 @@ get_exec_prefix(cls):
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.load" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.load" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 load(cls, exec_prefix=None, overwrite=False): 
@@ -169,7 +169,7 @@ load(cls, exec_prefix=None, overwrite=False):
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.get_class_map" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.get_class_map" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_class_map(cls): 
@@ -180,10 +180,10 @@ get_class_map(cls):
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.from_HTML" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.JHTML.HTMLWidgets.HTMLWidgets.from_HTML" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-from_HTML(cls, html: McUtils.McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_handlers=None, debug_pane=None, **props): 
+from_HTML(cls, html: McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_handlers=None, debug_pane=None, **props): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/__init__.py#L1082)/
@@ -242,7 +242,7 @@ from_HTML(cls, html: McUtils.McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_h
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTMLWidgets/HTMLWidgets.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTMLWidgets/HTMLWidgets.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTMLWidgets.py#L1037?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

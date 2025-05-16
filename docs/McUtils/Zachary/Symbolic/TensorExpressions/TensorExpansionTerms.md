@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms">TensorExpansionTerms</a> 
+## <a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms">TensorExpansionTerms</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L1524)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L1524?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions.py#L1524)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions.py#L1524?message=Update%20Docs)]
 </div>
 
 A friend of DumbTensor which exists
@@ -29,13 +29,13 @@ XVTerm: XVTerm
 QXVTerm: QXVTerm
 BasicContractionTerm: BasicContractionTerm
 ```
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, qx_terms, xv_terms, qxv_terms=None, base_qx=None, base_xv=None, q_name='Q', v_name='V'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1533)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1533?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1533)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1533?message=Update%20Docs)]
 </div>
 
   - `qx_terms`: `Iterable[np.ndarray]`
@@ -44,33 +44,33 @@ __init__(self, qx_terms, xv_terms, qxv_terms=None, base_qx=None, base_xv=None, q
     >
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.QX" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.QX" class="docs-object-method">&nbsp;</a> 
 ```python
 QX(self, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1550)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1550?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1550)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1550?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.XV" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.XV" class="docs-object-method">&nbsp;</a> 
 ```python
 XV(self, m): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1552)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1552?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1552)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1552?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.QXV" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms.QXV" class="docs-object-method">&nbsp;</a> 
 ```python
 QXV(self, n, m): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1554)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1554?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1554)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.py#L1554?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -125,7 +125,7 @@ QXV(self, n, m):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Symbolic/TensorExpressions.py#L1524?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Symbolic/TensorExpressions.py#L1524?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Devutils.FileHelpers.is_filepath_like">is_filepath_like</a>
+# <a id="McUtils.Devutils.FileHelpers.is_filepath_like">is_filepath_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L18)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L18?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/FileHelpers.py#L18)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/FileHelpers.py#L18?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ is_filepath_like(file, bad_chars=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/is_filepath_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/is_filepath_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L18?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/FileHelpers.py#L18?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

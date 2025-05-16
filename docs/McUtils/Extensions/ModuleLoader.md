@@ -1,7 +1,7 @@
-# <a id="McUtils.Extensions.ModuleLoader">McUtils.McUtils.Extensions.ModuleLoader</a> 
+# <a id="McUtils.Extensions.ModuleLoader">McUtils.Extensions.ModuleLoader</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ModuleLoader/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ModuleLoader/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Extensions/ModuleLoader/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ModuleLoader/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[ModuleLoader](Extensions/ModuleLoader/ModuleLoader.md)   
+[ModuleLoader](ModuleLoader/ModuleLoader.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -72,7 +72,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/ModuleLoader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/ModuleLoader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ModuleLoader/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Extensions/ModuleLoader/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

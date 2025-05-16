@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData">FiniteDifferenceData</a> 
+## <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData">FiniteDifferenceData</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L604)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L604?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction.py#L604)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction.py#L604?message=Update%20Docs)]
 </div>
 
 Holds the data used by to construct a finite difference matrix
@@ -19,46 +19,46 @@ Holds the data used by to construct a finite difference matrix
  </div>
  <div class="collapsible-section collapsible-section-body collapse " id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, weights, widths, order): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L608)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L608?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L608)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L608?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.weights" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.weights" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 weights(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L616)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L616?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L616)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L616?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.widths" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.widths" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 widths(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L619)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L619?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L619)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L619?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.order" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.order" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 order(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L622)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L622?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L622)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L622?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -149,7 +149,7 @@ ___
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L604?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction.py#L604?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

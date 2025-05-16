@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock">OptionsBlock</a> 
+## <a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock">OptionsBlock</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Jobs.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)]
 </div>
 
 
@@ -21,17 +21,17 @@
  ```python
 require_value: NoneType
 ```
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, canonicalize_opts=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L37?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_props" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_props" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_props(cls): 
@@ -42,7 +42,7 @@ get_props(cls):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_aliases" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_aliases" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_aliases(cls): 
@@ -53,7 +53,7 @@ get_aliases(cls):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_canonical_opts_map" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_canonical_opts_map" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_canonical_opts_map(cls): 
@@ -64,7 +64,7 @@ get_canonical_opts_map(cls):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_props_set" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_props_set" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_props_set(cls): 
@@ -75,7 +75,7 @@ get_props_set(cls):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_inverse_alias_map" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.get_inverse_alias_map" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_inverse_alias_map(cls): 
@@ -86,7 +86,7 @@ get_inverse_alias_map(cls):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.check_canon" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.check_canon" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 check_canon(cls, opt, val): 
@@ -97,7 +97,7 @@ check_canon(cls, opt, val):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.canonicalize_opt_name" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.canonicalize_opt_name" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 canonicalize_opt_name(cls, opt): 
@@ -108,17 +108,17 @@ canonicalize_opt_name(cls, opt):
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.check_opts" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.check_opts" class="docs-object-method">&nbsp;</a> 
 ```python
 check_opts(self, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs/OptionsBlock.py#L94?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.prep_opts" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.OptionsBlock.prep_opts" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 prep_opts(cls, opts): 
@@ -180,7 +180,7 @@ prep_opts(cls, opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Jobs/OptionsBlock.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/Jobs/Jobs.py#L34?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

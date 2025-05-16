@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Devutils.FileHelpers.write_json">write_json</a>
+# <a id="McUtils.Devutils.FileHelpers.write_json">write_json</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/FileHelpers.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/FileHelpers.py#L64?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ write_json(file, data, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/write_json.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/write_json.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L64?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/FileHelpers.py#L64?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

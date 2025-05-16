@@ -1,7 +1,7 @@
-# <a id="McUtils.Jupyter.JHTML.HTML">McUtils.McUtils.Jupyter.JHTML.HTML</a> 
+# <a id="McUtils.Jupyter.JHTML.HTML">McUtils.Jupyter.JHTML.HTML</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JHTML/HTML/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTML/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -10,13 +10,13 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[HTML](JHTML/HTML/HTML.md)   
+[HTML](HTML/HTML.md)   
 </div>
    <div class="col" markdown="1">
-[CSS](JHTML/HTML/CSS.md)   
+[CSS](HTML/CSS.md)   
 </div>
    <div class="col" markdown="1">
-[ContentXML](JHTML/HTML/ContentXML.md)   
+[ContentXML](HTML/ContentXML.md)   
 </div>
 </div>
   <div class="row">
@@ -83,7 +83,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JHTML/HTML/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

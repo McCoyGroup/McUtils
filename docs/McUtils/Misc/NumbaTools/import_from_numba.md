@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Misc.NumbaTools.import_from_numba">import_from_numba</a>
+# <a id="McUtils.Misc.NumbaTools.import_from_numba">import_from_numba</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/NumbaTools.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Misc/NumbaTools.py#L67)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/NumbaTools.py#L67?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ import_from_numba(name, default):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc/NumbaTools/import_from_numba.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc/NumbaTools/import_from_numba.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L67?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Misc/NumbaTools.py#L67?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

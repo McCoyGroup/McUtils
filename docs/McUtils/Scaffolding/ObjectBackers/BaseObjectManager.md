@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager">BaseObjectManager</a> 
+## <a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager">BaseObjectManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers.py#L14?message=Update%20Docs)]
 </div>
 
 Defines the basic parameters of an object interface
@@ -21,44 +21,44 @@ and object attribute to disk or vice versa
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L21)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L21?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager.get_basename" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.get_basename" class="docs-object-method">&nbsp;</a> 
 ```python
 get_basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L25?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager.basename" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.basename" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L32?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager.save_attr" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.save_attr" class="docs-object-method">&nbsp;</a> 
 ```python
 save_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L38)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L38?message=Update%20Docs)]
 </div>
 Saves some attribute of the object
   - `attr`: `Any`
@@ -67,13 +67,13 @@ Saves some attribute of the object
     >
 
 
-<a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager.load_attr" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.load_attr" class="docs-object-method">&nbsp;</a> 
 ```python
 load_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L50?message=Update%20Docs)]
 </div>
 Loads some attribute of the object
   - `attr`: `Any`
@@ -82,13 +82,13 @@ Loads some attribute of the object
     >
 
 
-<a id="McUtils.McUtils.Scaffolding.ObjectBackers.BaseObjectManager.del_attr" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.del_attr" class="docs-object-method">&nbsp;</a> 
 ```python
 del_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L62)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L62?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L62)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers/BaseObjectManager.py#L62?message=Update%20Docs)]
 </div>
 Deletes some attribute of the object
   - `attr`: `Any`
@@ -148,7 +148,7 @@ Deletes some attribute of the object
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L14?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/ObjectBackers.py#L14?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

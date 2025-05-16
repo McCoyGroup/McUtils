@@ -1,7 +1,7 @@
-### <a id="McUtils.McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.ZMatrixCoordinates">ZMatrixCoordinates</a> 
+### <a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.ZMatrixCoordinates">ZMatrixCoordinates</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16?message=Update%20Docs)]
 </div>
 Generic internals
 
@@ -54,7 +54,7 @@ Generic internals
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/ZMatrixCoordinates.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/ZMatrixCoordinates.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

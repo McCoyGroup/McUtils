@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Jupyter.Apps.Controls.TextArea">TextArea</a> 
+## <a id="McUtils.Jupyter.Apps.Controls.TextArea">TextArea</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls.py#L212)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L212?message=Update%20Docs)]
 </div>
 
 
@@ -21,23 +21,23 @@
  ```python
 base_cls: list
 ```
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.TextArea.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.TextArea.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, var, tag='textarea', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/TextArea.py#L214)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/TextArea.py#L214?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/TextArea.py#L214)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/TextArea.py#L214?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Jupyter.Apps.Controls.TextArea.to_jhtml" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Jupyter.Apps.Controls.TextArea.to_jhtml" class="docs-object-method">&nbsp;</a> 
 ```python
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/TextArea.py#L216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/TextArea.py#L216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/Apps/Controls/TextArea.py#L216)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls/TextArea.py#L216?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -92,7 +92,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/TextArea.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/TextArea.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L212?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/Apps/Controls.py#L212?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

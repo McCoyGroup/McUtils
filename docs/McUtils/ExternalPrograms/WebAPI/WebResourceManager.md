@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebResourceManager">WebResourceManager</a> 
+## <a id="McUtils.ExternalPrograms.WebAPI.WebResourceManager">WebResourceManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI.py#L392)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L392?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI.py#L392)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L392?message=Update%20Docs)]
 </div>
 
 
@@ -22,43 +22,43 @@
 default_resource_name: str
 default_request_handler: WebRequestHandler
 ```
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebResourceManager.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebResourceManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *, request_handler=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L395)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L395?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/WebResourceManager.py#L395)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/WebResourceManager.py#L395?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebResourceManager.get_resource_filename" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebResourceManager.get_resource_filename" class="docs-object-method">&nbsp;</a> 
 ```python
 get_resource_filename(self, name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L400)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L400?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/WebResourceManager.py#L400)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/WebResourceManager.py#L400?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebResourceManager.download_link" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebResourceManager.download_link" class="docs-object-method">&nbsp;</a> 
 ```python
 download_link(self, link): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L403)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L403?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/WebResourceManager.py#L403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/WebResourceManager.py#L403?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.ExternalPrograms.WebAPI.WebResourceManager.download_link" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.ExternalPrograms.WebAPI.WebResourceManager.download_link" class="docs-object-method">&nbsp;</a> 
 ```python
 resource_function(self, link): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L403)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI/WebResourceManager.py#L403?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/ExternalPrograms/WebAPI/WebResourceManager.py#L403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI/WebResourceManager.py#L403?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -113,7 +113,7 @@ resource_function(self, link):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/WebAPI/WebResourceManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/WebAPI/WebResourceManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/WebAPI.py#L392?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/ExternalPrograms/WebAPI.py#L392?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator">CoordinateInterpolator</a> 
+## <a id="McUtils.Zachary.Interpolator.CoordinateInterpolator">CoordinateInterpolator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L808)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L808?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator.py#L808)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator.py#L808?message=Update%20Docs)]
 </div>
 
 
@@ -21,17 +21,17 @@
  ```python
 default_interpolator_type: IncrementalCartesianCoordinateInterpolation
 ```
-<a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Interpolator.CoordinateInterpolator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, coordinates, arc_lengths=None, distance_function=None, base_interpolator=None, coordinate_system=None, **interpolator_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/CoordinateInterpolator.py#L812)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/CoordinateInterpolator.py#L812?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/CoordinateInterpolator.py#L812)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/CoordinateInterpolator.py#L812?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator.euclidean_coordinate_distance" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Interpolator.CoordinateInterpolator.euclidean_coordinate_distance" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 euclidean_coordinate_distance(cls, p1, p2): 
@@ -42,7 +42,7 @@ euclidean_coordinate_distance(cls, p1, p2):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator.lookup_distance_function" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Interpolator.CoordinateInterpolator.lookup_distance_function" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 lookup_distance_function(cls, distance_function): 
@@ -53,7 +53,7 @@ lookup_distance_function(cls, distance_function):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator.uniform_distance_function" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Interpolator.CoordinateInterpolator.uniform_distance_function" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 uniform_distance_function(cls, coords): 
@@ -64,7 +64,7 @@ uniform_distance_function(cls, coords):
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator.get_arc_lengths" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Interpolator.CoordinateInterpolator.get_arc_lengths" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_arc_lengths(cls, coordinates: numpy.ndarray, arc_lengths=None, distance_function: 'typing.Callable[[np.ndarray, np.ndarray], float]' = None): 
@@ -75,13 +75,13 @@ get_arc_lengths(cls, coordinates: numpy.ndarray, arc_lengths=None, distance_func
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Interpolator.CoordinateInterpolator.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Interpolator.CoordinateInterpolator.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, points, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/CoordinateInterpolator.py#L877)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/CoordinateInterpolator.py#L877?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Interpolator/CoordinateInterpolator.py#L877)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator/CoordinateInterpolator.py#L877?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -136,7 +136,7 @@ __call__(self, points, **etc):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Interpolator/CoordinateInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Interpolator/CoordinateInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L808?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Interpolator.py#L808?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

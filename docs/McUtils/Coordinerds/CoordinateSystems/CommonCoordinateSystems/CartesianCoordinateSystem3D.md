@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.CartesianCoordinateSystem3D">CartesianCoordinateSystem3D</a> 
+## <a id="McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.CartesianCoordinateSystem3D">CartesianCoordinateSystem3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L117)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L117?message=Update%20Docs)]
 </div>
 
 Represents Cartesian coordinates in 3D
@@ -21,13 +21,13 @@ Represents Cartesian coordinates in 3D
  ```python
 name: str
 ```
-<a id="McUtils.McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.CartesianCoordinateSystem3D.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.CartesianCoordinateSystem3D.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, converter_options=None, dimension=(None, 3), **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.py#L122?message=Update%20Docs)]
 </div>
 
   - `converter_options`: `None | dict`
@@ -89,7 +89,7 @@ __init__(self, converter_options=None, dimension=(None, 3), **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/CartesianCoordinateSystem3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L117?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L117?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

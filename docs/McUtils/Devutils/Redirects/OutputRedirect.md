@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Devutils.Redirects.OutputRedirect">OutputRedirect</a> 
+## <a id="McUtils.Devutils.Redirects.OutputRedirect">OutputRedirect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects.py#L9?message=Update%20Docs)]
 </div>
 
 
@@ -19,17 +19,17 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Devutils.Redirects.OutputRedirect.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Redirects.OutputRedirect.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, redirect=True, stdout=None, stderr=None, capture_output=False, capture_errors=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects/OutputRedirect.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects/OutputRedirect.py#L10?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Devutils.Redirects.OutputRedirect.get_handle" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Redirects.OutputRedirect.get_handle" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_handle(cls, handles=None, file_handles=False): 
@@ -40,7 +40,7 @@ get_handle(cls, handles=None, file_handles=False):
 </div>
 
 
-<a id="McUtils.McUtils.Devutils.Redirects.OutputRedirect.get_temp_stream" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Redirects.OutputRedirect.get_temp_stream" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_temp_stream(cls): 
@@ -51,23 +51,23 @@ get_temp_stream(cls):
 </div>
 
 
-<a id="McUtils.McUtils.Devutils.Redirects.OutputRedirect.__enter__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Redirects.OutputRedirect.__enter__" class="docs-object-method">&nbsp;</a> 
 ```python
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects/OutputRedirect.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects/OutputRedirect.py#L46?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Devutils.Redirects.OutputRedirect.__exit__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Devutils.Redirects.OutputRedirect.__exit__" class="docs-object-method">&nbsp;</a> 
 ```python
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Devutils/Redirects/OutputRedirect.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects/OutputRedirect.py#L84?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -122,7 +122,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/OutputRedirect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/OutputRedirect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Devutils/Redirects.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

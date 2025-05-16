@@ -1,7 +1,7 @@
 # <a id="McUtils.Docs">McUtils.Docs</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Docs/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 Adapted from the Peeves documentation system but tailored for more interactive usage.
@@ -74,9 +74,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-374024" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-374024"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-6f187d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6f187d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-374024" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6f187d" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
@@ -84,9 +84,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-89cf5d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-89cf5d"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-665cd4" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-665cd4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-89cf5d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-665cd4" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -260,7 +260,7 @@ class DocsTests(TestCase):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Docs/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
-# <a id="McUtils.McUtils.Numputils.VectorOps.distance_matrix">distance_matrix</a>
+# <a id="McUtils.Numputils.VectorOps.distance_matrix">distance_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Numputils/VectorOps.py#L107)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L107?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ distance_matrix(pts, axis=-1, axis2=None, return_triu=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/distance_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/distance_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L107?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Numputils/VectorOps.py#L107?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

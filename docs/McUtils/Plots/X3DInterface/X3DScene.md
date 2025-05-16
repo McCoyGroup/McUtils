@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Plots.X3DInterface.X3DScene">X3DScene</a> 
+## <a id="McUtils.Plots.X3DInterface.X3DScene">X3DScene</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L201)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L201?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L201?message=Update%20Docs)]
 </div>
 
 
@@ -22,13 +22,13 @@
 wrapper_class: Scene
 default_viewpoint: dict
 ```
-<a id="McUtils.McUtils.Plots.X3DInterface.X3DScene.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.X3DInterface.X3DScene.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *children, viewpoint=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DScene.py#L204)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DScene.py#L204?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Plots/X3DInterface/X3DScene.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface/X3DScene.py#L204?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -83,7 +83,7 @@ __init__(self, *children, viewpoint=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DScene.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DScene.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L201?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Plots/X3DInterface.py#L201?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

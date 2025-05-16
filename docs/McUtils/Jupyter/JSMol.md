@@ -1,7 +1,7 @@
-# <a id="McUtils.Jupyter.JSMol">McUtils.McUtils.Jupyter.JSMol</a> 
+# <a id="McUtils.Jupyter.JSMol">McUtils.Jupyter.JSMol</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JSMol/__init__.py#L1)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JSMol/__init__.py#L1?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Jupyter/JSMol/__init__.py#L1)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JSMol/__init__.py#L1?message=Update%20Docs)]
 </div>
     
 
@@ -10,7 +10,7 @@
 <div class="container alert alert-secondary bg-light">
   <div class="row">
    <div class="col" markdown="1">
-[JSMol](Jupyter/JSMol/JSMol.md)   
+[JSMol](JSMol/JSMol.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -72,7 +72,7 @@
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JSMol.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JSMol.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JSMol/__init__.py#L1?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Jupyter/JSMol/__init__.py#L1?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

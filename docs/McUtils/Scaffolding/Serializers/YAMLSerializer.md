@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Scaffolding.Serializers.YAMLSerializer">YAMLSerializer</a> 
+## <a id="McUtils.Scaffolding.Serializers.YAMLSerializer">YAMLSerializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L366)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L366?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers.py#L366)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L366?message=Update%20Docs)]
 </div>
 
 A serializer that makes dumping data to YAML simpler.
@@ -23,53 +23,53 @@ a huge need yet...
  ```python
 default_extension: str
 ```
-<a id="McUtils.McUtils.Scaffolding.Serializers.YAMLSerializer.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.YAMLSerializer.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L373)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L373?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/YAMLSerializer.py#L373)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/YAMLSerializer.py#L373?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.YAMLSerializer.convert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.YAMLSerializer.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L378)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L378?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/YAMLSerializer.py#L378)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/YAMLSerializer.py#L378?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.YAMLSerializer.deconvert" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.YAMLSerializer.deconvert" class="docs-object-method">&nbsp;</a> 
 ```python
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L380)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L380?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/YAMLSerializer.py#L380)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/YAMLSerializer.py#L380?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.YAMLSerializer.serialize" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.YAMLSerializer.serialize" class="docs-object-method">&nbsp;</a> 
 ```python
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L382)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L382?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/YAMLSerializer.py#L382)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/YAMLSerializer.py#L382?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Scaffolding.Serializers.YAMLSerializer.deserialize" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Scaffolding.Serializers.YAMLSerializer.deserialize" class="docs-object-method">&nbsp;</a> 
 ```python
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L387)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L387?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Scaffolding/Serializers/YAMLSerializer.py#L387)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers/YAMLSerializer.py#L387?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -124,7 +124,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/YAMLSerializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/YAMLSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L366?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Scaffolding/Serializers.py#L366?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

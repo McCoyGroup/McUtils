@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction">FiniteDifferenceFunction</a> 
+## <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction">FiniteDifferenceFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction.py#L26?message=Update%20Docs)]
 </div>
 
 The FiniteDifferenceFunction encapsulates a bunch of functionality extracted from [Fornberger's
@@ -24,13 +24,13 @@ A convenient application is the `FiniteDifferenceDerivative` class in the `Deriv
  </div>
  <div class="collapsible-section collapsible-section-body collapse " id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *diffs, axes=0, contract=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L35?message=Update%20Docs)]
 </div>
 Constructs an object to take finite differences derivatives of grids of data
   - `diffs`: `FiniteDifference1D`
@@ -41,13 +41,13 @@ Constructs an object to take finite differences derivatives of grids of data
     > Whether to reduce the shape of the returned tensor if applicable after application
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.apply" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.apply" class="docs-object-method">&nbsp;</a> 
 ```python
 apply(self, vals, axes=None, mesh_spacing=None, contract=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L49)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L49?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L49?message=Update%20Docs)]
 </div>
 Iteratively applies the stored finite difference objects to the vals
   - `vals`: `np.ndarray`
@@ -82,24 +82,24 @@ e
 s
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.__call__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, vals, axes=None, mesh_spacing=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L83)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L83?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.order" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.order" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 order(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L86)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L86?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L86)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L86?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[int]`
@@ -142,14 +142,14 @@ e
 d
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.weights" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.weights" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 weights(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L94?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[np.array[float]]`
@@ -192,14 +192,14 @@ i
 l
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.widths" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.widths" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 widths(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L102?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[(int, int)]`
@@ -286,7 +286,7 @@ i
 l
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.regular_difference" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.regular_difference" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 regular_difference(cls, order, mesh_spacing=None, accuracy=2, stencil=None, end_point_accuracy=2, axes=0, contract=True, **kwargs): 
@@ -316,7 +316,7 @@ Constructs a `FiniteDifferenceFunction` appropriate for a _regular grid_ with th
     >
 
 
-<a id="McUtils.McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.from_grid" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.from_grid" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 from_grid(cls, grid, order, accuracy=2, stencil=None, end_point_accuracy=2, axes=0, contract=True, **kwargs): 
@@ -473,7 +473,7 @@ ___
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L26?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Zachary/Taylor/FiniteDifferenceFunction.py#L26?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

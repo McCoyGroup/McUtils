@@ -1,8 +1,8 @@
-## <a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter">TemplateInterfaceFormatter</a> 
+## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter">TemplateInterfaceFormatter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1005)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1005?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine.py#L1008)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L1008?message=Update%20Docs)]
 </div>
 
 Provides an interface that mimics a `TemplateFormatter`
@@ -20,66 +20,66 @@ but does nothing more than route to a set of template functions
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, templates): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1010)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1010?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1013)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1013?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.format_parameters" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.format_parameters" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 format_parameters(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1013)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1013?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1016)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1016?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.templates" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.templates" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 templates(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1016)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1016?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1019)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1019?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.special_callbacks" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.special_callbacks" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 special_callbacks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1019)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1019?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1022)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1022?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.load_template" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.load_template" class="docs-object-method">&nbsp;</a> 
 ```python
 load_template(self, template): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1073)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1073?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1076)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1076?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.vformat" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceFormatter.vformat" class="docs-object-method">&nbsp;</a> 
 ```python
 vformat(self, template: Callable, args: Sequence[Any], kwargs: Mapping[str, Any]): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1085)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1085?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1088)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.py#L1088?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -134,7 +134,7 @@ vformat(self, template: Callable, args: Sequence[Any], kwargs: Mapping[str, Any]
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateInterfaceFormatter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1005?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/Formatters/TemplateEngine/TemplateEngine.py#L1008?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
