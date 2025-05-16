@@ -1,6 +1,7 @@
 include LICENSE.txt
 include README.md
 include setup.py
+include pyproject.toml
 
 # include tsconfig.json
 # include package.json
@@ -23,6 +24,8 @@ recursive-include McUtils/Extensions/FFI *.hpp
 recursive-include McUtils/Extensions/FFI *.cpp
 recursive-include McUtils/Extensions/FFI *.h
 recursive-include McUtils/Extensions/FFI *.c
+recursive-include McUtils/Extensions/FFI LICENSE
+recursive-include McUtils/Extensions/FFI Makefile
 
 # Examples
 # graft examples
