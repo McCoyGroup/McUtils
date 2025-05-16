@@ -973,7 +973,10 @@ class TemplateWalker(ObjectWalker):
         else:
             out_file = None
 
-        files = [self.visit_root(o, max_depth=max_depth) for o in objects]
+        files = [
+            self.visit_root(o, max_depth=max_depth)
+            for o in objects
+        ]
         files = [f for f in files if f is not None]
         w = self.get_handler(files,
                              cls=self.index_handler,

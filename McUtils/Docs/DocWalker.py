@@ -655,6 +655,17 @@ class ModuleWriter(DocTemplateHandler):
             obj = importlib.import_module(obj)
         super().__init__(obj, **kwargs)
 
+    DROP_MODULE_NAMES = True
+    @classmethod
+    def squash_reps(cls, ident):
+        ident = ident.split('.')
+        up = ident[0]
+        i = -1
+        for i,r in enumerate(ident[1:]):
+            if r != up:
+                i = i - 1
+                break
+        return '.'.join(ident[i+1:])
     def get_template_params(self):
         """
         Provides module specific parameters
@@ -674,9 +685,27 @@ class ModuleWriter(DocTemplateHandler):
             for a in mems
         }
         # flattend them
-        idents = {a:i for a,i in idents.items() if ident in i}
+        idents = {
+            a:i
+            for a,i in idents.items()
+            if ident in i
+        }
         # split by qualified names
-        idents = {a:".".join(a.split(".")[ident_depth-1:]) for a in idents}
+        if self.squash_repeat_packages:
+            idents = {
+                a:self.squash_reps(a)
+                for a in idents
+            }
+        else:
+            idents = {
+                a: a
+                for a in idents
+            }
+        if self.DROP_MODULE_NAMES:
+            idents = {
+                a:".".join(i.split(".")[ident_depth-1:])
+                for a,i in idents.items()
+            }
         descr, _, fields = self.parse_doc(mod.__doc__ if mod.__doc__ is not None else '')
         # long_descr = mod.__long_doc__ if hasattr(mod, '__long_doc__') and mod.__long_doc__ is not None else ''
 
@@ -949,7 +978,11 @@ class IndexWriter(DocTemplateHandler):
 
     def get_file_paths(self):
         rl = len(os.path.split(self.root)) if self.root is not None else 0
-        fs = ["/".join(os.path.split(f)[rl - 1:]) if isinstance(f, str) else f for f in self.obj]
+        fs = [
+            "/".join(os.path.split(f)[rl - 1:])
+                if isinstance(f, str) else f
+            for f in self.obj
+        ]
         return fs
     def get_index_files(self):
         return [

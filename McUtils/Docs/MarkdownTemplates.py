@@ -118,10 +118,10 @@ class MarkdownOps:
     @classmethod
     def canonical_link(self, identifier, root=None, formatter=None):
         ups = 0
-        if root is not None and identifier.startswith(root):
-            identifier = identifier[len(root):]
-            if identifier.startswith('.'):
-                identifier = identifier[1:]
+        # if root is not None and identifier.startswith(root):
+        #     identifier = identifier[len(root):]
+        #     if identifier.startswith('.'):
+        #         identifier = identifier[1:]
         while identifier[0] == ".":
             ups += 1
             identifier = identifier[1:]
