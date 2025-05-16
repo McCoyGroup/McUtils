@@ -190,6 +190,7 @@ class ObjectHandler(metaclass=abc.ABCMeta):
     @classmethod
     def get_identifier(cls, o):
         if hasattr(o, '__identifier__'):
+            print("!", o.__identifier__)
             return o.__identifier__
 
         try:
