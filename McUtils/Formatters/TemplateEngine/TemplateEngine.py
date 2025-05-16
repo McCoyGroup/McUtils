@@ -664,9 +664,11 @@ class TemplateHandler(ObjectHandler):
                  engine:TemplateEngine=None,
                  root=None,
                  squash_repeat_packages=True,
+                 is_package_root=False,
                  **extra_fields
                  ):
         super().__init__(obj, **extra_fields)
+        self.is_package_root = is_package_root
         self.squash_repeat_packages = squash_repeat_packages
         self.target = self.get_output_file(out)
         # if root is None:
@@ -708,7 +710,10 @@ class TemplateHandler(ObjectHandler):
         :return:
         :rtype:
         """
-        pkg_split = self.identifier.split(".", 1)
+        ident = self.identifier
+        if self.squash_repeat_packages:
+            ident = self.squash_reps(ident)
+        pkg_split = ident.split(".", 1)
 
         if len(pkg_split) == 1:
             pkg = pkg_split[0]
@@ -728,10 +733,14 @@ class TemplateHandler(ObjectHandler):
         #             break
         #     rest = ".".join(new_id)
 
-        if len(rest) == 0:
-            file_url = "__init__.py"
+        # if len(rest) == 0:
+        #     file_url = "__init__.py"
+        # else:
+        file_url = ident.replace(".", "/")
+        if self.is_package_root:
+            file_url += "/__init__.py"
         else:
-            file_url = rest.replace(".", "/") + "/__init__.py"
+            file_url += '.py'
 
         if include_url_base and 'url_base' in self.extra_fields:
             file_url = self.extra_fields['url_base'] + "/" + file_url
@@ -740,6 +749,16 @@ class TemplateHandler(ObjectHandler):
     @property
     def target_identifier(self):
         return ".".join(self.get_target_extension())
+    @classmethod
+    def squash_reps(cls, ident):
+        ident = ident.split('.')
+        up = ident[0]
+        i = -1
+        for i,r in enumerate(ident[1:]):
+            if r != up:
+                i = i - 1
+                break
+        return '.'.join(ident[i+1:])
     def get_target_extension(self, identifier=None):
         if identifier is None:
             identifier = self.identifier

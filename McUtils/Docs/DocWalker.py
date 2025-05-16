@@ -650,22 +650,14 @@ class ModuleWriter(DocTemplateHandler):
     :related: DocWalker
     """
     template = 'module.md'
-    def __init__(self, obj, **kwargs):
+    def __init__(self, obj, is_package_root=None, **kwargs):
         if isinstance(obj, str):
             obj = importlib.import_module(obj)
-        super().__init__(obj, **kwargs)
+        if is_package_root is None:
+            is_package_root = obj.__file__.endswith('__init__.py')
+        super().__init__(obj, is_package_root=is_package_root, **kwargs)
 
     DROP_MODULE_NAMES = True
-    @classmethod
-    def squash_reps(cls, ident):
-        ident = ident.split('.')
-        up = ident[0]
-        i = -1
-        for i,r in enumerate(ident[1:]):
-            if r != up:
-                i = i - 1
-                break
-        return '.'.join(ident[i+1:])
     def get_template_params(self):
         """
         Provides module specific parameters
