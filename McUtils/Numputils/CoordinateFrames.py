@@ -19,7 +19,7 @@ import itertools, collections
 
 import numpy as np, scipy.optimize as opt
 from . import VectorOps as vec_ops
-from . import TensorDerivatives as td_ops
+from . import PermutationOps as perm_ops
 # from . import SetOps as set_ops
 # from . import Misc as misc
 # from . import TransformationMatrices as tf_mats
@@ -272,7 +272,7 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
     com = center_of_mass(coords, masses)
     com = np.expand_dims(com, 1) # ???
     shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[: np.newaxis, :])
-    cos_rot = td_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
+    cos_rot = perm_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
     R = vec_ops.vec_tensordot(
         shift_crds, cos_rot,
         shared=1,
