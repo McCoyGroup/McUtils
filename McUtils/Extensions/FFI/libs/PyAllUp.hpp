@@ -898,6 +898,29 @@ namespace mcutils {
         }
 
         template<typename T>
+        void populate_numpy_array(PyObject* arr, T* buffer, size_t buffer_size) {
+            T* npy_buf = get_numpy_data<T>(arr);
+            size_t bytes = sizeof(T) * buffer_size;
+            memcpy(npy_buf, buffer, bytes);
+        }
+
+        template<>
+        void populate_numpy_array(PyObject* arr, pyobj* buffer, size_t buffer_size) {
+            auto npy_buf = get_numpy_data<PyObject*>(arr);
+            for (size_t i = 0; i < buffer_size; i++) {
+                npy_buf[i] = buffer[i].obj();
+            }
+        }
+
+        template<>
+        void populate_numpy_array(PyObject* arr, std::string* buffer, size_t buffer_size) {
+            auto npy_buf = get_numpy_data<char*>(arr);
+            for (size_t i = 0; i < buffer_size; i++) {
+                strcpy(npy_buf[i], buffer[i].c_str());
+            }
+        }
+
+        template<typename T>
         PyObject* numpy_object_from_data(
                 T* buffer, size_t buffer_size,
                 NPY_TYPES dtype,
@@ -922,9 +945,10 @@ namespace mcutils {
                 if (arr == NULL) {
                     throw std::runtime_error("bad numpy shit");
                 }
-                T* npy_buf = get_numpy_data<T>(arr);
-                size_t bytes = sizeof(T) * buffer_size;
-                memcpy(npy_buf, buffer, bytes);
+                populate_numpy_array(arr, buffer, buffer_size);
+//                T* npy_buf = get_numpy_data<T>(arr);
+//                size_t bytes = sizeof(T) * buffer_size;
+//                memcpy(npy_buf, buffer, bytes);
  //               auto arr = PyArray_EMPTY(0, 0, dtype, false);
  //               if (arr == NULL) {
  //                   throw std::runtime_error("bad numpy shit");
@@ -1194,11 +1218,12 @@ namespace mcutils {
             // }
             
             if constexpr (std::is_same_v<D, bool>) {
-                bool subbuffer[offset];
+
+//                bool subbuffer[offset];
                 for (size_t i = 0; i < nvecs; i++) {
                     auto mindex = get_multindex(core_shape, nels, i);
-                    apply_multindex<D, V>(buffer, mindex, subbuffer); // fills buffer instead of returning buffer b.c. vec<bool> is special
-                    std::copy(subbuffer, subbuffer + offset, new_vec + cur_pos);
+                    apply_multindex<D, V>(buffer, mindex, new_vec + cur_pos); // fills buffer instead of returning buffer b.c. vec<bool> is special
+//                    std::copy(subbuffer, subbuffer + offset, new_vec + cur_pos);
                     cur_pos += offset;
                     //                for (size_t j = 0; j < subv.size(); j++) {
                     //                    new_vec[cur_pos + j] = subv[j];
@@ -1311,7 +1336,7 @@ namespace mcutils {
         ) {
             if (!vec.empty()) {
                 auto nels = vec.size();
-                bool buffer[nels];
+                auto buffer = new bool[nels];
                 auto new_shape = manage_shape(nels, shape);
 //                for (auto s:new_shape) {
 //                    printf("???? %zu ", s);

@@ -1985,10 +1985,46 @@ class NumputilsTests(TestCase):
         print(c)
         print(commutator_terms(c)[1])
 
-    @validationTest
+    @debugTest
     def test_YoungTableaux(self):
         import McUtils.Iterators as itut
         import McUtils.Combinatorics as comb
+        from McUtils.McUtils.Numputils.TensorDerivatives import nca_partition_terms
+
+        a = [
+            np.random.rand(5, 5),
+            symmetrize_array(np.random.rand(5, 5, 5), axes=[0, 1]),
+            symmetrize_array(np.random.rand(5, 5, 5, 5), axes=[0, 1, 2])
+        ]
+        b = [
+            np.random.rand(5),
+            symmetrize_array(np.random.rand(5, 5)),
+            symmetrize_array(np.random.rand(5, 5, 5)),
+        ]
+        tensor_reexpand(a, b)
+
+        # for ia in a: print(ia.shape)
+        # for ib in b: print(ib.shape)
+        return
+
+
+        perm_inds, perms = comb.UniquePermutations([2, 2, 1, 1]).permutations(return_indices=True)
+        print(
+            np.concatenate([
+                np.array([
+                    np.min(perm_inds[:, :2], axis=1),
+                    np.min(perm_inds[:, 2:], axis=1)
+                ]).T,
+                perms
+            ], axis=1)
+        )
+
+        return
+
+        print(nca_partition_terms((2, 2)))
+        return
+
+        comb.UniquePermutations([0, 0, 1, 1]).permutations(position_blocks=[0, ])
 
 
 

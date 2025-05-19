@@ -294,7 +294,7 @@ namespace DynamicFFILibrary {
         pyobj call(std::vector<ffi_arg_ptr>& values) {
             init<restype>();
 
-            void* buf[values.size()];
+            std::vector<void*> buf(values.size());
             for (size_t i=0; i<values.size(); i++) {
                 if (values[i].is_ptr) {
                     buf[i] = &values[i].ptr;
@@ -308,27 +308,27 @@ namespace DynamicFFILibrary {
             if constexpr (std::is_same_v<restype, void>) {
                     
                     if (debug::debug_print(DebugLevel::Excessive)) {
-                        py_printf("  calling void function with values from %p...\n", buf);
+                        py_printf("  calling void function with values from %p...\n", buf.data());
                     }
 
                 long double res;
-                call_buffer(&res, buf);
+                call_buffer(&res, buf.data());
                 return pyobj::None();
             } else {
                 if (vectorized) {  // not sure if this even makes sense to be honest...
                     if (debug::debug_print(DebugLevel::Excessive)) py_printf("  wtf why are we here???\n");
 
                     std::vector<restype> res;
-                    call_buffer(&res, buf);
+                    call_buffer(&res, buf.data());
                     return pyobj::cast<restype>(std::move(res));
                 } else {
                     
                     if (debug::debug_print(DebugLevel::Excessive)) {
-                        py_printf("  calling %s function with values from %p...\n", mcutils::type_name<restype>::c_str(), buf);
+                        py_printf("  calling %s function with values from %p...\n", mcutils::type_name<restype>::c_str(), buf.data());
                     }
                     
                     restype res;
-                    call_buffer(&res, buf);
+                    call_buffer(&res, buf.data());
                     // return pyobj::None();
                     return pyobj::cast<restype>(std::move(res));
                 }
@@ -467,8 +467,10 @@ namespace DynamicFFILibrary {
             std::vector<size_t>& thread_inds,
             std::vector<size_t>& block_byte_offsets_sizes
         ) {
-            void* buf[values.size()];
-            char* tmp[values.size()]; // allocate space for temporary storage of offset pointers
+            std::vector<void*> buf(values.size());
+            std::vector<char*> tmp(values.size());
+//            void* buf[values.size()];
+//            char* tmp[values.size()]; // allocate space for temporary storage of offset pointers
             for (size_t i = 0; i < values.size(); i++) {  // initial pass
                 if (values[i].is_ptr) {
                 buf[i] = &values[i].ptr;
@@ -497,14 +499,14 @@ namespace DynamicFFILibrary {
                 // we make a new one every time since we can't do pointer arithmetic with void easily
                 // and we should never depend on the void result
                 if (debug::debug_print(DebugLevel::Excessive)) {
-                    py_printf("  calling void function(%p & cif %p) with values from %p...\n", func, cif, buf);
+                    py_printf("  calling void function(%p & cif %p) with values from %p...\n", func, cif, buf.data());
                 }
-                ffi_call(cif, func, NULL, buf);
+                ffi_call(cif, func, NULL, buf.data());
             } else {
                 long double res;
                 if (debug::debug_print(DebugLevel::Excessive))
-                py_printf("  calling %s function with values from %p to populate %p...\n", mcutils::type_name<restype>::c_str(), buf, res_buffer + idx);
-                ffi_call(cif, func, &res, buf);
+                py_printf("  calling %s function with values from %p to populate %p...\n", mcutils::type_name<restype>::c_str(), buf.data(), res_buffer + idx);
+                ffi_call(cif, func, &res, buf.data());
             }
         }
 
@@ -722,38 +724,38 @@ namespace DynamicFFILibrary {
 }
 
 extern "C" {
-    void print_hi() { printf("hi\n"); }
-    void print_int(int i) { printf("--> %d\n", i+1);  }
-    int print_ret_int(int i) { printf("--> %d\n", i+1); return i; }
-    int print_int_ptr(int* i) { 
-        printf("....?\n");
-        printf("ip> %p\n", i);
-        printf("ii> %d\n", *i); 
-        return *i;
-    }
-    // void print_int_ptr(int* i) { 
-    //     printf("....?\n");
-    //     printf("ip> %p\n", i);
-    //     printf("ii> %d\n", *i); 
-    // }
-    void print_int_crd(int* i, double* coords) { printf("ic> %d %f\n", *i, coords[0]); }
-    void print_ij(int64_t* i, int64_t* j) {
-        printf("ij> %lld %lld\n", *i, *j);
-        printf("ip> %p %p\n", i, j);
-        // printf("ip1> %p %p\n", i + 1, j + 1);
-        // printf("ij1> %lld %lld\n", *(i + 1), *(j + 1));
-    }
-
-    double print_coords(int* nwaters, double* energy, double* coords) {
-         printf("ic> %d %f\n", *nwaters, *energy);
-         printf("crds(");
-         for (size_t i=0; i<9; i++) {
-             printf("%f, ", coords[i]);
-         }
-         printf(")\n");
-        //  energy = &20.0;
-         return *energy;
-         }
+//    void print_hi() { printf("hi\n"); }
+//    void print_int(int i) { printf("--> %d\n", i+1);  }
+//    int print_ret_int(int i) { printf("--> %d\n", i+1); return i; }
+//    int print_int_ptr(int* i) {
+//        printf("....?\n");
+//        printf("ip> %p\n", i);
+//        printf("ii> %d\n", *i);
+//        return *i;
+//    }
+//    // void print_int_ptr(int* i) {
+//    //     printf("....?\n");
+//    //     printf("ip> %p\n", i);
+//    //     printf("ii> %d\n", *i);
+//    // }
+//    void print_int_crd(int* i, double* coords) { printf("ic> %d %f\n", *i, coords[0]); }
+//    void print_ij(int64_t* i, int64_t* j) {
+//        printf("ij> %lld %lld\n", *i, *j);
+//        printf("ip> %p %p\n", i, j);
+//        // printf("ip1> %p %p\n", i + 1, j + 1);
+//        // printf("ij1> %lld %lld\n", *(i + 1), *(j + 1));
+//    }
+//
+//    double print_coords(int* nwaters, double* energy, double* coords) {
+//         printf("ic> %d %f\n", *nwaters, *energy);
+//         printf("crds(");
+//         for (size_t i=0; i<9; i++) {
+//             printf("%f, ", coords[i]);
+//         }
+//         printf(")\n");
+//        //  energy = &20.0;
+//         return *energy;
+//         }
 }
 
 PyMODINIT_FUNC PyInit_DynamicFFILibrary(void) {

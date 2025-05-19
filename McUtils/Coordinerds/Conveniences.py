@@ -18,6 +18,7 @@ __all__ = [
     "enumerate_zmatrices",
     "extract_zmatrix_internals",
     "parse_zmatrix_string",
+    "format_zmatrix_string",
     "validate_zmatrix",
     "chain_zmatrix",
     "attached_zmatrix_fragment",
@@ -234,7 +235,7 @@ def extract_zmatrix_internals(zmat):
         specs.append(tuple(row[:4]))
     return specs
 
-def parse_zmatrix_string(zmat):
+def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,):
     from ..Data import AtomData, UnitsData
     # we have to reparse the Gaussian Z-matrix...
 
@@ -291,11 +292,91 @@ def parse_zmatrix_string(zmat):
     ordering = np.array(ordering)[:, :4]
 
     coords = np.array(coords)
-    coords[:, 0] *= UnitsData.convert("Angstroms", "BohrRadius")
-    coords[:, 1] = np.deg2rad(coords[:, 1])
-    coords[:, 2] = np.deg2rad(coords[:, 2])
+    coords[:, 0] *= UnitsData.convert(units, "BohrRadius")
+    coords[:, 1] = coords[:, 1] if in_radians else np.deg2rad(coords[:, 1])
+    coords[:, 2] = coords[:, 2] if in_radians else np.deg2rad(coords[:, 2])
 
     return (atoms, ordering, coords)
+
+def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms", in_radians=False, float_fmt="{:11.8f}"):
+    from ..Data import UnitsData
+    zmat = np.asanyarray(zmat).copy()
+    zmat[:, 0] *= UnitsData.convert("BohrRadius", units)
+    zmat[:, 1] = zmat[:, 1] if in_radians else np.rad2deg(zmat[:, 1])
+    zmat[:, 2] = zmat[:, 2] if in_radians else np.rad2deg(zmat[:, 2])
+
+    if ordering is None:
+        if len(zmat) == len(atoms):
+            zmat = zmat[1:]
+        ordering = [
+            [z[0], z[2], z[4]]
+            if i > 1 else
+            [z[0], z[2], -1]
+            if i > 0 else
+            [z[0], -1, -1]
+            for i, z in enumerate(zmat)
+        ]
+        zmat = [
+            [z[1], z[3], z[5]]
+            if i > 1 else
+            [z[1], z[3], -1]
+            if i > 0 else
+            [z[1], -1, -1]
+            for i, z in enumerate(zmat)
+        ]
+    if len(ordering) < len(atoms):
+        ordering = [[-1, -1, -1]] + list(ordering)
+    if len(zmat) < len(atoms):
+        zmat = [[-1, -1, -1]] + list(zmat)
+
+    zmat = [
+        ["", "", ""]
+        if i == 0 else
+        [z[0], "", ""]
+        if i == 1 else
+        [z[0], z[1], ""]
+        if i == 2 else
+        [z[0], z[1], z[2]]
+        for i, z in enumerate(zmat)
+    ]
+    zmat = [
+        [float_fmt.format(x) if not isinstance(x, str) else x for x in zz]
+        for zz in zmat
+    ]
+    ordering = [
+        ["", "", ""]
+        if i == 0 else
+        [z[0], "", ""]
+        if i == 1 else
+        [z[0], z[1], ""]
+        if i == 2 else
+        [z[0], z[1], z[2]]
+        for i, z in enumerate(ordering)
+    ]
+    ordering = [
+        ["{:.0f}".format(x) if not isinstance(x, str) else x for x in zz]
+        for zz in ordering
+    ]
+
+    max_at_len = max(len(a) for a in atoms)
+
+    nls = [
+        max([len(xyz[i]) for xyz in ordering])
+        for i in range(3)
+    ]
+    zls = [
+        max([len(xyz[i]) for xyz in zmat])
+        for i in range(3)
+    ]
+    fmt_string = f"{{a:<{max_at_len}}} {{n[0]:>{nls[0]}}} {{r[0]:>{zls[0]}}} {{n[1]:>{nls[1]}}} {{r[1]:>{zls[1]}}} {{n[2]:>{nls[2]}}} {{r[2]:>{zls[2]}}}"
+    return "\n".join(
+        fmt_string.format(
+            a=a,
+            n=n,
+            r=r
+        )
+        for a, n, r in zip(atoms, ordering, zmat)
+    )
 
 def validate_zmatrix(ordering):
     proxy_order = [o[0] for o in ordering]
