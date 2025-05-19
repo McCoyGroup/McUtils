@@ -174,16 +174,17 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e5382c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e5382c"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-4da641" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-4da641"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e5382c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-4da641" markdown="1">
  - [CIFFiles](#CIFFiles)
+- [GaussianJob](#GaussianJob)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-704b0b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-704b0b"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e98119" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e98119"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-704b0b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e98119" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -207,6 +208,21 @@ class ExternalProgramsTest(TestCase):
             struct = next(iter(structs[0].values()))
             res = CIFConverter(struct)#.find_all('cell_*', strict=False)
             pprint.pp(res.cell_properties)
+```
+
+#### <a name="GaussianJob">GaussianJob</a>
+```python
+    def test_GaussianJob(self):
+        job = GaussianJob(
+            system={
+                'zmatrix':[],
+                'variables':[]
+            },
+            Opt="ZMatrix",
+            Freq="Anh"
+        )
+        print()
+        print(job.format())
 ```
 
  </div>
