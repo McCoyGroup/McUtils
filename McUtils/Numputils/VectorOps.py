@@ -1,6 +1,8 @@
 """
 A module of useful math for handling coordinate transformations and things
 """
+import itertools
+import math
 
 import numpy as np
 from . import Misc as util
@@ -49,7 +51,8 @@ __all__ = [
     "imaginary_symmetric_matrix_exp",
     "symmetric_matrix_log",
     "imaginary_symmetric_matrix_log",
-    "sylvester_solve"
+    "sylvester_solve",
+    "symmetrize_array"
 ]
 
 ##
@@ -1291,3 +1294,21 @@ def sylvester_solve(A, B, C):
     S = np.kron(B.T, np.eye(n)) + np.kron(np.eye(m), A)
     val = np.linalg.solve(S, C.flatten()) # in case it can be cleverer than I can
     return val.reshape(m,n)
+
+def symmetrize_array(a, axes=None):
+    if axes is None:
+        axes = np.arange(a.ndim)
+    a = a / math.factorial(len(axes))
+    missing = np.setdiff1d(np.arange(a.ndim), axes)
+    inv = np.argsort(np.concatenate([axes, missing]), axis=0)
+    perm_iter = itertools.permutations(axes)
+    b = a
+    next(perm_iter) # first step
+    if len(missing) == 0:
+        for p in itertools.permutations(axes):
+            b += a.transpose(p)
+    else:
+        for p in itertools.permutations(axes):
+            p = np.concatenate([p, missing])[inv]
+            b += a.transpose(p)
+    return b

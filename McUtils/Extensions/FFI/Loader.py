@@ -74,7 +74,7 @@ class FFILoader:
         )
         if linked_libs is None:
             linked_libs = []
-        linked_libs = tuple(linked_libs) #+ ("plzffi", )
+        linked_libs = ("ffi",) + tuple(linked_libs) #+ ("plzffi", )
 
         self.threaded = threaded
         if macros is None:

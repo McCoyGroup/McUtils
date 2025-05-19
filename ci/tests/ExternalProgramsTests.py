@@ -7,7 +7,7 @@ class ExternalProgramsTest(TestCase):
 
     # other format tests are covered in Psience.Molecools, don't really need here
     # api work is covered in Psience.PotentialRegistry
-    @debugTest
+    @validationTest
     def test_CIFFiles(self):
         import pprint
         print()
@@ -17,3 +17,16 @@ class ExternalProgramsTest(TestCase):
             res = CIFConverter(struct)#.find_all('cell_*', strict=False)
             pprint.pp(res.cell_properties)
             # print(cif.parse())
+
+    @debugTest
+    def test_GaussianJob(self):
+        job = GaussianJob(
+            system={
+                'zmatrix':[],
+                'variables':[]
+            },
+            Opt="ZMatrix",
+            Freq="Anh"
+        )
+        print()
+        print(job.format())

@@ -301,6 +301,15 @@ namespace mcutils::python {
             };
 
         }
+        template<>
+        void populate_numpy_array(PyObject* arr, plzffi::FFICompoundType* buffer, size_t buffer_size) {
+            auto npy_buf = get_numpy_data<PyObject*>(arr);
+            pyobj obj;
+            for (size_t i = 0; i < buffer_size; i++) {
+                obj = as_python(buffer[i]);
+                npy_buf[i] = obj.obj();
+            }
+        }
 
 //    template<>
 //    PyObject* numpy_object_from_data<plzffi::FFICompoundReturn>(
@@ -320,6 +329,15 @@ namespace mcutils::python {
     template<>
      PyObject* as_python_object<plzffi::FFICompoundReturn>(plzffi::FFICompoundReturn data) {
         return as_python<plzffi::FFICompoundReturn>(data).obj();
+    }
+    template<>
+    void populate_numpy_array(PyObject* arr, plzffi::FFICompoundReturn* buffer, size_t buffer_size) {
+        auto npy_buf = get_numpy_data<PyObject*>(arr);
+        pyobj obj;
+        for (size_t i = 0; i < buffer_size; i++) {
+            obj = as_python(buffer[i]);
+            npy_buf[i] = obj.obj();
+        }
     }
 //        template<>
 //         plzffi::FFICompoundReturn convert<plzffi::FFICompoundReturn>(pyobj data) {

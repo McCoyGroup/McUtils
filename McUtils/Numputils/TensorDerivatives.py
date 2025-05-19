@@ -6,6 +6,7 @@ from .. import Devutils as dev
 
 from . import PermutationOps as perms
 from . import VectorOps as vec_ops
+from . import SetOps as set_ops
 from .Misc import is_numeric, is_zero
 
 __all__ = [
@@ -889,9 +890,36 @@ def get_unique_permutations(perm_idx):
         condition=lambda k:k is not None and len(k) <= max_symm_perm_order,
         args=(perm_idx,)
     )
+def get_nca_perm_iter(partition):
+    blocks, counts = np.unique(partition, return_counts=True)
+    base_perm = sum([(b,) * (b*c) for b,c in zip(blocks, counts)], ())
+    base_perm_inds, _ = get_unique_permutations(base_perm)
+    sub_ind_blocks = []
+    padding = 0
+    for b,c in zip(blocks, counts):
+        if c == 1 or b == 1:
+            sub_perm_inds = np.arange(b*c)[np.newaxis]
+        else:
+            # if len(c)
+            sub_perm = sum([(c-i,) * b for i in range(c)], ())
+            sub_perm_inds, _ = get_unique_permutations(sub_perm)
+            filter_inds = [
+                np.min(sub_perm_inds[:, b*i:b*(i+1)], axis=1)
+                for i in range(c)
+            ]
+            ord_filter = np.all(np.diff(filter_inds, axis=0) > 0, axis=0)
+            sub_perm_inds = sub_perm_inds[ord_filter,]
+        sub_ind_blocks.append(padding+sub_perm_inds)
+        padding += b*c
+
+    for block_list in itertools.product(*sub_ind_blocks):
+        sublist = np.concatenate(block_list)
+        yield set_ops.vector_take(sublist, base_perm_inds)
+
 def nca_symmetrize(tensor, partition,
                    shared=None,
                    identical=True,
+                   use_base_perms=True,
                    reweight=None):
     perm_counter = len(partition)
     perm_idx = []  # to establish the set of necessary permutations to make things symmetric
@@ -903,11 +931,18 @@ def nca_symmetrize(tensor, partition,
             perm_idx.append(perm_counter)
 
     # sometimes we overcount, so we factor that out here
-    perm_inds, _ = get_unique_permutations(perm_idx)
     if reweight or (reweight is None and identical):
         nterms = nca_partition_terms(partition)
-        overcount = len(perm_inds) / nterms
-        tensor = tensor / overcount
+        if use_base_perms:
+            perm_inds = np.concatenate(list(get_nca_perm_iter(partition)), axis=0)
+            if len(perm_inds) != nterms:
+                raise ValueError("mismatch between reduced perms and actual number")
+        else:
+            perm_inds, _ = get_unique_permutations(perm_idx)
+            overcount = len(perm_inds) / nterms
+            tensor = tensor / overcount
+    else:
+        perm_inds, _ = get_unique_permutations(perm_idx)
 
     if shared is None:
         perm_inds = [
