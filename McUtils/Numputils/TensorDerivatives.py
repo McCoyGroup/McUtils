@@ -1020,7 +1020,20 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
     if order is None:
         order = len(vals)
 
-    shared = derivs[0].ndim - 2
+    derivs = [
+        np.asanyarray(d) if not is_zero(d) else d
+        for d in derivs
+    ]
+    shared = 0
+    for i,d in enumerate(derivs):
+        if not is_zero(d):
+            shared = d.ndim - (i + 2)
+
+    vals = [
+        np.asanyarray(d) if not is_zero(d) else d
+        for d in vals
+    ]
+
     if is_numeric(order): order = list(range(1, order+1))
 
     for o in order:
@@ -1029,6 +1042,15 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
             for parts in get_integer_partitions(o)
             for p in parts
         )
+        if not is_zero(term):
+            # if we are transforming beyond axis zero in the target array, need
+            # to shift the new axes back
+            if axes is not None:
+                target = axes[-1]
+                if target > 0:
+                    target = target + o
+                for i in range(o):
+                    term = np.moveaxis(term, shared, target)
         terms.append(term)
 
     return terms

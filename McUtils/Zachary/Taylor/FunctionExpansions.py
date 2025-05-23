@@ -77,16 +77,22 @@ class TaylorPoly:
     @classmethod
     def canonicalize_tfs(cls, tfs):
         if len(tfs) == 2 and (
-                nput.is_numeric_array_like(tfs[0])
-                and nput.is_numeric_array_like(tfs[1])
-                and np.asanyarray(tfs[0]).ndim == np.asanyarray(tfs[1]).ndim
+                nput.is_numeric_array_like(tfs[0][0])
+                and nput.is_numeric_array_like(tfs[1][0])
+                and np.asanyarray(tfs[0][0]).ndim == np.asanyarray(tfs[1][0]).ndim
         ):
             return [np.asanyarray(t) for t in tfs[0]], [np.asanyarray(t) for t in tfs[1]]
         else:
             return [np.asanyarray(t) for t in tfs], None
     @property
     def transforms(self):
-        return list(self._transf) if self._transf is not None else None
+        return (
+            [list(self._transf), list(self._inv)]
+                if self._inv is not None else
+            [list(self._transf)]
+                if self._transf is not None else
+            None
+        )
     @property
     def expansion_tensors(self):
         """
@@ -99,7 +105,7 @@ class TaylorPoly:
             if self._transf is None or self._tf_derivs:
                 self._tensors = self._derivs
             else:
-                self._tensors = nput.tensor_reexpand(self.transforms, self._derivs, len(self._derivs))
+                self._tensors = nput.tensor_reexpand(self.transforms[0], self._derivs, len(self._derivs))
         return self._tensors
     @expansion_tensors.setter
     def expansion_tensors(self, tensors):
@@ -181,6 +187,9 @@ class TaylorPoly:
                     center = center[:, np.newaxis, :]
             disp = coords - center
 
+        if transform_displacements is None and self._transf is not None:
+            transform_displacements = disp.shape[-1] != self._transf[0].shape[0]
+
         if transform_displacements and self._transf is not None:
             if self._inv is not None:
                 inv = self._inv[0]
@@ -234,6 +243,9 @@ class TaylorPoly:
         ref = self.ref
         base_exps = self.get_expansions(coords, outer=outer, transform_displacements=transform_displacements, order=order)
         exps = [sum(e) for e in base_exps]
+        if transform_displacements is None and self._transf is not None:
+            transform_displacements = self.ref.shape != self._transf[0].shape[0]
+
         if transform_displacements and len(exps) > 1 and self._transf is not None:
             inv = self._inv
             if inv is None:

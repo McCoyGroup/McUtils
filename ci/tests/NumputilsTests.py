@@ -1985,27 +1985,67 @@ class NumputilsTests(TestCase):
         print(c)
         print(commutator_terms(c)[1])
 
+    @validationTest
+    def test_Symmetrization(self):
+        # a = np.random.rand(3, 3, 3)
+        # b = symmetrize_array(a,
+        #                      axes=[[0, 2], [1]],
+        #                      # restricted_diagonal=True,
+        #                      mixed_block_symmetrize=True,
+        #                      symmetrization_mode='low',
+        #                      out=np.zeros_like(a)
+        #                      )
+        # # print(b)
+        # print(b - np.transpose(b, (1, 2, 0)))
+
+        a = [
+            np.random.rand(3, 9),
+            symmetrize_array(np.random.rand(3, 3, 9), axes=[[0, 1], [2]]),
+            symmetrize_array(np.random.rand(3, 3, 3, 9), axes=[[0, 1, 2], [3]])
+        ]
+
+        b = [
+            np.random.rand(3),
+            symmetrize_array(np.random.rand(3, 3)),
+            symmetrize_array(
+                np.random.rand(3, 3, 9),
+                axes=[[0, 1], [2]]
+            ),
+            symmetrize_array(
+                np.random.rand(3, 3, 9, 9),
+                axes=[[0, 1], [2, 3]]
+            )
+        ]
+
+        c = tensor_reexpand(a, b[-2:], axes=[-1, -1])
+        print([cc.shape for cc in c])
+        return
+
     @debugTest
+    def test_mixedShapeExpansions(self):
+        """
+        [(6, 12), (6, 6, 12), (6, 6, 6, 12)] [(3, 12), (3, 6, 12), (3, 6, 6, 12)]
+        :return:
+        """
+        a = [
+            np.random.rand(6, 12),
+            symmetrize_array(np.random.rand(6, 6, 12), [0, 1]),
+            symmetrize_array(np.random.rand(6, 6, 6, 12), [0, 1, 2])
+        ]
+        b = [
+            np.random.rand(3, 12),
+            symmetrize_array(np.random.rand(3, 12, 12), [1]),
+            symmetrize_array(np.random.rand(3, 4, 4, 12, 12), [1, 2])
+        ]
+        c = tensor_reexpand(a[:2], b[:2], axes=[-1, -1])
+        print([cc.shape for cc in c])
+
+
+    @validationTest
     def test_YoungTableaux(self):
         import McUtils.Iterators as itut
         import McUtils.Combinatorics as comb
         from McUtils.McUtils.Numputils.TensorDerivatives import nca_partition_terms
-
-        a = [
-            np.random.rand(5, 5),
-            symmetrize_array(np.random.rand(5, 5, 5), axes=[0, 1]),
-            symmetrize_array(np.random.rand(5, 5, 5, 5), axes=[0, 1, 2])
-        ]
-        b = [
-            np.random.rand(5),
-            symmetrize_array(np.random.rand(5, 5)),
-            symmetrize_array(np.random.rand(5, 5, 5)),
-        ]
-        tensor_reexpand(a, b)
-
-        # for ia in a: print(ia.shape)
-        # for ib in b: print(ib.shape)
-        return
 
 
         perm_inds, perms = comb.UniquePermutations([2, 2, 1, 1]).permutations(return_indices=True)
