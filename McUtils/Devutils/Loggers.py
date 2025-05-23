@@ -217,14 +217,14 @@ class Logger:
                 try:
                     ll = LogLevel[key]
                 except KeyError:
-                    logger = None
+                    if construct:
+                        logger = cls(key)
+                    else:
+                        logger = None
                 else:
                     logger = cls(log_level=ll)
             else:
-                if construct:
-                    logger = cls(key)
-                else:
-                    logger = None
+                logger = None
         if logger is None:
             logger = NullLogger()
 
