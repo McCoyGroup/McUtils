@@ -74,17 +74,17 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-ecbea8" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ecbea8"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-fe51f9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fe51f9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ecbea8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fe51f9" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-d6a2c9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d6a2c9"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-128945" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-128945"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d6a2c9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-128945" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

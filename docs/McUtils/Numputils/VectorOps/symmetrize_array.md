@@ -5,7 +5,7 @@
 </div>
 
 ```python
-symmetrize_array(a, axes=None): 
+symmetrize_array(a, axes=None, symmetrization_mode='total', axes_block_ordering=None, mixed_block_symmetrize=False, restricted_diagonal=False, out=None): 
 ```
 
 

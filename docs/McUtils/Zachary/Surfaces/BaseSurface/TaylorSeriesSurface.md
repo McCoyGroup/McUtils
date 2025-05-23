@@ -69,7 +69,7 @@ expansion_tensors(self):
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.check_dimension" class="docs-object-method">&nbsp;</a> 
 ```python
-check_dimension(self, gridpoints): 
+check_dimension(self, gridpoints, target=None, raise_exception=True): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126)/

@@ -680,9 +680,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-3dc20a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3dc20a"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-cfae13" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cfae13"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3dc20a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cfae13" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -707,13 +707,15 @@ Any lowish-level numerical operations that need to be shared go here.
 - [DihedralDerivativeComparison](#DihedralDerivativeComparison)
 - [ConvertInternals](#ConvertInternals)
 - [NormalFormCommutators](#NormalFormCommutators)
+- [Symmetrization](#Symmetrization)
+- [mixedShapeExpansions](#mixedShapeExpansions)
 - [YoungTableaux](#YoungTableaux)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-cc8325" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-cc8325"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c61e36" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c61e36"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-cc8325" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c61e36" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -2708,28 +2710,71 @@ class NumputilsTests(TestCase):
         print(commutator_terms(c)[1])
 ```
 
+#### <a name="Symmetrization">Symmetrization</a>
+```python
+    def test_Symmetrization(self):
+        # a = np.random.rand(3, 3, 3)
+        # b = symmetrize_array(a,
+        #                      axes=[[0, 2], [1]],
+        #                      # restricted_diagonal=True,
+        #                      mixed_block_symmetrize=True,
+        #                      symmetrization_mode='low',
+        #                      out=np.zeros_like(a)
+        #                      )
+        # # print(b)
+        # print(b - np.transpose(b, (1, 2, 0)))
+
+        a = [
+            np.random.rand(3, 9),
+            symmetrize_array(np.random.rand(3, 3, 9), axes=[[0, 1], [2]]),
+            symmetrize_array(np.random.rand(3, 3, 3, 9), axes=[[0, 1, 2], [3]])
+        ]
+
+        b = [
+            np.random.rand(3),
+            symmetrize_array(np.random.rand(3, 3)),
+            symmetrize_array(
+                np.random.rand(3, 3, 9),
+                axes=[[0, 1], [2]]
+            ),
+            symmetrize_array(
+                np.random.rand(3, 3, 9, 9),
+                axes=[[0, 1], [2, 3]]
+            )
+        ]
+
+        c = tensor_reexpand(a, b[-2:], axes=[-1, -1])
+        print([cc.shape for cc in c])
+        return
+```
+
+#### <a name="mixedShapeExpansions">mixedShapeExpansions</a>
+```python
+    def test_mixedShapeExpansions(self):
+        """
+        [(6, 12), (6, 6, 12), (6, 6, 6, 12)] [(3, 12), (3, 6, 12), (3, 6, 6, 12)]
+        :return:
+        """
+        a = [
+            np.random.rand(6, 12),
+            symmetrize_array(np.random.rand(6, 6, 12), [0, 1]),
+            symmetrize_array(np.random.rand(6, 6, 6, 12), [0, 1, 2])
+        ]
+        b = [
+            np.random.rand(3, 12),
+            symmetrize_array(np.random.rand(3, 12, 12), [1]),
+            symmetrize_array(np.random.rand(3, 4, 4, 12, 12), [1, 2])
+        ]
+        c = tensor_reexpand(a[:2], b[:2], axes=[-1, -1])
+        print([cc.shape for cc in c])
+```
+
 #### <a name="YoungTableaux">YoungTableaux</a>
 ```python
     def test_YoungTableaux(self):
         import McUtils.Iterators as itut
         import McUtils.Combinatorics as comb
         from McUtils.McUtils.Numputils.TensorDerivatives import nca_partition_terms
-
-        a = [
-            np.random.rand(5, 5),
-            symmetrize_array(np.random.rand(5, 5, 5), axes=[0, 1]),
-            symmetrize_array(np.random.rand(5, 5, 5, 5), axes=[0, 1, 2])
-        ]
-        b = [
-            np.random.rand(5),
-            symmetrize_array(np.random.rand(5, 5)),
-            symmetrize_array(np.random.rand(5, 5, 5)),
-        ]
-        tensor_reexpand(a, b)
-
-        # for ia in a: print(ia.shape)
-        # for ib in b: print(ib.shape)
-        return
 
 
         perm_inds, perms = comb.UniquePermutations([2, 2, 1, 1]).permutations(return_indices=True)
