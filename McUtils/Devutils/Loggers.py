@@ -197,7 +197,7 @@ class Logger:
         """
         self._loggers[key] = self
     @classmethod
-    def lookup(cls, key):
+    def lookup(cls, key, construct=False):
         """
         Looks up a logger. Has the convenient, but potentially surprising
         behavior that if no logger is found a `NullLogger` is returned.
@@ -211,7 +211,7 @@ class Logger:
         elif isinstance(key, Logger):
             logger = key
         elif key is True:
-            logger = Logger()
+            logger = cls()
         else:
             if isinstance(key, str):
                 try:
@@ -219,9 +219,12 @@ class Logger:
                 except KeyError:
                     logger = None
                 else:
-                    logger = Logger(log_level=ll)
+                    logger = cls(log_level=ll)
             else:
-                logger = None
+                if construct:
+                    logger = cls(key)
+                else:
+                    logger = None
         if logger is None:
             logger = NullLogger()
 
