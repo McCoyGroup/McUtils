@@ -33,23 +33,23 @@ class BaseSurface(metaclass=abc.ABCMeta):
         :rtype:
         """
         raise NotImplemented
-    def check_dimension(self, gridpoints):
+    def check_dimension(self, gridpoints, target=None, raise_exception=True):
         gridpoints = np.asanyarray(gridpoints)
-        if self.dimension is not None:
-            # if self.dimension == 1:
-            #     if gridpoints.ndim > 1:
-            #         raise ValueError("{}: dimension mismatch in call, surface expects grid points to be 1D".format(
-            #             type(self).__name__
-            #         ))
-            # else:
+        if target is None:
+            target = self.dimension
+        if target is not None:
             gp_dim = gridpoints.shape[-1]
-            if gp_dim != self.dimension:
-                raise ValueError(
-                    "{}: dimension mismatch in call, grid points had dim {} but surface expects dim {}".format(
-                        type(self).__name__,
-                        gp_dim,
-                        self.dimension
-                    ))
+            if gp_dim != target:
+                if raise_exception:
+                    raise ValueError(
+                        "{}: dimension mismatch in call, grid points had dim {} but surface expects dim {}".format(
+                            type(self).__name__,
+                            gp_dim,
+                            self.dimension
+                        ))
+                else:
+                    return False
+        return True
     def __call__(self, gridpoints, **kwargs):
         """
 
@@ -123,16 +123,16 @@ class TaylorSeriesSurface(BaseSurface):
     def expansion_tensors(self):
         return self.expansion.expansion_tensors
 
-    def check_dimension(self, gridpoints):
-        if self.expansion.transforms is not None:
-            dim = self.dimension
-            try:
-                self.dimension = self.expansion.transforms[0].shape[-1]
-                super().check_dimension(gridpoints)
-            finally:
-                self.dimension = dim
+    def check_dimension(self, gridpoints, target=None, raise_exception=True):
+        if target is not None or self.expansion.transforms is None:
+            return super().check_dimension(gridpoints, target=target, raise_exception=raise_exception)
         else:
-            super().check_dimension(gridpoints)
+            d1, d2 = self.expansion.transforms[0][0].shape
+            check_1 = super().check_dimension(gridpoints, target=d1, raise_exception=False)
+            if check_1: return True
+            check_2 = super().check_dimension(gridpoints, target=d2, raise_exception=False)
+            if check_2: return True
+            return super().check_dimension(gridpoints, target=target, raise_exception=raise_exception)
 
 
     def evaluate(self, points, **kwargs):

@@ -1295,20 +1295,144 @@ def sylvester_solve(A, B, C):
     val = np.linalg.solve(S, C.flatten()) # in case it can be cleverer than I can
     return val.reshape(m,n)
 
-def symmetrize_array(a, axes=None):
+def symmetrize_array(a,
+                     axes=None,
+                     symmetrization_mode='total',
+                     axes_block_ordering=None,
+                     mixed_block_symmetrize=False,
+                     restricted_diagonal=False,
+                     out=None
+                     ):
+    from . import Misc as misc
+
     if axes is None:
         axes = np.arange(a.ndim)
-    a = a / math.factorial(len(axes))
-    missing = np.setdiff1d(np.arange(a.ndim), axes)
-    inv = np.argsort(np.concatenate([axes, missing]), axis=0)
-    perm_iter = itertools.permutations(axes)
-    b = a
-    next(perm_iter) # first step
-    if len(missing) == 0:
-        for p in itertools.permutations(axes):
-            b += a.transpose(p)
+    if misc.is_numeric(axes[0]):
+        axes = [axes]
+
+    axes_groups = axes
+    del axes # easier debugging
+
+    symmetrization_mode = symmetrization_mode.lower()
+
+    if (
+            not restricted_diagonal
+            and axes_block_ordering is None
+            and symmetrization_mode == 'total'
+    ):
+        if mixed_block_symmetrize:
+            axes_groups = np.concatenate(axes_groups)
+        b = a
+        for i,axes in enumerate(axes_groups):
+            a = b / math.factorial(len(axes))
+            missing = np.setdiff1d(np.arange(a.ndim), axes)
+            inv = np.argsort(np.concatenate([axes, missing]), axis=0)
+            perm_iter = itertools.permutations(axes)
+            b = a
+            next(perm_iter) # first step
+            if len(missing) == 0:
+                for p in itertools.permutations(axes):
+                    b += a.transpose(p)
+            else:
+                for p in itertools.permutations(axes):
+                    p = np.concatenate([p, missing])[inv]
+                    b += a.transpose(p)
+        if out is not None:
+            out[:] = b
+            b = out
     else:
-        for p in itertools.permutations(axes):
-            p = np.concatenate([p, missing])[inv]
-            b += a.transpose(p)
+        flat_axes = np.concatenate(axes_groups)
+        rem_axes = np.setdiff1d(np.arange(a.ndim), flat_axes)
+        ordering = np.argsort(np.concatenate([flat_axes, rem_axes]))
+        nmodes = a.shape[0]
+
+        if restricted_diagonal:
+            if mixed_block_symmetrize:
+                pos_spec = [
+                    sum(
+                        [(i,)*len(axes) for i,axes in zip(term, axes_groups)],
+                        ()
+                    )
+                    for term in itertools.combinations_with_replacement(
+                        range(nmodes),
+                        len(axes_groups)
+                    )
+                ]
+            else:
+                pos_spec = [
+                    sum(
+                        [(i,) * len(axes) for i, axes in zip(p, axes_groups)],
+                        ()
+                    )
+                    for term in itertools.combinations_with_replacement(
+                        range(nmodes),
+                        len(axes_groups)
+                    )
+                    for p in np.unique(list(itertools.permutations(term)), axis=0)
+                ]
+        else:
+            pos_spec = list(
+                itertools.combinations_with_replacement(
+                    range(nmodes),
+                    len(flat_axes)
+                )
+            )
+
+        if mixed_block_symmetrize:
+            perms = itertools.permutations(np.arange(len(flat_axes)), len(flat_axes))
+        else:
+            cumlens = np.cumsum([0] + [len(a) for a in axes_groups])
+            perms = (
+                sum(t, ())
+                for t in itertools.product(*[
+                    itertools.permutations(range(l, l + len(x)), len(x))
+                    for x, l in zip(axes_groups, cumlens)
+                ])
+            )
+
+        if out is None:
+            b = a.copy()
+        else:
+            b = out
+
+        pos_arr = tuple(np.array(list(pos_spec)).T)
+        padding = (slice(None),) * len(rem_axes)
+        if symmetrization_mode == 'unhandled':
+            for perm in perms:
+                new_pos = tuple(pos_arr[flat_axes[p]] for p in perm) + padding
+                new_pos = tuple(new_pos[i] for i in ordering)
+                b[new_pos] = a[new_pos]
+        else:
+            if axes_block_ordering is not None:
+                new_pos = tuple(
+                    pos_arr[p] for p in
+                    np.concatenate([axes_groups[f] for f in axes_block_ordering])
+                ) + padding
+                new_pos = tuple(new_pos[i] for i in ordering)
+                val = a[new_pos]
+            else:
+                if symmetrization_mode == 'low':
+                    new_pos = tuple(pos_arr[f] for f in reversed(flat_axes)) + padding
+                    new_pos = tuple(new_pos[i] for i in ordering)
+                    val = a[new_pos]
+                elif symmetrization_mode == 'high':
+                    new_pos = tuple(pos_arr[f] for f in flat_axes) + padding
+                    new_pos = tuple(new_pos[i] for i in ordering)
+                    val = a[new_pos]
+                elif symmetrization_mode == 'average':
+                    new_pos_1 = tuple(pos_arr[f] for f in reversed(flat_axes)) + padding
+                    new_pos_1 = tuple(new_pos_1[i] for i in ordering)
+                    new_pos_2 = tuple(pos_arr[f] for f in flat_axes) + padding
+                    new_pos_2 = tuple(new_pos_2[i] for i in ordering)
+                    val = (a[new_pos_1] + a[new_pos_2]) / 2
+                else:
+                    raise ValueError(
+                        f"don't know what to do with `symmetrization_mode` '{symmetrization_mode}' "
+                    )
+
+            for perm in perms:
+                new_pos = tuple(pos_arr[flat_axes[p]] for p in perm) + padding
+                new_pos = tuple(new_pos[i] for i in ordering)
+                b[new_pos] = val
+
     return b
