@@ -900,8 +900,8 @@ class MPLAxes(GraphicsAxes):
         if points.ndim == 2:
             points = points[np.newaxis]
         return self.get_plotter('arrow')(
-            points[:, 0],
-            points[:, 1],
+            *points[0],
+            *(points[1] - points[0]),
             **styles
         )
 
@@ -2154,9 +2154,9 @@ class X3DAxes(GraphicsAxes3D):
 
         return disk_set
 
-    def draw_arrow(self, points, rads=.1, cone_radius=.15, **styles):
+    def draw_arrow(self, points, **styles):
         points = np.asanyarray(points)
-        arrows = x3d.X3DArrow(points[..., 0, :], points[..., 1, :], radius=rads, cone_radius=cone_radius, **styles)
+        arrows = x3d.X3DArrow(points[..., 0, :], points[..., 1, :], **styles)
         self.children.append(arrows)
         return arrows
 
@@ -2485,13 +2485,13 @@ class SceneJSONAxes(GraphicsAxes3D):
 
         return disk_set
 
-    def draw_arrow(self, points, rads=.1, cone_radius=.15, **styles):
+    def draw_arrow(self, points, radius=.1, **styles):
         points = np.asanyarray(points)
         if points.shape[-1] == 3:
             self.mode = '3d'
         else:
             self.mode = '2d'
-        arrows = sceneJSON.Arrow(points=points.tolist(), radius=rads, cone_radius=cone_radius, mode=self.mode, **styles)
+        arrows = sceneJSON.Arrow(points=points.tolist(), radius=radius, mode=self.mode, **styles)
         self.children.append(arrows)
         return arrows
 

@@ -18,15 +18,20 @@ class ExternalProgramsTest(TestCase):
             pprint.pp(res.cell_properties)
             # print(cif.parse())
 
+    # @validationTest
+    # def test_GaussianJob(self):
+    #     job = GaussianJob(
+    #         system={
+    #             'zmatrix':[],
+    #             'variables':[]
+    #         },
+    #         Opt="ZMatrix",
+    #         Freq="Anh"
+    #     )
+    #     print()
+    #     print(job.format())
+
     @debugTest
-    def test_GaussianJob(self):
-        job = GaussianJob(
-            system={
-                'zmatrix':[],
-                'variables':[]
-            },
-            Opt="ZMatrix",
-            Freq="Anh"
-        )
-        print()
-        print(job.format())
+    def test_ParseGaussianLogFile(self):
+        with GaussianLogReader('methanol_vpt_scan.log') as parser:
+            res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']

@@ -705,7 +705,7 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
             signs = np.sign(
                 vec_ops.vec_tensordot(
                     nonplanar_geoms[0][..., np.newaxis, :],
-                    up_vector[..., :, np.newaxis],
+                    up_vector[nonplanar_pos][..., :, np.newaxis],
                     axes=[-1, -2]
                 )
             )
@@ -718,16 +718,16 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
             for e in expansion
         ]
         for e,n,f in zip(expansion, norms, final_tensors):
-            f[planar_pos] = e[planar_pos]
-            f[nonplanar_pos] = n[nonplanar_pos]
+            f[planar_pos] = e#[planar_pos]
+            f[nonplanar_pos] = n#[nonplanar_pos]
         if return_unit_vectors:
             final_units = [
                 np.zeros(base_shape + u.shape[1:])
                 for u in units
             ]
             for e, n, f in zip(planar_units, units, final_units):
-                f[planar_pos] = e[planar_pos]
-                f[nonplanar_pos] = n[nonplanar_pos]
+                f[planar_pos] = e#[planar_pos]
+                f[nonplanar_pos] = n#[nonplanar_pos]
 
             units = final_units
         else:
@@ -875,7 +875,7 @@ def nca_partition_terms(partition):
     elif denl > numl:
         multinomial_num = np.concatenate([multinomial_num, np.ones(denl - numl, dtype=multinomial_num.dtype)])
 
-    return np.prod(multinomial_num / full_denom)
+    return np.round(np.prod(multinomial_num / full_denom))
 
 max_symm_perm_order = 4
 unique_permutation_cache = {}
@@ -903,8 +903,9 @@ def get_nca_perm_iter(partition):
             # if len(c)
             sub_perm = sum([(c-i,) * b for i in range(c)], ())
             sub_perm_inds, _ = get_unique_permutations(sub_perm)
+            inv_inds = np.argsort(sub_perm_inds, axis=1)
             filter_inds = [
-                np.min(sub_perm_inds[:, b*i:b*(i+1)], axis=1)
+                np.min(inv_inds[:, b*i:b*(i+1)], axis=1)
                 for i in range(c)
             ]
             ord_filter = np.all(np.diff(filter_inds, axis=0) > 0, axis=0)
@@ -915,12 +916,22 @@ def get_nca_perm_iter(partition):
     for block_list in itertools.product(*sub_ind_blocks):
         sublist = np.concatenate(block_list)
         yield set_ops.vector_take(sublist, base_perm_inds)
+def check_perm_sorting(block_counts, partition_inverse):
+    p = 0
+    for b,c in zip(*block_counts):
+        if c > 1:
+            if any(
+                    np.min(partition_inverse[p+b*i:p+b*(i+1)]) <
+                    np.min(partition_inverse[p+b*(i+1):p+b*(i+2)])
+                for i in range(c - 1)
+            ):
+                return False
 
-def nca_symmetrize(tensor, partition,
-                   shared=None,
-                   identical=True,
-                   use_base_perms=True,
-                   reweight=None):
+        p += b*c
+
+    return True
+
+def get_nca_perm_idx(partition, identical=True):
     perm_counter = len(partition)
     perm_idx = []  # to establish the set of necessary permutations to make things symmetric
     for i in partition:
@@ -929,18 +940,54 @@ def nca_symmetrize(tensor, partition,
             perm_counter -= 1
         else:
             perm_idx.append(perm_counter)
+    return perm_idx
+def get_nca_symmetrizing_perms(partition,
+                               perm_idx=None,
+                               use_base_perms=True,
+                               filter_unique=False,
+                               identical=True):
+    if perm_idx is None:
+        perm_idx = get_nca_perm_idx(partition, identical=identical)
 
+    nterms = nca_partition_terms(partition)
+    if use_base_perms:
+        perm_inds = np.concatenate(list(get_nca_perm_iter(partition)), axis=0)
+        scaling = 1
+        if len(perm_inds) != nterms:
+            raise ValueError(f"mismatch between reduced perms and actual number, expected {nterms}, got {len(perm_inds)} for partition {partition}")
+    elif filter_unique:
+        all_perm_inds, _ = get_unique_permutations(perm_idx)
+        counts = np.unique(partition, return_counts=True)
+        inv_perms = np.argsort(all_perm_inds, axis=1)
+        perm_inds = np.array([
+            p
+            for p, i in zip(all_perm_inds, inv_perms)
+            if check_perm_sorting(counts, i)
+        ])
+        scaling = 1
+        if len(perm_inds) != nterms:
+            raise ValueError(f"mismatch between reduced perms and actual number, expected {nterms}, got {len(perm_inds)} for partition {partition}")
+    else:
+        perm_inds, _ = get_unique_permutations(perm_idx)
+        overcount = len(perm_inds) / nterms
+        scaling = 1 / overcount
+
+    return perm_inds, scaling
+
+def nca_symmetrize(tensor, partition,
+                   shared=None,
+                   identical=True,
+                   use_base_perms=True,
+                   filter_unique=False,
+                   reweight=None):
+
+    perm_idx = get_nca_perm_idx(partition, identical=identical)
     # sometimes we overcount, so we factor that out here
     if reweight or (reweight is None and identical):
-        nterms = nca_partition_terms(partition)
-        if use_base_perms:
-            perm_inds = np.concatenate(list(get_nca_perm_iter(partition)), axis=0)
-            if len(perm_inds) != nterms:
-                raise ValueError("mismatch between reduced perms and actual number")
-        else:
-            perm_inds, _ = get_unique_permutations(perm_idx)
-            overcount = len(perm_inds) / nterms
-            tensor = tensor / overcount
+        perm_inds, scaling = get_nca_symmetrizing_perms(partition, perm_idx,
+                                                        filter_unique=filter_unique,
+                                                        use_base_perms=use_base_perms)
+        tensor = tensor * scaling
     else:
         perm_inds, _ = get_unique_permutations(perm_idx)
 
