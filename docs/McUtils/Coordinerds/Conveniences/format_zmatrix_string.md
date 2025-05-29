@@ -1,11 +1,11 @@
 # <a id="McUtils.Coordinerds.Conveniences.format_zmatrix_string">format_zmatrix_string</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L301)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L301?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L319?message=Update%20Docs)]
 </div>
 
 ```python
-format_zmatrix_string(atoms, zmat, ordering=None, units='Angstroms', in_radians=False, float_fmt='{:11.8f}'): 
+format_zmatrix_string(atoms, zmat, ordering=None, units='Angstroms', in_radians=False, float_fmt='{:11.8f}', index_padding=1): 
 ```
 
 
@@ -59,7 +59,7 @@ format_zmatrix_string(atoms, zmat, ordering=None, units='Angstroms', in_radians=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Conveniences/format_zmatrix_string.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/format_zmatrix_string.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L301?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L319?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

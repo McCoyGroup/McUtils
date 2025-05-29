@@ -174,17 +174,17 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-643c35" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-643c35"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-d69f47" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d69f47"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-643c35" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d69f47" markdown="1">
  - [CIFFiles](#CIFFiles)
-- [GaussianJob](#GaussianJob)
+- [ParseGaussianLogFile](#ParseGaussianLogFile)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-69ca33" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-69ca33"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-81d8d1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-81d8d1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-69ca33" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-81d8d1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -210,19 +210,11 @@ class ExternalProgramsTest(TestCase):
             pprint.pp(res.cell_properties)
 ```
 
-#### <a name="GaussianJob">GaussianJob</a>
+#### <a name="ParseGaussianLogFile">ParseGaussianLogFile</a>
 ```python
-    def test_GaussianJob(self):
-        job = GaussianJob(
-            system={
-                'zmatrix':[],
-                'variables':[]
-            },
-            Opt="ZMatrix",
-            Freq="Anh"
-        )
-        print()
-        print(job.format())
+    def test_ParseGaussianLogFile(self):
+        with GaussianLogReader('methanol_vpt_scan.log') as parser:
+            res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
 ```
 
  </div>
