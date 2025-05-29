@@ -97,7 +97,7 @@ class Arrow(GraphicsPrimitive):
     def plot(self, axes, *args, graphics=None, **kwargs):
         if hasattr(axes, 'axes'):
             axes = axes.axes
-        return axes.draw_arrow(*self.pos1, *(self.pos2 - self.pos1), **self.opts)
+        return axes.draw_arrow([self.pos1, self.pos2], **self.opts)
 
 class Sphere(GraphicsPrimitive):
     def __init__(self, position=(0, 0, 0), radius=1, sphere_points=48, **opts):

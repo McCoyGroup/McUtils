@@ -612,6 +612,54 @@ GaussianLogComponents["OptimizedScanEnergies"] = {
     "mode"     : mode
 }
 
+
+def parse_scf_energies(energy_blocks):
+    return np.array(Number.findall(" ".join(energy_blocks))).astype('float')
+
+GaussianLogComponents["SCFEnergies"] = {
+    "tag_start": "SCF Done:  E(",
+    "tag_end"  : " A.U. ",
+    "parser"   : parse_scf_energies,
+    "mode"     : "List"
+}
+
+
+tag_start = FileStreamerTag(
+    """/l202.exe""",
+    follow_ups=("Standard orientation: ",)
+)
+tag_end = FileStreamerTag(
+    "SCF Done:  E(",
+    follow_ups=(" A.U. ",)
+)
+
+SCFEnergyPattern = StringParser(
+    RegexPattern((
+        "SCF Done:  E\(", Repeating(Any), "\) =",
+        Whitespace,
+        Named(Number, "energy")
+    ))
+)
+
+def parse_scf_block_coordinate_energies(energy_blocks):
+    cart_bits = [
+        e.split('Rotational constants', 1)[0] for e in energy_blocks
+    ]
+    carts = cartesian_coordinates_parser(cart_bits)
+    scf_bits = ["SCF Done"+e.rsplit("SCF Done", 1)[-1] for e in energy_blocks]
+    energies = SCFEnergyPattern.parse_all("\n\n".join(scf_bits))
+    return {
+        "coords":carts,
+        "energies":energies['energy'].array
+    }
+
+GaussianLogComponents["SCFCoordinatesEnergies"] = {
+    "tag_start": tag_start,
+    "tag_end"  : tag_end,
+    "parser"   : parse_scf_block_coordinate_energies,
+    "mode"     : "List"
+}
+
 # endregion
 
 ########################################################################################################################

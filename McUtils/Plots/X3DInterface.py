@@ -18,6 +18,7 @@ __all__ = [
     "X3DSphere",
     "X3DCone",
     "X3DCylinder",
+    "X3DArrow",
     "X3DTorus",
     "X3DSwitch",
     "X3DListAnimator"
@@ -45,15 +46,65 @@ class X3D(X3DObject):
 
     X3DOM_JS = 'http://www.x3dom.org/download/x3dom.js'
     X3DOM_CSS = 'http://www.x3dom.org/download/x3dom.css'
-    def to_widget(self, dynamic_loading=None):
+
+    def get_export_script(self, id):
+        return f"""
+(function(){{
+  let link = document.createElement('a');
+  let base_name = '{id}';
+  link.download = base_name + '.png';
+  link.href = document.getElementById('{id}').getElementsByTagName('canvas')[0].toDataURL()
+  link.click();
+}})()
+       """
+
+    def get_record_screen_script(self, id, polling_rate=30, recording_duration=2):
+            return f"""
+    (function(){{
+        let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
+        
+        let x3DRecordingStream = canvas.captureStream({polling_rate});
+        let mediaRecorder = new MediaRecorder(x3DRecordingStream, {{mimeType: "video/mp4"}});
+        
+        mediaRecorder.frames = [];
+        mediaRecorder.ondataavailable = function(e) {{
+          mediaRecorder.frames.push(e.data);
+        }};
+        
+        mediaRecorder.onstop = function(e) {{
+          link = document.createElement('a');
+          const base_name = '{id}';
+          const blob = mediaRecorder.frames[0];
+          link.download = base_name + '.mp4';
+          console.log(blob);
+          const blobURL = window.URL.createObjectURL(blob);
+          link.href = blobURL;
+          console.log(blobURL);
+          mediaRecorder.frames = [];
+          link.click();
+        }};
+        
+        let duration = {recording_duration} * 1000;
+        setTimeout(() => {{mediaRecorder.stop()}}, duration);
+        mediaRecorder.start()
+    }})()
+           """
+
+    include_export_button = False
+    include_record_button = False
+    def to_widget(self, dynamic_loading=None, include_export_button=None, include_record_button=None):
         id = self.id
         x3d_embed = self.to_x3d()#.tostring()
 
         if dynamic_loading is None:
             dynamic_loading = self.dynamic_loading
+        if include_export_button is None:
+            include_export_button = self.include_export_button
+        if include_record_button is None:
+            include_record_button = self.include_record_button
 
         if not dynamic_loading:
-            return JHTML.Div(
+            base_fig = JHTML.Div(
                 JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
                 JHTML.Script(src=self.X3DOM_JS),
                 x3d_embed,
@@ -63,7 +114,7 @@ class X3D(X3DObject):
             JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
             load_script = JHTML.Script(src=self.X3DOM_JS).tostring()
             kill_id = "tmp-"+str(uuid.uuid4())[:10]
-            return JHTML.Figure(
+            base_fig = JHTML.Figure(
                 # JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
                 x3d_embed,
                 JHTML.Image(
@@ -78,6 +129,19 @@ class X3D(X3DObject):
                     ),
                 id=id
             )
+
+        elems = [base_fig]
+        if include_export_button:
+            elems.append(JHTML.Button("Save Figure", onclick=self.get_export_script(self.id)))
+        if include_record_button:
+            elems.append(JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id)))
+
+        if len(elems) > 1:
+            return JHTML.Div(
+                *elems
+            )
+        else:
+            return elems[0]
 
     def to_html(self, *base_elems, header_elems=None, **header_info):
         id = self.id
@@ -235,8 +299,10 @@ class X3DGeometryObject(X3DPrimitive):
             tf = None
         # base_obj = X3DHTML.Transform(base_obj, translation=translation, rotation=rotation, scale=scale)
         return base_obj, tf
-    def get_rotation(self, axis):
-        angs, crosses, norms = nput.vec_angles([0, 1, 0], axis, return_crosses=True, return_norms=True)
+    def get_rotation(self, axis, up_vector=None):
+        if up_vector is None:
+            up_vector = [0, 1, 0]
+        angs, crosses, norms = nput.vec_angles(up_vector, axis, return_crosses=True, return_norms=True)
         if nput.is_numeric(angs):
             return np.concatenate([crosses, [angs]]), norms[1]
         else:
@@ -346,6 +412,47 @@ class X3DCone(X3DGeometryGroup):
             {"translation":s, "rotation":a, "height":n, "bottomRadius":r, "topRadius":t}
             for s,a,n,r,t in zip((starts + ends) / 2, rots, norms, radius, top_radius)
         ]
+
+class X3DArrow(X3DGroup):
+
+    arrowhead_class = X3DCone
+    cylinder_class = X3DCylinder
+
+    def __init__(self,
+                 starts, ends,
+                 radius=1,
+                 top_radius=None,
+                 arrowhead_radius=2,
+                 arrowhead_radius_mode='scaled',
+                 arrowhead_offset=.3,
+                 arrowhead_offset_mode='scaled',
+                 cylinder_class=None,
+                 arrowhead_class=None,
+                 **opts):
+        if arrowhead_class is None:
+            arrowhead_class = self.arrowhead_class
+        if cylinder_class is None:
+            cylinder_class = self.cylinder_class
+
+        ends = np.asanyarray(ends)
+        starts = np.asanyarray(starts)
+        arrow_vectors = ends - starts
+        norms = nput.vec_norms(arrow_vectors)
+        if arrowhead_offset_mode == 'scaled':
+            arrowhead_offset = arrowhead_offset * norms
+        disp_vectors = arrowhead_offset * nput.vec_normalize(arrow_vectors, norms=norms)
+        arrow_starts = ends - disp_vectors
+        if arrowhead_radius_mode == 'scaled':
+            arrowhead_radius = arrowhead_radius * radius
+        arrowheads = arrowhead_class(arrow_starts, ends,
+                                     radius=arrowhead_radius,
+                                     top_radius=top_radius,
+                                     **opts)
+        cylinders = cylinder_class(starts, arrow_starts, radius=radius, **opts)
+
+        super().__init__(
+            arrowheads, cylinders
+        )
 
 class X3DTorus(X3DGeometryGroup):
     tag_class = X3DHTML.Torus

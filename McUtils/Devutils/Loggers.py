@@ -171,6 +171,7 @@ class Logger:
         if print_function is None:
             print_function = print
         self.print_function = print_function
+        self.active = True
 
     def to_state(self, serializer=None):
         return {
@@ -421,6 +422,9 @@ class NullLogger(Logger):
     A logger that implements the interface, but doesn't ever print.
     Allows code to avoid a bunch of "if logger is not None" blocks
     """
+    def __init__(self, *log_files, **logger_opts):
+        super().__init__(*log_files, **logger_opts)
+        self.active = False
     def log_print(self, message, *params, print_options=None, padding=None, newline=None, **kwargs):
         pass
     def __bool__(self):

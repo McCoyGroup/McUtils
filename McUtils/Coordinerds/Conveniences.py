@@ -244,15 +244,24 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,):
     atoms = []
     ordering = []
     coords = []
-    vars = {}
+    # vars = {}
 
-    zmat, vars_block = zmat.split("\n\n", 1)
-    bits = zmat.split()
+    if "Variables:" in zmat:
+        zmat, vars_block = zmat.split("Variables:", 1)
+    else:
+        zmat = zmat.split("\n\n", 1)
+        if len(zmat) == 1:
+            zmat = zmat[0]
+            vars_block = ""
+        else:
+            zmat, vars_block = zmat
+    bits = [b.strip() for b in zmat.split() if len(b.strip()) > 0]
 
     coord = []
     ord = []
     complete = False
     last_complete = -1
+    last_idx = len(bits) - 1
     for i, b in enumerate(bits):
         d = (i - last_complete) - 1
         m = d % 2
@@ -265,7 +274,13 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,):
         elif m == 0:
             coord.append(b)
 
-        if i == len(bits) - 1 or bits[i + 1][-1] in possible_atoms:
+        terminal = (
+                i == last_idx
+                or i in {0, 3, 8}
+                or (i > 8 and (i - 9) % 7 == 6)
+        )
+        # atom_q = bits[i + 1][:2] in possible_atoms
+        if terminal:
             last_complete = i
             ord = ord + [-1] * (4 - len(ord))
             coord = coord + [0] * (3 - len(coord))
@@ -274,10 +289,13 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,):
             ord = []
             coord = []
 
-    split_pairs = [vb.strip().split() for vb in vars_block.split("\n")]
-    split_pairs = [s for s in split_pairs if len(s) > 0]
+    split_pairs = [
+        (vb.strip().split("=", 1) if "=" in vb else vb.strip().split())
+        for vb in vars_block.split("\n")
+    ]
+    split_pairs = [s for s in split_pairs if len(s) == 2]
 
-    vars = {k: float(v) for k, v in split_pairs}
+    vars = {k.strip(): float(v) for k, v in split_pairs}
     coords = [
         [vars.get(x, x) for x in c]
         for c in coords
@@ -298,7 +316,11 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,):
 
     return (atoms, ordering, coords)
 
-def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms", in_radians=False, float_fmt="{:11.8f}"):
+def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
+                          in_radians=False,
+                          float_fmt="{:11.8f}",
+                          index_padding=1
+                          ):
     from ..Data import UnitsData
     zmat = np.asanyarray(zmat).copy()
     zmat[:, 0] *= UnitsData.convert("BohrRadius", units)
@@ -324,10 +346,12 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms", in_radi
             [z[1], -1, -1]
             for i, z in enumerate(zmat)
         ]
-    if len(ordering) < len(atoms):
-        ordering = [[-1, -1, -1]] + list(ordering)
-    if len(zmat) < len(atoms):
-        zmat = [[-1, -1, -1]] + list(zmat)
+    includes_atom_list = len(ordering[0]) == 4
+    if not includes_atom_list:
+        if len(ordering) < len(atoms):
+            ordering = [[-1, -1, -1]] + list(ordering)
+        if len(zmat) < len(atoms):
+            zmat = [[-1, -1, -1]] + list(zmat)
 
     zmat = [
         ["", "", ""]
@@ -343,18 +367,34 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms", in_radi
         [float_fmt.format(x) if not isinstance(x, str) else x for x in zz]
         for zz in zmat
     ]
+    if includes_atom_list:
+        ord_list = [o[0] for o in ordering]
+        atom_order = np.argsort(ord_list)
+        print(ord_list, "-->", atom_order)
+        atoms = [atoms[o] for o in ord_list]
+        ordering = [
+            ["", "", ""]
+              if i == 0 else
+            [atom_order[z[1]], "", ""]
+              if i == 1 else
+            [atom_order[z[1]], atom_order[z[2]], ""]
+              if i == 2 else
+            [atom_order[z[1]], atom_order[z[2]], atom_order[z[3]]]
+              for i, z in enumerate(ordering)
+        ]
+    else:
+        ordering = [
+            ["", "", ""]
+            if i == 0 else
+                [z[0], "", ""]
+            if i == 1 else
+                [z[0], z[1], ""]
+            if i == 2 else
+                [z[0], z[1], z[2]]
+            for i, z in enumerate(ordering)
+        ]
     ordering = [
-        ["", "", ""]
-        if i == 0 else
-        [z[0], "", ""]
-        if i == 1 else
-        [z[0], z[1], ""]
-        if i == 2 else
-        [z[0], z[1], z[2]]
-        for i, z in enumerate(ordering)
-    ]
-    ordering = [
-        ["{:.0f}".format(x) if not isinstance(x, str) else x for x in zz]
+        ["{:.0f}".format(x + index_padding) if not isinstance(x, str) else x for x in zz]
         for zz in ordering
     ]
 
