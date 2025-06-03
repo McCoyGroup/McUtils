@@ -1229,19 +1229,43 @@ def fractional_power(A, pow, zero_cutoff=1e-8):
     # only applies to symmetric A
     # if symmetric:
     vals, vecs = np.linalg.eigh(A)
-    take_pos = np.where(np.abs(vals) > zero_cutoff)[0]
-    s = vals[..., take_pos,]
-    u = vecs[..., take_pos]
-    v = np.moveaxis(u, -1, -2)
-    # else:
-    #     #TODO, make this resilient to rectangular matrices
-    #     u, s, v = np.linalg.svd(A)
-    #     take_pos = np.where(np.abs(s) > zero_cutoff)[0]
-    #     s = s[..., take_pos,]
-    #     u = u[..., take_pos]
-    #     v = v[..., take_pos, :]
+    if vals.ndim == 1:
+        cutoffs = np.abs(vals) > zero_cutoff
+        take_pos = np.where(cutoffs)[0]
+        s = vals[..., take_pos]
+        u = vecs[..., take_pos]
+        v = np.moveaxis(u, -1, -2)
+        return u @ vec_tensordiag(np.power(s, pow)) @ v
+    else:
+        base_shape = vals.shape[:-1]
+        vals = vals.reshape((-1,) + vals.shape[-1:])
+        vecs = vecs.reshape((-1,) + vecs.shape[-2:])
+        cutoffs = np.abs(vals) > zero_cutoff
+        cutoff_tests = np.sum(cutoffs, axis=-1)
+        num_block_types = np.unique(cutoff_tests)
+        blocks = len(num_block_types) > 1
+        if blocks:
+            take_pos = [np.where(c)[0] for c in cutoffs]
+            return [
+                vv[:, tp].T @ np.diag(np.power(va[tp], pow)) @ vv[:, tp]
+                for vv,va,tp in zip(vecs, vals, take_pos)
+            ]
+        else:
+            bt = num_block_types[0]
+            if bt == A.shape[-1]:
+                u = vecs
+                v = np.moveaxis(vecs, -2, -1)
+                s = vals
+            else:
+                take_idx = np.ravel_multi_index(np.where(cutoffs), vals.shape)
+                s = vals.reshape(-1)[take_idx,].reshape((-1, bt))
+                v = np.moveaxis(vecs, -2, -1).reshape((-1, vecs.shape[-1]))[
+                    take_idx
+                ].reshape(vecs.shape[:2] + (bt,))
+                u = np.moveaxis(v, -2, -1)
 
-    return u @ vec_tensordiag(np.power(s, pow)) @ v
+            flat_pow = u @ vec_tensordiag(np.power(s, pow)) @ v
+            return flat_pow.reshape(base_shape + flat_pow.shape[-2:])
 
 def unitarize_transformation(tf):
     u, s, v = np.linalg.svd(tf)

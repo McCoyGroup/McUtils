@@ -4,6 +4,7 @@ Convenience functions that are inefficient, but are maybe a bit easier to work w
 
 from .. import Iterators as itut
 from .. import Numputils as nput
+from .. import Devutils as dev
 
 import itertools
 from collections import namedtuple
@@ -14,7 +15,10 @@ from .CoordinateSystems import *
 __all__ = [
     "cartesian_to_zmatrix",
     "zmatrix_to_cartesian",
+    "zmatrix_indices",
     "canonicalize_internal",
+    "num_zmatrix_coords",
+    "zmatrix_embedding_coords",
     "enumerate_zmatrices",
     "extract_zmatrix_internals",
     "parse_zmatrix_string",
@@ -23,7 +27,9 @@ __all__ = [
     "chain_zmatrix",
     "attached_zmatrix_fragment",
     "functionalized_zmatrix",
-    "reindex_zmatrix"
+    "reindex_zmatrix",
+    "is_coordinate_list_like",
+    "is_valid_coordinate"
 ]
 
 def cartesian_to_zmatrix(coords, ordering=None, use_rad = True):
@@ -82,6 +88,38 @@ def canonicalize_internal(coord):
     elif coord[0] > coord[-1]:
         coord = tuple(reversed(coord))
     return coord
+
+def zmatrix_indices(zmat, coords):
+    base_coords = [canonicalize_internal(c) for c in extract_zmatrix_internals(zmat)]
+    return [
+        base_coords.index(canonicalize_internal(c))
+        for c in coords
+    ]
+
+def zmatrix_embedding_coords(zmat_or_num_atoms):
+    if not nput.is_int(zmat_or_num_atoms):
+        zmat_or_num_atoms = len(zmat_or_num_atoms) + (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
+    n: int = zmat_or_num_atoms
+
+    if n < 1:
+        return []
+    elif n == 1:
+        return [0, 1, 2]
+    elif n == 2:
+        return [0, 1, 2, 4, 5]
+    else:
+        return [0, 1, 2, 4, 5, 8]
+
+def num_zmatrix_coords(zmat_or_num_atoms, strip_embedding=True):
+    if not nput.is_int(zmat_or_num_atoms):
+        zmat_or_num_atoms = len(zmat_or_num_atoms) + (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
+    n: int = zmat_or_num_atoms
+
+    return (n*3) - (
+        0
+            if not strip_embedding else
+        len(zmatrix_embedding_coords(n))
+    )
 
 def _zmatrix_iterate(coords, natoms=None,
                      include_origins=False,
@@ -224,14 +262,14 @@ def enumerate_zmatrices(coords, natoms=None,
                 for z in zm
             ]
 
-def extract_zmatrix_internals(zmat):
+def extract_zmatrix_internals(zmat, strip_embedding=True):
     specs = []
-    for row in zmat:
-        if row[1] < 0: continue
+    for n,row in enumerate(zmat):
+        if strip_embedding and n == 0: continue
         specs.append(tuple(row[:2]))
-        if row[2] < 0: continue
+        if strip_embedding and n == 1: continue
         specs.append(tuple(row[:3]))
-        if row[3] < 0: continue
+        if strip_embedding and n == 2: continue
         specs.append(tuple(row[:4]))
     return specs
 
@@ -418,15 +456,35 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
         for a, n, r in zip(atoms, ordering, zmat)
     )
 
-def validate_zmatrix(ordering):
-    proxy_order = [o[0] for o in ordering]
-    if any(p < 0 for p in proxy_order):
+def validate_zmatrix(ordering,
+                     allow_reordering=True,
+                     ensure_nonnegative=True,
+                     # raise_exception=False
+                     ):
+    proxy_order = np.array([o[0] for o in ordering])
+    if allow_reordering:
+        order_sorting = np.argsort(proxy_order)
+        proxy_order = proxy_order[order_sorting,]
+        if ensure_nonnegative and proxy_order[0] < 0:
+            return False
+        new_order = [
+            [
+                [order_sorting[i] if i >= 0 else i for i in row]
+                for row in ordering
+            ]
+        ]
+        return validate_zmatrix(new_order, allow_reordering=False)
+    if ensure_nonnegative and proxy_order[0] < 0:
+        # if raise_exception:
+        #     raise ValueError("Z-matrix atom spec {} is non-zero")
         return False
-    order_sorting = np.argsort(proxy_order)
-    if len(ordering) > 1:
-        ...
 
-        # if ordering[0] < ordering
+    for n,row in enumerate(ordering):
+        if (
+                any(i > n for i in row)
+                or any(i > row[0] for i in row[1:])
+        ):
+            return False
 
     return True
 
@@ -478,3 +536,14 @@ def reindex_zmatrix(zm, perm):
         [perm[r] if r >= 0 else r for r in row]
         for row in zm
     ]
+
+def is_valid_coordinate(coord):
+    return (
+        len(coord) > 1 and len(coord) < 5
+        and all(nput.is_int(c) for c in coord)
+    )
+
+def is_coordinate_list_like(clist):
+    return dev.is_list_like(clist) and all(
+        is_valid_coordinate(c) for c in clist
+    )
