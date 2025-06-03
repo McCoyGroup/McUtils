@@ -230,6 +230,14 @@ class NumputilsTests(TestCase):
         print(guess, np.linalg.norm(guess, axis=-1))
         print(minimum, np.linalg.norm(minimum, axis=-1))
 
+    @debugTest
+    def test_coordBases(self):
+        coords = np.random.rand(6, 3)
+
+        b = angle_basis(coords, 1, 0, 2)
+        # print(b[0])
+
+
     @validationTest
     def test_skewRotationMatrix(self):
         for _ in range(10):
@@ -2021,7 +2029,7 @@ class NumputilsTests(TestCase):
         print([cc.shape for cc in c])
         return
 
-    @debugTest
+    @validationTest
     def test_mixedShapeExpansions(self):
         """
         [(6, 12), (6, 6, 12), (6, 6, 6, 12)] [(3, 12), (3, 6, 12), (3, 6, 6, 12)]

@@ -39,6 +39,7 @@ __all__ = [
     "polar_to_cartesian",
     "apply_by_coordinates",
     "apply_by_structures",
+    "find_basis",
     "projection_matrix",
     "orthogonal_projection_matrix",
     "project_onto",
@@ -1183,21 +1184,54 @@ def apply_by_structures(tf, points, ndim=1, **kwargs):
 #       project_out
 #
 
-def projection_matrix(basis, orthornomal=False):
+def find_basis(mat, nonzero_cutoff=1e-8):
+    u, s, v = np.linalg.svd(mat)
+    mask = s > nonzero_cutoff
+    if u.ndim == 2:
+        good_s = np.where(mask)
+        return u[:, good_s[0]]
+    else:
+        base_shape = u.shape[:-2]
+        u = u.reshape((-1,) + u.shape[-2:])
+        mask = mask.reshape((-1, mask.shape[-1]))
+        good_sums = np.sum(mask, axis=1)
+        num_good = np.unique(good_sums)
+        if len(num_good) == 1:
+            # num_good = num_good[0]
+            # mask_inds = np.where(mask)
+            # take_spec = mask_inds[:-1] + (slice(None),) + mask_inds[-1:]
+            # print(take_spec)
+            # u = u[take_spec].reshape(u.shape[:-1] + (num_good,))
+            # return u.reshape(base_shape + u.shape[-2:])
+            blocks = []
+            for uu, m in zip(u, mask):
+                w = np.where(m)
+                blocks.append(uu[:, w[0]])
+            blocks = np.array(blocks)
+            return blocks.reshape(base_shape + blocks.shape[1:])
+        else:
+            blocks = []
+            for uu,m in zip(u, mask):
+                w = np.where(m)
+                blocks.append(uu[:, w[0]])
+            #TODO: handle base shape
+            return blocks
+
+def projection_matrix(basis, orthonormal=False):
     basis = np.asanyarray(basis)
     if basis.ndim == 1:
         basis = basis[np.newaxis]
-    if not orthornomal:
+    if not orthonormal:
         basis, _ = np.linalg.qr(basis)
 
     return basis @ np.moveaxis(basis, -2, -1)
 
-def orthogonal_projection_matrix(basis, orthornomal=False):
-    proj = projection_matrix(basis, orthornomal=orthornomal)
+def orthogonal_projection_matrix(basis, orthonormal=False):
+    proj = projection_matrix(basis, orthonormal=orthonormal)
     identities = identity_tensors(proj.shape[:-2], proj.shape[-1])
     return identities - proj
 
-def _proj(projection_type, vecs, basis, ndim=None, orthornomal=False):
+def _proj(projection_type, vecs, basis, ndim=None, orthonormal=False):
     vecs = np.asanyarray(vecs)
     basis = np.asanyarray(basis)
     if vecs.shape[-1] != basis.shape[-2]:
@@ -1210,7 +1244,7 @@ def _proj(projection_type, vecs, basis, ndim=None, orthornomal=False):
             ndim = vecs.ndim - len(base_shape)
     base_shape = vecs.shape[:-ndim]
 
-    proj = projection_type(basis, orthornomal=orthornomal)
+    proj = projection_type(basis, orthonormal=orthonormal)
     if ndim == 1:
         vecs = (vecs[..., np.newaxis, :] @ proj).reshape(vecs.shape)
     else:
@@ -1219,11 +1253,11 @@ def _proj(projection_type, vecs, basis, ndim=None, orthornomal=False):
 
     return vecs
 
-def project_onto(vecs, basis, ndim=None, orthornomal=False):
-    return _proj(projection_matrix, vecs, basis, ndim=ndim, orthornomal=orthornomal)
+def project_onto(vecs, basis, ndim=None, orthonormal=False):
+    return _proj(projection_matrix, vecs, basis, ndim=ndim, orthonormal=orthonormal)
 
-def project_out(vecs, basis, ndim=None, orthornomal=False):
-    return _proj(orthogonal_projection_matrix, vecs, basis, ndim=ndim, orthornomal=orthornomal)
+def project_out(vecs, basis, ndim=None, orthonormal=False):
+    return _proj(orthogonal_projection_matrix, vecs, basis, ndim=ndim, orthonormal=orthonormal)
 
 def fractional_power(A, pow, zero_cutoff=1e-8):
     # only applies to symmetric A

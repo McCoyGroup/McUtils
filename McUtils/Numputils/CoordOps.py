@@ -15,6 +15,10 @@ __all__ = [
     'rot_deriv',
     'rot_deriv2',
     'cartesian_from_rad_derivatives',
+    'dist_basis',
+    'angle_basis',
+    # 'dihed_bases',
+    'internal_basis',
     'dist_deriv',
     'angle_deriv',
     'dihed_deriv',
@@ -593,7 +597,6 @@ def vec_sin_cos_derivs(a, b, order=1,
             ])
 
             d2_reshape = tuple(range(2, extra_dims+2)) + (0, 1, extra_dims+2, extra_dims+3)
-            # raise Exception(s2.shape, d2_reshape)
             s2 = s2.transpose(d2_reshape)
 
             sin_derivs.append(s2)
@@ -617,8 +620,6 @@ def vec_sin_cos_derivs(a, b, order=1,
             ])
 
             c2 = c2.transpose(d2_reshape)
-
-            # raise Exception(c2.shape)
 
             cos_derivs.append(c2)
 
@@ -1216,12 +1217,6 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
                 dn2[bad_friends] = sin_derivs[1][bad_friends, 1, :]
                 sign[bad_friends] = 1
 
-            # raise Exception(
-            #     dn1,
-            #     b,
-            #     vec_crosses(b, dn1)
-            # )
-
             di = vec_crosses(b, dn1)
             dj = vec_crosses(c, dn2) - vec_crosses(a+b, dn1)
             dk = vec_crosses(a, dn1) - vec_crosses(b+c, dn2)
@@ -1591,11 +1586,22 @@ def wag_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
     else:
         raise NotImplementedError("too annoying")
 
-def internal_conversion_specs(specs, angle_ordering='ijk', **opts):
+coord_type_map = {
+    'dist':dist_vec,
+    'bend':angle_vec,
+    'rock':rock_vec,
+    'dihed':dihed_vec,
+    'book':book_vec,
+    'oop':oop_vec,
+    'wag':wag_vec
+}
+def internal_conversion_specs(specs, angle_ordering='ijk', coord_type_dispatch=None, **opts):
+    if coord_type_dispatch is None:
+        coord_type_dispatch = coord_type_map
     targets = []
     for idx in specs:
         if isinstance(idx, dict):
-            for k in coord_type_map.keys():
+            for k in coord_type_dispatch.keys():
                 if k in idx:
                     coord_type = k
                     subopts = idx.copy()
@@ -1618,7 +1624,7 @@ def internal_conversion_specs(specs, angle_ordering='ijk', **opts):
 
         if coord_type in {'bend', 'rock'}: # very common to change
             subopts['angle_ordering'] = subopts.get('angle_ordering', angle_ordering)
-        targets.append((coord_type_map[coord_type], idx, dict(opts, **subopts)))
+        targets.append((coord_type_dispatch[coord_type], idx, dict(opts, **subopts)))
 
     return targets
 
@@ -1667,15 +1673,6 @@ def internal_conversion_function(specs,
     return convert
 
 
-coord_type_map = {
-    'dist':dist_vec,
-    'bend':angle_vec,
-    'rock':rock_vec,
-    'dihed':dihed_vec,
-    'book':book_vec,
-    'oop':oop_vec,
-    'wag':wag_vec
-}
 def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None, **opts):
     base_tensors = internal_conversion_function(specs, **opts)(
         coords,
@@ -2013,6 +2010,88 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
         return (tf, errors), opt_internals
     else:
         return tf, errors
+
+def coordinate_projection_data(basis_mat, fixed_mat, inds, nonzero_cutoff=1e-8):
+    if basis_mat is not None:
+        nats = basis_mat.shape[-2] // 3
+        basis_mat = find_basis(basis_mat, nonzero_cutoff=nonzero_cutoff)
+        mat = np.zeros(basis_mat.shape[:-2] + (nats, 3, nats, 3))
+    else:
+        nats = fixed_mat.shape[-2] // 3
+        fixed_mat = find_basis(fixed_mat, nonzero_cutoff=nonzero_cutoff)
+        mat = np.zeros(fixed_mat.shape[:-2] + (nats, 3, nats, 3))
+    for x in range(3):
+        for i in inds:
+            mat[..., i, x, i, x] = 1
+    mat = np.reshape(mat, mat.shape[:-4] + (nats*3, nats*3))
+
+    if basis_mat is not None:
+        return basis_mat, find_basis(mat - projection_matrix(basis_mat, orthonormal=True)), mat
+    else:
+        return find_basis(mat - projection_matrix(fixed_mat, orthonormal=True)), fixed_mat, mat
+
+def dist_basis_mat(coords, i, j):
+    coords = np.asanyarray(coords)
+    mat = np.zeros(coords.shape + (3,))
+    for x in range(3):
+        mat[..., i, x, x] = 1
+        mat[..., j, x, x] = -1
+
+    mat = mat.reshape(mat.shape[:-3] + (-1, 3))
+    return mat
+
+def dist_basis(coords, i, j, nonzero_cutoff=1e-8):
+    basis_mat = dist_basis_mat(coords, i, j)
+    return coordinate_projection_data(basis_mat, None, (i,j), nonzero_cutoff=nonzero_cutoff)
+
+def fixed_angle_basis(coords, i, j, k):
+    coords = np.asanyarray(coords)
+    mat = np.zeros(coords.shape + (6,))
+    for x in range(3):
+        mat[..., i, x, x] = 1
+        mat[..., j, x, x] = 1
+        mat[..., k, x, x] = 1
+    v1 = coords[i] - coords[j]
+    mat[..., i, :, 3] = v1
+    mat[..., j, :, 4] = -v1
+    mat[..., k, :, 4] = -v1
+    v2 = coords[k] - coords[j]
+    mat[..., k, :, 4] = v2
+    mat[..., j, :, 5] = -v2
+    mat[..., i, :, 5] = -v2
+
+    mat = mat.reshape(mat.shape[:-3] + (-1, 6))
+    return mat
+
+def angle_basis(coords, i, j, k, nonzero_cutoff=1e-8, angle_ordering='ijk'):
+    if angle_ordering == 'jik':
+        i,j,k = j,i,k
+    fixed_mat = fixed_angle_basis(coords, i, j, k)
+    return coordinate_projection_data(None, fixed_mat, (i,j,k), nonzero_cutoff=nonzero_cutoff)
+
+basis_coord_type_map = {
+    'dist':dist_basis,
+    'bend':angle_basis
+}
+def internal_basis_specs(specs, angle_ordering='ijk', **opts):
+    return internal_conversion_specs(
+        specs,
+        angle_ordering=angle_ordering,
+        coord_type_dispatch=basis_coord_type_map,
+        **opts
+    )
+def internal_basis(coords, specs, **opts):
+    base_specs = internal_basis_specs(specs, **opts)
+    bases = []
+    ortos = []
+    subprojs = []
+    for f, idx, subopts in base_specs:
+        basis, orthog, subproj = f(coords, *idx, **subopts)
+        bases.append(basis)
+        ortos.append(orthog)
+        subprojs.append(subproj)
+    return bases, ortos, subprojs
+
 
 def metric_tensor(internals_by_cartesians, masses=None):
     if misc.is_numeric_array_like(internals_by_cartesians):
