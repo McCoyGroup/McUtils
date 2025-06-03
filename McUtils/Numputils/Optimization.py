@@ -961,8 +961,8 @@ class QuasiNetwonHessianApproximator:
                  damping_parameter=None, damping_exponent=None,
                  line_search=True, restart_interval=10,
                  restart_hessian_norm=1e-5,
-                 approximation_mode='direct'
-                 # approximation_mode='inverse'
+                 # approximation_mode='direct'
+                 approximation_mode='inverse'
                  ):
         self.func = func
         self.jac = jacobian
@@ -1002,10 +1002,14 @@ class QuasiNetwonHessianApproximator:
     def take_nonzero_norm_regions(cls, norms, tensors, cutoff=None):
         if cutoff is None:
             cutoff = cls.orthogonal_dirs_cutoff
-        good_pos = np.where(np.logical_and(*[
-            np.abs(n.reshape(-1, )) > cutoff
-            for n in norms
-        ]))
+        mask = np.full(norms[0].reshape(-1,).shape, True)
+        for n in norms:
+            mask = np.logical_and(mask, np.abs(n.reshape(-1)) > cutoff)
+        # good_pos = np.where(np.logical_and(*[
+        #     np.abs(n.reshape(-1, )) > cutoff
+        #     for n in norms
+        # ]))
+        good_pos = np.where(mask)
         return good_pos, [t[good_pos] for t in tensors]
 
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
@@ -1039,7 +1043,6 @@ class QuasiNetwonHessianApproximator:
             B = np.linalg.inv(new_hess)
         else:
             B = new_hess
-        # print(new_hess)
         new_step_dir = -(B @ new_jacs[:, :, np.newaxis]).reshape(new_jacs.shape)
         if projector is not None:
             new_step_dir = (new_step_dir[:, np.newaxis, :] @ projector).reshape(new_step_dir.shape)
@@ -1081,6 +1084,7 @@ class BFGSApproximator(QuasiNetwonHessianApproximator):
         y = jacobian_diffs[:, :, np.newaxis]
         y_T = jacobian_diffs[:, np.newaxis, :]
         B = prev_hess.copy()
+        increment = False
         if self.approximation_mode == 'direct':
             diff_norm = y_T @ dx
             h_step = (B @ dx)
@@ -1098,6 +1102,7 @@ class BFGSApproximator(QuasiNetwonHessianApproximator):
             diff_step = diff_outer / diff_norm
             step_step = step_outer / h_norm
             update = diff_step - step_step
+            increment = True
         else:
             diff_norm = y_T @ dx
             good_pos, (
@@ -1107,13 +1112,17 @@ class BFGSApproximator(QuasiNetwonHessianApproximator):
                                                [I, B, dx, dx_T, y, y_T,
                                                 diff_norm])
 
-            diff_outer = y_T * y
-            diff_step = identities - diff_outer / diff_norm
+            diff_outer = np.moveaxis(dx_T * y, -1, -2)
+            diff_step = I - diff_outer / diff_norm
             step_outer = dx_T * dx
             step_step = step_outer / diff_norm
             update = diff_step @ H @ np.moveaxis(diff_step, -1, -2) + step_step
+            increment = False
 
-        B[good_pos] += update
+        if increment:
+            B[good_pos] += update
+        else:
+            B[good_pos] = update
         return B
 
 class DFPApproximator(QuasiNetwonHessianApproximator):

@@ -1686,20 +1686,74 @@ def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False,
     else:
         return base_tensors
 
-def inverse_internal_coordinate_tensors(expansion, coords, masses, order):
+def inverse_internal_coordinate_tensors(expansion,
+                                        coords=None, masses=None, order=None,
+                                        mass_weighted=True,
+                                        remove_translation_rotation=True,
+                                        fixed_atoms=None,
+                                        fixed_coords=None
+                                        ):
     from .CoordinateFrames import translation_rotation_invariant_transformation
 
-    # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
-    L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
-                                                                mass_weighted=False, strip_embedding=True)
-    new_tf = td.tensor_reexpand([L_inv], expansion, order)
-    inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
-    return [
-        vec_tensordot(j, np.moveaxis(L_inv, -1, -2), axes=[-1, -1], shared=L_base.ndim - 2)
-            if not misc.is_numeric(j) else
-        j
-        for j in inverse_tf
-    ]
+    if order is None:
+        order = len(expansion)
+
+    if fixed_atoms is not None:
+        atom_pos = np.reshape(
+            (np.array(fixed_atoms) * 3)[:, np.newaxis]
+            + np.arange(3)[np.newaxis],
+            -1
+        )
+        expansion = [e.copy() for e in expansion]
+        for n, e in enumerate(expansion):
+            idx = (...,) + np.ix_(*[atom_pos] * (n + 1)) + (slice(None),)
+            e[idx] = 0
+    if fixed_coords is not None:
+        expansion = [e.copy() for e in expansion]
+        for n, e in enumerate(expansion):
+            e[..., fixed_coords] = 0
+
+    if coords is not None and remove_translation_rotation:
+        # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
+        L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
+                                                                    mass_weighted=False, strip_embedding=True)
+        new_tf = td.tensor_reexpand([L_inv], expansion, order)
+        inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
+        inverse_expansion = [
+            vec_tensordot(j, np.moveaxis(L_inv, -1, -2), axes=[-1, -1], shared=L_base.ndim - 2)
+                if not misc.is_numeric(j) else
+            j
+            for j in inverse_tf
+        ]
+    elif mass_weighted and masses is not None:
+        sqrt_mass = np.expand_dims(
+            np.repeat(
+                np.diag(np.repeat(1 / np.sqrt(masses), 3)),
+                coords.shape[0],
+                axis=0
+            ),
+            list(range(expansion[0].ndim - 2))
+        )
+        expansion = td.tensor_reexpand([sqrt_mass], expansion, len(expansion))
+        inverse_expansion = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
+        inverse_expansion = td.tensor_reexpand(inverse_expansion, [sqrt_mass], order)
+    else:
+        inverse_expansion = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
+
+    if fixed_atoms is not None:
+        atom_pos = np.reshape(
+            (np.array(fixed_atoms) * 3)[:, np.newaxis]
+            + np.arange(3)[np.newaxis],
+            -1
+        )
+        for n, e in enumerate(inverse_expansion):
+            e[..., atom_pos] = 0
+    if fixed_coords is not None:
+        for n, e in enumerate(inverse_expansion):
+            idx = (...,) + np.ix_(*[fixed_coords] * (n + 1)) + (slice(None),)
+            e[idx] = 0
+
+    return inverse_expansion
 
 class _inverse_coordinate_conversion_caller:
     def __init__(self, conversion, target_internals,

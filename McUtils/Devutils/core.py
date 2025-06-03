@@ -1,7 +1,7 @@
 """
 Provides a set of singleton objects that can declare their purpose a little bit better than None can
 """
-
+import itertools
 # import enum
 import types
 
@@ -14,11 +14,15 @@ __all__ = [
     "handle_uninitialized",
     "is_interface_like",
     "is_dict_like",
+    "is_list_like",
     "cached_eval",
+    "merge_dicts",
     "str_comp",
     "str_is",
     "str_in",
-    "str_elide"
+    "str_elide",
+    "resolve_key_collision",
+    "merge_dicts"
 ]
 
 class SingletonType:
@@ -41,17 +45,28 @@ class UninitializedType(SingletonType):
     __is_uninitialized__ = True
 uninitialized = UninitializedType()
 
-def is_interface_like(obj, interface_types, implementation_attrs):
+def is_interface_like(obj, interface_types, exlusion_types, implementation_attrs):
     return (
-        isinstance(obj, interface_types)
-        or all(hasattr(obj, a) for a in implementation_attrs)
+            (exlusion_types is None) or
+            not isinstance(obj, exlusion_types)
+    ) and (
+            (interface_types is not None and isinstance(obj, interface_types))
+            or all(hasattr(obj, a) for a in implementation_attrs)
     )
 
 def is_dict_like(obj,
                  interface_types=(dict, types.MappingProxyType),
+                 exlusion_types=None,
                  implementation_props=('items',)
                  ):
-    return is_interface_like(obj, interface_types, implementation_props)
+    return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
+
+def is_list_like(obj,
+                 interface_types=(list, tuple),
+                 exlusion_types=(dict,),
+                 implementation_props=('__getitem__',)
+                 ):
+    return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
 
 def is_default(obj, allow_None=True):
     if allow_None and obj is None:
@@ -118,3 +133,43 @@ def str_elide(long_str, width=80, placeholder='...'):
         r = total_width // 2
         long_str = long_str[:l] + placeholder + long_str[-r:]
     return long_str
+
+def resolve_key_collision(a, b, k):
+    if is_dict_like(a[k]):
+        if not is_dict_like(b[k]):
+            raise ValueError(f"can't resolve key collision on key {k} between {a[k]} and {b[k]}")
+        return merge_dicts(a[k], b[k], resolve_key_collision)
+    elif is_list_like(a[k]):
+        if not is_list_like(b[k]):
+            return type(a[k])(
+                itertools.chain(a[k], b[k])
+            )
+        else:
+            return type(a[k])(
+                itertools.chain(a[k], [b[k]])
+            )
+    else:
+        if is_dict_like(b[k]):
+            raise ValueError(f"can't resolve key collision on key {k} between {a[k]} and {b[k]}")
+        elif is_list_like(b[k]):
+            return type(b[k])(
+                itertools.chain([a[k]], b[k])
+            )
+        else:
+            return b[k]
+
+def merge_dicts(a, b, collision_handler=None):
+    key_inter = a.keys() & b.keys()
+    diff_a = a.keys() - key_inter
+    diff_b = b.keys() - key_inter
+    dd = {k: a[k] for k in diff_a}
+    dd.update((k, b[k]) for k in diff_b)
+    if len(key_inter) > 0:
+        if collision_handler is None:
+            collision_handler = resolve_key_collision
+        dd.update(
+            (k, collision_handler(a, b, k))
+            for k in key_inter
+        )
+
+    return dd

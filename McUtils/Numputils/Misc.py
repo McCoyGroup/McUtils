@@ -12,13 +12,16 @@ __all__ = [
     'numeric_types',
     'is_atomic',
     'is_numeric',
+    'is_int',
     'is_zero',
     'is_array_like',
     'is_numeric_array_like',
     'flatten_inds'
 ]
 
-numeric_types = (int, float, np.integer, np.floating)
+int_types = (int, np.integer)
+float_types = (float, np.floating)
+numeric_types = int_types + float_types
 atomic_types = numeric_types + (str, )
 def is_atomic(obj, types=None):
     if types is None: types = atomic_types
@@ -27,6 +30,9 @@ def is_atomic(obj, types=None):
     )
 def is_numeric(obj, types=None):
     if types is None: types = numeric_types
+    return is_atomic(obj, types=types)
+def is_int(obj, types=None):
+    if types is None: types = int_types
     return is_atomic(obj, types=types)
 def is_zero(obj, numeric_types=None):
     return is_numeric(obj, types=numeric_types) and obj == 0

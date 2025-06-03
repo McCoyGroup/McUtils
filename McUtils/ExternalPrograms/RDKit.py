@@ -363,8 +363,9 @@ class RDMolecule(ExternalMolecule):
             ff_helpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
             def optimizer(mol, **etc):
                 ff = mol.get_force_field(force_field_type)
-                return ff_helpers.OptimizeMolecule(ff, **etc)
+                return ff_helpers.OptimizeMolecule(ff)
 
+        maxIters = int(maxIters)
         if geoms is not None:
             cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
             geoms = np.asanyarray(geoms, dtype=float)
@@ -379,10 +380,10 @@ class RDMolecule(ExternalMolecule):
                     opt_geoms[i] = self.mol.GetPositions()
             finally:
                 self.mol.SetPositions(cur_geom)
-            return opt_vals.reshape(base_shape), opt_geoms.reshape(base_shape + opt_geoms.shape[1:])
+            return opt_vals.reshape(base_shape), opt_geoms.reshape(base_shape + opt_geoms.shape[1:]), {}
         else:
             opt = optimizer(self, maxIters=maxIters, **opts)
-            return opt, self.mol.GetPositions()
+            return opt, self.mol.GetPositions(), {}
 
     def show(self):
         return RDKitInterface.submodule('Chem.Draw.IPythonConsole').drawMol3D(

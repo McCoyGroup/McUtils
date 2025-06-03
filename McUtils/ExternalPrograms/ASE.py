@@ -177,4 +177,4 @@ class ASEMolecule(ExternalMolecule):
             self.mol.calc = cur_calc
             self.mol.positions = cur_geom
 
-        return opt, opt_coords
+        return opt, opt_coords, {}
