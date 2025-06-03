@@ -126,7 +126,18 @@ Chained conversions are not _currently_ supported, but might well become support
 [zmatrix_to_cartesian](Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
 </div>
    <div class="col" markdown="1">
+[zmatrix_indices](Coordinerds/Conveniences/zmatrix_indices.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [canonicalize_internal](Coordinerds/Conveniences/canonicalize_internal.md)   
+</div>
+   <div class="col" markdown="1">
+[num_zmatrix_coords](Coordinerds/Conveniences/num_zmatrix_coords.md)   
+</div>
+   <div class="col" markdown="1">
+[zmatrix_embedding_coords](Coordinerds/Conveniences/zmatrix_embedding_coords.md)   
 </div>
 </div>
   <div class="row">
@@ -164,10 +175,21 @@ Chained conversions are not _currently_ supported, but might well become support
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[PrimitiveCoordinatePicker](Coordinerds/Redundant/PrimitiveCoordinatePicker.md)   
+[is_coordinate_list_like](Coordinerds/Conveniences/is_coordinate_list_like.md)   
 </div>
    <div class="col" markdown="1">
+[is_valid_coordinate](Coordinerds/Conveniences/is_valid_coordinate.md)   
+</div>
+   <div class="col" markdown="1">
+[PrimitiveCoordinatePicker](Coordinerds/Redundant/PrimitiveCoordinatePicker.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [RedundantCoordinateGenerator](Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -195,9 +217,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-7ba489" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7ba489"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-5ce17e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-5ce17e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7ba489" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-5ce17e" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -233,9 +255,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-6b3214" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-6b3214"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a49005" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a49005"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-6b3214" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a49005" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

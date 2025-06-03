@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.VectorOps.project_onto">project_onto</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1222)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1222?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1256)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1256?message=Update%20Docs)]
 </div>
 
 ```python
-project_onto(vecs, basis, ndim=None, orthornomal=False): 
+project_onto(vecs, basis, ndim=None, orthonormal=False): 
 ```
 
 
@@ -59,7 +59,7 @@ project_onto(vecs, basis, ndim=None, orthornomal=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/project_onto.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/project_onto.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1222?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1256?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

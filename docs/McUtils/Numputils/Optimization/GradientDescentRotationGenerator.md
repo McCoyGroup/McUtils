@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.GradientDescentRotationGenerator">GradientDescentRotationGenerator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1958)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1958?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1967)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1967?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, column_function, gradient, tol=1e-16, max_iterations=10, damping_parameter=0.9, damping_exponent=1.1, restart_interval=3): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1959)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1959?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1968)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1968?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, column_function, gradient, tol=1e-16, max_iterations=10, damping_
 __call__(self, mat, col_i, col_j): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L1974)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L1974?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L1983)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L1983?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -90,7 +90,7 @@ __call__(self, mat, col_i, col_j):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1958?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1967?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

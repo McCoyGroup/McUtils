@@ -38,23 +38,34 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 [is_dict_like](Devutils/core/is_dict_like.md)   
 </div>
    <div class="col" markdown="1">
-[cached_eval](Devutils/core/cached_eval.md)   
+[is_list_like](Devutils/core/is_list_like.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[cached_eval](Devutils/core/cached_eval.md)   
+</div>
+   <div class="col" markdown="1">
+[merge_dicts](Devutils/core/merge_dicts.md)   
+</div>
+   <div class="col" markdown="1">
 [str_comp](Devutils/core/str_comp.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [str_is](Devutils/core/str_is.md)   
 </div>
    <div class="col" markdown="1">
 [str_in](Devutils/core/str_in.md)   
 </div>
+   <div class="col" markdown="1">
+[str_elide](Devutils/core/str_elide.md)   
+</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[str_elide](Devutils/core/str_elide.md)   
+[resolve_key_collision](Devutils/core/resolve_key_collision.md)   
 </div>
    <div class="col" markdown="1">
 [is_filepath_like](Devutils/FileHelpers/is_filepath_like.md)   

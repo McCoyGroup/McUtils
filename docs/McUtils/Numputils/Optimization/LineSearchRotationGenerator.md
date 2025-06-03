@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.LineSearchRotationGenerator">LineSearchRotationGenerator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1873)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1873?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1882)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1882?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, column_function, tol=1e-16, max_iterations=10): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1874)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1874?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1883)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1883?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, column_function, tol=1e-16, max_iterations=10):
 quadratic_opt(self, g0, g1, g2, f0, f1, f2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1879)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1879?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1888)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1888?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ quadratic_opt(self, g0, g1, g2, f0, f1, f2):
 __call__(self, mat, col_i, col_j): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/LineSearchRotationGenerator.py#L1906)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/LineSearchRotationGenerator.py#L1906?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/LineSearchRotationGenerator.py#L1915)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/LineSearchRotationGenerator.py#L1915?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -101,7 +101,7 @@ __call__(self, mat, col_i, col_j):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/LineSearchRotationGenerator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/LineSearchRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1873?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1882?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

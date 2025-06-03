@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.Misc.recast_indices">recast_indices</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L66)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L66?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ recast_indices(indexing_array):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/recast_indices.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/recast_indices.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L60?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L66?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
