@@ -199,6 +199,7 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
 
     if masses is None:
         masses = np.ones(coords.shape[-2])
+    masses = np.asanyarray(masses)
 
     n = len(masses)
     # explicitly put masses in m_e from AMU
@@ -321,13 +322,20 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
 
     return freqs, eigs
 
-def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False):
+def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False,
+                                   orthonormal=True
+                                   ):
     if masses is None:
         masses = np.ones(coords.shape[-2])
     _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
-    shared = tr_modes.ndim - 2
-    eye = vec_ops.identity_tensors(tr_modes.shape[:-2], tr_modes.shape[-2])
-    projector = eye - vec_ops.vec_tensordot(tr_modes, tr_modes, axes=[-1, -1], shared=shared)
+    if orthonormal:
+        if not mass_weighted:
+            tr_modes = vec_ops.vec_normalize(tr_modes, axis=0)
+        projector = vec_ops.orthogonal_projection_matrix(tr_modes, orthonormal=True)
+    else:
+        shared = tr_modes.ndim - 2
+        eye = vec_ops.identity_tensors(tr_modes.shape[:-2], tr_modes.shape[-2])
+        projector = eye - vec_ops.vec_tensordot(tr_modes, tr_modes, axes=[-1, -1], shared=shared)
 
     if return_modes:
         return projector, tr_modes
