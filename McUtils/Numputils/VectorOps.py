@@ -1184,38 +1184,99 @@ def apply_by_structures(tf, points, ndim=1, **kwargs):
 #       project_out
 #
 
-def find_basis(mat, nonzero_cutoff=1e-8):
-    u, s, v = np.linalg.svd(mat)
-    mask = s > nonzero_cutoff
-    if u.ndim == 2:
-        good_s = np.where(mask)
-        return u[:, good_s[0]]
-    else:
-        base_shape = u.shape[:-2]
-        u = u.reshape((-1,) + u.shape[-2:])
-        mask = mask.reshape((-1, mask.shape[-1]))
-        good_sums = np.sum(mask, axis=1)
-        num_good = np.unique(good_sums)
-        if len(num_good) == 1:
-            # num_good = num_good[0]
-            # mask_inds = np.where(mask)
-            # take_spec = mask_inds[:-1] + (slice(None),) + mask_inds[-1:]
-            # print(take_spec)
-            # u = u[take_spec].reshape(u.shape[:-1] + (num_good,))
-            # return u.reshape(base_shape + u.shape[-2:])
-            blocks = []
-            for uu, m in zip(u, mask):
-                w = np.where(m)
-                blocks.append(uu[:, w[0]])
-            blocks = np.array(blocks)
-            return blocks.reshape(base_shape + blocks.shape[1:])
+def find_basis(mat, nonzero_cutoff=1e-8, method='svd'):
+    if method == 'qr':
+        basis, _ = np.linalg.qr(mat)
+        return basis
+    elif method == 'svd':
+        u, s, v = np.linalg.svd(mat)
+        mask = s > nonzero_cutoff
+        if u.ndim == 2:
+            good_s = np.where(mask)
+            return u[:, good_s[0]]
         else:
-            blocks = []
-            for uu,m in zip(u, mask):
-                w = np.where(m)
-                blocks.append(uu[:, w[0]])
-            #TODO: handle base shape
-            return blocks
+            base_shape = u.shape[:-2]
+            u = u.reshape((-1,) + u.shape[-2:])
+            mask = mask.reshape((-1, mask.shape[-1]))
+            good_sums = np.sum(mask, axis=1)
+            num_good = np.unique(good_sums)
+            if len(num_good) == 1:
+                # num_good = num_good[0]
+                # mask_inds = np.where(mask)
+                # take_spec = mask_inds[:-1] + (slice(None),) + mask_inds[-1:]
+                # print(take_spec)
+                # u = u[take_spec].reshape(u.shape[:-1] + (num_good,))
+                # return u.reshape(base_shape + u.shape[-2:])
+                blocks = []
+                for uu, m in zip(u, mask):
+                    w = np.where(m)
+                    blocks.append(uu[:, w[0]])
+                blocks = np.array(blocks)
+                return blocks.reshape(base_shape + blocks.shape[1:])
+            else:
+                blocks = []
+                for uu,m in zip(u, mask):
+                    w = np.where(m)
+                    blocks.append(uu[:, w[0]])
+                #TODO: handle base shape
+                return blocks
+    elif method == 'right-svd':
+        u, s, v = np.linalg.svd(mat)
+        mask = s > nonzero_cutoff
+        if u.ndim == 2:
+            good_s = np.where(mask)
+            return mat @ v.T[:, good_s[0]]
+        else:
+            base_shape = u.shape[:-2]
+            v = v.reshape((-1,) + v.shape[-2:])
+            mask = mask.reshape((-1, mask.shape[-1]))
+            mat = mat.reshape((-1,) + mat.shape[-2:])
+            good_sums = np.sum(mask, axis=1)
+            num_good = np.unique(good_sums)
+            if len(num_good) == 1:
+                blocks = []
+                for vv, m, a in zip(v, mask, mat):
+                    w = np.where(m)
+                    blocks.append(a @ vv.T[:, w[0]])
+                blocks = np.array(blocks)
+                return blocks.reshape(base_shape + blocks.shape[1:])
+            else:
+                blocks = []
+                for vv, m, a in zip(v, mask, mat):
+                    w = np.where(m)
+                    blocks.append(a @ vv.T[:, w[0]])
+                # TODO: handle base shape
+                return blocks
+    elif method == 'right-unitary':
+        u, s, v = np.linalg.svd(mat)
+        mask = s > nonzero_cutoff
+        if u.ndim == 2:
+            good_s = np.where(mask)
+            return mat @ (np.diag(1/s) @ v).T[:, good_s[0]]
+        else:
+            base_shape = u.shape[:-2]
+            v = v.reshape((-1,) + v.shape[-2:])
+            mask = mask.reshape((-1, mask.shape[-1]))
+            s = s.reshape((-1, s.shape[-1]))
+            mat = mat.reshape((-1,) + mat.shape[-2:])
+            good_sums = np.sum(mask, axis=1)
+            num_good = np.unique(good_sums)
+            if len(num_good) == 1:
+                blocks = []
+                for vv, m, a, ss in zip(v, mask, mat, s):
+                    w = np.where(m)
+                    blocks.append(a @ (np.diag(1/ss) @ vv).T[:, w[0]])
+                blocks = np.array(blocks)
+                return blocks.reshape(base_shape + blocks.shape[1:])
+            else:
+                blocks = []
+                for vv, m, a, ss in zip(v, mask, mat, s):
+                    w = np.where(m)
+                    blocks.append(a @ (np.diag(1/ss) @ vv).T[:, w[0]])
+                # TODO: handle base shape
+                return blocks
+    else:
+        raise ValueError(f"method `{method}`")
 
 def projection_matrix(basis, orthonormal=False):
     basis = np.asanyarray(basis)

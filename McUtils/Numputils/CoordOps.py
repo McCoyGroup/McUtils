@@ -1679,7 +1679,11 @@ def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False,
         order=order
     )
     if return_inverse:
-        return base_tensors, inverse_internal_coordinate_tensors(base_tensors[1:], coords, masses=masses, order=order)
+        if order is None:
+            bt = [base_tensors]
+        else:
+            bt = base_tensors[1:]
+        return base_tensors, inverse_internal_coordinate_tensors(bt, coords, masses=masses, order=order)
     else:
         return base_tensors
 
@@ -2011,12 +2015,44 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
     else:
         return tf, errors
 
-def coordinate_projection_data(basis_mat, fixed_mat, inds, nonzero_cutoff=1e-8):
+def coordinate_projection_data(basis_mat, fixed_mat, inds, nonzero_cutoff=1e-8,
+                               masses=None, coords=None,
+                               project_transrot=False):
+    from .CoordinateFrames import translation_rotation_projector
+
+    if project_transrot and coords is not None:
+        sub_projector, sub_tr_modes = translation_rotation_projector(
+            coords[..., inds, :],
+            masses=(
+                [masses[i] for i in inds]
+                    if masses is not None else
+                masses
+            ),
+            mass_weighted=False,
+            return_modes=True
+        )
+        cs = coords.shape[-1]
+        ncoord = coords.shape[-2]*coords.shape[-1]
+        projector = np.zeros(coords.shape[:-2] + (ncoord, ncoord))
+        full_idx = sum(( tuple(i*3+j for j in range(cs)) for i in inds ), ())
+        proj_sel = (...,) + np.ix_(full_idx, full_idx)
+        projector[proj_sel] = sub_projector
+        tr_modes = np.zeros(coords.shape[:-2] + (ncoord, sub_tr_modes.shape[-1]))
+        tr_modes[..., full_idx, :] = sub_tr_modes
+    else:
+        projector, tr_modes = None, None
     if basis_mat is not None:
+        if projector is not None:
+            #TODO: handle broadcasting
+            basis_mat = projector @ basis_mat
         nats = basis_mat.shape[-2] // 3
         basis_mat = find_basis(basis_mat, nonzero_cutoff=nonzero_cutoff)
         mat = np.zeros(basis_mat.shape[:-2] + (nats, 3, nats, 3))
     else:
+        if projector is not None:
+            #     #TODO: handle broadcasting
+            #     fixed_mat = projector @ fixed_mat
+            fixed_mat = np.concatenate([tr_modes, fixed_mat], axis=-1)
         nats = fixed_mat.shape[-2] // 3
         fixed_mat = find_basis(fixed_mat, nonzero_cutoff=nonzero_cutoff)
         mat = np.zeros(fixed_mat.shape[:-2] + (nats, 3, nats, 3))
@@ -2040,13 +2076,16 @@ def dist_basis_mat(coords, i, j):
     mat = mat.reshape(mat.shape[:-3] + (-1, 3))
     return mat
 
-def dist_basis(coords, i, j, nonzero_cutoff=1e-8):
+def dist_basis(coords, i, j, **opts):
     basis_mat = dist_basis_mat(coords, i, j)
-    return coordinate_projection_data(basis_mat, None, (i,j), nonzero_cutoff=nonzero_cutoff)
+    return coordinate_projection_data(basis_mat, None, (i,j),
+                                      coords=coords,
+                                      **opts
+                                      )
 
 def fixed_angle_basis(coords, i, j, k):
     coords = np.asanyarray(coords)
-    mat = np.zeros(coords.shape + (6,))
+    mat = np.zeros(coords.shape + (7,))
     for x in range(3):
         mat[..., i, x, x] = 1
         mat[..., j, x, x] = 1
@@ -2056,22 +2095,56 @@ def fixed_angle_basis(coords, i, j, k):
     mat[..., j, :, 4] = -v1
     mat[..., k, :, 4] = -v1
     v2 = coords[k] - coords[j]
-    mat[..., k, :, 4] = v2
-    mat[..., j, :, 5] = -v2
-    mat[..., i, :, 5] = -v2
+    mat[..., k, :, 5] = v2
+    mat[..., j, :, 6] = -v2
+    mat[..., i, :, 6] = -v2
 
-    mat = mat.reshape(mat.shape[:-3] + (-1, 6))
+    mat = mat.reshape(mat.shape[:-3] + (-1, 7))
     return mat
 
-def angle_basis(coords, i, j, k, nonzero_cutoff=1e-8, angle_ordering='ijk'):
+def angle_basis(coords, i, j, k, angle_ordering='ijk', **opts):
     if angle_ordering == 'jik':
         i,j,k = j,i,k
     fixed_mat = fixed_angle_basis(coords, i, j, k)
-    return coordinate_projection_data(None, fixed_mat, (i,j,k), nonzero_cutoff=nonzero_cutoff)
+    return coordinate_projection_data(None, fixed_mat, (i,j,k),
+                                      coords=coords,
+                                      **opts
+                                      )
+
+def fixed_dihed_basis(coords, i, j, k, l):
+    coords = np.asanyarray(coords)
+    mat = np.zeros(coords.shape + (9,))
+    for x in range(3):
+        mat[..., i, x, x] = 1
+        mat[..., j, x, x] = 1
+        mat[..., k, x, x] = 1
+        mat[..., l, x, x] = 1
+    # basis for plane 1
+    v1 = coords[i] - coords[j]
+    v2 = coords[j] - coords[k]
+    mat[..., i, :, 3] = v1
+    mat[..., i, :, 4] = v2
+    mat[..., j, :, 5] = v2
+    # basis for plane 2
+    v3 = coords[l] - coords[k]
+    mat[..., l, :, 6] = v2
+    mat[..., l, :, 7] = v3
+    mat[..., k, :, 8] = v2
+
+    mat = mat.reshape(mat.shape[:-3] + (-1, 9))
+    return mat
+
+def dihed_basis(coords, i, j, k, l, **opts):
+    fixed_mat = fixed_dihed_basis(coords, i, j, k, l)
+    return coordinate_projection_data(None, fixed_mat, (i,j,k,l),
+                                      coords=coords,
+                                      **opts
+                                      )
 
 basis_coord_type_map = {
     'dist':dist_basis,
-    'bend':angle_basis
+    'bend':angle_basis,
+    'dihed':dihed_basis,
 }
 def internal_basis_specs(specs, angle_ordering='ijk', **opts):
     return internal_conversion_specs(
