@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.angle_basis">angle_basis</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2066)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2066?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2105)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2105?message=Update%20Docs)]
 </div>
 
 ```python
-angle_basis(coords, i, j, k, nonzero_cutoff=1e-08, angle_ordering='ijk'): 
+angle_basis(coords, i, j, k, angle_ordering='ijk', **opts): 
 ```
 
 
@@ -59,7 +59,7 @@ angle_basis(coords, i, j, k, nonzero_cutoff=1e-08, angle_ordering='ijk'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/angle_basis.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/angle_basis.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2066?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2105?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

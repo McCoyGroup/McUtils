@@ -5,7 +5,7 @@
 </div>
 
 ```python
-find_basis(mat, nonzero_cutoff=1e-08): 
+find_basis(mat, nonzero_cutoff=1e-08, method='svd'): 
 ```
 
 
