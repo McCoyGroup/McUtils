@@ -15,6 +15,7 @@ from .CoordinateSystems import *
 __all__ = [
     "cartesian_to_zmatrix",
     "zmatrix_to_cartesian",
+    "zmatrix_unit_convert",
     "zmatrix_indices",
     "canonicalize_internal",
     "num_zmatrix_coords",
@@ -32,7 +33,8 @@ __all__ = [
     "is_valid_coordinate"
 ]
 
-def cartesian_to_zmatrix(coords, ordering=None, use_rad = True):
+zm_type = namedtuple("zms", ["coords", "ordering"])
+def cartesian_to_zmatrix(coords, ordering=None, use_rad=True):
     """
     Converts Cartesians to Z-Matrix coords and returns the underlying arrays
 
@@ -45,8 +47,7 @@ def cartesian_to_zmatrix(coords, ordering=None, use_rad = True):
     """
 
     zms = CoordinateSet(coords, system=CartesianCoordinates3D).convert(ZMatrixCoordinates, ordering=ordering, use_rad=use_rad)
-    crds = namedtuple("zms", ["coords", "ordering"])
-    return crds(np.asarray(zms), zms.converter_options['ordering'])
+    return zm_type(np.asarray(zms), zms.converter_options['ordering'])
 
 def zmatrix_to_cartesian(coords, ordering=None, origins=None, axes=None, use_rad=True):
     """
@@ -68,6 +69,25 @@ def zmatrix_to_cartesian(coords, ordering=None, origins=None, axes=None, use_rad
     carts = CoordinateSet(coords, ZMatrixCoordinates).convert(CartesianCoordinates3D,
                                                             ordering=ordering, origins=origins, axes=axes, use_rad=use_rad)
     return np.asarray(carts)
+
+def zmatrix_unit_convert(zmat, distance_conversion, angle_conversion=None, rad2deg=False, deg2rad=False):
+    zm2 = np.asanyarray(zmat)
+    if zm2 is zmat: zm2 = zm2.copy()
+
+    zm2[..., :, 0] *= distance_conversion
+    if angle_conversion is None:
+        if deg2rad:
+            zm2[..., :, 1] = np.deg2rad(zm2[..., :, 1])
+            zm2[..., :, 2] = np.deg2rad(zm2[..., :, 2])
+        elif rad2deg:
+            zm2[..., :, 1] = np.rad2deg(zm2[..., :, 1])
+            zm2[..., :, 2] = np.rad2deg(zm2[..., :, 2])
+    else:
+        zm2[..., :, 1] *= angle_conversion
+        zm2[..., :, 2] *= angle_conversion
+
+    return zm2
+
 
 
 def canonicalize_internal(coord):
@@ -402,13 +422,17 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
         for i, z in enumerate(zmat)
     ]
     zmat = [
-        [float_fmt.format(x) if not isinstance(x, str) else x for x in zz]
+        [
+            float_fmt.format(x)
+                if not isinstance(x, str) else
+            x
+            for x in zz
+        ]
         for zz in zmat
     ]
     if includes_atom_list:
         ord_list = [o[0] for o in ordering]
         atom_order = np.argsort(ord_list)
-        print(ord_list, "-->", atom_order)
         atoms = [atoms[o] for o in ord_list]
         ordering = [
             ["", "", ""]

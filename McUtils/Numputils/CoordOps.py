@@ -2090,11 +2090,11 @@ def fixed_angle_basis(coords, i, j, k):
         mat[..., i, x, x] = 1
         mat[..., j, x, x] = 1
         mat[..., k, x, x] = 1
-    v1 = coords[i] - coords[j]
+    v1 = coords[..., i, :] - coords[..., j, :]
     mat[..., i, :, 3] = v1
     mat[..., j, :, 4] = -v1
     mat[..., k, :, 4] = -v1
-    v2 = coords[k] - coords[j]
+    v2 = coords[..., k, :] - coords[..., j, :]
     mat[..., k, :, 5] = v2
     mat[..., j, :, 6] = -v2
     mat[..., i, :, 6] = -v2
@@ -2120,13 +2120,13 @@ def fixed_dihed_basis(coords, i, j, k, l):
         mat[..., k, x, x] = 1
         mat[..., l, x, x] = 1
     # basis for plane 1
-    v1 = coords[i] - coords[j]
-    v2 = coords[j] - coords[k]
+    v1 = coords[..., i, :] - coords[..., j, :]
+    v2 = coords[..., j, :] - coords[..., k, :]
     mat[..., i, :, 3] = v1
     mat[..., i, :, 4] = v2
     mat[..., j, :, 5] = v2
     # basis for plane 2
-    v3 = coords[l] - coords[k]
+    v3 = coords[..., l, :] - coords[..., k, :]
     mat[..., l, :, 6] = v2
     mat[..., l, :, 7] = v3
     mat[..., k, :, 8] = v2
