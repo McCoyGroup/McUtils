@@ -1,6 +1,8 @@
+import re
 
 from ..Parsers import FileStreamReader, StringStreamReader
 from ..Devutils import Logger, LogLevel, NullLogger, LoggingBlock
+from ..Graphs import TreeWrapper
 
 __all__ = [
     "Logger",
@@ -14,14 +16,14 @@ class LogParser(FileStreamReader):
     """
     A parser that will take a log file and stream it as a series of blocks
     """
-    def __init__(self, file, block_settings=None, block_level_padding=None, **kwargs):
+    def __init__(self, file, block_settings=None, binary=False, block_level_padding=None, **kwargs):
         if block_settings is None:
             block_settings = LoggingBlock.block_settings
         self.block_settings = block_settings
         if block_level_padding is None:
             block_level_padding = LoggingBlock.block_level_padding
         self.block_level_padding = block_level_padding
-        super().__init__(file, **kwargs)
+        super().__init__(file, binary=binary, **kwargs)
 
     def get_block_settings(self, block_level):
         block_level_padding = self.block_level_padding
@@ -152,6 +154,26 @@ class LogParser(FileStreamReader):
                 len(self.lines)
             )
 
+        def to_tree(self, tag_filter=None, depth=-1, combine_subtrees=True):
+            tag, lines = self.tag, self.lines
+            if depth < 0 or depth > 0:
+                lines = [
+                    b.to_tree(depth-1)
+                        if not isinstance(b, str) else
+                    b
+                    for b in lines
+                    if not (
+                            not isinstance(b, str)
+                            and self.parent.tag_match(b.tag, tag_filter)
+                    )
+                ]
+                lines = self.parent.post_process_treelist(lines, combine_subtrees=combine_subtrees)
+
+            if tag is not None:
+                return {tag:lines}
+            else:
+                return lines
+
     def get_block(self, level=0, tag=None):
         """
         :param level:
@@ -236,3 +258,42 @@ class LogParser(FileStreamReader):
                 if next_block is None:
                     return None
                 yield next_block
+
+    @classmethod
+    def tag_match(cls, tag, tag_filter):
+        if tag_filter is None or tag is None: return False
+        elif isinstance(tag_filter, (str, re.Pattern)):
+            return re.match(tag_filter, tag)
+        elif callable(tag_filter):
+            return tag_filter(tag)
+        else:
+            return tag in tag
+    @classmethod
+    def post_process_treelist(cls, res, combine_subtrees=True):
+        if len(res) == 1:
+            res = res[0]
+        elif combine_subtrees and all(isinstance(r, dict) for r in res):
+            nice_tree = {}
+            key_conflicts = False
+            for r in res:
+                for k,v in r.items():
+                    key_conflicts = k in nice_tree
+                    if key_conflicts:
+                        break
+                    nice_tree[k] = v
+                if key_conflicts:
+                    break
+            else:
+                res = nice_tree
+        return res
+    def to_tree(self, tag_filter=None, depth=-1, combine_subtrees=True):
+        res = []
+        for b in self.get_blocks():
+            if self.tag_match(b.tag, tag_filter): continue
+            if depth < 0 or depth > 0:
+                subtree = b.to_tree(tag_filter=tag_filter, depth=depth - 1, combine_subtrees=combine_subtrees)
+            else:
+                subtree = b
+            res.append(subtree)
+
+        return TreeWrapper(self.post_process_treelist(res, combine_subtrees=combine_subtrees))
