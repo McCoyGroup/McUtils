@@ -126,70 +126,70 @@ Chained conversions are not _currently_ supported, but might well become support
 [zmatrix_to_cartesian](Coordinerds/Conveniences/zmatrix_to_cartesian.md)   
 </div>
    <div class="col" markdown="1">
-[zmatrix_indices](Coordinerds/Conveniences/zmatrix_indices.md)   
+[zmatrix_unit_convert](Coordinerds/Conveniences/zmatrix_unit_convert.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[zmatrix_indices](Coordinerds/Conveniences/zmatrix_indices.md)   
+</div>
    <div class="col" markdown="1">
 [canonicalize_internal](Coordinerds/Conveniences/canonicalize_internal.md)   
 </div>
    <div class="col" markdown="1">
 [num_zmatrix_coords](Coordinerds/Conveniences/num_zmatrix_coords.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [zmatrix_embedding_coords](Coordinerds/Conveniences/zmatrix_embedding_coords.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [enumerate_zmatrices](Coordinerds/Conveniences/enumerate_zmatrices.md)   
 </div>
    <div class="col" markdown="1">
 [extract_zmatrix_internals](Coordinerds/Conveniences/extract_zmatrix_internals.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [parse_zmatrix_string](Coordinerds/Conveniences/parse_zmatrix_string.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [format_zmatrix_string](Coordinerds/Conveniences/format_zmatrix_string.md)   
 </div>
    <div class="col" markdown="1">
 [validate_zmatrix](Coordinerds/Conveniences/validate_zmatrix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [chain_zmatrix](Coordinerds/Conveniences/chain_zmatrix.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [attached_zmatrix_fragment](Coordinerds/Conveniences/attached_zmatrix_fragment.md)   
 </div>
    <div class="col" markdown="1">
 [functionalized_zmatrix](Coordinerds/Conveniences/functionalized_zmatrix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [reindex_zmatrix](Coordinerds/Conveniences/reindex_zmatrix.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [is_coordinate_list_like](Coordinerds/Conveniences/is_coordinate_list_like.md)   
 </div>
    <div class="col" markdown="1">
 [is_valid_coordinate](Coordinerds/Conveniences/is_valid_coordinate.md)   
 </div>
-   <div class="col" markdown="1">
-[PrimitiveCoordinatePicker](Coordinerds/Redundant/PrimitiveCoordinatePicker.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[RedundantCoordinateGenerator](Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
+[PrimitiveCoordinatePicker](Coordinerds/Redundant/PrimitiveCoordinatePicker.md)   
 </div>
    <div class="col" markdown="1">
-   
+[RedundantCoordinateGenerator](Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -217,9 +217,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-29b9b7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-29b9b7"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-6f53ce" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6f53ce"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-29b9b7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6f53ce" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -255,9 +255,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-f0eb41" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f0eb41"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-075eac" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-075eac"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f0eb41" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-075eac" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
