@@ -229,6 +229,9 @@ class PlotsTests(TestCase):
             ColorPalette.color_lighten(c, .2, modification_space='hsl', shift=True)
             for c in palette_base
         ]
+        print(
+            ColorPalette(lighter_palette_hsl).get_colorblindness_test_url()
+        )
 
         for n,p in {
             'base':palette_base,
@@ -244,8 +247,8 @@ class PlotsTests(TestCase):
                     style_list={'color': ColorPalette(p)},
                     plot_label=n
                 )
-            base_fig.savefig(os.path.expanduser(f"~/Desktop/palette_example_{n}.png"))
-        base_fig.show()
+            # base_fig.savefig(os.path.expanduser(f"~/Desktop/palette_example_{n}.png"))
+        # base_fig.show()
 
         # palette = ColorPalette("WarioColors")
         # base_fig = None
