@@ -11,8 +11,8 @@ data = {
             "#bd7ebe", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"
         ],
         "starters": [
-            "#5a9ca4ff","#e63900ff","#184a4aff","#73ac31ff","#ac0031ff","#623108ff","#62d5b4ff",
-            "#8b2900ff","#ffd508ff","#526229ff","#f6a400ff","#ffd57bff"
+            "#5a9ca4ff","#e63900ff","#ffd508ff","#526229ff","#62d5b4ff","#ac0031ff","#ffd57bff","#73ac31ff",
+            "#184a4aff","#8b2900ff","#f6a400ff"
         ],
         "neon":["#0bb4ff", "#ffa300", "#50e991", "#e60049", "#e6d800", "#9b19f5", "#dc0ab4", "#b3d4ff", "#00bfa0"],
         "dark-rainbow":["#b30000", "#7c1158", "#4421af", "#1a53ff", "#0d88e6", "#00b7c7", "#5ad45a", "#8be04e", "#ebdc78"],

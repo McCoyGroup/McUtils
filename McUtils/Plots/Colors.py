@@ -69,7 +69,7 @@ class ColorPalette:
 
     def get_colorblindness_test_url(self):
         return "https://davidmathlogic.com/colorblind/#" + "-".join(
-            urllib.parse.quote(c) for c in self.color_strings
+            urllib.parse.quote(c[:7] if c.startswith("#") else c[:6]) for c in self.color_strings
         )
 
     def blend(self, amount, return_color_code=True):
