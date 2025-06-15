@@ -98,6 +98,13 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
+    def get_style_list(self):
+        ...
+    @abc.abstractmethod
+    def set_style_list(self, props):
+        ...
+
+    @abc.abstractmethod
     def get_frame_visible(self):
         ...
     @abc.abstractmethod
@@ -659,6 +666,11 @@ class MPLAxes(GraphicsAxes):
         return self.obj.set_title()
     def set_plot_label(self, val, **style):
         self.obj.set_title(val, **style)
+
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        self.obj.set_prop_cycle(**props)
 
     def get_frame_visible(self):
         return (
@@ -1222,6 +1234,11 @@ class VTKAxes(GraphicsRegionAxes):
         # pos = self.renormalize(np.array([(x_max+x_min)/2, (y_max+y_min)/2, 0]))
         # self.obj.draw_text(val, )
 
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        raise NotImplementedError("style list cyclers not supported")
+
     def get_frame_visible(self):
         raise NotImplementedError("get_frame_visible")
 
@@ -1646,6 +1663,11 @@ class VPythonAxes(GraphicsAxes):
     def set_plot_label(self, val, **style):
         self.graph.title = val
 
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        raise NotImplementedError("style list cyclers not supported")
+
     def get_frame_visible(self):
         raise NotImplementedError(...)
     def set_frame_visible(self, frame_spec):
@@ -1828,6 +1850,11 @@ class VPythonAxes3D(GraphicsAxes3D):
         return self.canvas.title
     def set_plot_label(self, val, **style):
         self.canvas.title = val
+
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        raise NotImplementedError("style list cyclers not supported")
 
     def get_frame_visible(self):
         raise NotImplementedError(...)
@@ -2046,6 +2073,11 @@ class X3DAxes(GraphicsAxes3D):
         return self.title
     def set_plot_label(self, val, **style):
         self.title = val
+
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        raise NotImplementedError("style list cyclers not supported")
 
     def get_frame_visible(self):
         raise NotImplementedError(...)
@@ -2366,6 +2398,11 @@ class SceneJSONAxes(GraphicsAxes3D):
         return self.title
     def set_plot_label(self, val, **style):
         self.title = val
+
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        raise NotImplementedError("style list cyclers not supported")
 
     def get_frame_visible(self):
         raise NotImplementedError(...)

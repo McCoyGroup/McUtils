@@ -78,20 +78,45 @@ class TreeWrapper:
         fmt_tree = pprint.pformat(self.tree)
         cls = type(self)
         return f"{cls.__name__}({fmt_tree})"
+    def __len__(self):
+        return len(self.tree)
+    def keys(self):
+        if hasattr(self.tree, 'keys'):
+            return self.tree.keys()
+        else:
+            return None
+    def values(self):
+        if hasattr(self.tree, 'values'):
+            return self.tree.values()
+        else:
+            return self.tree
     def __getitem__(self, item):
         if nput.is_atomic(item):
             item = [item]
         t = self.tree
+        base_exception = None
         for k in item:
             if not isinstance(k, str) and hasattr(t, 'keys'):
-                key_iter = t.keys()
                 woof = []
-                for n,v in enumerate(key_iter):
+                for n,v in enumerate(t.keys()):
                     woof.append(v)
-                    if n > k:
+                    if n >= k:
                         break
+                else:
+                    base_exception = IndexError("index {} not valid for subtree with keys {}".format(
+                        k, t.keys()
+                    ))
+                    break
                 k = woof[-1]
-            t = t[k]
+            try:
+                t = t[k]
+            except (IndexError, KeyError) as e:
+                base_exception = e
+                break
+
+        if base_exception is not None:
+            raise IndexError(f"{item} not found in tree") from base_exception
+
 
         return t
     def bfs(self, callback, **opts):

@@ -19,3 +19,5 @@ from .WavefunctionData import *; from .WavefunctionData import __all__ as _all
 __all__ += _all
 from .PotentialData import *; from .PotentialData import __all__ as _all
 __all__ += _all
+from .ColorData import *; from .ColorData import __all__ as _all
+__all__ += _all

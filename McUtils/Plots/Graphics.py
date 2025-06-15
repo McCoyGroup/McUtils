@@ -856,6 +856,7 @@ class Graphics(GraphicsBase):
 
     axes_keys = {
         'plot_label',
+        'style_list',
         'plot_legend',
         'legend_style'
         'axes_labels',
@@ -881,6 +882,7 @@ class Graphics(GraphicsBase):
     def set_options(self,
                     axes_labels=None,
                     plot_label=None,
+                    style_list=None,
                     plot_range=None,
                     plot_legend=None,
                     legend_style=None,
@@ -907,6 +909,7 @@ class Graphics(GraphicsBase):
 
         opts = (
             ('plot_label', plot_label),
+            ('style_list', style_list),
             ('plot_legend', plot_legend),
             ('legend_style', legend_style),
             ('axes_labels', axes_labels),
@@ -942,6 +945,15 @@ class Graphics(GraphicsBase):
     def plot_label(self, value):
         self._update_copy_opt('plot_label', value)
         self._prop_manager.plot_label = value
+
+
+    @property
+    def style_list(self):
+        return self.parent._prop_manager.style_list
+    @style_list.setter
+    def style_list(self, value):
+        self._update_copy_opt('style_list', value)
+        self.parent._prop_manager.style_list = value
 
     @property
     def plot_legend(self):
@@ -1209,6 +1221,7 @@ class Graphics3D(Graphics):
                  animate=None,
                  axes_labels=None,
                  plot_label=None,
+                 style_list=None,
                  plot_range=None,
                  plot_legend=None,
                  ticks=None,
@@ -1230,6 +1243,7 @@ class Graphics3D(Graphics):
             subplot_kw=subplot_kw,
             axes_labels=axes_labels,
             plot_label=plot_label,
+            style_list=style_list,
             plot_range=plot_range,
             plot_legend=plot_legend,
             ticks=ticks,
