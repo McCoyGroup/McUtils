@@ -1,4 +1,5 @@
 import numpy as np
+import urllib.parse
 from ..Data import ColorData
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -65,6 +66,11 @@ class ColorPalette:
     def __eq__(self, other):
         if not hasattr(other, "color_strings"): return False
         return self.color_strings == other.color_strings
+
+    def get_colorblindness_test_url(self):
+        return "https://davidmathlogic.com/colorblind/#" + "-".join(
+            urllib.parse.quote(c) for c in self.color_strings
+        )
 
     def blend(self, amount, return_color_code=True):
         insertion_index = np.searchsorted(self.abcissae, amount)
