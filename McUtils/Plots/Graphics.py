@@ -907,6 +907,10 @@ class Graphics(GraphicsBase):
 
         super().set_options(prolog=prolog, epilog=epilog, **parent_opts)
 
+        if self is self.parent:
+            plot_label_padding = self.get_plot_label_padding(plot_label)
+            axes_label_padding = self.get_axes_label_padding(axes_labels)
+            padding = self.resolve_default_padding(padding, [plot_label_padding, axes_label_padding])
         opts = (
             ('plot_label', plot_label),
             ('style_list', style_list),
@@ -932,6 +936,74 @@ class Graphics(GraphicsBase):
             oval = self._get_def_opt(oname, oval, {})
             if oval is not None:
                 setattr(self, oname, oval)
+
+    padding_line_height = 50
+    def get_plot_label_padding(self, plot_label):
+        p = self.padding_line_height
+        if plot_label is None:
+            return [[None, None], [None, None]]
+        else:
+            return [[None, None], [None, p]]
+    def get_axes_label_padding(self, axes_labels):
+        p = self.padding_line_height
+        if axes_labels is None:
+            return [[None, None], [None, None]]
+        else:
+            x,y = axes_labels
+            return [
+                [None, None] if y is None or len(y) == 0 else [p, None],
+                [None, None] if x is None or len(x) == 0 else [p, None]
+            ]
+
+    def resolve_default_padding(self, padding, modifications=None):
+        base_padding = self._get_def_opt('padding', None, {})
+        if padding is None:
+            padding = base_padding
+            if modifications is not None:
+                ((l,r), (b, t)) = padding
+                for mods in modifications:
+                    ((l_m,r_m), (b_m, t_m)) = mods
+                    l = l + (l_m if l_m is not None else 0)
+                    r = r + (r_m if r_m is not None else 0)
+                    b = b + (b_m if b_m is not None else 0)
+                    t = t + (t_m if t_m is not None else 0)
+                padding = ((l,r), (b, t))
+        else:
+            if isinstance(padding, (int, np.integer)):
+                padding = [[padding, padding], [padding, padding]]
+            lr, bt = padding
+            if lr is None or isinstance(lr, (int, np.integer)):
+                lr = [[lr, lr]]
+            if bt is None or isinstance(bt, (int, np.integer)):
+                bt = [[bt, bt]]
+            l,r = lr
+            b,t = bt
+
+            ((l_b,r_b), (b_b, t_b)) = base_padding
+            l_none = l is None
+            if l_none: l = l_b
+            r_none = r is None
+            if r_none: r = r_b
+            b_none = b is None
+            if b_none: b = b_b
+            t_none = t is None
+            if t_none: t = t_b
+            if modifications is not None:
+                for mods in modifications:
+                    ((l_m,r_m), (b_m, t_m)) = mods
+                    if l_none:
+                        l = l + (l_m if l_m is not None else 0)
+                    if r_none:
+                        r = r_b + (r_m if r_m is not None else 0)
+                    if b_none:
+                        b = b_b + (b_m if b_m is not None else 0)
+                    if t_none:
+                        t = t_b + (t_m if r_m is not None else 0)
+            padding = ((l,r), (b, t))
+
+        return padding
+
+
 
     @property
     def artists(self):
