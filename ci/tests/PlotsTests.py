@@ -229,16 +229,15 @@ class PlotsTests(TestCase):
             ColorPalette.color_lighten(c, .2, modification_space='hsl', shift=True)
             for c in palette_base
         ]
-        print(
-            ColorPalette(lighter_palette_hsl).get_colorblindness_test_url()
-        )
 
         for n,p in {
+            'starters':'starters',
             'base':palette_base,
             'lighter':lighter_palette,
             'lighter_hsl':lighter_palette_hsl,
         }.items():
             base_fig = None
+            print(ColorPalette(p).get_colorblindness_test_url())
             for i in range(6):
                 base_fig = Plot(
                     grid,
