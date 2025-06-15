@@ -407,6 +407,17 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
 </div>
    <div class="col" markdown="1">
+[ColorPalette](Plots/Colors/ColorPalette.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
    
 </div>
 </div>
@@ -432,9 +443,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-275fd4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-275fd4"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-073803" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-073803"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-275fd4" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-073803" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -446,15 +457,16 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 - [ListTriDensityPlot](#ListTriDensityPlot)
 - [ListTriContourPlot](#ListTriContourPlot)
 - [Animation](#Animation)
-- [VPythin](#VPythin)
+- [X3D](#X3D)
+- [ColorPalettes](#ColorPalettes)
 - [PlotDelayed](#PlotDelayed)
 - [Plot3DDelayed](#Plot3DDelayed)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-4cc3a3" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4cc3a3"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-658230" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-658230"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4cc3a3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-658230" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -657,12 +669,77 @@ class PlotsTests(TestCase):
         plot.close()
 ```
 
-#### <a name="VPythin">VPythin</a>
+#### <a name="X3D">X3D</a>
 ```python
-    def test_VPythin(self):
+    def test_X3D(self):
         plot = Graphics3D(backend="x3d", image_size=[1500, 500], background='white')
         Sphere(color='red').plot(plot)
         plot.show()
+```
+
+#### <a name="ColorPalettes">ColorPalettes</a>
+```python
+    def test_ColorPalettes(self):
+        rgb_code = [200, 10, 25]
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'xyz')
+        og = ColorPalette.color_convert(huh, 'xyz', 'rgb')
+        print(huh, og)
+
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
+        og = ColorPalette.color_convert(huh, 'hsl', 'rgb')
+        print(huh, og, ColorPalette.rgb_code(og))
+
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsv')
+        og = ColorPalette.color_convert(huh, 'hsv', 'rgb')
+        print(huh, og, ColorPalette.rgb_code(og))
+
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'lab')
+        og = ColorPalette.color_convert(huh, 'lab', 'rgb')
+        print(huh, og, ColorPalette.rgb_code(og))
+
+        print(ColorPalette("pastel").blend(.2))
+        # return
+
+        grid = np.linspace(0, 2 * np.pi, 200)
+        # base_fig = None
+        # for i in range(6):
+        #     base_fig = Plot(
+        #         grid,
+        #         i + np.sin((i + 1) * grid),
+        #         figure=base_fig,
+        #         style_list={'color': ColorPalette("pastel")}
+        #     )
+
+        palette_base = [
+                    "#3a2652", "#dcca00", "#a15547",
+                    "#009b5d", "#14013d",
+                    "#8d0001", "#494947"
+                ]
+        lighter_palette = [
+            ColorPalette.color_lighten(c, .2, shift=True)
+            for c in palette_base
+        ]
+        lighter_palette_hsl = [
+            ColorPalette.color_lighten(c, .2, modification_space='hsl', shift=True)
+            for c in palette_base
+        ]
+
+        for n,p in {
+            'base':palette_base,
+            'lighter':lighter_palette,
+            'lighter_hsl':lighter_palette_hsl,
+        }.items():
+            base_fig = None
+            for i in range(6):
+                base_fig = Plot(
+                    grid,
+                    i + np.sin((i + 1) * grid),
+                    figure=base_fig,
+                    style_list={'color': ColorPalette(p)},
+                    plot_label=n
+                )
+            base_fig.savefig(os.path.expanduser(f"~/Desktop/palette_example_{n}.png"))
+        base_fig.show()
 ```
 
 #### <a name="PlotDelayed">PlotDelayed</a>
