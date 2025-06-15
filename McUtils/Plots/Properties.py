@@ -2,6 +2,7 @@
 Handles all the nastiness of Matplotlib properties so that we can use a more classically python plotting method
 """
 
+from .. import Devutils as dev
 from .Backends import DPI_SCALING
 from .Styling import Styled, PlotLegend
 
@@ -25,6 +26,7 @@ class GraphicsPropertyManager:
         self.axes = axes
         self._figure_label = None
         self._plot_label = None
+        self._style_lists = None
         self._plot_legend = None
         self._legend_style = None
         self._axes_labels = None
@@ -72,6 +74,28 @@ class GraphicsPropertyManager:
             self.axes.set_plot_label(*label.val, **label.opts)
         else:
             self.axes.set_plot_label(label)
+
+    @property
+    def style_list(self):
+        return self._style_lists
+    @style_list.setter
+    def style_list(self, props):
+        if props is not None:
+            updated = False
+            if self._style_lists is None:
+                updated = True
+                self._style_lists = props
+            else:
+                for k,v in props.items():
+                    if (
+                            k not in self._style_lists
+                            or v != self._style_lists[k]
+                    ):
+                        print(k, v, self._style_lists[k], v == self._style_lists[k])
+                        self._style_lists[k] = v
+                        updated = True
+            if updated:
+                self.axes.set_style_list(props)
 
     # set plot legend
     @property

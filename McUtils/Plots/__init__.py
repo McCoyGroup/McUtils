@@ -38,3 +38,5 @@ from .SceneJSON import *; from .SceneJSON import __all__ as exposed
 __all__ += exposed
 from .X3DInterface import *; from .X3DInterface import __all__ as exposed
 __all__ += exposed
+from .Colors import *; from .Colors import __all__ as exposed
+__all__ += exposed

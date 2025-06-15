@@ -178,11 +178,84 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_ListTriContourPlot.gif"))
         plot.close()
 
-    @debugTest
-    def test_VPythin(self):
+    @validationTest
+    def test_X3D(self):
         plot = Graphics3D(backend="x3d", image_size=[1500, 500], background='white')
         Sphere(color='red').plot(plot)
         plot.show()
+
+    @debugTest
+    def test_ColorPalettes(self):
+        rgb_code = [200, 10, 25]
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'xyz')
+        og = ColorPalette.color_convert(huh, 'xyz', 'rgb')
+        print(huh, og)
+
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
+        og = ColorPalette.color_convert(huh, 'hsl', 'rgb')
+        print(huh, og, ColorPalette.rgb_code(og))
+
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsv')
+        og = ColorPalette.color_convert(huh, 'hsv', 'rgb')
+        print(huh, og, ColorPalette.rgb_code(og))
+
+        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'lab')
+        og = ColorPalette.color_convert(huh, 'lab', 'rgb')
+        print(huh, og, ColorPalette.rgb_code(og))
+
+        print(ColorPalette("pastel").blend(.2))
+        # return
+
+        grid = np.linspace(0, 2 * np.pi, 200)
+        # base_fig = None
+        # for i in range(6):
+        #     base_fig = Plot(
+        #         grid,
+        #         i + np.sin((i + 1) * grid),
+        #         figure=base_fig,
+        #         style_list={'color': ColorPalette("pastel")}
+        #     )
+
+        palette_base = [
+                    "#3a2652", "#dcca00", "#a15547",
+                    "#009b5d", "#14013d",
+                    "#8d0001", "#494947"
+                ]
+        lighter_palette = [
+            ColorPalette.color_lighten(c, .2, shift=True)
+            for c in palette_base
+        ]
+        lighter_palette_hsl = [
+            ColorPalette.color_lighten(c, .2, modification_space='hsl', shift=True)
+            for c in palette_base
+        ]
+
+        for n,p in {
+            'base':palette_base,
+            'lighter':lighter_palette,
+            'lighter_hsl':lighter_palette_hsl,
+        }.items():
+            base_fig = None
+            for i in range(6):
+                base_fig = Plot(
+                    grid,
+                    i + np.sin((i + 1) * grid),
+                    figure=base_fig,
+                    style_list={'color': ColorPalette(p)},
+                    plot_label=n
+                )
+            base_fig.savefig(os.path.expanduser(f"~/Desktop/palette_example_{n}.png"))
+        base_fig.show()
+
+        # palette = ColorPalette("WarioColors")
+        # base_fig = None
+        # for i in range(10):
+        #     base_fig = Plot(
+        #         grid,
+        #         i + np.sin((i + 1) * grid),
+        #         figure=base_fig,
+        #         color=palette.blend(i / 9)
+        #     )
 
     # @validationTest
     # def test_Plot3D_adaptive(self):

@@ -1,3 +1,4 @@
+import numpy as np
 
 from Peeves.TestUtils import *
 from unittest import TestCase
