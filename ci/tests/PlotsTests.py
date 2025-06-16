@@ -184,7 +184,7 @@ class PlotsTests(TestCase):
         Sphere(color='red').plot(plot)
         plot.show()
 
-    @debugTest
+    @validationTest
     def test_ColorPalettes(self):
         rgb_code = [200, 10, 25]
         huh = ColorPalette.color_convert(rgb_code, 'rgb', 'xyz')
@@ -259,6 +259,32 @@ class PlotsTests(TestCase):
         #         color=palette.blend(i / 9)
         #     )
 
+    @debugTest
+    def test_ColorMaps(self):
+        print(
+            ColorPalette('pastel').blend([
+                0, .2, .5, 1.1
+            ])
+        )
+
+        print(
+            ColorPalette('pastel')([0, .2, .5, 1.1])
+        )
+
+        grid_x = np.linspace(0, 2*np.pi, 100)
+        grid_y = np.linspace(0, 2*np.pi, 100)
+        mg = np.meshgrid(grid_x, grid_y)
+        grid_z = np.sum(np.meshgrid(np.sin(grid_x), np.cos(grid_y)), axis=0)
+        ContourPlot(
+            *mg,
+            grid_z,
+            cmap=ColorPalette('starters').as_colormap(
+                levels=np.linspace(0, 1, 20)**2,
+                cmap_type='interpolated'
+            ),
+            levels=50,
+            colorbar=True
+        ).show()
     # @validationTest
     # def test_Plot3D_adaptive(self):
     #     f = lambda pt: np.sin(pt[0]) + np.cos(pt[1])

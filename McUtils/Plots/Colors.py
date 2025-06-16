@@ -1,3 +1,5 @@
+import uuid
+
 import numpy as np
 import urllib.parse
 from ..Data import ColorData
@@ -23,6 +25,9 @@ class ColorPalette:
         self.abcissae = np.asanyarray(blend_spacings)
         self.cycle = cycle
 
+    def __hash__(self):
+        return hash((type(self), self.color_strings))
+
     @classmethod
     def prep_color_palette(cls, colors, color_space='rgb', lab_colors=None):
         if lab_colors is not None:
@@ -47,7 +52,7 @@ class ColorPalette:
                 rgb_colors = colors
             color_lists = [cls.rgb_code(c, 2) for c in rgb_colors]
 
-        return color_lists, lab_colors
+        return tuple(color_lists), lab_colors
 
 
     @classmethod
@@ -72,27 +77,107 @@ class ColorPalette:
             urllib.parse.quote(c[:7] if c.startswith("#") else c[:6]) for c in self.color_strings
         )
 
-    def blend(self, amount, return_color_code=True):
-        insertion_index = np.searchsorted(self.abcissae, amount)
-        if insertion_index == len(self.abcissae):
+    def blend(self, amount, modification_space='lab', rescale=False, return_color_code=True):
+        amount = np.asanyarray(amount)
+        smol = amount.ndim == 0
+        if smol: amount = np.array([amount])
+        insertion_indices = np.searchsorted(self.abcissae, amount)
+        terminals = insertion_indices == len(self.abcissae)
+        starts = insertion_indices == 0
+        rems = np.logical_not(np.logical_or(terminals, starts))
+        codes = [""] * len(amount)
+        new_colors = np.empty((len(amount), len(self.lab_colors[0])), dtype=float)
+        if return_color_code:
+            term_pos = np.where(terminals)
+            if len(term_pos) > 0:
+                for i in term_pos[0]:
+                    codes[i] = self.color_strings[-1]
+            start_pos = np.where(starts)
+            if len(start_pos) > 0:
+                for i in start_pos[0]:
+                    codes[i] = self.color_strings[0]
+        else:
+            if terminals.any():
+                color = np.array(self.parse_rgb_code(self.color_strings[-1]))
+                new_colors[terminals] = color[np.newaxis]
+            if starts.any():
+                color = np.array(self.parse_rgb_code(self.color_strings[0]))
+                new_colors[starts] = color[np.newaxis]
+        if rems.any():
+            rem_inds = insertion_indices[rems]
+            x = self.abcissae[rem_inds - 1,]
+            y = self.abcissae[rem_inds,]
+            d = ((amount[rems,] - x) / (y - x))[:, np.newaxis]
+
+            colors = self.lab_colors
+            if modification_space != 'lab':
+                colors = self.color_convert(colors, 'lab', modification_space).T
+            new_lab = colors[rem_inds - 1,] * (1 - d) + colors[rem_inds,] * d
+            rgb = self.color_convert(new_lab.T, modification_space, 'rgb').T
+
             if return_color_code:
-                return self.color_strings[-1]
+                rgb = self.rgb_code(rgb.T)
+                rems = np.where(rems)[0]
+                for n,r in enumerate(rgb):
+                    codes[rems[n]] = r
             else:
-                return self.parse_rgb_code(self.color_strings[-1])
-        elif insertion_index == 0:
-            if return_color_code:
-                return self.color_strings[0]
-            else:
-                return self.parse_rgb_code(self.color_strings[0])
+                new_colors[rems,] = rgb
 
-        x = self.abcissae[insertion_index - 1]
-        y = self.abcissae[insertion_index]
-        d = (amount - x) / (y - x)
+        if return_color_code:
+            if smol: codes = codes[0]
+            return codes
+        else:
+            if rescale: new_colors = self.color_rescale(new_colors, 'rgb')
+            if smol: new_colors = new_colors[0]
+            return new_colors
 
-        new_lab = self.lab_colors[insertion_index - 1] * (1 - d) + self.lab_colors[insertion_index] * d
+    def as_colormap(self, levels=None, cmap_type='list', name=None, **opts):
+        from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
-        rgb = self.color_convert(new_lab, 'lab', 'rgb')
-        return self.rgb_code(rgb)
+        if levels is None:
+            levels = np.linspace(0, 1, len(self.color_strings))
+            vals = np.array(self.parse_rgb_code(self.color_strings)) / 255
+        else:
+            if nput.is_int(levels):
+                levels = np.linspace(0, 1, levels)
+            vals = self(levels)
+
+        if dev.str_is(cmap_type, 'list'):
+            cmap = np.concatenate([
+                vals,
+                np.ones((len(vals), 1)),
+                ],
+                axis=1
+            )
+            new_map = ListedColormap(cmap, **opts)
+        elif dev.str_is(cmap_type, 'interpolated'):
+            cmap_dict = {
+                'red':np.concatenate([
+                    levels[:, np.newaxis],
+                    vals[:, (0,)],
+                    vals[:, (0,)]
+                ],axis=1),
+                'green':np.concatenate([
+                    levels[:, np.newaxis],
+                    vals[:, (1,)],
+                    vals[:, (1,)]
+                ],axis=1),
+                'blue':np.concatenate([
+                    levels[:, np.newaxis],
+                    vals[:, (2,)],
+                    vals[:, (2,)]
+                ],axis=1)
+            }
+            if name is None:
+                name = '-'.join(['cmap']+str(uuid.uuid4()).split("-")[:2])
+            new_map = LinearSegmentedColormap(name, segmentdata=cmap_dict, **opts)
+        else:
+            new_map: ListedColormap|LinearSegmentedColormap = cmap_type(levels, vals, **opts)
+
+        return new_map
+
+    def __call__(self, amount, rescale=True, return_color_code=False):
+        return self.blend(amount, rescale=rescale, return_color_code=return_color_code)
 
     @classmethod
     def color_normalize(cls, color_list, color_space='rgb'):
@@ -106,6 +191,15 @@ class ColorPalette:
         elif color_list in {'hsl', 'hsv'}:
             color_list = np.clip(color_list, 0, 1)
         if smol: color_list = color_list[:, 0]
+        return color_list
+
+    @classmethod
+    def color_rescale(cls, color_list, color_space='rgb'):
+        color_list = np.asanyarray(color_list)
+        if color_space == 'rgb':
+            color_list = color_list / 255
+        elif color_space == 'xyz':
+            color_list = color_list / 100
         return color_list
     @classmethod
     def color_modify(cls, color, modification_function, color_space='rgb', modification_space='lab', clip=True):
@@ -170,9 +264,6 @@ class ColorPalette:
                 lab_colors=self.lab_colors[item]
             )
 
-    def __call__(self, amount):
-        return self.blend(amount)
-
 
     @classmethod
     def rgb_code(cls, rgb, padding=2):
@@ -185,6 +276,18 @@ class ColorPalette:
         return f"#{rgb[0]:0>{padding}x}{rgb[1]:0>{padding}x}{rgb[2]:0>{padding}x}"
     @classmethod
     def parse_rgb_code(cls, code, padding=None, return_padding=False):
+        if not isinstance(code, str):
+            if not return_padding:
+                return [
+                    cls.parse_rgb_code(c, padding=padding, return_padding=False)
+                    for c in code
+                ]
+            else:
+                padding, _ = cls.parse_rgb_code(code[0], padding=padding, return_padding=True)
+                return [
+                    cls.parse_rgb_code(c, padding=padding, return_padding=False)
+                    for c in code
+                ], padding
         if code[0] == "#":
             code = code[1:]
         if padding is None:
