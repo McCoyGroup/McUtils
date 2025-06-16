@@ -259,7 +259,7 @@ class PlotsTests(TestCase):
         #         color=palette.blend(i / 9)
         #     )
 
-    @debugTest
+    @validationTest
     def test_ColorMaps(self):
         print(
             ColorPalette('pastel').blend([
@@ -290,6 +290,16 @@ class PlotsTests(TestCase):
     #     f = lambda pt: np.sin(pt[0]) + np.cos(pt[1])
     #     plot = Plot3D(f, [0, 2*np.pi], [0, 2*np.pi])
     #     plot.show()
+
+    @debugTest
+    def test_PropertySetting(self):
+        StickPlot(
+            np.linspace(0, 2*np.pi, 35),
+            np.sin(np.linspace(0, 2*np.pi, 35)),
+            color='red',
+            label='spec_1',
+            plot_legend=True
+        ).show()
 
     @validationTest
     def test_PlotDelayed(self):

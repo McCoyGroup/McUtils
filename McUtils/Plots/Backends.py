@@ -186,6 +186,11 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     def legend(self, **opts):
         raise NotImplementedError("legend")
 
+    def get_graphics_properties(self, obj, property=None):
+        raise NotImplementedError("get_graphics_properties")
+    def set_graphics_properties(self, obj, **props):
+        raise NotImplementedError("set_graphics_properties")
+
     @abc.abstractmethod
     def draw_line(self, points, **styles):
         ...
@@ -269,6 +274,8 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
         ...
+    def create_colorbar(self, graphics, axes, norm=None, cmap=None, **kw):
+        raise NotImplementedError("create_colorbar")
     def add_axes(self, ax) -> 'GraphicsAxes':
         if self.axes is None: self.axes = []
         if not isinstance(ax, self.Axes): ax = self.Axes(ax)
@@ -855,6 +862,15 @@ class MPLAxes(GraphicsAxes):
 
     def legend(self, **opts):
         return self.get_plotter('legend')(**opts)
+
+    def get_graphics_properties(self, obj, property=None):
+        from matplotlib.artist import getp
+
+        return getp(obj, property=property)
+    def set_graphics_properties(self, obj, **props):
+        from matplotlib.artist import setp
+
+        return setp(obj, **props)
 
     def draw_line(self, points, **styles):
         points = np.asanyarray(points)

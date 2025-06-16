@@ -107,8 +107,10 @@ class GraphicsPropertyManager:
 
         if PlotLegend.could_be_legend(legend):
             self._plot_legend = PlotLegend.construct(legend)
+        elif legend is True:
+            pass
         else:
-            raise NotImplementedError("plot legends not properly supported..")
+            raise NotImplementedError("inferred legends not properly supported..")
             artists = self.graphics.artists
             if artists is not None:
                 if legend is None:
