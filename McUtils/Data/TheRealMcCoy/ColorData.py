@@ -11,14 +11,14 @@ data = {
             "#bd7ebe", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"
         ],
         "starters": [
-            "#5a9ca4ff","#e63900ff","#ffd508ff","#526229ff","#62d5b4ff","#ac0031ff","#ffd57bff","#73ac31ff",
-            "#184a4aff","#8b2900ff","#f6a400ff"
+            "#5a9ca4","#e63900","#ffd508","#526229","#62d5b4","#ac0031","#ffd57b","#73ac31",
+            "#184a4a","#8b2900","#f6a400"
         ],
         "neon":["#0bb4ff", "#ffa300", "#50e991", "#e60049", "#e6d800", "#9b19f5", "#dc0ab4", "#b3d4ff", "#00bfa0"],
         "dark-rainbow":["#b30000", "#7c1158", "#4421af", "#1a53ff", "#0d88e6", "#00b7c7", "#5ad45a", "#8be04e", "#ebdc78"],
         "pikafree": [
-            "#313152ff","#f6e652ff","#8383bdff","#f6bd20ff","#6abdcdff","#c52018ff","#bdbde6ff",
-            "#de3131ff","#fff6a4ff","#41414aff","#9c5200ff","#ff9cb4ff","#623108ff","#623139ff"
+            "#313152","#f6e652","#8383bd","#f6bd20","#6abdcd","#c52018","#bdbde6",
+            "#de3131","#fff6a4","#41414a","#9c5200","#ff9cb4","#623108","#623139"
         ]
     },
     "Gradients": {
