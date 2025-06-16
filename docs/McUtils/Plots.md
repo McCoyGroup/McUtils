@@ -443,9 +443,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-bf2dd7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-bf2dd7"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-36a71e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-36a71e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-bf2dd7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-36a71e" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -459,14 +459,15 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 - [Animation](#Animation)
 - [X3D](#X3D)
 - [ColorPalettes](#ColorPalettes)
+- [ColorMaps](#ColorMaps)
 - [PlotDelayed](#PlotDelayed)
 - [Plot3DDelayed](#Plot3DDelayed)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-1d1783" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1d1783"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-bd0389" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bd0389"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1d1783" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bd0389" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -740,6 +741,35 @@ class PlotsTests(TestCase):
                     style_list={'color': ColorPalette(p)},
                     plot_label=n
                 )
+```
+
+#### <a name="ColorMaps">ColorMaps</a>
+```python
+    def test_ColorMaps(self):
+        print(
+            ColorPalette('pastel').blend([
+                0, .2, .5, 1.1
+            ])
+        )
+
+        print(
+            ColorPalette('pastel')([0, .2, .5, 1.1])
+        )
+
+        grid_x = np.linspace(0, 2*np.pi, 100)
+        grid_y = np.linspace(0, 2*np.pi, 100)
+        mg = np.meshgrid(grid_x, grid_y)
+        grid_z = np.sum(np.meshgrid(np.sin(grid_x), np.cos(grid_y)), axis=0)
+        ContourPlot(
+            *mg,
+            grid_z,
+            cmap=ColorPalette('starters').as_colormap(
+                levels=np.linspace(0, 1, 20)**2,
+                cmap_type='interpolated'
+            ),
+            levels=50,
+            colorbar=True
+        ).show()
 ```
 
 #### <a name="PlotDelayed">PlotDelayed</a>
