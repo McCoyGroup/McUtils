@@ -20,6 +20,7 @@ __all__ = [
     "canonicalize_internal",
     "num_zmatrix_coords",
     "zmatrix_embedding_coords",
+    "set_zmatrix_embedding",
     "enumerate_zmatrices",
     "extract_zmatrix_internals",
     "parse_zmatrix_string",
@@ -116,19 +117,34 @@ def zmatrix_indices(zmat, coords):
         for c in coords
     ]
 
-def zmatrix_embedding_coords(zmat_or_num_atoms):
-    if not nput.is_int(zmat_or_num_atoms):
-        zmat_or_num_atoms = len(zmat_or_num_atoms) + (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
-    n: int = zmat_or_num_atoms
-
-    if n < 1:
-        return []
-    elif n == 1:
-        return [0, 1, 2]
-    elif n == 2:
-        return [0, 1, 2, 4, 5]
+emb_pos_map = [
+    (0,1),
+    (0,2),
+    (0,3),
+    None,
+    (1,2),
+    (1,3),
+    None,
+    None,
+    (2,3)
+]
+def zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False):
+    if array_inds:
+        base_inds = zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False)
+        return [emb_pos_map[i] for i in base_inds]
     else:
-        return [0, 1, 2, 4, 5, 8]
+        if not nput.is_int(zmat_or_num_atoms):
+            zmat_or_num_atoms = len(zmat_or_num_atoms) + (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
+        n: int = zmat_or_num_atoms
+
+        if n < 1:
+            return []
+        elif n == 1:
+            return [0, 1, 2]
+        elif n == 2:
+            return [0, 1, 2, 4, 5]
+        else:
+            return [0, 1, 2, 4, 5, 8]
 
 def num_zmatrix_coords(zmat_or_num_atoms, strip_embedding=True):
     if not nput.is_int(zmat_or_num_atoms):
@@ -523,6 +539,15 @@ def attached_zmatrix_fragment(n, fragment, attachment_points):
         [attachment_points[-r-1] if r < 0 else n+r for r in row]
         for row in fragment
     ]
+
+def set_zmatrix_embedding(zmat, embedding=None):
+    zmat = np.array(zmat)
+    if embedding is None:
+        embedding = [-1, -2, -3, -1, -2, -1]
+    emb_pos = zmatrix_embedding_coords(zmat, array_inds=True)
+    for (i,j),v in zip(emb_pos, embedding):
+        zmat[..., i,j] = v
+    return zmat
 
 def functionalized_zmatrix(
         base_zm,

@@ -1017,7 +1017,13 @@ def nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=Non
     if is_numeric(B) and B == 0:
         return 0
     a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
-    b_ax = [B.ndim + b if b < 0 else b for b in b_ax]
+    b_ax = [
+        (B.ndim + b - (len(partition) - 1))
+            if b < 0 else
+        b #+ (len(partition) - 1)
+        for b in b_ax
+    ]
+    # account for increasing dimension with longer partitions
     for i in reversed(partition):
         if len(A_expansion) <= i - 1:
             return 0
@@ -1075,6 +1081,7 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
     for i,d in enumerate(derivs):
         if not is_zero(d):
             shared = d.ndim - (i + 2)
+            break
 
     vals = [
         np.asanyarray(d) if not is_zero(d) else d
@@ -1095,7 +1102,7 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
             if axes is not None:
                 target = axes[-1]
                 if target > 0:
-                    target = target + o
+                    target = target + (o - 1) # indexes past end of array otherwise
                 for i in range(o):
                     term = np.moveaxis(term, shared, target)
         terms.append(term)
