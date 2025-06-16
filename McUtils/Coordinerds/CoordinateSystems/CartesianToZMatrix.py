@@ -38,7 +38,11 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
             ordering = range(len(coords[0]))
         base_shape = coords.shape
         new_coords = np.reshape(coords, (np.prod(base_shape[:-1]),) + base_shape[-1:])
-        new_coords, ops = self.convert(new_coords, ordering=ordering, use_rad=use_rad, return_derivs=return_derivs)
+        new_coords, ops = self.convert(new_coords,
+                                       ordering=ordering,
+                                       use_rad=use_rad,
+                                       return_derivs=return_derivs,
+                                       **kw)
         single_coord_shape = (base_shape[-2]-1, new_coords.shape[-1])
         new_shape = base_shape[:-2] + single_coord_shape
         new_coords = np.reshape(new_coords, new_shape)
@@ -54,7 +58,9 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                 ops['derivs'] = reshaped_ders
         return new_coords, ops
 
-    def convert(self, coords, *, ordering, use_rad=True, return_derivs=None, order=None, **kw):
+    def convert(self, coords, *, ordering, use_rad=True, return_derivs=None, order=None,
+                strip_embedding=False,
+                **kw):
         """The ordering should be specified like:
 
         [
@@ -101,48 +107,83 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         # given coordinate
         om = 1 + np.argsort(ol[:, 0])
         if return_derivs:
-            if order is None: order = 1
+            og_ord = None
+            if order is None:
+                order = 1
+            elif isinstance(order, list):
+                og_ord = order
+                order = max(order)
 
-            specs = [
-                p
-                for n,(i, j, k, l) in enumerate(ordering[1:])
-                for p in (
-                        [(i, j), (i, j, k), (i, j, k, l)]
-                            if n > 1 else
-                        [(i, j), (i, j, k)]
-                            if n > 0 else
-                        [(i,j)]
-                )
-            ]
-            if len(specs) > 3:
-                ix = np.concatenate([[0, 1], np.arange(3, len(specs), 3)])
-                jx = np.concatenate([[2], np.arange(4, len(specs), 3)])
-                kx = np.arange(5, len(specs), 3)
-            elif len(specs) > 1:
-                ix = [0, 1]
-                jx = [2]
-                kx = None
+            if strip_embedding:
+                specs = [
+                    p
+                    for n,(i, j, k, l) in enumerate(ordering[1:])
+                    for p in (
+                            [(i, j), (i, j, k), (i, j, k, l)]
+                                if n > 1 else
+                            [(i, j), (i, j, k)]
+                                if n > 0 else
+                            [(i,j)]
+                    )
+                ]
+                if len(specs) > 3:
+                    ix = np.concatenate([[0, 1], np.arange(3, len(specs), 3)])
+                    jx = np.concatenate([[2], np.arange(4, len(specs), 3)])
+                    kx = np.arange(5, len(specs), 3)
+                elif len(specs) > 1:
+                    ix = [0, 1]
+                    jx = [2]
+                    kx = None
+                else:
+                    ix = [0]
+                    jx = None
+                    kx = None
             else:
-                ix = [0]
-                jx = None
-                kx = None
+                specs = [
+                    p
+                    for n, (i, j, k, l) in enumerate(ordering[1:])
+                    for p in (
+                        [(i, j), (i, j, k), (i, j, k, l)]
+                    )
+                ]
+                ix = np.arange(0, len(specs), 3)
+                jx = np.arange(1, len(specs), 3)
+                kx = np.arange(2, len(specs), 3)
 
             base_conv = nput.internal_coordinate_tensors(coords, specs, order=order, angle_ordering='ijk')
-            dists = base_conv[0][ix,]
-            angles = np.concatenate([[0]] + ([base_conv[0][jx,]] if jx is not None else []))
-            diheds = np.concatenate([[0, 0]] + ([base_conv[0][kx,]] if kx is not None else []))
+            if strip_embedding:
+                dists = base_conv[0][ix,]
+                angles = np.concatenate([[0]] + ([base_conv[0][jx,]] if jx is not None else []))
+                diheds = np.concatenate([[0, 0]] + ([base_conv[0][kx,]] if kx is not None else []))
+            else:
+                dists = base_conv[0][ix,]
+                angles = base_conv[0][jx,]
+                diheds = base_conv[0][kx,]
+
 
             base_derivs = base_conv[1:]
             derivs = []
             nats = coords.shape[-2]
             for n,d in enumerate(base_derivs):
                 deriv = np.zeros(coords.shape[:-2] + ((nats)*3,)*(n+1) + ((nats-1) * 3,))
-                deriv[..., np.arange(0, deriv.shape[-1], 3)] = d[..., ix]
-                if jx is not None:
-                    deriv[..., np.arange(1, deriv.shape[-1], 3)] = np.pad(d[..., jx], [[0, 0]] * (d.ndim-1) + [[1, 0]])
-                if kx is not None:
-                    deriv[..., np.arange(2, deriv.shape[-1], 3)] = np.pad(d[..., kx], [[0, 0]] * (d.ndim-1) + [[2, 0]])
+                if strip_embedding:
+                    deriv[..., np.arange(0, deriv.shape[-1], 3)] = d[..., ix]
+                    if jx is not None:
+                        deriv[..., np.arange(1, deriv.shape[-1], 3)] = np.pad(d[..., jx],
+                                                                              [[0, 0]] * (d.ndim - 1) + [[1, 0]])
+                    if kx is not None:
+                        deriv[..., np.arange(2, deriv.shape[-1], 3)] = np.pad(d[..., kx],
+                                                                              [[0, 0]] * (d.ndim - 1) + [[2, 0]])
+                else:
+                    deriv[..., np.arange(0, deriv.shape[-1], 3)] = d[..., ix]
+                    if jx is not None:
+                        deriv[..., np.arange(1, deriv.shape[-1], 3)] = d[..., jx]
+                    if kx is not None:
+                        deriv[..., np.arange(2, deriv.shape[-1], 3)] = d[..., kx]
                 derivs.append(deriv)
+
+            if og_ord is not None:
+                derivs = [derivs[o-1] for o in og_ord]
         else:
             # need to check against the cases of like 1, 2, 3 atom molecules
             # annoying but not hard

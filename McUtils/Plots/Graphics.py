@@ -6,7 +6,7 @@ import os, weakref, numpy as np, functools
 
 from .Properties import GraphicsPropertyManager, GraphicsPropertyManager3D
 from .Styling import Styled, ThemeManager, PlotLegend
-from .Backends import GraphicsBackend, DPI_SCALING
+from .Backends import GraphicsBackend, GraphicsFigure, GraphicsAxes, DPI_SCALING
 
 __all__ = ["GraphicsBase", "Graphics", "Graphics3D", "GraphicsGrid"]
 __reload_hook__ = ['.Properties', ".Styling", ".Backends"]
@@ -229,9 +229,9 @@ class GraphicsBase(metaclass=ABCMeta):
         :param args:
         :type args:
         :param figure:
-        :type figure: GraphicsBackend.Figure | None
+        :type figure: GraphicsFigure | None
         :param axes:
-        :type axes: GraphicsBackend.Figure.Axes | None
+        :type axes: GraphicsAxes | None
         :param subplot_kw:
         :type subplot_kw: dict | None
         :param parent:
@@ -321,7 +321,9 @@ class GraphicsBase(metaclass=ABCMeta):
 
         self.subplot_kw = subplot_kw
         with self.theme_manager.from_spec(self.theme, backend=self.backend):
-            self.figure, self.axes = self.initialize_figure_and_axes(figure, axes, *args, **subplot_kw)
+            fig, ax = self.initialize_figure_and_axes(figure, axes, *args, **subplot_kw)
+        self.figure: GraphicsFigure = fig
+        self.axes: GraphicsAxes = ax
         self.figure._called_show = False # for avoiding excess show calls with a custom backend
         if self.inset:
             FigureTreeManager.add_axes_graphics(self.axes, self)
@@ -344,7 +346,7 @@ class GraphicsBase(metaclass=ABCMeta):
 
         self._in_init = False
 
-    def initialize_figure_and_axes(self, figure, axes, *args, **kw) -> 'tuple[GraphicsBackend.Figure, GraphicsBackend.Figure.Axes]':
+    def initialize_figure_and_axes(self, figure, axes, *args, **kw) -> 'tuple[GraphicsFigure, GraphicsAxes]':
         """Initializes the subplots for the Graphics object
 
         :param figure:

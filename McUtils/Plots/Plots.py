@@ -3,9 +3,10 @@ Provides various types of plots and plotting utilities
 """
 
 from .Graphics import Graphics, Graphics3D, GraphicsGrid
+from .Backends import GraphicsAxes, GraphicsFigure
 import numpy as np
-import matplotlib.figure
-import matplotlib.axes
+# import matplotlib.figure
+# import matplotlib.axes
 
 __all__ = [
     "Plot", "DataPlot", "ArrayPlot", "TensorPlot",
@@ -357,7 +358,7 @@ class Plot(Graphics):
             style = self._data[1]
         return style
 
-    def add_colorbar(self, graphics = None, norm = None,  **kw):
+    def add_colorbar(self, graphics=None, norm=None,  **kw):
         """
         Adds a colorbar to the plot
         """
@@ -367,13 +368,12 @@ class Plot(Graphics):
             return super().add_colorbar(graphics=graphics, **kw)
 
     def set_graphics_properties(self, *which, **kw):
-        with self.pyplot as plt:
-            if isinstance(self.graphics, tuple):
-                for n,g in enumerate(self.graphics):
-                    if len(which) == 0 or n in which:
-                        plt.setp(g, **kw)
-            else:
-                plt.setp(self.graphics, **kw)
+        if isinstance(self.graphics, tuple):
+            for n,g in enumerate(self.graphics):
+                if len(which) == 0 or n in which:
+                    self.axes.set_graphics_properties(g, **kw)
+        else:
+            self.axes.set_graphics_properties(self.graphics, **kw)
 
 
     @classmethod
@@ -1141,9 +1141,9 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         return self.graphics
     def add_colorbar(self, **kw):
         if self._initialized:
-            fig = self.figure  # type: matplotlib.figure.Figure
-            ax = self.axes  # type: matplotlib.axes.Axes
-            return fig.colorbar(self.graphics, **kw)
+            fig:GraphicsFigure = self.figure
+            ax:GraphicsAxes = self.axes
+            return fig.create_colorbar(self.graphics, **kw)
         else:
             self._colorbar = kw
     plot_classes = {}

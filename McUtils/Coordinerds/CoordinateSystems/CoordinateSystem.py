@@ -223,10 +223,11 @@ class CoordinateSystem:
             self.kwargs = kw
             self.do_many = do_many
         def __call__(self, coords, *args, **kwargs):
+            ops = dict(self.kwargs, **kwargs)
             if self.do_many:
-                return self.converter.convert_many(coords, **self.kwargs)
+                return self.converter.convert_many(coords, **ops)
             else:
-                return self.converter.convert(coords, **self.kwargs)
+                return self.converter.convert(coords, **ops)
     def convert_coords(self, coords, system, converter=None, apply_pre_converter=False, **kw):
         """
         Converts coordiantes from the current coordinate system to _system_
@@ -254,6 +255,7 @@ class CoordinateSystem:
             sysops = {}
         ops = dict(sysops, **converter_opts)
         kw = dict(ops, **kw)
+
         if self.matrix is not None:
             # This very commonly means that we're doing an expansion in some coordinate set,
             #   but there's an equilibrium value or 'origin' that we need to shift off...
@@ -513,8 +515,9 @@ class CoordinateSystem:
             # unless we got enough analytic derivatives to not need to do any more FD
             ret_d_key = self.return_derivs_key
             rd = converter_options.get(ret_d_key)
-            converter_options[ret_d_key] = order if analytic_deriv_order is None else analytic_deriv_order
-            test_crd, test_opts = self.convert_coords(coords, system, order=order, apply_pre_converter=False, **converter_options)
+            converter_options[ret_d_key] = order if analytic_deriv_order is None else (analytic_deriv_order != 0)
+            test_crd, test_opts = self.convert_coords(coords, system, order=order,
+                                                      apply_pre_converter=False, **converter_options)
             if rd is None:
                 del converter_options[ret_d_key]
             else:
@@ -529,6 +532,8 @@ class CoordinateSystem:
                 if isinstance(deriv_tensors, np.ndarray):
                     deriv_tensors = [deriv_tensors]
                 if analytic_deriv_order is not None:
+                    if analytic_deriv_order < 0:
+                        analytic_deriv_order = len(deriv_tensors)
                     num_derivs = min(len(deriv_tensors), analytic_deriv_order)
                     deriv_tensors = deriv_tensors[:num_derivs]
                 else:
@@ -542,6 +547,7 @@ class CoordinateSystem:
                     order = order-num_derivs
                 else:
                     order = [o-num_derivs for o in order if o > num_derivs]
+
 
                 kw = converter_options.copy()
                 kw["order"] = order
