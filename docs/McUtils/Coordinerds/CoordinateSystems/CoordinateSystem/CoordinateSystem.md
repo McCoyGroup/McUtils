@@ -46,13 +46,34 @@ Sets up the CoordinateSystem object
     > the actual shape of a single coordinate in the coordinate system
 
 
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.to_state" class="docs-object-method">&nbsp;</a> 
+```python
+to_state(self, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L80)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L80?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.from_state" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+from_state(cls, data, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L92)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L92?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
 __call__(self, coords, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L106?message=Update%20Docs)]
 </div>
 
 
@@ -61,8 +82,8 @@ __call__(self, coords, **opts):
 pre_convert(self, system): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L86)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L86?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L113)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L113?message=Update%20Docs)]
 </div>
 A hook to allow for handlign details before converting
   - `system`: `Any`
@@ -77,8 +98,8 @@ A hook to allow for handlign details before converting
 basis(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L133?message=Update%20Docs)]
 </div>
 
   - `:returns`: `CoordinateSystem`
@@ -134,8 +155,8 @@ x
 origin(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L140?message=Update%20Docs)]
 </div>
 
   - `:returns`: `np.ndarray`
@@ -195,8 +216,8 @@ x
 matrix(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L151)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L151?message=Update%20Docs)]
 </div>
 The matrix representation in the `CoordinateSystem.basis`
 `None` is shorthand for the identity matrix
@@ -212,8 +233,8 @@ t
 inverse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L164)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L164?message=Update%20Docs)]
 </div>
 The inverse of the representation in the `basis`.
 `None` is shorthand for the inverse or pseudoinverse of `matrix`.
@@ -229,8 +250,8 @@ v
 dimension(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L180)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L180?message=Update%20Docs)]
 </div>
 The dimension of the coordinate system.
 `None` means unspecified dimension
@@ -245,8 +266,8 @@ m
 converter(self, system): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L164)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L164?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L191?message=Update%20Docs)]
 </div>
 Gets the converter from the current system to a new system
   - `system`: `CoordinateSystem`
@@ -275,8 +296,8 @@ t
 convert_coords(self, coords, system, converter=None, apply_pre_converter=False, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L231)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L231?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L258)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L258?message=Update%20Docs)]
 </div>
 Converts coordiantes from the current coordinate system to _system_
   - `coords`: `CoordinateSet`
@@ -318,8 +339,8 @@ s
 rescale(self, scaling, in_place=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L299)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L299?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L326)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L326?message=Update%20Docs)]
 </div>
 
 
@@ -328,8 +349,8 @@ rescale(self, scaling, in_place=False):
 rotate(self, rot, in_place=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L311)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L311?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L338)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L338?message=Update%20Docs)]
 </div>
 
 
@@ -338,8 +359,8 @@ rotate(self, rot, in_place=False):
 displacement(self, amts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L325)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L325?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L352)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L352?message=Update%20Docs)]
 </div>
 Generates a displacement or matrix of displacements based on the vector or matrix amts
 The relevance of this method has become somewhat unclear...
@@ -354,8 +375,8 @@ The relevance of this method has become somewhat unclear...
 derivatives(self, coords, function, order=1, coordinates=None, result_shape=None, **finite_difference_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L347)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L347?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L374)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L374?message=Update%20Docs)]
 </div>
 Computes derivatives for an arbitrary function with respect to this coordinate system.
 Basically a more flexible version of `jacobian`.
@@ -392,8 +413,8 @@ r
 jacobian(self, coords, system, order=1, coordinates=None, converter_options=None, all_numerical=False, analytic_deriv_order=None, **finite_difference_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L461)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L461?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L488)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L488?message=Update%20Docs)]
 </div>
 Computes the Jacobian between the current coordinate system and a target coordinate system
   - `system`: `CoordinateSystem`
@@ -433,8 +454,8 @@ r
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L622)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L622?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L649)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L649?message=Update%20Docs)]
 </div>
 Provides a clean representation of a `CoordinateSystem` for printing
   - `:returns`: `str`
@@ -447,8 +468,8 @@ Provides a clean representation of a `CoordinateSystem` for printing
 is_compatible(cls, self, system): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L629)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L629?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L656)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L656?message=Update%20Docs)]
 </div>
 
 
@@ -457,8 +478,8 @@ is_compatible(cls, self, system):
 has_conversion(self, system): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L637)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L637?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L664)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/CoordinateSystem.py#L664?message=Update%20Docs)]
 </div>
  </div>
 </div>

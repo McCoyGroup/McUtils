@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.BaseCoordinateSystem">BaseCoordinateSystem</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L657)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L657?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L684)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L684?message=Update%20Docs)]
 </div>
 
 A CoordinateSystem object that can't be reduced further.
@@ -23,11 +23,32 @@ This allows us to define flexible `CoordinateSystem` subclasses that we _don't_ 
  
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.BaseCoordinateSystem.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, name, dimension=None, matrix=None, coordinate_shape=None, converter_options=None): 
+__init__(self, name, dimension=None, coordinate_shape=None, converter_options=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L664)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L664?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L691)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L691?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.BaseCoordinateSystem.to_state" class="docs-object-method">&nbsp;</a> 
+```python
+to_state(self, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/BaseCoordinateSystem.py#L697)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/BaseCoordinateSystem.py#L697?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.BaseCoordinateSystem.from_state" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+from_state(cls, data, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L704)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L704?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +103,7 @@ __init__(self, name, dimension=None, matrix=None, coordinate_shape=None, convert
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/BaseCoordinateSystem.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem/BaseCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L657?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSystem.py#L684?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

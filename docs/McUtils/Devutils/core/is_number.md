@@ -1,11 +1,11 @@
-# <a id="McUtils.Devutils.core.str_in">str_in</a>
+# <a id="McUtils.Devutils.core.is_number">is_number</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L162)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L162?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L60?message=Update%20Docs)]
 </div>
 
 ```python
-str_in(str_val, test_vals): 
+is_number(obj, interface_types=(<class 'numbers.Number'>,), exlusion_types=None, implementation_props=None): 
 ```
 
 
@@ -53,13 +53,13 @@ str_in(str_val, test_vals):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Devutils/core/str_in.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Devutils/core/str_in.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Devutils/core/is_number.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Devutils/core/is_number.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/str_in.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/str_in.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_number.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_number.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L162?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L60?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

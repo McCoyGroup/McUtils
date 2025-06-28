@@ -1,7 +1,7 @@
 # <a id="McUtils.Devutils.core.str_elide">str_elide</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L164)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L164?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ str_elide(long_str, width=80, placeholder='...'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/str_elide.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/str_elide.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L128?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L164?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

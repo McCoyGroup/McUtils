@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Checkpointing.NullCheckpointer">NullCheckpointer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L550)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L550?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L680)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L680?message=Update%20Docs)]
 </div>
 
 A checkpointer that saves absolutely nothing
@@ -24,8 +24,8 @@ A checkpointer that saves absolutely nothing
 __init__(self, checkpoint_file=None, allowed_keys=None, omitted_keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L554)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L554?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L684)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L684?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, checkpoint_file=None, allowed_keys=None, omitted_keys=None):
 open_checkpoint_file(self, chk): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L561)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L561?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L691)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L691?message=Update%20Docs)]
 </div>
 Opens the passed `checkpoint_file` (if not already open)
   - `chk`: `str | file-like`
@@ -49,8 +49,8 @@ Opens the passed `checkpoint_file` (if not already open)
 close_checkpoint_file(self, stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L571)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L571?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L701)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L701?message=Update%20Docs)]
 </div>
 Opens the passed `checkpoint_file` (if not already open)
   - `chk`: `Any`
@@ -64,8 +64,8 @@ Opens the passed `checkpoint_file` (if not already open)
 save_parameter(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L581)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L581?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L711)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L711?message=Update%20Docs)]
 </div>
 Saves a parameter to the checkpoint file
   - `key`: `Any`
@@ -81,8 +81,23 @@ Saves a parameter to the checkpoint file
 load_parameter(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L593)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L593?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L723)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L723?message=Update%20Docs)]
+</div>
+Loads a parameter from the checkpoint file
+  - `key`: `Any`
+    > 
+  - `:returns`: `_`
+    >
+
+
+<a id="McUtils.Scaffolding.Checkpointing.NullCheckpointer.delete_parameter" class="docs-object-method">&nbsp;</a> 
+```python
+delete_parameter(self, key): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L733)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L733?message=Update%20Docs)]
 </div>
 Loads a parameter from the checkpoint file
   - `key`: `Any`
@@ -96,8 +111,8 @@ Loads a parameter from the checkpoint file
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L603)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L603?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L743)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NullCheckpointer.py#L743?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -152,7 +167,7 @@ keys(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Checkpointing/NullCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L550?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L680?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

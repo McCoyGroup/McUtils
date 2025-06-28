@@ -19,7 +19,9 @@ Higher-dimensional derivatives are built by chaining these.
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse " id="methods" markdown="1">
- 
+ ```python
+only_odd_orders: bool
+```
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifference1D.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, finite_difference_data, matrix): 
@@ -66,11 +68,11 @@ widths(self):
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifference1D.get_stencil" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-get_stencil(cls, order, stencil, accuracy): 
+get_stencil(cls, order, stencil, accuracy, only_odd_orders=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L290)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L290?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L291)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L291?message=Update%20Docs)]
 </div>
 
 
@@ -79,8 +81,8 @@ get_stencil(cls, order, stencil, accuracy):
 apply(self, vals, val_dim=None, axis=0, mesh_spacing=None, check_shape=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.py#L298)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.py#L298?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.py#L300)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifference1D.py#L300?message=Update%20Docs)]
 </div>
 Applies the held `FiniteDifferenceMatrix` to the array of values
   - `vals`: `np.ndarray | sparse.csr_matrix`
@@ -101,8 +103,8 @@ Applies the held `FiniteDifferenceMatrix` to the array of values
 sparse_tensordot(sparse, mat, axis): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L383)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L383?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L385)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L385?message=Update%20Docs)]
 </div>
 Not sure how fast this will be, but does a very simple contraction of `mat` along `axis` by the final axis of `sparse`
 

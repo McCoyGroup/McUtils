@@ -1,11 +1,11 @@
 # <a id="McUtils.Devutils.core.is_list_like">is_list_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L90?message=Update%20Docs)]
 </div>
 
 ```python
-is_list_like(obj, interface_types=(<class 'list'>, <class 'tuple'>), exlusion_types=(<class 'dict'>,), implementation_props=('__getitem__',)): 
+is_list_like(obj, interface_types=(<class 'list'>, <class 'tuple'>), exlusion_types=(<class 'str'>, <class 'dict'>, <class 'type'>), implementation_props=('__getitem__',)): 
 ```
 
 
@@ -59,7 +59,7 @@ is_list_like(obj, interface_types=(<class 'list'>, <class 'tuple'>), exlusion_ty
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_list_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_list_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L64?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L90?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

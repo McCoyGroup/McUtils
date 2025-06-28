@@ -58,92 +58,81 @@ to file and allows for easy checkpoint loading
 [ModuleSerializer](Scaffolding/Serializers/ModuleSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Schema](Scaffolding/Schema/Schema.md)   
+[LogParser](Scaffolding/Logging/LogParser.md)   
 </div>
 </div>
   <div class="row">
-   <div class="col" markdown="1">
-[LogParser](Scaffolding/Logging/LogParser.md)   
-</div>
    <div class="col" markdown="1">
 [Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
 [CheckpointerKeyError](Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DumpCheckpointer](Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [JSONCheckpointer](Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [NumPyCheckpointer](Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [HDF5Checkpointer](Scaffolding/Checkpointing/HDF5Checkpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DictCheckpointer](Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [NullCheckpointer](Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PersistenceLocation](Scaffolding/Persistence/PersistenceLocation.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PersistenceManager](Scaffolding/Persistence/PersistenceManager.md)   
 </div>
    <div class="col" markdown="1">
 [ResourceManager](Scaffolding/Persistence/ResourceManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [BaseObjectManager](Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [FileBackedObjectManager](Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
 [Config](Scaffolding/Configurations/Config.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ParameterManager](Scaffolding/Configurations/ParameterManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Job](Scaffolding/Jobs/Job.md)   
 </div>
    <div class="col" markdown="1">
 [JobManager](Scaffolding/Jobs/JobManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CLI](Scaffolding/CLIs/CLI.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
 [Command](Scaffolding/CLIs/Command.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-   
-</div>
-   <div class="col" markdown="1">
-   
 </div>
    <div class="col" markdown="1">
    
@@ -171,10 +160,11 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-ce4587" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ce4587"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-787300" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-787300"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ce4587" markdown="1">
- - [Pseudopickle](#Pseudopickle)
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-787300" markdown="1">
+ - [Schema](#Schema)
+- [Pseudopickle](#Pseudopickle)
 - [HDF5Serialization](#HDF5Serialization)
 - [JSONSerialization](#JSONSerialization)
 - [JSONPseudoPickleSerialization](#JSONPseudoPickleSerialization)
@@ -198,9 +188,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-639f7f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-639f7f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-3346f6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3346f6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-639f7f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3346f6" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -221,6 +211,54 @@ class ScaffoldingTests(TestCase):
 
  </div>
 </div>
+
+#### <a name="Schema">Schema</a>
+```python
+    def test_Schema(self):
+        data = {
+            'file': 'test.txt',
+            'filesystem': {
+                'os':'macOS'
+            }
+        }
+
+        # schema = dev.Schema(['file'], ['filesystem'])
+        # self.assertTrue(schema.validate(data))
+        # #
+        # schema = dev.Schema(['file', 'filesystem'])
+        # self.assertFalse(schema.validate(data, throw=False))
+        #
+        # schema = dev.Schema({'file':'number'}, ['filesystem'])
+        # self.assertFalse(schema.validate(data, throw=False))
+        #
+        schema = dev.Schema(
+            {'file':'str'},
+            {'filesystem':str}
+        )
+        self.assertFalse(schema.validate(data, throw=False))
+
+        schema = dev.Schema(
+            {'file': 'str'},
+            {
+                'filesystem': {
+                    'os': {
+                        'type': 'str',
+                        'enum': ['macOS', 'linux', 'windows']
+                    }
+                }
+            }
+        )
+        self.assertTrue(schema.validate(data))
+
+
+        data = {
+            'file': 'test.txt',
+            'filesystem': {
+                'os':'OSX'
+            }
+        }
+        self.assertFalse(schema.validate(data, throw=False))
+```
 
 #### <a name="Pseudopickle">Pseudopickle</a>
 ```python

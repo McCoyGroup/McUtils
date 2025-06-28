@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.SphericalCoordinateSystem">SphericalCoordinateSystem</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L326)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L326?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L353)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L353?message=Update%20Docs)]
 </div>
 
 Represents Spherical coordinates generally
@@ -26,8 +26,8 @@ name: str
 __init__(self, converter_options=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L331)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L331?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L358)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L358?message=Update%20Docs)]
 </div>
 
   - `converter_options`: `None | dict`
@@ -87,7 +87,7 @@ __init__(self, converter_options=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/SphericalCoordinateSystem.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems/SphericalCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L326?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CommonCoordinateSystems.py#L353?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

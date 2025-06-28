@@ -50,13 +50,34 @@ __array_finalize__(self, coords):
 </div>
 
 
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSet.CoordinateSet.to_state" class="docs-object-method">&nbsp;</a> 
+```python
+to_state(self, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L45?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSet.CoordinateSet.from_state" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+from_state(cls, data, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L51?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSet.CoordinateSet.__str__" class="docs-object-method">&nbsp;</a> 
 ```python
 __str__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L76?message=Update%20Docs)]
 </div>
 
 
@@ -65,8 +86,8 @@ __str__(self):
 __eq__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L66)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L66?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L79)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L79?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +97,8 @@ __eq__(self, other):
 multiconfig(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L85?message=Update%20Docs)]
 </div>
 Determines whether self.coords represents multiple configurations of the coordinates
   - `:returns`: `_`
@@ -89,8 +110,8 @@ Determines whether self.coords represents multiple configurations of the coordin
 transform(self, tf): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L94?message=Update%20Docs)]
 </div>
 Applies a transformation to the stored coordinates
   - `tf`: `Any`
@@ -104,8 +125,8 @@ Applies a transformation to the stored coordinates
 convert(self, system, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L106?message=Update%20Docs)]
 </div>
 Converts across coordinate systems
   - `system`: `CoordinateSystem`
@@ -128,8 +149,8 @@ s
 derivatives(self, function, order=1, coordinates=None, result_shape=None, **fd_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L126?message=Update%20Docs)]
 </div>
 Takes derivatives of `function` with respect to the current geometry
   - `function`: `Any`
@@ -149,8 +170,8 @@ Takes derivatives of `function` with respect to the current geometry
 jacobian(self, system, order=1, coordinates=None, converter_options=None, all_numerical=False, analytic_deriv_order=None, **fd_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L150)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CoordinateSet/CoordinateSet.py#L150?message=Update%20Docs)]
 </div>
 Delegates to the jacobian function of the current coordinate system.
   - `system`: `Any`

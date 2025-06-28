@@ -36,6 +36,17 @@ __init__(self, dimension=None, converter_options=None, coordinate_shape=None, **
     > the dimension of the coordinate system
   - `opts`: `Any`
     > other options, if `converter_options` is None, these are used as the `converter_options`
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.CartesianCoordinateSystem.from_state" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+from_state(cls, data, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L41)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L41?message=Update%20Docs)]
+</div>
  </div>
 </div>
 
