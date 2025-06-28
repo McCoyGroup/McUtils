@@ -13,3 +13,5 @@ from .Options import *; from .Options import __all__ as _all
 __all__ += _all
 from .Redirects import *; from .Redirects import __all__ as _all
 __all__ += _all
+from .Schema import *; from .Schema import __all__ as _all
+__all__ += _all

@@ -5,6 +5,7 @@ Module that provides a FiniteDifferenceDerivative class that does finite-differe
 from .FiniteDifferenceFunction import FiniteDifferenceFunction
 from ...Parallelizers import Parallelizer, SerialNonParallelizer
 from ...Scaffolding import Logger, NullLogger
+from ... import Numputils as nput
 import numpy as np, itertools as it, scipy.sparse as sparse
 
 __all__ = [
@@ -274,8 +275,18 @@ class DerivativeGenerator:
             )
             self._fdfs[(dorder, mesh_spacing)] = fdf
 
-        stencil_widths = tuple(len(cf[1]) if cf is not None else cf for cf in fdf.weights)
-        stencil_shapes = tuple(w[1] if w is not None else w for w in fdf.widths)
+        stencil_widths = tuple(
+                len(cf[1])
+                    if cf is not None else
+                cf
+                for cf in fdf.weights
+        )
+        stencil_shapes = tuple(
+                w[1]
+                    if w is not None else
+                w
+                for w in fdf.widths
+        )
         if any(x != sum(y) for x,y in zip(stencil_widths, stencil_shapes)):
             raise ValueError("weights {} don't correspond to shapes {}...".format(
                 fdf.weights,
@@ -329,7 +340,7 @@ class DerivativeGenerator:
         if mesh_spacing is None:
             mesh_spacing = self.mesh_spacing
         displacement = self.displacement_function(self._coord_index(coord)[0], mesh_spacing)
-        if isinstance(displacement, (float, np.floating)):
+        if nput.is_numeric(displacement):
             displacement = np.full(self.coord_shape, displacement)
         elif displacement.shape == self.coord_shape[-1:]:
             displacement = np.broadcast_to(displacement, self.coord_shape)
@@ -565,7 +576,7 @@ class DerivativeGenerator:
         for spec, disp_data, fd_data in self._get_fd_data(specs):
             yield self._get_single_deriv(spec, disp_data, fd_data, return_coords)
 
-    def _get_specs(self, order, pos=(), coordinates=None):
+    def _get_specs(self, order, pos=(), pos_filter=None, coordinates=None):
         """
         We compute the positions defined by the total order of the derivative as they would show up in the total tensor
         If a given block of derivatives is specified **[NOTE: I didn't finish this docstring and have no idea what it was supposed to say...]**
@@ -594,7 +605,12 @@ class DerivativeGenerator:
             specs = [tuple(coordinates[c] for c in pos)]
         else:
             # we need to broadcast our specs
-            sub_specs = [ tuple(coordinates[a]) if not isinstance(a, (int, np.integer)) else (coordinates[a],) for a in pos]
+            sub_specs = [
+                tuple(coordinates[a])
+                    if not isinstance(a, (int, np.integer)) else
+                (coordinates[a],)
+                for a in pos
+            ]
             sub_specs = sub_specs + [coordinates for i in range(order - len(pos))]
             unique = set()
             def test(p):
@@ -611,6 +627,8 @@ class DerivativeGenerator:
             # then we filter by symmetry
             specs = [p for p in it.product(*sub_specs) if test(p)]
 
+        if pos_filter is not None:
+            specs = pos_filter(specs)
         return [self._idx(s) for s in specs], specs
 
     def _parallel_derivs(self, specs=None, parallelizer=None):
@@ -626,7 +644,10 @@ class DerivativeGenerator:
             if not isinstance(derivs, np.ndarray):
                 derivs = np.concatenate(derivs, axis=0)
         return derivs
-    def compute_derivatives(self, order, pos=(), coordinates=None, lazy=None, parallelizer=None):
+    def compute_derivatives(self, order, pos=(), coordinates=None, lazy=None,
+                            pos_filter=None,
+                            parallelizer=None
+                            ):
         """
         Computes the derivatives up to `order` filtered by `pos` over the `coordinates`
 
@@ -656,7 +677,7 @@ class DerivativeGenerator:
         lazy = self.lazy if lazy is None else lazy
         if lazy:
             for which, o in enumerate(order):
-                specs, raw = self._get_specs(o, pos, coordinates)
+                specs, raw = self._get_specs(o, pos, coordinates=coordinates, pos_filter=pos_filter)
                 derivs = self._spec_derivs(specs)
                 res[which] = lazy_derivs(derivs)
         else:
@@ -665,13 +686,13 @@ class DerivativeGenerator:
             par = Parallelizer.lookup(parallelizer)
             if isinstance(par, SerialNonParallelizer):
                 for which, o in enumerate(order):
-                    specs, raw = self._get_specs(o, pos, coordinates)
+                    specs, raw = self._get_specs(o, pos, coordinates=coordinates, pos_filter=pos_filter)
                     derivs = np.array([s for s in self._spec_derivs(specs)])
                     res[which] = derivs
             else:
                 with par:
                     for which, o in enumerate(order):
-                        specs, raw = self._get_specs(o, pos, coordinates)
+                        specs, raw = self._get_specs(o, pos, coordinates=coordinates, pos_filter=pos_filter)
                         comm = None if len(specs)>=par.nprocs else list(range(len(specs)))
                         derivs = par.run(self._parallel_derivs, main_kwargs={'specs':specs},
                                          comm=comm
@@ -681,7 +702,10 @@ class DerivativeGenerator:
             res = res[0]
         return res
 
-    def derivative_tensor(self, order, pos=(), coordinates=None, parallelizer=None, logger=None):
+    def derivative_tensor(self, order, pos=(), coordinates=None,
+                          pos_filter=None,
+                          parallelizer=None,
+                          logger=None):
         """
         Computes a given derivative tensor
 
@@ -716,15 +740,24 @@ class DerivativeGenerator:
             par = Parallelizer.lookup(parallelizer)
             with par:
                 for which, o in enumerate(order):
-                    pos = [slice(None, None, None) if a is None else a for a in pos]
+                    pos = [
+                        slice(None, None, None)
+                            if a is None else a
+                        for a in pos
+                    ]
                     if coordinates is None:
                         coordinates = np.arange(np.prod(self.coord_shape))
                     elif not isinstance(coordinates[0], (int, np.integer)):
                         coordinates = self._fidx(coordinates)
 
-                    sub_specs = [coordinates[a] if not isinstance(a, (int, np.integer)) else (coordinates[a],) for a in pos]
+                    sub_specs = [
+                        coordinates[a]
+                            if not isinstance(a, (int, np.integer)) else
+                        (coordinates[a],)
+                        for a in pos
+                    ]
                     sub_specs = sub_specs + [coordinates for i in range(o - len(pos))]
-                    specs, raw = self._get_specs(o, pos, coordinates)
+                    specs, raw = self._get_specs(o, pos, coordinates=coordinates, pos_filter=pos_filter)
 
                     if isinstance(par, SerialNonParallelizer):
                         logger.log_print("evaluating {nspec} derivatives", nspec=len(specs))
@@ -741,7 +774,10 @@ class DerivativeGenerator:
                     # apply symmetry
                     for s, d in zip(raw, derivs):
                         if d_tensor is None:
-                            d_tensor = np.ones(tuple(len(s) for s in sub_specs) + d.shape)
+                            d_tensor = np.zeros(
+                                tuple(len(s) for s in sub_specs) + d.shape,
+                                dtype=float
+                            )
 
                         for p in it.permutations(s, len(s)):
                             try:

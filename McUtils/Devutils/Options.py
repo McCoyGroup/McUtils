@@ -182,7 +182,11 @@ class OptionsMethodDispatch:
             return method, opts
 
         methods_table = self.load_methods_table()
-        if self.methods_enum is not None and method not in methods_table:
+        if (
+                self.methods_enum is not None
+                and not core.is_default(method, allow_None=True)
+                and method not in methods_table
+        ):
             if self.case_insensitive and isinstance(method, str):
                 try:
                     method = self.methods_enum(method)

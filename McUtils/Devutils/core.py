@@ -4,6 +4,7 @@ Provides a set of singleton objects that can declare their purpose a little bit 
 import itertools
 # import enum
 import types
+import numbers
 
 __all__ = [
     "default",
@@ -12,9 +13,13 @@ __all__ = [
     "uninitialized",
     "is_uninitialized",
     "handle_uninitialized",
+    "missing",
+    "is_missing",
     "is_interface_like",
     "is_dict_like",
     "is_list_like",
+    "is_number",
+    "is_int",
     "cached_eval",
     "merge_dicts",
     "str_comp",
@@ -38,12 +43,33 @@ class DefaultType(SingletonType):
     __is_default__ = True
 default=DefaultType()
 
+class MissingType(SingletonType):
+    """
+    A type for declaring a value is missing (for when `None` has meaning)
+    """
+    __is_missing__ = False
+missing=MissingType()
+
 class UninitializedType(SingletonType):
     """
     A type for declaring an argument should use its default value (for when `None` has meaning)
     """
     __is_uninitialized__ = True
 uninitialized = UninitializedType()
+
+def is_number(obj,
+              interface_types=(numbers.Number,),
+              exlusion_types=None,
+              implementation_props=None
+              ):
+    return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
+
+def is_int(obj,
+           interface_types=(numbers.Integral,),
+           exlusion_types=None,
+           implementation_props=None
+           ):
+    return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
 
 def is_interface_like(obj, interface_types, exlusion_types, implementation_attrs):
     return (
@@ -63,7 +89,7 @@ def is_dict_like(obj,
 
 def is_list_like(obj,
                  interface_types=(list, tuple),
-                 exlusion_types=(dict,),
+                 exlusion_types=(str, dict, type),
                  implementation_props=('__getitem__',)
                  ):
     return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
@@ -99,6 +125,16 @@ def handle_uninitialized(opt, initializer, allow_None=True, args=(), kwargs=None
         return initializer(*args, **({} if kwargs is None else kwargs))
     else:
         return opt
+
+def is_missing(obj, allow_None=True):
+    if allow_None and obj is None:
+        return True
+
+    return (
+            obj is missing
+            or isinstance(obj, MissingType)
+            or (hasattr(obj, '__is_missing__') and obj.__is_missing__)
+    )
 
 
 def cached_eval(cache, key, generator, *,

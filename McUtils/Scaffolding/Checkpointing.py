@@ -1,7 +1,7 @@
 
 import abc, os
+from .. import Devutils as dev
 from .Serializers import *
-from .Schema import *
 
 __all__ = [
     "Checkpointer",
@@ -63,20 +63,23 @@ class Checkpointer(metaclass=abc.ABCMeta):
             return Checkpointer.from_file(checkpoint)
         elif isinstance(checkpoint, Checkpointer):
             return checkpoint
-        elif Schema(["file"]).validate(checkpoint, throw=False):
-            checkpoint = Schema(["file"], ['keys', 'opts']).to_dict(checkpoint)
-            opts = checkpoint['opts'] if 'opts' in checkpoint else {}
-            if 'keys' in checkpoint:
-                allowed_opts = Schema(['allowed_keys'], ['omitted_keys']).to_dict(checkpoint['keys'], throw=False)
-                if allowed_opts is not None:
-                    opts = dict(opts, **allowed_opts)
-                else:
-                    omitted_opts = Schema(['omitted_keys']).to_dict(checkpoint['keys'], throw=False)
+        elif dev.is_dict_like(checkpoint):
+            if dev.Schema(["file"]).validate(checkpoint, throw=False):
+                checkpoint = dev.Schema(["file"], ['keys', 'opts']).to_dict(checkpoint)
+                opts = checkpoint['opts'] if 'opts' in checkpoint else {}
+                if 'keys' in checkpoint:
+                    allowed_opts = dev.Schema(['allowed_keys'], ['omitted_keys']).to_dict(checkpoint['keys'], throw=False)
                     if allowed_opts is not None:
-                        opts = dict(opts, **omitted_opts)
+                        opts = dict(opts, **allowed_opts)
                     else:
-                        opts['allowed_keys'] = checkpoint['keys']
-            return cls.from_file(checkpoint['file'], **opts)
+                        omitted_opts = dev.Schema(['omitted_keys']).to_dict(checkpoint['keys'], throw=False)
+                        if allowed_opts is not None:
+                            opts = dict(opts, **omitted_opts)
+                        else:
+                            opts['allowed_keys'] = checkpoint['keys']
+                return cls.from_file(checkpoint['file'], **opts)
+            else:
+                return DictCheckpointer(checkpoint)
         else:
             return checkpoint
 
@@ -118,6 +121,19 @@ class Checkpointer(metaclass=abc.ABCMeta):
             if self._open_depth == 0:
                 self.close_checkpoint_file(self._stream)
                 self._stream = None
+
+    def cached_eval(self, key, generator, *,
+                    condition=None,
+                    args=(),
+                    kwargs=None):
+        return dev.cached_eval(
+            self,
+            key,
+            generator,
+            condition=condition,
+            args=args,
+            kwargs=kwargs
+        )
 
     @property
     def is_open(self):
@@ -170,6 +186,36 @@ class Checkpointer(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError("CheckpointerBase is an abstract base class...")
 
+    def delete_parameter(self, key):
+        raise NotImplementedError("checkpointer does not need to implement deletion")
+    def check_parameter(self, key):
+        try:
+            self.check_allowed_key(key)
+            self.__getitem__(key)
+        except KeyError:
+            return False
+        else:
+            return True
+
+    def update(self, vals):
+        if dev.is_dict_like(vals):
+            return self.update(vals.items())
+
+        if not self.is_open:
+            with self:
+                return self.update(vals)
+
+        for k, v in vals:
+            self[k] = v
+    def get_keys(self, keys):
+        if not self.is_open:
+            with self:
+                return self.get_keys(keys)
+
+        return [
+            self[k] for k in keys
+        ]
+
     def check_allowed_key(self, item):
         if isinstance(item, tuple):
             # for subkey in item:
@@ -188,18 +234,49 @@ class Checkpointer(metaclass=abc.ABCMeta):
                         self
                     ))
 
+    def __contains__(self, key):
+        if not self.is_open:
+            with self:
+                return self.__contains__(key)
+        return self.check_parameter(key)
+
     def __getitem__(self, item):
         if not self.is_open:
             with self:
                 return self.__getitem__(item)
         self.check_allowed_key(item)
         return self.load_parameter(item)
+    def get(self, key, default=None):
+        try:
+            val = self[key]
+        except KeyError:
+            val = default
+        return val
     def __setitem__(self, key, value):
         if not self.is_open:
             with self:
                 return self.__setitem__(key, value)
         self.check_allowed_key(key)
         self.save_parameter(key, value)
+
+    def __delitem__(self, key):
+        if not self.is_open:
+            with self:
+                return self.__delitem__(key)
+        self.check_allowed_key(key)
+        self.delete_parameter(key)
+    def pop(self, key, *default):
+        if len(default) > 0:
+            try:
+                val = self[key]
+            except KeyError:
+                val = default[0]
+            else:
+                del self[key]
+        else:
+            val = self[key]
+            del self[key]
+        return val
 
     @abc.abstractmethod
     def keys(self):
@@ -293,6 +370,24 @@ class DumpCheckpointer(Checkpointer):
             base[cur] = value
         else:
             self.backend[key] = value
+    def check_parameter(self, key):
+        """
+        Loads a parameter from the checkpoint file
+        :param key:
+        :type key:
+        :return:
+        :rtype:
+        """
+        if isinstance(key, tuple):
+            base = self.backend
+            cur = key[0]
+            for subk in key[1:]:
+                if cur not in base: return False
+                base = base[cur]
+                cur = subk
+            return cur in base
+        else:
+            return key in self.backend
     def load_parameter(self, key):
         """
         Loads a parameter from the checkpoint file
@@ -305,13 +400,33 @@ class DumpCheckpointer(Checkpointer):
             base = self.backend
             cur = key[0]
             for subk in key[1:]:
-                if cur not in base: base[cur] = {}
+                if cur not in base:
+                    raise KeyError(f"{key} not found")
                 base = base[cur]
                 cur = subk
             val = base[cur]
         else:
             val = self.backend[key]
         return val
+    def delete_parameter(self, key):
+        """
+        Loads a parameter from the checkpoint file
+        :param key:
+        :type key:
+        :return:
+        :rtype:
+        """
+        if isinstance(key, tuple):
+            base = self.backend
+            cur = key[0]
+            for subk in key[1:]:
+                if cur not in base:
+                    raise KeyError(f"{key} not found")
+                base = base[cur]
+                cur = subk
+            del base[cur]
+        else:
+            del self.backend[key]
 
     def keys(self):
         if not self.is_open:
@@ -499,8 +614,10 @@ class DictCheckpointer(Checkpointer):
                  allowed_keys=None,
                  omitted_keys=None
                  ):
+        if checkpoint_file is None:
+            checkpoint_file = {}
         super().__init__(checkpoint_file, allowed_keys=allowed_keys, omitted_keys=omitted_keys)
-        self.backend = {}
+        self.backend = checkpoint_file
 
     def open_checkpoint_file(self, chk):
         """
@@ -510,7 +627,7 @@ class DictCheckpointer(Checkpointer):
         :return:
         :rtype:
         """
-        return "NotAFile"
+        return chk
 
     def close_checkpoint_file(self, stream):
         """
@@ -543,9 +660,22 @@ class DictCheckpointer(Checkpointer):
         :rtype:
         """
         return self.backend[key]
+    def delete_parameter(self, key):
+        """
+        Loads a parameter from the checkpoint file
+        :param key:
+        :type key:
+        :return:
+        :rtype:
+        """
+        del self.backend[key]
 
     def keys(self):
         return list(self.backend.keys())
+    def get(self, key, default=None):
+        return self.backend.get(key, default)
+    def pop(self, key, *default):
+        return self.backend.pop(key, *default)
 
 class NullCheckpointer(Checkpointer):
     """
@@ -591,6 +721,16 @@ class NullCheckpointer(Checkpointer):
         pass
 
     def load_parameter(self, key):
+        """
+        Loads a parameter from the checkpoint file
+        :param key:
+        :type key:
+        :return:
+        :rtype:
+        """
+        raise CheckpointerKeyError("NullCheckpointer doesn't support _any_ keys")
+
+    def delete_parameter(self, key):
         """
         Loads a parameter from the checkpoint file
         :param key:
