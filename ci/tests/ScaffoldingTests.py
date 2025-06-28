@@ -1,10 +1,57 @@
 from Peeves.TestUtils import *
+import McUtils.Devutils as dev
 from McUtils.Scaffolding import *
 import McUtils.Parsers as parsers
 from unittest import TestCase
 import numpy as np, io, os, sys, tempfile as tmpf
 
 class ScaffoldingTests(TestCase):
+
+    @debugTest
+    def test_Schema(self):
+        data = {
+            'file': 'test.txt',
+            'filesystem': {
+                'os':'macOS'
+            }
+        }
+
+        # schema = dev.Schema(['file'], ['filesystem'])
+        # self.assertTrue(schema.validate(data))
+        # #
+        # schema = dev.Schema(['file', 'filesystem'])
+        # self.assertFalse(schema.validate(data, throw=False))
+        #
+        # schema = dev.Schema({'file':'number'}, ['filesystem'])
+        # self.assertFalse(schema.validate(data, throw=False))
+        #
+        schema = dev.Schema(
+            {'file':'str'},
+            {'filesystem':str}
+        )
+        self.assertFalse(schema.validate(data, throw=False))
+
+        schema = dev.Schema(
+            {'file': 'str'},
+            {
+                'filesystem': {
+                    'os': {
+                        'type': 'str',
+                        'enum': ['macOS', 'linux', 'windows']
+                    }
+                }
+            }
+        )
+        self.assertTrue(schema.validate(data))
+
+
+        data = {
+            'file': 'test.txt',
+            'filesystem': {
+                'os':'OSX'
+            }
+        }
+        self.assertFalse(schema.validate(data, throw=False))
 
     #region Checkpointing
     @validationTest
@@ -179,7 +226,7 @@ class ScaffoldingTests(TestCase):
                 self.assertEquals(len(chk['step_2']), 100)
         finally:
             os.remove(my_file)
-    @debugTest
+    @validationTest
     def test_JSONCheckpointingKeyed(self):
         with tmpf.NamedTemporaryFile() as chk_file:
             my_file = chk_file.name
@@ -207,7 +254,7 @@ class ScaffoldingTests(TestCase):
         finally:
             os.remove(my_file)
 
-    @debugTest
+    @validationTest
     def test_JSONCheckpointingCanonicalKeyed(self):
         with tmpf.NamedTemporaryFile() as chk_file:
             my_file = chk_file.name + ".json"

@@ -80,6 +80,18 @@ class TreeWrapper:
         return f"{cls.__name__}({fmt_tree})"
     def __len__(self):
         return len(self.tree)
+    def __iter__(self):
+        return iter(self.tree)
+    def condense_subtrees(self):
+        if hasattr(self.tree, 'keys') or not all(
+            hasattr(t, 'keys') for t in self.tree
+        ):
+            return self
+        else:
+            new_tree = self.tree[0]
+            for t in self.tree[1:]:
+                new_tree = dev.merge_dicts(new_tree, t)
+            return type(self)(new_tree)
     def keys(self):
         if hasattr(self.tree, 'keys'):
             return self.tree.keys()
@@ -90,10 +102,23 @@ class TreeWrapper:
             return self.tree.values()
         else:
             return self.tree
-    def __getitem__(self, item):
+    def find_subtree(self, key):
+        if hasattr(self.tree, 'keys'):
+            return self.__getitem__(key)
+        else:
+            if nput.is_atomic(key):
+                key = [key]
+            for k in key:
+                for n,v in enumerate(self.tree):
+                    if dev.is_dict_like(v) and k in v:
+                        return v[k]
+                    # elif v == k:
+                    #     return v
+    @classmethod
+    def get_tree_item(cls, tree, item):
+        t = tree
         if nput.is_atomic(item):
             item = [item]
-        t = self.tree
         base_exception = None
         for k in item:
             if not isinstance(k, str) and hasattr(t, 'keys'):
@@ -117,8 +142,9 @@ class TreeWrapper:
         if base_exception is not None:
             raise IndexError(f"{item} not found in tree") from base_exception
 
-
         return t
+    def __getitem__(self, item):
+        return self.get_tree_item(self.tree, item)
     def bfs(self, callback, **opts):
         #TODO: support most sophsticated children/item indexing
         return tree_traversal(self.tree, callback, traversal_ordering='bfs', **opts)

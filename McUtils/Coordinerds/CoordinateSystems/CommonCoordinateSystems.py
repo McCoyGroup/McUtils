@@ -34,9 +34,17 @@ class CartesianCoordinateSystem(BaseCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
+            opts = {}
         super().__init__(self.name, dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
+    @classmethod
+    def from_state(cls, data, serializer=None):
+        return cls(
+            dimension=data['dimension'],
+            coordinate_shape=data['coordinate_shape'],
+            converter_options=data['converter_options']
+        )
 
 ######################################################################################################
 ##
@@ -60,9 +68,17 @@ class InternalCoordinateSystem(BaseCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
+            opts = {}
         super().__init__(self.name, dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
+    @classmethod
+    def from_state(cls, data, serializer=None):
+        return cls(
+            dimension=data['dimension'],
+            coordinate_shape=data['coordinate_shape'],
+            converter_options=data['converter_options']
+        )
 
 ######################################################################################################
 ##
@@ -83,8 +99,9 @@ class CartesianCoordinateSystem1D(CartesianCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
+            opts = {}
         super().__init__(dimension=dimension, converter_options=converter_options)
 CartesianCoordinates1D = CartesianCoordinateSystem1D()
 CartesianCoordinates1D.__name__ = "CartesianCoordinates1D"
@@ -105,8 +122,9 @@ class CartesianCoordinateSystem2D(CartesianCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
+            opts = {}
         super().__init__(dimension=dimension, converter_options=converter_options)
 CartesianCoordinates2D = CartesianCoordinateSystem2D()
 CartesianCoordinates2D.__name__ = "CartesianCoordinates2D"
@@ -128,8 +146,9 @@ class CartesianCoordinateSystem3D(CartesianCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
+            opts = {}
         super().__init__(dimension=dimension, converter_options=converter_options)
 CartesianCoordinates3D = CartesianCoordinateSystem3D()
 CartesianCoordinates3D.__name__ = "CartesianCoordinates3D"
@@ -202,6 +221,14 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
         # we will want to make sure all angles and dihedrals stay within a range of eachother...
         return displacements, values
 
+    def to_state(self, serializer=None):
+        base = super().to_state(serializer=serializer)
+        converter_options = base.get('converter_options', {})
+        if converter_options.get('jacobian_prep') is ZMatrixCoordinateSystem.jacobian_prep_coordinates:
+            converter_options = converter_options.copy()
+            del converter_options['jacobian_prep']
+            base['converter_options'] = converter_options
+        return base
 
     @classmethod
     def canonicalize_order_list(self, ncoords, order_list):
@@ -335,8 +362,9 @@ class SphericalCoordinateSystem(BaseCoordinateSystem):
         :param opts: other options, if `converter_options` is None, these are used as the `converter_options`
         :type opts:
         """
-        if converter_options is None:
+        if converter_options is None or len(converter_options) == 0:
             converter_options = opts
+            opts = {}
         super().__init__(self.name, dimension=3, converter_options=converter_options)
 SphericalCoordinates = SphericalCoordinateSystem()
 SphericalCoordinates.__name__ = "SphericalCoordinates"

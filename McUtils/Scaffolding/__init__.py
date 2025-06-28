@@ -16,8 +16,6 @@ from .Caches import *; from .Caches import __all__ as exposed
 __all__ += exposed
 from .Serializers import *; from .Serializers import __all__ as exposed
 __all__ += exposed
-from .Schema import *; from .Schema import __all__ as exposed
-__all__ += exposed
 from .Logging import *; from .Logging import __all__ as exposed
 __all__ += exposed
 from .Checkpointing import *; from .Checkpointing import __all__ as exposed

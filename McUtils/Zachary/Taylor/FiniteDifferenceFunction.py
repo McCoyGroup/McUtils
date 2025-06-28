@@ -287,13 +287,15 @@ class FiniteDifference1D:
     def widths(self):
         return tuple(tuple(w) for w in self.data.widths)
 
+    only_odd_orders = False
     @classmethod
-    def get_stencil(cls, order, stencil, accuracy):
+    def get_stencil(cls, order, stencil, accuracy, only_odd_orders=None):
+        if only_odd_orders is None:
+            only_odd_orders = cls.only_odd_orders
         if stencil is None:
-            sten = order + accuracy - 1
-        else:
-            sten = stencil - 1
-        return sten
+            stencil = order + accuracy
+        stencil = stencil + (1 - (stencil %2 ) if only_odd_orders else 0)
+        return stencil - 1
 
     def apply(self, vals, val_dim=None, axis=0, mesh_spacing=None, check_shape=True):
         """
@@ -434,11 +436,13 @@ class RegularGridFiniteDifference(FiniteDifference1D):
     """
     Defines a 1D finite difference over a regular grid
     """
+    only_odd_orders=True
     def __init__(self,
                  order,
-                 stencil = None,
-                 accuracy = 4,
-                 end_point_accuracy = 2,
+                 stencil=None,
+                 accuracy=4,
+                 end_point_accuracy=2,
+                 only_odd_orders=None,
                  **kw
                  ):
         """
@@ -455,7 +459,11 @@ class RegularGridFiniteDifference(FiniteDifference1D):
         :type kw:
         """
 
-        data = self.finite_difference_data(order, self.get_stencil(order, stencil, accuracy), end_point_accuracy)
+        data = self.finite_difference_data(
+            order,
+            self.get_stencil(order, stencil, accuracy, only_odd_orders=only_odd_orders),
+            end_point_accuracy
+        )
         mat = FiniteDifferenceMatrix(data, **kw)
         super().__init__(data, mat)
 

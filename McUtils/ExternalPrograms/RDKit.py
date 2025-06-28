@@ -289,7 +289,7 @@ class RDMolecule(ExternalMolecule):
             vals = np.empty(len(geoms), dtype=float)
             try:
                 for i,g in enumerate(geoms):
-                    self.mol.SetPositions(g)
+                    self.mol.SetPositions(g.copy())
                     ff = force_field_generator(force_field_type)
                     vals[i] = ff.CalcEnergy()
             finally:
@@ -310,7 +310,7 @@ class RDMolecule(ExternalMolecule):
             vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
             try:
                 for i, g in enumerate(geoms):
-                    self.mol.SetPositions(g)
+                    self.mol.SetPositions(g.copy())
                     ff = force_field_generator(force_field_type)
                     vals[i] = ff.CalcGrad()
             finally:

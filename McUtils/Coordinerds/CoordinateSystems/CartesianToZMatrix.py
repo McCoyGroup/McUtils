@@ -94,7 +94,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         nol = len(ol)
         ncol = len(ol[0])
         fsteps = ncoords / nol
-        steps = int(fsteps)
+        steps = int(round(fsteps))
 
         # print(">> c2z >> ordering:", ol)
 
@@ -131,11 +131,11 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                     jx = np.concatenate([[2], np.arange(4, len(specs), 3)])
                     kx = np.arange(5, len(specs), 3)
                 elif len(specs) > 1:
-                    ix = [0, 1]
-                    jx = [2]
+                    ix = np.array([0, 1])
+                    jx = np.array([2])
                     kx = None
                 else:
-                    ix = [0]
+                    ix = np.array([0])
                     jx = None
                     kx = None
             else:
@@ -150,30 +150,51 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                 jx = np.arange(1, len(specs), 3)
                 kx = np.arange(2, len(specs), 3)
 
-            base_conv = nput.internal_coordinate_tensors(coords, specs, order=order, angle_ordering='ijk')
+            crd = coords.reshape((steps, nol, 3))
+            base_conv = nput.internal_coordinate_tensors(crd, specs, order=order, angle_ordering='ijk')
             if strip_embedding:
-                dists = base_conv[0][ix,]
-                angles = np.concatenate([[0]] + ([base_conv[0][jx,]] if jx is not None else []))
-                diheds = np.concatenate([[0, 0]] + ([base_conv[0][kx,]] if kx is not None else []))
+                dists = base_conv[0][..., ix]
+                if jx is None:
+                    angles = np.zeros((len(base_conv), 1))
+                else:
+                    angles = np.array([
+                        np.concatenate([[0], a])
+                        for a in base_conv[0][..., jx]
+                    ])
+                if kx is None:
+                    diheds = np.zeros((len(base_conv), 2))
+                else:
+                    diheds = np.array([
+                        np.concatenate([[0], d])
+                        for d in base_conv[0][..., kx]
+                    ])
             else:
-                dists = base_conv[0][ix,]
-                angles = base_conv[0][jx,]
-                diheds = base_conv[0][kx,]
+                dists = base_conv[0][..., ix]
+                angles = base_conv[0][..., jx]
+                diheds = base_conv[0][..., kx]
 
 
             base_derivs = base_conv[1:]
             derivs = []
-            nats = coords.shape[-2]
+            nats = nol
             for n,d in enumerate(base_derivs):
-                deriv = np.zeros(coords.shape[:-2] + ((nats)*3,)*(n+1) + ((nats-1) * 3,))
+                deriv = np.zeros(
+                    (steps,)
+                    + ((nats)*3,)*(n+1)
+                    + ((nats-1) * 3,)
+                )
                 if strip_embedding:
                     deriv[..., np.arange(0, deriv.shape[-1], 3)] = d[..., ix]
                     if jx is not None:
-                        deriv[..., np.arange(1, deriv.shape[-1], 3)] = np.pad(d[..., jx],
-                                                                              [[0, 0]] * (d.ndim - 1) + [[1, 0]])
+                        deriv[..., np.arange(1, deriv.shape[-1], 3)] = np.pad(
+                            d[..., jx],
+                            [[0, 0]] * (d.ndim - 1) + [[1, 0]]
+                        )
                     if kx is not None:
-                        deriv[..., np.arange(2, deriv.shape[-1], 3)] = np.pad(d[..., kx],
-                                                                              [[0, 0]] * (d.ndim - 1) + [[2, 0]])
+                        deriv[..., np.arange(2, deriv.shape[-1], 3)] = np.pad(
+                            d[..., kx],
+                            [[0, 0]] * (d.ndim - 1) + [[2, 0]]
+                        )
                 else:
                     deriv[..., np.arange(0, deriv.shape[-1], 3)] = d[..., ix]
                     if jx is not None:

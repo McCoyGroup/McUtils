@@ -42,6 +42,19 @@ class CoordinateSet(np.ndarray):
         self.system = getattr(coords, "system", CartesianCoordinates3D)
         self.converter_options = getattr(coords, "converter_options", None)
 
+    def to_state(self, serializer=None):
+        return {
+            'coords':self.view(np.ndarray),
+            'system':serializer.serialize(self.system),
+            'converter_options':self.converter_options
+        }
+    @classmethod
+    def from_state(cls, data, serializer=None):
+        return cls(
+            data['coords'],
+            serializer.deserialize(data['system']),
+            converter_options=data['converter_options']
+        )
     def _validate(self):
         base_dim = self.system.dimension
         if base_dim is not None:

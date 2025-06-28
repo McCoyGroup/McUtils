@@ -76,6 +76,33 @@ class CoordinateSystem:
         self.coordinate_shape = coordinate_shape
         self.converter_options = converter_options
         self._validate()
+
+    def to_state(self, serializer=None):
+        return {
+            'name':self.name,
+            'basis':serializer.serialize(self._basis),
+            'matrix':self._matrix,
+            'inverse':self._inv,
+            'dimension':self._dimension,
+            'origin':self._origin,
+            'coordinate_shape':self.coordinate_shape,
+            'jacobian_prep':self.jacobian_prep,
+            'converter_options':self.converter_options
+        }
+    @classmethod
+    def from_state(cls, data, serializer=None):
+        return cls(
+            name=data['name'],
+            basis=serializer.deserialize(data['basis']),
+            matrix=data['matrix'],
+            inverse=data['inverse'],
+            dimension=data['dimension'],
+            origin=data['origin'],
+            coordinate_shape=data['coordinate_shape'],
+            jacobian_prep=serializer.deserialize(data['jacobian_prep']),
+            converter_options=data['converter_options']
+        )
+
     def __call__(self, coords, **opts): # just a convenience...
         from .CoordinateSet import CoordinateSet
         opts = dict(self.converter_options, **opts)
@@ -661,8 +688,24 @@ class BaseCoordinateSystem(CoordinateSystem):
     This allows us to define flexible `CoordinateSystem` subclasses that we _don't_ expect to be used as a base
     """
 
-    def __init__(self, name, dimension=None, matrix=None, coordinate_shape=None, converter_options=None):
+    def __init__(self, name, dimension=None, coordinate_shape=None, converter_options=None):
         super().__init__(name=name,
-                         dimension=dimension, basis=self, matrix=matrix, coordinate_shape=coordinate_shape,
+                         dimension=dimension, basis=self, coordinate_shape=coordinate_shape,
                          converter_options=converter_options
                          )
+
+    def to_state(self, serializer=None):
+        return {
+            'name':self.name,
+            'dimension':self._dimension,
+            'coordinate_shape':self.coordinate_shape,
+            'converter_options':self.converter_options
+        }
+    @classmethod
+    def from_state(cls, data, serializer=None):
+        return cls(
+            name=data['name'],
+            dimension=data['dimension'],
+            coordinate_shape=data['coordinate_shape'],
+            converter_options=data['converter_options']
+        )

@@ -494,7 +494,11 @@ def matdet_deriv(forward_expansion, order):
     return det_exp
 
 def _broadcast_mul(scalar, other):
-    if isinstance(scalar, np.ndarray) and scalar.ndim < other.ndim:
+    if (
+            isinstance(scalar, np.ndarray)
+            and isinstance(other, np.ndarray)
+            and scalar.ndim < other.ndim
+    ):
         return np.expand_dims(scalar, list(range(scalar.ndim, other.ndim))) * other
     else:
         return scalar * other
@@ -516,7 +520,12 @@ def _scalarinv_deriv(scalar_expansion, o):
     for parts in get_integer_partitions(o):
         l = len(parts[0])
         scaling = ((-1) ** l) * math.factorial(l) / (scalar_expansion[0] ** (l + 1))
-        term += sum(
+        # term = 0
+        # for p in parts:
+        #     nca_term = nca_partition_prod(p, scalar_expansion[1:], shared=shared)
+        #     b_term = _broadcast_mul(scaling, nca_term)
+        #     term += b_term
+        term = sum(
             _broadcast_mul(scaling, nca_partition_prod(p, scalar_expansion[1:], shared=shared))
             for p in parts
         )
