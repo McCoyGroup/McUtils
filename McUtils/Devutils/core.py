@@ -17,6 +17,8 @@ __all__ = [
     "is_missing",
     "is_interface_like",
     "is_dict_like",
+    "is_option_spec_like",
+    "destructure_option_spec",
     "is_list_like",
     "is_number",
     "is_int",
@@ -27,7 +29,8 @@ __all__ = [
     "str_in",
     "str_elide",
     "resolve_key_collision",
-    "merge_dicts"
+    "merge_dicts",
+    "context_wrap"
 ]
 
 class SingletonType:
@@ -73,11 +76,14 @@ def is_int(obj,
 
 def is_interface_like(obj, interface_types, exlusion_types, implementation_attrs):
     return (
-            (exlusion_types is None) or
-            not isinstance(obj, exlusion_types)
+            (exlusion_types is None)
+            or not isinstance(obj, exlusion_types)
     ) and (
             (interface_types is not None and isinstance(obj, interface_types))
-            or all(hasattr(obj, a) for a in implementation_attrs)
+            or (
+                implementation_attrs is not None
+                and all(hasattr(obj, a) for a in implementation_attrs)
+            )
     )
 
 def is_dict_like(obj,
@@ -103,6 +109,35 @@ def is_default(obj, allow_None=True):
             or isinstance(obj, DefaultType)
             or (hasattr(obj, '__is_default__') and obj.__is_default__)
     )
+
+def is_option_spec_like(obj, allow_enums=True):
+    method, opts = destructure_option_spec(obj, allow_enums)
+    return method is not None
+
+def destructure_option_spec(spec, allow_enums=True, method_key='method'):
+    if isinstance(spec, (str, bool)) or is_number(spec) or is_default(spec):
+        opts = {}
+        method = spec
+    elif (
+            allow_enums and
+            hasattr(spec, 'name') and hasattr(spec, 'value')
+    ):  # enum
+        method = spec.value
+        opts = {}
+    elif is_dict_like(spec):
+        opts = spec.copy()
+        method = opts.pop(method_key, None)
+    elif callable(spec):
+        method = spec
+        opts = {}
+    else:
+        try:
+            method, opts = spec
+        except TypeError:
+            method = None
+            opts = None
+
+    return method, opts
 
 def handle_default(opt, default_value, allow_None=True):
     if is_default(opt, allow_None=allow_None):
@@ -209,3 +244,15 @@ def merge_dicts(a, b, collision_handler=None):
         )
 
     return dd
+
+class context_wrap:
+    def __init__(self, obj):
+        self.obj = obj
+    def __enter__(self):
+        if hasattr(self.obj, '__enter__'):
+            return self.obj.__enter__()
+        else:
+            return self.obj
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if hasattr(self.obj, '__exit__'):
+            return self.obj.__exit__(exc_type, exc_val, exc_tb)

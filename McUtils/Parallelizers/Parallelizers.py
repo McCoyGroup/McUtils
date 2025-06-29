@@ -4,9 +4,12 @@ Currently primarily targets multiprocessing and mpi4py, but also should work
 with Ray. Dask will require more work unfortunately...
 """
 
-import abc, functools, multiprocessing as mp, typing, uuid, os
+import abc, functools, multiprocessing as mp, multiprocessing.pool as mp_pool, typing, uuid, os
+import contextlib
+
 import numpy as np, pickle, time
 
+from .. import Devutils as dev
 from ..Scaffolding import Logger, NullLogger, ObjectRegistry
 from .SharedMemory import SharedObjectManager, SharedMemoryList, SharedMemoryDict
 
@@ -60,16 +63,34 @@ class Parallelizer(metaclass=abc.ABCMeta):
     #
     _par_registry = None
     default_printer = print
-    def __init__(self, logger=None, contract=None, uid=None):
+    base_log_level = Logger.LogLevel.MoreDebug
+    def __init__(self, logger=None, contract=None, uid=None,
+                 initialization_function=None,
+                 initialization_args=None,
+                 initialization_kwargs=None
+                 ):
         self._active_sentinel=0
         self._pickle_prot = None
         if logger is None:
             logger = Logger()
-        self.logger=logger
-        self.contract=contract if contract is None or isinstance(contract, CallerContract) else CallerContract(contract)
+        self.logger = logger
+        self.contract = (
+            contract
+                if contract is None or isinstance(contract, CallerContract) else
+            CallerContract(contract)
+        )
         self._default_stack = None
         self.uid = uuid.uuid1()
         self._pid = None
+        self.initialization_args = () if initialization_args is None else initialization_args
+        self.initialization_kwargs = {} if initialization_kwargs is None else initialization_kwargs
+        self.initialization_function = (
+            functools.partial(initialization_function,
+                              *initialization_args,
+                              **initialization_kwargs)
+                if initialization_function is not None else
+            initialization_function
+        )
         # if printer is None:
         #     self._logger = Logger()
         #     self._default_printer = self._logger.log_print
@@ -93,9 +114,21 @@ class Parallelizer(metaclass=abc.ABCMeta):
         :return:
         :rtype:
         """
-        return cls.lookup(None)
+        return cls.lookup(None, construct=False)
+    class Backends:
+        Serial = "serial"
+        MPI = "mpi"
+        Multiprocessing = "multiprocessing"
     @classmethod
-    def lookup(cls, key) -> 'Parallelizer':
+    def get_paralellizer_types(cls):
+        return {
+            cls.Backends.Serial:SerialNonParallelizer,
+            cls.Backends.MPI:MPIParallelizer,
+            cls.Backends.Multiprocessing:MultiprocessingParallelizer,
+        }
+    parallelizer_dispatch = None
+    @classmethod
+    def lookup(cls, key, construct=True) -> 'Parallelizer':
         """
         Checks in the registry to see if a given parallelizer is there
         otherwise returns a `SerialNonParallelizer`.
@@ -104,7 +137,30 @@ class Parallelizer(metaclass=abc.ABCMeta):
         :return:
         :rtype:
         """
-        return cls.load_registry().lookup(key)
+        if isinstance(key, Parallelizer):
+            return key
+        else:
+            if key is None or isinstance(key, str):
+                new = cls.load_registry().lookup(key)
+            else:
+                new = None
+            if construct and (
+                    new is None
+                    or isinstance(new, SerialNonParallelizer)
+            ) and dev.is_option_spec_like(key):
+                cls.parallelizer_dispatch = dev.handle_uninitialized(
+                    cls.parallelizer_dispatch,
+                    lambda: dev.OptionsMethodDispatch(
+                        cls.get_paralellizer_types,
+                        methods_enum=cls.Backends
+                    )
+                )
+                type, opts = cls.parallelizer_dispatch.resolve(
+                    key,
+                )
+                if type is not None:
+                    new = type(**opts)
+            return new
 
     def register(self, key):
         """
@@ -121,6 +177,17 @@ class Parallelizer(metaclass=abc.ABCMeta):
     def active(self):
         return self._active_sentinel > 0
 
+    def set_initializer(self, func, *args, **kwargs):
+        self.initialization_function = functools.partial(func, *args, **kwargs)
+        self.run(self.initialization_function)
+        # self.pool.map(
+        #     self._initialize_worker,
+        #     [self.initialization_function] * (self.nproc)
+        # )
+        # self.pool.initializer = functools.partial(
+        #     self._initialize_worker,
+        #     self.initialization_function
+        # )
     @abc.abstractmethod
     def initialize(self):
         """
@@ -294,7 +361,7 @@ class Parallelizer(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError("Parallelizer is an abstract base class")
     @abc.abstractmethod
-    def scatter(self, data, **kwargs):
+    def scatter(self, data, locs=None, return_locs=False, **kwargs):
         """
         Performs a scatter of data to the different
         available parallelizer processes.
@@ -365,7 +432,7 @@ class Parallelizer(metaclass=abc.ABCMeta):
         raise NotImplementedError("Parallelizer is an abstract base class")
 
     @abc.abstractmethod
-    def apply(self, func, *args, main_kwargs=None, **kwargs):
+    def apply(self, func, *args, main_kwargs=None, cleanup=True, **kwargs):
         """
         Runs the callable `func` in parallel
         :param func:
@@ -639,7 +706,7 @@ class SendRecieveParallelizer(Parallelizer):
             raise val.error
         else:
             return val
-    def broadcast(self, data, **kwargs):
+    def broadcast(self, data, locs=None, **kwargs):
         """
         Sends the same data to all processes
 
@@ -653,12 +720,14 @@ class SendRecieveParallelizer(Parallelizer):
         if self.contract is not None:
             self.contract.handle_call(self, "broadcast")
         if self.on_main:
-            for i in self.comm.locations[1:]:
+            if locs is None:
+                locs = list(self.comm.locations)[1:]
+            for i in locs:
                 self.comm.send(data, i, **kwargs)
             return data
         else:
             return self.comm.send(data, self.comm.location) # effectively a receive...
-    def scatter(self, data, **kwargs):
+    def scatter(self, data, locs=None, return_locs=False, **kwargs):
         """
         Performs a scatter of data to the different
         available parallelizer processes.
@@ -677,8 +746,10 @@ class SendRecieveParallelizer(Parallelizer):
         if self.contract is not None:
             self.contract.handle_call(self, "scatter")
         if self.on_main:
-            locs = list(self.comm.locations) # gotta be safe
-            nlocs = len(locs)
+            if locs is None:
+                locs = list(self.comm.locations)[1:]
+            locs = list(locs) # gotta be safe
+            nlocs = len(locs) + 1
             chunk_size = len(data) // nlocs
             chunk_sizes = [chunk_size] * nlocs
             chunk_coverage = (chunk_size*nlocs)
@@ -686,14 +757,21 @@ class SendRecieveParallelizer(Parallelizer):
                 chunk_sizes[i] += 1
             s = chunk_sizes[0]
             main_data = data[:s]
-            for i, b in zip(locs[1:], chunk_sizes[1:]):
+            for i, b in zip(locs, chunk_sizes[1:]):
                 chunk = data[s:s+b]
                 self.comm.send(chunk, i, **kwargs)
                 s+=b
-            return main_data
+            if not return_locs:
+                return main_data
+            else:
+                return main_data, locs[:len(chunk_sizes)-1]
         else:
-            return self.comm.send(data, self.comm.location) # effectively a receive...
-    def gather(self, data, **kwargs):
+            res = self.comm.send(data, self.comm.location)
+            if return_locs:
+                return res, None
+            else:
+                return res # effectively a receive...
+    def gather(self, data, locs=None, **kwargs):
         """
         Performs a gather of data from the different
         available parallelizer processes
@@ -709,28 +787,34 @@ class SendRecieveParallelizer(Parallelizer):
         if self.contract is not None:
             self.contract.handle_call(self, "gather")
         if self.on_main:
-            locs = list(self.comm.locations) # gotta be safe
+            if locs is None:
+                locs = list(self.comm.locations)[1:] # gotta be safe
+            else:
+                locs = list(locs)
             nlocs = len(locs) # we reserve space for the main thread
-            recv = [None] * nlocs
+            recv = [None] * (nlocs + 1)
             recv[0] = data
             all_numpy = True
-            for n, i in enumerate(locs[1:]):
+            for n, i in enumerate(locs):
                 res = self.comm.receive(data, i, **kwargs)
                 if not isinstance(res, np.ndarray):
                     all_numpy=False
                 if isinstance(res, Exception):
                     raise res
                 recv[n+1] = res
-            if all_numpy:
-                # special case
-                try:
-                    recv = np.concatenate(recv, axis=0)
-                except:
-                    pass
+            # if all_numpy:
+            #     # special case
+            #     try:
+            #         recv = np.concatenate(recv, axis=0)
+            #     except:
+            #         pass
             return recv
         else:
             return self.comm.receive(data, self.comm.location, **kwargs) # effectively a send...
-    def map(self, func, data, extra_args=None, extra_kwargs=None, **kwargs):
+    def map(self, func, data, extra_args=None, extra_kwargs=None,
+            vectorized=False,
+            aggregate=True,
+            **kwargs):
         """
         Performs a parallel map of function over
         the held data on different processes
@@ -746,26 +830,40 @@ class SendRecieveParallelizer(Parallelizer):
         """
 
         # self.wait()
-        self.print("Scattering Data", log_level=Logger.LogLevel.MoreDebug)
-        data = self.scatter(data, **kwargs)
+        self.print("Scattering Data", log_level=Parallelizer.base_log_level)
+        data, locs = self.scatter(data, return_locs=True, **kwargs)
         # self.wait()
-        self.print("Broadcasting Extra Args", log_level=Logger.LogLevel.MoreDebug)
+        self.print("Broadcasting Extra Args", log_level=Parallelizer.base_log_level)
         extra_args = self.broadcast(extra_args, **kwargs)
         # self.wait()
-        self.print("Broadcasting Extra Kwargs", log_level=Logger.LogLevel.MoreDebug)
+        self.print("Broadcasting Extra Kwargs", log_level=Parallelizer.base_log_level)
         extra_kwargs = self.broadcast(extra_kwargs, **kwargs)
         if extra_args is None:
             extra_args = ()
         if extra_kwargs is None:
             extra_kwargs = {}
         # try:
-        evals = [func(sub_data, *extra_args, **extra_kwargs) for sub_data in data]
+        if vectorized:
+            evals = func(data, *extra_args, **extra_kwargs)
+        else:
+            evals = [
+                func(sub_data, *extra_args, **extra_kwargs)
+                for sub_data in data
+            ]
         # except Exception as e:
         #     self.gather(e, **kwargs)
         #     raise
-        res = self.gather(evals, **kwargs)
+        res = self.gather(evals, locs=locs, **kwargs)
         if self.on_main:
-            return sum(res, [])
+            if aggregate:
+                if len(res) == 1:
+                    res = res[0]
+                else:
+                    _ = []
+                    for r in res:
+                        _.extend(r)
+                    res = _
+            return res
         else:
             return Parallelizer.InWorkerProcess
     def starmap(self, func, data, extra_args=None, extra_kwargs=None, **kwargs):
@@ -796,7 +894,8 @@ class SendRecieveParallelizer(Parallelizer):
         #     raise
         res = self.gather(evals, **kwargs)
         if self.on_main:
-            return sum(res, [])
+            return res
+            # return sum(res, [])
         else:
             return Parallelizer.InWorkerProcess
 
@@ -865,12 +964,12 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             :rtype:
             """
             if not self.queues[self.id].init_flag.is_set():
-                self.parent.print("setting init flag on {id}", id=self.id, log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("setting init flag on {id}", id=self.id, log_level=Parallelizer.base_log_level)
                 self.queues[self.id].init_flag.set()
             if self.parent.on_main:
                 for i, q in enumerate(self.queues):
                     if not q.init_flag.is_set():
-                        self.parent.print("checking init flag on {i}".format(i=i), log_level=Logger.LogLevel.MoreDebug)
+                        self.parent.print("checking init flag on {i}".format(i=i), log_level=Parallelizer.base_log_level)
                         wat = q.init_flag.wait(self.initialization_timeout)
                         if not wat:
                             raise self.PoolError("Failed to initialize pool")
@@ -885,12 +984,12 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             for i, q in enumerate(self.queues):
                 q.init_flag.clear()
             # if not self.queues[self.id].init_flag.is_set():
-            #     self.parent.print("setting init flag on {id}", id=self.id, log_level=Logger.LogLevel.MoreDebug)
+            #     self.parent.print("setting init flag on {id}", id=self.id, log_level=Parallelizer.base_log_level)
             #     self.queues[self.id].init_flag.set()
             # if self.parent.on_main:
             #     for i, q in enumerate(self.queues):
             #         if not q.init_flag.is_set():
-            #             self.parent.print("checking init flag on {i}".format(i=i), log_level=Logger.LogLevel.MoreDebug)
+            #             self.parent.print("checking init flag on {i}".format(i=i), log_level=Parallelizer.base_log_level)
             #             wat = q.init_flag.wait(self.initialization_timeout)
             #             if not wat:
             #                 raise self.PoolError("Failed to initialize pool")
@@ -912,7 +1011,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             """
             return self.id
 
-        def send(self, data, loc, **kwargs):
+        def send(self, data, loc, prepickled=False, **kwargs):
             """
             Sends the specified data to loc
             :param data:
@@ -927,18 +1026,19 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
 
             queue = self.queues[loc].send_queue #type: mp.queues.Queue
             if loc == self.id:
-                self.parent.print("Send: getting on {id}".format(id=self.id), log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("Send: getting on {id}".format(id=self.id), log_level=Parallelizer.base_log_level)
                 res = queue.get()
-                self.parent.print("Send: got on {id}".format(id=self.id), log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("Send: got on {id}".format(id=self.id), log_level=Parallelizer.base_log_level)
                 res = pickle.loads(res)
                 return res
             else:
-                self.parent.print("Send: putting {id} to {loc}".format(id=self.id, loc=loc), log_level=Logger.LogLevel.MoreDebug)
-                data = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+                self.parent.print("Send: putting {id} to {loc}".format(id=self.id, loc=loc), log_level=Parallelizer.base_log_level)
+                if not prepickled:
+                    data = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
                 queue.put(data)
-                self.parent.print("Send: put on {id} to {loc}".format(id=self.id, loc=loc), log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("Send: put on {id} to {loc}".format(id=self.id, loc=loc), log_level=Parallelizer.base_log_level)
                 return data
-        def receive(self, data, loc, **kwargs):
+        def receive(self, data, loc, prepickled=False, **kwargs):
             """
             Receives the specified data from loc
             :param data:
@@ -952,16 +1052,17 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             """
             queue = self.queues[loc].receive_queue
             if loc != self.id:
-                self.parent.print("Recv: getting on {id} from {loc}".format(id=self.id, loc=loc), log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("Recv: getting on {id} from {loc}".format(id=self.id, loc=loc), log_level=Parallelizer.base_log_level)
                 res = queue.get()
                 res = pickle.loads(res)
-                self.parent.print("Recv: got on {id} from {loc}".format(id=self.id, loc=loc), log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("Recv: got on {id} from {loc}".format(id=self.id, loc=loc), log_level=Parallelizer.base_log_level)
                 return res
             else:
-                self.parent.print("Recv: putting on {id}".format(id=self.id), log_level=Logger.LogLevel.MoreDebug)
-                data = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+                self.parent.print("Recv: putting on {id}".format(id=self.id), log_level=Parallelizer.base_log_level)
+                if not prepickled:
+                    data = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
                 queue.put(data)
-                self.parent.print("Recv: put on {id}".format(id=self.id), log_level=Logger.LogLevel.MoreDebug)
+                self.parent.print("Recv: put on {id}".format(id=self.id), log_level=Parallelizer.base_log_level)
                 return data
 
         def get_subcomm(self, idx):
@@ -985,15 +1086,22 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                  rank=None,
                  allow_restart=True,
                  initialization_timeout=.5,
+                 initialization_function=None,
+                 initialization_args=None,
+                 initialization_kwargs=None,
                  **kwargs
                  ):
         self.initialization_timeout=initialization_timeout
-        super().__init__(logger=logger, contract=contract)
-        self.opts=kwargs
-        self.pool=pool
-        self.worker=worker
-        self.ctx=context
-        self.manager=manager
+        super().__init__(logger=logger, contract=contract,
+                         initialization_function=initialization_function,
+                         initialization_args=initialization_args,
+                         initialization_kwargs=initialization_kwargs,
+                         )
+        self.opts = kwargs
+        self.pool:mp_pool.Pool = pool
+        self.worker = worker
+        self.ctx = context
+        self.manager:mp.Manager = manager
         self._comm = comm
         self._id = rank
         self.nproc = None
@@ -1061,6 +1169,28 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         #     print(":o", self, list(self.parallelizer_registry.values()))
         #     self.register(self.uid)
 
+    # def broadcast(self, data, locs=None, prepickled=False, **kwargs):
+    #     """
+    #     Sends the same data to all processes
+    #
+    #     :param data:
+    #     :type data:
+    #     :param kwargs:
+    #     :type kwargs:
+    #     :return:
+    #     :rtype:
+    #     """
+    #     if self.on_main:
+    #         if not prepickled:
+    #             pick = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+    #         else:
+    #             pick = data
+    #             data = pickle.loads(data)
+    #         super().broadcast(pick, locs=locs, prepickled=True, **kwargs)
+    #         return data
+    #     else:
+    #         return super().broadcast(data, locs=locs, prepickled=prepickled, **kwargs)
+
     @staticmethod
     def _run(runner, comm:PoolCommunicator, args, kwargs, main_kwargs=None):
         """
@@ -1091,7 +1221,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                         runner=runner,
                         grp=self.comm.locations
                     ),
-                    log_level=Logger.LogLevel.MoreDebug
+                    log_level=Parallelizer.base_log_level
                 )
             else:
                 self.print(
@@ -1099,7 +1229,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                         p=self.pid,
                         t=time.ctime()
                     ),
-                    log_level=Logger.LogLevel.MoreDebug
+                    log_level=Parallelizer.base_log_level
                 )
             self._comm.initialize()
             kwargs['parallelizer'] = comm.parent
@@ -1116,7 +1246,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                     comm.send(self.ReceivedError(e), 0)
                     raise
 
-    def apply(self, func, *args, comm=None, main_kwargs=None, **kwargs):
+    def apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs):
         """
         Applies func to args in parallel on all of the processes
 
@@ -1130,7 +1260,6 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         :return:
         :rtype:
         """
-        import multiprocessing as mp
 
         if comm is None:
             comm = self.comm
@@ -1166,8 +1295,9 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                     None
                 ] for i in range(1, self.nproc)
             ]
-            pool = self.pool #type: mp.pool.Pool
-            self.comm.reset()
+            pool = self.pool #type: mp_pool.Pool
+            if cleanup:
+                self.comm.reset()
             subsidiary = pool.starmap_async(self._run, mapping)
             # pool._worker_handler.join()
             # pool._task_handler.join()
@@ -1196,11 +1326,14 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
     def _get_pool(self,
                   manager: mp.Manager,
                   **kwargs
-                  ):
+                  ) -> mp.pool.Pool:
         if 'processes' not in kwargs:
             kwargs['processes'] = mp.cpu_count() - 1
         if 'initializer' not in kwargs:
-            kwargs['initializer'] = self._set_is_worker
+            kwargs['initializer'] = functools.partial(
+                self._initialize_worker,
+                self.initialization_function
+            )
         return manager.Pool(**kwargs)
     @staticmethod
     def get_pool_context(pool):
@@ -1214,19 +1347,33 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         self.queues = None
         self.comm = None
     @classmethod
-    def _set_is_worker(cls, *args):
+    def _initialize_worker(cls, initializer=None, *etc):
         """
         Sets a flag so that worker processes
         can know immediately that they are workers
         """
+        if initializer is not None:
+            initializer()
         cls._is_worker = True
+    def set_initializer(self, func, *args, **kwargs):
+        self.initialization_function = functools.partial(func, *args, **kwargs)
+        self.initialization_function()
+        self.pool.map(
+            self._initialize_worker,
+            [self.initialization_function] * (self.nproc)
+        )
+        self.pool.initializer = functools.partial(
+            self._initialize_worker,
+            self.initialization_function
+        )
+
     def initialize(self, allow_restart=None):
         if not self.worker:
             if self.pool is None:
-                self.print("Initializing pool...", log_level=Logger.LogLevel.MoreDebug)
+                self.print("Initializing pool...", log_level=Parallelizer.base_log_level)
                 if self.ctx is None:
                     self.ctx = mp.get_context() # get the default context
-                self.pool = self._get_pool(self.ctx, **self.opts)
+                self.pool:mp.Pool = self._get_pool(self.ctx, **self.opts)
             elif self.ctx is None:
                 self.ctx = self.get_pool_context(self.pool)
             if self.manager is None:
@@ -1242,11 +1389,19 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             else:
                 self.pool.__enter__()
             self.nproc = self.get_pool_nprocs(self.pool)
-            self.pool.map(self._set_is_worker, [None] * self.nproc)
+            self.pool.map(
+                self._initialize_worker,
+                [self.initialization_function] * (self.nproc+1)
+            )
+            if self.initialization_function is not None:
+                self.initialization_function()
             # just to be safe
             self._is_worker = False
             self.worker = False
-            self.queues = [self.SendRecvQueuePair(i, self.manager) for i in range(0, self.nproc)]
+            self.queues = [
+                self.SendRecvQueuePair(i, self.manager)
+                for i in range(0, self.nproc)
+            ]
 
     def finalize(self, exc_type, exc_val, exc_tb):
         if not self.worker:
@@ -1474,7 +1629,8 @@ class MPIParallelizer(SendRecieveParallelizer):
                         recv_buf,
                         root=root
                     )
-                    self.parent.print("sending", send_buf, recv_buf, self.get_mpi_type(dtype).name, log_level=Logger.LogLevel.MoreDebug)
+                    self.parent.print("sending", send_buf, recv_buf, self.get_mpi_type(dtype).name,
+                                      log_level=Parallelizer.base_log_level)
                     return recv_buf
             else:
                 return self.scatter_obj(data, root=root, **kwargs)
@@ -1660,7 +1816,7 @@ class MPIParallelizer(SendRecieveParallelizer):
         res = func(sub_data)
         return self.gather(res, shape=output_shape, **kwargs)
 
-    def apply(self, func, *args, **kwargs):
+    def apply(self, func, *args, cleanup=True, **kwargs):
         """
         Applies func to args in parallel on all of the processes.
         For MPI, since jobs are always started with mpirun, this
@@ -1700,6 +1856,8 @@ class SerialNonParallelizer(Parallelizer):
         :return:
         :rtype:
         """
+        if self.initialization_function is not None:
+            self.initialization_function()
         pass
     def finalize(self, exc_type, exc_val, exc_tb):
         """
@@ -1777,9 +1935,12 @@ class SerialNonParallelizer(Parallelizer):
         :return:
         :rtype:
         """
-        return data
+        return [data]
 
-    def map(self, function, data, extra_args=None, extra_kwargs=None, **kwargs):
+    def map(self, function, data, extra_args=None, extra_kwargs=None,
+            vectorized=True,
+            aggregate=False,
+            **kwargs):
         """
         Performs a serial map of the function over
         the passed data
@@ -1801,7 +1962,12 @@ class SerialNonParallelizer(Parallelizer):
                 extra_kwargs={}
             function = lambda a, fn=function, ea=extra_args, ek=extra_kwargs: fn(a, *ea, **ek)
 
-        return list(map(function, data, **kwargs))
+        if vectorized:
+            res = function(data, **kwargs)
+        else:
+            res = list(map(function, data, **kwargs))
+
+        return res
 
     def starmap(self, function, data, extra_args=None, extra_kwargs=None, **kwargs):
         """
@@ -1826,7 +1992,7 @@ class SerialNonParallelizer(Parallelizer):
 
         return list(map(function, data, **kwargs))
 
-    def apply(self, func, *args, comm=None, main_kwargs=None, **kwargs):
+    def apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs):
         kwargs['parallelizer'] = self
         if main_kwargs is None:
             main_kwargs = {}
