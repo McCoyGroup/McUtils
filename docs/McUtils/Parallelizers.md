@@ -241,9 +241,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a02c34" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a02c34"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-99aedd" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-99aedd"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a02c34" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-99aedd" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -256,9 +256,9 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-7df5c7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7df5c7"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4dd55a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4dd55a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7df5c7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4dd55a" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -271,7 +271,8 @@ class ParallelizerTests(TestCase):
         return {}
     def __setstate__(self, state):
         pass
-    def run_job(self, parallelizer=None):
+    def run_job(self, parallelizer:Parallelizer=None):
+        time.sleep(3)
         if parallelizer.on_main:
             data = np.arange(1000)
         else:
@@ -284,15 +285,19 @@ class ParallelizerTests(TestCase):
         # self.worker_print(test)
         data = parallelizer.scatter(data)
         lens = parallelizer.gather(len(data))
-        return lens
+        return sum(lens)
     def mapped_func(self, data):
-        return 1 + data
-    def map_applier(self, n=1000, parallelizer=None):
+        return [
+            sum(1 + d for d in p)
+            for c in data
+            for p in itertools.permutations(c)
+        ]
+    def map_applier(self, n=12, r=9, parallelizer=None):
         if parallelizer.on_main:
-            data = np.arange(n)
+            data = list(itertools.combinations(range(n), r))
         else:
             data = None
-        return parallelizer.map(self.mapped_func, data)
+        return parallelizer.map(self.mapped_func, data, vectorized=True)
     def bcast_parallelizer(self, parallelizer=None):
         root_par = parallelizer.broadcast(parallelizer)
     def scatter_gather(self, n=1000, parallelizer=None):
@@ -331,16 +336,21 @@ class ParallelizerTests(TestCase):
 #### <a name="BasicMultiprocessing">BasicMultiprocessing</a>
 ```python
     def test_BasicMultiprocessing(self):
-        par_lens = MultiprocessingParallelizer().run(self.run_job)
+        par_lens = MultiprocessingParallelizer(processes=5, initialization_timeout=2).run(self.run_job)
         serial_lens = SerialNonParallelizer().run(self.run_job)
-        self.assertEquals(sum(par_lens), serial_lens)
+        self.assertEquals(par_lens, serial_lens)
 ```
 
 #### <a name="MapMultiprocessing">MapMultiprocessing</a>
 ```python
     def test_MapMultiprocessing(self):
-        par_lens = MultiprocessingParallelizer().run(self.map_applier)
-        serial_lens = SerialNonParallelizer().run(self.map_applier)
+        from McUtils.Profilers import Timer
+        with MultiprocessingParallelizer(initialization_timeout=1) as par:
+            with Timer():
+               par_lens = par.run(self.map_applier)
+
+        with Timer():
+            serial_lens = SerialNonParallelizer().run(self.map_applier)
         self.assertEquals(par_lens, serial_lens)
 ```
 
