@@ -1,3 +1,6 @@
+import itertools
+import time
+
 from Peeves.TestUtils import *
 from McUtils.Scaffolding import Logger
 from McUtils.Parallelizers import *
@@ -27,7 +30,8 @@ class ParallelizerTests(TestCase):
     def __setstate__(self, state):
         pass
 
-    def run_job(self, parallelizer=None):
+    def run_job(self, parallelizer:Parallelizer=None):
+        time.sleep(3)
         if parallelizer.on_main:
             data = np.arange(1000)
         else:
@@ -40,25 +44,34 @@ class ParallelizerTests(TestCase):
         # self.worker_print(test)
         data = parallelizer.scatter(data)
         lens = parallelizer.gather(len(data))
-        return lens
+        return sum(lens)
     @validationTest
     def test_BasicMultiprocessing(self):
-        par_lens = MultiprocessingParallelizer().run(self.run_job)
+        par_lens = MultiprocessingParallelizer(processes=5, initialization_timeout=2).run(self.run_job)
         serial_lens = SerialNonParallelizer().run(self.run_job)
-        self.assertEquals(sum(par_lens), serial_lens)
+        self.assertEquals(par_lens, serial_lens)
 
     def mapped_func(self, data):
-        return 1 + data
-    def map_applier(self, n=1000, parallelizer=None):
+        return [
+            sum(1 + d for d in p)
+            for c in data
+            for p in itertools.permutations(c)
+        ]
+    def map_applier(self, n=12, r=9, parallelizer=None):
         if parallelizer.on_main:
-            data = np.arange(n)
+            data = list(itertools.combinations(range(n), r))
         else:
             data = None
-        return parallelizer.map(self.mapped_func, data)
-    @validationTest
+        return parallelizer.map(self.mapped_func, data, vectorized=True)
+    @debugTest
     def test_MapMultiprocessing(self):
-        par_lens = MultiprocessingParallelizer().run(self.map_applier)
-        serial_lens = SerialNonParallelizer().run(self.map_applier)
+        from McUtils.Profilers import Timer
+        with MultiprocessingParallelizer(initialization_timeout=1) as par:
+            with Timer():
+               par_lens = par.run(self.map_applier)
+
+        with Timer():
+            serial_lens = SerialNonParallelizer().run(self.map_applier)
         self.assertEquals(par_lens, serial_lens)
     @validationTest
     def test_MapMultiprocessingDataSmall(self):
@@ -138,7 +151,7 @@ class ParallelizerTests(TestCase):
             wat['key'] = 5
         parallelizer.print('{v} {g}', v=wat, g=d['d'])
 
-    @debugTest
+    @validationTest
     def test_DistributedDict(self):
 
          my_data = {'a':np.random.rand(10, 5, 5), 'b':np.random.rand(10, 3, 8), 'c':np.random.rand(10, 15, 4), 'd':{}}
