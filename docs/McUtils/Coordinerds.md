@@ -228,9 +228,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-3528ca" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3528ca"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c8f3d0" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c8f3d0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3528ca" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c8f3d0" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -266,9 +266,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-0d9b54" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-0d9b54"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-269baa" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-269baa"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-0d9b54" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-269baa" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
