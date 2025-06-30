@@ -1,6 +1,7 @@
 """
 Utilities for working with permutations and permutation indexing
 """
+import sys
 
 import numpy as np, time, typing, gc, itertools, math
 import collections, functools as ft
@@ -22,7 +23,9 @@ __all__ = [
     "SymmetricGroupGenerator",
     "CompleteSymmetricGroupSpace",
     "LatticePathGenerator",
-    "PermutationRelationGraph"
+    "PermutationRelationGraph",
+    "lehmer_encode",
+    "lehmer_decode"
 ]
 
 _infer_dtype = infer_int_dtype
@@ -47,6 +50,110 @@ def _as_pos_neg_dtype(ar):
         return ar
 
 # _infer_dtype = _infer_dtype#lambda why: 'int64' # makes my life a little easier right now...
+
+def _smaller_counts(perms, i):
+    return np.sum(
+        perms[:, i+1:] < perms[:, (i,)],
+        axis=1
+    )
+def lehmer_encode(perms, dtype=None):
+    perms = np.asanyarray(perms)
+    base_shape = perms.shape[:-1]
+    ndim = perms.shape[-1]
+    perms = perms.reshape(-1, perms.shape[-1])
+    if dtype is None:
+        max_obj = sum(math.factorial(i) for i in range(ndim))
+        if max_obj > sys.maxsize:
+            dtype = object
+        else:
+            dtype = int #TODO: make this smarter
+    code_counts = [
+        _smaller_counts(perms, i).astype(dtype) * math.factorial(ndim - 1 - i)
+        for i in range(perms.shape[1])
+    ]
+    return np.sum(code_counts, axis=0).reshape(base_shape)
+def lehmer_decode(ndim, codes, dtype=None):
+    codes = np.asanyarray(codes)
+    base_shape = codes.shape
+    codes = codes.reshape(-1,)
+    perms = np.array([
+        (codes % math.factorial(ndim - i)) // math.factorial(ndim - 1 - i)
+        for i in range(ndim)
+    ]).T
+    if dtype is not None:
+        perms = perms.astype(dtype)
+    elif codes.dtype == np.dtype(object):
+        perms = perms.astype(int)
+
+    # mask = np.full(codes.shape[0], True)
+    submask = np.full(perms.shape, True)
+    for i in range(ndim):
+        counters = np.zeros(codes.shape)
+        rem_mask = np.full(codes.shape, True)
+        for j in range(ndim):
+            rem_pos = np.where(rem_mask)
+            if len(rem_pos) == 0 or len(rem_pos[0]) == 0:
+                break
+
+            inc_pos = np.where(submask[rem_pos[0], j])
+            if len(inc_pos) > 0 and len(inc_pos[0]) > 0:
+                counters[rem_pos[0][inc_pos]] += 1
+            res_pos = np.where(counters[rem_pos] == perms[rem_pos[0], i] + 1)
+            if len(res_pos) > 0 and len(res_pos[0]) > 0:
+                rr = rem_pos[0][res_pos[0]]
+                perms[rr, i] = j
+                submask[rr, j] = False
+                rem_mask[rr,] = False
+                # break
+    return perms.reshape(base_shape + (ndim,))
+def encode(permutation):
+    """Return Lehmer Code of the given permutation.
+    """
+
+    def permutation_is_valid(permutation):
+        if not permutation:
+            return False
+
+        minimum = min(permutation)
+        maximum = max(permutation)
+
+        used = [0] * (maximum - minimum + 1)
+        for i in permutation:
+            used[i - minimum] += 1
+
+        if min(used) == 1 and max(used) == 1:
+            return True
+        else:
+            return False
+
+    def count_lesser(i, permutation):
+        return sum(it < permutation[i] for it in permutation[i + 1:])
+
+    def parial_result(i, permutation):
+        return count_lesser(i, permutation) * factorial(len(permutation) - 1 - i)
+
+    if not permutation_is_valid(permutation):
+        return False
+
+    return sum(parial_result(i, permutation) for i in range(0, len(permutation)))
+
+
+def decode(length, lehmer):
+    """Return permutation for the given Lehmer Code and permutation length. Result permutation contains
+    number from 0 to length-1.
+    """
+    result = [(lehmer % factorial(length - i)) // factorial(length - 1 - i) for i in range(length)]
+    used = [False] * length
+    for i in range(length):
+        counter = 0
+        for j in range(length):
+            if not used[j]:
+                counter += 1
+            if counter == result[i] + 1:
+                result[i] = j
+                used[j] = True
+                break
+    return result
 
 class IntegerPartitioner:
 
