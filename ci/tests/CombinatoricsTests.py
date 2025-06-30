@@ -49,6 +49,18 @@ class CombinatoricsTests(TestCase):
         def __call__(self, *specs, mode=None):
             return self.make_state(*specs, mode=mode)
 
+
+    @debugTest
+    def test_lemherCodes(self):
+        # print(
+        #     lehmer_encode([0, 1, 2])
+        # )
+        base_perms = list(list(p) for p in itertools.permutations(range(5), 5))
+        lehmers = lehmer_encode(base_perms)
+        self.assertEquals(list(range(len(base_perms))), lehmers.tolist())
+        decodes = lehmer_decode(5, lehmers)
+        self.assertEquals(base_perms, decodes.tolist())
+
     @validationTest
     def test_IntegerPartitions(self):
         """
@@ -163,7 +175,7 @@ class CombinatoricsTests(TestCase):
             msg="{} should have indices {} but got {}".format(test_parts, inds, test_inds)
         )
 
-    @debugTest
+    @validationTest
     def test_Partitions2D(self):
         # for p in IntegerPartitioner2D.get_partitions(
         #         [3, 2, 1],
