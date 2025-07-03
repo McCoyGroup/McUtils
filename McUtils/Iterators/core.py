@@ -1,5 +1,5 @@
 import itertools
-import numpy as np
+import numbers
 
 __all__ = [
     "is_fixed_size",
@@ -167,10 +167,10 @@ def _is_atomic(atomic_obj, atomic_types):
 
 def flatten(iterable, atomic_types=None):
     if atomic_types is None:
-        atomic_types = (int,str,float,np.integer,np.float)
+        atomic_types = (int,str,float,numbers.Number)
     for o in iterable:
         if _is_atomic(o, atomic_types):
             yield o
         else:
-            for f in flatten(iterable, atomic_types=atomic_types):
+            for f in flatten(o, atomic_types=atomic_types):
                 yield f

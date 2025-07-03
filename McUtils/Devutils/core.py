@@ -22,6 +22,7 @@ __all__ = [
     "is_list_like",
     "is_number",
     "is_int",
+    "is_atomic",
     "cached_eval",
     "merge_dicts",
     "str_comp",
@@ -59,6 +60,13 @@ class UninitializedType(SingletonType):
     """
     __is_uninitialized__ = True
 uninitialized = UninitializedType()
+
+def is_atomic(obj,
+              interface_types=(str, bool, numbers.Number),
+              exlusion_types=None,
+              implementation_props=None
+              ):
+    return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
 
 def is_number(obj,
               interface_types=(numbers.Number,),

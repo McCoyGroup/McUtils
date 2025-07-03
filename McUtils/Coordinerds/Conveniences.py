@@ -31,7 +31,14 @@ __all__ = [
     "functionalized_zmatrix",
     "reindex_zmatrix",
     "is_coordinate_list_like",
-    "is_valid_coordinate"
+    "is_valid_coordinate",
+    "get_stretch_angles",
+    "get_angle_dihedrals",
+    "get_angle_stretches",
+    "get_dihedral_stretches",
+    "get_stretch_angle_dihedrals",
+    "get_stretch_coordinate_system",
+    "get_coordinate_label"
 ]
 
 zm_type = namedtuple("zms", ["coords", "ordering"])
@@ -596,3 +603,197 @@ def is_coordinate_list_like(clist):
     return dev.is_list_like(clist) and all(
         is_valid_coordinate(c) for c in clist
     )
+
+def get_stretch_angles(stretches):
+    angles = []
+    for i,(sa,sb) in enumerate(stretches):
+        for sc,sd in stretches[i+1:]:
+            if sa == sc:
+                if sb == sd: continue
+                angles.append((sb, sa, sd))
+            elif sa == sd:
+                if sb == sc: continue
+                angles.append((sb, sa, sc))
+            elif sb == sc:
+                angles.append((sa, sb, sd))
+            elif sb == sd:
+                angles.append((sa, sb, sc))
+    return angles
+def get_stretch_angle_dihedrals(stretches, angles):
+    dihedrals = []
+    for sa,sb in stretches:
+        for ba,bc,bd in angles:
+            if sa in (ba,bc,bd) and sb in (ba,bc,bd): continue
+            # enumerate for simplicity & avoiding try/except
+            if sa == ba:
+                dihedrals.append(
+                    (sb, ba, bc, bd)
+                )
+            elif sa == bc:
+                dihedrals.append(
+                    (ba, sb, bc, bd)
+                )
+            elif sa == bd:
+                dihedrals.append(
+                    (ba, bc, bd, sb)
+                )
+            elif sb == ba:
+                dihedrals.append(
+                    (sa, ba, bc, bd)
+                )
+            elif sb == bc:
+                dihedrals.append(
+                    (ba, sa, bc, bd)
+                )
+            elif sb == bd:
+                dihedrals.append(
+                    (ba, bc, bd, sa)
+                )
+    return dihedrals
+def get_angle_stretches(angles):
+    return [
+        s
+        for a,b,c in angles
+        for s in [(a, b), (b, c)]
+    ]
+def get_dihedral_stretches(dihedrals):
+    return [
+        s
+        for a,b,c,d in dihedrals
+        for s in [(a, b), (b, c), (c,d)]
+    ]
+def get_angle_dihedrals(angles):
+    dihedrals = []
+    for i, (aa, ab, ac) in enumerate(angles):
+        for ad, ae, af in angles[i + 1:]:
+            if ae == ac:
+                if ad == ab:
+                    if af == aa: continue
+                    dihedrals.append((aa, ab, ac, af))
+                elif af == ab:
+                    if ad == aa: continue
+                    dihedrals.append((aa, ab, ac, ad))
+            elif ae == aa:
+                if ad == ab:
+                    if af == ac: continue
+                    dihedrals.append((af, aa, ab, ac))
+                elif af == ab:
+                    if ad == ac: continue
+                    dihedrals.append((ad, aa, ab, ac))
+    return dihedrals
+
+def get_stretch_coordinate_system(stretches):
+    angles = get_stretch_angles(stretches)
+    dihedrals = get_angle_dihedrals(angles)
+    return stretches,angles,dihedrals
+
+atom_sort_order = ['C', 'O', 'N', 'H', 'F', 'Cl', 'Br', 'I']
+coordinate_label = namedtuple('coordinate_label', ['ring', 'group', 'atoms', 'type'])
+def get_coordinate_label(coord, atom_labels, atom_order=None):
+    ring_lab = None
+    group_lab = None
+    # motif_lab = ""
+    tag = None
+    if atom_order is None:
+        atom_order = atom_sort_order
+    if not isinstance(atom_order, dict):
+        atom_order = {a:i for i,a in enumerate(atom_order)}
+
+    if isinstance(coord, dict):
+        coord, tag = next(iter(coord.items()))
+    if len(coord) == 2:
+        if tag is None:
+            tag = "stretch"
+
+        a,b = coord
+        atom_1 = atom_labels[a]
+        atom_2 = atom_labels[b]
+        r1 = atom_1.ring
+        r2 = atom_2.ring
+        if r1 is not None:
+            if r2 is None or r1 == r2:
+                ring_lab = r1
+        elif r2 is not None:
+            if r1 is None:
+                ring_lab = r2
+
+        g1 = atom_1.group
+        g2 = atom_2.group
+        if g1 is not None:
+            if g2 is None or g1 == g2:
+                group_lab = g1
+        elif g2 is not None:
+            if g1 is None:
+                ring_lab = g2
+
+        a1 = atom_1.atom
+        a2 = atom_2.atom
+        a,b = sorted([a1,a2], key=lambda c:atom_order.get(c, len(atom_order)))
+        motif_lab = a+b
+
+    elif len(coord) == 3:
+        if tag is None:
+            tag = "bend"
+
+        a,b,c = coord
+        atom_1 = atom_labels[a]
+        atom_2 = atom_labels[b]
+        atom_3 = atom_labels[c]
+
+        r1 = atom_1.ring
+        r2 = atom_2.ring
+        r3 = atom_3.ring
+        if (
+                r1 is not None and r2 is not None and r3 is not None
+                and r1 == r2 and r1 == r3 and r2 == r3
+        ):
+            ring_lab = r1
+
+        g1 = atom_1.group
+        g2 = atom_2.group
+        g3 = atom_3.group
+        if (
+                g1 is not None and g2 is not None and g3 is not None
+                and g1 == g2 and g1 == g3 and g2 == g3
+        ):
+            group_lab = g1
+
+        a1 = atom_1.atom
+        a2 = atom_2.atom
+        a3 = atom_3.atom
+        if atom_order.get(a1, len(atom_order)) > atom_order.get(a3, len(atom_order)):
+            a1, a2, a3 = a3, a2, a1
+        motif_lab = a1 + a2 + a3
+    else:
+        if tag is None:
+            tag = "dihedral"
+
+        a, b, c, d = coord
+        atom_1 = atom_labels[a]
+        atom_2 = atom_labels[b]
+        atom_3 = atom_labels[c]
+        atom_4 = atom_labels[d]
+
+        rings = [atom_1.ring, atom_2.ring, atom_3.ring, atom_4.ring]
+        if (
+            all(r is not None for r in rings)
+            and all(r1 == r2 for r1,r2 in itertools.combinations(rings, 2))
+        ):
+            ring_lab = rings[0]
+
+        groups = [atom_1.group, atom_2.group, atom_3.group, atom_4.group]
+        if (
+                all(r is not None for r in groups)
+                and all(r1 == r2 for r1, r2 in itertools.combinations(groups, 2))
+        ):
+            group_lab = groups[0]
+
+        a1 = atom_1.atom
+        a2 = atom_2.atom
+        a3 = atom_3.atom
+        a4 = atom_4.atom
+        if atom_order.get(a1, len(atom_order)) > atom_order.get(a4, len(atom_order)):
+            a1, a2, a3, a4 = a4, a3, a2, a1
+        motif_lab = a1 + a2 + a3 + a4
+
+    return coordinate_label(ring_lab, group_lab, motif_lab, tag)

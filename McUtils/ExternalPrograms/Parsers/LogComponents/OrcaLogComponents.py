@@ -65,11 +65,12 @@ def strip_recursive(at_list):
         s.strip() if isinstance(s, str) else strip_recursive(s)
         for s in at_list
     ]
+OrcaCoords = namedtuple("OrcaCoords", ["atoms", "coords"])
 def cartesian_coordinates_parser(strs):
     strss = "\n\n".join(strs)
 
     parse = CartParser.parse_all(strss)
-    coords = (
+    coords = OrcaCoords(
         strip_recursive(parse["Atoms"].array),
         parse["Coordinates"].array
     )
@@ -80,6 +81,76 @@ Components["CartesianCoordinates"] = {
     "tag_start": cartesian_start_tag,
     "tag_end"  : cartesian_end_tag,
     "parser"   : cartesian_coordinates_parser,
+    "mode"     : "List"
+}
+
+
+cartesian_au_start_tag = FileStreamerTag(
+    """CARTESIAN COORDINATES (A.U.)""",
+    follow_ups="X           Y           Z"
+)
+cartesian_end_tag = "\n\n"
+
+CartAUParser = StringParser(
+    Repeating(
+        (
+           Named(
+                Integer, "AtNos",
+                prefix=Optional(Whitespace),
+                suffix=Whitespace
+            ),
+            Named(
+                Word, "Atoms",
+                prefix=Optional(Whitespace),
+                suffix=Whitespace
+            ),
+           Named(
+                Number, "ZA",
+                prefix=Optional(Whitespace),
+                suffix=Whitespace
+            ),
+           Named(
+                Integer, "Frag",
+                prefix=Optional(Whitespace),
+                suffix=Whitespace
+            ),
+           Named(
+                Number, "Mass",
+                prefix=Optional(Whitespace),
+                suffix=Whitespace
+            ),
+            Named(
+                Repeating(
+                    Capturing(Number),
+                    min=3,
+                    max=3,
+                    prefix=Optional(Whitespace),
+                    joiner = Whitespace
+                ),
+                "Coordinates", handler=StringParser.array_handler(dtype=float)
+            )
+        ),
+        suffix=Optional(Newline)
+    )
+)
+
+OrcaAUCoords = namedtuple("OrcaAUCoords", ["atoms", "masses", "coords"])
+def cartesian_au_coordinates_parser(strs):
+    strss = "\n\n".join(strs)
+
+    parse = CartAUParser.parse_all(strss)
+    coords = OrcaAUCoords(
+        strip_recursive(parse["Atoms"].array),
+        parse["Mass"].array,
+        parse["Coordinates"].array
+    )
+
+    return coords
+
+Components["CartesianAUCoordinates"] = {
+    "tag_start": cartesian_au_start_tag,
+    "tag_end"  : cartesian_end_tag,
+    "parser"   : cartesian_au_coordinates_parser,
     "mode"     : "List"
 }
 
