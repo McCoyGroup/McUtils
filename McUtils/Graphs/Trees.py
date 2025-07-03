@@ -10,6 +10,11 @@ class TreeTraversalOrder(enum.Enum):
     BreadthFirst = 'bfs'
     DepthFirst = 'dfs'
 
+class TreeCallOrder(enum.Enum):
+    PreVisit = "pre"
+    PostVisit = "post"
+    PostChildren = "final"
+
 def _get_tree_children(tree):
     if hasattr(tree, 'keys'):
         return list(enumerate(tree.keys()))
@@ -23,13 +28,14 @@ def tree_traversal(tree, callback,
                    get_children=None,
                    visited:set=None,
                    check_visited=None,
-                   traversal_ordering='bfs'
+                   traversal_ordering='bfs',
+                   call_order='post'
                    ):
     if get_children is None and get_item is None:
         get_children, get_item = _get_tree_children, _get_tree_item
-    elif get_children is not None:
+    elif get_children is not None and get_item is None:
         raise ValueError("`get_children` must be implemented if `get_item` is provided")
-    elif get_item is not None:
+    elif get_children is None and get_item is not None:
         raise ValueError("`get_item` must be implemented if `get_children` is provided")
 
     if root is dev.default:
@@ -42,33 +48,50 @@ def tree_traversal(tree, callback,
     if check_visited and visited is None:
         visited = set()
 
-    queue = collections.deque([root])
+    queue = collections.deque([[None, root]])
     if isinstance(traversal_ordering, str):
         traversal_ordering = TreeTraversalOrder(traversal_ordering)
+    if isinstance(call_order, str):
+        call_order = TreeCallOrder(call_order)
     if traversal_ordering is traversal_ordering.BreadthFirst:
-        pop = queue.pop
+        pop = queue.popleft
         extend = queue.extend
     else:
         pop = queue.popleft
         extend = queue.extendleft
 
     while queue:
-        head = pop()
+        parent, head = pop()
+
+        if call_order == TreeCallOrder.PreVisit:
+            res = callback(parent, head, visited)
+            if res is not None:
+                return res
+
         if check_visited:
             visited.add(head)
-        callback(head)
+
+        if call_order == TreeCallOrder.PostVisit:
+            res = callback(parent, head, visited)
+            if res is not None:
+                return res
 
         if check_visited:
             extend(
-                get_item(head, h)
+                [head, get_item(head, h)]
                 for h in get_children(head)
                 if h not in visited
             )
         else:
             extend(
-                get_item(head, h)
+                [head, get_item(head, h)]
                 for h in get_children(head)
             )
+
+        if call_order == TreeCallOrder.PostChildren:
+            res = callback(parent, head, visited)
+            if res is not None:
+                return res
 
 class TreeWrapper:
     def __init__(self, tree):
