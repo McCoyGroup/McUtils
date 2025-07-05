@@ -117,6 +117,7 @@ class OptionsMethodDispatch:
                  methods_enum=None,
                  case_insensitive=True,
                  allow_custom_methods=True,
+                 ignore_bad_enum_keys=False,
                  method_key='method'):
         if not hasattr(methods_table, 'items'):
             self.methods_table_generator = methods_table
@@ -130,6 +131,7 @@ class OptionsMethodDispatch:
         self.methods_enum = methods_enum
         self.default_method = default_method
         self.allow_custom_methods = allow_custom_methods
+        self.ignore_bad_enum_keys = ignore_bad_enum_keys
 
     def register(self, method_name, method, base_attributes=None):
         self.methods_table[method_name] = method
@@ -191,13 +193,31 @@ class OptionsMethodDispatch:
                 try:
                     method = self.methods_enum(method)
                 except ValueError:
-                    method = self.methods_enum(method.lower())
+                    if self.ignore_bad_enum_keys:
+                        try:
+                            method = self.methods_enum(method)
+                        except ValueError:
+                            ...
+                    else:
+                        method = self.methods_enum(method.lower())
             else:
-                method = self.methods_enum(method)
+                if self.ignore_bad_enum_keys:
+                    try:
+                        method = self.methods_enum(method)
+                    except ValueError:
+                        ...
+                else:
+                    method = self.methods_enum(method)
 
-            return methods_table.get(
+            if hasattr(method, 'value'):
+                return methods_table.get(
+                    method,
+                    methods_table.get(method.value, methods_table.get(self.default_method))
+                ), opts
+            else:
+                return methods_table.get(
                 method,
-                methods_table.get(method.value, methods_table.get(self.default_method))
+                methods_table.get(self.default_method)
             ), opts
         else:
             if self.case_insensitive and isinstance(method, str) and not method in methods_table:

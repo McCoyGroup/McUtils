@@ -1356,7 +1356,7 @@ def fractional_power(A, pow, zero_cutoff=1e-8):
                 s = vals.reshape(-1)[take_idx,].reshape((-1, bt))
                 v = np.moveaxis(vecs, -2, -1).reshape((-1, vecs.shape[-1]))[
                     take_idx
-                ].reshape(vecs.shape[:2] + (bt,))
+                ].reshape((vecs.shape[0], bt, vecs.shape[-1]))
                 u = np.moveaxis(v, -2, -1)
 
             flat_pow = u @ vec_tensordiag(np.power(s, pow)) @ v
