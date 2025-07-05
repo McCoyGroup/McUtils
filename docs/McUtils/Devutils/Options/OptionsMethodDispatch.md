@@ -21,7 +21,7 @@
  
 <a id="McUtils.Devutils.Options.OptionsMethodDispatch.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, methods_table: 'dict|Callable[[], dict]', attributes_map=None, default_method=None, methods_enum=None, case_insensitive=True, allow_custom_methods=True, method_key='method'): 
+__init__(self, methods_table: 'dict|Callable[[], dict]', attributes_map=None, default_method=None, methods_enum=None, case_insensitive=True, allow_custom_methods=True, ignore_bad_enum_keys=False, method_key='method'): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options.py#L113)/
@@ -34,8 +34,8 @@ __init__(self, methods_table: 'dict|Callable[[], dict]', attributes_map=None, de
 register(self, method_name, method, base_attributes=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L136)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L136?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ register(self, method_name, method, base_attributes=None):
 load_methods_table(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L145)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L145?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ load_methods_table(self):
 prep_method_spec(self, method_spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L162)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L162?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ prep_method_spec(self, method_spec):
 resolve(self, method_spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsMethodDispatch.py#L181?message=Update%20Docs)]
 </div>
  </div>
 </div>

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parallelizers.Parallelizers.SendRecieveParallelizer">SendRecieveParallelizer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L612)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L612?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L614)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L614?message=Update%20Docs)]
 </div>
 
 Parallelizer that implements `scatter`, `gather`, `broadcast`, and `map`
@@ -29,8 +29,8 @@ SendReceieveCommunicator: SendReceieveCommunicator
 comm(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L669)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L669?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L671)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L671?message=Update%20Docs)]
 </div>
 Returns the communicator used by the paralellizer
   - `:returns`: `SendRecieveParallelizer.SendReceieveCommunicator`
@@ -42,8 +42,8 @@ Returns the communicator used by the paralellizer
 send(self, data, loc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L677)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L677?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L679)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L679?message=Update%20Docs)]
 </div>
 Sends data to the process specified by loc
   - `data`: `Any`
@@ -59,8 +59,8 @@ Sends data to the process specified by loc
 receive(self, data, loc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L693)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L693?message=Update%20Docs)]
 </div>
 Receives data from the process specified by loc
   - `data`: `Any`
@@ -76,8 +76,8 @@ Receives data from the process specified by loc
 broadcast(self, data, locs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L709)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L709?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L711)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L711?message=Update%20Docs)]
 </div>
 Sends the same data to all processes
   - `data`: `Any`
@@ -93,8 +93,8 @@ Sends the same data to all processes
 scatter(self, data, locs=None, return_locs=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L730)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L730?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L732)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L732?message=Update%20Docs)]
 </div>
 Performs a scatter of data to the different
 available parallelizer processes.
@@ -114,8 +114,8 @@ processes
 gather(self, data, locs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L774)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L774?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L776)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L776?message=Update%20Docs)]
 </div>
 Performs a gather of data from the different
 available parallelizer processes
@@ -132,8 +132,8 @@ available parallelizer processes
 map(self, func, data, extra_args=None, extra_kwargs=None, vectorized=False, aggregate=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L814)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L814?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L816)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L816?message=Update%20Docs)]
 </div>
 Performs a parallel map of function over
 the held data on different processes
@@ -152,8 +152,8 @@ the held data on different processes
 starmap(self, func, data, extra_args=None, extra_kwargs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L869)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L869?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L871)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L871?message=Update%20Docs)]
 </div>
 Performs a parallel map with unpacking of function over
 the held data on different processes
@@ -172,8 +172,8 @@ the held data on different processes
 wait(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L902)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L902?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L904)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.py#L904?message=Update%20Docs)]
 </div>
 Causes all processes to wait until they've met up at this point.
   - `:returns`: `_`
@@ -231,7 +231,7 @@ Causes all processes to wait until they've met up at this point.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers/Parallelizers/SendRecieveParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L612?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L614?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
