@@ -6,6 +6,7 @@ with Ray. Dask will require more work unfortunately...
 
 import abc, functools, multiprocessing as mp, multiprocessing.pool as mp_pool, typing, uuid, os
 import contextlib
+import enum
 
 import numpy as np, pickle, time
 
@@ -115,7 +116,7 @@ class Parallelizer(metaclass=abc.ABCMeta):
         :rtype:
         """
         return cls.lookup(None, construct=False)
-    class Backends:
+    class Backends(enum.Enum):
         Serial = "serial"
         MPI = "mpi"
         Multiprocessing = "multiprocessing"
@@ -152,11 +153,12 @@ class Parallelizer(metaclass=abc.ABCMeta):
                     cls.parallelizer_dispatch,
                     lambda: dev.OptionsMethodDispatch(
                         cls.get_paralellizer_types,
-                        methods_enum=cls.Backends
+                        methods_enum=cls.Backends,
+                        ignore_bad_enum_keys=True
                     )
                 )
                 type, opts = cls.parallelizer_dispatch.resolve(
-                    key,
+                    key
                 )
                 if type is not None:
                     new = type(**opts)
