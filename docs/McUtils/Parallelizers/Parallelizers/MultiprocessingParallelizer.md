@@ -92,8 +92,8 @@ __setstate__(self, state):
 apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1251)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1251?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1252)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1252?message=Update%20Docs)]
 </div>
 Applies func to args in parallel on all of the processes
   - `func`: `Any`
@@ -112,8 +112,8 @@ Applies func to args in parallel on all of the processes
 get_pool_context(pool): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1340)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1340?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1341)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1341?message=Update%20Docs)]
 </div>
 
 
@@ -123,8 +123,8 @@ get_pool_context(pool):
 get_pool_nprocs(pool): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1343)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1343?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1344)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1344?message=Update%20Docs)]
 </div>
 
 
@@ -133,8 +133,8 @@ get_pool_nprocs(pool):
 set_initializer(self, func, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1361)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1361?message=Update%20Docs)]
 </div>
 
 
@@ -143,8 +143,8 @@ set_initializer(self, func, *args, **kwargs):
 initialize(self, allow_restart=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1372)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1372?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1373)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1373?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ initialize(self, allow_restart=None):
 finalize(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1408)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1408?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1409)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1409?message=Update%20Docs)]
 </div>
 
 
@@ -164,8 +164,8 @@ finalize(self, exc_type, exc_val, exc_tb):
 on_main(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1414)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1414?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1415)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1415?message=Update%20Docs)]
 </div>
 
 
@@ -175,8 +175,8 @@ on_main(self):
 from_config(cls, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1418)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1418?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1419)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1419?message=Update%20Docs)]
 </div>
  </div>
 </div>
