@@ -1165,7 +1165,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         # allow for better syncing...
         if self.uid in self.parallelizer_registry:
             parent = self.lookup(self.uid)
-            self.__dict__.update(parent.__dict__)
+            if parent is not None:
+                self.__dict__.update(parent.__dict__)
             # print("?", parent)
         # else:
         #     print(":o", self, list(self.parallelizer_registry.values()))
