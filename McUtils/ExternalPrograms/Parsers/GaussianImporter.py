@@ -4,6 +4,7 @@ Implements an importer for Gaussian output formats
 
 import numpy as np, re, math, io
 from .GaussianLogComponents import GaussianLogComponents, GaussianLogDefaults, GaussianLogOrdering
+from . import GaussianLogComponents as GaussianLogParsers
 from .GaussianFChkComponents import FormattedCheckpointComponents, FormattedCheckpointCommonNames
 from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException
 
@@ -54,6 +55,7 @@ class GaussianLogReader(FileStreamReader):
     registered_components = GaussianLogComponents
     default_keys = GaussianLogDefaults
     default_ordering = GaussianLogOrdering
+    parsers = GaussianLogParsers
 
     def parse(self, keys=None, num=None, reset=False):
         """The main function we'll actually use. Parses bits out of a .log file.
