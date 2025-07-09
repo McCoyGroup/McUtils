@@ -490,7 +490,7 @@ __getitem__(self, item):
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.match" class="docs-object-method">&nbsp;</a> 
 ```python
-match(self, txt): 
+match(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L700)/
@@ -500,7 +500,7 @@ match(self, txt):
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.search" class="docs-object-method">&nbsp;</a> 
 ```python
-search(self, txt): 
+search(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L702)/
@@ -510,7 +510,7 @@ search(self, txt):
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.findall" class="docs-object-method">&nbsp;</a> 
 ```python
-findall(self, txt): 
+findall(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L704)/
@@ -520,7 +520,7 @@ findall(self, txt):
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.finditer" class="docs-object-method">&nbsp;</a> 
 ```python
-finditer(self, txt): 
+finditer(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L706)/

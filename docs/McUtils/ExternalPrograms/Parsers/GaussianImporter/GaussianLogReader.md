@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader">GaussianLogReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L24)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L24?message=Update%20Docs)]
 </div>
 
 Implements a stream based reader for a Gaussian .log file.
@@ -47,6 +47,7 @@ If you need something we don't have, give `GaussianLogComponents` a look to see 
 registered_components: OrderedDict
 default_keys: tuple
 default_ordering: dict
+parsers: module
 job_default_keys: dict
 ```
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.parse" class="docs-object-method">&nbsp;</a> 
@@ -54,8 +55,8 @@ job_default_keys: dict
 parse(self, keys=None, num=None, reset=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L60?message=Update%20Docs)]
 </div>
 The main function we'll actually use. Parses bits out of a .log file.
   - `keys`: `str or list(str)`
@@ -156,8 +157,8 @@ _
 get_default_keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L109)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.py#L109?message=Update%20Docs)]
 </div>
 Tries to get the default keys one might be expected to want depending on the type of job as determined from the Header
 Currently only supports 'opt', 'scan', and 'popt' as job types.
@@ -181,8 +182,8 @@ g
 read_props(cls, file, keys): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L138?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -237,7 +238,7 @@ read_props(cls, file, keys):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianLogReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L24?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
