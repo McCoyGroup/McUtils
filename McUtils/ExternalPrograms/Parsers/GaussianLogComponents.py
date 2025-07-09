@@ -1,6 +1,8 @@
 """
 This lists the types of readers and things available to the GaussianLogReader
 """
+import io
+
 import numpy as np
 
 from ...Parsers import *
@@ -195,6 +197,20 @@ GaussianLogComponents["InputCartesianCoordinates"] = {
     "mode"     : "List"
 }
 
+def header_cartesian_parser(carts):
+    xyz = carts.strip().split("\n", 1)[1]#.strip()
+    atoms = [
+        line.split(None, 1)[0]
+        for line in io.StringIO(xyz)
+    ]
+    coords = np.array(Number.findall(xyz)).astype(float).reshape(-1, 3)
+    return atoms, coords
+GaussianLogComponents["HeaderCartesianCoordinates"] = {
+    "tag_start": 'Symbolic Z-matrix:',
+    "tag_end"  : "\n\n",
+    "parser"   : header_cartesian_parser,
+    "mode"     : "Single"
+}
 # endregion
 
 ########################################################################################################################
@@ -791,70 +807,6 @@ def parse_weird_mat(pars): # identical to X-matrix parser...
 HessianBlockTags = ["Force constants in Cartesian coordinates:", "Final forces"]
 
 
-tag_start = """Full mass-weighted force constant matrix:"""
-tag_end = """
- 
-"""
-"""
-                    193                    194                    195
-                      A                      A                      A
- Frequencies --   3235.3026              3250.8741              3253.7284
- Red. masses --      1.0940                 1.0918                 1.0944
- Frc consts  --      6.7468                 6.7982                 6.8264
- IR Inten    --      5.0789                 1.9672                 1.1082
-  Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
-     1   8     0.00  -0.00   0.00     0.00  -0.00   0.00     0.00   0.00  -0.00
- """
-
-normal_mode_block = RegexPattern(
-    (
-        Named(Repeating((Whitespace, Integer), min=1, max=3), "label"),
-        Named(Repeating((Whitespace, Word), min=1, max=3), "symmetry"),
-        Named(("Frequencies --", Repeating((Whitespace, Number), min=1, max=3)), "freqs"),
-        Named(("Red. masses --", Repeating((Whitespace, Number), min=1, max=3)), "masses"),
-        Named(("Frc consts  --", Repeating((Whitespace, Number), min=1, max=3)), "fcs"),
-        Named(("IR Inten    --", Repeating((Whitespace, Number), min=1, max=3)), "ir_ints"),
-        RegexPattern(("Atom  AN", Repeating((Whitespace, "X      Y      Z"), min=1, max=3))),
-        Named(
-            Repeating(
-                (Whitespace, Integer, Whitespace, Integer, Repeating((Whitespace, Number), min=3, max=9), Newline)
-            ),
-            "displacements"
-        )
-    ),
-    joiner=RegexPattern((Newline, Whitespace))
-)
-
-def parse_nms_modes(label, symmetries, freqs, masses, fcs, ir_ints, _, disps):
-    freqs = [float(x) for x in freqs[len('Frequencies --'):].split()] # since len max 3, probably fastest way
-    masses = [float(x) for x in masses[len('Red. masses --'):].split()] # since len max 3, probably fastest way
-    disps = StringParser.array_handler(dtype=float)(disps)[:, 2:]
-    disps = np.moveaxis(disps.reshape(disps.shape[0], 3, -1), 1, -1).reshape(-1, 3)
-    return freqs, masses, disps
-def parse_nms_block(block):
-    bits = normal_mode_block.findall(block)
-    freqs = [None] * len(bits)
-    masses = [None] * len(bits)
-    disps = [None] * len(bits)
-    for i,bit in enumerate(bits):
-        f, m, d = parse_nms_modes(*bit)
-        freqs[i] = f
-        masses[i] = m
-        disps[i] = d
-
-    return np.concatenate(freqs), np.concatenate(masses), np.concatenate(disps, axis=1)
-def parse(blocks):
-    return [parse_nms_block(b) for b in blocks]
-
-mode = "List"
-GaussianLogComponents["NormalModes"] = {
-    "tag_start": tag_start,
-    "tag_end"  : tag_end,
-    "parser"   : parse,
-    "mode"     : mode
-}
-
-
 def convert_D_number_block(a, **kw):
     import numpy as np
     convertable = np.char.replace(a.view('U15').reshape(a.shape[0], -1), 'D', 'E')
@@ -929,6 +881,77 @@ GaussianLogComponents["AIMDTrajectory"] = {
     "mode"     : mode
 }
 
+
+def parse_hessian_list(hessias):
+    return [parse_weird_mat(h) for h in hessias]
+
+mode = "List"
+GaussianLogComponents["Hessians"] = {
+    "tag_start": HessianBlockTags[0],
+    "tag_end"  : HessianBlockTags[1],
+    "parser"   : parse_hessian_list,
+    "mode"     : mode
+}
+
+
+tag_start = """Full mass-weighted force constant matrix:"""
+tag_end = """
+
+"""
+
+normal_mode_block = RegexPattern(
+    (
+        Named(Repeating((Whitespace, Integer), min=1, max=3), "label"),
+        Named(Repeating((Whitespace, Word), min=1, max=3), "symmetry"),
+        Named(("Frequencies --", Repeating((Whitespace, Number), min=1, max=3)), "freqs"),
+        Named(("Red. masses --", Repeating((Whitespace, Number), min=1, max=3)), "masses"),
+        Named(("Frc consts  --", Repeating((Whitespace, Number), min=1, max=3)), "fcs"),
+        Named(("IR Inten    --", Repeating((Whitespace, Number), min=1, max=3)), "ir_ints"),
+        RegexPattern(("Atom  AN", Repeating((Whitespace, "X      Y      Z"), min=1, max=3))),
+        Named(
+            Repeating(
+                (Whitespace, Integer, Whitespace, Integer, Repeating((Whitespace, Number), min=3, max=9), Newline)
+            ),
+            "displacements"
+        )
+    ),
+    joiner=RegexPattern((Newline, Whitespace))
+)
+
+
+def parse_nms_modes(label, symmetries, freqs, masses, fcs, ir_ints, _, disps):
+    freqs = [float(x) for x in freqs[len('Frequencies --'):].split()]  # since len max 3, probably fastest way
+    masses = [float(x) for x in masses[len('Red. masses --'):].split()]  # since len max 3, probably fastest way
+    disps = StringParser.array_handler(dtype=float)(disps)[:, 2:]
+    disps = np.moveaxis(disps.reshape(disps.shape[0], 3, -1), 1, -1).reshape(-1, 3)
+    return freqs, masses, disps
+
+
+def parse_nms_block(block):
+    bits = normal_mode_block.findall(block)
+    freqs = [None] * len(bits)
+    masses = [None] * len(bits)
+    disps = [None] * len(bits)
+    for i, bit in enumerate(bits):
+        f, m, d = parse_nms_modes(*bit)
+        freqs[i] = f
+        masses[i] = m
+        disps[i] = d
+
+    return np.concatenate(freqs), np.concatenate(masses), np.concatenate(disps, axis=1)
+
+
+def parse(blocks):
+    return [parse_nms_block(b) for b in blocks]
+
+
+mode = "List"
+GaussianLogComponents["NormalModes"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    "parser": parse,
+    "mode": mode
+}
 # mode = "List"
 # GaussianLogComponents["AIMDCoordinates"] = {
 #     "tag_start": tag_start,

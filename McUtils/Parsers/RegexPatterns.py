@@ -697,14 +697,14 @@ class RegexPattern:
         return self.child_map[item]
 
     ### Supporting the re mechanisms directly for convenience
-    def match(self, txt):
-        return re.match(self.compiled, txt)
-    def search(self, txt):
-        return re.search(self.compiled, txt)
-    def findall(self, txt):
-        return re.findall(self.compiled, txt)
-    def finditer(self, txt):
-        return re.finditer(self.compiled, txt)
+    def match(self, txt, *args):
+        return re.match(self.compiled, txt, *args)
+    def search(self, txt, *args):
+        return re.search(self.compiled, txt, *args)
+    def findall(self, txt, *args):
+        return re.findall(self.compiled, txt, *args)
+    def finditer(self, txt, *args):
+        return re.finditer(self.compiled, txt, *args)
 
 ######################################################################################################################
 #
