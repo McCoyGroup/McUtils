@@ -158,9 +158,10 @@ class TreeWrapper:
                 k = woof[-1]
             try:
                 t = t[k]
-            except (IndexError, KeyError) as e:
+            except (IndexError, KeyError, TypeError) as e:
                 base_exception = e
                 break
+
 
         if base_exception is not None:
             raise IndexError(f"{item} not found in tree") from base_exception
