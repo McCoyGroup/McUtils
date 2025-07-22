@@ -443,9 +443,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-907eec" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-907eec"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-7034d2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7034d2"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-907eec" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7034d2" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -466,9 +466,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-b143f1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b143f1"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ff0f18" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ff0f18"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b143f1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ff0f18" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

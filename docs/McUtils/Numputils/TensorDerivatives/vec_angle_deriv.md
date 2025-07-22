@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.TensorDerivatives.vec_angle_deriv">vec_angle_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L769)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L769?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L928)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L928?message=Update%20Docs)]
 </div>
 
 ```python
-vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, unitized=False): 
+vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, component_vectors=None, unit_expansions=None, unitized=False): 
 ```
 
 
@@ -59,7 +59,7 @@ vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, unitized=False)
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/vec_angle_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/vec_angle_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L769?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L928?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
