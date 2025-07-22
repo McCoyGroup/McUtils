@@ -16,6 +16,7 @@ __all__ = [
     "vec_norms",
     "vec_tensordot",
     "vec_tensordiag",
+    "block_array",
     "vec_tdot",
     "distance_matrix",
     "identity_tensors",
@@ -501,6 +502,7 @@ def diag_indices(block_shape, n, k=2):
     di = np.expand_dims(np.arange(n, dtype=int), list(range(len(block_shape))))
     return tuple(indexing_shape) + (di,) * k
 def vec_tensordiag(obj, axis=-1, extra_dims=1):
+    obj = np.asanyarray(obj)
     base_shape = obj.shape[:axis]
     shp = obj.shape[axis:]
     extra_shp = (shp[0],) * extra_dims
@@ -508,6 +510,11 @@ def vec_tensordiag(obj, axis=-1, extra_dims=1):
     inds = diag_indices(base_shape, shp[0], k=(extra_dims + 1))
     tensor[inds] = obj
     return tensor
+def block_array(blocks, ndim=2, padding=0):
+    blocks = np.asanyarray(blocks)
+    for k in range(blocks.ndim-ndim-padding):
+        blocks = np.concatenate(blocks, axis=-(k+1))
+    return blocks
 
 def identity_tensors(base_shape, ndim):
     eye = np.eye(ndim)

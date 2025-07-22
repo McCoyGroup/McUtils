@@ -9,6 +9,7 @@ from .VectorOps import *
 from . import TensorDerivatives as td
 from . import Misc as misc
 from . import SetOps as setops
+from . import PermutationOps as pops
 from .Options import Options
 
 __all__ = [
@@ -123,8 +124,8 @@ def rot_deriv(angle, axis, dAngle, dAxis):
     c = np.cos(angle)[..., np.newaxis]
     s = np.sin(angle)[..., np.newaxis]
     i3 = np.broadcast_to(np.eye(3), axis.shape[:-1] + (3, 3))
-    e3 = np.broadcast_to(td.levi_cevita3, axis.shape[:-1] + (3, 3, 3))
-    # e3 = td.levi_cevita3
+    e3 = np.broadcast_to(pops.levi_cevita3, axis.shape[:-1] + (3, 3, 3))
+    # e3 = pops.levi_cevita3
     # i3 = np.eye(3)
     ct = vdOdv*(1-c[..., np.newaxis])
     st = (i3-vec_outer(axis, axis))*s[..., np.newaxis]*dAngle
@@ -158,7 +159,7 @@ def rot_deriv2(angle, axis, dAngle1, dAxis1, dAngle2, dAxis2, d2Angle, d2Axis):
     d2vXv = _prod_deriv_2(vec_outer, axis, axis, dAxis1, dAxis2, dAxis1, dAxis2, d2Axis, d2Axis)
 
     i3 = np.broadcast_to(np.eye(3), axis.shape[:-1] + (3, 3))
-    e3 = np.broadcast_to(td.levi_cevita3, axis.shape[:-1] + (3, 3, 3))
+    e3 = np.broadcast_to(pops.levi_cevita3, axis.shape[:-1] + (3, 3, 3))
 
     c = np.cos(angle)
     s = np.sin(angle)
@@ -535,12 +536,12 @@ def vec_sin_cos_derivs(a, b, order=1,
                         ))
 
             if extra_dims > 0:
-                e3 = np.broadcast_to(td.levi_cevita3,  extra_shape + (3, 3, 3))
+                e3 = np.broadcast_to(pops.levi_cevita3,  extra_shape + (3, 3, 3))
                 # td = np.tensordot
                 outer = vec_outer
                 vec_td = lambda a, b, **kw: vec_tensordot(a, b, shared=extra_dims, **kw)
             else:
-                e3 = td.levi_cevita3
+                e3 = pops.levi_cevita3
                 # td = np.tensordot
                 vec_td = lambda a, b, **kw: vec_tensordot(a, b, shared=0, **kw)
                 outer = np.outer
@@ -760,7 +761,7 @@ def fill_proj_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None):
         mat = mat.reshape(base_shape + mat.shape[-3:])
     return mat
 
-fast_proj = False
+fast_proj = True
 def disp_deriv_mat(coords, i, j, at_list, axes=None):
     if not fast_proj:
         mats = np.zeros(coords.shape + (3,))
@@ -829,6 +830,14 @@ def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_co
     sin_derivs, cos_derivs = vec_sin_cos_derivs(a, b,
                                                 up_vectors=up_vectors,
                                                 order=order, zero_thresh=zero_thresh)
+    # cos_expansion = [0] + [block_array(c, i+1) for i,c in enumerate(cos_derivs[1:])]
+    # sin_expansion = [0] + [block_array(c, i+1) for i,c in enumerate(sin_derivs[1:])]
+    # print(
+    #     (cos_expansion[1][:, np.newaxis, np.newaxis] * sin_expansion[2][np.newaxis, :, :])[2][:3, :3]
+    # )
+    # print(
+    #     (sin_expansion[1][:, np.newaxis, np.newaxis] * cos_expansion[2][np.newaxis, :, :])[2][:3, :3]
+    # )
 
     s = sin_derivs[0]
     c = cos_derivs[0]
@@ -1019,11 +1028,12 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering=
             proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
             _, B_expansion = prep_disp_expansion(coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
 
+        # A_expansion = [A_expansion[0], np.concatenate([np.eye(3), np.zeros((3, 3))], axis=0)]
+        # B_expansion = [B_expansion[0], np.concatenate([np.zeros((3, 3)), np.eye(3)], axis=0)]
         base_deriv = td.vec_angle_deriv(A_expansion, B_expansion, order=order)
         if proj is None: return base_deriv
         return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
     else:
-
         if angle_ordering == 'ijk':
             # derivs = angle_deriv(coords, j, i, k, order=order, angle_ordering='jik',
             #                      method=method,
@@ -1280,9 +1290,9 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
             extra_shape = a.shape[:-1]
             dot = lambda x, y, axes=(-1, -2) : vec_tensordot(x, y, axes=axes, shared=extra_dims)
             if extra_dims > 0:
-                e3 = np.broadcast_to(td.levi_cevita3,  extra_shape + td.levi_cevita3.shape)
+                e3 = np.broadcast_to(pops.levi_cevita3,  extra_shape + pops.levi_cevita3.shape)
             else:
-                e3 = td.levi_cevita3
+                e3 = pops.levi_cevita3
 
             Ca = dot(e3, a, axes=[-1, -1])
             Cb = dot(e3, b, axes=[-1, -1])
@@ -1967,6 +1977,7 @@ def inverse_coordinate_solve(specs, target_internals, initial_cartesians,
                 f"failed to find coordinates after {max_iterations} iterations"
                 f"\ntarget:{target_internals}\ninitial:{init_internals}"
                 f"\nresidual:{target_internals - opt_internals[0]}"
+                f"\n1-norm error: {errors}"
                 f"\n1-norm error: {errors}"
                 f"\nmax deviation error: {np.max(abs(target_internals - opt_internals[0]))}"
             )

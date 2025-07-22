@@ -203,6 +203,7 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
         true_diffs = dihedrals - ref
         bad_spots = np.where(abs(true_diffs) > dihedral_cutoff)
         if len(bad_spots) > 0 and len(bad_spots[0]) > 0:
+            values = values.copy()
             if analytic_order == 0:
                 # ref_vals = ref[bad_spots]
                 patch_vals = dihedrals[bad_spots]
