@@ -165,7 +165,15 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def from_smiles(cls, smiles, num_confs=1, optimize=False, take_min=True,
                     force_field_type='mmff',
-                    add_implicit_hydrogens=False):
+                    sanitize=False,
+                    parse_name=True,
+                    allow_cxsmiles=True,
+                    strict_cxsmiles=True,
+                    remove_hydrogens=False,
+                    replacements=None,
+                    add_implicit_hydrogens=False,
+                    call_add_hydrogens=True,
+                    **opts):
 
         if os.path.isfile(smiles):
             with open(smiles) as f:
@@ -174,9 +182,23 @@ class RDMolecule(ExternalMolecule):
         AllChem = cls.allchem_api()
 
         params = Chem.SmilesParserParams()
-        params.removeHs = False
+        params.removeHs = remove_hydrogens
+        params.sanitize = sanitize
+        if replacements is not None:
+            params.replacements = replacements
+        params.parseName = parse_name
+        params.allowCXSMILES = allow_cxsmiles
+        params.strictCXSMILES = strict_cxsmiles
+        for k,v in opts.items():
+            setattr(params, k, v)
+
         rdkit_mol = Chem.MolFromSmiles(smiles, params)
-        mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
+        if not sanitize:
+            rdkit_mol.UpdatePropertyCache()
+        if call_add_hydrogens:
+            mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
+        else:
+            mol = rdkit_mol
 
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
         # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
