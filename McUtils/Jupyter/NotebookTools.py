@@ -3,6 +3,7 @@ import re
 import json
 from .. import Devutils as dev
 from .JHTML import JHTML
+from ..ExternalPrograms import PILInterface
 
 __all__ = [
     "NotebookReader"
@@ -31,6 +32,12 @@ class NotebookReader:
         @property
         def attachments(self):
             return self.prep_attachments(self.nb, self.data.get('attachments', {}))
+        def get_images(self):
+            return {
+                k:PILInterface.from_url(v.attrs['src'])
+                for k,v in self.attachments.items()
+                if k.startswith('image/')
+            }
         @property
         def source(self):
             return self.data["source"]
@@ -44,6 +51,8 @@ class NotebookReader:
         @classmethod
         def get_cell_header(cls, data):
             src = data['source']
+            if len(src) == 0: return None
+
             if not isinstance(src, str):
                 src = src[0]
             if src.strip().startswith("#"):

@@ -429,7 +429,7 @@ class ScatterPlot(Plot):
     """
     known_styles = { "s", "c", "marker", "cmap", "norm", "vmin", "vmax", "alpha",
                      "linewidths", "edgecolors", "plotnonfinite", "data", "zorder"}
-    style_mapping = {"color":"c"}
+    style_mapping = {"color":"c", "marker_size":"s"}
     method = "scatter"
 
 class ListScatterPlot(ScatterPlot):

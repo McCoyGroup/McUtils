@@ -12,6 +12,8 @@ from .Runner import *; from .Runner import __all__ as exposed
 __all__ += exposed
 from .ChemToolkits import *; from .ChemToolkits import __all__ as exposed
 __all__ += exposed
+from .ImageKits import *; from .ImageKits import __all__ as exposed
+__all__ += exposed
 from .Visualizers import *; from .Visualizers import __all__ as exposed
 __all__ += exposed
 from .RDKit import *; from .RDKit import __all__ as exposed

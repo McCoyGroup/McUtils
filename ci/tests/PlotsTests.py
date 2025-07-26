@@ -184,24 +184,58 @@ class PlotsTests(TestCase):
         Sphere(color='red').plot(plot)
         plot.show()
 
-    @validationTest
+    @debugTest
     def test_ColorPalettes(self):
+        rgb_code = np.array([255, 255, 255])
+        conv = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
+        inv = ColorPalette.color_convert(conv, 'hsl', 'rgb')
+        self.assertTrue(
+            np.allclose(inv, rgb_code)
+        )
+
         rgb_code = [200, 10, 25]
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'xyz')
-        og = ColorPalette.color_convert(huh, 'xyz', 'rgb')
-        print(huh, og)
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_code, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_code)
+            )
 
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
-        og = ColorPalette.color_convert(huh, 'hsl', 'rgb')
-        print(huh, og, ColorPalette.rgb_code(og))
+        rgb_codes = np.array([
+            [0, 0, 0],
+            [255, 255, 255],
+        ]).T
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_codes, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_codes),
+                msg=f"bad conversion for {space}: {rgb_codes}, {inv}"
+            )
 
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsv')
-        og = ColorPalette.color_convert(huh, 'hsv', 'rgb')
-        print(huh, og, ColorPalette.rgb_code(og))
+        rgb_codes = np.random.rand(3, 10, 50) * 255
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_codes, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_codes)
+            )
 
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'lab')
-        og = ColorPalette.color_convert(huh, 'lab', 'rgb')
-        print(huh, og, ColorPalette.rgb_code(og))
+        rgb_codes = np.ones((3, 1000, 500)) * 255
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_codes, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_codes)
+            )
 
         print(ColorPalette("pastel").blend(.2))
         # return
@@ -291,7 +325,7 @@ class PlotsTests(TestCase):
     #     plot = Plot3D(f, [0, 2*np.pi], [0, 2*np.pi])
     #     plot.show()
 
-    @debugTest
+    @validationTest
     def test_PropertySetting(self):
         StickPlot(
             np.linspace(0, 2*np.pi, 35),

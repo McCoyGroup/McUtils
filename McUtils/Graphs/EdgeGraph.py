@@ -363,7 +363,7 @@ class MoleculeEdgeGraph(EdgeGraph):
         if visited is None: visited = {root}
         nl = []
         ni = []
-        for m in self.map[root]:
+        for m in self.map.get(root, []):
             if m in visited: continue
             visited.add(m)
             if depth > 1:

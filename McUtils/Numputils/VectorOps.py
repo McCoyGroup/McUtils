@@ -13,6 +13,7 @@ __all__ = [
     "vec_handle_zero_norms",
     "vec_apply_zero_threshold",
     "vec_normalize",
+    "vec_rescale",
     "vec_norms",
     "vec_tensordot",
     "vec_tensordiag",
@@ -190,6 +191,24 @@ def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None):
     norms[zeros] = Options.zero_placeholder # since we already zeroed out the vector
 
     return vecs/norms
+
+def vec_rescale(vecs, target_range=None, axis=-1):
+    vecs = np.asanyarray(vecs)
+    cur_mins = np.expand_dims(np.min(vecs, axis=axis), axis)
+    cur_max = np.expand_dims(np.max(vecs, axis=axis), axis)
+    cur_range = cur_max - cur_mins
+    rescaled = (vecs - cur_mins) / cur_range
+    if target_range is not None:
+        if util.is_numeric(target_range):
+            rescaled = rescaled * target_range
+        else:
+            t_min, t_max = target_range
+            if not util.is_numeric(t_min):
+                t_min = np.expand_dims(np.asanyarray(t_min), axis)
+            if not util.is_numeric(t_max):
+                t_max = np.expand_dims(np.asanyarray(t_max), axis)
+            rescaled = rescaled*(t_max - t_min) + t_min
+    return rescaled
 
 ################################################
 #
