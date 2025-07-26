@@ -19,6 +19,7 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
+named_colors: dict
 converters: dict
 xyz_to_rbg_array: list
 rgb_to_xyz_array: list
@@ -44,14 +45,25 @@ __hash__(self):
 </div>
 
 
+<a id="McUtils.Plots.Colors.ColorPalette.parse_color_string" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+parse_color_string(cls, name: str): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L32?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Plots.Colors.ColorPalette.prep_color_palette" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 prep_color_palette(cls, colors, color_space='rgb', lab_colors=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L45?message=Update%20Docs)]
 </div>
 
 
@@ -61,8 +73,8 @@ prep_color_palette(cls, colors, color_space='rgb', lab_colors=None):
 is_palette_list(self, colors): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L72)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L72?message=Update%20Docs)]
 </div>
 
 
@@ -71,8 +83,8 @@ is_palette_list(self, colors):
 flip(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L82)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L82?message=Update%20Docs)]
 </div>
 
 
@@ -81,8 +93,8 @@ flip(self):
 __eq__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L85?message=Update%20Docs)]
 </div>
 
 
@@ -91,8 +103,8 @@ __eq__(self, other):
 get_colorblindness_test_url(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L89?message=Update%20Docs)]
 </div>
 
 
@@ -101,8 +113,8 @@ get_colorblindness_test_url(self):
 blend(self, amount, modification_space='lab', rescale=False, return_color_code=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L94?message=Update%20Docs)]
 </div>
 
 
@@ -111,8 +123,8 @@ blend(self, amount, modification_space='lab', rescale=False, return_color_code=T
 as_colormap(self, levels=None, cmap_type='list', name=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L148)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L148?message=Update%20Docs)]
 </div>
 
 
@@ -121,8 +133,8 @@ as_colormap(self, levels=None, cmap_type='list', name=None, **opts):
 __call__(self, amount, rescale=True, return_color_code=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L193?message=Update%20Docs)]
 </div>
 
 
@@ -132,8 +144,8 @@ __call__(self, amount, rescale=True, return_color_code=False):
 color_normalize(cls, color_list, color_space='rgb'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L196)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L196?message=Update%20Docs)]
 </div>
 
 
@@ -143,8 +155,8 @@ color_normalize(cls, color_list, color_space='rgb'):
 color_rescale(cls, color_list, color_space='rgb'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L196)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L196?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L210?message=Update%20Docs)]
 </div>
 
 
@@ -154,8 +166,8 @@ color_rescale(cls, color_list, color_space='rgb'):
 color_modify(cls, color, modification_function, color_space='rgb', modification_space='lab', clip=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L204)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L204?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L218?message=Update%20Docs)]
 </div>
 
 
@@ -165,8 +177,8 @@ color_modify(cls, color, modification_function, color_space='rgb', modification_
 color_lighten(cls, color, percentage, color_space='rgb', modification_space='lab', shift=False, absolute=False, clip=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L239)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L239?message=Update%20Docs)]
 </div>
 
 
@@ -175,8 +187,8 @@ color_lighten(cls, color, percentage, color_space='rgb', modification_space='lab
 __len__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L252)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L252?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L266?message=Update%20Docs)]
 </div>
 
 
@@ -185,8 +197,8 @@ __len__(self):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L254)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L254?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L268)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L268?message=Update%20Docs)]
 </div>
 
 
@@ -196,8 +208,8 @@ __getitem__(self, item):
 rgb_code(cls, rgb, padding=2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L268)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L268?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L282?message=Update%20Docs)]
 </div>
 
 
@@ -207,8 +219,8 @@ rgb_code(cls, rgb, padding=2):
 parse_rgb_code(cls, code, padding=None, return_padding=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L277)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L277?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L291)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L291?message=Update%20Docs)]
 </div>
 
 
@@ -218,8 +230,8 @@ parse_rgb_code(cls, code, padding=None, return_padding=False):
 color_convert(self, color, original_space, target_space): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L305)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L305?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L319?message=Update%20Docs)]
 </div>
 
 
@@ -229,8 +241,8 @@ color_convert(self, color, original_space, target_space):
 xyz_to_rgb(self, x, y, z): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L324)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L324?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L356)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L356?message=Update%20Docs)]
 </div>
 
 
@@ -240,8 +252,8 @@ xyz_to_rgb(self, x, y, z):
 rgb_to_xyz(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L343)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L343?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L375)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L375?message=Update%20Docs)]
 </div>
 
 
@@ -251,8 +263,8 @@ rgb_to_xyz(self, r, g, b):
 rgb_to_hsl(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L378)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L378?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L410)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L410?message=Update%20Docs)]
 </div>
 
 
@@ -262,8 +274,8 @@ rgb_to_hsl(self, r, g, b):
 hsl_to_rgb(cls, h, s, l): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L430)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L430?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L465)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L465?message=Update%20Docs)]
 </div>
 
 
@@ -273,8 +285,8 @@ hsl_to_rgb(cls, h, s, l):
 rgb_to_hsv(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L458)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L458?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L501)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L501?message=Update%20Docs)]
 </div>
 
 
@@ -284,8 +296,8 @@ rgb_to_hsv(self, r, g, b):
 hsv_to_hsl(cls, h, s, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L486)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L486?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L532)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L532?message=Update%20Docs)]
 </div>
 
 
@@ -295,8 +307,8 @@ hsv_to_hsl(cls, h, s, v):
 hsv_to_rgb(cls, h, s, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L514)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L514?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L563)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L563?message=Update%20Docs)]
 </div>
 
 
@@ -306,8 +318,8 @@ hsv_to_rgb(cls, h, s, v):
 xyz_to_lab(cls, x, y, z, scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L519)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L519?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L568)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L568?message=Update%20Docs)]
 </div>
 
 
@@ -317,8 +329,30 @@ xyz_to_lab(cls, x, y, z, scaling=None):
 lab_to_xyz(cls, l, a, b, scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L547)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L547?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L599)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L599?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.lab_to_lch" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+lab_to_lch(cls, l, a, b): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L630)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L630?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.lch_to_lab" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+lch_to_lab(cls, l, c, h): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L635)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L635?message=Update%20Docs)]
 </div>
 
 
@@ -328,8 +362,8 @@ lab_to_xyz(cls, l, a, b, scaling=None):
 rgb_to_lab(cls, r, g, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L575)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L575?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L642)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L642?message=Update%20Docs)]
 </div>
 
 
@@ -339,8 +373,8 @@ rgb_to_lab(cls, r, g, b, xyz_scaling=None):
 lab_to_rgb(cls, l, a, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L578)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L578?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L645)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L645?message=Update%20Docs)]
 </div>
  </div>
 </div>

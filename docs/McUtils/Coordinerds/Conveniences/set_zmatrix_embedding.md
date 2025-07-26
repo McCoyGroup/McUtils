@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds.Conveniences.set_zmatrix_embedding">set_zmatrix_embedding</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L550)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L550?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L551)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L551?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ set_zmatrix_embedding(zmat, embedding=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Conveniences/set_zmatrix_embedding.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/set_zmatrix_embedding.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L550?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L551?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

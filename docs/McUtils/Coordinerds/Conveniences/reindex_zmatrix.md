@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds.Conveniences.reindex_zmatrix">reindex_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L590)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L590?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Conveniences.py#L591)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L591?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ reindex_zmatrix(zm, perm):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Conveniences/reindex_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Conveniences/reindex_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L590?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Conveniences.py#L591?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -102,48 +102,59 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [CCLibInterface](ExternalPrograms/ChemToolkits/CCLibInterface.md)   
 </div>
    <div class="col" markdown="1">
+[PILInterface](ExternalPrograms/ImageKits/PILInterface.md)   
+</div>
+   <div class="col" markdown="1">
+[OpenCVInterface](ExternalPrograms/ImageKits/OpenCVInterface.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [VPythonInterface](ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
    <div class="col" markdown="1">
 [VTKInterface](ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RDMolecule](ExternalPrograms/RDKit/RDMolecule.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ASEMolecule](ExternalPrograms/ASE/ASEMolecule.md)   
 </div>
    <div class="col" markdown="1">
 [OBMolecule](ExternalPrograms/OpenBabel/OBMolecule.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebRequestHandler](ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [WebAPIConnection](ExternalPrograms/WebAPI/WebAPIConnection.md)   
 </div>
    <div class="col" markdown="1">
 [WebSubAPIConnection](ExternalPrograms/WebAPI/WebSubAPIConnection.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebResourceManager](ExternalPrograms/WebAPI/WebResourceManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GitHubReleaseManager](ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
 </div>
    <div class="col" markdown="1">
 [ReleaseZIPManager](ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
 </div>
+   <div class="col" markdown="1">
+[ChemSpiderAPI](ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
+</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ChemSpiderAPI](ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
+   
 </div>
    <div class="col" markdown="1">
    
@@ -174,17 +185,17 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-7791cf" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7791cf"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-bf0545" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-bf0545"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7791cf" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-bf0545" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-cadad2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-cadad2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a9f563" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a9f563"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-cadad2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a9f563" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

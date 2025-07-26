@@ -443,9 +443,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-7034d2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7034d2"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-df5cc6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-df5cc6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7034d2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-df5cc6" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -466,9 +466,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ff0f18" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ff0f18"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-866613" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-866613"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ff0f18" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-866613" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -682,22 +682,56 @@ class PlotsTests(TestCase):
 #### <a name="ColorPalettes">ColorPalettes</a>
 ```python
     def test_ColorPalettes(self):
+        rgb_code = np.array([255, 255, 255])
+        conv = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
+        inv = ColorPalette.color_convert(conv, 'hsl', 'rgb')
+        self.assertTrue(
+            np.allclose(inv, rgb_code)
+        )
+
         rgb_code = [200, 10, 25]
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'xyz')
-        og = ColorPalette.color_convert(huh, 'xyz', 'rgb')
-        print(huh, og)
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_code, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_code)
+            )
 
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
-        og = ColorPalette.color_convert(huh, 'hsl', 'rgb')
-        print(huh, og, ColorPalette.rgb_code(og))
+        rgb_codes = np.array([
+            [0, 0, 0],
+            [255, 255, 255],
+        ]).T
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_codes, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_codes),
+                msg=f"bad conversion for {space}: {rgb_codes}, {inv}"
+            )
 
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'hsv')
-        og = ColorPalette.color_convert(huh, 'hsv', 'rgb')
-        print(huh, og, ColorPalette.rgb_code(og))
+        rgb_codes = np.random.rand(3, 10, 50) * 255
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_codes, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_codes)
+            )
 
-        huh = ColorPalette.color_convert(rgb_code, 'rgb', 'lab')
-        og = ColorPalette.color_convert(huh, 'lab', 'rgb')
-        print(huh, og, ColorPalette.rgb_code(og))
+        rgb_codes = np.ones((3, 1000, 500)) * 255
+        for space in [
+            'rgb', 'hsv', 'hsl', 'xyz', 'lab'
+        ]:
+            conv = ColorPalette.color_convert(rgb_codes, 'rgb', space)
+            inv = ColorPalette.color_convert(conv, space, 'rgb')
+            self.assertTrue(
+                np.allclose(inv, rgb_codes)
+            )
 
         print(ColorPalette("pastel").blend(.2))
         # return
