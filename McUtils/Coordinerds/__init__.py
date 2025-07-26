@@ -13,16 +13,23 @@ Conversions between different systems are implemented by a `CoordinateSystemConv
 Chained conversions are not _currently_ supported, but might well become supported in the future.
 """
 
-from .CoordinateSystems import *
-# from .CoordinateTransformations import *
-from .Conveniences import *
 
 __all__ = []
-from .CoordinateSystems import __all__ as exposed
+from .CoordinateSystems import *; from .CoordinateSystems import __all__ as exposed
 __all__ += exposed
 # from .CoordinateTransformations import __all__ as exposed
 # __all__ += exposed
-from .Conveniences import __all__ as exposed
+from .Conveniences import *; from .Conveniences import __all__ as exposed
+__all__ += exposed
+from .Internals import *; from .Internals import __all__ as exposed
+__all__ += exposed
+from .ZMatrices import *; from .ZMatrices import __all__ as exposed
+__all__ += exposed
+from .Labels import *; from .Labels import __all__ as exposed
+__all__ += exposed
+from .Generators import *; from .Generators import __all__ as exposed
+__all__ += exposed
+from .Pruning import *; from .Pruning import __all__ as exposed
 __all__ += exposed
 from .Redundant import *; from .Redundant import __all__ as exposed
 __all__ += exposed
