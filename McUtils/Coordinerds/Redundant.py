@@ -424,7 +424,9 @@ class PrimitiveCoordinatePicker:
 
 class RedundantCoordinateGenerator:
 
-    def __init__(self, coordinate_specs, angle_ordering='ijk', untransformed_coordinates=None, masses=None,
+    def __init__(self,
+                 coordinate_specs, angle_ordering='ijk',
+                 untransformed_coordinates=None, masses=None,
                  relocalize=False,
                  **opts):
         self.specs = coordinate_specs
@@ -589,7 +591,7 @@ class RedundantCoordinateGenerator:
             untransformed_coordinates = self.untransformed_coordinates
         if relocalize is None:
             relocalize = self.relocalize
-        base_expansions = nput.internal_coordinate_tensors(coords, self.specs, **opts)
+        base_expansions = nput.internal_coordinate_tensors(coords, self.specs, **opts)[1:]
         return self.get_redundant_transformation(base_expansions,
                                                  untransformed_coordinates=untransformed_coordinates,
                                                  masses=self.masses,

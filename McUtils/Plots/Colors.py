@@ -28,6 +28,20 @@ class ColorPalette:
     def __hash__(self):
         return hash((type(self), self.color_strings))
 
+    named_colors = {}
+    @classmethod
+    def parse_color_string(cls, name:str):
+        if not name.startswith('#'):
+            c = cls.named_colors.get(name)
+            if c is None:
+                from matplotlib.colors import to_rgba
+                c = [255*x for x in to_rgba(name)[:3]]
+        else:
+            c = name
+        if isinstance(c, str):
+            c = cls.parse_rgb_code(c)
+        return c
+
     @classmethod
     def prep_color_palette(cls, colors, color_space='rgb', lab_colors=None):
         if lab_colors is not None:
@@ -172,7 +186,7 @@ class ColorPalette:
                 name = '-'.join(['cmap']+str(uuid.uuid4()).split("-")[:2])
             new_map = LinearSegmentedColormap(name, segmentdata=cmap_dict, **opts)
         else:
-            new_map: ListedColormap|LinearSegmentedColormap = cmap_type(levels, vals, **opts)
+            new_map: 'ListedColormap|LinearSegmentedColormap' = cmap_type(levels, vals, **opts)
 
         return new_map
 
@@ -272,7 +286,7 @@ class ColorPalette:
                 cls.rgb_code([r, g, b])
                 for r, g, b in zip(*rgb)
             ]
-        rgb = np.round(rgb).astype(int)
+        rgb = np.round(np.clip(rgb, 0, 255)).astype(int)
         return f"#{rgb[0]:0>{padding}x}{rgb[1]:0>{padding}x}{rgb[2]:0>{padding}x}"
     @classmethod
     def parse_rgb_code(cls, code, padding=None, return_padding=False):
@@ -304,22 +318,40 @@ class ColorPalette:
     converters = {}
     @classmethod
     def color_convert(self, color, original_space, target_space):
+        if original_space == target_space:
+            return color
         if (original_space, target_space) in self.converters:
             conversion = self.converters[(original_space, target_space)]
         else:
-            try:
-                conversion = getattr(self, f"{original_space}_to_{target_space}") #TODO: register these better
-            except AttributeError:
-                # send everything through RGB
-                conversion1 = getattr(self, f"{original_space}_to_rgb")
-                conversion2 = getattr(self, f"rgb_to_{target_space}")
-                conversion = lambda *c: conversion2(*conversion1(*c))
+            if original_space == 'rgb' or target_space == 'rgb':
+                conversion = getattr(self, f"{original_space}_to_{target_space}")
+            else:
+                try:
+                    conversion = getattr(self, f"{original_space}_to_{target_space}") #TODO: register these better
+                except AttributeError:
+                    # send everything through RGB
+                    conversion1 = getattr(self, f"{original_space}_to_rgb")
+                    conversion2 = getattr(self, f"rgb_to_{target_space}")
+                    conversion = lambda *c: conversion2(*conversion1(*c))
         return conversion(*color)
 
     xyz_to_rbg_array = [
-        [ 3.2406, -1.5372, -0.4986],
-        [-0.9689,  1.8758,  0.0415],
-        [ 0.0557, -0.2040,  1.0570],
+        # exact-ish inverse of conversion matrix
+        [
+            670962301703 * (1000000 / 207056369298614928),
+            -318277012021 * (1000000 / 207056369298614928),
+            -103225121660 * (1000000 / 207056369298614928)
+        ],
+        [
+            -200690410871 * (1000000 / 207056369298614928),
+            388435678549 * (1000000 / 207056369298614928),
+            8604419276 * (1000000 / 207056369298614928)
+        ],
+        [
+            11521991063 * (1000000 / 207056369298614928),
+            -42248058709 * (1000000 / 207056369298614928),
+            218922991300 * (1000000 / 207056369298614928)
+        ]
     ]
     @classmethod
     def xyz_to_rgb(self, x, y, z):
@@ -328,7 +360,7 @@ class ColorPalette:
             self.xyz_to_rbg_array = np.array(self.xyz_to_rbg_array)
 
         xyz = np.array([x, y, z]) / 100
-        rgb = np.dot(self.xyz_to_rbg_array, xyz)
+        rgb = np.tensordot(self.xyz_to_rbg_array, xyz, axes=[0, 0])
         mask = rgb > 0.0031308
         rgb[mask] = 1.055*rgb[mask]**(1/2.4) - 0.055
         not_mask = np.logical_not(mask)
@@ -336,9 +368,9 @@ class ColorPalette:
         return rgb * 255
 
     rgb_to_xyz_array = [ # just the inverse
-        [0.4124, 0.3576, 0.1805],
-        [0.2126, 0.7152, 0.0722],
-        [0.0193, 0.1192, 0.9505],
+        [0.412453, 0.357580, 0.180423],
+        [0.212671, 0.715160, 0.072169],
+        [0.019334, 0.119193, 0.950227],
     ]
     @classmethod
     def rgb_to_xyz(self, r, g, b):
@@ -351,7 +383,7 @@ class ColorPalette:
         not_mask = np.logical_not(mask)
         rgb[not_mask] = rgb[not_mask] / 12.92
 
-        xyz = np.dot(self.rgb_to_xyz_array, rgb)
+        xyz = np.tensordot(self.rgb_to_xyz_array, rgb, axes=[0, 0])
         return xyz * 100
 
     @classmethod
@@ -367,9 +399,9 @@ class ColorPalette:
         ]
 
         h = np.zeros_like(diff)
-        h[r_primary] = (diff_b - diff_g)
-        h[g_primary] = (1 / 3 + diff_r - diff_b)
-        h[b_primary] = (2 / 3 + diff_g - diff_r)
+        h[r_primary] = (diff_b[r_primary,] - diff_g[r_primary,])
+        h[g_primary] = (1 / 3 + diff_r[g_primary,] - diff_b[g_primary,])
+        h[b_primary] = (2 / 3 + diff_g[b_primary,] - diff_r[b_primary,])
 
         h[h < 0] += 1
         h[h > 1] -= 1
@@ -382,6 +414,8 @@ class ColorPalette:
         smol = rgb.ndim == 1
         if smol:
             rgb = rgb[:, np.newaxis]
+        base_shape = rgb.shape[1:]
+        rgb = rgb.reshape(3, -1)
 
         min_val = np.min(rgb, axis=0)
         max_val = np.max(rgb, axis=0)
@@ -393,14 +427,15 @@ class ColorPalette:
         s = np.zeros_like(L)
         h = np.zeros_like(L)
         if non_gray.any():
-            s[non_gray] = (diff / (2 - (max_val + min_val)))
+            s[non_gray] = (diff[non_gray] / (2 - (max_val[non_gray] + min_val[non_gray])))
             dim_mask = np.logical_and(non_gray, L < .5)
-            s[dim_mask] = (diff / (max_val + min_val))[dim_mask]
+            s[dim_mask] = (diff[dim_mask] / (max_val[dim_mask] + min_val[dim_mask]))
 
             h_ = self._rgb2hue(rgb[:, non_gray], diff[non_gray], max_val[non_gray])
             h[non_gray] = h_
 
         hsl = np.array([h, s, L])
+        hsl = hsl.reshape((3,) + base_shape)
         if smol:
             hsl = hsl[:, 0]
 
@@ -434,6 +469,9 @@ class ColorPalette:
         smol = hsl.ndim == 1
         if smol:
             hsl = hsl[:, np.newaxis]
+        base_shape = hsl.shape[1:]
+        hsl = hsl.reshape((3,-1))
+
         non_gray = hsl[1] > 0
         dim = np.logical_and(non_gray, hsl[2] < .5)
 
@@ -450,6 +488,11 @@ class ColorPalette:
             for i,shift in enumerate([1/3, 0, -1/3]):
                 rgb[i, non_gray] = cls._hue2rgb(v1[non_gray], v2[non_gray], h[non_gray] + shift)
 
+        gray = np.logical_not(non_gray)
+        for i in range(3):
+            rgb[i, gray] = hsl[2, gray]
+
+        rgb = rgb.reshape((3,) + base_shape)
         if smol:
             rgb = rgb[:, 0]
 
@@ -462,6 +505,8 @@ class ColorPalette:
         smol = rgb.ndim == 1
         if smol:
             rgb = rgb[:, np.newaxis]
+        base_shape = rgb.shape[1:]
+        rgb = rgb.reshape((3, -1))
 
         min_val = np.min(rgb, axis=0)
         max_val = np.max(rgb, axis=0)
@@ -473,11 +518,12 @@ class ColorPalette:
         s = np.zeros_like(v)
         h = np.zeros_like(v)
         if non_gray.any():
-            s[non_gray] = (diff / max_val)[non_gray]
+            s[non_gray] = (diff[non_gray] / max_val[non_gray])
             h_ = self._rgb2hue(rgb[:, non_gray], diff[non_gray], max_val[non_gray])
             h[non_gray] = h_
 
         hsl = np.array([h, s, v])
+        hsl = hsl.reshape((3,) + base_shape)
         if smol:
             hsl = hsl[:, 0]
 
@@ -490,6 +536,8 @@ class ColorPalette:
         smol = hsv.ndim == 1
         if smol:
             hsv = hsv[:, np.newaxis]
+        base_shape = hsv.shape[1:]
+        hsv = hsv.reshape((3, -1))
 
         h, s, v = hsv
         max_val = np.array(v)
@@ -501,11 +549,12 @@ class ColorPalette:
         non_gray = diff > 0
         s = np.zeros_like(L)
         if non_gray.any():
-            s[non_gray] = (diff / (2 - (max_val + min_val)))
+            s[non_gray] = (diff[non_gray] / (2 - (max_val[non_gray] + min_val[non_gray])))
             dim_mask = np.logical_and(non_gray, L < .5)
-            s[dim_mask] = (diff / (max_val + min_val))[dim_mask]
+            s[dim_mask] = (diff[dim_mask] / (max_val[dim_mask] + min_val[dim_mask]))
 
         hsl = np.array([h, s, L])
+        hsl = hsl.reshape((3,) + base_shape)
         if smol:
             hsl = hsl[:, 0]
 
@@ -523,6 +572,8 @@ class ColorPalette:
         smol = xyz.ndim == 1
         if smol:
             xyz = xyz[:, np.newaxis]
+        base_shape = xyz.shape[1:]
+        xyz = xyz.reshape((3, -1))
 
         if scaling is None:
             scaling = cls.lab_scaling_reference
@@ -539,6 +590,7 @@ class ColorPalette:
         b = 200 * (xyz[1] - xyz[2])
 
         lab = np.array([L, a, b])
+        lab = lab.reshape((3,) + base_shape)
         if smol:
             lab = lab[:, 0]
 
@@ -551,6 +603,8 @@ class ColorPalette:
         smol = lab.ndim == 1
         if smol:
             lab = lab[:, np.newaxis]
+        base_shape = lab.shape[1:]
+        lab = lab.reshape((3, -1))
 
         if scaling is None:
             scaling = cls.lab_scaling_reference
@@ -567,11 +621,24 @@ class ColorPalette:
         xyz[not_max] = (xyz[not_max] - (16/116)) / 7.787
 
         xyz *= np.array(scaling)[:, np.newaxis]
+        xyz = xyz.reshape((3,) + base_shape)
         if smol:
             xyz = xyz[:, 0]
 
         return xyz
 
+    @classmethod
+    def lab_to_lch(cls, l, a, b):
+        c = np.linalg.norm([a, b], axis=0)
+        h = np.arctan2(b, a)
+        return np.array([l, c, h])
+    @classmethod
+    def lch_to_lab(cls, l, c, h):
+        return np.array([
+            l,
+            np.cos(h) * c,
+            np.sin(h) * c
+        ])
     @classmethod
     def rgb_to_lab(cls, r, g, b, xyz_scaling=None):
         return cls.xyz_to_lab(*cls.rgb_to_xyz(r, g, b), scaling=xyz_scaling)
