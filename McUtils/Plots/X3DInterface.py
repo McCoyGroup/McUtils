@@ -194,25 +194,13 @@ class X3D(X3DObject):
             html = self.to_x3d()
         return html.write(file, **opts)
 
-class X3DMaterial(X3DObject):
-    __props__ = {
-        "diffuseColor",
-        "ambientIntensity",
-        "emissiveColor",
-        "specularColor",
-        "shininess",
-        "transparency",
-        # "metadata"
-    }
+class X3DOptionsSet(X3DObject):
+    __props__ = {}
+
     def __init__(self, **attrs):
         self.attrs = attrs
 
-    conversion_map = {
-        "brightness": "ambientIntensity",
-        "glow":"emissiveColor",
-        "color": "diffuseColor",
-        "specularity": "specularColor"
-    }
+    conversion_map = {}
     @classmethod
     def prop_keys(cls):
         return (cls.__props__ | cls.conversion_map.keys())
@@ -223,10 +211,130 @@ class X3DMaterial(X3DObject):
         }
         excess_keys = attrs.keys() - self.__props__
         if len(excess_keys) > 0:
-            raise ValueError(f"keys {excess_keys} are invalid material keys")
+            cls = type(self).__name__
+            raise ValueError(f"keys {excess_keys} are invalid keys for {cls}")
         return attrs
+
+class X3DMaterial(X3DOptionsSet):
+    __props__ = {
+        "diffuseColor",
+        "ambientIntensity",
+        "emissiveColor",
+        "specularColor",
+        "shininess",
+        "transparency",
+        # "metadata"
+    }
+    conversion_map = {
+        "brightness": "ambientIntensity",
+        "glow": "emissiveColor",
+        "color": "diffuseColor",
+        "specularity": "specularColor"
+    }
     def to_x3d(self):
         return X3DHTML.Material(**self.prep_attrs(self.attrs))
+
+class X3DAppearance(X3DOptionsSet):
+    __props__ = {
+        "alphaClipThreshold",
+        "blendMode",
+        "colorMaskMode"
+        "depthMode"
+        "lineProperties"
+        "material"
+        "metadata"
+        "pointProperties"
+        "shaders",
+        "sortKey",
+        "sortType",
+        "texture",
+        "textureTransform"
+    }
+    def prep_attrs(self, attrs:dict):
+        material_keys = attrs.keys() & X3DMaterial.prop_keys()
+        line_keys = attrs.keys() & X3DLineProperties.prop_keys()
+        point_keys = attrs.keys() & X3DPointProperties.prop_keys()
+
+        rem_keys = attrs.keys() - (
+            X3DMaterial.prop_keys()
+            | X3DLineProperties.prop_keys()
+            | X3DPointProperties.prop_keys()
+        )
+        base_attrs = {k:attrs[k] for k in rem_keys}
+
+        if len(material_keys) > 0:
+            base_attrs['material'] = {k:attrs[k] for k in material_keys}
+
+        if len(line_keys) > 0:
+            base_attrs['lineProperties'] = {k:attrs[k] for k in line_keys}
+
+        if len(point_keys) > 0:
+            base_attrs['pointProperties'] = {k:attrs[k] for k in point_keys}
+
+        return base_attrs
+    def to_x3d(self):
+        base_attrs = self.prep_attrs(self.attrs)
+
+        comps = []
+        line_props = base_attrs.pop('lineProperties', None)
+        if line_props is not None:
+            if isinstance(line_props, dict):
+                line_props = X3DLineProperties(**line_props)
+            if isinstance(line_props, X3DLineProperties):
+                line_props = line_props.to_x3d()
+            comps.append(line_props)
+
+        point_props = base_attrs.pop('pointProperties', None)
+        if point_props is not None:
+            if isinstance(point_props, dict):
+                point_props = X3DPointProperties(**point_props)
+            if isinstance(point_props, X3DPointProperties):
+                point_props = point_props.to_x3d()
+            comps.append(point_props)
+
+        material_props = base_attrs.pop('material', None)
+        if material_props is not None:
+            if isinstance(material_props, dict):
+                material_props = X3DMaterial(**material_props)
+            if isinstance(material_props, X3DMaterial):
+                material_props = material_props.to_x3d()
+            comps.append(material_props)
+
+        return X3DHTML.Appearance(*comps, **base_attrs)
+
+class X3DLineProperties(X3DOptionsSet):
+    __props__ = {
+        "applied",
+        "linetype",
+        "linewidthScaleFactor"
+    }
+    conversion_map = {
+        "line_style":"linetype",
+        "line_thickness":"linewidthScaleFactor"
+    }
+    def prep_attrs(self, attrs:dict):
+        attrs = super().prep_attrs(attrs)
+        attrs['containerField'] = attrs.get('containerField', 'lineProperties')
+        return attrs
+    def to_x3d(self):
+        return X3DHTML.LineProperties(**self.prep_attrs(self.attrs))
+
+class X3DPointProperties(X3DOptionsSet):
+    __props__ = {
+        "attenuation",
+        "pointSizeMaxValue",
+        "pointSizeMinValue",
+        "pointSizeScaleFactor"
+    }
+    conversion_map = {
+        "point_size":"pointSizeMinValue"
+    }
+    def prep_attrs(self, attrs:dict):
+        attrs = super().prep_attrs(attrs)
+        attrs['containerField'] = attrs.get('containerField', 'pointProperties')
+        return attrs
+    def to_x3d(self):
+        return X3DHTML.PointProperties(**self.prep_attrs(self.attrs))
 
 class X3DPrimitive(X3DObject):
     wrapper_class = None
@@ -237,18 +345,23 @@ class X3DPrimitive(X3DObject):
         self.children = children
         self.opts = opts
     def split_opts(self, opts:dict):
-        material_keys = opts.keys() & X3DMaterial.prop_keys()
+        material_keys = opts.keys() & (
+            X3DMaterial.prop_keys()
+            | X3DAppearance.prop_keys()
+            | X3DLineProperties.prop_keys()
+            | X3DPointProperties.prop_keys()
+        )
         rem_keys = opts.keys() - material_keys
         return {k:opts[k] for k in rem_keys}, {k:opts[k] for k in material_keys}
-    def get_appearance(self, material_opts):
-        if len(material_opts) == 0:
-            return None
+    def get_appearance(self, appearance_options):
+        if len(appearance_options) > 0:
+            return X3DAppearance(**appearance_options).to_x3d()
         else:
-            return X3DHTML.Appearance(X3DMaterial(**material_opts).to_x3d())
+            return None
     def to_x3d(self):
-        obj_opts, material_opts = self.split_opts(self.opts)
+        obj_opts, appearance_opts = self.split_opts(self.opts)
         kids = [k.to_x3d() if hasattr(k, 'to_x3d') else k for k in self.children]
-        appearance = self.get_appearance(material_opts)
+        appearance = self.get_appearance(appearance_opts)
         if self.tag_class is None:
             if appearance is not None:
                 kids = [appearance] + kids
@@ -258,7 +371,7 @@ class X3DPrimitive(X3DObject):
             )
         else:
             core = self.tag_class(kids, **obj_opts)
-            appearance = self.get_appearance(material_opts)
+            appearance = self.get_appearance(appearance_opts)
             if appearance is not None:
                 return self.wrapper_class(appearance, core)
             else:
@@ -378,12 +491,6 @@ class X3DGeometryGroup(X3DGeometryObject):
         else:
             return X3DHTML.Group(objs)
 
-class X3DLine(X3DGeometryObject):
-    tag_class = X3DHTML.LineSet
-
-    def prep_geometry_opts(self, points, **opts)->dict:
-        return {"coords":np.asanyarray(points).flatten()}
-
 class X3DSphere(X3DGeometryGroup):
     tag_class = X3DHTML.Sphere
 
@@ -482,26 +589,24 @@ class X3DTorus(X3DGeometryGroup):
             for s,r,i in zip(centers, radius, inner_radius)
         ]
 
+class X3DCoordinatesWrapper(X3DGeometryGroup):
+    tag_class: X3DHTML.X3DElement
+    def create_tag_object(self, *, point, **etc):
+        return self.tag_class(X3DCoordinate(point).to_x3d(), **etc)
+    def prep_geometry_opts(self, points):
+        return [
+            {"translation":"0,0,0", "point":points}
+        ]
+
 class X3DRectangle2D(X3DGeometryGroup):
     tag_class = X3DHTML.Rectangle2D
 
-class X3DTriangleSet(X3DGeometryGroup):
-    tag_class = X3DHTML.TriangleSet
-    def create_tag_object(self, *, point, **etc):
-        return self.tag_class(X3DCoordinate(point).to_x3d(), **etc)
-    def prep_geometry_opts(self, points):
-        return [
-            {"translation":"0,0,0", "point":points}
-        ]
-
-class X3DPointSet(X3DGeometryGroup):
+class X3DPointSet(X3DCoordinatesWrapper):
     tag_class = X3DHTML.PointSet
-    def create_tag_object(self, *, point, **etc):
-        return self.tag_class(X3DCoordinate(point).to_x3d(), **etc)
-    def prep_geometry_opts(self, points):
-        return [
-            {"translation":"0,0,0", "point":points}
-        ]
+class X3DLine(X3DCoordinatesWrapper):
+    tag_class = X3DHTML.LineSet
+class X3DTriangleSet(X3DCoordinatesWrapper):
+    tag_class = X3DHTML.TriangleSet
 
 class X3DListAnimator(X3DGroup):
     def __init__(self, *frames, id=None, animation_duration=2, running=True, slider=False,
