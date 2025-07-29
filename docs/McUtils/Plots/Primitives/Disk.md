@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Disk">Disk</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L43?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, position=(0, 0), radius=1, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L44?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, position=(0, 0), radius=1, **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Disk.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Disk.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Disk.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Disk.py#L50?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ get_bbox(self):
 plot(self, axes, *args, graphics=None, zdir=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Disk.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Disk.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Disk.py#L53)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Disk.py#L53?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -100,7 +100,7 @@ plot(self, axes, *args, graphics=None, zdir=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Disk.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Disk.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L33?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L43?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

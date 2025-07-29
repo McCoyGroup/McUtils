@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DLine">X3DLine</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L369)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L369?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L606)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L606?message=Update%20Docs)]
 </div>
 
 
@@ -21,14 +21,7 @@
  ```python
 tag_class: LineSet
 ```
-<a id="McUtils.Plots.X3DInterface.X3DLine.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
-```python
-prep_geometry_opts(self, points, **opts) -> dict: 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DLine.py#L372)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DLine.py#L372?message=Update%20Docs)]
-</div>
+
  </div>
 </div>
 
@@ -82,7 +75,7 @@ prep_geometry_opts(self, points, **opts) -> dict:
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DLine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DLine.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L369?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L606?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

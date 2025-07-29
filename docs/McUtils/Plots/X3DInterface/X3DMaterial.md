@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DMaterial">X3DMaterial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L195)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L195?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L218?message=Update%20Docs)]
 </div>
 
 
@@ -21,44 +21,13 @@
  ```python
 conversion_map: dict
 ```
-<a id="McUtils.Plots.X3DInterface.X3DMaterial.__init__" class="docs-object-method">&nbsp;</a> 
-```python
-__init__(self, **attrs): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L205?message=Update%20Docs)]
-</div>
-
-
-<a id="McUtils.Plots.X3DInterface.X3DMaterial.prop_keys" class="docs-object-method">&nbsp;</a> 
-```python
-@classmethod
-prop_keys(cls): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L214)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L214?message=Update%20Docs)]
-</div>
-
-
-<a id="McUtils.Plots.X3DInterface.X3DMaterial.prep_attrs" class="docs-object-method">&nbsp;</a> 
-```python
-prep_attrs(self, attrs: dict): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L217)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L217?message=Update%20Docs)]
-</div>
-
-
 <a id="McUtils.Plots.X3DInterface.X3DMaterial.to_x3d" class="docs-object-method">&nbsp;</a> 
 ```python
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L234)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L234?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -113,7 +82,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DMaterial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DMaterial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L195?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L218?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

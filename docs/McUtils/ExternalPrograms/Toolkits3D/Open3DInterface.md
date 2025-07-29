@@ -1,11 +1,11 @@
-## <a id="McUtils.Plots.X3DInterface.X3DListAnimator">X3DListAnimator</a> 
+## <a id="McUtils.ExternalPrograms.Toolkits3D.Open3DInterface">Open3DInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L611)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L611?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Toolkits3D.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Toolkits3D.py#L10?message=Update%20Docs)]
 </div>
 
-
+A simple class to support operations that make use of the OpenCV toolkit
 
 
 
@@ -18,15 +18,11 @@
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
- 
-<a id="McUtils.Plots.X3DInterface.X3DListAnimator.__init__" class="docs-object-method">&nbsp;</a> 
-```python
-__init__(self, *frames, id=None, animation_duration=2, running=True, slider=False, **opts): 
+ ```python
+name: str
+module: str
 ```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L612)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L612?message=Update%20Docs)]
-</div>
+
  </div>
 </div>
 
@@ -74,13 +70,13 @@ __init__(self, *frames, id=None, animation_duration=2, running=True, slider=Fals
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/X3DInterface/X3DListAnimator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/X3DInterface/X3DListAnimator.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/ExternalPrograms/Toolkits3D/Open3DInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/ExternalPrograms/Toolkits3D/Open3DInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DListAnimator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DListAnimator.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Toolkits3D/Open3DInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Toolkits3D/Open3DInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L611?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Toolkits3D.py#L10?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
