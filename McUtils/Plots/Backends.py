@@ -2194,8 +2194,21 @@ class X3DAxes(GraphicsAxes3D):
         else:
             self.opts['viewpoint'] = new_opts
 
-    def draw_line(self, points, **styles):
-        line_set = x3d.X3DLine(points, **styles)
+    def draw_line(self, points, s=None, riffle=True, line_thickness=None,
+                  edgecolors=None, color=None, glow=None, **styles):
+        if color is None: color = edgecolors
+        if color is None: color = 'black'
+        if line_thickness is None and s is not None:
+            if not nput.is_numeric(s): s = s[0]
+            line_thickness = s / 1000
+        if riffle:
+            points = np.concatenate([
+                points[..., :-1, np.newaxis, :],
+                points[..., 1:, np.newaxis, :]
+            ], axis=-2).reshape(-1, 3)
+        if glow is None:
+            glow = color
+        line_set = x3d.X3DLine(points, line_thickness=line_thickness, glow=glow, **styles)
         self.children.append(line_set)
 
         return line_set
@@ -2223,9 +2236,10 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(rects)
 
         return rects
-    def draw_point(self, points, **styles):
+    def draw_point(self, points, color=None, glow=None, **styles):
         points = np.asanyarray(points)
-        rects = x3d.X3DPointSet(points, **styles)
+        if glow is None: glow = color
+        rects = x3d.X3DPointSet(points, glow=glow, **styles)
         self.children.append(rects)
 
         return rects
