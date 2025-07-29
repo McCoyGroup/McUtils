@@ -1,7 +1,7 @@
 # <a id="McUtils.Devutils.core.is_dict_like">is_dict_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L97)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L97?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L99?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ is_dict_like(obj, interface_types=(<class 'dict'>, <class 'mappingproxy'>), exlu
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_dict_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_dict_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L97?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L99?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

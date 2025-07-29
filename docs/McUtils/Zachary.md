@@ -72,103 +72,103 @@ Deals with anything tensor, Taylor expansion, or interpolation related
 [MultiSurface](Zachary/Surfaces/Surface/MultiSurface.md)   
 </div>
    <div class="col" markdown="1">
-[FittedModel](Zachary/FittableModels/FittedModel.md)   
+[SphereUnionSurface](Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[FittedModel](Zachary/FittableModels/FittedModel.md)   
+</div>
    <div class="col" markdown="1">
 [Interpolator](Zachary/Interpolator/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
 [Extrapolator](Zachary/Interpolator/Extrapolator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [RBFDInterpolator](Zachary/NeighborBasedInterpolators/RBFDInterpolator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [InverseDistanceWeightedInterpolator](Zachary/NeighborBasedInterpolators/InverseDistanceWeightedInterpolator.md)   
 </div>
    <div class="col" markdown="1">
 [ProductGridInterpolator](Zachary/Interpolator/ProductGridInterpolator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [UnstructuredGridInterpolator](Zachary/Interpolator/UnstructuredGridInterpolator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CoordinateInterpolator](Zachary/Interpolator/CoordinateInterpolator.md)   
 </div>
    <div class="col" markdown="1">
 [Tensor](Zachary/LazyTensors/Tensor.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TensorOp](Zachary/LazyTensors/TensorOp.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [LazyOperatorTensor](Zachary/LazyTensors/LazyOperatorTensor.md)   
 </div>
    <div class="col" markdown="1">
 [SparseTensor](Zachary/LazyTensors/SparseTensor.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TensorDerivativeConverter](Zachary/Symbolic/TensorExpressions/TensorDerivativeConverter.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [TensorExpansionTerms](Zachary/Symbolic/TensorExpressions/TensorExpansionTerms.md)   
 </div>
    <div class="col" markdown="1">
 [TensorExpression](Zachary/Symbolic/TensorExpressions/TensorExpression.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Symbols](Zachary/Symbolic/ElementaryFunctions/Symbols.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SymPyFunction](Zachary/Symbolic/ElementaryFunctions/SymPyFunction.md)   
 </div>
    <div class="col" markdown="1">
 [AbstractPolynomial](Zachary/Polynomials/AbstractPolynomial.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DensePolynomial](Zachary/Polynomials/DensePolynomial.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SparsePolynomial](Zachary/Polynomials/SparsePolynomial.md)   
 </div>
    <div class="col" markdown="1">
 [PureMonicPolynomial](Zachary/Polynomials/PureMonicPolynomial.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TensorCoefficientPoly](Zachary/Polynomials/TensorCoefficientPoly.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DifferentiableFunction](Zachary/DifferentiableFunctions/DifferentiableFunction.md)   
 </div>
    <div class="col" markdown="1">
 [PolynomialFunction](Zachary/DifferentiableFunctions/PolynomialFunction.md)   
 </div>
-   <div class="col" markdown="1">
-[MorseFunction](Zachary/DifferentiableFunctions/MorseFunction.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CoordinateFunction](Zachary/DifferentiableFunctions/CoordinateFunction.md)   
+[MorseFunction](Zachary/DifferentiableFunctions/MorseFunction.md)   
 </div>
    <div class="col" markdown="1">
-   
+[CoordinateFunction](Zachary/DifferentiableFunctions/CoordinateFunction.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -302,9 +302,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-f72d8d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f72d8d"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-f1d1b4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f1d1b4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f72d8d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f1d1b4" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -357,9 +357,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-4cefa6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4cefa6"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e212d8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e212d8"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4cefa6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e212d8" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

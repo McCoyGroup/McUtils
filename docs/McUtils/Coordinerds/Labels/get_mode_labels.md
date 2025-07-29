@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds.Labels.get_mode_labels">get_mode_labels</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Labels.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Labels.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Labels.py#L162)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Labels.py#L162?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ get_mode_labels(internals, internal_modes_by_coords: numpy.ndarray, norm_cutoff=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Labels/get_mode_labels.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Labels/get_mode_labels.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Labels.py#L122?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Labels.py#L162?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

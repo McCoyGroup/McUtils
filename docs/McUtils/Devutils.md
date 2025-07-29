@@ -98,65 +98,65 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[slice_dict](Devutils/core/slice_dict.md)   
+</div>
+   <div class="col" markdown="1">
+[dict_take](Devutils/core/dict_take.md)   
+</div>
+   <div class="col" markdown="1">
 [is_filepath_like](Devutils/FileHelpers/is_filepath_like.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [safe_open](Devutils/FileHelpers/safe_open.md)   
 </div>
    <div class="col" markdown="1">
 [write_file](Devutils/FileHelpers/write_file.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [read_file](Devutils/FileHelpers/read_file.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [read_json](Devutils/FileHelpers/read_json.md)   
 </div>
    <div class="col" markdown="1">
 [write_json](Devutils/FileHelpers/write_json.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Logger](Devutils/Loggers/Logger.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NullLogger](Devutils/Loggers/NullLogger.md)   
 </div>
    <div class="col" markdown="1">
 [LogLevel](Devutils/Loggers/LogLevel.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [LoggingBlock](Devutils/Loggers/LoggingBlock.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OptionsSet](Devutils/Options/OptionsSet.md)   
 </div>
    <div class="col" markdown="1">
 [OptionsMethodDispatch](Devutils/Options/OptionsMethodDispatch.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OutputRedirect](Devutils/Redirects/OutputRedirect.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DefaultDirectory](Devutils/Redirects/DefaultDirectory.md)   
 </div>
    <div class="col" markdown="1">
 [Schema](Devutils/Schema/Schema.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-   
-</div>
-   <div class="col" markdown="1">
-   
 </div>
    <div class="col" markdown="1">
    

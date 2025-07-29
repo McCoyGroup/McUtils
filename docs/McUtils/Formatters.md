@@ -109,6 +109,17 @@ Defines a set of formatting utilities
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[format_tensor_element_table](Formatters/Conveniences/format_tensor_element_table.md)   
+</div>
+   <div class="col" markdown="1">
+[format_symmetric_tensor_elements](Formatters/Conveniences/format_symmetric_tensor_elements.md)   
+</div>
+   <div class="col" markdown="1">
+[format_mode_labels](Formatters/Conveniences/format_mode_labels.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
    
 </div>
    <div class="col" markdown="1">
