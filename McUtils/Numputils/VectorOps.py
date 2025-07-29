@@ -110,7 +110,7 @@ def vec_norms(vecs, axis=-1):
     #     raise NotImplementedError("Norm along not-the-last axis not there yet...")
     return np.linalg.norm(vecs, axis=axis)
 
-def distance_matrix(pts, axis=-1, axis2=None, return_triu=False):
+def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False):
     pts = np.asanyarray(pts)
     if axis2 is None:
         axis2 = axis-1
@@ -122,7 +122,10 @@ def distance_matrix(pts, axis=-1, axis2=None, return_triu=False):
 
     dists = vec_norms(vecs_r - vecs_c, axis=axis)
     if return_triu:
-        return dists
+        if return_indices:
+            return dists, (rows, cols)
+        else:
+            return dists
     else:
         dist_mats = np.zeros(tuple(np.delete(pts.shape, [axis, axis2])) + (n, n), dtype=dists.dtype)
         dist_mats[..., rows, cols] = dists

@@ -2,6 +2,7 @@
 Just a simple text table formatter with support for headers, separators, any kind of python formatting spec
 etc.
 """
+import itertools
 
 import numpy as np
 
@@ -406,16 +407,46 @@ class TableFormatter:
         if row_join is None: row_join = self.row_join
         if row_join is None: row_join = self.default_row_join
 
-        body_rows = [
-            column_join.join(r) for r in data_rows
-        ]
+        if isinstance(column_join, str):
+            body_rows = [
+                column_join.join(r) for r in data_rows
+            ]
+        else:
+            joins = list(column_join) + [""] * (len(data_rows[0]) - len(column_join))
+            body_rows = [
+                "".join(
+                    x
+                    for body_join in zip(r, joins)
+                    for x in body_join
+                )
+                for r in data_rows
+            ]
         body = row_join.join(body_rows)
 
         if headers is not None:
             if header_column_join is None: header_column_join = self.header_column_join
-            if header_column_join is None: header_column_join = column_join
+            if header_column_join is None:
+                if isinstance(column_join, str):
+                    header_column_join = column_join
+                else:
+                    pos = np.cumsum(header_spans) - 1
+                    header_column_join = [
+                        column_join[p] if len(column_join) > p else
+                        "" for p in pos
+                    ]
 
-            header_rows = [header_column_join.join(r) for r in header_rows]
+            if isinstance(header_column_join, str):
+                header_rows = [header_column_join.join(r) for r in header_rows]
+            else:
+                joins = list(header_column_join) + [""] * (len(header_rows[0]) - len(column_join))
+                header_rows = [
+                    "".join(
+                        x
+                        for body_join in zip(r, joins)
+                        for x in body_join
+                    )
+                    for r in header_rows
+                ]
 
             if header_row_join is None: header_row_join = self.header_row_join
             if header_row_join is None: header_row_join = row_join

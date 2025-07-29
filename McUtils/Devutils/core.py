@@ -31,7 +31,9 @@ __all__ = [
     "str_elide",
     "resolve_key_collision",
     "merge_dicts",
-    "context_wrap"
+    "context_wrap",
+    "slice_dict",
+    "dict_take"
 ]
 
 class SingletonType:
@@ -272,3 +274,39 @@ class context_wrap:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if hasattr(self.obj, '__exit__'):
             return self.obj.__exit__(exc_type, exc_val, exc_tb)
+
+class slice_dict:
+    __slots__ = ["dict_obj"]
+    def __init__(self, dict_obj:types.MappingProxyType):
+        self.dict_obj = dict_obj
+    def __getitem__(self, item):
+        return dict_take(self.dict_obj, item)
+
+def dict_take(dict_obj:types.MappingProxyType, spec):
+    if is_number(spec):
+        if spec < 0:
+            spec = len(dict_obj) - spec
+        for k in itertools.islice(dict_obj.keys(), spec, -1):
+            return k, dict_obj[k]
+    elif isinstance(spec, slice):
+        return dict(
+            itertools.islice(dict_obj.items(), spec.start, spec.stop, spec.step)
+        )
+    else:
+        if not is_int(spec[0]):
+            return {
+                k:dict_obj[k]
+                for k in spec
+            }
+
+        results = {}
+        rem = set(spec)
+        for n,k in enumerate(dict_obj.keys()):
+            if n in rem:
+                results[n] = (k, dict_obj[k])
+                rem.remove(n)
+                if len(rem) == 0: break
+        else:
+            raise IndexError("can't take elements {rem}")
+
+        return dict(results[n] for n in spec)

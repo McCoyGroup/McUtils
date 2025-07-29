@@ -1,13 +1,20 @@
 import numpy as np
 import itertools
 from collections import namedtuple
+from ..Data import UnitsData
+from .. import Numputils as nput
 
 __all__ = [
+    "coordinate_label",
     "get_coordinate_label",
-    "get_mode_labels"
+    "mode_label",
+    "get_mode_labels",
+    "coordinate_sorting_key",
+    "sort_internal_coordinates",
+    # "print_mode_labels"
 ]
 
-atom_sort_order = ['C', 'O', 'N', 'H', 'F', 'Cl', 'Br', 'I']
+atom_sort_order = ['C', 'O', 'N', 'H', 'D', 'F', 'Cl', 'Br', 'I']
 coordinate_label = namedtuple('coordinate_label', ['ring', 'group', 'atoms', 'type'])
 def get_coordinate_label(coord, atom_labels, atom_order=None):
     ring_lab = None
@@ -118,6 +125,39 @@ def get_coordinate_label(coord, atom_labels, atom_order=None):
 
     return coordinate_label(ring_lab, group_lab, motif_lab, tag)
 
+coord_type_ordering = {'stretch': 0, 'bend': 1, 'dihedral': 2}
+atom_coordinate_sort_order = ['H', 'D', 'O', 'N', 'F', 'Cl', 'Br', 'I', 'C']
+def coordinate_sorting_key(label, type_ordering=None, atom_ordering=None):
+    if type_ordering is None:
+        type_ordering = coord_type_ordering
+
+    if atom_ordering is None:
+        atom_ordering = atom_coordinate_sort_order
+    if not hasattr(atom_ordering, 'items'):
+        atom_ordering = {a:i for i,a in enumerate(atom_ordering)}
+
+    if isinstance(label, str): # assume it's just atoms
+        return (len(label),) + tuple(sorted(atom_ordering.get(a, -1) for a in label))
+    else:
+        return (type_ordering.get(label.type, 3),) + tuple(sorted(atom_ordering.get(a, -1) for a in label.atoms))
+def sort_internal_coordinates(coords, atoms=None, sort_key=None):
+    if sort_key is None:
+        sort_key = coordinate_sorting_key
+    if atoms is not None:
+        sort_key = lambda s: sort_key(
+            s
+                if not nput.is_int(s[0]) else
+            "".join(atoms[i] for i in s)
+        )
+    if isinstance(coords, dict):
+        return dict(
+            sorted(coords.items(), key=lambda kv: sort_key(kv[1]))
+        )
+    else:
+        return tuple(
+            sorted(coords, key=sort_key)
+        )
+
 mode_label = namedtuple("mode_type", ["coefficients", "indices", "labels", "type"])
 def get_mode_labels(
         internals,
@@ -203,3 +243,15 @@ def get_mode_labels(
         )
 
     return types
+
+# def print_mode_labels(modes, labels):
+#     for i, (freq, lab) in enumerate(zip(reversed(modes.freqs), reversed(labels))):
+#         print(
+#             "Mode {} ({}): {:.0f} {}".format(i + 1,
+#                                              len(modes.freqs) - (i+1),
+#                                              freq * UnitsData.hartrees_to_wavenumbers,
+#                                              "mixed"
+#                                              if lab.type is None else
+#                                              lab.type
+#                                              )
+#         )
