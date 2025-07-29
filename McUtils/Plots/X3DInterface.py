@@ -20,6 +20,8 @@ __all__ = [
     "X3DCylinder",
     "X3DArrow",
     "X3DTorus",
+    "X3DRectangle2D",
+    "X3DTriangleSet",
     "X3DSwitch",
     "X3DListAnimator"
 ]
@@ -274,6 +276,14 @@ class X3DScene(X3DPrimitive):
         if len(viewpoint) > 0:
             self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
 
+class X3DCoordinate(X3DPrimitive):
+    wrapper_class = X3DHTML.Coordinate
+    def __init__(self, points):
+        super().__init__(point=self.prep_points(points))
+    @classmethod
+    def prep_points(cls, points):
+        return " ".join(np.asanyarray(points).flatten().astype(str))
+
 class X3DGroup(X3DPrimitive):
     wrapper_class = X3DHTML.Group
 
@@ -289,8 +299,10 @@ class X3DGeometryObject(X3DPrimitive):
     @abc.abstractmethod
     def prep_geometry_opts(self, *args, **opts) -> dict:
         ...
+    def create_tag_object(self, **core_opts):
+        return self.tag_class(**core_opts)
     def create_object(self, translation=None, rotation=None, scale=None, **core_opts):
-        base_obj = self.tag_class(**core_opts)
+        base_obj = self.create_tag_object(**core_opts)
         tf = {}
         for k,v in [["translation",translation], ["rotation",rotation], ["scale", scale]]:
             if v is not None:
@@ -454,6 +466,9 @@ class X3DArrow(X3DGroup):
             arrowheads, cylinders
         )
 
+class X3DText(X3DGeometryGroup):
+    tag_class = X3DHTML.Text
+
 class X3DTorus(X3DGeometryGroup):
     tag_class = X3DHTML.Torus
 
@@ -465,6 +480,27 @@ class X3DTorus(X3DGeometryGroup):
         return [
             {"translation":s,  "outerRadius":r, "innerRadius":i}
             for s,r,i in zip(centers, radius, inner_radius)
+        ]
+
+class X3DRectangle2D(X3DGeometryGroup):
+    tag_class = X3DHTML.Rectangle2D
+
+class X3DTriangleSet(X3DGeometryGroup):
+    tag_class = X3DHTML.TriangleSet
+    def create_tag_object(self, *, point, **etc):
+        return self.tag_class(X3DCoordinate(point).to_x3d(), **etc)
+    def prep_geometry_opts(self, points):
+        return [
+            {"translation":"0,0,0", "point":points}
+        ]
+
+class X3DPointSet(X3DGeometryGroup):
+    tag_class = X3DHTML.PointSet
+    def create_tag_object(self, *, point, **etc):
+        return self.tag_class(X3DCoordinate(point).to_x3d(), **etc)
+    def prep_geometry_opts(self, points):
+        return [
+            {"translation":"0,0,0", "point":points}
         ]
 
 class X3DListAnimator(X3DGroup):

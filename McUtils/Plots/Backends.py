@@ -194,12 +194,16 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def draw_line(self, points, **styles):
         ...
+    def draw_point(self, points, **styles):
+        return self.draw_disk(points, **styles)
     @abc.abstractmethod
     def draw_disk(self, points, **styles):
         ...
     @abc.abstractmethod
     def draw_rect(self, points, **styles):
         ...
+    def draw_triangle(self, points, **styles):
+        return self.draw_poly(points, **styles)
     @abc.abstractmethod
     def draw_poly(self, points, **styles):
         ...
@@ -2219,7 +2223,18 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(rects)
 
         return rects
+    def draw_point(self, points, **styles):
+        points = np.asanyarray(points)
+        rects = x3d.X3DPointSet(points, **styles)
+        self.children.append(rects)
 
+        return rects
+    def draw_triangle(self, points, **styles):
+        points = np.asanyarray(points)
+        rects = x3d.X3DTriangleSet(points, **styles)
+        self.children.append(rects)
+
+        return rects
     def draw_poly(self, points, **styles):
         raise NotImplementedError("2D")
 

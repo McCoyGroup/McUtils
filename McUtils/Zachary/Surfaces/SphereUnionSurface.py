@@ -3,6 +3,7 @@ import numpy as np
 import scipy.spatial
 from ... import Numputils as nput
 from ...Data import AtomData, UnitsData
+from ...ExternalPrograms import Open3DInterface as o3d
 
 __all__ = [
     "SphereUnionSurface"
@@ -49,6 +50,17 @@ class SphereUnionSurface:
     def sampling_points(self, pts):
         if pts is not None: pts = np.asanyarray(pts)
         self._sample_points = pts
+
+    @classmethod
+    def nearest_centers(cls, pts, centers, return_normals=False):
+        center_vecs = pts[:, np.newaxis, :] - centers[np.newaxis, :, :]
+        center_dm = np.linalg.norm(center_vecs, axis=-1)
+        np.fill_diagonal(center_dm, 1e6)
+        nearest_centers = np.argmin(center_dm, axis=1)
+        if return_normals:
+            norms = center_dm[np.arange(len(pts)), nearest_centers]
+            return nearest_centers, (norms, center_vecs[np.arange(len(pts)), nearest_centers, :] / norms[:, np.newaxis])
+        return nearest_centers
 
     @classmethod
     def sphere_project(cls, pts, centers, radii):
@@ -297,22 +309,104 @@ class SphereUnionSurface:
 
         return pts
 
-    def generate_points(self, scaling=None, expansion=None, samples=None):
+    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False):
         if samples is None: samples = self.samples
         if scaling is None: scaling = self.scaling
         if expansion is None: expansion = self.expansion
+
         base_points = self.sphere_points(
             self.centers,
             self.radii*scaling + expansion,
             samples
-        ).reshape(-1, 3)
-        dvs = np.linalg.norm(
-            base_points[:, np.newaxis, :] - self.centers[np.newaxis, :, :],
-            axis=-1
         )
-        mask = np.all(dvs >= self.radii[np.newaxis], axis=1)
+        if not preserve_origins:
+            base_points = base_points.reshape(-1, 3)
+            dvs = np.linalg.norm(
+                base_points[:, np.newaxis, :] - self.centers[np.newaxis, :, :],
+                axis=-1
+            )
 
-        return base_points[mask,]
+            mask = np.all(dvs >= self.radii[np.newaxis], axis=1)
+
+            return base_points[mask,]
+        else:
+            subpoints = []
+            for bp in base_points:
+                dvs = np.linalg.norm(
+                    bp[:, np.newaxis, :] - self.centers[np.newaxis, :, :],
+                    axis=-1
+                )
+
+                mask = np.all(dvs >= self.radii[np.newaxis], axis=1)
+
+                subpoints.append(bp[mask,])
+
+            return subpoints
+
+    def generate_mesh(self,
+                      points=None,
+                      normals=None,
+                      scaling=None, expansion=None, samples=None,
+                      method='poisson',
+                      depth=5,
+                      **reconstruction_settings):
+
+        if points is None:
+            if scaling is None and expansion is None and samples is None:
+                points = self.sampling_points
+            else:
+                points = self.generate_points(scaling=scaling, expansion=expansion, samples=samples)
+        if method == 'poisson':
+            if normals is None:
+                if isinstance(points, list):
+                    normal_list = []
+                    for c,p in zip(self.centers, points):
+                        normal_list.append(nput.vec_normalize(p - c[np.newaxis]))
+                    normals = np.concatenate(normal_list)
+                else:
+                    _, (_, normals) = self.nearest_centers(points, self.centers, return_normals=True)
+            geom = o3d.submodule('geometry')
+            pcd = geom.PointCloud()
+            pcd.points = o3d.submodule('utility').Vector3dVector(np.asanyarray(points).view(np.ndarray))
+            pcd.normals = o3d.submodule('utility').Vector3dVector(np.asanyarray(normals).view(np.ndarray))
+            mesh, densities = geom.TriangleMesh.create_from_point_cloud_poisson(
+                pcd,
+                depth=depth,
+                **reconstruction_settings
+            )
+        else:
+            raise NotImplementedError("only Open3D Poisson currently supported")
+        return np.array(mesh.vertices), np.array(mesh.triangles)
+
+    # def generate_mesh(self, point_cloud, distance_cutoff=.8):
+    #     dm = nput.distance_matrix(point_cloud)
+    #     np.fill_diagonal(dm, 1e6)
+    #     mins = np.argsort(dm, axis=1)
+    #
+    #     tris = []
+    #     for i,dists in enumerate(dm):
+    #         ...
+    #
+    #     # mask = dm < distance_cutoff
+    #     # points = scipy.spatial.KDTree(point_cloud)
+    #     #
+    #     # delaunay = scipy.spatial.Delaunay(point_cloud)
+    #     # simps = delaunay.simplices
+    #     # tris_1 = simps[:, :3]
+    #     # tris_2 = simps[:, 1:]
+    #     # tris_3 = simps[:, (2, 3, 0)]
+    #     # tris_4 = simps[:, (3, 0, 1)]
+    #     # tris = np.concatenate([
+    #     #     tris_1,
+    #     #     tris_2,
+    #     #     tris_3,
+    #     #     tris_4
+    #     # ], axis=0)
+    #     # pts = point_cloud[tris]
+    #     return pts
+    #     # for (pi,pj,pk,pl) in pts:
+    #     #     if
+    #     # for simps
 
     @classmethod
     def sphere_points(cls, centers, radii, samples, generator=None):

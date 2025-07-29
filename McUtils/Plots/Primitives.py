@@ -4,7 +4,17 @@ Provides stuff like Disk, Sphere, etc. and lets them figure out how to plot them
 """
 
 __all__ = [
-    "GraphicsPrimitive", "Sphere", "Cylinder", "Disk", "Line", "Text", "Arrow", "Inset"
+    "GraphicsPrimitive",
+    "Sphere",
+    "Cylinder",
+    "Disk",
+    "Line",
+    "Text",
+    "Arrow",
+    "Inset",
+    "Point",
+    "Triangle",
+    "Polygon"
 ]
 
 import abc, numpy as np
@@ -49,15 +59,15 @@ class Disk(GraphicsPrimitive):
         kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
         return axes.draw_disk(self.pos, **kw)
 class Line(GraphicsPrimitive):
-    def __init__(self, pos1, pos2, *rest, radius=.1, **opts):
-        self.pos1 = pos1
-        self.pos2 = pos2
-        self.rest = rest
+    def __init__(self, points, radius=.1, **opts):
+        self.pos = points
+        # self.pos2 = pos2
+        # self.rest = rest
         self.rad = 72*radius # this can't be configured nearly as cleanly as the circle stuff...
         self.opts = opts
     @property
     def points(self):
-        return [self.pos1, self.pos2, *self.rest]
+        return self.pos
     def get_bbox(self):
         pos = np.array(self.points).T
         return [(np.min(pos[0]), np.min(pos[1])), (np.max(pos[0]), np.max(pos[1]))]
@@ -68,7 +78,7 @@ class Line(GraphicsPrimitive):
         kw = dict(edgecolors=[[0.]*3+[.3]])
         kw = dict(kw, **self.opts)
         kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
-        return axes.draw_line(self.pos1, self.pos2, **kw)
+        return axes.draw_line(self.pos, **kw)
 
 class Text(GraphicsPrimitive):
     def __init__(self, txt, pos, bbox=((1, 1), (1, 1)), **opts):
@@ -133,6 +143,46 @@ class Cylinder(GraphicsPrimitive):
             if hasattr(axes, 'axes'):
                 axes = axes.axes
             return axes.draw_cylinder(self.pos1, self.pos2, self.rad, **self.opts)
+
+class Point(GraphicsPrimitive):
+    def __init__(self, pts, **opts):
+        self.pos = pts
+        self.opts = dict(opts)
+
+    def get_bbox(self):
+        raise NotImplementedError("...")
+
+    def plot(self, axes, *args, graphics=None, **kwargs):
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_point(self.pos, **self.opts)
+
+class Triangle(GraphicsPrimitive):
+    def __init__(self, pts, **opts):
+        self.pos = pts
+        self.opts = dict(opts)
+
+    def get_bbox(self):
+        raise NotImplementedError("...")
+
+    def plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs):
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_triangle(self.pos, **self.opts)
+
+class Polygon(GraphicsPrimitive):
+    def __init__(self, points, **opts):
+        self.pos = points
+        self.opts = dict(opts)
+
+    def get_bbox(self):
+        raise NotImplementedError("...")
+
+    def plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs):
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_poly(self.pos, **self.opts)
+
 
 class Inset(GraphicsPrimitive):
     def __init__(self, prims, position, offset=(.5, .5), dimensions=None, plot_range=None, **opts):
