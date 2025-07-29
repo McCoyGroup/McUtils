@@ -6,11 +6,10 @@ The idea is to provide a unified interface that represents the _concept_ while a
 Specific types of surfaces, like PES and dipole surfaces can be layered on top as superclasses and provided their own bespoke importers.
 """
 
-from .BaseSurface import *
-from .Surface import *
-
 __all__ = []
-from .BaseSurface import __all__ as exposed
+from .BaseSurface import *; from .BaseSurface import __all__ as exposed
 __all__ += exposed
-from .Surface import __all__ as exposed
+from .Surface import *; from .Surface import __all__ as exposed
+__all__ += exposed
+from .SphereUnionSurface import *; from .SphereUnionSurface import __all__ as exposed
 __all__ += exposed

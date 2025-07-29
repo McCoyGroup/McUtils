@@ -13,3 +13,5 @@ from .FileMatcher import *; from .FileMatcher import __all__ as exposed
 __all__ += exposed
 from .TableFormatters import *; from .TableFormatters import __all__ as exposed
 __all__ += exposed
+from .Conveniences import *; from .Conveniences import __all__ as exposed
+__all__ += exposed
