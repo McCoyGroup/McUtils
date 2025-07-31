@@ -17,6 +17,8 @@ __all__ = [
     "format_zmatrix_string",
     "validate_zmatrix",
     "chain_zmatrix",
+    # "methyl_zmatrix",
+    # "ethyl_zmatrix",
     "attached_zmatrix_fragment",
     "functionalized_zmatrix",
     "reindex_zmatrix",
@@ -41,8 +43,8 @@ def zmatrix_unit_convert(zmat, distance_conversion, angle_conversion=None, rad2d
 
     return zm2
 
-def zmatrix_indices(zmat, coords):
-    base_coords = [canonicalize_internal(c) for c in extract_zmatrix_internals(zmat)]
+def zmatrix_indices(zmat, coords, strip_embedding=True):
+    base_coords = [canonicalize_internal(c) for c in extract_zmatrix_internals(zmat, strip_embedding=strip_embedding)]
     return [
         base_coords.index(canonicalize_internal(c))
         for c in coords
@@ -231,13 +233,17 @@ def enumerate_zmatrices(coords, natoms=None,
 
 def extract_zmatrix_internals(zmat, strip_embedding=True):
     specs = []
-    for n,row in enumerate(zmat):
-        if strip_embedding and n == 0: continue
-        specs.append(tuple(row[:2]))
-        if strip_embedding and n == 1: continue
-        specs.append(tuple(row[:3]))
-        if strip_embedding and n == 2: continue
-        specs.append(tuple(row[:4]))
+    if len(zmat[0]) == 3:
+        zmat = np.asanyarray(zmat)
+        return np.delete(zmat.flatten(), zmatrix_embedding_coords(len(zmat)))
+    else:
+        for n,row in enumerate(zmat):
+            if strip_embedding and n == 0: continue
+            specs.append(tuple(row[:2]))
+            if strip_embedding and n == 1: continue
+            specs.append(tuple(row[:3]))
+            if strip_embedding and n == 2: continue
+            specs.append(tuple(row[:4]))
     return specs
 
 def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False):
@@ -480,10 +486,26 @@ def set_zmatrix_embedding(zmat, embedding=None):
         zmat[..., i,j] = v
     return zmat
 
+# ethyl_zmatrix = [
+#     [0, -1, -2, -3],
+#     [1,  0, -1, -2],
+#     [2,  0,  1, -1]
+# ]
+#
+# methyl_zmatrix = [
+#     [0, -1, -2, -3],
+#     [1,  0, -1, -2],
+#     [2,  0,  1, -1],
+#     [3,  0,  2,  1]
+# ]
+
+
 def functionalized_zmatrix(
         base_zm,
-        attachments:dict,
-        single_atoms:list[int]=None # individual components, embedding doesn't matter
+        attachments:dict=None,
+        single_atoms:list[int]=None, # individual components, embedding doesn't matter
+        methyl_positions:list[int]=None,
+        ethyl_positions:list[int]=None,
 ):
     if nput.is_numeric(base_zm):
         zm = chain_zmatrix(base_zm)
@@ -491,6 +513,7 @@ def functionalized_zmatrix(
         zm = [
             list(x) for x in base_zm
         ]
+    if attachments is None: attachments = {}
     for attachment_points, fragment in attachments.items():
         if nput.is_numeric(fragment):
             fragment = chain_zmatrix(fragment)
@@ -504,6 +527,33 @@ def functionalized_zmatrix(
             zm = zm + attached_zmatrix_fragment(
                 len(zm),
                 [[0, -1, -2, -3]],
+                [
+                    (atom - i) if i < 0 else i
+                    for i in range(atom, atom - 4, -1)
+                ]
+            )
+    if methyl_positions is not None:
+        for atom in methyl_positions:
+            zm = zm + attached_zmatrix_fragment(
+                len(zm),
+                [
+                    [0, -1, -2, -3],
+                    [1, -1,  0, -2],
+                    [2, -1,  0,  1],
+                ],
+                [
+                    (atom - i) if i < 0 else i
+                    for i in range(atom, atom - 4, -1)
+                ]
+            )
+    if ethyl_positions is not None:
+        for atom in ethyl_positions:
+            zm = zm + attached_zmatrix_fragment(
+                len(zm),
+                [
+                    [0, -1, -2, -3],
+                    [1, -1,  0, -2]
+                ],
                 [
                     (atom - i) if i < 0 else i
                     for i in range(atom, atom - 4, -1)

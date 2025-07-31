@@ -18,12 +18,15 @@ class RDMolecule(ExternalMolecule):
 
     def __init__(self, rdconf, charge=None):
         #atoms, coords, bonds):
+        self._rdmol = rdconf.GetOwningMol()
         super().__init__(rdconf)
         self.charge = charge
 
     @property
     def rdmol(self):
-        return self.mol.GetOwningMol()
+        if self._rdmol is None:
+            self._rdmol = self.mol.GetOwningMol()
+        return self._rdmol
     @property
     def atoms(self):
         mol = self.rdmol
@@ -101,7 +104,6 @@ class RDMolecule(ExternalMolecule):
         for a in atoms:
             a = Chem.Atom(a)
             mol.AddAtom(a)
-            print("!", a)
         if bonds is not None:
             for b in bonds:
                 if len(b) == 2:
@@ -164,8 +166,7 @@ class RDMolecule(ExternalMolecule):
         params.useBasicKnowledge = True
         return params
     @classmethod
-    def from_smiles(cls, smiles, num_confs=1, optimize=False, take_min=True,
-                    force_field_type='mmff',
+    def from_smiles(cls, smiles,
                     sanitize=False,
                     parse_name=True,
                     allow_cxsmiles=True,
@@ -174,13 +175,14 @@ class RDMolecule(ExternalMolecule):
                     replacements=None,
                     add_implicit_hydrogens=False,
                     call_add_hydrogens=True,
+                    num_confs=1, optimize=False, take_min=True,
+                    force_field_type='mmff',
                     **opts):
 
         if os.path.isfile(smiles):
             with open(smiles) as f:
                 smiles = f.read()
         Chem = cls.chem_api()
-        AllChem = cls.allchem_api()
 
         params = Chem.SmilesParserParams()
         params.removeHs = remove_hydrogens
@@ -201,8 +203,46 @@ class RDMolecule(ExternalMolecule):
         else:
             mol = rdkit_mol
 
+        return cls.from_base_mol(mol,
+                                 num_confs=1, optimize=False, take_min=True,
+                                 force_field_type='mmff'
+                                 )
+
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
         # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
+
+    @classmethod
+    def from_base_mol(cls, mol,
+                           conf_id=-1,
+                           num_confs=1,
+                           optimize=False,
+                           take_min=None,
+                           force_field_type='mmff',
+                           **mol_opts):
+        conf = mol.GetConformer(conf_id)
+        if conf:
+            return cls.from_rdmol(mol, conf_id, **mol_opts)
+        else:
+            if conf_id > num_confs + 1:
+                num_confs = conf_id
+            return cls.from_no_conformer_molecule(mol,
+                                                  num_confs=num_confs,
+                                                  optimize=optimize,
+                                                  take_min=conf_id < 0 if take_min is None else take_min,
+                                                  force_field_type=force_field_type,
+                                                  **mol_opts
+                                                  )
+
+    @classmethod
+    def from_no_conformer_molecule(cls,
+                                   mol,
+                                   num_confs=1,
+                                   optimize=False,
+                                   take_min=True,
+                                   force_field_type='mmff',
+                                   **etc
+                                   ):
+        AllChem = cls.allchem_api()
 
         with OutputRedirect():
             conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=cls.get_confgen_opts())
@@ -237,7 +277,8 @@ class RDMolecule(ExternalMolecule):
         else:
             conf_id = 0
 
-        return cls.from_rdmol(mol, conf_id=conf_id)
+        return cls.from_rdmol(mol, conf_id=conf_id, **etc)
+
     def to_smiles(self):
         return self.chem_api().MolToSmiles(self.rdmol)
 
