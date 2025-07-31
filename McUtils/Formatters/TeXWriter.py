@@ -1,5 +1,8 @@
 
 import abc, numpy as np, io, weakref
+from .. import Devutils as dev
+from .. import Numputils as nput
+from .TableFormatters import TableFormatter
 from ..Misc.Symbolics import Abstract
 
 __all__ = [
@@ -120,8 +123,15 @@ class TeXBlock(TeXWriter):
     def construct_modified_tag(self, tag, mod, mod_type='[]'):
         header = "\\begin{"+str(tag)+"}"
         if mod is not None:
-            l, r = mod_type
-            header = header + l + mod + r
+            if isinstance(mod_type, str):
+                l, r = mod_type
+                header = header + l + mod + r
+            else:
+                bits = []
+                for m,t in zip(mod, mod_type):
+                    l, r = t
+                    bits.append(l + m + r)
+                header = header + "".join(bits)
         return header, "\\end{"+str(tag)+"}"
     def construct_header_footer(self):
         return self.construct_modified_tag(self.tag, self.modifier, self.modifier_type)
@@ -164,8 +174,48 @@ class TeXArray(TeXBlock):
     separator = '\n'
     array_separator = " & "
     array_newline = " \\\\\n"
-    def __init__(self, body, *, alignment='auto', **opts):
+    header_separator = "\n\\hline \\\\[-4ex]\n"
+    header_lines = "\n\\hline \\\\[-4ex]"
+    footer_lines = "\\hline \\\\[-4ex]\n"
+    number_format = "{:8.3f}"
+    def __init__(self, headers_or_body, body=None, *,
+                 alignment='auto',
+                 number_format="{:8.3f}",
+                 content_join=None,
+                 column_join=None,
+                 row_join=None,
+                 separator=None,
+                 header_spans=None,
+                 header_alignments=None,
+                 resizeable=False,
+                 **opts):
+        self.resizeable = resizeable
+        if resizeable:
+            self.tag = 'tabularx'
+            self.modifier_type = ["{}", "{}"]
+            self.array_separator = " && "
+
+        if body is None:
+            body = headers_or_body
+            headers_or_body = None
+        self.headers = headers_or_body
         self.alignment = alignment
+        if content_join is None:
+            content_join = self.header_separator
+        opts['content_join'] = content_join
+        if row_join is None:
+            row_join = self.array_newline
+        opts['row_join'] = row_join
+        if column_join is None:
+            column_join = self.array_separator
+        opts['column_join'] = column_join
+        if separator is None:
+            separator = ""
+        opts['separator'] = separator
+        self.format_opts, opts = dev.OptionsSet(opts).split(TableFormatter)
+        self.format = number_format
+        self.header_spans = header_spans
+        self.header_alignments = header_alignments
         super().__init__(
             body,
             **opts
@@ -201,7 +251,10 @@ class TeXArray(TeXBlock):
             mod = self.construct_alignment_spec(body)
         else:
             mod = self.modifier
-        return self.construct_modified_tag(self.tag, mod, self.modifier_type)
+        if self.resizeable:
+            mod = ['\\textwidth', "X".join(mod)]
+        header, footer = self.construct_modified_tag(self.tag, mod, self.modifier_type)
+        return header + self.header_lines, self.footer_lines + footer
 
     def format_numpy_array(self, array):
         int_digits = int(np.floor(np.log10(np.max(np.abs(array))))) + 1
@@ -232,20 +285,155 @@ class TeXArray(TeXBlock):
             self.array_separator.join(" " * (row_padding[i] - len(s)) + s for i,s in enumerate(string_row))
             for string_row in string_array
         )
-    def prep_body(self, context=None):
-        body = self.body
-        if isinstance(body, np.ndarray) and not np.issubdtype(body.dtype, (np.integer, np.floating)):
-            body = body.tolist()
+    def prep_body(self, context=None, headers=None, body=None):
         if body is None:
-            return []
-        elif isinstance(body, np.ndarray):
-            return [
-                self.format_numpy_array(body)
-            ]
+            body = self.body
+        if headers is None:
+            headers = self.headers
+        if headers is None:
+            if len(body) == 2 and not all(dev.is_atomic(b) for b in body[0]):
+                headers, body = body
+        opts = self.format_opts
+        if 'column_formats' in opts:
+            opts = opts.copy()
+            column_formats = opts.pop('column_formats')
         else:
-            return [
-                self.format_mixed_array(body, context=context)
+            column_formats = [
+                ""
+                    if not nput.is_numeric(o) else
+                "{:>.0f}"
+                    if nput.is_int(o) else
+                self.format
+                for o in body[0]
             ]
+
+        if headers is not None:
+            if dev.is_list_like(headers[0]):
+                headers = [
+                    [
+                        h.format_tex(context=context)
+                        if isinstance(h, TeXWriter) else
+                        h
+                        for h in hl
+                    ]
+                    for hl in headers
+                ]
+                if self.header_spans is not None:
+                    alignments = self.header_alignments
+                    if alignments is None:
+                        alignments = [
+                            ["c"] * len(hl)
+                            for hl in headers
+                        ]
+
+                    _blocks = []
+                    for lhl, lhs, lhc in zip(headers, self.header_spans, alignments):
+                        _ = []
+                        for hl, hs, hc in zip(lhl, lhs, lhc):
+                            _.append(
+                                TeXMulticolumn(2*hs - 1, hc, hl).format_tex(context)
+                                    if hs > 1 else
+                                hl
+                            )
+                        _blocks.append(_)
+                    headers = _blocks
+            else:
+                headers = [
+                    h.format_tex(context=context)
+                        if isinstance(h, TeXWriter) else
+                    h
+                    for h in headers
+                ]
+                if self.header_spans is not None:
+                    alignments = self.header_alignments
+                    if alignments is None:
+                        alignments = ["c"] * len(headers)
+
+                    _ = []
+                    for hl, hs, hc in zip(headers, self.header_spans, alignments):
+                        _.append(
+                            TeXMulticolumn(hs, hc, hl).format_tex(context)
+                                if hs > 1 else
+                            hl
+                        )
+                    headers = _
+
+        wtf = TableFormatter(
+            column_formats,
+            headers=headers,
+            header_spans=self.header_spans,
+            **self.format_opts
+        ).format(body) + self.array_newline.strip()
+        return [
+            wtf
+        ]
+
+class TeXTable(TeXBlock):
+    tag = 'table'
+    modifier = 'ht'
+    modifier_type = '[]'
+    separator = '\n'
+    # array_separator = " & "
+    # array_newline = " \\\\\n"
+    def __init__(self,
+                 headers_or_body,
+                 body=None,
+                 width=1,
+                 caption=None,
+                 # label=None,
+                 resizeable=False,
+                 number_format=None,
+                 header_spans=None,
+                 **etc
+                 ):
+        if body is None:
+            body = headers_or_body
+            headers_or_body = None
+        body = [
+            TeXArray(headers_or_body, body,
+                     number_format=number_format,
+                     resizeable=resizeable,
+                     header_spans=header_spans
+                     )
+                if not isinstance(body, TeXWriter) else
+            body
+        ]
+        self.width = width
+        self.caption = caption
+        # self.label = label
+        super().__init__(body, **etc)
+
+    def prep_body(self, context=None, body=None):
+        if body is None:
+            body = self.body
+
+        base = [
+            TeXBlock(
+                TeXBlock(
+                    body,
+                    tag='minipage',
+                    modifier_type=["[]", "{}"],
+                    modifier=['c', f'{self.width} \\textwidth']
+                ),
+                tag="center"
+            )
+        ]
+        if self.caption is not None:
+            base.append(
+                TeXFunction(self.caption, function_name="caption")
+                    if not isinstance(self.caption, TeXWriter) else
+                self.caption
+            )
+        if self.label is not None:
+            base.append(
+                TeXFunction(self.label, function_name="label")
+                    if not isinstance(self.label, TeXWriter) else
+                self.label
+            )
+        return [
+            b.format_tex(context=context)
+            for b in base
+        ]
 
 class TeXFunction(TeXWriter):
     function_name = None
@@ -258,6 +446,11 @@ class TeXFunction(TeXWriter):
         tag = "\\" + self.function_name
         body = ["{" + self.dispatch_format(b, context) + "}" for b in self.args]
         return tag + "".join(body)
+
+class TeXMulticolumn(TeXFunction):
+    function_name = 'multicolumn'
+    def __init__(self, width, fmt, body):
+        super().__init__(width, fmt, body)
 
 class TeXBold(TeXFunction):
     function_name = 'textbf'
@@ -554,6 +747,7 @@ class TeX:
     Function = TeXExpr.symbol
 
     Array = TeXArray
+    Table = TeXTable
     Equation = TeXEquation
 
     wrap_parens = TeXParenthesized

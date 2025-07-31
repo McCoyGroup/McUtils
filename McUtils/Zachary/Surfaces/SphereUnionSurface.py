@@ -1,13 +1,19 @@
 
 import numpy as np
-import scipy.spatial
+# import scipy.spatial
+from ... import Devutils as dev
 from ... import Numputils as nput
 from ...Data import AtomData, UnitsData
 from ...ExternalPrograms import Open3DInterface as o3d
 
 __all__ = [
-    "SphereUnionSurface"
+    "SphereUnionSurface",
+    "SphereUnionSurfaceMesh"
 ]
+
+# class TriangleMesh:
+#
+#     ...
 
 class SphereUnionSurface:
 
@@ -376,7 +382,9 @@ class SphereUnionSurface:
             )
         else:
             raise NotImplementedError("only Open3D Poisson currently supported")
-        return np.array(mesh.vertices), np.array(mesh.triangles)
+
+        return SphereUnionSurfaceMesh.from_o3d(mesh, densities, surf=self)
+        # return np.array(mesh.vertices), np.array(mesh.triangles)
 
     # def generate_mesh(self, point_cloud, distance_cutoff=.8):
     #     dm = nput.distance_matrix(point_cloud)
@@ -458,9 +466,111 @@ class SphereUnionSurface:
 
         return np.array([x, y, z]).T
 
-    def get_triangulation(self, *delaunay_kwargs, **delaunay_opts):
-        return scipy.spatial.Delaunay(
-            self.sampling_points,
-            *delaunay_kwargs,
-            *delaunay_opts
+    # def get_triangulation(self, *delaunay_kwargs, **delaunay_opts):
+    #     return scipy.spatial.Delaunay(
+    #         self.sampling_points,
+    #         *delaunay_kwargs,
+    #         *delaunay_opts
+    #     )
+
+class SphereUnionSurfaceMesh:
+    def __init__(self, verts, inds, surf=None, densities=None):
+        self.surf = surf
+        self.verts = verts
+        self.inds = inds
+        self.densities = densities
+
+    @classmethod
+    def from_o3d(cls, mesh, densities=None, surf=None):
+        return cls(
+            np.array(mesh.vertices),
+            np.array(mesh.triangles),
+            densities=densities,
+            surf=surf
         )
+
+    def plot(self,
+             figure=None,
+             *,
+             function=None,
+             color=None,
+             vertex_values=None,
+             distance_units='Angstroms',
+             **etc
+             ):
+
+        # TODO: move this to molecule specific class...
+        conv = UnitsData.convert("BohrRadius", distance_units)
+        if vertex_values is None and function is not None:
+            vertex_values = function(self.verts)
+
+        if vertex_values is not None or color is not None:
+            etc['color'] = color
+
+        return self.plot_triangle_mesh(
+            self.verts * conv,
+            self.inds,
+            figure=figure,
+            vertex_values=vertex_values,
+            **etc
+        )
+
+    @classmethod
+    def plot_triangle_mesh(cls,
+                           verts, indices,
+                           figure=None,
+                           *,
+                           color='blue',
+                           transparency=.8,
+                           backend='x3d',
+                           return_objects=False,
+                           line_color='black',
+                           line_transparency=.9,
+                           line_style=None,
+                           vertex_colors=None,
+                           vertex_values=None,
+                           vertex_colormap='WarioColors',
+                           rescale_color_values=True,
+                           **etc):
+        from ... import Plots as plt
+
+        if figure is None:
+            figure = plt.Graphics3D(backend=backend)
+
+        # func_vals = func(verts)
+        if vertex_values is not None and rescale_color_values:
+            if dev.is_list_like(rescale_color_values):
+                vertex_values = nput.vec_rescale(vertex_values, rescale_color_values)
+            else:
+                vertex_values = nput.vec_rescale(vertex_values)
+
+            colormap = plt.Colors.ColorPalette(vertex_colormap)
+            vertex_colors = colormap(vertex_values)
+
+        objs = []
+        if vertex_colors is not None or color is not None:
+            tri_obj = plt.Triangle(verts,
+                                   indices=indices, transparency=transparency, color=color,
+                                   vertex_colors=vertex_colors,
+                                   **etc)
+            objs.append(tri_obj)
+
+        if line_style is None:
+            line_style = etc if color is None else {}
+        else:
+            line_style = line_style.copy()
+
+        if line_color is not None or len(line_style) > 0:
+            line_style['color'] = line_style.get('color', line_color)
+            line_style['transparency'] = line_style.get('transparency', line_transparency)
+            line_obj = plt.Line(verts, indices=indices, **line_style)
+            objs.append(line_obj)
+
+        for o in objs:
+            o.plot(figure)
+
+        if return_objects:
+            return figure, objs
+        else:
+            return figure
+

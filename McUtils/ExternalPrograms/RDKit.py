@@ -101,6 +101,7 @@ class RDMolecule(ExternalMolecule):
         for a in atoms:
             a = Chem.Atom(a)
             mol.AddAtom(a)
+            print("!", a)
         if bonds is not None:
             for b in bonds:
                 if len(b) == 2:

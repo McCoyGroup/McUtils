@@ -2194,7 +2194,7 @@ class X3DAxes(GraphicsAxes3D):
         else:
             self.opts['viewpoint'] = new_opts
 
-    def draw_line(self, points, s=None, riffle=True, line_thickness=None,
+    def draw_line(self, points, indices=None, s=None, riffle=True, line_thickness=None,
                   edgecolors=None, color=None, glow=None, **styles):
         if color is None: color = edgecolors
         if color is None: color = 'black'
@@ -2202,13 +2202,30 @@ class X3DAxes(GraphicsAxes3D):
             if not nput.is_numeric(s): s = s[0]
             line_thickness = s / 1000
         if riffle:
-            points = np.concatenate([
-                points[..., :-1, np.newaxis, :],
-                points[..., 1:, np.newaxis, :]
-            ], axis=-2).reshape(-1, 3)
+            if indices is not None:
+                indices = np.asanyarray(indices)
+                if indices.ndim > 1 and indices.shape[-1] > 2:
+                    riff_start = np.arange(indices.shape[-1])
+                    riff_end = np.roll(riff_start, -1)
+                    indices = np.concatenate([
+                        indices[..., riff_start, np.newaxis],
+                        indices[..., riff_end, np.newaxis]
+                    ], axis=-1).reshape(-1, 2)
+                    indices = np.concatenate([indices, np.full((indices.shape[0], 1), -1)], axis=-1)
+            elif points.ndim > 2 and points.shape[-2] > 2:
+                riff_start = np.arange(points.shape[-2])
+                riff_end = np.roll(riff_start, 1)
+                points = np.concatenate([
+                    points[..., riff_start, np.newaxis, :],
+                    points[..., riff_end, np.newaxis, :]
+                ], axis=-2).reshape((-1, 2, 3))
         if glow is None:
             glow = color
-        line_set = x3d.X3DLine(points, line_thickness=line_thickness, glow=glow, **styles)
+
+        if indices is not None:
+            line_set = x3d.X3DIndexedLineSet(points, indices, line_thickness=line_thickness, glow=glow, **styles)
+        else:
+            line_set = x3d.X3DLine(points, line_thickness=line_thickness, glow=glow, **styles)
         self.children.append(line_set)
 
         return line_set
@@ -2243,9 +2260,14 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(rects)
 
         return rects
-    def draw_triangle(self, points, **styles):
-        points = np.asanyarray(points)
-        rects = x3d.X3DTriangleSet(points, **styles)
+    def draw_triangle(self, points, indices=None, **styles):
+        if indices is None:
+            points = np.asanyarray(points)
+            rects = x3d.X3DTriangleSet(points, **styles)
+        else:
+            points = np.asanyarray(points)
+            indices = np.asanyarray(indices)
+            rects = x3d.X3DIndexedTriangleSet(points, indices, **styles)
         self.children.append(rects)
 
         return rects
