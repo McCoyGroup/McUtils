@@ -1,6 +1,7 @@
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.ExternalPrograms import *
+from McUtils.Data import UnitsData
 import sys, os, numpy as np
 
 class ExternalProgramsTest(TestCase):
@@ -36,7 +37,7 @@ class ExternalProgramsTest(TestCase):
         with GaussianLogReader(TestManager.test_data('methanol_vpt_scan.log')) as parser:
             res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
 
-    @debugTest
+    @validationTest
     def test_CRESTParse(self):
 
         parser = CRESTParser(TestManager.test_data_dir)
@@ -56,3 +57,22 @@ class ExternalProgramsTest(TestCase):
         print(parser.parse_conformers().coords[0].shape)
         rotamers = parser.parse_rotamers()
         print(np.sum(rotamers.weights))
+
+
+    @debugTest
+    def test_CRESTJob(self):
+        from Psience.Molecools import Molecule
+
+
+        mol = Molecule.from_file(TestManager.test_data('tbhp_180.fchk'))
+
+        print(
+            CRESTJob(
+                "gfn2",
+                "nci",
+                ewin=10,
+                # "nco",
+                atoms=mol.atoms,
+                cartesians=mol.coords * UnitsData.convert("BohrRadius", "Angstroms")
+            ).format()
+        )

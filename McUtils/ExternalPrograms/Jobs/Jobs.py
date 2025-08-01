@@ -342,7 +342,7 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
             else:
                 bad_opts.add(o)
         if len(bad_opts) > 0:
-            raise ValueError(f"can't find block type in {self.blocks} for opts {bad_opts}")
+            raise ValueError(f"can't find block type for opts {bad_opts} in {self.blocks}")
 
         return block_opts
 
