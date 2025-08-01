@@ -196,9 +196,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-77d139" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-77d139"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-dcfc2a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-dcfc2a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-77d139" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-dcfc2a" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [CRESTParse](#CRESTParse)
@@ -206,9 +206,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-c16600" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c16600"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-6648d1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-6648d1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c16600" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-6648d1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
