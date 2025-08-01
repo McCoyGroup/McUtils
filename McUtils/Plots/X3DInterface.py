@@ -22,6 +22,8 @@ __all__ = [
     "X3DTorus",
     "X3DRectangle2D",
     "X3DTriangleSet",
+    "X3DIndexedTriangleSet",
+    "X3DIndexedLineSet",
     "X3DSwitch",
     "X3DListAnimator"
 ]
@@ -397,6 +399,18 @@ class X3DCoordinate(X3DPrimitive):
     def prep_points(cls, points):
         return " ".join(np.asanyarray(points).flatten().astype(str))
 
+class X3DColor(X3DPrimitive):
+    wrapper_class = X3DHTML.Color
+    def __init__(self, colors):
+        super().__init__(color_list=colors)
+    def split_opts(self, opts:dict):
+        base_opts, appearance_opts = super().split_opts(opts)
+        base_opts['color'] = self.prep_color(base_opts.pop('color_list'))
+        return base_opts, appearance_opts
+    @classmethod
+    def prep_color(cls, points):
+        return " ".join(np.asanyarray(points).flatten().astype(str))
+
 class X3DGroup(X3DPrimitive):
     wrapper_class = X3DHTML.Group
 
@@ -591,12 +605,28 @@ class X3DTorus(X3DGeometryGroup):
 
 class X3DCoordinatesWrapper(X3DGeometryGroup):
     tag_class: X3DHTML.X3DElement
-    def create_tag_object(self, *, point, **etc):
-        return self.tag_class(X3DCoordinate(point).to_x3d(), **etc)
-    def prep_geometry_opts(self, points):
+    def create_tag_object(self, *, point, color=None, **etc):
+        body = [X3DCoordinate(point).to_x3d()]
+        if color is not None:
+            body.append(X3DColor(color).to_x3d())
+        return self.tag_class(body, **etc)
+    def prep_geometry_opts(self, point, **etc):
         return [
-            {"translation":"0,0,0", "point":points}
+            dict({"translation":"0,0,0", "point":point}, **etc)
         ]
+
+class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
+    def prep_geometry_opts(self, point, indices, vertex_colors=None, **etc):
+        base_dict = dict(
+                {
+                    'index': " ".join(np.asanyarray(indices).flatten().astype(int).astype(str))
+                },
+                **super().prep_geometry_opts(point, **etc)[0]
+            )
+        if vertex_colors is not None:
+            base_dict['colorPerVertex'] = True
+            base_dict['color'] = vertex_colors
+        return [base_dict]
 
 class X3DRectangle2D(X3DGeometryGroup):
     tag_class = X3DHTML.Rectangle2D
@@ -607,6 +637,18 @@ class X3DLine(X3DCoordinatesWrapper):
     tag_class = X3DHTML.LineSet
 class X3DTriangleSet(X3DCoordinatesWrapper):
     tag_class = X3DHTML.TriangleSet
+class X3DIndexedTriangleSet(X3DIndexedCoordinatesWrapper):
+    tag_class = X3DHTML.IndexedTriangleSet
+class X3DIndexedLineSet(X3DIndexedCoordinatesWrapper):
+    tag_class = X3DHTML.IndexedLineSet
+    def prep_geometry_opts(self, point, indices, **etc):
+        opts = super().prep_geometry_opts(point, indices, **etc)
+        opts[0]['coordIndex'] = opts[0].pop('index')
+        return opts
+class X3DIndexedQuadSet(X3DIndexedCoordinatesWrapper):
+    tag_class = X3DHTML.IndexedQuadSet
+class X3DIndexedFaceSet(X3DIndexedCoordinatesWrapper):
+    tag_class = X3DHTML.IndexedFaceSet
 
 class X3DListAnimator(X3DGroup):
     def __init__(self, *frames, id=None, animation_duration=2, running=True, slider=False,

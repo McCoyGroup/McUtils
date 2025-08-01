@@ -1185,7 +1185,7 @@ def nca_symmetrize(tensor, partition,
                    contract=True,
                    use_base_perms=True,
                    filter_unique=False,
-                   check_symmetry=True,
+                   check_symmetry=False,
                    reweight=None):
 
     perm_idx = get_nca_perm_idx(partition, contract=contract, identical=identical)

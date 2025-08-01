@@ -31,7 +31,28 @@ class ExternalProgramsTest(TestCase):
     #     print()
     #     print(job.format())
 
-    @debugTest
+    @validationTest
     def test_ParseGaussianLogFile(self):
-        with GaussianLogReader('methanol_vpt_scan.log') as parser:
+        with GaussianLogReader(TestManager.test_data('methanol_vpt_scan.log')) as parser:
             res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
+
+    @debugTest
+    def test_CRESTParse(self):
+
+        parser = CRESTParser(TestManager.test_data_dir)
+
+        structs = parser.parse_optimized_structures()
+        print(len(structs))
+        print(structs[-1].energy)
+        print(len(structs[-1].atoms))
+        print(len(structs[-1].coords))
+
+        log_info = parser.parse_log()
+        # import pprint
+        # pprint.pprint(log_info)
+
+        print(log_info['FinalEnsembleInfo'].weights.shape)
+
+        print(parser.parse_conformers().coords[0].shape)
+        rotamers = parser.parse_rotamers()
+        print(np.sum(rotamers.weights))

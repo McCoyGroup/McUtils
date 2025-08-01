@@ -12,6 +12,21 @@ __all__ = [
 
 class TableFormatter:
 
+    __props__ = (
+        "header_spans",
+        "header_format",
+        "column_join",
+        "row_join",
+        "header_column_join",
+        "header_row_join",
+        "separator",
+        "separator_lines",
+        "content_join",
+        "column_alignments",
+        "header_alignments",
+        "row_padding",
+    )
+
     default_header_format=""
     default_column_join = '  '
     default_row_join = '\n'

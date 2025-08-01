@@ -15,7 +15,9 @@ __all__ = [
 class ColorPalette:
     def __init__(self, colors, blend_spacings=None, lab_colors=None, color_space='rgb', cycle=False):
         if isinstance(colors, str):
-            colors = ColorData[colors].data
+            colors = self.resolve_color_palette(colors)
+        elif self.is_colormap_like(colors):
+            colors = self.discretize_colormap(colors)
         if not self.is_palette_list(colors):
             raise ValueError(f"{colors} is not a color palette list")
         self.color_strings, self.lab_colors = self.prep_color_palette(colors, color_space, lab_colors=lab_colors)
@@ -68,6 +70,27 @@ class ColorPalette:
 
         return tuple(color_lists), lab_colors
 
+    @classmethod
+    def resolve_color_palette(cls, cmap_name):
+        try:
+            data = ColorData[cmap_name].data
+        except KeyError:
+            from matplotlib import colormaps
+
+            data = cls.discretize_colormap(colormaps[cmap_name])
+
+        return data
+
+    @classmethod
+    def is_colormap_like(cls, cmap):
+        return hasattr(cmap, '__call__')
+    @classmethod
+    def discretize_colormap(cls, cmap, samples=10):
+        if isinstance(cmap, ColorPalette):
+            return cmap.color_strings
+        else:
+            vals = cmap(np.linspace(0, 1, samples))
+            return 255 * vals[:, :3]
 
     @classmethod
     def is_palette_list(self, colors):
@@ -193,6 +216,33 @@ class ColorPalette:
     def __call__(self, amount, rescale=True, return_color_code=False):
         return self.blend(amount, rescale=rescale, return_color_code=return_color_code)
 
+    def modify(self, modification_function, modification_space='lab', clip=True):
+        return type(self)(
+            modification_function(
+                self.lab_colors.T,
+                color_space='lab',
+                modification_space=modification_space,
+                clip=clip
+            ).T,
+            color_space='lab'
+        )
+
+    def lighten(self, percentage,
+                modification_space='lab',
+                shift=False,
+                absolute=False, clip=True):
+        return type(self)(
+            self.color_lighten(self.lab_colors.T,
+                               percentage,
+                               color_space='lab',
+                               modification_space=modification_space,
+                               shift=shift,
+                               absolute=absolute,
+                               clip=clip
+                               ).T,
+            color_space='lab'
+        )
+
     @classmethod
     def color_normalize(cls, color_list, color_space='rgb'):
         color_list = np.asanyarray(color_list)
@@ -200,9 +250,9 @@ class ColorPalette:
         if smol: color_list = color_list[:, np.newaxis]
         if color_space == 'rgb':
             color_list = np.clip(color_list, 0, 255)
-        elif color_space == 'xyz':
-            color_list = np.clip(color_list, 0, 100)
-        elif color_list in {'hsl', 'hsv'}:
+        # elif color_space == 'xyz':
+        #     color_list = np.clip(color_list, 0, 100)
+        elif color_space in {'hsl', 'hsv'}:
             color_list = np.clip(color_list, 0, 1)
         if smol: color_list = color_list[:, 0]
         return color_list

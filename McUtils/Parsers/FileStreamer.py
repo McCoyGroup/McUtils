@@ -314,7 +314,8 @@ class SearchStreamReader:
     def find_tag(self,
                  tag,
                  skip_tag=None,
-                 seek=None
+                 seek=None,
+                 allow_terminal=False
                  ):
         """
         Finds a tag in a file
@@ -352,7 +353,7 @@ class SearchStreamReader:
                 for tag in follow_ups:
                     self.stream.seek(pos + 1)
                     p = self.find_tag(tag)
-                    if p > -1:
+                    if allow_terminal or p > -1:
                         pos = p
 
             offset = tags.offset
@@ -364,7 +365,7 @@ class SearchStreamReader:
 
         return pos
 
-    def get_tagged_block(self, tag_start, tag_end, block_size=500):
+    def get_tagged_block(self, tag_start, tag_end, allow_terminal=False, block_size=500):
         """
         Pulls the string between tag_start and tag_end
 
@@ -376,18 +377,22 @@ class SearchStreamReader:
         :rtype:
         """
         if tag_start is not None:
-            start = self.find_tag(tag_start)
+            start = self.find_tag(tag_start, allow_terminal=False)
             if start >= 0:
                 with FileStreamCheckPoint(self):
-                    end = self.find_tag(tag_end, seek=False)
+                    end = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False)
                 if end > start:
                     return self.stream.read(end-start)
+                elif allow_terminal and end < 0:
+                    return self.stream.read()
         else:
             start = self.tell()
             with FileStreamCheckPoint(self):
-                end = self.find_tag(tag_end, seek=False)
+                end = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False)
             if end >= start:
                 return self.stream.read(end-start)
+            elif allow_terminal and end < 0:
+                return self.stream.read()
 
         # implict None return if no block found
 
