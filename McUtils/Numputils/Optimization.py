@@ -162,7 +162,10 @@ def iterative_step_minimize_step(step_predictor,
         overlaps = np.reshape(overlaps, prev_steps.shape[:2])
         osc = np.where(
             np.all(
-                np.logical_and(oscillation_overlap_cutoff_min < abs(overlaps), abs(overlaps) < oscillation_overlap_cutoff_max),
+                np.logical_and(
+                    oscillation_overlap_cutoff_min < abs(overlaps),
+                    abs(overlaps) < oscillation_overlap_cutoff_max
+                ),
                 axis=1
             )
         )
@@ -175,11 +178,12 @@ def iterative_step_minimize_step(step_predictor,
                 scaling = np.min([cur_norms[osc2], -dist[osc2] / 2], axis=0) / cur_norms[osc2]
                 step[osc,] = step[osc,] * scaling
             if unitary:
-                norms = np.linalg.norm(step[osc,], axis=1)
+                norms = np.linalg.norm(step[osc], axis=1)
                 # norms = norms[rem,]
                 v = np.linalg.norm(guess[rem,], axis=-1)
                 r = np.sqrt(norms ** 2 + v ** 2)
                 step = guess[rem,] * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+
 
     return step, errs, mask, done
 
