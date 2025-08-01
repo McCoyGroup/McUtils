@@ -77,87 +77,87 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[CRESTParser](ExternalPrograms/Parsers/Crest/CRESTParser.md)   
+</div>
+   <div class="col" markdown="1">
 [ExternalProgramRunner](ExternalPrograms/Runner/ExternalProgramRunner.md)   
 </div>
    <div class="col" markdown="1">
 [OpenBabelInterface](ExternalPrograms/ChemToolkits/OpenBabelInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PybelInterface](ExternalPrograms/ChemToolkits/PybelInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RDKitInterface](ExternalPrograms/ChemToolkits/RDKitInterface.md)   
 </div>
    <div class="col" markdown="1">
 [ASEInterface](ExternalPrograms/ChemToolkits/ASEInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OpenChemistryInterface](ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CCLibInterface](ExternalPrograms/ChemToolkits/CCLibInterface.md)   
 </div>
    <div class="col" markdown="1">
 [PILInterface](ExternalPrograms/ImageKits/PILInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OpenCVInterface](ExternalPrograms/ImageKits/OpenCVInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Open3DInterface](ExternalPrograms/Toolkits3D/Open3DInterface.md)   
 </div>
    <div class="col" markdown="1">
 [VPythonInterface](ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [VTKInterface](ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RDMolecule](ExternalPrograms/RDKit/RDMolecule.md)   
 </div>
    <div class="col" markdown="1">
 [ASEMolecule](ExternalPrograms/ASE/ASEMolecule.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OBMolecule](ExternalPrograms/OpenBabel/OBMolecule.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebRequestHandler](ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
    <div class="col" markdown="1">
 [WebAPIConnection](ExternalPrograms/WebAPI/WebAPIConnection.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [WebSubAPIConnection](ExternalPrograms/WebAPI/WebSubAPIConnection.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebResourceManager](ExternalPrograms/WebAPI/WebResourceManager.md)   
 </div>
    <div class="col" markdown="1">
 [GitHubReleaseManager](ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
 </div>
-   <div class="col" markdown="1">
-[ReleaseZIPManager](ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ChemSpiderAPI](ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
+[ReleaseZIPManager](ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
 </div>
    <div class="col" markdown="1">
-   
+[ChemSpiderAPI](ExternalPrograms/ChemSpiderAPI/ChemSpiderAPI.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -185,17 +185,18 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-76c57e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-76c57e"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-d99cc7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d99cc7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-76c57e" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d99cc7" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
+- [CRESTParse](#CRESTParse)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2b57ac" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2b57ac"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-082e88" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-082e88"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2b57ac" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-082e88" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -224,8 +225,31 @@ class ExternalProgramsTest(TestCase):
 #### <a name="ParseGaussianLogFile">ParseGaussianLogFile</a>
 ```python
     def test_ParseGaussianLogFile(self):
-        with GaussianLogReader('methanol_vpt_scan.log') as parser:
+        with GaussianLogReader(TestManager.test_data('methanol_vpt_scan.log')) as parser:
             res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
+```
+
+#### <a name="CRESTParse">CRESTParse</a>
+```python
+    def test_CRESTParse(self):
+
+        parser = CRESTParser(TestManager.test_data_dir)
+
+        structs = parser.parse_optimized_structures()
+        print(len(structs))
+        print(structs[-1].energy)
+        print(len(structs[-1].atoms))
+        print(len(structs[-1].coords))
+
+        log_info = parser.parse_log()
+        # import pprint
+        # pprint.pprint(log_info)
+
+        print(log_info['FinalEnsembleInfo'].weights.shape)
+
+        print(parser.parse_conformers().coords[0].shape)
+        rotamers = parser.parse_rotamers()
+        print(np.sum(rotamers.weights))
 ```
 
  </div>

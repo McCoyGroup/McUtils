@@ -418,15 +418,26 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [X3DTriangleSet](Plots/X3DInterface/X3DTriangleSet.md)   
 </div>
    <div class="col" markdown="1">
-[X3DSwitch](Plots/X3DInterface/X3DSwitch.md)   
+[X3DIndexedTriangleSet](Plots/X3DInterface/X3DIndexedTriangleSet.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
+[X3DIndexedLineSet](Plots/X3DInterface/X3DIndexedLineSet.md)   
 </div>
    <div class="col" markdown="1">
+[X3DSwitch](Plots/X3DInterface/X3DSwitch.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [ColorPalette](Plots/Colors/ColorPalette.md)   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -454,9 +465,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-9ead06" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9ead06"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-8bb1dc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-8bb1dc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9ead06" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-8bb1dc" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -477,9 +488,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-465ca3" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-465ca3"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4fce37" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4fce37"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-465ca3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4fce37" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -1,11 +1,11 @@
-## <a id="McUtils.Parsers.FileStreamer.StringLineByLineReader">StringLineByLineReader</a> 
+## <a id="McUtils.Plots.X3DInterface.X3DIndexedLineSet">X3DIndexedLineSet</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L717)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L717?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L642)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L642?message=Update%20Docs)]
 </div>
 
-Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
+
 
 
 
@@ -18,14 +18,16 @@ Represents a string from which we'll stream blocks of data by finding tags and p
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
- 
-<a id="McUtils.Parsers.FileStreamer.StringLineByLineReader.__init__" class="docs-object-method">&nbsp;</a> 
+ ```python
+tag_class: IndexedLineSet
+```
+<a id="McUtils.Plots.X3DInterface.X3DIndexedLineSet.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, string, ignore_comments=False, max_nesting_depth=-1): 
+prep_geometry_opts(self, point, indices, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L721)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L721?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DIndexedLineSet.py#L644)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DIndexedLineSet.py#L644?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -74,13 +76,13 @@ __init__(self, string, ignore_comments=False, max_nesting_depth=-1):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/X3DInterface/X3DIndexedLineSet.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/X3DInterface/X3DIndexedLineSet.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DIndexedLineSet.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DIndexedLineSet.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L717?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L642?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

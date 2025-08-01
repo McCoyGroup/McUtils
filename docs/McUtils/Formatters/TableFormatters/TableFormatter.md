@@ -33,8 +33,8 @@ supported_alignments: dict
 __init__(self, column_formats, *, headers=None, header_spans=None, header_format=None, column_join=None, row_join=None, header_column_join=None, header_row_join=None, separator=None, separator_lines=1, content_join=None, column_alignments=None, header_alignments=None, row_padding=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TableFormatters.py#L22)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TableFormatters.py#L22?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TableFormatters.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TableFormatters.py#L37?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ __init__(self, column_formats, *, headers=None, header_spans=None, header_format
 prep_input_arrays(cls, headers, data, header_spans): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L69?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ prep_input_arrays(cls, headers, data, header_spans):
 custom_formatter(cls, f): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L98)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L98?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L113)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L113?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ custom_formatter(cls, f):
 resolve_formatters(cls, ncols, col_formats): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L131)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L131?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ resolve_formatters(cls, ncols, col_formats):
 prep_formatters(cls, formats): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L139?message=Update%20Docs)]
 </div>
 
 
@@ -88,8 +88,8 @@ prep_formatters(cls, formats):
 format_tablular_data_columns(cls, data, formats, row_padding=None, strict=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L158)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L158?message=Update%20Docs)]
 </div>
 
 
@@ -99,8 +99,8 @@ format_tablular_data_columns(cls, data, formats, row_padding=None, strict=False)
 align_left(cls, col, width): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L172?message=Update%20Docs)]
 </div>
 
 
@@ -110,8 +110,8 @@ align_left(cls, col, width):
 align_right(cls, col, width): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L161)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L161?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L176)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L176?message=Update%20Docs)]
 </div>
 
 
@@ -121,8 +121,8 @@ align_right(cls, col, width):
 align_center(cls, col, width): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L181?message=Update%20Docs)]
 </div>
 
 
@@ -132,8 +132,8 @@ align_center(cls, col, width):
 align_dot(cls, col, width, dot='.'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -143,8 +143,8 @@ align_dot(cls, col, width, dot='.'):
 resolve_aligner(cls, alignment): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L207)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L207?message=Update%20Docs)]
 </div>
 
 
@@ -154,8 +154,8 @@ resolve_aligner(cls, alignment):
 align_column(cls, header_data, cols_data, header_alignment, column_alignment, join_width, header_widths): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L194)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L194?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L209)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L209?message=Update%20Docs)]
 </div>
 
 
@@ -164,8 +164,8 @@ align_column(cls, header_data, cols_data, header_alignment, column_alignment, jo
 format(self, headers_or_table, *table_data, header_format=None, header_spans=None, column_formats=None, column_alignments=None, header_alignments=None, column_join=None, row_join=None, header_column_join=None, header_row_join=None, separator=None, separator_lines=None, content_join=None, row_padding=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TableFormatters/TableFormatter.py#L238)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TableFormatters/TableFormatter.py#L238?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TableFormatters/TableFormatter.py#L253)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TableFormatters/TableFormatter.py#L253?message=Update%20Docs)]
 </div>
  </div>
 </div>
