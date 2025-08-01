@@ -14,22 +14,16 @@ Three main threads are handled:
    using a streamer to match chunks and a parser to extract data from the matched chunks.
 """
 
-from .FileStreamer import *
-from .StringParser import *
-from .RegexPatterns import *
-from .StructuredType import *
-from .Parsers import *
-
-from .FileStreamer import __all__ as FS__all__
-from .StringParser import __all__ as StringParser__all__
-from .RegexPatterns import __all__ as RegexPatterns__all__
-from .StructuredType import __all__ as StructuredType__all__
-from .Parsers import __all__ as Parsers__all__
-
-__all__ = (
-        FS__all__  +
-        RegexPatterns__all__ +
-        StringParser__all__ +
-        StructuredType__all__ +
-        Parsers__all__
-)
+__all__ = []
+from .FileStreamer import *; from .FileStreamer import __all__ as exposed
+__all__ += exposed
+from .StringParser import *; from .StringParser import __all__ as exposed
+__all__ += exposed
+from .RegexPatterns import *; from .RegexPatterns import __all__ as exposed
+__all__ += exposed
+from .StructuredType import *; from .StructuredType import __all__ as exposed
+__all__ += exposed
+from .Parsers import *; from .Parsers import __all__ as exposed
+__all__ += exposed
+from .XYZParser import *; from .XYZParser import __all__ as exposed
+__all__ += exposed
