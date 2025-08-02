@@ -1,3 +1,4 @@
+import itertools
 
 import numpy as np
 # import scipy.spatial
@@ -19,8 +20,9 @@ class SphereUnionSurface:
 
     default_samples = 50
     default_scaling = 1
-    default_expansion = .01
-    def __init__(self, centers, radii, scaling=None, expansion=None, samples=None):
+    default_expansion = 0
+    default_tolerance = 1e-6
+    def __init__(self, centers, radii, scaling=None, expansion=None, samples=None, pruning_tolerance=None):
         self.centers = np.asanyarray(centers)
         self.radii = np.asanyarray(radii)
         if samples is None:
@@ -31,6 +33,9 @@ class SphereUnionSurface:
         self.scaling = scaling
         if expansion is None:
             expansion = self.default_expansion
+        if pruning_tolerance is None:
+            pruning_tolerance = self.default_tolerance
+        self.pruning_tolerance = pruning_tolerance
         self.expansion = expansion
         self._sample_points = None
 
@@ -38,6 +43,7 @@ class SphereUnionSurface:
     def from_xyz(cls,
                  atoms, positions,
                  scaling=None, expansion=None, samples=None,
+                 pruning_tolerance=None,
                  radius_property='IconRadius',
                  distance_units='BohrRadius'):
         radii = np.array([
@@ -45,7 +51,10 @@ class SphereUnionSurface:
             for a in atoms
         ])
 
-        return cls(positions, radii, samples=samples, scaling=scaling, expansion=expansion)
+        return cls(positions, radii,
+                   samples=samples, scaling=scaling, expansion=expansion,
+                   pruning_tolerance=pruning_tolerance
+                   )
 
     @property
     def sampling_points(self):
@@ -315,39 +324,67 @@ class SphereUnionSurface:
 
         return pts
 
-    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False):
-        if samples is None: samples = self.samples
-        if scaling is None: scaling = self.scaling
-        if expansion is None: expansion = self.expansion
+    @classmethod
+    def get_exterior_points(cls, points, centers, radii, tolerance=0):
+        points = np.asanyarray(points)
+        centers = np.asanyarray(centers)
+        radii = np.asanyarray(radii)
 
-        base_points = self.sphere_points(
-            self.centers,
-            self.radii*scaling + expansion,
+        dvs = np.linalg.norm(
+            points[:, np.newaxis, :] - centers[np.newaxis, :, :],
+            axis=-1
+        )
+
+        mask = np.all(dvs >= radii[np.newaxis] - tolerance, axis=1)
+        return mask
+
+    @classmethod
+    def get_surface_points(cls,
+                           centers,
+                           radii,
+                           samples=50,
+                           scaling=1,
+                           expansion=0,
+                           preserve_origins=False,
+                           tolerance=0
+                           ):
+        centers = np.asanyarray(centers)
+        radii = np.asanyarray(radii) * scaling + expansion
+
+        base_points = cls.sphere_points(
+            centers,
+            radii,
             samples
         )
         if not preserve_origins:
             base_points = base_points.reshape(-1, 3)
-            dvs = np.linalg.norm(
-                base_points[:, np.newaxis, :] - self.centers[np.newaxis, :, :],
-                axis=-1
-            )
-
-            mask = np.all(dvs >= self.radii[np.newaxis], axis=1)
+            mask = cls.get_exterior_points(base_points, centers, radii, tolerance=tolerance)
 
             return base_points[mask,]
         else:
             subpoints = []
             for bp in base_points:
-                dvs = np.linalg.norm(
-                    bp[:, np.newaxis, :] - self.centers[np.newaxis, :, :],
-                    axis=-1
-                )
-
-                mask = np.all(dvs >= self.radii[np.newaxis], axis=1)
-
+                mask = cls.get_exterior_points(bp, centers, radii, tolerance=tolerance)
                 subpoints.append(bp[mask,])
 
             return subpoints
+
+    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None):
+        if samples is None: samples = self.samples
+        if scaling is None: scaling = self.scaling
+        if expansion is None: expansion = self.expansion
+        if tolerance is None: tolerance = self.pruning_tolerance
+
+        return self.get_surface_points(
+            self.centers,
+            self.radii,
+            scaling=scaling,
+            expansion=expansion,
+            samples=samples,
+            preserve_origins=preserve_origins,
+            tolerance=tolerance
+        )
+
 
     def generate_mesh(self,
                       points=None,
@@ -385,36 +422,6 @@ class SphereUnionSurface:
 
         return SphereUnionSurfaceMesh.from_o3d(mesh, densities, surf=self)
         # return np.array(mesh.vertices), np.array(mesh.triangles)
-
-    # def generate_mesh(self, point_cloud, distance_cutoff=.8):
-    #     dm = nput.distance_matrix(point_cloud)
-    #     np.fill_diagonal(dm, 1e6)
-    #     mins = np.argsort(dm, axis=1)
-    #
-    #     tris = []
-    #     for i,dists in enumerate(dm):
-    #         ...
-    #
-    #     # mask = dm < distance_cutoff
-    #     # points = scipy.spatial.KDTree(point_cloud)
-    #     #
-    #     # delaunay = scipy.spatial.Delaunay(point_cloud)
-    #     # simps = delaunay.simplices
-    #     # tris_1 = simps[:, :3]
-    #     # tris_2 = simps[:, 1:]
-    #     # tris_3 = simps[:, (2, 3, 0)]
-    #     # tris_4 = simps[:, (3, 0, 1)]
-    #     # tris = np.concatenate([
-    #     #     tris_1,
-    #     #     tris_2,
-    #     #     tris_3,
-    #     #     tris_4
-    #     # ], axis=0)
-    #     # pts = point_cloud[tris]
-    #     return pts
-    #     # for (pi,pj,pk,pl) in pts:
-    #     #     if
-    #     # for simps
 
     @classmethod
     def sphere_points(cls, centers, radii, samples, generator=None):
@@ -473,12 +480,502 @@ class SphereUnionSurface:
     #         *delaunay_opts
     #     )
 
+    @classmethod
+    def sampling_point_surface_area(cls,
+                                    centers,
+                                    radii,
+                                    points=None,
+                                    exterior_test=None,
+                                    point_generator=None,
+                                    generator_args=None,
+                                    center_surface_areas=None,
+                                    **test_args
+                                    ):
+        if points is None:
+            if generator_args is None:
+                generator_args = {}
+            if point_generator is None:
+                point_generator = cls.sphere_points
+            points = point_generator(
+                centers,
+                radii,
+                **generator_args
+            )
+        if exterior_test is None:
+            exterior_test = cls.get_exterior_points
+
+        if center_surface_areas is None:
+            center_surface_areas = 4 * np.pi * radii**2
+
+        a = 0
+        for ca, center_points in zip(center_surface_areas, points):
+            mask = exterior_test(center_points, centers, radii, **test_args)
+            a += ca * np.sum(mask).astype(int) / len(mask)
+
+        return a
+
+    @classmethod
+    def _trip_q(self, a, b, c, alpha, beta, gamma, e):
+        return a * (
+            b**2 + c**2 - a**2
+            + beta**2 + gamma**2 - 2*alpha**2
+            + e*(b**2 - c**2)
+        )
+    @classmethod
+    def _trip_e(self, a, r2, r3):
+        return (r2**2 - r3**2) / a**2
+    @classmethod
+    def _trip_w(self, a, b, c, alpha, beta, gamma):
+        A = alpha**2
+        B = beta**2
+        C = gamma**2
+        a = a**2
+        b = b**2
+        c = c**2
+        d = np.linalg.det([
+            [0, 1, 1, 1, 1],
+            [1, 0, C, B, A],
+            [1, C, 0, a, b],
+            [1, B, a, 0, c],
+            [1, A, b, c, 0],
+        ])
+        if d > 0:
+            return np.sqrt(1 / 2 * d)
+        else:
+            return d
+    @classmethod
+    def _trip_s(self, beta, a, c, q1, q3, e1, e3, w):
+        t1 = np.arctan2(a*w*(1+e1), (beta*q1) )
+        t2 = np.arctan2(c*w*(1-e3), (beta*q3) )
+        t3 = np.arctan2(2*w,  q1)
+        t4 = np.arctan2(2*w,  q3)
+        s1 = t1 + t2
+        if s1 < 0 or s1 > np.pi:
+            raise ValueError(...)
+        if t2 < 0: t2 = np.pi + t2
+        if t3 < 0: t3 = np.pi + t3
+        if t4 < 0: t4 = np.pi + t4
+        return 2*(beta**2) * (t1 + t2) - beta*(
+            a*(1+e1)*t3
+            + c*(1-e3)*t4
+        )
+    @classmethod
+    def _trip_t(cls, a, b, c):
+        return (a+b+c)*(-a + b + c)*(a-b+c)*(a+b-c)
+    @classmethod
+    def _trip_p(cls, a, b, c, r1, r2, r3, t):
+        A = (b ** 2 - c ** 2 + r2 ** 2 - r3 ** 2) ** 2
+        t_abg = np.sqrt(cls._trip_t(a, r2, r3))
+        pp = (A + (t + t_abg) ** 2) / (4 * a ** 2) - r1 ** 2
+        # pm = (A + (t - t_abg) ** 2) / (4 * a ** 2) - r1 ** 2
+        # if pp > 0 and pm < 0:
+        #     raise ValueError("?", pp, pm)
+        return pp
+    @classmethod
+    def sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3):
+        # https://www.tandfonline.com/doi/pdf/10.1080/00268978800100453
+        # https://www-tandfonline-com/doi/epdf/10.1080/00268978700102951
+        w = cls._trip_w(a, b, c, r1, r2, r3)
+        if abs(w) < 1e-8:
+            return 0
+        elif w < 0:
+            t2 = cls._trip_t(a, b, c)
+            if t2 < 0: return 0 # no intersection
+            t = np.sqrt(t2)
+            p1 = cls._trip_p(a, b, c, r1, r2, r3, t)
+            p2 = cls._trip_p(b, a, c, r2, r3, r1, t)
+            p3 = cls._trip_p(c, a, b, r3, r1, r2, t)
+
+            if p1 > 0 and p2 > 0 and p3 > 0:
+                return 0
+            if p1 < 0 and p2 > 0 and p3 > 0:
+                return -cls.sphere_double_intersection_area(a, r2, r3)
+            if p1 > 0 and p2 < 0 and p3 > 0:
+                return -cls.sphere_double_intersection_area(b, r1, r3)
+            if p1 > 0 and p2 > 0 and p3 < 0:
+                return -cls.sphere_double_intersection_area(c, r1, r2)
+            if p1 < 0 and p2 < 0 and p3 > 0:
+                return -4*np.pi*r3**2
+            if p1 < 0 and p2 > 0 and p3 < 0:
+                return -4*np.pi*r2**2
+            if p1 > 0 and p2 < 0 and p3 < 0:
+                return -4*np.pi*r1**2
+            else:
+                raise ValueError("don't know what to do here")
+
+        e1 = cls._trip_e(a, r2, r3) #(r2**2 - r3**2) / a**2
+        e2 = cls._trip_e(b, r3, r1) #(r3**2 - r1**2) / b**2
+        e3 = cls._trip_e(c, r1, r2) #(r1**2 - r2**2) / c**2
+
+        q1 = cls._trip_q(a, b, c, r1, r2, r3, e1)
+        q2 = cls._trip_q(b, c, a, r2, r3, r1, e2)
+        q3 = cls._trip_q(c, a, b, r3, r1, r2, e3)
+
+        A1 = cls._trip_s(r1, c, b, q3, q2, e2, e3, w)
+        A2 = cls._trip_s(r2, a, c, q1, q3, e1, e3, w)
+        A3 = cls._trip_s(r3, b, a, q2, q1, e2, e1, w)
+
+        return A1 + A2 + A3
+
+    @classmethod
+    def sphere_double_intersection_area(cls, a, r1, r2):
+        # fully enveloped
+        if a + r2 < r1:
+            return -4*np.pi*r2**2
+        elif a + r1 < r2:
+            return -4*np.pi*r1**2
+        else:
+            return np.pi * (
+                    2 * (r1**2 + r2**2)
+                    - (r1 + r2) * a
+                    - (r2 - r1)*(r2**2 - r1**2)/a
+            )
+
+    @classmethod
+    def _quad_w(cls, a, b, c, f, g, h):
+        A = a ** 2
+        B = b ** 2
+        C = c ** 2
+        F = f ** 2
+        G = g ** 2
+        H = h ** 2
+        d = np.linalg.det([
+            [0, 1, 1, 1, 1],
+            [1, 0, H, G, F],
+            [1, H, 0, A, B],
+            [1, G, A, 0, C],
+            [1, F, B, C, 0],
+        ])
+        if d < 0:
+            return d
+        else:
+            return np.sqrt(1 / 2 * d)
+    @classmethod
+    def _quad_s(cls, a, b, c, f, g, h):
+        return a * (
+                b**2 + c**2 - a**2 + g**2 + h**2
+                - 2*f**2 + (g**2 - h**2)*(b**2 - c**2)/a**2
+        )
+    @classmethod
+    def _quad_term(cls, a, beta, gamma, W2, s1):
+        t = np.arctan2(W2, s1)
+        return a*(beta + gamma)*(1 + ((beta - gamma)**2) /a**2) * t
+    @classmethod
+    def sphere_quadruple_intersection_area(cls,
+                                           a, b, c, f, g, h,
+                                           # 23, 12, 13, 14, 24, 34
+                                           r1, r2, r3, r4,
+                                           A123, A124, A134, A234
+                                           ):
+        if b < r1 and c < r1 and f < r1:
+            return -cls.sphere_triple_intersection_area(h, a, g, r2, r3, r4)
+        elif a < r2 and b < r2 and g < r2:
+            return -cls.sphere_triple_intersection_area(h, c, f, r1, r3, r4)
+        elif a < r3 and c < r3 and h < r3:
+            return -cls.sphere_triple_intersection_area(g, b, f, r1, r2, r4)
+        elif f < r4 and g < r4 and h < r4:
+            return -cls.sphere_triple_intersection_area(a, b, c, r1, r2, r3)
+
+        W2 = 2*cls._quad_w(a, b, c, f, g, h)
+        if W2 <= 0:
+            raise ValueError(W2)
+            # three spheres intersecting inside fourth
+
+        s1 = cls._quad_s(a, b, c, f, g, h)
+        s2 = cls._quad_s(b, c, a, g, h, f)
+        s3 = cls._quad_s(c, a, b, h, f, g)
+        s4 = cls._quad_s(h, a, g, c, f, b)
+        s5 = cls._quad_s(g, h, a, b, c, f)
+        s6 = cls._quad_s(f, g, c, a, b, h)
+
+        A1 = cls._quad_term(a, r2, r3, W2, s1) #a*(beta + gamma)*(1 + ((beta - gamma)**2) /a**2) * t
+        A2 = cls._quad_term(b, r1, r3, W2, s2)
+        A3 = cls._quad_term(c, r1, r2, W2, s3)
+        A4 = cls._quad_term(h, r3, r4, W2, s4)
+        A5 = cls._quad_term(g, r2, r4, W2, s5)
+        A6 = cls._quad_term(f, r1, r4, W2, s6)
+
+        A = (
+                -np.pi * (r1 ** 2 + r2 ** 2 + r3 ** 2 + r4 ** 2)
+                + 1 / 2 * (
+                        A1 + A2 + A3
+                        + A4 + A5 + A6
+                        + A123 + A124
+                        + A134 + A234
+                )
+        )
+
+        # if A < 0:
+        #     print(np.pi * (r1 ** 2 + r2 ** 2 + r3 ** 2 + r4 ** 2))
+        #     print((
+        #                 A1 + A2 + A3
+        #                 + A4 + A5 + A6
+        #                 + A123 + A124
+        #                 + A134 + A234
+        #         ))
+        #     raise Exception(...)
+
+        return A
+
+    # @classmethod
+    # def _check_dispatch_quint_intersection(
+    #         cls,
+    #         ri, dj, dk, dl, da,
+    #         Aijkl, Ajkla, Aikla,
+    #         Ajkl, Ajka
+    # ):
+    #
+    #     if dj < ri:
+    #         if dk < ri:
+    #             if dl < ri:
+    #                 if da < ri:
+    #                     return -Ajkla
+    #                 else:
+    #                     return Ajkla + Aikla - Ajkl
+    #             else:
+    #                 return Aijla
+    #
+    #
+    #         ...
+    #
+    #     return 0
+
+    @classmethod
+    def sphere_quintuple_intersection_area(
+            cls,
+            djk, dik, dij,
+            dil, djl, dkl,
+            dia, dja, dka,
+            dla,
+            ri, rj, rk, rl, ra,
+            Aijkl, Aijka,
+            Aijla, Aikla,
+            Ajkla,
+            Aijk, Aijl,
+            Aikl, Ajkl,
+            Aija, Aika,
+            Aila, Ajka,
+            Ajla, Akla
+        ):
+        cls._check_dispatch_quint_intersection(
+            ri, dij, dik, dil, dia,
+
+        )
+
+    @classmethod
+    def sphere_union_surface_area(cls, centers, radii,
+                                  include_doubles=True,
+                                  include_triples=None,
+                                  include_quadruples=None,
+                                  include_quintuples=None):
+        if include_triples is None:
+            include_triples = include_doubles
+        if include_quadruples is None:
+            include_quadruples = include_triples is not False
+        if include_quintuples is None:
+            include_quintuples = include_quadruples is not False
+        dm = nput.distance_matrix(centers)
+        surf = 4*np.pi*np.sum(radii**2)
+        nc = len(centers)
+        intersections = np.full(dm.shape, False)
+        pairs = np.full((nc, nc), 0.0)
+        if include_doubles:
+            for i,j in itertools.combinations(range(nc), 2):
+                if radii[i] + radii[j] > dm[i, j]:
+                    intersections[i, j] = True
+                    pairs[i, j] = cls.sphere_double_intersection_area(
+                        dm[i, j], radii[i], radii[j]
+                    )
+                    surf -= np.abs(pairs[i, j])
+        cubics = np.full((nc, nc, nc), 0.0)
+        if include_triples or include_quadruples or include_quintuples:
+            for i,j,k in itertools.combinations(range(nc), 3):
+                if all(pairs[p] > 0 for p in itertools.combinations((i, j, k), 2)):
+                    cubics[i, j, k] = cls.sphere_triple_intersection_area(
+                        dm[j, k], dm[i, k], dm[i, j],
+                        radii[i], radii[j], radii[k]
+                    )
+                    if include_triples:
+                        surf += abs(cubics[i, j, k])
+
+        quartics = np.full((nc, nc, nc, nc), 0.0)
+        if include_quadruples or include_quintuples:
+            for i,j,k,l in itertools.combinations(range(nc), 4):
+                if all(cubics[p] > 0 for p in itertools.combinations((i, j, k, l), 3)):
+                    quartics[i, j, k, l] = cls.sphere_quadruple_intersection_area(
+                        dm[j, k], dm[i, k], dm[i, j],
+                        dm[i, l], dm[j, l], dm[k, l],
+                        radii[i], radii[j], radii[k], radii[l],
+                        cubics[i, j, k], cubics[i,j,l],
+                        cubics[i, k, l], cubics[j,k,l]
+                    )
+                    # if quartics[i, j, k, l] < 0:
+                    #     print(quad)
+                    #     raise ValueError(...)
+                    if include_quadruples:
+                        surf -= abs(quartics[i, j, k, l])
+
+        # if include_quintuples:
+        #     for i,j,k,l,a in itertools.combinations(range(nc), 5):
+        #         if all(quartics[p] > 0 for p in itertools.combinations((i, j, k, l, a), 4)):
+        #             quint = cls.sphere_quintuple_intersection_area(
+        #                 dm[j, k], dm[i, k], dm[i, j],
+        #                 dm[i, l], dm[j, l], dm[k, l],
+        #                 dm[i, a], dm[j, a], dm[k, a],
+        #                 dm[l, a],
+        #                 radii[i], radii[j], radii[k], radii[l], radii[a],
+        #                 quartics[i, j, k, l], cubics[i, j, k, a],
+        #                 quartics[i, j, l, a], cubics[i, k, l, a],
+        #                 quartics[j, k, l, a],
+        #                 cubics[i, j, k], cubics[i,j,l],
+        #                 cubics[i, k, l], cubics[j,k,l],
+        #                 cubics[i, j, a], cubics[i, k, a],
+        #                 cubics[i, l, a], cubics[j, k, a],
+        #                 cubics[j, l, a], cubics[k, l, a]
+        #             )
+        #             # if quartics[i, j, k, l] < 0:
+        #             #     print(quad)
+        #             #     raise ValueError(...)
+        #             surf += quint
+        return surf
+
+    def surface_area(self, method='union', **opts):
+        if method == 'union':
+            return self.sphere_union_surface_area(self.centers, self.radii, **opts)
+        elif method == 'sampling':
+            expansion = opts.pop('expansion', self.expansion)
+            scaling = opts.pop('scaling', self.scaling)
+            generator_args = {
+                'samples':opts.pop('samples', self.samples),
+                'generator':opts.pop('sphere_point_generator', None)
+            }
+            opts['tolerance'] = opts.get('tolerance', self.pruning_tolerance)
+            return self.sampling_point_surface_area(
+                self.centers,
+                self.radii * scaling + expansion,
+                generator_args=generator_args,
+                **opts
+            )
+        elif method == 'mesh':
+            return self.generate_mesh().surface_area()
+        else:
+            raise ValueError(f"unknown surface area method '{method}'")
+
+    def plot(self,
+             figure=None,
+             *,
+             color=None,
+             points=None,
+             function=None,
+             sphere_color='white',
+             sphere_style=None,
+             point_style=None,
+             point_values=None,
+             distance_units='Angstroms',
+             **etc
+             ):
+
+        if points is None:
+            points = self.sampling_points
+
+        # TODO: move this to molecule specific class...
+        conv = UnitsData.convert("BohrRadius", distance_units)
+        if point_values is None and function is not None:
+            point_values = function(points)
+
+        if point_values is not None or color is not None:
+            etc['color'] = color
+
+        return self.plot_sphere_points(
+            points * conv,
+            self.centers * conv,
+            self.radii * conv,
+            figure=figure,
+            sphere_color=sphere_color,
+            point_values=point_values,
+            sphere_style=sphere_style,
+            point_style=point_style,
+            **etc
+        )
+
+    @classmethod
+    def plot_sphere_points(cls,
+                           points,
+                           centers,
+                           radii,
+                           figure=None,
+                           *,
+                           color='black',
+                           # transparency=.8,
+                           backend='x3d',
+                           return_objects=False,
+                           sphere_color='white',
+                           sphere_style=None,
+                           point_colors=None,
+                           point_values=None,
+                           vertex_colormap='WarioColors',
+                           rescale_color_values=True,
+                           **etc):
+        from ... import Plots as plt
+
+        if figure is None:
+            figure = plt.Graphics3D(backend=backend)
+
+        # func_vals = func(verts)
+        if point_values is not None and rescale_color_values:
+            if dev.is_list_like(rescale_color_values):
+                point_values = nput.vec_rescale(point_values, rescale_color_values)
+            else:
+                point_values = nput.vec_rescale(point_values)
+
+            colormap = plt.Colors.ColorPalette(vertex_colormap)
+            point_colors = colormap(point_values)
+
+        objs = []
+        if sphere_style is None:
+            sphere_style = etc if color is None else {}
+            if sphere_color is not None:
+                sphere_style['color'] = sphere_color
+            for c,r in zip(centers,radii):
+                objs.append(
+                    plt.Sphere(c, r, **sphere_style)
+                )
+
+        if point_colors is not None or color is not None:
+            point_obj = plt.Point(
+                points,
+                color=color,
+                vertex_colors=point_colors,
+                **etc)
+            objs.append(point_obj)
+
+
+        for o in objs:
+            o.plot(figure)
+
+        if return_objects:
+            return figure, objs
+        else:
+            return figure
+
 class SphereUnionSurfaceMesh:
     def __init__(self, verts, inds, surf=None, densities=None):
         self.surf = surf
         self.verts = verts
         self.inds = inds
         self.densities = densities
+
+    def surface_area(self, return_components=False):
+        dm = nput.distance_matrix(self.verts)
+        a = dm[self.inds[:, 0], self.inds[:, 1]]
+        b = dm[self.inds[:, 1], self.inds[:, 2]]
+        c = dm[self.inds[:, 0], self.inds[:, 2]]
+        s = (a + b + c) /2
+        tris = np.sqrt(s*(s-a)*(s-b)*(s-c))
+        if return_components:
+            return tris
+        else:
+            return np.sum(tris)
 
     @classmethod
     def from_o3d(cls, mesh, densities=None, surf=None):
