@@ -54,10 +54,7 @@ class Disk(GraphicsPrimitive):
         if hasattr(axes, 'axes'):
             axes = axes.axes
 
-        kw = dict(edgecolors=[ [0.]*3 +[.3] ])
-        kw = dict(kw, **self.opts)
-        kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
-        return axes.draw_disk(self.pos, **kw)
+        return axes.draw_disk(self.pos, radius=self.rad, **dict(self.opts, **kwargs))
 class Line(GraphicsPrimitive):
     def __init__(self, points, radius=.1, **opts):
         self.pos = points

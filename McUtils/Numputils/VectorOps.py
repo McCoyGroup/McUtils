@@ -177,7 +177,7 @@ def vec_handle_zero_norms(vecs, norms, axis=-1, zero_thresh=None):
     vecs = vecs * (1 - zeros.astype(int))
     return vecs, zeros
 
-def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None):
+def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None, return_norms=False):
     """
 
     :param vecs:
@@ -190,10 +190,13 @@ def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None):
     if norms is None:
         norms = vec_norms(vecs, axis=axis)
     vecs, zeros = vec_handle_zero_norms(vecs, norms, axis=axis, zero_thresh=zero_thresh)
-    norms = np.expand_dims(norms, axis)
-    norms[zeros] = Options.zero_placeholder # since we already zeroed out the vector
+    e_norms = np.expand_dims(norms, axis)
+    e_norms[zeros] = Options.zero_placeholder # since we already zeroed out the vector
 
-    return vecs/norms
+    if return_norms:
+        return vecs/e_norms, norms
+    else:
+        return vecs/e_norms
 
 def vec_rescale(vecs, target_range=None, axis=-1):
     vecs = np.asanyarray(vecs)

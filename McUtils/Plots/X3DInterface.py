@@ -18,9 +18,13 @@ __all__ = [
     "X3DSphere",
     "X3DCone",
     "X3DCylinder",
+    "X3DCappedCylinder",
     "X3DArrow",
     "X3DTorus",
     "X3DRectangle2D",
+    "X3DDisk2D",
+    "X3DCircle2D",
+    "X3DPolyline2D",
     "X3DTriangleSet",
     "X3DIndexedTriangleSet",
     "X3DIndexedLineSet",
@@ -48,8 +52,8 @@ class X3D(X3DObject):
         self.id = id
         self.dynamic_loading = dynamic_loading
 
-    X3DOM_JS = 'http://www.x3dom.org/download/x3dom.js'
-    X3DOM_CSS = 'http://www.x3dom.org/download/x3dom.css'
+    X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
+    X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
 
     def get_export_script(self, id):
         return f"""
@@ -308,14 +312,16 @@ class X3DLineProperties(X3DOptionsSet):
     __props__ = {
         "applied",
         "linetype",
+        "linewidth",
         "linewidthScaleFactor"
     }
     conversion_map = {
         "line_style":"linetype",
-        "line_thickness":"linewidthScaleFactor"
+        "line_thickness":"linewidth"
     }
     def prep_attrs(self, attrs:dict):
         attrs = super().prep_attrs(attrs)
+        attrs['linewidthScaleFactor'] = attrs.get('linewidthScaleFactor', '1')
         attrs['containerField'] = attrs.get('containerField', 'lineProperties')
         return attrs
     def to_x3d(self):
@@ -329,11 +335,18 @@ class X3DPointProperties(X3DOptionsSet):
         "pointSizeScaleFactor"
     }
     conversion_map = {
-        "point_size":"pointSizeMinValue"
+        "point_size":"pointSizeScaleFactor"
     }
     def prep_attrs(self, attrs:dict):
         attrs = super().prep_attrs(attrs)
         attrs['containerField'] = attrs.get('containerField', 'pointProperties')
+        attrs['pointSizeMaxValue'] = str(
+            max([
+                float(attrs.get('pointSizeMaxValue', '0')),
+                float(attrs.get('pointSizeMinValue', '0')),
+                float(attrs.get('pointSizeScaleFactor', '0')),
+            ])
+        )
         return attrs
     def to_x3d(self):
         return X3DHTML.PointProperties(**self.prep_attrs(self.attrs))
@@ -397,7 +410,7 @@ class X3DCoordinate(X3DPrimitive):
         super().__init__(point=self.prep_points(points))
     @classmethod
     def prep_points(cls, points):
-        return " ".join(np.asanyarray(points).flatten().astype(str))
+        return " ".join(np.asanyarray(np.round(points, 4)).flatten().astype(str))
 
 class X3DColor(X3DPrimitive):
     wrapper_class = X3DHTML.Color
@@ -409,7 +422,7 @@ class X3DColor(X3DPrimitive):
         return base_opts, appearance_opts
     @classmethod
     def prep_color(cls, points):
-        return " ".join(np.asanyarray(points).flatten().astype(str))
+        return " ".join(np.asanyarray(np.round(points, 4)).flatten().astype(str))
 
 class X3DGroup(X3DPrimitive):
     wrapper_class = X3DHTML.Group
@@ -428,12 +441,23 @@ class X3DGeometryObject(X3DPrimitive):
         ...
     def create_tag_object(self, **core_opts):
         return self.tag_class(**core_opts)
-    def create_object(self, translation=None, rotation=None, scale=None, **core_opts):
+    def create_object(self,
+                      translation=None,
+                      rotation=None,
+                      scale=None,
+                      normal=None,
+                      up_vector=None,
+                      **core_opts):
         base_obj = self.create_tag_object(**core_opts)
         tf = {}
+        if normal is not None and rotation is None:
+            if up_vector is None:
+                up_vector = [0, 0, 1]
+            angs, crosses = nput.vec_angles(up_vector, normal, return_crosses=True, return_norms=False)
+            rotation = np.concatenate([crosses, [angs]])
         for k,v in [["translation",translation], ["rotation",rotation], ["scale", scale]]:
             if v is not None:
-                tf[k] = v
+                tf[k] = np.round(v, 4) if not isinstance(v, str) else v
         if len(tf) == 0:
             tf = None
         # base_obj = X3DHTML.Transform(base_obj, translation=translation, rotation=rotation, scale=scale)
@@ -587,20 +611,64 @@ class X3DArrow(X3DGroup):
             arrowheads, cylinders
         )
 
+class X3DCappedCylinder(X3DGroup):
+
+    cap_class = X3DSphere
+    cylinder_class = X3DCylinder
+
+    def __init__(self,
+                 starts, ends,
+                 radius=1,
+                 cylinder_class=None,
+                 cap_class=None,
+                 cap_offset=0,
+                 use_caps=(True, True),
+                 **opts):
+        if cap_class is None:
+            cap_class = self.cap_class
+        if cylinder_class is None:
+            cylinder_class = self.cylinder_class
+
+        if cap_offset != 0:
+            raise NotImplementedError("cap offseting not supported yet")
+
+        if use_caps is True: use_caps = [True, True]
+        elif use_caps is False: use_caps = [False, False]
+
+        cap_list = []
+        if use_caps[0]:
+            cap_list.append(cap_class(starts, radius=radius, **opts))
+        if use_caps[1]:
+            cap_list.append(cap_class(ends, radius=radius, **opts))
+        cylinders = cylinder_class(starts, ends, radius=radius, **opts)
+
+        super().__init__(
+            *cap_list, cylinders
+        )
+
 class X3DText(X3DGeometryGroup):
     tag_class = X3DHTML.Text
 
 class X3DTorus(X3DGeometryGroup):
     tag_class = X3DHTML.Torus
 
-    def prep_geometry_opts(self, centers, radius=1, inner_radius=None, **opts):
+    def prep_geometry_opts(self, centers, radius=1, inner_radius=None,
+                           normal=None, rotation=None, scale=None,
+                           **opts):
         centers = self.prep_vecs(centers)
+        normal = self.prep_vecs(normal, centers.shape[0])
+        rotation = self.prep_vecs(rotation, centers.shape[0])
+        scale = self.prep_vecs(scale, centers.shape[0])
         radius = self.prep_const(radius, centers.shape[0])
         inner_radius = self.prep_const(inner_radius, centers.shape[0])
 
         return [
-            {"translation":s,  "outerRadius":r, "innerRadius":i}
-            for s,r,i in zip(centers, radius, inner_radius)
+            {
+                "translation": s, "normal": n, "outerRadius": r,
+                "innerRadius": i, 'rotation': rot, 'scale': sc,
+                **opts}
+            for s, n, r, i, rot, sc in
+            zip(centers, normal, radius, inner_radius, rotation, scale)
         ]
 
 class X3DCoordinatesWrapper(X3DGeometryGroup):
@@ -628,8 +696,43 @@ class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
             base_dict['color'] = vertex_colors
         return [base_dict]
 
-class X3DRectangle2D(X3DGeometryGroup):
+class X3DGeometry2DGroup(X3DGeometryGroup):
+    def prep_geometry_opts(self, center, **etc):
+        # raise Exception(crosses)
+        # a = np.concatenate([crosses, [angs]])
+        # a, _ = self.get_rotation(crosses, up_vector=up_vector)
+        return [
+            {
+                "translation":center,
+                 **etc
+            }
+        ]
+
+class X3DRectangle2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Rectangle2D
+class X3DCircle2D(X3DGeometry2DGroup):
+    tag_class = X3DHTML.Circle2D
+class X3DDisk2D(X3DGeometry2DGroup):
+    tag_class = X3DHTML.Disk2D
+    def prep_geometry_opts(self, centers,
+                           radius=1, inner_radius=None,
+                           normal=None, rotation=None, scale=None, **opts):
+        centers = self.prep_vecs(centers)
+        normal = self.prep_vecs(normal, centers.shape[0])
+        rotation = self.prep_vecs(rotation, centers.shape[0])
+        scale = self.prep_vecs(scale, centers.shape[0])
+        radius = self.prep_const(radius, centers.shape[0])
+        inner_radius = self.prep_const(inner_radius, centers.shape[0])
+
+        return [
+            {
+                "translation": s, "normal": n, "outerRadius": r,
+                "innerRadius": i, 'rotation':rot, 'scale':sc,
+                **opts}
+            for s, n, r, i,rot,sc in zip(centers, normal, radius, inner_radius, rotation, scale)
+        ]
+class X3DPolyline2D(X3DGeometry2DGroup):
+    tag_class = X3DHTML.Polyline2D
 
 class X3DPointSet(X3DCoordinatesWrapper):
     tag_class = X3DHTML.PointSet
