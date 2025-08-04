@@ -13,6 +13,7 @@ __all__ = [
     "X3DGeometryGroup",
     "X3DGroup",
     "X3DScene",
+    "X3DBackground",
     "X3DMaterial",
     "X3DLine",
     "X3DSphere",
@@ -66,13 +67,19 @@ class X3D(X3DObject):
 }})()
        """
 
-    def get_record_screen_script(self, id, polling_rate=30, recording_duration=2):
+    def get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'):
             return f"""
     (function(){{
         let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
         
-        let x3DRecordingStream = canvas.captureStream({polling_rate});
-        let mediaRecorder = new MediaRecorder(x3DRecordingStream, {{mimeType: "video/mp4"}});
+        let pollingRate = (typeof canvas.pollingRate === 'undefined') ? {polling_rate} : canvas.pollingRate;
+        let videoFormat = (typeof canvas.videoFormat === 'undefined') ? "{video_format}" : canvas.videoFormat;
+        let videoExtension = canvas.videoExtension;
+        if (typeof canvas.videoExtension === 'undefined') {{
+            videoExtension = videoFormat.split("/")[1].split(";")[0];
+        }}
+        let x3DRecordingStream = canvas.captureStream(pollingRate);
+        let mediaRecorder = new MediaRecorder(x3DRecordingStream, {{mimeType: videoFormat}});
         
         mediaRecorder.frames = [];
         mediaRecorder.ondataavailable = function(e) {{
@@ -83,7 +90,7 @@ class X3D(X3DObject):
           link = document.createElement('a');
           const base_name = '{id}';
           const blob = mediaRecorder.frames[0];
-          link.download = base_name + '.mp4';
+          link.download = base_name + videoExtension;
           console.log(blob);
           const blobURL = window.URL.createObjectURL(blob);
           link.href = blobURL;
@@ -92,9 +99,19 @@ class X3D(X3DObject):
           link.click();
         }};
         
-        let duration = {recording_duration} * 1000;
-        setTimeout(() => {{mediaRecorder.stop()}}, duration);
+        let duration = (typeof canvas.recordingDuration === 'undefined') ? {recording_duration} : canvas.recordingDuration;
+        setTimeout(() => {{mediaRecorder.stop()}}, duration * 1000);
         mediaRecorder.start()
+    }})()
+           """
+
+    def set_animation_duration_script(self, id):
+        return f"""
+    (function(){{
+        let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
+        let input = document.getElementById('{id}-input');
+        
+        canvas.recordingDuration = input.value;
     }})()
            """
 
@@ -142,7 +159,10 @@ class X3D(X3DObject):
         if include_export_button:
             elems.append(JHTML.Button("Save Figure", onclick=self.get_export_script(self.id)))
         if include_record_button:
-            elems.append(JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id)))
+            elems.extend([
+                JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id)),
+                JHTML.Input(value="2", id=self.id+'-input', oninput=self.set_animation_duration_script(self.id))
+            ])
 
         if len(elems) > 1:
             return JHTML.Div(
@@ -395,14 +415,51 @@ class X3DPrimitive(X3DObject):
 class X3DScene(X3DPrimitive):
     wrapper_class = X3DHTML.Scene
     default_viewpoint = {'viewAll':True}
-    def __init__(self, *children, viewpoint=None, **opts):
+    children: list
+    def __init__(self, *children:X3DPrimitive, background=None, viewpoint=None, **opts):
         if viewpoint is None:
             viewpoint = self.default_viewpoint
         elif viewpoint is False:
             viewpoint = {}
         super().__init__(*children, **opts)
+        if background is not None:
+            self.children = [X3DBackground(color=background)] + list(self.children)
         if len(viewpoint) > 0:
             self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
+
+class X3DBackground(X3DOptionsSet):
+    wrapper_class = X3DHTML.Background
+    __props__ = {
+        'skyColor',
+        'skyAngle'
+    }
+    conversion_map = {
+        "color": "skyColor"
+    }
+    def prep_attrs(self, attrs: dict):
+        attrs = super().prep_attrs(attrs)
+        color = attrs.get('skyColor', None)
+        if color is not None:
+            if isinstance(color, (list, tuple, np.ndarray)) and all(isinstance(c, str) for c in color):
+                color = " ".join(color)
+            if isinstance(color, str):
+                try:
+                    _ = [float(s) for s in color.split()]
+                except ValueError:
+                    from .Colors import ColorPalette
+
+                    bits = []
+                    for c in color.split():
+                        if color.startswith('#'):
+                            c = ColorPalette.parse_rgb_code(c)
+                        else:
+                            c = np.array(ColorPalette.parse_color_string(c))
+                        bits.extend(np.array(c) / 255)
+                    attrs['skyColor'] = bits
+        return attrs
+
+    def to_x3d(self):
+        return X3DHTML.Background(**self.prep_attrs(self.attrs))
 
 class X3DCoordinate(X3DPrimitive):
     wrapper_class = X3DHTML.Coordinate
