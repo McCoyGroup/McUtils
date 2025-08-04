@@ -385,70 +385,81 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [X3DScene](Plots/X3DInterface/X3DScene.md)   
 </div>
    <div class="col" markdown="1">
-[X3DMaterial](Plots/X3DInterface/X3DMaterial.md)   
+[X3DBackground](Plots/X3DInterface/X3DBackground.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[X3DMaterial](Plots/X3DInterface/X3DMaterial.md)   
+</div>
    <div class="col" markdown="1">
 [X3DLine](Plots/X3DInterface/X3DLine.md)   
 </div>
    <div class="col" markdown="1">
 [X3DSphere](Plots/X3DInterface/X3DSphere.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DCone](Plots/X3DInterface/X3DCone.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DCylinder](Plots/X3DInterface/X3DCylinder.md)   
 </div>
    <div class="col" markdown="1">
 [X3DCappedCylinder](Plots/X3DInterface/X3DCappedCylinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DArrow](Plots/X3DInterface/X3DArrow.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DTorus](Plots/X3DInterface/X3DTorus.md)   
 </div>
    <div class="col" markdown="1">
 [X3DRectangle2D](Plots/X3DInterface/X3DRectangle2D.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DDisk2D](Plots/X3DInterface/X3DDisk2D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DCircle2D](Plots/X3DInterface/X3DCircle2D.md)   
 </div>
    <div class="col" markdown="1">
 [X3DPolyline2D](Plots/X3DInterface/X3DPolyline2D.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DTriangleSet](Plots/X3DInterface/X3DTriangleSet.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DIndexedTriangleSet](Plots/X3DInterface/X3DIndexedTriangleSet.md)   
 </div>
    <div class="col" markdown="1">
 [X3DIndexedLineSet](Plots/X3DInterface/X3DIndexedLineSet.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DSwitch](Plots/X3DInterface/X3DSwitch.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
 </div>
    <div class="col" markdown="1">
 [ColorPalette](Plots/Colors/ColorPalette.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -476,9 +487,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-ed7a65" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ed7a65"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-69f498" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-69f498"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ed7a65" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-69f498" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -499,9 +510,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-961ab1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-961ab1"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ea2809" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ea2809"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-961ab1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ea2809" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
