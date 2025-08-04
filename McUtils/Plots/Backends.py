@@ -1757,8 +1757,17 @@ class VPythonAxes(GraphicsAxes):
     def draw_line(self, points, **styles):
         return self.graph.plot(*np.asanyarray(points).T, **styles)
 
-    def draw_disk(self, points, color=None, **styles):
-        return self.graph.scatter(*np.asanyarray(points).T, **styles)
+    def draw_disk(self, points, color=None, edge_color=None, radius=1,
+                  edgecolors=None,
+                  s=None, **styles):
+        if edgecolors is None:
+            if edge_color is not None:
+                edgecolors = edge_color
+            else:
+                edgecolors=[[0.] * 3 + [.3]]
+        if s is None:
+            s = (10 * radius) ** 2
+        return self.graph.scatter(*np.asanyarray(points).T, s=s, edgecolors=edgecolors, **styles)
 
     def draw_rect(self, points, **styles):
         raise NotImplementedError("too annoying")
@@ -2230,11 +2239,66 @@ class X3DAxes(GraphicsAxes3D):
 
         return line_set
 
-    def draw_disk(self, points, **styles):
-        disk_set = x3d.X3DDisk(points, **styles)
-        self.children.append(disk_set)
+    def draw_disk(self,
+                  points,
+                  radius=None,
+                  color=None,
+                  line_color=None,
+                  edgecolors=None,
+                  s=None,
+                  normal=None,
+                  line_thickness=None,
+                  innerRadius=None,
+                  outerRadius=None,
+                  solid=None,
+                  **styles):
+        if radius is None and s is not None:
+            radius = s / 100
+        if line_color is None:
+            line_color = edgecolors
 
-        return disk_set
+        objects = []
+        if line_color is not None:
+            if line_thickness is None:
+                disk_set = x3d.X3DCircle2D(points,
+                                           normal,
+                                           radius=radius,
+                                           glow=line_color,
+                                           solid=False if solid is None else solid,
+                                           **styles
+                                           )
+            else:
+                if color is None:
+                    if innerRadius is None:
+                        innerRadius = line_thickness
+                    if outerRadius is None:
+                        outerRadius = radius
+                disk_set = x3d.X3DTorus(points,
+                                        normal=normal,
+                                        inner_radius=innerRadius if color is None else line_thickness,
+                                        radius=outerRadius if color is None else radius,
+                                        color=line_color,
+                                        solid=solid,
+                                        **styles
+                                        )
+            objects.append(disk_set)
+        if color is None and line_color is None:
+            color = 'black'
+        if color is not None:
+            if outerRadius is None:
+                outerRadius = radius
+            disk_set = x3d.X3DDisk2D(points,
+                                     normal,
+                                     inner_radius=innerRadius,
+                                     radius=outerRadius,
+                                     color=color,
+                                     solid=False if solid is None else solid,
+                                     **styles
+                                     )
+            objects.append(disk_set)
+
+        self.children.extend(objects)
+        return objects
 
     def draw_arrow(self, points, **styles):
         points = np.asanyarray(points)
@@ -2280,8 +2344,11 @@ class X3DAxes(GraphicsAxes3D):
 
         return spheres
 
-    def draw_cylinder(self, starts, ends, rads, **styles):
-        cyls = x3d.X3DCylinder(starts, ends, radius=rads, **styles)
+    def draw_cylinder(self, starts, ends, rads, capped=False, **styles):
+        if capped:
+            cyls = x3d.X3DCappedCylinder(starts, ends, radius=rads, **styles)
+        else:
+            cyls = x3d.X3DCylinder(starts, ends, radius=rads, **styles)
         self.children.append(cyls)
 
         return cyls
