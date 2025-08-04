@@ -580,39 +580,44 @@ class SphereUnionSurface:
         pm = (A + (t - t_abg) ** 2) / (4 * a ** 2) - r1 ** 2
         # if pp > 0 and pm < 0:
         #     raise ValueError("?", pp, pm)
-        return pp
+        return pp, pm
     @classmethod
     def sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3):
         # https://www.tandfonline.com/doi/pdf/10.1080/00268978800100453
         # https://www-tandfonline-com/doi/epdf/10.1080/00268978700102951
         w = cls._trip_w(a, b, c, r1, r2, r3)
-        if abs(w) < 1e-8:
-            return 0
-        elif w < 0:
+        # if abs(w) < 1e-8:
+        #     return 0
+        if w < -1e-8:
             t2 = cls._trip_t(a, b, c)
-            if t2 < 0: return 0 # no intersection
+            if t2 < 0: return (), 0 # no intersection
             t = np.sqrt(t2)
-            p1 = cls._trip_p(a, b, c, r1, r2, r3, t)
-            p2 = cls._trip_p(b, a, c, r2, r3, r1, t)
-            p3 = cls._trip_p(c, a, b, r3, r1, r2, t)
+            p1p, p1m = cls._trip_p(a, b, c, r1, r2, r3, t)
+            p2p, p2m = cls._trip_p(b, a, c, r2, r3, r1, t)
+            p3p, p3m = cls._trip_p(c, a, b, r3, r1, r2, t)
+
+            if p1p > 0 and p2p > 0 and p3p > 0:
+                p1, p2, p3 = p1m, p2m, p3m
+            else:
+                p1, p2, p3 = p1p, p2p, p3p
 
             if p1 > 0 and p2 > 0 and p3 > 0:
                 return (), 0
             if p1 <= 0 and p2 > 0 and p3 > 0:
-                _, area = cls.sphere_double_intersection_area(a, r2, r3)
-                return (1, 2), area
+                # _, area = cls.sphere_double_intersection_area(a, r2, r3)
+                return (1, 2), None
             if p1 > 0 and p2 <= 0 and p3 > 0:
-                _, area = cls.sphere_double_intersection_area(b, r1, r3)
-                return (0, 2), area
+                # _, area = cls.sphere_double_intersection_area(b, r1, r3)
+                return (0, 2), None
             if p1 > 0 and p2 > 0 and p3 <= 0:
-                _, area = cls.sphere_double_intersection_area(c, r1, r2)
-                return (0, 1), area
+                # _, area = cls.sphere_double_intersection_area(c, r1, r2)
+                return (0, 1), None
             if p1 <= 0 and p2 <= 0 and p3 > 0:
-                return (2,), -cls.sphere_area(r3)
+                return (2,), None#-cls.sphere_area(r3)
             if p1 <= 0 and p2 > 0 and p3 <= 0:
-                return (1,), -cls.sphere_area(r2)
+                return (1,), None#-cls.sphere_area(r2)
             if p1 > 0 and p2 <= 0 and p3 <= 0:
-                return (0,), -cls.sphere_area(r1)
+                return (0,), None#-cls.sphere_area(r1)
             else:
                 raise ValueError((p1 > 0,  p2 > 0,  p3 > 0),
                                  p1, p2, p3)
@@ -780,132 +785,132 @@ class SphereUnionSurface:
 
         W2 = 2*cls._quad_w(a, b, c, f, g, h)
 
-        if W2 < 0:
-            ia4, ib4 = I4
-            ia3, ib3 = I3
-            ia2, ib2 = I2
-            ia1, ib1 = I1
+        # if W2 < 0:
+        ia4, ib4 = I4
+        ia3, ib3 = I3
+        ia2, ib2 = I2
+        ia1, ib1 = I1
 
-            test_bits = (int(ia4), int(ib4), int(ia3), int(ib3), int(ia2), int(ib2), int(ia1), int(ib1))
+        test_bits = (int(ia4), int(ib4), int(ia3), int(ib3), int(ia2), int(ib2), int(ia1), int(ib1))
 
-            # clean_tests = [
-            #     ((1, 0) if s1 == 0 else (0, 1))
-            #     + ((1, 0) if s2 == 0 else (0, 1))
-            #     + ((1, 0) if s3 == 0 else (0, 1))
-            #     + ((1, 0) if s4 == 0 else (0, 1))
-            #     for s1, s2, s3, s4 in itertools.product(range(2), range(2), range(2), range(2))
-            # ]
-            clean_tests = {
-                (1, 0, 1, 0, 1, 0, 1, 0),
-                (1, 0, 1, 0, 1, 0, 0, 1),
-                (1, 0, 1, 0, 0, 1, 1, 0),
-                (1, 0, 1, 0, 0, 1, 0, 1),
-                (1, 0, 0, 1, 1, 0, 1, 0),
-                (1, 0, 0, 1, 1, 0, 0, 1),
-                (1, 0, 0, 1, 0, 1, 1, 0),
-                (1, 0, 0, 1, 0, 1, 0, 1),
-                (0, 1, 1, 0, 1, 0, 1, 0),
-                (0, 1, 1, 0, 1, 0, 0, 1),
-                (0, 1, 1, 0, 0, 1, 1, 0),
-                (0, 1, 1, 0, 0, 1, 0, 1),
-                (0, 1, 0, 1, 1, 0, 1, 0),
-                (0, 1, 0, 1, 1, 0, 0, 1),
-                (0, 1, 0, 1, 0, 1, 1, 0),
-                (0, 1, 0, 1, 0, 1, 0, 1)
-            }
+        # clean_tests = [
+        #     ((1, 0) if s1 == 0 else (0, 1))
+        #     + ((1, 0) if s2 == 0 else (0, 1))
+        #     + ((1, 0) if s3 == 0 else (0, 1))
+        #     + ((1, 0) if s4 == 0 else (0, 1))
+        #     for s1, s2, s3, s4 in itertools.product(range(2), range(2), range(2), range(2))
+        # ]
+        clean_tests = {
+            (1, 0, 1, 0, 1, 0, 1, 0),
+            (1, 0, 1, 0, 1, 0, 0, 1),
+            (1, 0, 1, 0, 0, 1, 1, 0),
+            (1, 0, 1, 0, 0, 1, 0, 1),
+            (1, 0, 0, 1, 1, 0, 1, 0),
+            (1, 0, 0, 1, 1, 0, 0, 1),
+            (1, 0, 0, 1, 0, 1, 1, 0),
+            (1, 0, 0, 1, 0, 1, 0, 1),
+            (0, 1, 1, 0, 1, 0, 1, 0),
+            (0, 1, 1, 0, 1, 0, 0, 1),
+            (0, 1, 1, 0, 0, 1, 1, 0),
+            (0, 1, 1, 0, 0, 1, 0, 1),
+            (0, 1, 0, 1, 1, 0, 1, 0),
+            (0, 1, 0, 1, 1, 0, 0, 1),
+            (0, 1, 0, 1, 0, 1, 1, 0),
+            (0, 1, 0, 1, 0, 1, 0, 1)
+        }
 
-            print(test_bits)
+        # print(test_bits)
 
-            if test_bits == (1, 1, 0, 0, 0, 0, 0, 0):
-                _, area = cls.sphere_triple_intersection_area(a, b, c, r1, r2, r3)
-                return (0, 1, 2), area
-            elif test_bits == (0, 0, 1, 1, 0, 0, 0, 0):
-                _, area = cls.sphere_triple_intersection_area(g, f, c, r1, r2, r4)
-                return (0, 1, 3), area
-            elif test_bits == (0, 0, 0, 0, 1, 1, 0, 0):
-                _, area = cls.sphere_triple_intersection_area(h, f, b, r1, r3, r4)
-                return (0, 2, 3), area
-            elif test_bits == (0, 0, 0, 0, 0, 0, 1, 1):
-                _, area = cls.sphere_triple_intersection_area(h, g, a, r2, r3, r4)
-                return (1, 2, 3), area
-            elif test_bits == (1, 1, 1, 1, 0, 0, 0, 0):
-                _, area = cls.sphere_double_intersection_area(c, r1, r2)
-                return (0, 1), area
-            elif test_bits == (1, 1, 0, 0, 1, 1, 0, 0):
-                _, area = cls.sphere_double_intersection_area(b, r1, r3)
-                return (0, 2), area
-            elif test_bits == (0, 0, 1, 1, 1, 1, 0, 0):
-                _, area = cls.sphere_double_intersection_area(f, r1, r4)
-                return (0, 3), area
-            elif test_bits == (1, 1, 0, 0, 0, 0, 1, 1):
-                _, area = cls.sphere_double_intersection_area(a, r2, r3)
-                return (1, 2), area
-            elif test_bits == (0, 0, 1, 1, 0, 0, 1, 1):
-                _, area = cls.sphere_double_intersection_area(g, r2, r4)
-                return (1, 3), area
-            elif test_bits == (0, 0, 0, 0, 1, 1, 1, 1):
-                _, area = cls.sphere_double_intersection_area(h, r3, r4)
-                return (2, 3), area
-            elif test_bits == (1, 1, 1, 1, 1, 1, 0, 0):
-                return (0,), cls.sphere_area(r1)
-            elif test_bits == (1, 1, 1, 1, 0, 0, 1, 1):
-                return (1,), cls.sphere_area(r2)
-            elif test_bits == (1, 1, 0, 0, 1, 1, 1, 1):
-                return (2,), cls.sphere_area(r3)
-            elif test_bits == (0, 0, 1, 1, 1, 1, 1, 1):
-                return (3,), cls.sphere_area(r4)
-            elif test_bits == (1, 1, 1, 1, 1, 1, 1, 1):
-                # if W2 < 0:
-                T123 = cls.triangle_area(r1, r2, r3)
-                T124 = cls.triangle_area(r1, r2, r4)
-                T134 = cls.triangle_area(r1, r3, r4)
-                T234 = cls.triangle_area(r2, r3, r4)
-                test_vec = np.array([T123, T124, T134, T234])
+        if test_bits == (1, 1, 0, 0, 0, 0, 0, 0):
+            # _, area = cls.sphere_triple_intersection_area(a, b, c, r1, r2, r3)
+            return (0, 1, 2), None
+        elif test_bits == (0, 0, 1, 1, 0, 0, 0, 0):
+            # _, area = cls.sphere_triple_intersection_area(g, f, c, r1, r2, r4)
+            return (0, 1, 3), None
+        elif test_bits == (0, 0, 0, 0, 1, 1, 0, 0):
+            # _, area = cls.sphere_triple_intersection_area(h, f, b, r1, r3, r4)
+            return (0, 2, 3), None
+        elif test_bits == (0, 0, 0, 0, 0, 0, 1, 1):
+            # _, area = cls.sphere_triple_intersection_area(h, g, a, r2, r3, r4)
+            return (1, 2, 3), None
+        elif test_bits == (1, 1, 1, 1, 0, 0, 0, 0):
+            # _, area = cls.sphere_double_intersection_area(c, r1, r2)
+            return (0, 1), None
+        elif test_bits == (1, 1, 0, 0, 1, 1, 0, 0):
+            # _, area = cls.sphere_double_intersection_area(b, r1, r3)
+            return (0, 2), None
+        elif test_bits == (0, 0, 1, 1, 1, 1, 0, 0):
+            # _, area = cls.sphere_double_intersection_area(f, r1, r4)
+            return (0, 3), None
+        elif test_bits == (1, 1, 0, 0, 0, 0, 1, 1):
+            # _, area = cls.sphere_double_intersection_area(a, r2, r3)
+            return (1, 2), None
+        elif test_bits == (0, 0, 1, 1, 0, 0, 1, 1):
+            # _, area = cls.sphere_double_intersection_area(g, r2, r4)
+            return (1, 3), None
+        elif test_bits == (0, 0, 0, 0, 1, 1, 1, 1):
+            # _, area = cls.sphere_double_intersection_area(h, r3, r4)
+            return (2, 3), None
+        elif test_bits == (1, 1, 1, 1, 1, 1, 0, 0):
+            return (0,), None#cls.sphere_area(r1)
+        elif test_bits == (1, 1, 1, 1, 0, 0, 1, 1):
+            return (1,), None#cls.sphere_area(r2)
+        elif test_bits == (1, 1, 0, 0, 1, 1, 1, 1):
+            return (2,), None#cls.sphere_area(r3)
+        elif test_bits == (0, 0, 1, 1, 1, 1, 1, 1):
+            return (3,), None#cls.sphere_area(r4)
+        elif test_bits == (1, 1, 1, 1, 1, 1, 1, 1):
+            # if W2 < 0:
+            T123 = cls.triangle_area(r1, r2, r3)
+            T124 = cls.triangle_area(r1, r2, r4)
+            T134 = cls.triangle_area(r1, r3, r4)
+            T234 = cls.triangle_area(r2, r3, r4)
+            test_vec = np.array([T123, T124, T134, T234])
 
-                if (
-                        abs(np.dot([1, 1, -1, -1], test_vec)) < 1e-6
-                        or abs(np.dot([1, -1, 1, -1], test_vec)) < 1e-6
-                        or abs(np.dot([1, -1, -1, 1], test_vec)) < 1e-6
-                ):
-                    A, B, C, F, G, H = np.array([a, b, c, f, g, h])**2
-                    # need to find triangles
-                    if (A - (B + C)) > 1e-6:
-                        # 1 --c-- 2
-                        # | b   g |
-                        # 3 --h-- 4
-                        _, area = cls.sphere_double_intersection_area(a, r2, r3)
-                        return (1, 2), -area
-                    elif (B - (A + C)) > 1e-6:
-                        # 2 --c-- 1
-                        # | a   g |
-                        # 3 --h-- 4
-                        _, area = cls.sphere_double_intersection_area(b, r1, r3)
-                        return (0, 2), -area
-                    elif (C - (A + B)) > 1e-6:
-                        # 3 --b-- 1
-                        # | a   f |
-                        # 2 --g-- 4
-                        _, area = cls.sphere_double_intersection_area(c, r1, r2)
-                        return (0, 1), -area
-                    elif (F - (G + H)) > 1e-6:
-                        # 3 --b-- 1
-                        # | h   c |
-                        # 4 --f-- 2
-                        # f is a diagonal
-                        _, area = cls.sphere_double_intersection_area(f, r1, r4)
-                        return (0, 3), -area
-                    # elif (G - (F + H)) > 1e-6:
-                    #     # g is a diagonal
-                    #     _, area = cls.sphere_double_intersection_area(g, r2, r4)
-                    #     return (1, 3), area
-                    else:
-                        raise ValueError("no set of diagonals works...")
-                elif abs(np.dot([1, 1, 1, -1], test_vec)) < 1e-6:
-                    raise NotImplementedError(...)
+            if (
+                    abs(np.dot([1, 1, -1, -1], test_vec)) < 1e-6
+                    or abs(np.dot([1, -1, 1, -1], test_vec)) < 1e-6
+                    or abs(np.dot([1, -1, -1, 1], test_vec)) < 1e-6
+            ):
+                A, B, C, F, G, H = np.array([a, b, c, f, g, h])**2
+                # need to find triangles
+                if (A - (B + C)) > 1e-6:
+                    # 1 --c-- 2
+                    # | b   g |
+                    # 3 --h-- 4
+                    # _, area = cls.sphere_double_intersection_area(a, r2, r3)
+                    return (1, 2), None
+                elif (B - (A + C)) > 1e-6:
+                    # 2 --c-- 1
+                    # | a   g |
+                    # 3 --h-- 4
+                    # _, area = cls.sphere_double_intersection_area(b, r1, r3)
+                    return (0, 2), None
+                elif (C - (A + B)) > 1e-6:
+                    # 3 --b-- 1
+                    # | a   f |
+                    # 2 --g-- 4
+                    # _, area = cls.sphere_double_intersection_area(c, r1, r2)
+                    return (0, 1), None
+                elif (F - (G + H)) > 1e-6:
+                    # 3 --b-- 1
+                    # | h   c |
+                    # 4 --f-- 2
+                    # f is a diagonal
+                    # _, area = cls.sphere_double_intersection_area(f, r1, r4)
+                    return (0, 3), None
+                # elif (G - (F + H)) > 1e-6:
+                #     # g is a diagonal
+                #     _, area = cls.sphere_double_intersection_area(g, r2, r4)
+                #     return (1, 3), area
                 else:
-                    raise ValueError("no set of areas works...")
-            elif test_bits not in clean_tests:
-                raise ValueError(test_bits)
+                    raise ValueError("no set of diagonals works...")
+            elif abs(np.dot([1, 1, 1, -1], test_vec)) < 1e-6:
+                raise NotImplementedError(...)
+            else:
+                raise ValueError("no set of areas works...")
+        elif test_bits not in clean_tests:
+            raise ValueError(test_bits)
 
         if W2 <= 0:
             raise ValueError(...)
@@ -967,8 +972,8 @@ class SphereUnionSurface:
         return None, A
 
     @classmethod
-    def sphere_area(cls, radii):
-        return 4*np.pi*np.sum(radii**2)
+    def sphere_area(cls, radii, axis=None):
+        return 4*np.pi*np.sum(radii**2, axis=axis)
 
     @classmethod
     def sphere_union_surface_area(cls,
@@ -976,109 +981,150 @@ class SphereUnionSurface:
                                   include_doubles=True,
                                   include_triples=None,
                                   include_quadruples=None,
-                                  include_quintuples=None,
+                                  # include_quintuples=None,
+                                  return_terms=False,
                                   overlap_tolerance=0):
         if include_triples is None:
             include_triples = include_doubles
         if include_quadruples is None:
             include_quadruples = include_triples is not False
-        if include_quintuples is None:
-            include_quintuples = include_quadruples is not False
+        # if include_quintuples is None:
+        #     include_quintuples = include_quadruples is not False
+
         dm = nput.distance_matrix(centers)
-        surf = cls.sphere_area(radii)
+        terms = {
+            (i,):v
+            for i,v in enumerate(cls.sphere_area(np.asanyarray(radii)[:, np.newaxis], axis=-1))
+        }
         nc = len(centers)
-        visible = np.full((nc), True)
-        pairs = np.full((nc, nc), 0.0)
-        include_pairs = np.full((nc, nc), False)
+        # visible = np.full((nc), True)
+        # include_pairs = np.full((nc, nc), False)
         if include_doubles:
             for i,j in itertools.combinations(range(nc), 2):
-                if not (visible[i] and visible[j]): continue
+                if not (
+                        (i,) in terms
+                        and (j,) in terms
+                ): continue
                 if (radii[i] + radii[j]) * (1+overlap_tolerance) > dm[i, j]:
-                    overlaps, pairs[i, j] = cls.sphere_double_intersection_area(
+                    overlaps, contrib = cls.sphere_double_intersection_area(
                         dm[i, j], radii[i], radii[j]
                     )
                     if overlaps is not None:
                         if len(overlaps) > 0:
                             k = [i, j][overlaps[0]]
-                            visible[k] = False
+                            # visible[k] = False
+                            terms.pop((k,), None)
                     else:
-                        include_pairs[i, j] = True
-                    print(i, j, overlaps, pairs[i, j], surf - pairs[i, j])
-                    surf -= pairs[i, j]
+                        # include_pairs[i, j] = True
+                        terms[(i, j)] = -contrib
 
-        cubics = np.full((nc, nc, nc), 0.0)
         if include_quadruples:
             intersection_points = np.full((nc, nc, nc, 2, 3), 0.0)
-            include_cubics = np.full((nc, nc, nc), False)
         else:
-            include_cubics = None
             intersection_points = None
         if include_triples or include_quadruples:
             for i,j,k in itertools.combinations(range(nc), 3):
-                if not (visible[i] and visible[j] and visible[k]): continue
-                if all(include_pairs[p] for p in itertools.combinations((i, j, k), 2)):
-                    overlaps, cubics[i, j, k] = cls.sphere_triple_intersection_area(
+                if not all(p in terms for p in itertools.combinations((i, j, k), 1)): continue
+                if all(p in terms for p in itertools.combinations((i, j, k), 2)):
+                    overlaps, contrib = cls.sphere_triple_intersection_area(
                         dm[j, k], dm[i, k], dm[i, j],
                         radii[i], radii[j], radii[k]
                     )
                     if overlaps is not None:
                         overlaps = tuple([i,j,k][x] for x in overlaps)
                         if len(overlaps) == 2:
-                            include_pairs[overlaps] = False
+                            i, j = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if i in p and j in p:
+                                    del terms[p]
                         elif len(overlaps) == 1:
-                            visible[overlaps,] = False
+                            l, = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if l in p:
+                                    del terms[p]
                     else:
                         if include_quadruples:
-                            include_cubics[i, j, k] = True
                             intersection_points[i, j, k] = cls.sphere_triple_intersection_point(
                                 centers[(i, j, k),],
                                 radii[(i, j, k),],
                                 dists=(dm[i, j], dm[i, k])
                             )
-                    if include_triples:
-                        if all(pairs[p] > 0 for p in itertools.combinations((i, j, k), 2)):
-                            print(i, j, k, overlaps, pairs[i, j], surf + cubics[i, j, k])
-                            surf += cubics[i, j, k]
+                        terms[(i, j, k)] = contrib
 
-        quartics = np.full((nc, nc, nc, nc), 0.0)
+        intersection_tests = None
+        include_quartics = None
         if include_quadruples:
+            intersection_tests = np.full((nc, nc, nc, nc, 2), False)
+            # include_quartics = np.full((nc, nc, nc, nc), False)
             for i,j,k,l in itertools.combinations(range(nc), 4):
-                if not (
-                        visible[i] and visible[j]
-                        and visible[k] and visible[l]
-                ): continue
-                if not all(
-                    include_pairs[p]
-                    for p in itertools.combinations((i, j, k, l), 2)
-                ): continue
-                if all(
-                        include_cubics[p]
-                        for p in itertools.combinations((i, j, k, l), 3)
-                ):
-                    l_ints = np.linalg.norm(centers[(l,)] - intersection_points[i, j, k], axis=-1) < radii[l] * (1+overlap_tolerance)
-                    k_ints = np.linalg.norm(centers[(k,)] - intersection_points[i, j, l], axis=-1) < radii[k] * (1+overlap_tolerance)
-                    j_ints = np.linalg.norm(centers[(j,)] - intersection_points[i, k, l], axis=-1) < radii[j] * (1+overlap_tolerance)
-                    i_ints = np.linalg.norm(centers[(i,)] - intersection_points[j, k, l], axis=-1) < radii[i] * (1+overlap_tolerance)
-                    overlaps, quartics[i, j, k, l] = cls.sphere_quadruple_intersection_area(
+                if not all(p in terms for p in itertools.combinations((i, j, k, l), 1)): continue
+                if not all(p in terms for p in itertools.combinations((i, j, k, l), 2)): continue
+                if all(p in terms for p in itertools.combinations((i, j, k, l), 3)):
+                    l_ints = intersection_tests[i, j, k, l] = (
+                            np.linalg.norm(centers[(l,)] - intersection_points[i, j, k], axis=-1)
+                             < radii[l] * (1 + overlap_tolerance)
+                    )
+                    k_ints = intersection_tests[i, j, l, k] = (
+                            np.linalg.norm(centers[(k,)] - intersection_points[i, j, l], axis=-1)
+                            < radii[k] * (1+overlap_tolerance)
+                    )
+                    j_ints = intersection_tests[i, k, l, j] = (
+                            np.linalg.norm(centers[(j,)] - intersection_points[i, k, l], axis=-1)
+                            < radii[j] * (1+overlap_tolerance)
+                    )
+                    i_ints = intersection_tests[j, k, l, i] = (
+                            np.linalg.norm(centers[(i,)] - intersection_points[j, k, l], axis=-1)
+                            < radii[i] * (1 + overlap_tolerance)
+                    )
+                    overlaps, contrib = cls.sphere_quadruple_intersection_area(
                         dm[j, k], dm[i, k], dm[i, j],
                         dm[i, l], dm[j, l], dm[k, l],
                         radii[i], radii[j], radii[k], radii[l],
-                        cubics[i, j, k], cubics[i,j,l],
-                        cubics[i, k, l], cubics[j,k,l],
+                        terms[(i, j, k)], terms[(i,j,l)],
+                        terms[(i, k, l)], terms[(j,k,l)],
                         l_ints, k_ints, j_ints, i_ints
                     )
                     if overlaps is not None:
-                        overlaps = tuple([i,j,k, l][x] for x in overlaps)
+                        overlaps = tuple([i, j, k, l][x] for x in overlaps)
                         if len(overlaps) == 3:
-                            include_cubics[overlaps] = False
+                            x, y, z = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if x in p and y in p and z in p:
+                                    del terms[p]
                         elif len(overlaps) == 2:
-                            include_pairs[overlaps] = False
+                            x, y, = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if x in p and y in p:
+                                    del terms[p]
                         elif len(overlaps) == 1:
-                            visible[overlaps,] = False
-                    print(i, j, k, l, overlaps, quartics[i, j, k, l], surf - quartics[i, j, k, l])
-                    surf -= quartics[i, j, k, l]
+                            term_keys = list(terms.keys())
+                            x, = overlaps
+                            for p in term_keys:
+                                if x in p:
+                                    del terms[p]
+                    else:
+                        terms[(i, j, k, l)] = -contrib
 
-        return surf
+        if return_terms:
+            return terms
+        else:
+            if include_doubles and include_triples and include_quadruples:
+                return sum(terms.values())
+            else:
+                return sum(
+                    v
+                    for k,v in terms.items()
+                    if (
+                        len(k) == 1
+                        or (include_doubles and len(k) == 2)
+                        or (include_triples and len(k) == 3)
+                        or (include_quadruples and len(k) == 4)
+                    )
+                )
 
     def surface_area(self, method='union', **opts):
         if method == 'union':
