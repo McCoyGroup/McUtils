@@ -404,40 +404,51 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [X3DCylinder](Plots/X3DInterface/X3DCylinder.md)   
 </div>
    <div class="col" markdown="1">
-[X3DArrow](Plots/X3DInterface/X3DArrow.md)   
+[X3DCappedCylinder](Plots/X3DInterface/X3DCappedCylinder.md)   
 </div>
    <div class="col" markdown="1">
-[X3DTorus](Plots/X3DInterface/X3DTorus.md)   
+[X3DArrow](Plots/X3DInterface/X3DArrow.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[X3DTorus](Plots/X3DInterface/X3DTorus.md)   
+</div>
    <div class="col" markdown="1">
 [X3DRectangle2D](Plots/X3DInterface/X3DRectangle2D.md)   
 </div>
    <div class="col" markdown="1">
-[X3DTriangleSet](Plots/X3DInterface/X3DTriangleSet.md)   
-</div>
-   <div class="col" markdown="1">
-[X3DIndexedTriangleSet](Plots/X3DInterface/X3DIndexedTriangleSet.md)   
+[X3DDisk2D](Plots/X3DInterface/X3DDisk2D.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[X3DCircle2D](Plots/X3DInterface/X3DCircle2D.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DPolyline2D](Plots/X3DInterface/X3DPolyline2D.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DTriangleSet](Plots/X3DInterface/X3DTriangleSet.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[X3DIndexedTriangleSet](Plots/X3DInterface/X3DIndexedTriangleSet.md)   
+</div>
    <div class="col" markdown="1">
 [X3DIndexedLineSet](Plots/X3DInterface/X3DIndexedLineSet.md)   
 </div>
    <div class="col" markdown="1">
 [X3DSwitch](Plots/X3DInterface/X3DSwitch.md)   
 </div>
-   <div class="col" markdown="1">
-[X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[ColorPalette](Plots/Colors/ColorPalette.md)   
+[X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
 </div>
    <div class="col" markdown="1">
-   
+[ColorPalette](Plots/Colors/ColorPalette.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -465,9 +476,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6641f9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6641f9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-ed7a65" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ed7a65"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6641f9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ed7a65" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -488,9 +499,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-88b5c5" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-88b5c5"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-961ab1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-961ab1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-88b5c5" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-961ab1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
