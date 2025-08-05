@@ -1784,7 +1784,7 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
         if prev is None or next is None: return jac
         self._last_tangent = self.get_tangent(guess, mask, cur, prev, next)
 
-        return vec_ops.project_out(jac, self._last_tangent[:, :, np.newaxis], orthornomal=True)
+        return vec_ops.project_out(jac, self._last_tangent[:, :, np.newaxis], orthonormal=True)
 
     def image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
         if order > 2: return 0

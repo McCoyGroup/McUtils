@@ -1,5 +1,8 @@
 
 import itertools, collections
+import typing
+
+import scipy
 import scipy.sparse as sparse, numpy as np
 from .. import Numputils as nput
 from .. import Iterators as itut
@@ -11,7 +14,8 @@ __all__ = [
 ]
 
 class EdgeGraph:
-    __slots__ = ["labels", "edges", "graph", "map"]
+    map: dict[int, set[int]]
+    __slots__ = ["labels", "edges", "graph", "map", "_rings", "_sp_data"]
     def __init__(self, labels, edges, graph=None, edge_map=None):
         self.labels = labels
         self.edges = np.asanyarray(edges)
@@ -22,10 +26,62 @@ class EdgeGraph:
             edge_map = self.build_edge_map(self.edges)
         self.map = edge_map
         self._rings = None
+        self._sp_data = None
+
+    def graph_difference(self, other):
+        diff = (other.graph - self.graph)
+        if isinstance(diff, np.ndarray):
+            nzr, nzc = np.nonzero(diff)
+            new = diff[nzr, nzc].asarray() > 0
+        else:
+            nzr, nzc, vals = sparse.find(diff)
+            new = vals > 0
+        old = np.logical_not(new)
+
+        return np.array([nzr[new], nzc[new]]).T, np.array([nzr[old], nzc[old]]).T
+
+    @classmethod
+    def get_edge_graph(cls, spec):
+        if isinstance(spec, dict):
+            num_nodes = len(spec)
+            edge_list = np.array([
+                (i, j)
+                for i in spec
+                for j in spec[i]
+            ])
+            return cls.adj_mat(num_nodes, edge_list)
+        elif isinstance(spec, (sparse.csr_matrix, sparse.coo_matrix, sparse.csc_matrix)): #TODO: better checks
+            return spec
+        else:
+            num_nodes = len(np.unique(np.concatenate(spec, axis=1)))
+            return cls.adj_mat(num_nodes, spec)
+
+    @classmethod
+    def get_edge_list(cls, spec):
+        if isinstance(spec, dict):
+            return [
+                (i, j)
+                for i in spec
+                for j in spec[i]
+            ]
+        elif isinstance(spec, (sparse.csr_matrix, sparse.coo_matrix, sparse.csc_matrix)): #TODO: better checks
+            r, c = spec.nonzero()
+            return np.array([r, c]).T
+        else:
+            return spec
+
+    @classmethod
+    def get_edge_map(cls, spec):
+        if isinstance(spec, dict):
+            return spec
+        elif isinstance(spec, (sparse.csr_matrix, sparse.coo_matrix, sparse.csc_matrix)):  # TODO: better checks
+            return cls.get_edge_map(cls.get_edge_list(spec))
+        else:
+            return cls.build_edge_map(spec)
 
     @classmethod
     def adj_mat(cls, num_nodes, edges):
-        adj = np.zeros((num_nodes, num_nodes), dtype=bool)
+        adj = np.zeros((num_nodes, num_nodes), dtype=int)
         rows,cols = edges.T
         adj[rows, cols] = 1
         adj[cols, rows] = 1
@@ -63,7 +119,7 @@ class EdgeGraph:
 
         return [labels[p] for p in pos], edge_list
     @classmethod
-    def _take(cls, pos, labels, adj_mat:sparse.compressed):
+    def _take(cls, pos, labels, adj_mat:sparse.compressed) -> 'typing.Self':
         rows, cols, _ = sparse.find(adj_mat)
         utri = cols >= rows
         rows = rows[utri]
@@ -179,22 +235,23 @@ class EdgeGraph:
         if self._rings is None:
             self._rings = self.get_rings()
         return self._rings
-    def get_rings(self):
-        # clunky, but it works
+
+    @classmethod
+    def find_rings_in_graph(cls, n_inds, edge_map):
         test_rings = []
-        for n,l in enumerate(self.labels):
-            if len(self.map[n]) < 2: continue
+        for n in range(n_inds):
+            if len(edge_map[n]) < 2: continue
             visited = set()
             test_rings.append(
                 tree.tree_traversal(
-                    self.map,
+                    edge_map,
                     lambda parent, child, visited: (
                         visited
-                            if len(visited & self.map[child]) > 1 else
+                        if len(visited & edge_map[child]) > 1 else
                         None
                     ),
                     root=n,
-                    get_children=lambda h: [c for c in self.map[h] if len(self.map[c]) > 1],
+                    get_children=lambda h: [c for c in edge_map[h] if len(edge_map[c]) > 1],
                     get_item=lambda _, h: h,
                     visited=visited,
                     call_order='post',
@@ -206,38 +263,156 @@ class EdgeGraph:
 
         rings = []
         keys = set()
-        for i,r1 in enumerate(filt_rings):
+        for i, r1 in enumerate(filt_rings):
             for r2 in filt_rings[i:]:
                 int_ring = r1 & r2
                 key = tuple(sorted(int_ring))
                 if key in keys: continue
                 keys.add(key)
-                r = self.check_ring(int_ring)
+                r = cls.check_ring_in_graph(int_ring, edge_map)
                 if r: rings.append(r)
         return rings
 
-
-    def check_ring(self, ring_atoms):
+    @classmethod
+    def check_ring_in_graph(cls, ring_atoms, edge_map):
         if len(ring_atoms) < 3: return False
         ring_atoms = set(ring_atoms)
-        if any(len(self.map[r] & ring_atoms) == 1 for r in ring_atoms): return False
+        if any(len(edge_map[r] & ring_atoms) == 1 for r in ring_atoms): return False
         visited = set()
         root = next(iter(ring_atoms))
         ring = []
         return tree.tree_traversal(
-                    self.map,
+                    edge_map,
                     lambda parent, child, visited: (
                         ring + [child]
-                            if (parent != root and root in self.map[child]) else
+                            if (parent != root and root in edge_map[child]) else
                         ring.append(child)
                     ),
                     root=root,
-                    get_children=lambda h: self.map[h] & ring_atoms,
+                    get_children=lambda h: edge_map[h] & ring_atoms,
                     get_item=lambda _, h: h,
                     visited=visited,
                     call_order='post',
                     traversal_ordering='dfs'
                 )
+
+    def get_rings(self):
+        return self.find_rings_in_graph(len(self.labels), self.map)
+
+    @classmethod
+    def get_shortest_path_data(cls, graph):
+        return sparse.csgraph.shortest_path(
+            graph, directed=False, return_predecessors=True
+        )
+    @property
+    def shortest_path_data(self):
+        if self._sp_data is None:
+            self._sp_data = self.get_shortest_path_data(self.graph)
+        return self._sp_data
+
+    @classmethod
+    def get_path_from_data(cls, start, end, sp_data):
+        dist_matrix, predecessors = sp_data
+        path = [end]
+        # straight from scipy docs...I had a better imp. at one point but dunno where it is
+        for _ in range(len(dist_matrix)):  # max number of steps
+            cur_node = int(predecessors[start][path[-1]])
+            if cur_node < 0:
+                break
+            path.append(cur_node)
+        return tuple(reversed(path))
+    @classmethod
+    def get_longest_path_from_data(cls, shortest_path_data):
+        dist_matrix, predecessors = shortest_path_data
+        max_cols = np.argmax(dist_matrix, axis=1)
+        max_row = np.argmax(dist_matrix[np.arange(len(max_cols)), max_cols])
+        return cls.get_path_from_data(max_row, max_cols[max_row], shortest_path_data)
+    def get_path(self, start, end):
+        return self.get_path_from_data(start, end, self.shortest_path_data)
+
+    @classmethod
+    def compute_edge_centralities(self, indices, map):
+        if nput.is_int(indices):
+            return len(map[indices])
+        else:
+            return np.array([len(map[i]) for i in indices])
+
+    @classmethod
+    def find_longest_chain_from_breakpoints(cls,
+                                            map,
+                                            graph=None,
+                                            rings=None,
+                                            use_highest_valencies=True,
+                                            shortest_path_data=None
+                                            ):
+        if rings is None:
+            rings = cls.find_rings_in_graph(len(map), map)
+        if graph is None:
+            graph = cls.get_edge_graph(map)
+        if len(rings) == 0:
+            if shortest_path_data is None:
+                shortest_path_data = cls.get_shortest_path_data(graph)
+            return cls.get_longest_path_from_data(shortest_path_data)
+        else:
+            # in principle we have to check every set of breakpoints...
+            # but we can make this more efficient by noting that a break
+            # has to occur near the highest-valency position for fused rings
+            # and if breaking can lead to a long ring will again be near a high-valency
+            # atom in non-fused rings
+            # each potential high-valency bond can be broken
+            if use_highest_valencies:
+                ring_valencies = [cls.compute_edge_centralities(r, map) for r in rings]
+                break_pos = [
+                    np.array(r)[np.where(v == np.max(v))]
+                    for r,v in zip(rings, ring_valencies)
+                ]
+            else:
+                break_pos = rings
+
+            break_bonds = [
+                [
+                    (p, j)  # enumerate all ring bonds starting at the breakpos, could be more efficient
+                    for p in bp
+                    for j in map[p]
+                    if j in r
+                ]
+                for r, bp in zip(rings, break_pos)
+            ]
+
+            # chain = None
+            n_inds = len(map)
+            for p_list in itertools.product(*break_bonds):
+                if len({tuple(sorted(p)) for p in p_list}) < len(p_list): continue # dupe bond in fused ring
+                new_map: dict[int, set[int]] = {k: v.copy() for k, v in map.items()}
+                for center, bond in p_list:
+                    new_map[center].remove(bond)
+                    new_map[bond].remove(center)
+
+                new_rings = cls.find_rings_in_graph(n_inds, new_map)
+                if len(new_rings) == 0:
+                    chain = cls.find_longest_chain_from_breakpoints(
+                        new_map
+                    )
+                    break
+            else:
+                raise ValueError("couldn't find a way to break rings?")
+
+            return chain
+
+    def find_longest_chain(self,
+                           rings=None,
+                           use_highest_valencies=True,
+                           ):
+        if rings is None:
+            rings = self.rings
+
+        return self.find_longest_chain_from_breakpoints(
+            self.map,
+            graph=self.graph,
+            rings=self.rings,
+            use_highest_valencies=use_highest_valencies,
+            shortest_path_data=self.shortest_path_data
+        )
 
     def get_fragments(self):
         from scipy.sparse import csgraph
@@ -669,4 +844,42 @@ class MoleculeEdgeGraph(EdgeGraph):
             for n, _ in enumerate(self.labels)
         ]
 
+    light_atoms = {"H", "D"}
+    def get_heavy_atom_framework_graph(
+            self,
+            heavy_atoms=None,
+            light_atoms=None
+    ):
+        if heavy_atoms is None:
+            if light_atoms is None:
+                light_atoms = self.light_atoms
 
+            inds = [
+                i for i,l in enumerate(self.labels)
+                if l not in light_atoms
+            ]
+        else:
+            inds = [
+                i for i,l in enumerate(self.labels)
+                if l in heavy_atoms
+            ]
+
+        return self.take(inds)
+    def find_longest_chain(self,
+                           rings=None,
+                           use_highest_valencies=True,
+                           heavy_atoms=True,
+                           light_atoms=None
+                           ):
+        if heavy_atoms or (light_atoms is not None):
+            if heavy_atoms is True: heavy_atoms = None
+            graph = self.get_heavy_atom_framework_graph(
+                heavy_atoms=heavy_atoms,
+                light_atoms=light_atoms
+            )
+            return graph.find_longest_chain(
+                heavy_atoms=None,
+                light_atoms=None
+            )
+        else:
+            return super().find_longest_chain()
