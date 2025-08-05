@@ -219,7 +219,10 @@ class RDMolecule(ExternalMolecule):
                            take_min=None,
                            force_field_type='mmff',
                            **mol_opts):
-        conf = mol.GetConformer(conf_id)
+        try:
+            conf = mol.GetConformer(conf_id)
+        except ValueError:
+            conf = None
         if conf:
             return cls.from_rdmol(mol, conf_id, **mol_opts)
         else:

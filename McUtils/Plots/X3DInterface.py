@@ -76,7 +76,7 @@ class X3D(X3DObject):
         let videoFormat = (typeof canvas.videoFormat === 'undefined') ? "{video_format}" : canvas.videoFormat;
         let videoExtension = canvas.videoExtension;
         if (typeof canvas.videoExtension === 'undefined') {{
-            videoExtension = videoFormat.split("/")[1].split(";")[0];
+            videoExtension = ""
         }}
         let x3DRecordingStream = canvas.captureStream(pollingRate);
         let mediaRecorder = new MediaRecorder(x3DRecordingStream, {{mimeType: videoFormat}});

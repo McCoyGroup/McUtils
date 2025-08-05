@@ -504,8 +504,8 @@ def functionalized_zmatrix(
         base_zm,
         attachments:dict=None,
         single_atoms:list[int]=None, # individual components, embedding doesn't matter
-        methyl_positions:list[int]=None,
-        ethyl_positions:list[int]=None,
+        methyl_positions:list[int]=None, # all bonds attached to central atom, angles relative to eachother
+        ethyl_positions:list[int]=None, # all bonds attached to central atom, angles relative to eachother
 ):
     if nput.is_numeric(base_zm):
         zm = chain_zmatrix(base_zm)
@@ -560,6 +560,12 @@ def functionalized_zmatrix(
                 ]
             )
     return zm
+
+# def bond_graph_zmatrix(
+#         backbone,
+#
+# ):
+#     ...
 
 def reindex_zmatrix(zm, perm):
     return [
