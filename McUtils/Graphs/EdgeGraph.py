@@ -41,19 +41,21 @@ class EdgeGraph:
         return np.array([nzr[new], nzc[new]]).T, np.array([nzr[old], nzc[old]]).T
 
     @classmethod
-    def get_edge_graph(cls, spec):
+    def get_edge_graph(cls, spec, num_nodes=None):
         if isinstance(spec, dict):
-            num_nodes = len(spec)
             edge_list = np.array([
                 (i, j)
                 for i in spec
                 for j in spec[i]
             ])
+            if num_nodes is None:
+                num_nodes = len(np.unique(edge_list.flatten()))
             return cls.adj_mat(num_nodes, edge_list)
         elif isinstance(spec, (sparse.csr_matrix, sparse.coo_matrix, sparse.csc_matrix)): #TODO: better checks
             return spec
         else:
-            num_nodes = len(np.unique(np.concatenate(spec, axis=1)))
+            spec = np.array(spec)
+            num_nodes = len(np.unique(spec.flatten()))
             return cls.adj_mat(num_nodes, spec)
 
     @classmethod
@@ -82,9 +84,10 @@ class EdgeGraph:
     @classmethod
     def adj_mat(cls, num_nodes, edges):
         adj = np.zeros((num_nodes, num_nodes), dtype=int)
-        rows,cols = edges.T
-        adj[rows, cols] = 1
-        adj[cols, rows] = 1
+        if len(edges) > 0:
+            rows,cols = edges.T
+            adj[rows, cols] = 1
+            adj[cols, rows] = 1
 
         return sparse.csr_matrix(adj)
 
@@ -97,13 +100,16 @@ class EdgeGraph:
         )
 
     @classmethod
-    def build_edge_map(cls, edge_list):
+    def build_edge_map(cls, edge_list, num_nodes=None):
         map = {}
         for e1,e2 in edge_list:
             if e1 not in map: map[e1] = set()
             map[e1].add(e2)
             if e2 not in map: map[e2] = set()
             map[e2].add(e1)
+        if num_nodes is not None:
+            for i in range(num_nodes):
+                if i not in map: map[i] = set()
         return map
 
     @classmethod
@@ -414,11 +420,124 @@ class EdgeGraph:
             shortest_path_data=self.shortest_path_data
         )
 
-    def get_fragments(self):
-        from scipy.sparse import csgraph
-        _, labels = csgraph.connected_components(self.graph, directed=False, return_labels=True)
+    def segment_by_chains(self,
+                          rings=None,
+                          use_highest_valencies=True,
+                          ):
+        return self.segment_graph_by_chains(
+            self.map,
+            graph=self.graph,
+            rings=self.rings,
+            use_highest_valencies=use_highest_valencies,
+            shortest_path_data=self.shortest_path_data
+        )
+
+    @classmethod
+    def find_graph_centroid(cls, graph, shortest_path_data=None):
+        # we define the graph centroid as the point with the minimum maximum graph
+        # distance over a fully-connected graph
+
+        if shortest_path_data is None:
+            shortest_path_data = cls.get_shortest_path_data(graph)
+        distance_matrix, _ = shortest_path_data
+        return np.argmin(np.argmax(distance_matrix, axis=1), axis=0)
+
+    def get_centroid(self, check_fragments=True):
+        if check_fragments:
+            fragments = self.get_fragments()
+            if len(fragments) > 0:
+                centroids = []
+                for f in fragments:
+                    g = self.take(f)
+                    centroids.append(g.get_centroid(check_fragments=False))
+                return fragments, centroids
+
+        return self.find_graph_centroid(self.graph, shortest_path_data=self.shortest_path_data)
+
+    @classmethod
+    def get_graph_fragment_indices(cls, graph):
+        _, labels = sparse.csgraph.connected_components(graph, directed=False, return_labels=True)
         _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
         return groups
+
+    def get_fragments(self):
+        return self.get_graph_fragment_indices(self.graph)
+
+    @classmethod
+    def _reindex_segmentss(cls, frags, remapping):
+        if nput.is_int(frags[0]):
+            return tuple(remapping[j] for j in frags)
+        else:
+            return tuple(
+                cls._reindex_segmentss(f, remapping)
+                for f in frags
+            )
+    @classmethod
+    def segment_graph_by_chains(cls,
+                      map:dict[int, set[int]],
+                      graph:('sparse.coo_matrix|sparse.csr_matrix|sparse.csc_matrix')=None,
+                      rings=None,
+                      use_highest_valencies=True,
+                      shortest_path_data=None
+                      ):
+
+        if len(map) == 1:
+            return tuple(map.keys())
+
+        if graph is None:
+            graph = cls.get_edge_graph(map)
+
+        segments = []
+
+        backbone = cls.find_longest_chain_from_breakpoints(
+            map,
+            graph=graph,
+            rings=rings,
+            use_highest_valencies=use_highest_valencies,
+            shortest_path_data=shortest_path_data
+        )
+
+        segments.append(backbone)
+
+        # n_labels = range(len(map))
+        new_map = {k:v.copy() for k,v in map.items()}
+        for i in backbone:
+            for j in new_map.get(i, set()):
+                new_map[j].remove(i)
+            del new_map[i]
+
+        rem = np.delete(np.arange(len(map)), backbone)
+        base_remapping = {k: i for i, k in enumerate(rem)}
+        base_inv = {i: k for i, k in enumerate(rem)}
+        new_map = {
+            base_remapping[i]: {base_remapping[k] for k in v}
+            for i,v in new_map.items()
+        }
+
+        fragments = cls.get_graph_fragment_indices(
+            cls.get_edge_graph(new_map)
+        )
+
+        for frag in fragments:
+            if len(frag) == 1:
+                return frag
+            else:
+                remapping = {k:i for i,k in enumerate(frag)}
+                inverse_mapping = {i:base_inv[k] for i,k in enumerate(frag)}
+                subbones = cls.segment_graph_by_chains(
+                    {
+                        remapping[k]: {remapping[j] for j in new_map[k]}
+                        for k in frag
+                    },
+                    use_highest_valencies=use_highest_valencies
+                )
+                segments.append(
+                    cls._reindex_segmentss(subbones, inverse_mapping)
+                )
+
+
+        return segments
+
 
     @classmethod
     def get_maximum_overlap_permutation(cls, graph_1:'EdgeGraph', graph_2:'EdgeGraph'):
@@ -878,8 +997,27 @@ class MoleculeEdgeGraph(EdgeGraph):
                 light_atoms=light_atoms
             )
             return graph.find_longest_chain(
-                heavy_atoms=None,
+                heavy_atoms=False,
                 light_atoms=None
             )
         else:
             return super().find_longest_chain()
+
+    def segment_by_chains(self,
+                          rings=None,
+                          use_highest_valencies=True,
+                          heavy_atoms=True,
+                          light_atoms=None
+                          ):
+        if heavy_atoms or (light_atoms is not None):
+            if heavy_atoms is True: heavy_atoms = None
+            graph = self.get_heavy_atom_framework_graph(
+                heavy_atoms=heavy_atoms,
+                light_atoms=light_atoms
+            )
+            return graph.segment_by_chains(
+                heavy_atoms=False,
+                light_atoms=None
+            )
+        else:
+            return super().segment_by_chains()
