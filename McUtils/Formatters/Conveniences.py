@@ -5,7 +5,8 @@ from .TableFormatters import TableFormatter
 __all__ = [
     "format_tensor_element_table",
     "format_symmetric_tensor_elements",
-    "format_mode_labels"
+    "format_mode_labels",
+    "format_zmatrix"
 ]
 
 def format_tensor_element_table(inds, vals,
@@ -100,3 +101,41 @@ def format_mode_labels(labels,
                 reversed(labels) if high_to_low else labels
             )
         ])
+
+def format_zmatrix(zm, preserve_embedding=True, preserve_indices=True, list_form=True):
+    max_ind = int(np.log10(max([max(z) for z in zm]))) + 2
+    formatter = TableFormatter(
+        f"{{:>{max_ind}.0f}}",
+        column_join=", " if list_form else " ",
+        row_padding=" [" if list_form else "",
+        row_join="],\n" if list_form else "\n"
+    )
+    if not preserve_embedding:
+        if isinstance(zm, np.ndarray):
+            zm = zm.tolist()
+        else:
+            zm = [list(z) for z in zm]
+        if len(zm[0]) == 4:
+            zm[0][1] = ""
+            zm[0][2] = ""
+            zm[0][3] = ""
+
+            zm[1][2] = ""
+            zm[1][3] = ""
+
+            zm[2][3] = ""
+        else:
+            zm[0][1] = ""
+            zm[0][2] = ""
+
+            zm[1][2] = ""
+
+    if not preserve_indices:
+        if len(zm[0]) == 4:
+            zm = [z[1:] for z in zm[1:]]
+
+    base = formatter.format(zm)
+    if list_form:
+        base = "[" + base[1:] + "]]"
+
+    return base

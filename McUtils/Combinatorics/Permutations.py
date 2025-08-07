@@ -2364,8 +2364,8 @@ class EmptyIntegerPartitionPermutations(IntegerPartitionPermutations):
 
         self.dim = dim
         self._class_counts = np.full(1, None, dtype=object)
-        self._class_counts[0] = [np.array([0], dtype='int8'), np.array([dim], dtype='int8')]
-        self.partition_counts = np.array([], dtype='int8')
+        self._class_counts[0] = [np.array([0], dtype=int), np.array([dim], dtype=int)]
+        self.partition_counts = np.array([], dtype=int)
         self._cumtotals = np.array([0, 1])
         self._num_terms = 1
 
@@ -2400,7 +2400,7 @@ class EmptyIntegerPartitionPermutations(IntegerPartitionPermutations):
         if woof.ndim == 1:
             return 0
         else:
-            return np.zeros(len(woof), dtype='int8' if dtype is None else dtype)
+            return np.zeros(len(woof), dtype=int if dtype is None else dtype)
 
     def get_partition_permutations_from_indices(self, indices,
                                                 assume_sorted=None,

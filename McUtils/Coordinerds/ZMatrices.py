@@ -2,6 +2,7 @@ import numpy as np
 import itertools
 from .. import Numputils as nput
 from .. import Iterators as itut
+from ..Graphs import EdgeGraph
 
 from .Internals import canonicalize_internal
 
@@ -21,7 +22,10 @@ __all__ = [
     # "ethyl_zmatrix",
     "attached_zmatrix_fragment",
     "functionalized_zmatrix",
+    "add_missing_zmatrix_bonds",
+    "bond_graph_zmatrix",
     "reindex_zmatrix",
+    "complex_zmatrix"
 ]
 
 
@@ -445,10 +449,8 @@ def validate_zmatrix(ordering,
         if ensure_nonnegative and proxy_order[0] < 0:
             return False
         new_order = [
-            [
-                [order_sorting[i] if i >= 0 else i for i in row]
-                for row in ordering
-            ]
+            [order_sorting[i] if i >= 0 else i for i in row]
+            for row in ordering
         ]
         return validate_zmatrix(new_order, allow_reordering=False)
     if ensure_nonnegative and proxy_order[0] < 0:
@@ -460,6 +462,7 @@ def validate_zmatrix(ordering,
         if (
                 any(i > n for i in row)
                 or any(i > row[0] for i in row[1:])
+                or len(set(row)) < len(row)
         ):
             return False
 
@@ -468,6 +471,27 @@ def validate_zmatrix(ordering,
 def chain_zmatrix(n):
     return [
         list(range(i, i-4, -1))
+        for i in range(n)
+    ]
+
+def center_bound_zmatrix(n, center=-1):
+    return [
+        [
+            i,
+            center,
+            (
+                (i - 2)
+                if i > 1 else
+                0
+                if i == 1 else
+                -2
+            ),
+            (
+                (i - 1)
+                if i > 1 else
+                -3 + i
+            ),
+        ]
         for i in range(n)
     ]
 
@@ -561,14 +585,198 @@ def functionalized_zmatrix(
             )
     return zm
 
-# def bond_graph_zmatrix(
-#         backbone,
-#
-# ):
-#     ...
 
 def reindex_zmatrix(zm, perm):
     return [
         [perm[r] if r >= 0 else r for r in row]
         for row in zm
     ]
+
+def canonicalize_zmatrix(zm):
+    if len(zm[0]) == 3:
+        zm = [
+            [0, -1, -2, -3]
+        ] + [
+            [i+1] + z
+            for i,z in enumerate(zm)
+        ]
+
+    perm = np.array([z[0] for z in zm])
+    return perm, reindex_zmatrix(zm, np.argsort(perm))
+
+def _attachment_point(i_pos):
+    return (i_pos,
+     ((i_pos - 1) if i_pos > 0 else 1),
+     ((i_pos - 2) if i_pos > 1 else 2)
+     )
+def add_missing_zmatrix_bonds(
+        base_zmat,
+        bonds,
+        max_iterations=None
+):
+    atoms, zm = canonicalize_zmatrix(base_zmat)
+    new_bonds = {}
+    reindexing = list(atoms)
+    for bi, be in bonds:
+        if bi in atoms and be in atoms: continue
+        if bi not in atoms and be not in atoms: continue
+        if bi in atoms:
+            # bi_pos = np.where(atoms == bi)[0][0]
+            if bi not in new_bonds: new_bonds[bi] = []
+            new_bonds[bi].append(be)
+        if be in atoms:
+            if be not in new_bonds: new_bonds[be] = []
+            new_bonds[be].append(bi)
+
+    if len(new_bonds) == 0:
+        return base_zmat, new_bonds
+    else:
+        mods = {}
+        for i,v in new_bonds.items():
+            i_pos = np.where(atoms == i)[0][0]
+            reindexing.extend(v)
+            ix = _attachment_point(i_pos)
+            mods[ix] = center_bound_zmatrix(len(v))
+
+        new_zm = reindex_zmatrix(
+            functionalized_zmatrix(
+                zm,
+                mods
+            ),
+            np.argsort(reindexing)
+        )
+
+        if max_iterations is None or max_iterations > 0:
+            new_zm, new_new_bonds = add_missing_zmatrix_bonds(
+                new_zm,
+                bonds,
+                max_iterations=max_iterations-1 if max_iterations is not None else max_iterations
+            )
+
+            new_bonds.update(new_new_bonds)
+
+        return new_zm, new_bonds
+
+
+def bond_graph_zmatrix(
+        bonds,
+        fragments,
+        edge_map=None,
+        reindex=False
+):
+    submats = []
+    backbone = fragments[0]
+    primary = chain_zmatrix(len(backbone))
+    if edge_map is None:
+        edge_map = EdgeGraph.get_edge_map(bonds)
+    for frag in fragments[1:]:
+        if nput.is_int(frag[0]):
+            submats.append(
+                chain_zmatrix(len(frag))
+            )
+        else:
+            submats.append(
+                bond_graph_zmatrix(
+                    bonds,
+                    frag,
+                    edge_map=edge_map,
+                    reindex=False
+                )
+            )
+
+
+    attachment_points = []
+    for frag in fragments[1:]:
+        if not nput.is_int(frag[0]):
+            frag = frag[0]
+
+        for f in frag:
+            attach = None
+            submap = edge_map.get(f)
+            if nput.is_int(submap):
+                if submap in backbone:
+                    attach = submap
+            else:
+                for s in submap:
+                    if s in backbone:
+                        attach = s
+                        break
+
+            if attach is not None:
+                attachment_points.append(backbone.index(attach))
+                break
+
+        else:
+            raise ValueError("can't attach fragment to backbone, no connections")
+
+    fused = functionalized_zmatrix(
+        len(primary),
+        {
+            _attachment_point(ap):zmat
+            for ap,zmat in zip(attachment_points, submats)
+        }
+    )
+
+    if reindex:
+        flat_frags = itut.flatten(fragments)
+        fused = reindex_zmatrix(fused, flat_frags)
+
+    return fused
+
+
+def complex_zmatrix(
+        bonds,
+        fragment_inds=None,
+        fragment_zmats=None,
+        distance_matrix=None,
+        attachment_points=None,
+        graph=None,
+        reindex=True
+):
+    if fragment_inds is None:
+        if fragment_zmats is not None:
+            raise ValueError("can't supply just Z-mats, unclear which fragments they come from...")
+        all_inds = np.unique(np.concatenate(bonds))
+        if graph is None:
+            graph = EdgeGraph(all_inds, bonds)
+
+        fragment_inds = graph.get_fragments()
+
+    all_inds = np.concatenate(fragment_inds)
+    if graph is None:
+        graph = EdgeGraph(all_inds, bonds)
+
+    if fragment_zmats is None:
+        fragment_zmats = [
+            bond_graph_zmatrix(bonds, f, edge_map=graph.map)
+            for f in fragment_inds
+        ]
+
+    inds = np.asanyarray(fragment_inds[0])
+    zm = fragment_zmats[0]
+    if attachment_points is None:
+        attachment_points = [None] * len(fragment_inds)
+    for inds_2, zm_2, root in zip(fragment_inds[1:], fragment_zmats[1:], attachment_points[1:]):
+        if root is None:
+            if distance_matrix is None:
+                subgraph = graph.take(inds)
+                root = subgraph.get_centroid(check_fragments=False)
+            else:
+                distance_matrix = np.asanyarray(distance_matrix)
+                dm = distance_matrix[np.ix_(inds, inds_2)]
+                min_cols = np.argmin(dm, axis=1)
+                min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
+                root = np.where(inds == min_row)[0][0]
+
+        inds = np.concatenate([inds, inds_2])
+        zm = functionalized_zmatrix(
+            zm,
+            {
+                _attachment_point(root): zm_2
+            }
+        )
+
+    if reindex:
+        zm = reindex_zmatrix(zm, inds)
+
+    return zm

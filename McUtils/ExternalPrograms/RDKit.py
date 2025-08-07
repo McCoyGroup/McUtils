@@ -55,7 +55,10 @@ class RDMolecule(ExternalMolecule):
         new_mol.AddConformer(conf)
         return type(self).from_rdmol(new_mol,
                                      conf_id=conf.GetId(),
-                                     charge=self.charge, sanitize=False, guess_bonds=False)
+                                     charge=self.charge, sanitize=False,
+                                     guess_bonds=False,
+                                     add_implicit_hydrogens=False
+                                     )
     @property
     def charges(self):
         from rdkit.Chem import AllChem
@@ -286,13 +289,17 @@ class RDMolecule(ExternalMolecule):
         return self.chem_api().MolToSmiles(self.rdmol)
 
     @classmethod
-    def from_molblock(cls, molblock):
+    def from_molblock(cls,
+                      molblock,
+                      add_implicit_hydrogens=False,
+                      call_add_hydrogens=True,
+                      ):
         Chem = cls.chem_api()
         if os.path.isfile(molblock):
             mol = Chem.MolFromMolFile(molblock, sanitize=False, removeHs=False)
         else:
             mol = Chem.MolFromMolBlock(molblock, sanitize=False, removeHs=False)
-        return cls.from_rdmol(mol)
+        return cls.from_rdmol(mol, add_implicit_hydrogens=add_implicit_hydrogens)
 
     @classmethod
     def allchem_api(cls):
@@ -431,6 +438,8 @@ class RDMolecule(ExternalMolecule):
             def optimizer(mol, **etc):
                 ff = mol.get_force_field(force_field_type)
                 return ff_helpers.OptimizeMolecule(ff)
+
+        Chem
 
         maxIters = int(maxIters)
         if geoms is not None:
