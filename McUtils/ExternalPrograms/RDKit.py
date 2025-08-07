@@ -51,7 +51,7 @@ class RDMolecule(ExternalMolecule):
     def copy(self):
         Chem = self.chem_api()
         conf = self.mol
-        new_mol = Chem.Mol(self.rdmol)
+        new_mol = Chem.AddHs(Chem.Mol(self.rdmol), explicitOnly=True)
         new_mol.AddConformer(conf)
         return type(self).from_rdmol(new_mol,
                                      conf_id=conf.GetId(),
@@ -100,6 +100,20 @@ class RDMolecule(ExternalMolecule):
         return cls(conf, charge=charge)
 
     @classmethod
+    def resolve_bond_type(cls, t):
+        Chem = cls.chem_api()
+
+        if abs(t - 1.5) < 1e-2:
+            t = Chem.BondType.names["AROMATIC"]
+        elif abs(t - 2.5) < 1e-2:
+            t = Chem.BondType.names["TWOANDAHALF"]
+        elif abs(t - 3.5) < 1e-2:
+            t = Chem.BondType.names["TWOANDAHALF"]
+        else:
+            t = Chem.BondType.values[int(t)]
+
+        return t
+    @classmethod
     def from_coords(cls, atoms, coords, bonds=None, charge=None, guess_bonds=None):
         Chem = cls.chem_api()
         mol = Chem.EditableMol(Chem.Mol())
@@ -115,18 +129,18 @@ class RDMolecule(ExternalMolecule):
                 else:
                     i,j,t = b
                 if nput.is_numeric(t):
-                    t = Chem.BondType.values[int(t)]
+                    t = cls.resolve_bond_type(t)
                 else:
                     t = Chem.BondType.names[t]
                 mol.AddBond(int(i), int(j), t)
         mol.CommitBatchEdit()
 
         mol = mol.GetMol()
+        mol = Chem.AddHs(mol, explicitOnly=True)
         conf = Chem.Conformer(len(atoms))
         conf.SetPositions(np.asanyarray(coords))
         conf.SetId(0)
         mol.AddConformer(conf)
-        mol = Chem.AddHs(mol, explicitOnly=True)
 
         if guess_bonds is None:
             guess_bonds = bonds is None
@@ -246,9 +260,12 @@ class RDMolecule(ExternalMolecule):
                                    optimize=False,
                                    take_min=True,
                                    force_field_type='mmff',
+                                   add_implicit_hydrogens=False,
                                    **etc
                                    ):
         AllChem = cls.allchem_api()
+
+        AllChem.AddHs(mol, explicitOnly=not add_implicit_hydrogens)
 
         with OutputRedirect():
             conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=cls.get_confgen_opts())
@@ -283,7 +300,7 @@ class RDMolecule(ExternalMolecule):
         else:
             conf_id = 0
 
-        return cls.from_rdmol(mol, conf_id=conf_id, **etc)
+        return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
 
     def to_smiles(self):
         return self.chem_api().MolToSmiles(self.rdmol)
@@ -318,12 +335,17 @@ class RDMolecule(ExternalMolecule):
 
         return ff_type
 
-    def get_force_field(self, force_field_type='mmff', mol=None, conf_id=None, **extra_props):
-        if mol is None:
-            mol = self
-        if conf_id is None:
-            conf_id = mol.mol.GetId()
-        mol = mol.rdmol
+    def get_force_field(self, force_field_type='mmff', conf=None, mol=None, conf_id=None, **extra_props):
+        if conf is None:
+            if mol is None:
+                mol = self
+            if conf_id is None:
+                conf_id = mol.mol.GetId()
+            mol = mol.rdmol
+        else:
+            mol = conf.GetOwningMol()
+            if conf_id is None:
+                conf_id = conf.GetId()
 
         force_field_type = self.get_force_field_type(force_field_type)
         if isinstance(force_field_type, (list, tuple)):
@@ -353,6 +375,9 @@ class RDMolecule(ExternalMolecule):
             raise ValueError(f"charge model {model} not supported in RDKit")
 
     def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
+        Chem = self.chem_api()
+        conf = Chem.Conformer(self.mol)
+
         if force_field_generator is None:
             force_field_generator = self.get_force_field
         if geoms is not None:
@@ -364,7 +389,7 @@ class RDMolecule(ExternalMolecule):
             try:
                 for i,g in enumerate(geoms):
                     self.mol.SetPositions(g.copy())
-                    ff = force_field_generator(force_field_type)
+                    ff = force_field_generator(force_field_type, conf=conf)
                     vals[i] = ff.CalcEnergy()
             finally:
                 self.mol.SetPositions(cur_geom)
@@ -376,7 +401,13 @@ class RDMolecule(ExternalMolecule):
     def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
         if force_field_generator is None:
             force_field_generator = self.get_force_field
-        cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
+
+        Chem = self.chem_api()
+        conf = Chem.Conformer(self.mol)
+        mol = conf.GetOwningMol()
+        Chem.AddHs(mol)
+
+        cur_geom = np.array(conf.GetPositions()).reshape(-1, 3)
         if geoms is not None:
             geoms = np.asanyarray(geoms)
             base_shape = geoms.shape[:-2]
@@ -384,11 +415,11 @@ class RDMolecule(ExternalMolecule):
             vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
             try:
                 for i, g in enumerate(geoms):
-                    self.mol.SetPositions(g.copy())
-                    ff = force_field_generator(force_field_type)
+                    conf.SetPositions(g.copy())
+                    ff = force_field_generator(force_field_type, conf=conf)
                     vals[i] = ff.CalcGrad()
             finally:
-                self.mol.SetPositions(cur_geom)
+                conf.SetPositions(cur_geom)
             return vals.reshape(base_shape + (-1,))
         else:
             ff = force_field_generator(force_field_type, conf_id=conf_id)
@@ -438,8 +469,6 @@ class RDMolecule(ExternalMolecule):
             def optimizer(mol, **etc):
                 ff = mol.get_force_field(force_field_type)
                 return ff_helpers.OptimizeMolecule(ff)
-
-        Chem
 
         maxIters = int(maxIters)
         if geoms is not None:
