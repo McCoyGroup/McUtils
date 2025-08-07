@@ -183,7 +183,7 @@ class Plot(Graphics):
         "markeredgewidth", "markeredgecolor", "markerfacecolor", "markerfacecoloralt",
         "fillstyle", "antialiased", "dash_capstyle", "solid_capstyle",
         "dash_joinstyle", "solid_joinstyle", "pickradius", "drawstyle", "markevery",
-        'gid', "zorder"
+        'gid', "zorder", 'label'
     }
     patch_parms = {
         "agg_filter", "alpha", "animated", "antialiased", "capstyle",

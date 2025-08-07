@@ -2250,12 +2250,23 @@ class X3DAxes(GraphicsAxes3D):
                   line_thickness=None,
                   innerRadius=None,
                   outerRadius=None,
+                  uv_axes=None,
+                  rotation=None,
                   solid=None,
                   **styles):
         if radius is None and s is not None:
             radius = s / 100
         if line_color is None:
             line_color = edgecolors
+
+        if uv_axes is not None:
+            u, v = uv_axes
+            ang, normal = nput.vec_angles(u, v, return_crosses=True)
+            emb_angle, _ = nput.vec_angles(
+                [1, 0, 0],
+                nput.rotation_matrix([0, 0, 1], normal) @ v
+            )
+            rotation = [0, 0, 1, emb_angle]
 
         objects = []
         if line_color is not None:
@@ -2264,6 +2275,7 @@ class X3DAxes(GraphicsAxes3D):
                                            normal=normal,
                                            radius=radius,
                                            glow=line_color,
+                                           rotation=rotation,
                                            solid=False if solid is None else solid,
                                            **styles
                                            )
@@ -2279,9 +2291,11 @@ class X3DAxes(GraphicsAxes3D):
                                         radius=outerRadius if color is None else radius,
                                         color=line_color,
                                         solid=solid,
+                                        rotation=rotation,
                                         **styles
                                         )
             objects.append(disk_set)
+
         if color is None and line_color is None:
             color = 'black'
         if color is not None:
@@ -2292,6 +2306,7 @@ class X3DAxes(GraphicsAxes3D):
                                      inner_radius=innerRadius,
                                      radius=outerRadius,
                                      color=color,
+                                     rotation=rotation,
                                      solid=False if solid is None else solid,
                                      **styles
                                      )

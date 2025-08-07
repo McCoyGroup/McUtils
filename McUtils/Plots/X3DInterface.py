@@ -797,24 +797,70 @@ class X3DRectangle2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Rectangle2D
 class X3DCircle2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Circle2D
-class X3DDisk2D(X3DGeometry2DGroup):
-    tag_class = X3DHTML.Disk2D
-    def prep_geometry_opts(self, centers,
-                           radius=1, inner_radius=None,
-                           normal=None, rotation=None, scale=None, **opts):
+    def prep_geometry_opts(self, centers, radius=1,
+                           normal=None, rotation=None, scale=None,
+                           angle=None,
+                           **opts):
         centers = self.prep_vecs(centers)
         normal = self.prep_vecs(normal, centers.shape[0])
+        if angle is not None and angle < 0:
+            if rotation is None:
+                rotation = [0, 0, 1, 0]
+            if isinstance(rotation, str):
+                rotation = np.array(rotation.split()).astype(float)
+            rotation = list(rotation[:3]) + [rotation[3] + angle]
+            angle = abs(angle)
+        rotation = self.prep_vecs(rotation, centers.shape[0])
+        scale = self.prep_vecs(scale, centers.shape[0])
+        radius = self.prep_const(radius, centers.shape[0])
+        angle = self.prep_const(angle, centers.shape[0])
+
+        return [
+            {
+                "translation": s, "normal": n, "radius": r,
+                'rotation': rot, 'scale': sc,
+                'angle': ang,
+                **opts}
+            for s, n, rot, sc, r, i, ang in zip(
+                centers, normal,
+                rotation, scale,
+                radius, angle
+            )
+        ]
+
+class X3DDisk2D(X3DGeometry2DGroup):
+    tag_class = X3DHTML.Disk2D
+
+    def prep_geometry_opts(self, centers, radius=1, inner_radius=None,
+                           normal=None, rotation=None, scale=None,
+                           angle=None,
+                           **opts):
+        centers = self.prep_vecs(centers)
+        normal = self.prep_vecs(normal, centers.shape[0])
+        if angle is not None and angle < 0:
+            if rotation is None:
+                rotation = [0, 0, 1, 0]
+            if isinstance(rotation, str):
+                rotation = np.array(rotation.split()).astype(float)
+            rotation = list(rotation[:3]) + [rotation[3] + angle]
+            angle = abs(angle)
         rotation = self.prep_vecs(rotation, centers.shape[0])
         scale = self.prep_vecs(scale, centers.shape[0])
         radius = self.prep_const(radius, centers.shape[0])
         inner_radius = self.prep_const(inner_radius, centers.shape[0])
+        angle = self.prep_const(angle, centers.shape[0])
 
         return [
             {
                 "translation": s, "normal": n, "outerRadius": r,
-                "innerRadius": i, 'rotation':rot, 'scale':sc,
+                "innerRadius": i, 'rotation': rot, 'scale': sc,
+                'angle': ang,
                 **opts}
-            for s, n, r, i,rot,sc in zip(centers, normal, radius, inner_radius, rotation, scale)
+            for s, n, rot, sc, r, i, ang in zip(
+                centers, normal,
+                rotation, scale,
+                radius, inner_radius, angle
+            )
         ]
 class X3DPolyline2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Polyline2D
