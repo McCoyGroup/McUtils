@@ -2261,7 +2261,7 @@ class X3DAxes(GraphicsAxes3D):
         if line_color is not None:
             if line_thickness is None:
                 disk_set = x3d.X3DCircle2D(points,
-                                           normal,
+                                           normal=normal,
                                            radius=radius,
                                            glow=line_color,
                                            solid=False if solid is None else solid,
@@ -2288,7 +2288,7 @@ class X3DAxes(GraphicsAxes3D):
             if outerRadius is None:
                 outerRadius = radius
             disk_set = x3d.X3DDisk2D(points,
-                                     normal,
+                                     normal=normal,
                                      inner_radius=innerRadius,
                                      radius=outerRadius,
                                      color=color,

@@ -171,9 +171,17 @@ class X3D(X3DObject):
         else:
             return elems[0]
 
-    def to_html(self, *base_elems, header_elems=None, **header_info):
+    def to_html(self, *base_elems, header_elems=None,
+                dynamic_loading=False,
+                include_export_button=None,
+                include_record_button=None,
+                **header_info):
         id = self.id
-        x3d_embed = self.to_x3d()  # .tostring()
+        x3d_embed = self.to_widget(
+            dynamic_loading=dynamic_loading,
+            include_export_button=include_export_button,
+            include_record_button=include_record_button
+        )  # .tostring()
 
         return JHTML.Html(
             JHTML.Head(
@@ -507,10 +515,17 @@ class X3DGeometryObject(X3DPrimitive):
                       **core_opts):
         base_obj = self.create_tag_object(**core_opts)
         tf = {}
-        if normal is not None and rotation is None:
+        if normal is not None:
             if up_vector is None:
                 up_vector = [0, 0, 1]
             angs, crosses = nput.vec_angles(up_vector, normal, return_crosses=True, return_norms=False)
+            if rotation is not None:
+                if isinstance(rotation, str):
+                    rotation = np.array(rotation.split()).astype(float)
+                angs, crosses = nput.extract_rotation_angle_axis(
+                    nput.rotation_matrix(crosses, angs)
+                        @ nput.rotation_matrix(rotation[:3], rotation[3])
+                )
             rotation = np.concatenate([crosses, [angs]])
         for k,v in [["translation",translation], ["rotation",rotation], ["scale", scale]]:
             if v is not None:
@@ -711,21 +726,34 @@ class X3DTorus(X3DGeometryGroup):
 
     def prep_geometry_opts(self, centers, radius=1, inner_radius=None,
                            normal=None, rotation=None, scale=None,
+                           angle=None,
                            **opts):
         centers = self.prep_vecs(centers)
         normal = self.prep_vecs(normal, centers.shape[0])
+        if angle is not None and angle < 0:
+            if rotation is None:
+                rotation = [0, 0, 1, 0]
+            if isinstance(rotation, str):
+                rotation = np.array(rotation.split()).astype(float)
+            rotation = list(rotation[:3]) + [rotation[3] + angle]
+            angle = abs(angle)
         rotation = self.prep_vecs(rotation, centers.shape[0])
         scale = self.prep_vecs(scale, centers.shape[0])
         radius = self.prep_const(radius, centers.shape[0])
         inner_radius = self.prep_const(inner_radius, centers.shape[0])
+        angle = self.prep_const(angle, centers.shape[0])
 
         return [
             {
                 "translation": s, "normal": n, "outerRadius": r,
                 "innerRadius": i, 'rotation': rot, 'scale': sc,
+                'angle': ang,
                 **opts}
-            for s, n, r, i, rot, sc in
-            zip(centers, normal, radius, inner_radius, rotation, scale)
+            for s, n, rot, sc, r, i, ang in zip(
+                centers, normal,
+                rotation, scale,
+                radius, inner_radius, angle
+            )
         ]
 
 class X3DCoordinatesWrapper(X3DGeometryGroup):
