@@ -960,6 +960,76 @@ GaussianLogComponents["NormalModes"] = {
 #     "mode"     : mode
 # }
 
+tag_start = "Zeta(I,J)"
+tag_end = "Num. of Coriolis"
+
+def parse_coriolis(blocks):
+    if blocks is not None:
+        blocks = blocks.rsplit("\n", 1)[0]
+        cors = np.loadtxt(io.StringIO(blocks), skiprows=1, usecols=[1, 2, 3])
+        ax = np.loadtxt(io.StringIO(blocks), skiprows=1, usecols=[0], dtype=str)
+        ar = np.zeros((len(ax), 1), dtype=float)
+        for i, a in enumerate(ax):
+            if a == 'y':
+                ar[i, 0] = 1
+            elif a == 'z':
+                ar[i, 0] = 2
+        return np.concatenate([ar, cors], axis=1)
+
+mode = "Single"
+GaussianLogComponents["CoriolisTerms"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    "parser": parse_coriolis,
+    "mode": mode
+}
+
+
+tag_start = "K(I,J)"
+tag_end = "Num. of 2nd derivatives"
+
+def parse_quadratics(blocks):
+    blocks = blocks.rsplit("\n", 1)[0]
+    return np.loadtxt(io.StringIO(blocks), skiprows=1, usecols=[0, 1, 2])
+
+mode = "Single"
+GaussianLogComponents["QuadraticTerms"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    "parser": parse_quadratics,
+    "mode": mode
+}
+
+tag_start = "K(I,J,K)"
+tag_end = "Num. of 3rd derivatives"
+
+def parse_cubics(blocks):
+    blocks = blocks.rsplit("\n", 1)[0]
+    return np.loadtxt(io.StringIO(blocks), skiprows=1, usecols=[0, 1, 2, 3])
+
+mode = "Single"
+GaussianLogComponents["CubicTerms"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    "parser": parse_cubics,
+    "mode": mode
+}
+
+tag_start = "K(I,J,K,L)"
+tag_end = "Num. of 4th derivatives"
+
+def parse_quartics(blocks):
+    blocks = blocks.rsplit("\n", 1)[0]
+    return np.loadtxt(io.StringIO(blocks), skiprows=1, usecols=[0, 1, 2, 3, 4])
+
+mode = "Single"
+GaussianLogComponents["QuarticTerms"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    "parser": parse_quartics,
+    "mode": mode
+}
+
 ########################################################################################################################
 #
 #                                           GaussianLogDefaults

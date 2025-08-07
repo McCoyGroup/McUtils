@@ -3,10 +3,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[         0,          0]
-NotebookDataLength[     65875,       1489]
-NotebookOptionsPosition[     60216,       1389]
-NotebookOutlinePosition[     60611,       1405]
-CellTagsIndexPosition[     60568,       1402]
+NotebookDataLength[     66219,       1496]
+NotebookOptionsPosition[     60465,       1395]
+NotebookOutlinePosition[     60860,       1411]
+CellTagsIndexPosition[     60817,       1408]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1384,7 +1384,13 @@ McUtils/Data/TheRealMcCoy/AtomData.py\"\>"], "Output",
  CellChangeTimes->{3.947980681153055*^9, 3.9635209839090347`*^9},
  CellLabel->
   "Out[360]=",ExpressionUUID->"9e862091-1496-40d5-bfdf-afee74842a81"]
-}, Open  ]]
+}, Open  ]],
+
+Cell[BoxData["\"\<https://chemistry-europe.onlinelibrary.wiley.com/doi/epdf/\
+10.1002/chem.200800987\>\""], "Input",
+ CellChangeTimes->{{3.9635212804658327`*^9, 
+  3.9635212815588207`*^9}},ExpressionUUID->"da548ad5-ae17-4995-b6a6-\
+408e53ec39b5"]
 }, Open  ]]
 },
 WindowSize->{1043, 1035},
@@ -1482,7 +1488,8 @@ Cell[57968, 1333, 1101, 23, 220, "Input",ExpressionUUID->"f528dab7-a264-4420-af3
 Cell[CellGroupData[{
 Cell[59094, 1360, 814, 19, 199, "Input",ExpressionUUID->"7ade6cd8-521c-4926-baa8-8af8ca7d436a"],
 Cell[59911, 1381, 277, 4, 34, "Output",ExpressionUUID->"9e862091-1496-40d5-bfdf-afee74842a81"]
-}, Open  ]]
+}, Open  ]],
+Cell[60203, 1388, 246, 4, 30, "Input",ExpressionUUID->"da548ad5-ae17-4995-b6a6-408e53ec39b5"]
 }, Open  ]]
 }
 ]
