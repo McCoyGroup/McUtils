@@ -27,6 +27,13 @@ recursive-include McUtils/Extensions/FFI *.c
 recursive-include McUtils/Extensions/FFI LICENSE
 recursive-include McUtils/Extensions/FFI Makefile
 
+
+# FFI libs
+recursive-include McUtils/ExternalPrograms/ *.sh
+recursive-include McUtils/ExternalPrograms/ *.gjf
+recursive-include McUtils/ExternalPrograms/ *.inp
+recursive-include McUtils/ExternalPrograms/ *.json
+
 # Examples
 # graft examples
 
