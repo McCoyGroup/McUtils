@@ -1,7 +1,7 @@
 # <a id="McUtils.Formatters.Conveniences.format_mode_labels">format_mode_labels</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L62)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L62?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ format_mode_labels(labels, freqs=None, high_to_low=True, mode_index_format='{:.0
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_mode_labels.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_mode_labels.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L61?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L62?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

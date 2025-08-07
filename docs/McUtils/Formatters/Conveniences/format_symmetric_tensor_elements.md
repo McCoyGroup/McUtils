@@ -1,7 +1,7 @@
 # <a id="McUtils.Formatters.Conveniences.format_symmetric_tensor_elements">format_symmetric_tensor_elements</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L35?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ format_symmetric_tensor_elements(tensor, symmetries=None, cutoff=1e-06, headers=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_symmetric_tensor_elements.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_symmetric_tensor_elements.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L35?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

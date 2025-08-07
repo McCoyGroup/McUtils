@@ -186,7 +186,18 @@ Chained conversions are not _currently_ supported, but might well become support
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[add_missing_zmatrix_bonds](Coordinerds/ZMatrices/add_missing_zmatrix_bonds.md)   
+</div>
+   <div class="col" markdown="1">
+[bond_graph_zmatrix](Coordinerds/ZMatrices/bond_graph_zmatrix.md)   
+</div>
+   <div class="col" markdown="1">
 [reindex_zmatrix](Coordinerds/ZMatrices/reindex_zmatrix.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[complex_zmatrix](Coordinerds/ZMatrices/complex_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
 [coordinate_label](Coordinerds/Labels/coordinate_label.md)   
@@ -272,9 +283,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-948bbc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-948bbc"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c4c922" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c4c922"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-948bbc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c4c922" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -310,9 +321,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-cfe56d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-cfe56d"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-92f6d4" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-92f6d4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-cfe56d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-92f6d4" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -1,7 +1,7 @@
 # <a id="McUtils.Formatters.Conveniences.format_tensor_element_table">format_tensor_element_table</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L12)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L12?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ format_tensor_element_table(inds, vals, headers=('Indices', 'Value'), format='{:
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_tensor_element_table.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_tensor_element_table.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L11?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L12?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
