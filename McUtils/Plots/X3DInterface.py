@@ -821,7 +821,7 @@ class X3DCircle2D(X3DGeometry2DGroup):
                 'rotation': rot, 'scale': sc,
                 'angle': ang,
                 **opts}
-            for s, n, rot, sc, r, i, ang in zip(
+            for s, n, rot, sc, r, ang in zip(
                 centers, normal,
                 rotation, scale,
                 radius, angle
