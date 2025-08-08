@@ -2251,6 +2251,8 @@ class X3DAxes(GraphicsAxes3D):
                   innerRadius=None,
                   outerRadius=None,
                   uv_axes=None,
+                  uv_sign=None,
+                  angle=None,
                   rotation=None,
                   solid=None,
                   **styles):
@@ -2261,12 +2263,25 @@ class X3DAxes(GraphicsAxes3D):
 
         if uv_axes is not None:
             u, v = uv_axes
-            ang, normal = nput.vec_angles(u, v, return_crosses=True)
-            emb_angle, _ = nput.vec_angles(
-                [1, 0, 0],
-                nput.rotation_matrix([0, 0, 1], normal) @ v
-            )
-            rotation = [0, 0, 1, emb_angle]
+            base_ang, base_norm = nput.vec_angles(u, v, return_crosses=True)
+            base_norm = nput.vec_normalize(base_norm)
+            if normal is None:
+                normal = base_norm
+            angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
+            embedding_axes = nput.rotation_matrix(crosses, angs).T
+            local_x, local_y, local_z = embedding_axes
+            emb_angle, ax2 = nput.vec_angles(local_x, v)
+            if uv_sign is None:
+                # print(np.dot(local_x, v))
+                # print(np.dot(local_y, v))
+                # print(np.dot(local_x, u))
+                # print(np.dot(local_y, u))
+                uv_sign = np.sign(np.dot(local_y, v))
+            emb_angle = uv_sign * emb_angle
+            if rotation is None:
+                rotation = [0, 0, 1, emb_angle]
+            if angle is None:
+                angle = base_ang
 
         objects = []
         if line_color is not None:
@@ -2277,6 +2292,7 @@ class X3DAxes(GraphicsAxes3D):
                                            glow=line_color,
                                            rotation=rotation,
                                            solid=False if solid is None else solid,
+                                           angle=angle,
                                            **styles
                                            )
             else:
@@ -2292,6 +2308,7 @@ class X3DAxes(GraphicsAxes3D):
                                         color=line_color,
                                         solid=solid,
                                         rotation=rotation,
+                                        angle=angle,
                                         **styles
                                         )
             objects.append(disk_set)
@@ -2308,6 +2325,7 @@ class X3DAxes(GraphicsAxes3D):
                                      color=color,
                                      rotation=rotation,
                                      solid=False if solid is None else solid,
+                                     angle=angle,
                                      **styles
                                      )
             objects.append(disk_set)

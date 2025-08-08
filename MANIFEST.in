@@ -28,7 +28,7 @@ recursive-include McUtils/Extensions/FFI LICENSE
 recursive-include McUtils/Extensions/FFI Makefile
 
 
-# FFI libs
+# External program tempaltes
 recursive-include McUtils/ExternalPrograms/ *.sh
 recursive-include McUtils/ExternalPrograms/ *.gjf
 recursive-include McUtils/ExternalPrograms/ *.inp
