@@ -433,7 +433,46 @@ class X3DScene(X3DPrimitive):
         if background is not None:
             self.children = [X3DBackground(color=background)] + list(self.children)
         if len(viewpoint) > 0:
+            viewpoint = self.get_view_settings(**viewpoint)
             self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
+
+    @classmethod
+    def get_view_settings(cls,
+                          up_vector=None, view_vector=None, right_vector=None,
+
+                          view_position=None, **etc):
+        # CO = coords0[1] - coords0[0]
+        # OH = coords0[5] - coords0[1]
+        if view_vector is not None:
+            m = nput.rotation_matrix(
+                view_vector,
+                [0, 0, 1]
+            )
+        else:
+            m = np.eye(3)
+
+        if up_vector is None and right_vector is not None:
+            if view_vector is None:
+                view_vector = [0, 0, 1]
+            up_vector = nput.vec_normalize(
+                nput.vec_crosses(view_vector, right_vector)
+            )
+        if up_vector is not None:
+            m = m @ nput.rotation_matrix(
+                m.T @ up_vector,
+                [0, 1, 0]
+            )
+        ang, cross = nput.extract_rotation_angle_axis(m)
+        if view_position is None:
+            view_position = np.array([0, 0, 10])
+        view_position = m @ view_position
+        return dict(
+            {
+                'orientation': list(cross) + [ang],
+                'position': view_position
+            },
+            **etc
+        )
 
 class X3DBackground(X3DOptionsSet):
     wrapper_class = X3DHTML.Background

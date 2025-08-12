@@ -35,7 +35,8 @@ class PlotLegend(list):
                     "markerfirst", "frameon", "fancybox", "shadow", "framealpha", "facecolor",
                     "edgecolor", "mode", "bbox_transform", "title", "title_fontproperties",
                     "title_fontsize", "borderpad", "labelspacing", "handlelength", "handleheight",
-                    "handletextpad", "borderaxespad", "columnspacing", "handler_map"}
+                    "handletextpad", "borderaxespad", "columnspacing", "handler_map",
+                    "draggable"}
     default_styles={'frameon':False}
     def __init__(self, components, **styles):
         if isinstance(components, type(self)):

@@ -601,8 +601,9 @@ def canonicalize_zmatrix(zm):
             for i,z in enumerate(zm)
         ]
 
-    perm = np.array([z[0] for z in zm])
-    return perm, reindex_zmatrix(zm, np.argsort(perm))
+    z_vec = np.array([z[0] for z in zm])
+    perm = {z:i for i,z in enumerate(z_vec)}
+    return z_vec, reindex_zmatrix(zm, perm)
 
 def _attachment_point(i_pos):
     return (i_pos,
@@ -643,7 +644,7 @@ def add_missing_zmatrix_bonds(
                 zm,
                 mods
             ),
-            np.argsort(reindexing)
+            reindexing
         )
 
         if max_iterations is None or max_iterations > 0:
@@ -662,7 +663,7 @@ def bond_graph_zmatrix(
         bonds,
         fragments,
         edge_map=None,
-        reindex=False
+        reindex=True
 ):
     submats = []
     backbone = fragments[0]
@@ -718,7 +719,7 @@ def bond_graph_zmatrix(
     )
 
     if reindex:
-        flat_frags = itut.flatten(fragments)
+        flat_frags = list(itut.flatten(fragments))
         fused = reindex_zmatrix(fused, flat_frags)
 
     return fused
@@ -766,7 +767,8 @@ def complex_zmatrix(
                 dm = distance_matrix[np.ix_(inds, inds_2)]
                 min_cols = np.argmin(dm, axis=1)
                 min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
-                root = np.where(inds == min_row)[0][0]
+                root = inds[min_row]
+                # root = np.where(inds == min_row)[0][0]
 
         inds = np.concatenate([inds, inds_2])
         zm = functionalized_zmatrix(
