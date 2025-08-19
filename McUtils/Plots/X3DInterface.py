@@ -436,36 +436,62 @@ class X3DScene(X3DPrimitive):
             viewpoint = self.get_view_settings(**viewpoint)
             self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
 
+    default_up_vector = (0, 1, 0)
+    default_right_vector = (1, 0, 0)
+    default_view_vector = (0, 0, 1)
+    default_view_distance = 10
     @classmethod
     def get_view_settings(cls,
                           up_vector=None, view_vector=None, right_vector=None,
-
-                          view_position=None, **etc):
+                          view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc):
         # CO = coords0[1] - coords0[0]
         # OH = coords0[5] - coords0[1]
-        if view_vector is not None:
-            m = nput.rotation_matrix(
-                view_vector,
-                [0, 0, 1]
-            )
-        else:
-            m = np.eye(3)
-
-        if up_vector is None and right_vector is not None:
+        if view_matrix is None:
             if view_vector is None:
-                view_vector = [0, 0, 1]
-            up_vector = nput.vec_normalize(
-                nput.vec_crosses(view_vector, right_vector)
-            )
-        if up_vector is not None:
-            m = m @ nput.rotation_matrix(
-                m.T @ up_vector,
-                [0, 1, 0]
-            )
-        ang, cross = nput.extract_rotation_angle_axis(m)
+                if (
+                    up_vector is not None and right_vector is not None
+                ):
+                    view_vector = nput.vec_crosses(up_vector, right_vector, normalize=True)
+                elif right_vector is not None:
+                    view_vector = nput.vec_crosses(cls.default_up_vector, right_vector, normalize=True)
+                elif up_vector is not None:
+                    view_vector = nput.vec_crosses(up_vector, cls.default_right_vector, normalize=True)
+
+            if view_vector is not None:
+                m = nput.rotation_matrix(
+                    view_vector,
+                    cls.default_view_vector
+                )
+            else:
+                m = np.eye(3)
+
+            if up_vector is None and right_vector is not None:
+                if view_vector is None:
+                    view_vector = cls.default_view_vector
+                up_vector = nput.vec_normalize(
+                    nput.vec_crosses(view_vector, right_vector)
+                )
+            if up_vector is not None:
+                m = m @ nput.rotation_matrix(
+                    m.T @ up_vector,
+                    cls.default_up_vector
+                )
+            view_matrix = m
+
+        ang, cross = nput.extract_rotation_angle_axis(view_matrix)
+        if view_vector is None:
+            view_vector = view_matrix[:, -1]
         if view_position is None:
-            view_position = np.array([0, 0, 10])
-        view_position = m @ view_position
+            if view_distance is None:
+                view_distance = cls.default_view_distance
+            view_position = view_distance * nput.vec_normalize(np.asanyarray(view_vector))
+            if view_center is not None:
+                view_center = view_matrix @ np.asanyarray(view_center)
+                view_position = view_distance * nput.vec_normalize(
+                    view_position + view_center
+                )
+        else:
+            view_position = view_matrix @ np.asanyarray(view_position)
         return dict(
             {
                 'orientation': list(cross) + [ang],

@@ -2,6 +2,10 @@ source = ["pokemon", "https://www.heavy.ai/blog/12-color-palettes-for-telling-be
 data = {
     "Palettes": {
         "default": [
+            '001C7F', '017517', '8C0900', '7600A1', 'B8860B', '006374',
+            '#10278A', '#368827', '#A5151A', '#9015B5', '#E79E37', '#307487'
+        ],
+        "contrasting": [
             "#3F5679", "#E19C24", "#8FB032", "#EB6235", "#5A5077", "#834911", "#5D9EC7",
             "#FFBF00", "#A5609D", "#929600", "#E95536", "#6685D9", "#F89F13", "#BC5B80",
             "#47B66D"

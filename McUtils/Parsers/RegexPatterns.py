@@ -23,6 +23,7 @@ __all__ = [
     "Any",
     "Sign",
     "Number",
+    "IntBaseNumber",
     "Integer",
     "PositiveInteger",
     "ASCIILetter",
@@ -129,7 +130,12 @@ class RegexPattern:
             else:
                 children = list(children)
 
-        children = [ c if isinstance(c, RegexPattern) else NonCapturing(c) for c in children ]
+        children = [
+            c
+                if isinstance(c, RegexPattern) else
+            NonCapturing(c)
+            for c in children
+        ]
         for c in children:
             c.add_parent(self)
         self._children = children
@@ -699,12 +705,22 @@ class RegexPattern:
     ### Supporting the re mechanisms directly for convenience
     def match(self, txt, *args):
         return re.match(self.compiled, txt, *args)
+    def fullmatch(self, txt, *args):
+        return re.fullmatch(self.compiled, txt, *args)
     def search(self, txt, *args):
         return re.search(self.compiled, txt, *args)
     def findall(self, txt, *args):
         return re.findall(self.compiled, txt, *args)
     def finditer(self, txt, *args):
         return re.finditer(self.compiled, txt, *args)
+    def sub(self, rep, txt, *args):
+        return re.sub(self.compiled, rep, txt, *args)
+    def subn(self, rep, txt, *args):
+        return re.subn(self.compiled, rep, txt, *args)
+    def replace(self, txt, replacement, *args):
+        return re.sub(self.compiled, replacement, txt, *args)
+    def remove(self, txt, *args):
+        return self.replace(txt, '', *args)
 
 ######################################################################################################################
 #
@@ -935,6 +951,13 @@ Number = RegexPattern(num_p, "Number", dtype=float)
 Number.__name__ = "Number"
 Number.__doc__ = """
     Represents a real number, like -1.23434; doesn't support "E" notation
+    """
+
+num_p = opnb_p(sign_p)+r"\d+\.\d*" # real number
+IntBaseNumber = RegexPattern(num_p, "IntBaseNumber", dtype=float)
+IntBaseNumber.__name__ = "IntBaseNumber"
+IntBaseNumber.__doc__ = """
+    Represents a real number with definite integer part, like -1.23434 or 0.; doesn't support "E" notation
     """
 
 int_p = opnb_p(sign_p)+r"\d+" # integer

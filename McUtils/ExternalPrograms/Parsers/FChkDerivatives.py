@@ -17,9 +17,15 @@ class FchkForceConstants:
     Holder class for force constants coming out of an fchk file.
     Allows us to construct the force constant matrix in lazy fashion if we want.
     """
-    def __init__(self, fcs, reader=None):
+    def __init__(self, fcs, num_atoms=None, reader=None):
         self.fcs = fcs
-        self._n = reader.num_atoms
+        self._n = (
+            num_atoms
+                if num_atoms is not None else
+            reader.num_atoms
+                if reader is not None else
+            None
+        )
 
     def __len__(self):
         return len(self.fcs)
@@ -60,7 +66,13 @@ class FchkForceDerivatives:
     """Holder class for force constant derivatives coming out of an fchk file"""
     def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
         self.derivs = derivs
-        self._n = num_atoms if num_atoms is not None else reader.num_atoms
+        self._n = (
+            num_atoms
+                if num_atoms is not None else
+            reader.num_atoms
+                if reader is not None else
+            None
+        )
         self._m = num_modes
 
     def __len__(self):
@@ -177,7 +189,13 @@ class FchkDipoleDerivatives:
     """Holder class for dipole derivatives coming out of an fchk file"""
     def __init__(self, derivs, num_atoms=None, reader=None):
         self.derivs = derivs
-        self._n = num_atoms if num_atoms is not None else reader.num_atoms
+        self._n = (
+            num_atoms
+                if num_atoms is not None else
+            reader.num_atoms
+                if reader is not None else
+            None
+        )
 
     def _get_n(self):
         """
@@ -202,7 +220,13 @@ class FchkDipoleHigherDerivatives:
     """Holder class for dipole derivatives coming out of an fchk file"""
     def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
         self.derivs = derivs
-        self._n = num_atoms if num_atoms is not None else reader.num_atoms
+        self._n = (
+            num_atoms
+                if num_atoms is not None else
+            reader.num_atoms
+                if reader is not None else
+            None
+        )
         self._m = num_modes
     def _get_n_m(self):
         """

@@ -4,6 +4,7 @@ Defines a helper class Styled to make it easier to style plots and stuff and a T
 import contextlib
 from collections import deque
 from .Backends import GraphicsBackend
+from .Colors import ColorPalette
 
 __all__ = [
     "Styled",
@@ -172,9 +173,26 @@ class ThemeManager:
         return cls(*theme_names, backend=backend, **theme_properties)
     def _test_rcparam(self, k):
         return '.' in k
+    @classmethod
+    def canonicalize_theme_props(cls, props):
+        if isinstance(props, dict):
+            new_props = {}
+            for k,v in props.items():
+                if isinstance(v, dict):
+                    new_props[k] = cls.canonicalize_theme_props(v)
+                elif k == 'palette':
+                    colors = ColorPalette(v).color_strings
+                    new_props['prop_cyle'] = dict(
+                        new_props.get('prop_cycle'),
+                        color=colors
+                    )
+        else:
+            return props
+
     def __enter__(self):
         theme = self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
         name_list = self.validate_theme(*theme)
+        theme_props = self.canonicalize_theme_props(theme)
         # name_list = list(theme[0])
         # opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
 

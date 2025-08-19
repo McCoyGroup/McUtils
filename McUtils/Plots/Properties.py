@@ -91,7 +91,7 @@ class GraphicsPropertyManager:
                             k not in self._style_lists
                             or v != self._style_lists[k]
                     ):
-                        print(k, v, self._style_lists[k], v == self._style_lists[k])
+                        # print(k, v, self._style_lists[k], v == self._style_lists[k])
                         self._style_lists[k] = v
                         updated = True
             if updated:
@@ -214,6 +214,16 @@ class GraphicsPropertyManager:
             self.axes.set_ylim(*y.val, **y.opts)
         elif y is not None:
             self.axes.set_ylim(y)
+
+
+    @property
+    def absolute_plot_range(self):
+        a, b = self.plot_range
+        if a is None:
+            a = self.axes.get_xlim()
+        if b is None:
+            b = self.axes.get_ylim()
+        return a, b
 
     # set plot ticks
     @property
@@ -385,7 +395,7 @@ class GraphicsPropertyManager:
     @aspect_ratio.setter
     def aspect_ratio(self, ar):
         if isinstance(ar, (float, int)):
-            a, b = self.plot_range
+            a, b = self.absolute_plot_range
             cur_ar = abs(b[1] - b[0]) / abs(a[1] - a[0])
             targ_ar = ar / cur_ar
             self.axes.set_aspect_ratio(targ_ar)
@@ -757,6 +767,15 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
             self.axes.set_zlim(*z.val, **z.opts)
         elif z is not None:
             self.axes.set_zlim(z)
+
+    @property
+    def absolute_plot_range(self):
+        a, b = self.plot_range
+        if a is None:
+            a = self.axes.get_xlim()
+        if b is None:
+            b = self.axes.get_ylim()
+        return a, b
 
     def _set_xticks(self, x, **opts):
         return self._set_ticks(x,
