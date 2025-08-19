@@ -188,6 +188,9 @@ class CoordinateSystem:
         """
         return self._dimension
 
+    def register_converter(self, system, conversion):
+        converters.register_converter(self, system, conversion)
+
     def converter(self, system):
         """
         Gets the converter from the current system to a new system

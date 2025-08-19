@@ -2,7 +2,7 @@ from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.ExternalPrograms import *
 from McUtils.Data import UnitsData
-import sys, os, numpy as np
+import sys, os, numpy as np, pprint
 
 class ExternalProgramsTest(TestCase):
 
@@ -10,7 +10,6 @@ class ExternalProgramsTest(TestCase):
     # api work is covered in Psience.PotentialRegistry
     @validationTest
     def test_CIFFiles(self):
-        import pprint
         print()
         with CIFParser(TestManager.test_data('samp.cif'), ignore_comments=True) as cif:
             structs = cif.parse()
@@ -37,6 +36,22 @@ class ExternalProgramsTest(TestCase):
         with GaussianLogReader(TestManager.test_data('methanol_vpt_scan.log')) as parser:
             res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
 
+    @debugTest
+    def test_ParseReports(self):
+        with GaussianLogReader(TestManager.test_data('molec1_tdcis_b3lyp.log')) as parser:
+            parse = parser.parse(['Reports', 'ExcitedStates'])
+            res = parse['Reports']
+
+        pprint.pprint(parse['ExcitedStates'])
+        # pprint.pprint(res[-1])
+        # print([len(x) for x in res[-1]['PotentialDeriv']])
+        # from Psience.Molecools import Molecule
+        # h2o = Molecule.from_file(TestManager.test_data('water_freq.fchk'))
+        # res_arr = res[1]['results'][-1]
+        # print(res_arr.shape)
+        # print(
+        #     np.round(h2o.potential_derivatives[1], 6) / (UnitsData.convert("BohrRadius", "Angstroms")**2))
+
     @validationTest
     def test_CRESTParse(self):
 
@@ -59,7 +74,7 @@ class ExternalProgramsTest(TestCase):
         print(np.sum(rotamers.weights))
 
 
-    @debugTest
+    @validationTest
     def test_CRESTJob(self):
         from Psience.Molecools import Molecule
 

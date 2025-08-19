@@ -41,6 +41,11 @@ class SingletonType:
     A base type for singletons
     """
     __slots__ = []
+    def __eq__(self, other):
+        return self is other or (
+            type(self).__name__ == type(other).__name__
+            and self.__module__ == other.__module__
+        )
 
 class DefaultType(SingletonType):
     """

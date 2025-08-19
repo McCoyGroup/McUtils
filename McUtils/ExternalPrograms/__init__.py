@@ -28,3 +28,5 @@ from .WebAPI import *; from .WebAPI import __all__ as exposed
 __all__ += exposed
 from .ChemSpiderAPI import *; from .ChemSpiderAPI import __all__ as exposed
 __all__ += exposed
+from .Subprocesses import *; from .Subprocesses import __all__ as exposed
+__all__ += exposed

@@ -332,7 +332,8 @@ class NotebookExporter:
 
 class ExamplesManager:
     data_path = ("ci", "tests", "TestData")
-    def __init__(self, root, data_path=None, globs=None):
+    examples_path = ("ci", "examples")
+    def __init__(self, root, data_path=None, examples_path=None, globs=None):
         self.root = root
         if os.path.isdir(root):
             root = root
@@ -346,12 +347,19 @@ class ExamplesManager:
         if isinstance(data_path, str):
             data_path = [data_path]
         self.test_dir = os.path.join(root, *data_path)
+        if examples_path is None:
+            examples_path = self.examples_path
+        if isinstance(examples_path, str):
+            examples_path = [examples_path]
+        self.examples_dir = os.path.join(root, *examples_path)
         if globs is None:
             globs = inspect.stack(1)[1].frame.f_globals
         self.globs = globs
 
     def test_data(cls, *path):
         return os.path.join(cls.test_dir, *path)
+    def examples_data(cls, *path):
+        return os.path.join(cls.examples_dir, *path)
 
     def load_module(self, module, modify_relative_imports=True):
         if modify_relative_imports:

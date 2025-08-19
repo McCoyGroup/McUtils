@@ -16,6 +16,8 @@ def format_tensor_element_table(inds, vals,
                                 index_format="{:>5.0f}",
                                 **etc
                                 ):
+    if isinstance(column_join, str):
+        column_join = (" ", column_join)
     vals = np.asanyarray(vals)
     if vals.ndim == 1:
         vals = vals[:, np.newaxis]
@@ -28,7 +30,11 @@ def format_tensor_element_table(inds, vals,
         ),
         headers=headers,
         header_spans=spans,
-        column_join=[""] * (spans[0]-1) + [column_join],
+        column_join=(
+            [column_join[0]] * (spans[0]-1)
+            + [column_join[1]]
+            + [column_join[0]] * (vals.shape[-1]-1)
+        ),
         **etc
     ).format(np.concatenate([np.array(inds).T, vals], axis=1))
 

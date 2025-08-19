@@ -18,7 +18,8 @@ __all__ = [
     "skew_from_rotation_matrix",
     "translation_matrix",
     "affine_matrix",
-    "extract_rotation_angle_axis"
+    "extract_rotation_angle_axis",
+    "view_matrix"
 ]
 
 #######################################################################################################################
@@ -431,3 +432,20 @@ def affine_matrix(tmat, shift):
         mat = np.concatenate([base_mat, shift[:, np.newaxis]], axis=-1)
         mat = np.concatenate([mat, [[0., 0., 0., 1.]]], axis=-2)
     return mat
+
+def view_matrix(
+        up_vector,
+        view_vector=(0, 0, 1)
+):
+    up_vector = vec_ops.vec_normalize(up_vector)
+    right_vector = vec_ops.vec_normalize(
+        vec_ops.vec_crosses(up_vector, view_vector)
+    )
+    view_vector = vec_ops.vec_normalize(
+        vec_ops.vec_crosses(up_vector, right_vector)
+    )
+    return np.concatenate([
+        view_vector[..., np.newaxis],
+        up_vector[..., np.newaxis],
+        right_vector[..., np.newaxis]
+    ], axis=-1)

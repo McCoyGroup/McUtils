@@ -960,6 +960,47 @@ GaussianLogComponents["NormalModes"] = {
 #     "mode"     : mode
 # }
 
+tag_start = "Excitation energies and oscillator strengths:"
+tag_end = "SavETr:"
+
+def parse_excited_states(blocks:str):
+    states = []
+    if blocks is not None:
+        blocks = blocks.strip().split(":")[1:]
+        for b in blocks:
+            lines = b.split("\n")
+            info = lines[0]
+            bits = info.strip().rsplit(maxsplit=6)
+            if len(bits) < 7: break
+            symmetry, energy, _, _, _, fspec, sspec = bits
+            _, osc = fspec.split("=")
+            _, ov = sspec.split("=")
+
+            state = {
+                "Energy": float(energy),
+                "Overlap": float(ov),
+                "Symmetry": symmetry,
+                "Transitions": {}
+            }
+            for l in lines[1:]:
+                l = l.strip()
+                if '->' in l:
+                    start, end = l.split('->')
+                    end, energy = end.split()
+                    state['Transitions'][(int(start), int(end))] = float(energy)
+            states.append(state)
+            if b.endswith('SavETr'): break
+
+    return states
+
+mode = "Single"
+GaussianLogComponents["ExcitedStates"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    "parser": parse_excited_states,
+    "mode": mode
+}
+
 tag_start = "Zeta(I,J)"
 tag_end = "Num. of Coriolis"
 
@@ -1027,6 +1068,103 @@ GaussianLogComponents["QuarticTerms"] = {
     "tag_start": tag_start,
     "tag_end": tag_end,
     "parser": parse_quartics,
+    "mode": mode
+}
+
+tag_start = "1\\"
+tag_end = FileStreamerTag(
+    ("\\\\@", "\\\n \\@", "\\\\\n @"),
+    # follow_ups = (""" -----""",)
+)
+
+def skip_report_header(stuff):
+    if stuff[0] in {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}:
+        return skip_report_header(stuff[1:])
+    return stuff
+
+def parse_reports(blocks,
+                  endline_pattern=RegexPattern([Newline, Whitespace]),
+                  numblock_pattern=Repeating(IntBaseNumber, suffix=Optional(",")),
+                  e_numb_pattern=RegexPattern((Number, "e", Integer), dtype=float)
+                  ):
+    bits = []
+    for b in blocks:
+        b = endline_pattern.remove(b)
+        res = {}
+        subblocks = b.split('\\\\')
+        info = subblocks[0]
+        stuff = info.split("\\")
+        stuff = skip_report_header(stuff)
+        if stuff[0].startswith('GINC-'):
+            res['node'] = stuff[0][5:]
+            stuff = stuff[1:]
+
+        for k in ['job', 'level_of_theory', 'basis', 'formula', 'user', 'date']:
+            res[k] = stuff[0]
+            stuff = stuff[1:]
+
+        res['route'] = subblocks[1]
+        res['description'] = subblocks[2]
+        res['molecule'] = subblocks[3].replace('\\', '\n')
+        res['results'] = []
+        for block in subblocks[4:]:
+            if block == '@': continue
+            for chunk in block.split('\\'):
+                defs = chunk.split('=')
+                if len(defs) == 1:
+                    v = defs[0]
+                    if numblock_pattern.fullmatch(v):
+                        v = np.array(v.split(',')).astype(float)
+                    res['results'].append(v)
+                elif len(defs) == 2:
+                    v = defs[1]
+                    if e_numb_pattern.fullmatch(v) or IntBaseNumber.fullmatch(v):
+                        v = float(v)
+                    elif numblock_pattern.fullmatch(v):
+                        v = np.array(v.split(',')).astype(float)
+                    res[defs[0]] = v
+                else:
+                    res['results'].append(chunk)
+
+        if res['job'] == 'Freq':
+            if len(res['results']) > 2:
+                fc_scaling = 6*len(res['results'][0])
+                cq_scaling = len(res['results'][2])
+                if cq_scaling % fc_scaling == 0:
+                    fcs, grad, higher = res['results'][:3]
+                    res['results'] = res['results'][3:]
+                    res['PotentialDeriv'] = [
+                        grad,
+                        fcs,
+                        higher
+                    ]
+                else:
+                    fcs, grad = res['results'][:2]
+                    res['results'] = res['results'][2:]
+                    res['PotentialDeriv'] = [
+                        grad, fcs
+                    ]
+            else:
+                fcs, grad = res['results'][:2]
+                res['results'] = res['results'][2:]
+                res['PotentialDeriv'] = [
+                    grad, fcs
+                ]
+
+
+        bits.append(res)
+
+    return bits
+
+def tag_validator(block):
+    return "\n\n" not in block
+
+mode = "List"
+GaussianLogComponents["Reports"] = {
+    "tag_start": tag_start,
+    "tag_end": tag_end,
+    'validator': tag_validator,
+    "parser": parse_reports,
     "mode": mode
 }
 
