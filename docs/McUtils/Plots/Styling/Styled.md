@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Styling.Styled">Styled</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L16?message=Update%20Docs)]
 </div>
 
 Simple styling class
@@ -24,8 +24,8 @@ Simple styling class
 __init__(self, *str, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L20?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, *str, **opts):
 could_be(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L26?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ could_be(cls, data):
 construct(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L29)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L29?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -102,7 +102,7 @@ construct(cls, data):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Styling/Styled.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Styling/Styled.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L15?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

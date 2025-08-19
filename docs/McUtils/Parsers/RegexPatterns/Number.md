@@ -1,7 +1,7 @@
 ### <a id="McUtils.Parsers.RegexPatterns.Number">Number</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L48?message=Update%20Docs)]
 </div>
 Represents a real number, like -1.23434; doesn't support "E" notation
 
@@ -54,7 +54,7 @@ Represents a real number, like -1.23434; doesn't support "E" notation
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/RegexPatterns/Number.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/RegexPatterns/Number.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L47?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L48?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

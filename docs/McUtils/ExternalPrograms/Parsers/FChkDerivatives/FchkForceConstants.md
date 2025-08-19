@@ -22,7 +22,7 @@ Allows us to construct the force constant matrix in lazy fashion if we want.
  
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkForceConstants.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, fcs, reader=None): 
+__init__(self, fcs, num_atoms=None, reader=None): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L20)/
@@ -35,8 +35,8 @@ __init__(self, fcs, reader=None):
 __len__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L30?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ __len__(self):
 n(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L42?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ n(self):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L45?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ shape(self):
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L60?message=Update%20Docs)]
 </div>
  </div>
 </div>

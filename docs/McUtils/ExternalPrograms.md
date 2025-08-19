@@ -165,10 +165,10 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[env_proc_call](ExternalPrograms/Subprocesses/env_proc_call.md)   
 </div>
    <div class="col" markdown="1">
-   
+[env_pip](ExternalPrograms/Subprocesses/env_pip.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -196,19 +196,20 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-dbad78" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-dbad78"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-38ff1c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-38ff1c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-dbad78" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-38ff1c" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
+- [ParseReports](#ParseReports)
 - [CRESTParse](#CRESTParse)
 - [CRESTJob](#CRESTJob)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-82d2f7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-82d2f7"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-d239e6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d239e6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-82d2f7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d239e6" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -225,7 +226,6 @@ class ExternalProgramsTest(TestCase):
 #### <a name="CIFFiles">CIFFiles</a>
 ```python
     def test_CIFFiles(self):
-        import pprint
         print()
         with CIFParser(TestManager.test_data('samp.cif'), ignore_comments=True) as cif:
             structs = cif.parse()
@@ -239,6 +239,16 @@ class ExternalProgramsTest(TestCase):
     def test_ParseGaussianLogFile(self):
         with GaussianLogReader(TestManager.test_data('methanol_vpt_scan.log')) as parser:
             res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
+```
+
+#### <a name="ParseReports">ParseReports</a>
+```python
+    def test_ParseReports(self):
+        with GaussianLogReader(TestManager.test_data('molec1_tdcis_b3lyp.log')) as parser:
+            parse = parser.parse(['Reports', 'ExcitedStates'])
+            res = parse['Reports']
+
+        pprint.pprint(parse['ExcitedStates'])
 ```
 
 #### <a name="CRESTParse">CRESTParse</a>

@@ -1,9 +1,14 @@
-### <a id="McUtils.Parsers.RegexPatterns.PositiveInteger">PositiveInteger</a> 
+# <a id="McUtils.ExternalPrograms.Subprocesses.env_pip">env_pip</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Subprocesses.py#L44)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Subprocesses.py#L44?message=Update%20Docs)]
 </div>
-Represents a positive integer (i.e. just a string of digits)
+
+```python
+env_pip(*args): 
+```
+
+
 
 
 
@@ -48,16 +53,13 @@ Represents a positive integer (i.e. just a string of digits)
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Parsers/RegexPatterns/PositiveInteger.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Parsers/RegexPatterns/PositiveInteger.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/ExternalPrograms/Subprocesses/env_pip.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/ExternalPrograms/Subprocesses/env_pip.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/RegexPatterns/PositiveInteger.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/RegexPatterns/PositiveInteger.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Subprocesses/env_pip.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Subprocesses/env_pip.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L48?message=Update%20Docs)   
-</div>
-   <div class="col" markdown="1">
-   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Subprocesses.py#L44?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
@@ -65,7 +67,9 @@ Represents a positive integer (i.e. just a string of digits)
    <div class="col" markdown="1">
    
 </div>
+   <div class="col" markdown="1">
+   
 </div>
 </div>
 </div>
-
+</div>

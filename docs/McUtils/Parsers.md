@@ -110,73 +110,73 @@ using a streamer to match chunks and a parser to extract data from the matched c
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[IntBaseNumber](Parsers/RegexPatterns/IntBaseNumber.md)   
+</div>
+   <div class="col" markdown="1">
 [Integer](Parsers/RegexPatterns/Integer.md)   
 </div>
    <div class="col" markdown="1">
 [PositiveInteger](Parsers/RegexPatterns/PositiveInteger.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ASCIILetter](Parsers/RegexPatterns/ASCIILetter.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [AtomName](Parsers/RegexPatterns/AtomName.md)   
 </div>
    <div class="col" markdown="1">
 [WhitespaceCharacter](Parsers/RegexPatterns/WhitespaceCharacter.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Word](Parsers/RegexPatterns/Word.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WordCharacter](Parsers/RegexPatterns/WordCharacter.md)   
 </div>
    <div class="col" markdown="1">
 [VariableName](Parsers/RegexPatterns/VariableName.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [CartesianPoint](Parsers/RegexPatterns/CartesianPoint.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [IntXYZLine](Parsers/RegexPatterns/IntXYZLine.md)   
 </div>
    <div class="col" markdown="1">
 [XYZLine](Parsers/RegexPatterns/XYZLine.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Empty](Parsers/RegexPatterns/Empty.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Newline](Parsers/RegexPatterns/Newline.md)   
 </div>
    <div class="col" markdown="1">
 [ZMatPattern](Parsers/RegexPatterns/ZMatPattern.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [StructuredType](Parsers/StructuredType/StructuredType.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [StructuredTypeArray](Parsers/StructuredType/StructuredTypeArray.md)   
 </div>
    <div class="col" markdown="1">
 [DisappearingType](Parsers/StructuredType/DisappearingType.md)   
 </div>
-   <div class="col" markdown="1">
-[XYZParser](Parsers/XYZParser/XYZParser.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[XYZParser](Parsers/XYZParser/XYZParser.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -342,9 +342,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-1b27b1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-1b27b1"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-d0c50e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d0c50e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-1b27b1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d0c50e" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
@@ -352,9 +352,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-17262f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-17262f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-2a0336" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2a0336"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-17262f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2a0336" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

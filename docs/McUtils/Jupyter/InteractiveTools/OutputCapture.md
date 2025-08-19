@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.InteractiveTools.OutputCapture">OutputCapture</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L439)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L439?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L447?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, handles=None, bind_global=True, file_handles=True, autoclose=None, save_output=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L440)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L440?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L448)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L448?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, handles=None, bind_global=True, file_handles=True, autoclose=None
 get_handles(cls, handles=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L464)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L464?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L472)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L472?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ get_handles(cls, handles=None, file_handles=False):
 get_temp_stream(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L473)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L473?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L481)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L481?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ get_temp_stream(cls):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L477)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L477?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L485)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L485?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ __enter__(self):
 __exit__(self, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L508)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/OutputCapture.py#L508?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -122,7 +122,7 @@ __exit__(self, *args):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/OutputCapture.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/OutputCapture.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L439?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L447?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -21,6 +21,10 @@
  ```python
 wrapper_class: Scene
 default_viewpoint: dict
+default_up_vector: tuple
+default_right_vector: tuple
+default_view_vector: tuple
+default_view_distance: int
 ```
 <a id="McUtils.Plots.X3DInterface.X3DScene.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
@@ -29,6 +33,17 @@ __init__(self, *children: McUtils.Plots.X3DInterface.X3DPrimitive, background=No
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L427)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L427?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3DScene.get_view_settings" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L443)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L443?message=Update%20Docs)]
 </div>
  </div>
 </div>
