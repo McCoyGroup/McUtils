@@ -196,9 +196,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-38ff1c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-38ff1c"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-84acf7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-84acf7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-38ff1c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-84acf7" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -207,9 +207,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-d239e6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d239e6"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-555719" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-555719"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d239e6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-555719" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -248,7 +248,28 @@ class ExternalProgramsTest(TestCase):
             parse = parser.parse(['Reports', 'ExcitedStates'])
             res = parse['Reports']
 
+        pprint.pprint(res)
         pprint.pprint(parse['ExcitedStates'])
+
+
+        with GaussianLogReader(TestManager.test_data('water_freq.log')) as parser:
+            parse = parser.parse(['Reports'])
+            res = parse['Reports']
+
+        pprint.pprint(res)
+
+        with GaussianLogReader(TestManager.test_data('tbhp_030.log')) as parser:
+            parse = parser.parse(['Reports'])
+            res = parse['Reports']
+
+        pprint.pprint(res)
+
+
+        with GaussianLogReader(TestManager.test_data('water_OH_scan.log')) as parser:
+            parse = parser.parse(['Reports'])
+            res = parse['Reports']
+
+        pprint.pprint(res)
 ```
 
 #### <a name="CRESTParse">CRESTParse</a>
