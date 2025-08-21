@@ -328,11 +328,15 @@ class EdgeGraph:
             path.append(cur_node)
         return tuple(reversed(path))
     @classmethod
-    def get_longest_path_from_data(cls, shortest_path_data):
+    def get_longest_path_from_data(cls, shortest_path_data, root=None):
         dist_matrix, predecessors = shortest_path_data
-        max_cols = np.argmax(dist_matrix, axis=1)
-        max_row = np.argmax(dist_matrix[np.arange(len(max_cols)), max_cols])
-        return cls.get_path_from_data(max_row, max_cols[max_row], shortest_path_data)
+        if root is None:
+            max_cols = np.argmax(dist_matrix, axis=1)
+            max_row = np.argmax(dist_matrix[np.arange(len(max_cols)), max_cols])
+            return cls.get_path_from_data(max_row, max_cols[max_row], shortest_path_data)
+        else:
+            max_col = np.argmax(dist_matrix[root], axis=0)
+            return cls.get_path_from_data(root, max_col, shortest_path_data)
     def get_path(self, start, end):
         return self.get_path_from_data(start, end, self.shortest_path_data)
 
@@ -348,6 +352,7 @@ class EdgeGraph:
                                             map,
                                             graph=None,
                                             rings=None,
+                                            root=None,
                                             use_highest_valencies=True,
                                             shortest_path_data=None
                                             ):
@@ -358,7 +363,7 @@ class EdgeGraph:
         if len(rings) == 0:
             if shortest_path_data is None:
                 shortest_path_data = cls.get_shortest_path_data(graph)
-            return cls.get_longest_path_from_data(shortest_path_data)
+            return cls.get_longest_path_from_data(shortest_path_data, root=root)
         else:
             # in principle we have to check every set of breakpoints...
             # but we can make this more efficient by noting that a break
@@ -384,6 +389,12 @@ class EdgeGraph:
                 ]
                 for r, bp in zip(rings, break_pos)
             ]
+            if root is not None:
+                # sort break bonds to priortize breaks by the root
+                break_bonds = [
+                    list(sorted(bl, key=lambda p: p[0] != root and p[1] != 1))
+                    for bl in break_bonds
+                ]
 
             # chain = None
             n_inds = len(map)
@@ -397,7 +408,8 @@ class EdgeGraph:
                 new_rings = cls.find_rings_in_graph(n_inds, new_map)
                 if len(new_rings) == 0:
                     chain = cls.find_longest_chain_from_breakpoints(
-                        new_map
+                        new_map,
+                        root=root
                     )
                     break
             else:
@@ -422,10 +434,12 @@ class EdgeGraph:
 
     def segment_by_chains(self,
                           rings=None,
+                          root=None,
                           use_highest_valencies=True,
                           ):
         return self.segment_graph_by_chains(
             self.map,
+            root=root,
             graph=self.graph,
             rings=self.rings,
             use_highest_valencies=use_highest_valencies,
@@ -474,12 +488,13 @@ class EdgeGraph:
             )
     @classmethod
     def segment_graph_by_chains(cls,
-                      map:dict[int, set[int]],
-                      graph:('sparse.coo_matrix|sparse.csr_matrix|sparse.csc_matrix')=None,
-                      rings=None,
-                      use_highest_valencies=True,
-                      shortest_path_data=None
-                      ):
+                                map: dict[int, set[int]],
+                                graph: ('sparse.coo_matrix|sparse.csr_matrix|sparse.csc_matrix') = None,
+                                rings=None,
+                                root=None,
+                                use_highest_valencies=True,
+                                shortest_path_data=None
+                                ):
 
         if len(map) == 1:
             return tuple(map.keys())
@@ -493,20 +508,20 @@ class EdgeGraph:
             map,
             graph=graph,
             rings=rings,
+            root=root,
             use_highest_valencies=use_highest_valencies,
             shortest_path_data=shortest_path_data
         )
 
         segments.append(backbone)
 
-        # n_labels = range(len(map))
         new_map = {k:v.copy() for k,v in map.items()}
         for i in backbone:
             for j in new_map.get(i, set()):
                 new_map[j].remove(i)
             del new_map[i]
 
-        rem = np.delete(np.arange(len(map)), backbone)
+        rem = np.delete(np.arange(graph.shape[0]), backbone)
         base_remapping = {k: i for i, k in enumerate(rem)}
         base_inv = {i: k for i, k in enumerate(rem)}
         new_map = {
@@ -515,12 +530,12 @@ class EdgeGraph:
         }
 
         fragments = cls.get_graph_fragment_indices(
-            cls.get_edge_graph(new_map)
+            cls.get_edge_graph(new_map, num_nodes=len(rem))
         )
 
         for frag in fragments:
             if len(frag) == 1:
-                return frag
+                return [frag]
             else:
                 remapping = {k:i for i,k in enumerate(frag)}
                 inverse_mapping = {i:base_inv[k] for i,k in enumerate(frag)}
@@ -967,7 +982,8 @@ class MoleculeEdgeGraph(EdgeGraph):
     def get_heavy_atom_framework_graph(
             self,
             heavy_atoms=None,
-            light_atoms=None
+            light_atoms=None,
+            included_atoms=None
     ):
         if heavy_atoms is None:
             if light_atoms is None:
@@ -982,10 +998,13 @@ class MoleculeEdgeGraph(EdgeGraph):
                 i for i,l in enumerate(self.labels)
                 if l in heavy_atoms
             ]
+        if included_atoms is not None:
+            inds = [i for i in inds if i not in inds] + inds
 
         return self.take(inds)
     def find_longest_chain(self,
                            rings=None,
+                           root=None,
                            use_highest_valencies=True,
                            heavy_atoms=True,
                            light_atoms=None
@@ -993,10 +1012,12 @@ class MoleculeEdgeGraph(EdgeGraph):
         if heavy_atoms or (light_atoms is not None):
             if heavy_atoms is True: heavy_atoms = None
             graph = self.get_heavy_atom_framework_graph(
+                included_atoms=[root] if root is not None else None,
                 heavy_atoms=heavy_atoms,
                 light_atoms=light_atoms
             )
             return graph.find_longest_chain(
+                root=0 if root is not None else None,
                 heavy_atoms=False,
                 light_atoms=None
             )
@@ -1004,6 +1025,7 @@ class MoleculeEdgeGraph(EdgeGraph):
             return super().find_longest_chain()
 
     def segment_by_chains(self,
+                          root=None,
                           rings=None,
                           use_highest_valencies=True,
                           heavy_atoms=True,
@@ -1012,12 +1034,14 @@ class MoleculeEdgeGraph(EdgeGraph):
         if heavy_atoms or (light_atoms is not None):
             if heavy_atoms is True: heavy_atoms = None
             graph = self.get_heavy_atom_framework_graph(
+                included_atoms=[root] if root is not None else None,
                 heavy_atoms=heavy_atoms,
                 light_atoms=light_atoms
             )
             return graph.segment_by_chains(
+                root=0 if root is not None else None,
                 heavy_atoms=False,
                 light_atoms=None
             )
         else:
-            return super().segment_by_chains()
+            return super().segment_by_chains(root=root)

@@ -70,7 +70,8 @@ class RegexPattern:
                  handler=None, # a data handler for after capturing a block
                  default_value=None, # default value for Optional types
                  capturing=None,
-                 allow_inner_captures=False # whether or not to multiple captures for a given pattern
+                 allow_inner_captures=False, # whether or not to multiple captures for a given pattern
+                 escape=True
                  ):
         """
         :param pat:
@@ -111,6 +112,7 @@ class RegexPattern:
         self._pat = pat
         self._cached = None
         self._comp = None
+        self.escape = escape
 
         self.name = name # not used for anything but can make the code clearer
 
@@ -125,15 +127,15 @@ class RegexPattern:
         if children is None:
             children = []
         elif not isinstance(children, list):
-            if isinstance(children, str):
-                children = [ children ]
+            if isinstance(children, (str, RegexPattern)):
+                children = [children]
             else:
                 children = list(children)
 
         children = [
             c
                 if isinstance(c, RegexPattern) else
-            NonCapturing(c)
+            NonCapturing(re.escape(c) if isinstance(c, str) else c)
             for c in children
         ]
         for c in children:
@@ -447,12 +449,12 @@ class RegexPattern:
             kids = [ group(k, no_capture=no_capture) if not is_grouped(k) else k for k in kids ]
         return joiner.join(kids)
     def build(self,
-              joiner = None,
-              prefix = None,
-              suffix = None,
-              recompile = True,
-              no_captures = False,
-              verbose = False
+              joiner=None,
+              prefix=None,
+              suffix=None,
+              recompile=True,
+              no_captures=False,
+              verbose=False
               ):
         # might want to add a flag that checks if a block has already been wrapped in no-capture? That would cut down
         # on regex length...

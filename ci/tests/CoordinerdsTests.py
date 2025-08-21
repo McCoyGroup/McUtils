@@ -247,7 +247,11 @@ class ConverterTest(TestCase):
     @validationTest
     def test_ZMatrixToCartesian(self):
         # print(self.test_zmats.coords[0, 0], file=sys.stderr)
-        coords = self.test_zmats.convert(CartesianCoordinates3D, use_rad = False)
+        # print(chain_zmatrix(16))
+        coords = self.test_zmats.convert(CartesianCoordinates3D,
+                                         ordering=chain_zmatrix(16),
+                                         use_rad=False
+                                         )
         self.assertEqual(coords.shape, (self.n, 16, 3))
     @validationTest
     def test_NumpyLikeTest(self):
@@ -632,7 +636,7 @@ class ConverterTest(TestCase):
         print(coords)
         for zm in enumerate_zmatrices(coords): print(zm)
 
-    @debugTest
+    @validationTest
     def test_fragmentZMatrix(self):
         ome = [
             [0, -1, -2, -3], # O
