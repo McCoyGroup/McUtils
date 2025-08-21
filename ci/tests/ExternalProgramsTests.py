@@ -42,15 +42,28 @@ class ExternalProgramsTest(TestCase):
             parse = parser.parse(['Reports', 'ExcitedStates'])
             res = parse['Reports']
 
+        pprint.pprint(res)
         pprint.pprint(parse['ExcitedStates'])
-        # pprint.pprint(res[-1])
-        # print([len(x) for x in res[-1]['PotentialDeriv']])
-        # from Psience.Molecools import Molecule
-        # h2o = Molecule.from_file(TestManager.test_data('water_freq.fchk'))
-        # res_arr = res[1]['results'][-1]
-        # print(res_arr.shape)
-        # print(
-        #     np.round(h2o.potential_derivatives[1], 6) / (UnitsData.convert("BohrRadius", "Angstroms")**2))
+
+
+        with GaussianLogReader(TestManager.test_data('water_freq.log')) as parser:
+            parse = parser.parse(['Reports'])
+            res = parse['Reports']
+
+        pprint.pprint(res)
+
+        with GaussianLogReader(TestManager.test_data('tbhp_030.log')) as parser:
+            parse = parser.parse(['Reports'])
+            res = parse['Reports']
+
+        pprint.pprint(res)
+
+
+        with GaussianLogReader(TestManager.test_data('water_OH_scan.log')) as parser:
+            parse = parser.parse(['Reports'])
+            res = parse['Reports']
+
+        pprint.pprint(res)
 
     @validationTest
     def test_CRESTParse(self):

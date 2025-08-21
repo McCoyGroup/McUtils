@@ -1082,10 +1082,18 @@ def skip_report_header(stuff):
         return skip_report_header(stuff[1:])
     return stuff
 
+num_pattern = Alternatives([
+    Integer,
+    Number,
+    IntBaseNumber,
+    (Number, "e", Integer)
+])
+
+scan_spec = namedtuple('scan_spec', ['value', 'steps', 'amount'])
 def parse_reports(blocks,
                   endline_pattern=RegexPattern([Newline, Whitespace]),
-                  numblock_pattern=Repeating(IntBaseNumber, suffix=Optional(",")),
-                  e_numb_pattern=RegexPattern((Number, "e", Integer), dtype=float)
+                  num_pattern=num_pattern,
+                  numblock_pattern=Repeating(num_pattern, suffix=Optional(","))
                   ):
     bits = []
     for b in blocks:
@@ -1118,7 +1126,10 @@ def parse_reports(blocks,
                     res['results'].append(v)
                 elif len(defs) == 2:
                     v = defs[1]
-                    if e_numb_pattern.fullmatch(v) or IntBaseNumber.fullmatch(v):
+                    if ",s," in v:
+                        v = v.split(",")
+                        v = scan_spec(float(v[0]), int(v[2]), float(v[3]))
+                    elif num_pattern.fullmatch(v):
                         v = float(v)
                     elif numblock_pattern.fullmatch(v):
                         v = np.array(v.split(',')).astype(float)
@@ -1128,7 +1139,7 @@ def parse_reports(blocks,
 
         if res['job'] == 'Freq':
             if len(res['results']) > 2:
-                fc_scaling = 6*len(res['results'][0])
+                fc_scaling = 6 * len(res['results'][0])
                 cq_scaling = len(res['results'][2])
                 if cq_scaling % fc_scaling == 0:
                     fcs, grad, higher = res['results'][:3]
@@ -1150,7 +1161,6 @@ def parse_reports(blocks,
                 res['PotentialDeriv'] = [
                     grad, fcs
                 ]
-
 
         bits.append(res)
 

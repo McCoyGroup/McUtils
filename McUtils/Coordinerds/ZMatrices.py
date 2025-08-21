@@ -1,3 +1,5 @@
+import collections
+
 import numpy as np
 import itertools
 from .. import Numputils as nput
@@ -25,6 +27,7 @@ __all__ = [
     "add_missing_zmatrix_bonds",
     "bond_graph_zmatrix",
     "reindex_zmatrix",
+    "sort_complex_attachment_points",
     "complex_zmatrix"
 ]
 
@@ -250,7 +253,20 @@ def extract_zmatrix_internals(zmat, strip_embedding=True):
             specs.append(tuple(row[:4]))
     return specs
 
-def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False):
+scan_spec = collections.namedtuple('scan_spec', ['value', 'steps', 'amount'])
+def _prep_var_spec(v):
+    if len(v) == 1:
+        return float(v[0])
+    elif len(v) == 2 and v[1] in {'f', 'F'}:
+        return scan_spec(float(v[0]), -1, 0)
+    elif len(v) == 3:
+        return scan_spec(float(v[0]), int(v[1]), float(v[2]))
+    else:
+        raise ValueError(f"can't parse var spec {v}")
+def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,
+                         keep_variables=False,
+                         variables=None,
+                         dialect='gaussian'):
     from ..Data import AtomData, UnitsData
     # we have to reparse the Gaussian Z-matrix...
 
@@ -297,39 +313,62 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False):
         # atom_q = bits[i + 1][:2] in possible_atoms
         if terminal:
             last_complete = i
-            ord = ord + [-1] * (4 - len(ord))
+            ord = [len(ordering)] + ord + [-1] * (3 - len(ord))
             coord = coord + [0] * (3 - len(coord))
             ordering.append(ord)
             coords.append(coord)
             ord = []
             coord = []
 
-    split_pairs = [
-        (vb.strip().split("=", 1) if "=" in vb else vb.strip().split())
+    split_vars = [
+        vb.strip().replace("=", " ").split()
         for vb in vars_block.split("\n")
     ]
-    split_pairs = [s for s in split_pairs if len(s) == 2]
+    # split_pairs = [s for s in split_pairs if len(s) == 2]
 
-    vars = {k.strip(): float(v) for k, v in split_pairs}
-    coords = [
-        [vars.get(x, x) for x in c]
-        for c in coords
-    ]
+    if dialect != "gaussian":
+        raise NotImplementedError(f"unsupported z-matrix dialect '{dialect}'")
+    vars = {
+        v[0]:_prep_var_spec(v[1:])
+        for v in split_vars
+        if len(v) > 0
+    }
+    if variables is not None:
+        vars.update(variables)
 
-    ordering = [
-        [i] + o
-        for i, o in enumerate(ordering)
-    ]
-    # convert book angles into sensible dihedrals...
-    # actually...I think I don't need to do anything for this?
-    ordering = np.array(ordering)[:, :4]
+    # ordering = [
+    #     [i] + o
+    #     for i, o in enumerate(ordering)
+    # ]
 
-    coords = np.array(coords)
-    coords[:, 0] *= UnitsData.convert(units, "BohrRadius")
-    coords[:, 1] = coords[:, 1] if in_radians else np.deg2rad(coords[:, 1])
-    coords[:, 2] = coords[:, 2] if in_radians else np.deg2rad(coords[:, 2])
+    if not keep_variables:
+        vals = {
+            k:(
+                v.value
+                    if not nput.is_numeric(v) else
+                v
+            )
+            for k, v in vars.items()
+        }
+        coords = [
+            [
+                vals[x] if x in vals else float(x)
+                for x in c
+            ]
+            for c in coords
+        ]
 
-    return (atoms, ordering, coords)
+        # convert book angles into sensible dihedrals...
+        # actually...I think I don't need to do anything for this?
+        ordering = np.array(ordering)[:, :4]
+
+        coords = np.array(coords)
+        coords[:, 0] *= UnitsData.convert(units, "BohrRadius")
+        coords[:, 1] = coords[:, 1] if in_radians else np.deg2rad(coords[:, 1])
+        coords[:, 2] = coords[:, 2] if in_radians else np.deg2rad(coords[:, 2])
+        return (atoms, ordering, coords)
+    else:
+        return (atoms, ordering, coords), vars
 
 def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
                           in_radians=False,
@@ -606,10 +645,66 @@ def canonicalize_zmatrix(zm):
     return z_vec, reindex_zmatrix(zm, perm)
 
 def _attachment_point(i_pos):
-    return (i_pos,
-     ((i_pos - 1) if i_pos > 0 else 1),
-     ((i_pos - 2) if i_pos > 1 else 2)
-     )
+    r = None
+    a = None
+    d = None
+    if nput.is_int(i_pos):
+        i_pos = [i_pos]
+
+    if len(i_pos) > 0:
+        r = i_pos[0]
+    if len(i_pos) > 1:
+        a = i_pos[1]
+    if len(i_pos) > 2:
+        d = i_pos[2]
+
+    if r is None:
+        if a is not None:
+            if d is not None:
+                if a > 0:
+                    r = a - 1
+                    if r == d: r = a + 1
+                else:
+                    r = a + 1
+                    if r == d: r = a + 2
+            else:
+                r = (a - 1) if a > 0 else (a + 1)
+        elif d is not None:
+            if d > 1:
+                r = d - 2
+            elif d > 0:
+                r = d - 1
+            else:
+                r = d + 1
+        else:
+            r = 0
+    if a is None:
+        if r > 0:
+            a = r - 1
+            if d is not None and a == d:
+                if r > 1:
+                    a = r - 2
+                else:
+                    a = r + 1
+        else:
+            a = r + 1
+            if d is not None and a == d:
+                a = r + 2
+    if d is None:
+        if r > 1:
+            d = r - 2
+            if a is not None and a == d:
+                d = r - 1
+        elif r > 0:
+            d = r - 1
+            if a is not None and a == d:
+                d = r + 1
+        else:
+            d = r + 1
+            if a is not None and a == d:
+                d = r + 2
+
+    return (r, a, d)
 def add_missing_zmatrix_bonds(
         base_zmat,
         bonds,
@@ -724,6 +819,52 @@ def bond_graph_zmatrix(
 
     return fused
 
+def sort_complex_attachment_points(
+        fragment_inds,
+        attachment_points: dict
+):
+    new_attachments = [None] * len(fragment_inds)
+    fragment_inds = list(fragment_inds)
+    for start, end in attachment_points.items():
+        if nput.is_int(start):
+            start = [start]
+        if nput.is_int(end):
+            end = [end]
+
+        start_frag = None
+        for i, f in enumerate(fragment_inds):
+            if start[0] in f:
+                start_frag = i
+                break
+        else:
+            raise ValueError(f"index {start[0]} not in fragments {fragment_inds}")
+
+        end_frag = None
+        for i, f in enumerate(fragment_inds):
+            if end[0] in f:
+                end_frag = i
+                break
+        else:
+            raise ValueError(f"index {start[0]} not in fragments {fragment_inds}")
+
+        if end_frag < start_frag:
+            start, end = end, start
+            start_frag, end_frag = end_frag, start_frag
+        elif end_frag == start_frag:
+            raise ValueError(f"root index {start[0]} and end index {end[0]} in same fragment")
+
+        fragment_inds[start_frag] = tuple(sorted(
+            fragment_inds[start_frag],
+            key=lambda i: start.index(i) if i in start else len(start)
+        ))
+        fragment_inds[end_frag] = tuple(sorted(
+            fragment_inds[end_frag],
+            key=lambda i: end.index(i) if i in end else len(end)
+        ))
+
+        new_attachments[end_frag] = start
+
+    return fragment_inds, new_attachments
 
 def complex_zmatrix(
         bonds,
@@ -731,9 +872,11 @@ def complex_zmatrix(
         fragment_zmats=None,
         distance_matrix=None,
         attachment_points=None,
+        check_attachment_points=True,
         graph=None,
         reindex=True
 ):
+
     if fragment_inds is None:
         if fragment_zmats is not None:
             raise ValueError("can't supply just Z-mats, unclear which fragments they come from...")
@@ -748,15 +891,25 @@ def complex_zmatrix(
         graph = EdgeGraph(all_inds, bonds)
 
     if fragment_zmats is None:
+        if isinstance(attachment_points, dict):
+            fragment_inds, attachment_points = sort_complex_attachment_points(
+                fragment_inds,
+                attachment_points
+            )
+
         fragment_zmats = [
             bond_graph_zmatrix(bonds, f, edge_map=graph.map)
             for f in fragment_inds
         ]
+    elif isinstance(attachment_points, dict) and check_attachment_points:
+        raise ValueError("can't supply Z-mats and dict of attachment points, can't be sure attachments are right")
 
     inds = np.asanyarray(fragment_inds[0])
     zm = fragment_zmats[0]
     if attachment_points is None:
         attachment_points = [None] * len(fragment_inds)
+    if len(attachment_points) < len(fragment_inds):
+        raise ValueError("too few attachment points specified")
     for inds_2, zm_2, root in zip(fragment_inds[1:], fragment_zmats[1:], attachment_points[1:]):
         if root is None:
             if distance_matrix is None:
@@ -769,6 +922,11 @@ def complex_zmatrix(
                 min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
                 root = inds[min_row]
                 # root = np.where(inds == min_row)[0][0]
+        else:
+            if nput.is_int(root):
+                root = np.where(inds == root)[0][0]
+            else:
+                root = [np.where(inds == r)[0][0] for r in root]
 
         inds = np.concatenate([inds, inds_2])
         zm = functionalized_zmatrix(
