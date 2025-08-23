@@ -22,7 +22,7 @@ to another coordinate system
  
 <a id="McUtils.Coordinerds.CoordinateSystems.CompositeCoordinateSystems.CompositeCoordinateSystem.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, base_system, conversion, inverse_conversion=None, name=None, batched=None, pointwise=True, max_expansion_order=0, **opts): 
+__init__(self, base_system, conversion, inverse_conversion=None, jacobian=None, inverse_jacobian=None, name=None, batched=None, pointwise=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L24)/
@@ -36,8 +36,8 @@ __init__(self, base_system, conversion, inverse_conversion=None, name=None, batc
 canonical_name(cls, name, conversion): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L43?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ canonical_name(cls, name, conversion):
 register(cls, base_system, conversion, inverse_conversion=None, name=None, batched=None, pointwise=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L55)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L55?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L61?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ register(cls, base_system, conversion, inverse_conversion=None, name=None, batch
 unregister(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L71?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ unregister(self):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystem.py#L73?message=Update%20Docs)]
 </div>
  </div>
 </div>

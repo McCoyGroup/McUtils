@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.ListContourPlot">ListContourPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1029)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1029?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1033)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1033?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, *params, interpolate=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1032)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1032?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1036)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1036?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -80,7 +80,7 @@ __init__(self, *params, interpolate=True, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ListContourPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ListContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1029?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1033?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

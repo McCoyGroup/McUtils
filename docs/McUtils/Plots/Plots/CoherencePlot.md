@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.CoherencePlot">CoherencePlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L737)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L737?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L741)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L741?message=Update%20Docs)]
 </div>
 
 
@@ -76,7 +76,7 @@ known_styles: set
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/CoherencePlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/CoherencePlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L737?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L741?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

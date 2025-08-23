@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.CompositeCoordinateSystems.CompositeCoordinateSystemConverter">CompositeCoordinateSystemConverter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L81?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, system: McUtils.Coordinerds.CoordinateSystems.CompositeCoordinateSystems.CompositeCoordinateSystem, direction='forward'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L76)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L76?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L82)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L82?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ __init__(self, system: McUtils.Coordinerds.CoordinateSystems.CompositeCoordinate
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L85?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ types(self):
 get_conversion(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L91?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ get_conversion(self):
 convert(self, coords, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L99?message=Update%20Docs)]
 </div>
 
 
@@ -65,8 +65,8 @@ convert(self, coords, **kw):
 convert_many(self, coords, order=0, derivs=None, return_derivs=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L98)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L98?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L104)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.py#L104?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -121,7 +121,7 @@ convert_many(self, coords, order=0, derivs=None, return_derivs=None, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems/CompositeCoordinateSystemConverter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L75?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/CompositeCoordinateSystems.py#L81?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
