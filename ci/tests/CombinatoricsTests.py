@@ -1,9 +1,11 @@
+import math
 
 from Peeves.TestUtils import *
 from Peeves import BlockProfiler, Timer
 from unittest import TestCase
 from McUtils.Combinatorics import *
 import McUtils.Numputils as nput
+import McUtils.Formatters as mfmt
 from McUtils.Scaffolding import Logger
 import sys, os, numpy as np, itertools
 
@@ -50,7 +52,7 @@ class CombinatoricsTests(TestCase):
             return self.make_state(*specs, mode=mode)
 
 
-    @debugTest
+    @validationTest
     def test_lemherCodes(self):
         # print(
         #     lehmer_encode([0, 1, 2])
@@ -60,6 +62,129 @@ class CombinatoricsTests(TestCase):
         self.assertEquals(list(range(len(base_perms))), lehmers.tolist())
         decodes = lehmer_decode(5, lehmers)
         self.assertEquals(base_perms, decodes.tolist())
+
+    @validationTest
+    def test_YT(self):
+        # print(
+        #     lehmer_encode([0, 1, 2])
+        # )
+
+        # gen = YoungTableauxGenerator(6)
+        # parts = list(itertools.chain(*IntegerPartitioner.partitions(6)))[4]
+        # tabs = gen.get_standard_tableaux(parts, brute_force=False)
+        # tabs_bf = gen.get_standard_tableaux(parts, brute_force=True)
+        # n = gen.number_of_tableaux(parts)
+        # l2 = len(tabs_bf[0])
+        # self.assertEquals(n, l2)
+        # l1 = len(tabs[0])
+        # self.assertEquals(l1, l2)
+
+        # gen = YoungTableauxGenerator(1)
+        for i in range(1, 11):
+            gen = YoungTableauxGenerator(i)
+            n = gen.number_of_tableaux()
+            print(">>>", n)
+            tabs = gen.get_standard_tableaux(brute_force=False)
+            # tabs_bf = gen.get_standard_tableaux(brute_force=True)
+
+            # l2 = [len(t[0]) for t in tabs_bf]
+            # self.assertEquals(n, sum(l2))
+            # gen.print_tableaux(tabs)
+            l1 = [len(t[0]) for t in tabs]
+            self.assertEquals(n, sum(l1))
+            # self.assertEquals(n, sum(l1))
+
+        for i in range(1, 9):
+            gen = YoungTableauxGenerator(i)
+            n = gen.number_of_tableaux()
+            print(">>>", n)
+            tabs = gen.get_standard_tableaux(brute_force=False)
+            tabs_bf = gen.get_standard_tableaux(brute_force=True)
+
+            l2 = [len(t[0]) for t in tabs_bf]
+            self.assertEquals(n, sum(l2))
+            # gen.print_tableaux(tabs)
+            l1 = [len(t[0]) for t in tabs]
+            self.assertEquals(l1, l2)
+            # self.assertEquals(n, sum(l1))
+
+    @validationTest
+    def test_PrimeFactorization(self):
+
+        plist = prime_list(20)
+        np.random.seed(1232232)
+        mod_pos = np.sort(np.random.choice(np.arange(20), (4, 3)), axis=1)
+        res = np.random.randint(1, 4, size=(4, 3))
+        ints = np.prod(np.array(plist)[mod_pos] ** res, axis=1, dtype=int)
+        _, facs = prime_factorize(ints)
+        print(ints)
+        print(len(_))
+        print(res)
+        facs = np.array(facs).T
+        sel = np.where(facs > 0)
+        print(facs[sel].reshape(4, 3))
+        print(mod_pos)
+        print(np.array(sel).T.reshape(4, 3, 2)[:, :, 1])
+
+
+        plist = prime_list(20)
+        np.random.seed(1232232)
+        mod_pos = np.sort(np.random.choice(np.arange(20), (100, 3)), axis=1)
+        res = np.random.randint(1, 4, size=(100, 3))
+        ints = np.prod(np.array(plist)[mod_pos] ** res, axis=1, dtype=int)
+        print(ints)
+        _, facs = prime_factorize(ints)
+        # facs = np.array(facs).T
+        # sel = np.where(facs > 0)
+
+        return
+
+    @validationTest
+    def test_Multinomials(self):
+        print(
+            stable_factorial_ratio([math.factorial(7)], [3, 4, 7])
+        )
+
+    @debugTest
+    def test_Characters(self):
+        print()
+
+        # ct = CharacterTable.point_group("Cv", 2)
+        ct = CharacterTable.fixed_size_point_group("T")
+        with np.printoptions(linewidth=1e8, threshold=1e8):
+            print(ct.format())
+            print(np.round(np.real(ct.table.T @ np.conj(ct.table)), 8))
+
+        return
+
+        print(mfmt.TableFormatter("").format(symmetric_group_character_table(3)))
+        print("="*50)
+        print(mfmt.TableFormatter("").format(symmetric_group_character_table(4)))
+        # print("="*50)
+        # print(mfmt.TableFormatter("").format(symmetric_group_character_table(5)))
+        # print("="*50)
+        # print(mfmt.TableFormatter("").format(symmetric_group_character_table(6)))
+        # print("="*50)
+        # print(mfmt.TableFormatter("").format(symmetric_group_character_table(7)))
+        # checked against Mathematica, good up through order 7
+
+        weights, ct = symmetric_group_character_table(4, return_weights=True)
+        weights = weights #/ np.sum(weights)
+        w_vec = np.sqrt(weights[np.newaxis, :] / np.sum(weights))
+        wct = w_vec * ct
+        # print(weights)
+        # print(ct)
+        print(mfmt.TableFormatter("").format(wct))
+        print(np.round(wct @ wct.T, 6))
+
+        sel = (0, 2, 3, 4)
+        b2 = wct[:, sel]
+        w2 = np.sqrt(weights[np.newaxis, sel] / np.sum(weights[sel,]))
+        q, r = np.linalg.qr(b2.T)
+        print(q.T / w2)
+
+        # s7 = symmetric_group_character_table(7)
+        # print(np.linalg.svd(s7))
 
     @validationTest
     def test_IntegerPartitions(self):

@@ -25,7 +25,8 @@ __all__ = [
     "LatticePathGenerator",
     "PermutationRelationGraph",
     "lehmer_encode",
-    "lehmer_decode"
+    "lehmer_decode",
+    # "permutation_cycles"
 ]
 
 _infer_dtype = infer_int_dtype
@@ -106,54 +107,6 @@ def lehmer_decode(ndim, codes, dtype=None):
                 rem_mask[rr,] = False
                 # break
     return perms.reshape(base_shape + (ndim,))
-def encode(permutation):
-    """Return Lehmer Code of the given permutation.
-    """
-
-    def permutation_is_valid(permutation):
-        if not permutation:
-            return False
-
-        minimum = min(permutation)
-        maximum = max(permutation)
-
-        used = [0] * (maximum - minimum + 1)
-        for i in permutation:
-            used[i - minimum] += 1
-
-        if min(used) == 1 and max(used) == 1:
-            return True
-        else:
-            return False
-
-    def count_lesser(i, permutation):
-        return sum(it < permutation[i] for it in permutation[i + 1:])
-
-    def parial_result(i, permutation):
-        return count_lesser(i, permutation) * factorial(len(permutation) - 1 - i)
-
-    if not permutation_is_valid(permutation):
-        return False
-
-    return sum(parial_result(i, permutation) for i in range(0, len(permutation)))
-
-
-def decode(length, lehmer):
-    """Return permutation for the given Lehmer Code and permutation length. Result permutation contains
-    number from 0 to length-1.
-    """
-    result = [(lehmer % factorial(length - i)) // factorial(length - 1 - i) for i in range(length)]
-    used = [False] * length
-    for i in range(length):
-        counter = 0
-        for j in range(length):
-            if not used[j]:
-                counter += 1
-            if counter == result[i] + 1:
-                result[i] = j
-                used[j] = True
-                break
-    return result
 
 class IntegerPartitioner:
 
@@ -576,7 +529,7 @@ class UniqueSubsets:
         else:
             k = sum(partition)
             storage_size = cls.num_unique_subsets(k, partition)
-            storage = np.zeros((storage_size, k), dtype=int)
+            storage = np.full((storage_size, k), -1, dtype=int)
             queue = collections.deque()
             symbols = np.arange(k)
             queue.append([0, 0, symbols, partition])
@@ -593,7 +546,8 @@ class UniqueSubsets:
                     ce = cp + n
                     for i, x in enumerate(itertools.combinations(range(len(symbols)), n)):
                         subsym = np.delete(symbols, x)
-                        storage[bp + i, cp: ce] = symbols[x,]
+                        for s in range(block_size):
+                            storage[bp + i * block_size + s, cp: ce] = symbols[x,]
                         queue.append([bp + i * block_size, ce, subsym, subpart])
             return storage
 
@@ -4261,4 +4215,17 @@ class PermutationRelationGraph:
         return [g[1] for g in groups]
 
 
-
+# def permutation_cycles(perm):
+#     # perm = np.asanyarray(perm)
+#     n = len(perm)
+#     sel = set(range(n))
+#     cycles = []
+#     for i in range(n):
+#         if i in sel:
+#             cycle = [i]
+#             j = perm[i]
+#             while j != i:
+#                 cycle.append(j)
+#                 j = perm[j]
+#             cycles.append(cycle)
+#     return cycles
