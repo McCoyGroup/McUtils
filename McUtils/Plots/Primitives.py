@@ -91,7 +91,7 @@ class Text(GraphicsPrimitive):
     def plot(self, axes, *args, graphics=None, **kwargs):
         if hasattr(axes, 'axes'):
             axes = axes.axes
-        return axes.text(*self.pos, self.txt, **self.opts)
+        return axes.draw_text(self.pos, self.txt, **self.opts)
 
 class Arrow(GraphicsPrimitive):
     def __init__(self, pos1, pos2, **opts):

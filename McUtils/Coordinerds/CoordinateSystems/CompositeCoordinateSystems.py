@@ -21,19 +21,25 @@ class CompositeCoordinateSystem(CoordinateSystem):
     """
 
     _register_cache = weakref.WeakValueDictionary()
-    def __init__(self, base_system,
-                 conversion, inverse_conversion=None,
+    def __init__(self,
+                 base_system,
+                 conversion,
+                 inverse_conversion=None,
+                 jacobian=None,
+                 inverse_jacobian=None,
                  name=None, batched=None, pointwise=True,
-                 max_expansion_order=0,
+                 # max_expansion_order=0,
                  **opts):
         self.base_system = base_system
         self.conversion = conversion
         self.inverse_conversion = inverse_conversion
         self.pointwise = pointwise
         self.batched = batched if batched is not None else not pointwise
-        self.max_expansion_order = max_expansion_order
+        # self.max_expansion_order = max_expansion_order
         super().__init__(**opts)
         self.name = self.canonical_name(name, conversion)
+        self.fwd_jacobian = jacobian
+        self.inverse_jacobian = inverse_jacobian
     @classmethod
     def canonical_name(cls, name, conversion):
         if name is None:
@@ -101,15 +107,34 @@ class CompositeCoordinateSystemConverter(CoordinateSystemConverter):
                      derivs=None,
                      return_derivs=None,
                      **kw):
-        if self.system.max_expansion_order > 0:
-            raise NotImplementedError(...)
+        # if self.system.max_expansion_order > 0:
+        #     raise NotImplementedError(...)
+        # else:
+        if self.system.pointwise:
+            base, opts = nput.apply_by_coordinates(self.get_conversion(), coords, **kw)
+        elif self.system.batched:
+            base, opts = self.convert(coords, **kw)
         else:
-            if self.system.pointwise:
-                return nput.apply_by_coordinates(self.get_conversion(), coords, **kw)
-            elif self.system.batched:
-                return self.convert(coords, **kw)
+            base, opts = super().convert_many(coords, **kw)
+
+        if return_derivs:
+            if order is None or order == 0: order = 1
+
+        if order > 0:
+            if self.direction == 'inverse':
+                test_jacobian = self.system.inverse_jacobian
+                inv_jacobian = self.system.fwd_jacobian
             else:
-                return super().convert_many(coords, **kw)
+                test_jacobian = self.system.fwd_jacobian
+                inv_jacobian = self.system.inverse_jacobian
+
+            if test_jacobian is not None:
+                opts['derivs'] = test_jacobian(coords, order=order, **kw)
+            elif inv_jacobian is not None:
+                opts['derivs'] = nput.inverse_transformation(inv_jacobian(coords, order=order, **kw), order)
+
+        return base, opts
+
 
 # class TransformedCoordinateSystemConverter(CompositeCoordinateSystem):
 #

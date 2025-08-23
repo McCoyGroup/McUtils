@@ -578,15 +578,19 @@ class HorizontalLinePlot(Plot):
     """
     Plots a bunch of vertical lines
     """
-    known_styles = {'ymin', 'ymax', 'colors', 'linestyles', 'label', 'data'} | Plot.line_params
-    method = 'vlines'
-    def _get_plot_data(self, y, x=1.0):
+    known_styles = {'xmin', 'xmax', 'colors', 'linestyles', 'label', 'data'} | Plot.line_params
+    method = 'hlines'
+    def _get_plot_data(self, y, x=None):
+        if x is not None:
+            x, y = y, x
+        else:
+            x = 1.0
         if isinstance(x, (int, float)):
             x = [0, x]
         return (x, y)
     def _plot_data(self, *data, **plot_style):
         x, y = data
-        return self._method(x, *y, **plot_style)
+        return self._method(y, *x, **plot_style)
 #     known_styles = {'xmin', 'xmax', 'colors', 'linestyles', 'label', 'data'}
 @Plot.register
 class PolygonPlot(Plot):

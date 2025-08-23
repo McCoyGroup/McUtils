@@ -939,7 +939,7 @@ class MPLAxes(GraphicsAxes):
 
     def draw_text(self, points, vals, **styles):
         points = np.asanyarray(points)
-        if points.ndim == 2:
+        if points.ndim == 1:
             points = points[np.newaxis]
         if isinstance(vals, str):
             vals = [vals]

@@ -593,6 +593,8 @@ def from_iter_nd(iter, dtype, shape, like=None, **extra):
 def permutation_indices(n, r, dtype=int):
     if r == 0:
         return np.array([[]])
+    n = int(n)
+    r = int(r)
     return from_iter_nd(
         itertools.permutations(range(n), r),
         shape=(math.factorial(n)//math.factorial(n-r), r),
