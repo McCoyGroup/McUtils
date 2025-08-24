@@ -197,7 +197,7 @@ def prime_factorize(ints, primes=None):
     if smol:
         count_list = [c[0] for c in count_list]
 
-    return prime_list, count_list
+    return np.array(prime_list), count_list
 
 
 def stable_factorial_ratio(num_terms, denom_terms, counts=None):

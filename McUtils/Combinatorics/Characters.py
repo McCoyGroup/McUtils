@@ -2,14 +2,17 @@ import itertools
 import numpy as np
 from .YoungTableaux import YoungTableauxGenerator
 from .Permutations import IntegerPartitioner
-from .Sequences import stable_factorial_ratio
+from .Sequences import stable_factorial_ratio, prime_factorize
 from .. import Numputils as nput
 
 __all__ = [
     "CharacterTable",
     "symmetric_group_class_sizes",
     "symmetric_group_character_table",
-    "dihedral_group_character_table"
+    "dihedral_group_character_table",
+    "dihedral_group_classes",
+    "ch_group_classes",
+    "dh_group_classes"
 ]
 
 def check_boundary_strip_sst(vals, sst):
@@ -117,6 +120,39 @@ def cyclic_group_character_table(n):
     table[1:] = np.exp(2j*np.pi*inds/n)
     return table
 
+def cyclic_permutations(n):
+    elements = np.zeros((n, n), dtype=int)
+    elements[0] = np.arange(n)
+    for i in range(1, n):
+        elements[i, :n-i] = elements[0][i:]
+        elements[i, -i:] = elements[0][:i]
+    return elements
+def cyclic_group_classes(n):
+    # cyclic permutations, kinda slow
+    elements = cyclic_permutations(n)
+    classes = np.arange(n)[:, np.newaxis]
+
+    return elements, classes
+
+def cyclic_group_operation_representation(n, elements=None):
+    if elements is None:
+        elements = np.arange(n)
+    # base rotation matrices
+    x = (2 * np.pi * elements) / n
+    c = np.cos(x)
+    s = np.sin(x)
+    z = np.zeros(len(x))
+    a = np.ones(len(x))
+    return np.moveaxis(
+        np.array([
+            [ c, s, z],
+            [-s, c, z],
+            [ z, z, a]
+        ]),
+        -1,
+        0
+    )
+
 def dihedral_group_character_table(n, return_conjugacy_classes=False):
     # if n < 3:
     #     raise ValueError("no dihedral group under 3 elements")
@@ -175,6 +211,57 @@ def dihedral_group_character_table(n, return_conjugacy_classes=False):
     else:
         return table
 
+def dihedral_group_classes(n):
+    if n == 1:
+        elements = np.array([
+            [0, 1],
+            [1, 0]
+        ])
+    elif n == 2:
+        elements = np.array([
+            [0, 1, 2, 3],
+            [0, 1, 3, 2],
+            [1, 0, 2, 3],
+            [1, 0, 3, 2]
+        ])
+    else:
+        # cyclic permutations, kinda slow
+        elements = np.zeros((2*n, n), dtype=int)
+        elements[0] = np.arange(n)
+        for i in range(1, n):
+            elements[i, :n-i] = elements[0][i:]
+            elements[i, -i:] = elements[0][:i]
+        elements[n:] = np.flip(elements[:n], axis=1)
+
+    if n % 2 == 1:
+        classes = [np.array([0])] + [
+            np.array([i + 1, n - i])
+            for i in range((n - 1) // 2)
+        ] + [
+            np.arange(n, 2*n)
+        ]
+    else:
+        classes = [np.array([0])] + [
+            np.array([i + 1, n - i])
+            for i in range((n - 1) // 2)
+        ] + [np.array([n//2])] + [
+            np.arange(n, 2 * n, 2),
+            np.arange(n+1, 2 * n, 2)
+        ]
+    return elements, classes
+
+def dihedral_group_operation_representation(n, elements=None):
+    if elements is None:
+        elements = np.arange(2*n)
+    cyclics = cyclic_group_operation_representation(n, elements)
+    # reflect about y
+    return np.array([
+        1, 0, 0,
+        0, -1, 0,
+        0, 0, 1
+    ])[np.newaxis] @ cyclics
+
+
 def dh_group_character_table(n):
     if n % 2 == 1:
         table = np.zeros((n+3, n+3), dtype=float)
@@ -220,11 +307,92 @@ def dh_group_character_table(n):
 
     return table
 
+def dh_group_classes(n):
+    if n % 2 == 1:
+        c1 = np.arange((n-3)//4+1)
+        c1 = np.array([n - (2*c1 + 1), n + 2*c1 + 1]).T
+        c2 = np.arange((n-5)//4+1)
+        c2 = np.array([2 + 2*c2, 2*n - 2*c2 - 2]).T
+        c3 = np.arange(2, n, 2)
+        c3 = np.array([c3 - 1, 2*n - c3 + 1]).T
+        classes = [
+            np.array([0])
+        ] + [
+            p
+            for r in zip(c1, c2)
+            for p in r
+        ] + list(
+            c1[len(c2):]
+        ) + [
+            np.arange(2*n, 4*n, 2),
+            np.array([n])
+        ] + list(
+            c3
+        ) + [
+            np.arange(2*n+1, 4*n, 2),
+        ]
+        classes = [
+            c for c in classes
+            if len(c) > 0
+        ]
+
+        elements = dihedral_group_classes(2*n)[0]
+
+    else:
+        c1 = np.arange(1, n//2)
+        c1 = np.array([c1, n - c1]).T
+        c2 = np.arange(5*(n//2), 2*n+1, -1)
+        c2 = np.array([c2-1, 5*n + 1 - c2]).T
+        classes = [
+            np.array([0])
+        ] + list(c1) + [
+            np.array([n//2]),
+            np.arange(n, 2*n, 2),
+            np.arange(n+1, 2*n, 2),
+            np.array([2*n])
+        ] + list(c2) + [
+            np.array([5*(n//2)]),
+            np.arange(3*n, 4*n, 2),
+            np.arange(3*n+1, 4*n+1, 2)
+        ]
+
+        elements=np.array(list(_permutation_product([
+            cyclic_permutations(2),
+            dihedral_group_classes(n)[0]
+        ])))
+
+    return elements, classes
+
+
 def dd_group_character_table(n):
     if n % 2 == 1:
         return dh_group_character_table(n)
     else:
         return dihedral_group_character_table(8)
+
+
+def _permutation_product(perms_lists):
+    perm_sizes = np.array([0] + [p.shape[-1] for p in perms_lists])
+    perm_shifts = np.cumsum(perm_sizes[:-1])
+    actual_perms = [
+        p+s
+        for p,s in zip(perms_lists, perm_shifts)
+    ]
+    for p in itertools.product(*actual_perms):
+        yield np.concatenate(p)
+
+def cycle_decomposition_permutation_product(n):
+    primes, orders = prime_factorize(n)
+    primes = np.array(primes)
+    orders = np.array(orders)
+    mask = np.where(orders > 0)
+    factors = -np.sort(-np.concatenate([primes[mask]**orders[mask], [2]]))
+    elements = np.array(list(_permutation_product([
+        cyclic_permutations(m)
+        for m in factors
+    ])))
+
+    return elements
 
 def improper_rotation_group_character_table(n):
     if n % 2 == 1:
@@ -246,6 +414,24 @@ def improper_rotation_group_character_table(n):
         table[m:] = table[:m] @ np.diag(np.concatenate([np.ones(m), -np.ones(m)]))
     return table
 
+def improper_rotation_group_classes(n):
+    if n % 2 == 1:
+        elements = cycle_decomposition_permutation_product(n)
+    else:
+        elements = cyclic_permutations(n)
+
+    if n % 4 == 0:
+        classes = np.arange(n)[:, np.newaxis]
+    elif n % 2 == 0:
+        classes = np.concatenate([
+            np.arange(0, n, 2),
+            (n//2 + 2*np.arange(n//2)) % n
+        ])[:, np.newaxis]
+    else:
+        classes = np.arange(2*n)[:, np.newaxis]
+
+    return elements, classes
+
 def ch_group_character_table(n):
     # rewrite in terms of diag
     table = np.zeros((2*n, 2*n), dtype=complex)
@@ -255,6 +441,19 @@ def ch_group_character_table(n):
     table[n:] = table[:n] @ np.diag(np.concatenate([np.ones(n), -np.ones(n)]))
     return table
 
+def ch_group_classes(n):
+    # get cycle decomposition
+    elements = cycle_decomposition_permutation_product(n)
+
+    if n % 2 == 0:
+        classes = np.concatenate([
+            np.arange(n),
+            np.arange((3*n)//2, 2*n),
+            np.arange(n, (3 * n) // 2),
+        ])[:, np.newaxis]
+    else:
+        classes = np.arange(2*n)[:, np.newaxis]
+    return elements, classes
 
 point_group_map = {
     'Cv':dihedral_group_character_table,

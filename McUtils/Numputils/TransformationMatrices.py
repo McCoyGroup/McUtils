@@ -192,9 +192,9 @@ def rotation_matrix(axis, theta=None):
         else:
             # we have the vectors that get mixed and their mixing angles, we assume any fixed axis is the 0 element
             # I haven't vectorized this at all...
-            base_shape = axis.shape[:-2]
+            base_shape = axis.shape[:-1]
             theta = theta.reshape(-1, theta.shape[-1])
-            axis = axis.reshape(-1, axis.shape[-2:])
+            axis = axis.reshape((-1,) + axis.shape[-1:])
 
             rots = np.array([
                 rotation_matrix_from_angles_vectors(l, T)

@@ -149,11 +149,18 @@ class CombinatoricsTests(TestCase):
     def test_Characters(self):
         print()
 
-        # ct = CharacterTable.point_group("Cv", 2)
-        ct = CharacterTable.fixed_size_point_group("T")
-        with np.printoptions(linewidth=1e8, threshold=1e8):
-            print(ct.format())
-            print(np.round(np.real(ct.table.T @ np.conj(ct.table)), 8))
+        elements, classes = dh_group_classes(5)
+        self.assertEquals(
+            np.sort(np.concatenate(classes)).tolist(),
+            np.arange(sum(len(l) for l in classes)).tolist()
+        )
+        self.assertEquals(len(elements), sum(len(l) for l in classes))
+
+        # ct = CharacterTable.point_group("Cv", 7)
+        # # ct = CharacterTable.fixed_size_point_group("T")
+        # with np.printoptions(linewidth=1e8, threshold=1e8):
+        #     print(ct.format())
+        #     print(np.round(np.real(ct.table.T @ np.conj(ct.table)), 8))
 
         return
 
