@@ -222,16 +222,73 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
     if rot_mat.shape[-1] == 2:
         return np.arccos(rot_mat[..., 0, 0]), None
     elif rot_mat.shape[-1] == 3:
-        ang = np.arccos((np.trace(rot_mat, axis1=-2, axis2=-1) - 1) / 2)
-        skew = (rot_mat - np.moveaxis(rot_mat, -1, -2)) / 2
-
+        base_shape = rot_mat.shape[:-2]
+        rot_mat = rot_mat.reshape((-1,) + rot_mat.shape[-2:])
         rows, cols = (np.array([2, 0, 1]), np.array([1, 2, 0]))
-        ax = skew[..., rows, cols]
-        if normalize:
-            ax = vec_normalize(ax)
-        else:
-            ax = ax
-        return ang, ax
+        skew = (rot_mat[:, rows, cols] - rot_mat[:, cols, rows]) / 2
+
+        ax = np.zeros(rot_mat.shape[:-1])
+        ang = np.zeros(rot_mat.shape[:-2])
+
+        pos_mask = np.linalg.norm(skew, axis=-1) < 1e-6
+        bad_pos = np.where(pos_mask)[0]
+        rem_pos = np.arange(len(rot_mat))
+        if len(bad_pos) > 0:
+            rem_pos = np.setdiff1d(rem_pos, bad_pos[0])
+            shift_rot = 1/2 * (rot_mat[bad_pos,] + vec_ops.identity_tensors((len(bad_pos),), rot_mat.shape[-1]))
+            for b,r in zip(bad_pos, shift_rot):
+                ord = np.lexsort(r)
+                ax[b] = r[ord[-1]]
+            if normalize:
+                ax[bad_pos,] = vec_ops.vec_normalize(ax[bad_pos,])
+
+            # check identity
+            id_mask = np.abs(np.trace(rot_mat[bad_pos,], axis1=-1, axis2=-2) > 3-3e-6)
+            ang[bad_pos,] = np.pi * np.logical_not(id_mask)
+
+        if len(rem_pos) > 0:
+            ax[rem_pos,] = vec_ops.vec_normalize(skew[rem_pos,])
+
+            proj = vec_ops.orthogonal_projection_matrix(ax[rem_pos,][:, :, np.newaxis])
+            perm = skew[rem_pos,][:, (1, 2, 0)]
+            ort_vec = (proj @ perm[:, :, np.newaxis]).reshape(perm.shape)
+            normal = vec_ops.vec_crosses(ax[rem_pos,], ort_vec)
+            w = np.reshape(rot_mat[rem_pos,] @ ort_vec[:, :, np.newaxis], ort_vec.shape)
+            ang[rem_pos,] = np.arctan2(vec_ops.vec_dots(w, normal), vec_ops.vec_dots(w, ort_vec))
+
+
+        # """
+        # ovec = w - axis Dot[w, axis];
+        # nvec = Cross[axis, ovec];
+        # w1 = m . ovec;
+        # """
+        #
+        # tr_rot = np.trace(rot_mat, axis1=-2, axis2=-1)
+        # ang = np.arccos((tr_rot - 1) / 2)
+        #
+        # zero_mask = np.abs(ang) < 1e-6
+        # zero_pos = np.where(zero_mask)
+        # gimbal_mask = np.abs(np.abs(ang) - np.pi) < 1e-6
+        # gimbal_locked = np.where(gimbal_mask)
+        # rem = np.where(np.logical_not(np.logical_or(zero_mask, gimbal_mask)))
+        #
+        # ax = np.zeros(rot_mat.shape[:-1])
+        # if len(zero_pos) > 0 and len(zero_pos[0]) > 0:
+        #     ax[zero_pos] = np.repeat([[0, 0, 1]], len(zero_pos[0]), axis=0)
+        # if len(gimbal_locked) > 0:
+        #     eigs, gimb_ax = np.linalg.eigh(rot_mat[gimbal_locked])
+        #     one_pos = np.where(eigs > 1-1e-4)
+        #     ax[gimbal_locked] = gimb_ax[one_pos[0], :, one_pos[1]]
+        # if len(rem) > 0 and len(rem[0]) > 0:
+        #     skew = (rot_mat[rem] - np.moveaxis(rot_mat[rem], -1, -2)) / 2
+        #     rows, cols = (np.array([2, 0, 1]), np.array([1, 2, 0]))
+        #     ax[rem] = skew[..., rows, cols]
+        #     ax[rem] = skew[..., rows, cols]
+        # if normalize:
+        #     ax = vec_normalize(ax)
+        # else:
+        #     ax = ax
+        return ang.reshape(base_shape), ax.reshape(base_shape + ax.shape[-1:])
     else:
         base_shape = rot_mat.shape[:-2]
         rot_mat = np.reshape(rot_mat, (-1,) + rot_mat.shape[-2:])
@@ -435,17 +492,42 @@ def affine_matrix(tmat, shift):
 
 def view_matrix(
         up_vector,
-        view_vector=(0, 0, 1)
+        view_vector=(0, 0, 1),
+        output_order=None
 ):
+
     up_vector = vec_ops.vec_normalize(up_vector)
+    d = up_vector.shape[-1]
+    base_shape = up_vector.shape[:-1]
+    up_vector = up_vector.reshape(-1, d)
+    view_vector = vec_normalize(view_vector)
+    view_vector = view_vector.reshape(-1, d)
+    overlaps = vec_ops.vec_dots(up_vector, view_vector)
+    bad_views = np.where(np.abs(overlaps) > 1-1e-6) # TOOD: make this a threshold
+    if len(bad_views) > 0 and len(bad_views[0]) > 0:
+        new_views = np.repeat(np.array([[1, 0, 0]]), len(bad_views[0])).copy()
+        overlaps2 = vec_ops.vec_dots(new_views, view_vector[bad_views])
+        bad_views2 = np.where(np.abs(overlaps2) > 1-1e-6) # TOOD: make this a threshold
+        if len(bad_views2) > 0 and len(bad_views2[0]) > 0:
+            new_views[bad_views2] = np.array([[0, 0, 1]])
+        new_views = new_views - vec_ops.vec_dots(new_views, view_vector[bad_views]) * view_vector[bad_views]
+        view_vector[bad_views] = new_views
     right_vector = vec_ops.vec_normalize(
         vec_ops.vec_crosses(up_vector, view_vector)
     )
     view_vector = vec_ops.vec_normalize(
         vec_ops.vec_crosses(up_vector, right_vector)
     )
-    return np.concatenate([
+    axes = np.concatenate([
         view_vector[..., np.newaxis],
         up_vector[..., np.newaxis],
         right_vector[..., np.newaxis]
-    ], axis=-1)
+    ], axis=-1).reshape(base_shape + (d, d))
+
+    if output_order is not None:
+        from .PermutationOps import permutation_sign
+        sign = permutation_sign(output_order)
+        axes = axes[..., :, output_order]
+        axes[..., :, 1] *= sign
+
+    return axes

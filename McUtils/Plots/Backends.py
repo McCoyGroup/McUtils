@@ -2210,6 +2210,7 @@ class X3DAxes(GraphicsAxes3D):
         if line_thickness is None and s is not None:
             if not nput.is_numeric(s): s = s[0]
             line_thickness = s / 1000
+        points = np.asanyarray(points)
         if riffle:
             if indices is not None:
                 indices = np.asanyarray(indices)

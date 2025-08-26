@@ -148,8 +148,7 @@ class CombinatoricsTests(TestCase):
     @debugTest
     def test_Characters(self):
         print()
-
-        elements, classes = dh_group_classes(5)
+        elements, classes = point_group_classes("Cv", 5)
         self.assertEquals(
             np.sort(np.concatenate(classes)).tolist(),
             np.arange(sum(len(l) for l in classes)).tolist()
