@@ -249,9 +249,15 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
         if len(rem_pos) > 0:
             ax[rem_pos,] = vec_ops.vec_normalize(skew[rem_pos,])
 
+            # uses an efficient implementation by Jens Noeckel: https://mathematica.stackexchange.com/a/29966/38205
             proj = vec_ops.orthogonal_projection_matrix(ax[rem_pos,][:, :, np.newaxis])
-            perm = skew[rem_pos,][:, (1, 2, 0)]
+            perm = skew[rem_pos,][:, (1, 2, 0)] * np.array([-1, 1, 1])
             ort_vec = (proj @ perm[:, :, np.newaxis]).reshape(perm.shape)
+            ort_norms = np.linalg.norm(ort_vec, axis=-1)
+            bad_orts = np.where(ort_norms < 1e-4)
+            if len(bad_orts) > 0 and len(bad_orts[0]) > 0:
+                perm[bad_orts] = vec_ops.vec_normalize(np.random.uniform(size=perm[bad_orts].shape))
+                ort_vec = (proj @ perm[:, :, np.newaxis]).reshape(perm.shape)
             normal = vec_ops.vec_crosses(ax[rem_pos,], ort_vec)
             w = np.reshape(rot_mat[rem_pos,] @ ort_vec[:, :, np.newaxis], ort_vec.shape)
             ang[rem_pos,] = np.arctan2(vec_ops.vec_dots(w, normal), vec_ops.vec_dots(w, ort_vec))
