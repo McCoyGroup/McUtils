@@ -9,10 +9,11 @@ __all__ = [
     "CharacterTable",
     "symmetric_group_class_sizes",
     "symmetric_group_character_table",
-    "dihedral_group_character_table",
-    "dihedral_group_classes",
-    "ch_group_classes",
-    "dh_group_classes"
+    "point_group_character_table",
+    "point_group_classes",
+    "point_group_matrices"
+    # "dihedral_group_character_table",
+    # "dihedral_group_classes",
 ]
 
 def check_boundary_strip_sst(vals, sst):
@@ -134,16 +135,21 @@ def cyclic_group_classes(n):
 
     return elements, classes
 
-def cyclic_group_operation_representation(n, elements=None):
+def cyclic_group_operation_representation(n, elements=None, check_mod=True):
     if elements is None:
         elements = np.arange(n)
+
+    elements = np.asanyarray(elements)
+    base_elems = elements % n
+    elements, inv = np.unique(base_elems, return_inverse=True)
+
     # base rotation matrices
     x = (2 * np.pi * elements) / n
     c = np.cos(x)
     s = np.sin(x)
     z = np.zeros(len(x))
     a = np.ones(len(x))
-    return np.moveaxis(
+    base_elems = np.moveaxis(
         np.array([
             [ c, s, z],
             [-s, c, z],
@@ -152,6 +158,8 @@ def cyclic_group_operation_representation(n, elements=None):
         -1,
         0
     )
+
+    return base_elems[inv,]
 
 def dihedral_group_character_table(n, return_conjugacy_classes=False):
     # if n < 3:
@@ -235,7 +243,7 @@ def dihedral_group_classes(n):
 
     if n % 2 == 1:
         classes = [np.array([0])] + [
-            np.array([i + 1, n - i])
+            np.array([i + 1, n - i - 1])
             for i in range((n - 1) // 2)
         ] + [
             np.arange(n, 2*n)
@@ -253,14 +261,36 @@ def dihedral_group_classes(n):
 def dihedral_group_operation_representation(n, elements=None):
     if elements is None:
         elements = np.arange(2*n)
+    elements = np.asanyarray(elements)
     cyclics = cyclic_group_operation_representation(n, elements)
-    # reflect about y
-    return np.array([
-        1, 0, 0,
-        0, -1, 0,
-        0, 0, 1
-    ])[np.newaxis] @ cyclics
+    refl = np.where((elements//n) % 2 == 1)
+    if len(refl) > 0 and len(refl[0]) > 0:
+        refl_mat = np.array([[
+            [1, 0, 0],
+            [0, -1, 0],
+            [0, 0, 1]
+        ]])
+        #TODO: speed this up in case of large n?
+        cyclics[refl] = refl_mat @ cyclics[refl]
 
+    return cyclics
+
+def d_group_matrices(n, elements=None):
+    if elements is None:
+        elements = np.arange(2*n)
+    elements = np.asanyarray(elements)
+    cyclics = cyclic_group_operation_representation(n, elements)
+    refl = np.where((elements//n) % 2 == 1)
+    if len(refl) > 0 and len(refl[0]) > 0:
+        refl_mat = np.array([[
+            [1, 0, 0],
+            [0, -1, 0],
+            [0, 0, -1]
+        ]])
+        #TODO: speed this up in case of large n?
+        cyclics[refl] = refl_mat @ cyclics[refl]
+
+    return cyclics
 
 def dh_group_character_table(n):
     if n % 2 == 1:
@@ -363,13 +393,112 @@ def dh_group_classes(n):
 
     return elements, classes
 
+def dh_group_matrices(n, elements=None):
+    if elements is None:
+        elements = np.arange(4*n)
+    elements = np.asanyarray(elements)
+    if n == 2:
+        flips = [
+            (),
+            (0, 1),
+            (0, 2),
+            (1, 2),
+            (0, 1, 2),
+            (2),
+            (1),
+            (0)
+        ]
+        flips = [flips[e] for e in elements]
+        diags = np.ones((len(flips), 3))
+        for i,f in flips:
+            diags[i, f] = -1
+        return nput.vec_tensordiag(diags)
+    elif n%2 == 1:
+        dihedrals = dihedral_group_operation_representation(n, elements)
+        refl = np.where((elements // (2*n)) % 2 == 1)
+        if len(refl) > 0 and len(refl[0]) > 0:
+            refl_mat = np.array([[
+                [1,  0,  0],
+                [0, -1,  0],
+                [0,  0, -1]
+            ]])
+            # TODO: speed this up in case of large n?
+            dihedrals[refl] = refl_mat @ dihedrals[refl]
+        return dihedrals
+    else:
+        cyclics = cyclic_group_operation_representation(n, elements)
+        mods = (elements // n) % 4
+        for key,refs in zip(*nput.group_by(np.arange(len(mods)), mods)[0]):
+            if key > 0 and len(refs) > 0:
+                if key == 1:
+                    refl_mat = np.array([[
+                        [1,  0,  0],
+                        [0, -1,  0],
+                        [0,  0, -1]
+                    ]])
+                    cyclics[refs,] = refl_mat @ cyclics[refs]
+                elif key == 2:
+                    refl_mat = np.array([[
+                        [-1,  0,  0],
+                        [0, -1,  0],
+                        [0,  0, -1]
+                    ]])
+                    cyclics[refs,] = refl_mat @ cyclics[refs]
+                else:
+                    refl_mat = np.array([[
+                        [-1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1]
+                    ]])
+                    cyclics[refs,] = refl_mat @ cyclics[refs]
+        return cyclics
 
 def dd_group_character_table(n):
     if n % 2 == 1:
         return dh_group_character_table(n)
     else:
-        return dihedral_group_character_table(8)
+        return dihedral_group_character_table(2*n)
 
+def dd_group_classes(n):
+    if n % 2 == 1:
+        c1 = np.arange(2, n, 2)
+        c1 = np.array([c1, 2*n-c1]).T
+        c2 = np.arange(n-2, 0, -2)
+        c2 = np.array([c2, 2*n-c2]).T
+        classes = [
+            np.array([0]),
+        ] + list(c1) + [
+            np.arange(2*n, 4*n, 2),
+            np.array([n])
+        ] + list(c2) + [
+            np.arange(2*n+1, 4*n, 2)
+        ]
+        classes = [
+            c for c in classes
+            if len(c) > 0
+        ]
+
+        elements = dihedral_group_classes(2*n)[0]
+        return elements, classes
+    else:
+        return dihedral_group_classes(2*n)
+
+def dd_group_matrices(n, elements=None):
+    if elements is None:
+        elements = np.arange(4*n)
+    elements = np.asanyarray(elements)
+
+    imp_rots = improper_rotation_group_operation_representation(2*n, elements)
+    refl = np.where((elements // (2 * n)) % 2 == 1)
+    if len(refl) > 0 and len(refl[0]) > 0:
+        refl_mat = np.array([[
+            [1, 0, 0],
+            [0, -1, 0],
+            [0, 0, -1]
+        ]])
+        # TODO: speed this up in case of large n?
+        imp_rots[refl] = refl_mat @ imp_rots[refl]
+    return imp_rots
 
 def _permutation_product(perms_lists):
     perm_sizes = np.array([0] + [p.shape[-1] for p in perms_lists])
@@ -432,6 +561,15 @@ def improper_rotation_group_classes(n):
 
     return elements, classes
 
+def improper_rotation_group_operation_representation(n, elements=None):
+    if elements is None:
+        elements = np.arange(n)
+    elements = np.asanyarray(elements)
+    cyclics = cyclic_group_operation_representation(n, elements)
+    cyclics[:, 2, 2] = (-1)**(elements)
+
+    return cyclics
+
 def ch_group_character_table(n):
     # rewrite in terms of diag
     table = np.zeros((2*n, 2*n), dtype=complex)
@@ -455,17 +593,75 @@ def ch_group_classes(n):
         classes = np.arange(2*n)[:, np.newaxis]
     return elements, classes
 
+def ch_group_matrices(n, elements=None):
+    if elements is None:
+        elements = np.arange(2*n)
+    elements = np.asanyarray(elements)
+    cyclics = cyclic_group_operation_representation(n, elements)
+    refl = np.where((elements//n) % 2 == 1)
+    if len(refl) > 0 and len(refl[0]) > 0:
+        refl_mat = np.array([[
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, -1]
+        ]])
+        #TODO: speed this up in case of large n?
+        cyclics[refl] = refl_mat @ cyclics[refl]
+
+    return cyclics
+
 point_group_map = {
-    'Cv':dihedral_group_character_table,
-    'S':improper_rotation_group_character_table,
-    'Dh':dh_group_character_table,
-    "Dd":dd_group_character_table,
-    "Ch":ch_group_character_table,
-    "C":cyclic_group_character_table
+    'Cv':{
+        "characters":dihedral_group_character_table,
+        "classes":dihedral_group_classes,
+        "matrices":dihedral_group_operation_representation
+    },
+    'S':{
+        "characters":improper_rotation_group_character_table,
+        "classes":improper_rotation_group_classes,
+        "matrices":improper_rotation_group_operation_representation
+    },
+    'D':{
+        "characters":dihedral_group_character_table,
+        "classes":dihedral_group_classes,
+        "matrices":d_group_matrices
+    },
+    'Dh':{
+        "characters":dh_group_character_table,
+        "classes":dh_group_classes,
+        "matrices":dh_group_matrices
+    },
+    "Dd":{
+        "characters":dd_group_character_table,
+        "classes":dd_group_classes,
+        "matrices":dd_group_matrices
+    },
+    "Ch":{
+        "characters":ch_group_character_table,
+        "classes":ch_group_classes,
+        "matrices":ch_group_matrices
+    },
+    "C":{
+        "characters":cyclic_group_character_table,
+        "classes":cyclic_group_classes,
+        "matrices":cyclic_group_operation_representation
+    }
 }
 
 def point_group_character_table(key, n, **etc):
-    return point_group_map[key](n, **etc)
+    return point_group_map[key]["characters"](n, **etc)
+def point_group_classes(key, n, **etc):
+    class_gen = point_group_map[key].get("classes")
+    if class_gen is not None:
+        return class_gen(n, **etc)
+    else:
+        return None
+def point_group_matrices(key, n, **etc):
+    mat_gen = point_group_map[key].get("matrices")
+    if mat_gen is not None:
+        return mat_gen(n, **etc)
+    else:
+        return None
 
 def I_point_group():
     return np.array([
@@ -552,21 +748,43 @@ def Th_point_group():
 
 
 fixed_size_point_group_map = {
-    'I': I_point_group,
-    "Ih": Ih_point_group,
-    "O": O_point_group,
-    "Oh": Oh_point_group,
-    "T": T_point_group,
-    "Td": Td_point_group,
-    "Th": Th_point_group
+    'I': {
+        "characters":I_point_group
+    },
+    "Ih": {
+        "characters":Ih_point_group
+    },
+    "O": {"characters":O_point_group},
+    "Oh": {"characters":Oh_point_group},
+    "T": {"characters":T_point_group},
+    "Td": {"characters":Td_point_group},
+    "Th": {"characters":Th_point_group}
 }
 
 
 def fixed_size_point_group_character_table(key, **etc):
-    return fixed_size_point_group_map[key](**etc)
+    return fixed_size_point_group_map[key]["characters"](**etc)
+def fixed_size_point_group_classes(key, n, **etc):
+    class_gen = fixed_size_point_group_map[key].get("classes")
+    if class_gen is not None:
+        return class_gen(n, **etc)
+    else:
+        return None
+def fixed_size_point_group_matrices(key, n, **etc):
+    mat_gen = point_group_map[key].get("matrices")
+    if mat_gen is not None:
+        return mat_gen(n, **etc)
+    else:
+        return None
 
 class CharacterTable:
-    def __init__(self, characters, group_name=None, classes=None, irrep_names=None):
+    def __init__(self, characters,
+                 group_name=None,
+                 class_names=None, irrep_names=None,
+                 permutations=None,
+                 classes=None,
+                 space_representation=None
+                 ):
         self.table = np.asanyarray(characters)
         if np.issubdtype(self.table.dtype, np.dtype(complex)):
             col_weights = np.real(nput.vec_dots(self.table.T, np.conj(self.table.T)))
@@ -575,8 +793,11 @@ class CharacterTable:
         self.group_order = col_weights[0]
         self.class_sizes = col_weights[0] // col_weights
         self.group_name = group_name
-        self.classes = classes
+        self.class_names = class_names
         self.irrep_names = irrep_names
+        self.permutations = permutations
+        self.classes = classes
+        self.space_representation = space_representation
 
     @classmethod
     def symmetric_group(cls, n):
@@ -584,41 +805,68 @@ class CharacterTable:
         return cls(
             chars,
             group_name=f"S_{n}",
-            classes=[
+            class_names=[
                 "".join(f"{x}[{c}]" for x, c in zip(*np.unique(p, return_counts=True)))
                 for p in parts
-            ]
+            ],
+            classes=parts
         )
 
     @classmethod
     def cyclic_group(cls, n):
+        elements, classes = cyclic_group_classes(n)
+        mats = cyclic_group_operation_representation(n, [c[0] for c in classes])
+
         return cls(
             cyclic_group_character_table(n),
             group_name=f"C_{n}",
-            classes=[str(i) for i in range(n)]
+            class_names=[str(i) for i in range(n)],
+            permutations=elements,
+            classes=classes,
+            space_representation=mats
         )
 
     @classmethod
     def dihedral_group(cls, n):
+        elements, classes = dihedral_group_classes(n)
+        mats = dihedral_group_operation_representation(n, [c[0] for c in classes])
+
         return cls(
             dihedral_group_character_table(n),
             group_name=f"D_{n}",
-            # classes=[str(i) for i in range(n)]
+            permutations=elements,
+            classes=classes,
+            space_representation=mats
         )
 
     @classmethod
     def improper_rotation_group(cls, n):
+        elements, classes = improper_rotation_group_classes(n)
+        mats = improper_rotation_group_operation_representation(n, [c[0] for c in classes])
+
         return cls(
             improper_rotation_group_character_table(n),
             group_name=f"s_{n}",
+            permutations=elements,
+            classes=classes,
+            space_representation=mats
             # classes=[str(i) for i in range(n)]
         )
 
     @classmethod
     def point_group(cls, key, n):
+        class_data = point_group_classes(key, n)
+        if class_data is not None:
+            elements, classes = class_data
+            mats = point_group_matrices(key, n, elements=[c[0] for c in classes])
+        else:
+            elements = classes = mats = None
         return cls(
             point_group_character_table(key, n),
             group_name=f"{key}_{n}",
+            classes=classes,
+            permutations=elements,
+            space_representation=mats
             # classes=[str(i) for i in range(n)]
         )
 
@@ -626,7 +874,8 @@ class CharacterTable:
     def fixed_size_point_group(cls, key):
         return cls(
             fixed_size_point_group_character_table(key),
-            group_name=key
+            group_name=key,
+            # classes=fixed_size_point_group_classes(key, n)
             # classes=[str(i) for i in range(n)]
         )
 
@@ -660,7 +909,7 @@ class CharacterTable:
 
     def format(self, classes=None, irrep_names=None, group_name=None):
         if classes is None:
-            classes = self.classes
+            classes = self.class_names
         if irrep_names is None:
             irrep_names = self.irrep_names
         if group_name is None:

@@ -225,15 +225,22 @@ def vec_crosses(vecs1, vecs2, normalize=False, zero_thresh=None, axis=-1):
     crosses = np.cross(vecs1, vecs2, axis=axis)
     if normalize:
         norms = vec_norms(crosses, axis=axis)
-
-        if isinstance(norms, np.ndarray):
-            zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
-            bad_norms = np.where(np.abs(norms) <= zero_thresh)
+        zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
+        smol = util.is_numeric(norms)
+        if smol:
+            bad_norms = norms < zero_thresh
+            if bad_norms:
+                norms = np.array(1.)
+        else:
+            bad_norms = np.where(norms <= zero_thresh)
             norms[bad_norms] = 1.
 
         crosses = crosses/norms[..., np.newaxis]
 
-        if isinstance(norms, np.ndarray):
+        if smol:
+            if bad_norms:
+                crosses *= 0.
+        else:
             crosses[bad_norms] *= 0.
 
     return crosses
@@ -329,18 +336,28 @@ def vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None
 
     norm_prod = norms1*norms2
     if check_zeros:
-        if isinstance(norm_prod, np.ndarray):
-            zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
+        zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
+        smol = util.is_numeric(norm_prod)
+        if smol:
+            bad_norms = norm_prod < zero_thresh
+            if bad_norms:
+                norm_prod = np.array(1.)
+        else:
             bad_norm_prods = np.where(np.abs(norm_prod) <= zero_thresh)
             norm_prod[bad_norm_prods] = 1.
+
     cos_comps = dots/norm_prod
     cross_norms = vec_norms(crosses, axis=axis)
     sin_comps = cross_norms/norm_prod
 
     angles = np.arctan2(sin_comps, cos_comps)
 
-    if check_zeros and isinstance(norm_prod, np.ndarray):
-        angles[bad_norm_prods] = 0.
+    if check_zeros:
+        if smol:
+            if bad_norms:
+                angles = np.array(0.)
+        else:
+            angles[bad_norm_prods] = 0.
 
     # return signed angles
     if up_vectors is not None:
