@@ -198,11 +198,14 @@ class CombinatoricsTests(TestCase):
         print()
 
         pg = CharacterTable.point_group("Cv", 2)
+        coords = np.array([[ 0.00000, 0.,  0.12595],
+                           [ 1.43714, 0., -0.99944],
+                           [-1.43714, 0., -0.99944]])
+        print(pg.coordinate_mode_reduction(coords))
+        # return
+
         pg = CharacterTable.point_group("Cv", 3)
         pg = CharacterTable.point_group("Td")
-        # coords = np.array([[ 0.00000, 0.,  0.12595],
-        #                    [ 1.43714, 0., -0.99944],
-        #                    [-1.43714, 0., -0.99944]])
 
         print(pg.format())
         rep = pg.axis_representation()

@@ -2154,7 +2154,7 @@ class CharacterTable:
             elements = classes = mats = None
         return cls(
             point_group_data(key, n=n, prop='characters'),
-            group_name=f"{key}_{n}",
+            group_name=f"{key}_{n}" if n is not None else f"{key}",
             classes=classes,
             permutations=elements,
             matrices=mats
@@ -2243,8 +2243,8 @@ class CharacterTable:
             )
             symms = nput.affine_matrix(symms, shifts)
 
-        tf = np.tensordot(mats, symms, axes=[-2, -1])
-        rep = np.moveaxis(tf, -2, -3)
+        rep = np.moveaxis(np.moveaxis(np.tensordot(symms, mats, axes=[-1, -2]), 0, -2), 0, -2)
+        # rep = np.moveaxis(tf, -2, -3)
         if affine:
             disps_new = rep[..., :-1, -1]
             disps_old = mats[..., :-1, -1][..., np.newaxis, :]
@@ -2309,3 +2309,9 @@ class CharacterTable:
             # reflection is the idea
             rots[..., reflection_pos[0]] *= -1
         return np.concatenate([carts, rots], axis=0)
+
+    def coordinate_mode_reduction(self, coords):
+        base_rep = np.sum(self.coordinate_representation(coords), axis=0)
+        reduced = self.decompose_representation(base_rep)
+        axes = self.decompose_representation(np.sum(self.axis_representation(), axis=0))
+        return reduced - axes
