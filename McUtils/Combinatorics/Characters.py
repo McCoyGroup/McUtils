@@ -2298,3 +2298,14 @@ class CharacterTable:
         rep = self.space_representation(mats)
         if smol: rep = rep[0]
         return rep
+
+    def axis_representation(self):
+        carts = self.space_representation(nput.vec_tensordiag(np.eye(3)))
+        reflection_pos = np.where(np.linalg.det(self.matrices) < 0)
+        rots = carts.copy()
+        if len(reflection_pos) > 0:
+            # I think this is justified, but not sure...
+            # the handedness of the rotation has to flip after
+            # reflection is the idea
+            rots[..., reflection_pos[0]] *= -1
+        return np.concatenate([carts, rots], axis=0)

@@ -195,32 +195,48 @@ class CombinatoricsTests(TestCase):
 
     @debugTest
     def test_CharacterDecomposition(self):
-
+        print()
 
         pg = CharacterTable.point_group("Cv", 2)
         pg = CharacterTable.point_group("Cv", 3)
-        # pg = CharacterTable.point_group("Td")
+        pg = CharacterTable.point_group("Td")
         # coords = np.array([[ 0.00000, 0.,  0.12595],
         #                    [ 1.43714, 0., -0.99944],
         #                    [-1.43714, 0., -0.99944]])
 
         print(pg.format())
-
-
-        # base_rep = np.sum(c2v.coordinate_representation(coords), axis=0)
-        # print(base_rep)
-        # print(c2v.decompose_representation(base_rep))
-        #
-        mats = nput.vec_tensordiag(np.eye(3))
-        rep = pg.space_representation([mats[0] + mats[1], mats[2]])
-        # rot_rep = cart_rep[(1, 2, 0), ] * cart_rep[(2, 0, 1), ]
-        # rep = np.concatenate([cart_rep, rot_rep], axis=0)
-        # rep = cart_rep
-
-        # rep = pg.space_representation(pg.matrices)
-        decomp = pg.decompose_representation(rep)
+        rep = pg.axis_representation()
         print(np.round(rep, 8))
-        print(np.round(decomp.T, 8))
+
+        decomp = pg.decompose_representation(rep).T
+        print(np.round(np.sum(decomp[:3], axis=0), 8))
+        print(np.round(np.sum(decomp[3:], axis=0), 8))
+        #
+        #
+        # # base_rep = np.sum(c2v.coordinate_representation(coords), axis=0)
+        # # print(base_rep)
+        # # print(c2v.decompose_representation(base_rep))
+        # #
+        # mats = nput.vec_tensordiag(np.eye(3))
+        # rep = pg.space_representation(mats)
+        # print(np.round(rep, 8))
+        # # rot_rep = cart_rep[(1, 2, 0), ] * cart_rep[(2, 0, 1), ]
+        # # rep = np.concatenate([cart_rep, rot_rep], axis=0)
+        # # rep = cart_rep
+        #
+        #
+        #
+        # # rep = pg.space_representation(pg.matrices)
+        # decomp = pg.decompose_representation(rep)
+        # # print(np.round(decomp.T, 8))
+        #
+        # rot_z = rep[2] * (np.sign(rep[1]) * np.sign(rep[0]))
+        # print(rot_z)
+        #
+        # decomp = pg.decompose_representation([
+        #     rot_z
+        # ])
+        # print(np.round(decomp.T, 8))
 
         return
 
