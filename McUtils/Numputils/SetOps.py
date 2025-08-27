@@ -21,6 +21,7 @@ __all__ = [
     "permutation_indices",
     "vector_ix",
     "vector_take",
+    "vector_take_ix",
     "index_mask",
     "index_complement"
 ]
@@ -651,6 +652,33 @@ def index_complement(shape, inds):
         mask_inds[k].reshape(targ_shape)
         for k in range(-len(shape), 0)
     )
+
+def vector_take_ix(base_shape, inds, shared=None):
+    if shared is None:
+        shared = len(base_shape) - 1
+
+    if isinstance(inds, tuple):
+        if is_numeric(inds[0]): inds = tuple(np.asanyarray(ii) for ii in inds)
+    else:
+        inds = (np.asanyarray(inds),)
+
+    if shared is None: shared = 0
+    shared_shape = base_shape[:shared]
+    bcast_shape_ind = inds[-1].shape[shared:-1]
+    bcast_shape_arr = base_shape[shared:-len(inds)]
+
+    total_shape = shared_shape + bcast_shape_arr + bcast_shape_ind
+
+    inds_nob = tuple(
+        np.broadcast_to(
+            np.expand_dims(x, list(range(shared, shared + len(bcast_shape_arr)))),
+            total_shape + x.shape[-len(inds):]
+        )
+        for x in inds
+    )
+    inds = vector_ix(base_shape[-len(inds):], inds_nob)
+
+    return inds
 
 def vector_take(arr, inds, shared=None, return_spec=False):
     """

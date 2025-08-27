@@ -5,6 +5,7 @@ import scipy.linalg
 from .VectorOps import vec_normalize, vec_angles
 from . import VectorOps as vec_ops
 from . import Misc as misc
+from . import SetOps as setops
 import math, numpy as np, scipy as sp
 
 __all__ = [
@@ -18,6 +19,9 @@ __all__ = [
     "skew_from_rotation_matrix",
     "translation_matrix",
     "affine_matrix",
+    "reflection_matrix",
+    "permutation_matrix",
+    "symmetry_permutation",
     "extract_rotation_angle_axis",
     "view_matrix"
 ]
@@ -104,8 +108,6 @@ def rotation_matrix_ER_vec(axes, thetas):
 
     ax_shape = axes.shape[:-1]
     t_shape = thetas.shape
-    axes = np.reshape(axes, (-1, 3))
-    thetas = thetas.reshape(-1)
     if thetas.ndim == 0:
         base_shape = ax_shape
     elif axes.ndim == 1:
@@ -114,6 +116,13 @@ def rotation_matrix_ER_vec(axes, thetas):
         raise ValueError(f"can't broadcast axes and angles with shapes {ax_shape} and {t_shape}")
     else:
         base_shape = tuple(a if t == 1 else t for a,t in zip(ax_shape, t_shape))
+
+    axes = np.reshape(axes, (-1, 3))
+    thetas = thetas.reshape(-1)
+    if thetas.shape[0] < axes.shape[0]:
+        thetas = np.broadcast_to(thetas, axes.shape[:-1])
+    elif axes.shape[0] < thetas.shape[0]:
+        axes = np.broadcast_to(axes, thetas.shape + axes.shape[-1:])
 
     a = np.cos(thetas/2.0)
     b, c, d = np.moveaxis(-axes * np.reshape(np.sin(thetas / 2.0), (len(thetas), 1)), -1, 0)
@@ -187,7 +196,7 @@ def rotation_matrix(axis, theta=None):
 
         if axis.shape == theta.shape:
             return rotation_matrix_align_vectors(axis, theta)
-        elif axis.ndim == theta.ndim + 1 and axis.shape[-1] == 3:
+        elif (axis.ndim == theta.ndim + 1) or theta.ndim == 0 and axis.shape[-1] == 3:
             return rotation_matrix_ER_vec(axis, theta)
         else:
             # we have the vectors that get mixed and their mixing angles, we assume any fixed axis is the 0 element
@@ -481,19 +490,23 @@ def affine_matrix(tmat, shift):
         shifts = np.asanyarray(shift)
         if shifts.ndim == 1:
             shifts = np.broadcast_to(shifts, (1,)*(base_mat.ndim-2) + shifts.shape)
-        shifts = np.broadcast_to(shifts, base_mat.shape[:-2] + (3,))
+        shifts = np.broadcast_to(shifts, base_mat.shape[:-2] + (shifts.shape[-1],))
         shifts = np.expand_dims(shifts, -1)
         mat = np.concatenate([base_mat, shifts], axis=-1)
-        padding = np.array([0., 0., 0., 1.])
+        padding = np.zeros(shifts.shape[-2]+1)
+        padding[-1] = 1
         padding = np.broadcast_to(
             np.broadcast_to(padding, (1,)*(base_mat.ndim-2) + padding.shape),
-            mat.shape[:-2] + (4,)
+            mat.shape[:-2] + (shifts.shape[-2]+1,)
         )
         padding = np.expand_dims(padding, -2)
         mat = np.concatenate([mat, padding], axis=-2)
     else:
+        shift = np.asanyarray(shift)
         mat = np.concatenate([base_mat, shift[:, np.newaxis]], axis=-1)
-        mat = np.concatenate([mat, [[0., 0., 0., 1.]]], axis=-2)
+        padding = np.zeros(shift.shape[-1]+1)
+        padding[-1] = 1
+        mat = np.concatenate([mat, padding[np.newaxis]], axis=-2)
     return mat
 
 def view_matrix(
@@ -537,3 +550,106 @@ def view_matrix(
         axes[..., :, 1] *= sign
 
     return axes
+
+def reflection_matrix(axes):
+    # need to find space of "null" vectors
+    axes = np.asanyarray(axes)
+    smol = axes.ndim == 1
+    if smol:
+        axes = axes[np.newaxis]
+    if axes.ndim == 2:
+        axes = axes[:, np.newaxis, :]
+    base_shape = axes.shape[:-2]
+    axes = axes.reshape((-1,) + axes.shape[-2:])
+    nax = axes.shape[-2]
+    ndim = axes.shape[-1]
+    eyes = vec_ops.identity_tensors(axes.shape[0], ndim)
+    full_basis = np.concatenate([axes, eyes], axis=-2)
+    q, r = np.linalg.qr(np.moveaxis(full_basis, -2, -1))
+    tf = q[:, :, :ndim]
+
+    diag_refl = np.diag([-1] * nax + [1] * (ndim - nax))[np.newaxis]
+    refls = tf @ diag_refl @ np.moveaxis(tf, -2, -1)
+
+    refls = refls.reshape(base_shape + refls.shape[1:])
+    if smol: refls = refls[0]
+
+    return refls
+
+def permutation_matrix(perm):
+    perm = np.asanyarray(perm)
+    smol = perm.ndim == 1
+    if smol:
+        perm = perm[np.newaxis]
+    base_shape = perm.shape[:-1]
+    perm = perm.reshape(-1, perm.shape[-1])
+    mats = np.zeros((perm.shape[0], perm.shape[-1], perm.shape[-1]), dtype='uint8')
+    ix = (
+        np.expand_dims(np.arange(mats.shape[0]), [1]),
+        np.expand_dims(np.arange(perm.shape[-1]), [0]),
+        perm
+    )
+    mats[ix] = 1
+
+    mats = mats.reshape(base_shape + mats.shape[1:])
+    if smol: mats = mats[0]
+
+    return mats
+
+def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
+    # converts a symmetry operation into a permutation of the coords
+    coords = np.asanyarray(coords)
+    op = np.asanyarray(op)
+
+    base_shape = coords.shape[:-2]
+    coords = coords.reshape((-1,) + coords.shape[-2:])
+    op = op.reshape((-1,) + op.shape[-2:])
+    new_coords = coords @ op
+    dm = np.linalg.norm(coords[:, :, np.newaxis] - new_coords[:, np.newaxis, :], axis=-1)
+
+    # iteratively find best matches and map them onto each other
+    perm_rows = np.repeat(np.arange(coords.shape[1])[np.newaxis], coords.shape[0], axis=0)
+    perm_cols = np.repeat(np.arange(coords.shape[1])[np.newaxis], coords.shape[0], axis=0)
+    a = np.arange(dm.shape[0])
+    a1 = np.arange(dm.shape[0])[:, np.newaxis]
+    a2 = np.arange(dm.shape[1])
+    for i in range(coords.shape[1]):
+        # we drop one more row each loop
+        if i > 0:
+            sel = a2[np.newaxis, :(-i)]
+        else:
+            sel = a2[np.newaxis, :]
+
+        min_pos = np.argmin(dm, axis=-1) # min across columns
+        min_vals = dm[a1, sel, min_pos]
+        ord = np.argsort(min_vals, axis=-1) # min across rows
+        # assign row permutation
+        perm_next = perm_rows[:, i:][a1[:, np.newaxis], ord[:, 0]]
+        perm_rows[:, i+1:] = perm_rows[:, i:][a1[:, np.newaxis], ord[:, 1:]]
+        perm_rows[:, i] = perm_next
+
+        # column can be duplicated, so we reorder just based on the minimum row
+        min_pos = np.argsort(dm[a, ord[:, 0]], axis=-1) # min across columns
+        # print("?", ord[:, 0].shape, dm[a1, ord[:, 0]].shape)
+        # min_pos = min_pos[a1, ord]
+        perm_next = perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 0]]
+        # print(perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 1:]])
+        perm_cols[:, i+1:] = perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 1:]]
+        perm_cols[:, i] = perm_next
+
+        dm = dm[a1, ord[:, np.newaxis, 1:], min_pos[:, 1:, np.newaxis]]
+        # print(dm.shape)
+
+    if return_row_ordering:
+        return perm_rows.reshape(base_shape), perm_cols.reshape(base_shape)
+    else:
+        row_sort = np.argsort(perm_rows, axis=1)
+        perms = perm_cols[a1, row_sort].reshape(base_shape + perm_cols.shape[1:])
+        return perms
+
+def symmetry_reduce(coords, op:np.ndarray):
+    base_perms = symmetry_permutation(coords, op)
+    # compute cycles for each permutation
+    permutation_cycles(base_perms)
+    #
+    ...

@@ -13,7 +13,8 @@ __all__ = [
     "levi_cevita_dot",
     "normalize_commutators",
     "commutator_terms",
-    "commutator_evaluate"
+    "commutator_evaluate",
+    "permutation_cycles"
 ]
 
 
@@ -253,3 +254,58 @@ def commutator_evaluate(commutator, expansion_terms, normalized=False, direct=No
                 comm += res
         return comm
 
+
+def permutation_cycles(perms, return_groups=False):
+    # since cycles have no set size, this can't be efficiently vectorized
+    # a much better candidate for speeding up with numba if we need it
+    perms = np.asanyarray(perms)
+    if return_groups and perms.ndim > 2:
+        raise ValueError(
+            f"can't destructure permutations of shape {perms.shape} into groups, "
+            "try `return_groups=False` to just get labels"
+        )
+    base_shape = perms.shape[:-1]
+    perms = perms.reshape(-1, perms.shape[-1])
+
+    labels = np.full(perms.shape, -1, dtype=int)
+    group_indicators = np.zeros(len(perms), dtype=int)
+    for i in range(perms.shape[-1]):
+        mask = np.where(labels[:, i] < 0)
+        if len(mask) == 0 or len(mask[0]) == 0:
+            continue
+
+        mask = mask[0]
+        start = new = perms[mask, i]
+        x = group_indicators[mask,]
+        group_indicators[mask,] += 1
+        for _ in range(perms.shape[-1]):
+            labels[mask, new] = x
+            new = perms[mask, new]
+            checks = np.where(start == new)
+            if len(checks) > 0 and len(checks[0]) > 0:
+                checks = checks[0]
+                if len(checks) == len(mask): break
+                rem = np.delete(np.arange(len(mask)), checks)
+                mask = mask[rem,]
+                x = x[rem,]
+                new = new[rem,]
+                start = start[rem,]
+            labels[mask, new] = x
+
+    labels = labels.reshape(base_shape + (labels.shape[-1],))
+    if return_groups:
+        if labels.ndim == 1:
+            groups = sets.group_by(np.arange(len(labels)), labels)[0][1]
+            return [
+                perms[0][g] for g in groups
+            ]
+        elif labels.ndim == 2:
+            cycle_lists = []
+            for l, p in zip(labels, perms):
+                groups = sets.group_by(np.arange(len(l)), l)[0][1]
+                cycle_lists.append([
+                    p[g] for g in groups
+                ])
+            return cycle_lists
+
+    return labels
