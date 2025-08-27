@@ -17,6 +17,8 @@ __all__ = [
     "vec_norms",
     "vec_tensordot",
     "vec_tensordiag",
+    "vec_block_diag",
+    "diag_indices",
     "block_array",
     "vec_tdot",
     "distance_matrix",
@@ -557,9 +559,22 @@ def block_array(blocks, ndim=2, padding=0):
     for k in range(blocks.ndim-ndim-padding):
         blocks = np.concatenate(blocks, axis=-(k+1))
     return blocks
+def vec_block_diag(mats):
+    mats = np.asanyarray(mats)
+    base_shape = mats.shape[:-3]
+    stack_shape = mats.shape[-3]
+    arr_shape = mats.shape[-2:]
+    arr = np.zeros(base_shape + (stack_shape, stack_shape) + arr_shape)
+    inds = diag_indices(base_shape, stack_shape, k=2)
+    arr[inds] = mats
+    return np.moveaxis(arr, -2, -3).reshape(base_shape + (stack_shape*arr_shape[-1], stack_shape*arr_shape[-2]))
+
 
 def identity_tensors(base_shape, ndim):
     eye = np.eye(ndim)
+    if util.is_int(base_shape):
+        base_shape = [base_shape]
+    base_shape = tuple(base_shape)
     return np.broadcast_to(
         np.expand_dims(eye, list(range(len(base_shape)))),
         base_shape + (ndim, ndim)

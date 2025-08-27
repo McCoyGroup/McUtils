@@ -15,6 +15,7 @@ class CombinatoricsTests(TestCase):
         import warnings
         np.seterr(all='raise')
         warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
+        np.set_printoptions(linewidth=1e8)
 
     class StateMaker:
         """
@@ -145,10 +146,10 @@ class CombinatoricsTests(TestCase):
             stable_factorial_ratio([math.factorial(7)], [3, 4, 7])
         )
 
-    @debugTest
+    @validationTest
     def test_Characters(self):
         print()
-        elements, classes = point_group_classes("Cv", 5)
+        elements, classes = point_group_data("Cv", 5)
         self.assertEquals(
             np.sort(np.concatenate(classes)).tolist(),
             np.arange(sum(len(l) for l in classes)).tolist()
@@ -191,6 +192,64 @@ class CombinatoricsTests(TestCase):
 
         # s7 = symmetric_group_character_table(7)
         # print(np.linalg.svd(s7))
+
+    @debugTest
+    def test_CharacterDecomposition(self):
+
+
+        pg = CharacterTable.point_group("Cv", 2)
+        pg = CharacterTable.point_group("Cv", 3)
+        # pg = CharacterTable.point_group("Td")
+        # coords = np.array([[ 0.00000, 0.,  0.12595],
+        #                    [ 1.43714, 0., -0.99944],
+        #                    [-1.43714, 0., -0.99944]])
+
+        print(pg.format())
+
+
+        # base_rep = np.sum(c2v.coordinate_representation(coords), axis=0)
+        # print(base_rep)
+        # print(c2v.decompose_representation(base_rep))
+        #
+        mats = nput.vec_tensordiag(np.eye(3))
+        rep = pg.space_representation([mats[0] + mats[1], mats[2]])
+        # rot_rep = cart_rep[(1, 2, 0), ] * cart_rep[(2, 0, 1), ]
+        # rep = np.concatenate([cart_rep, rot_rep], axis=0)
+        # rep = cart_rep
+
+        # rep = pg.space_representation(pg.matrices)
+        decomp = pg.decompose_representation(rep)
+        print(np.round(rep, 8))
+        print(np.round(decomp.T, 8))
+
+        return
+
+        mats = nput.rotation_matrix(np.eye(3), np.pi)
+        rep = c2v.space_representation(mats)
+        print(rep)
+        print(c2v.decompose_representation(rep))
+
+        print(np.round(c2v.matrix_from_representation([1, 1, 1, 1]), 8))
+
+        # mats = np.array([[1, 1, 0], [-1, 1, 0], [0, 0, 1]])
+        # rep = c2v.space_representation(mats)
+        # print(rep)
+        # print(c2v.decompose_representation(rep))
+
+        return
+
+        base_rep = np.sum(c2v.translation_representation(coords), axis=0)
+        print(base_rep)
+        print(c2v.decompose_representation(base_rep))
+
+        disps = nput.internal_coordinate_tensors(coords, [
+            (0, 1),
+            (0, 2)
+        ])
+        mode = 1 / np.sqrt(2) * (disps[:, 0] + disps[:, 1]).reshape(coords.shape)
+        base_rep = c2v.coordinate_representation(coords, mode)
+        print(np.round(c2v.decompose_representation(base_rep), 8))
+
 
     @validationTest
     def test_IntegerPartitions(self):
