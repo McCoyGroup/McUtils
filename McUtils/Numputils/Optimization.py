@@ -143,7 +143,7 @@ def iterative_step_minimize_step(step_predictor,
         norms = np.linalg.norm(step, axis=1)
         # norms = norms[rem,]
         v = np.linalg.norm(guess[rem,], axis=-1)
-        r = np.sqrt(norms[rem,] ** 2 + v ** 2)
+        r = np.sqrt(norms ** 2 + v ** 2)
         step = guess[rem,] * (1/r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
         if generate_rotation:
             raise NotImplementedError(">3D rotations are complicated")
@@ -177,12 +177,13 @@ def iterative_step_minimize_step(step_predictor,
                 osc = osc[0][osc2]
                 scaling = np.min([cur_norms[osc2], -dist[osc2] / 2], axis=0) / cur_norms[osc2]
                 step[osc,] = step[osc,] * scaling
-            if unitary:
-                norms = np.linalg.norm(step[osc], axis=1)
-                # norms = norms[rem,]
-                v = np.linalg.norm(guess[rem,], axis=-1)
-                r = np.sqrt(norms ** 2 + v ** 2)
-                step = guess[rem,] * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+                if unitary:
+                    g = guess[rem,][osc,]
+                    norms = np.linalg.norm(step[osc], axis=1)
+                    # norms = norms[rem,]
+                    v = np.linalg.norm(g, axis=-1)
+                    r = np.sqrt(norms ** 2 + v ** 2)
+                    step = g * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
 
 
     return step, errs, mask, done
@@ -297,6 +298,9 @@ def iterative_step_minimize(
 
             mask = new_mask
             guess[mask,] += step
+            if unitary:
+                # unitarization strategy breaking down and I don't quite know why...
+                guess[mask,] /= np.linalg.norm(guess[mask,], axis=-1)
             its[mask,] += 1
     else:
         converged = False
