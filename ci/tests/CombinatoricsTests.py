@@ -193,82 +193,118 @@ class CombinatoricsTests(TestCase):
         # s7 = symmetric_group_character_table(7)
         # print(np.linalg.svd(s7))
 
-    @debugTest
+    @validationTest
     def test_CharacterDecomposition(self):
-        print()
+        # print()
 
         pg = CharacterTable.point_group("Cv", 2)
         coords = np.array([[ 0.00000, 0.,  0.12595],
                            [ 1.43714, 0., -0.99944],
                            [-1.43714, 0., -0.99944]])
-        print(pg.coordinate_mode_reduction(coords))
+        self.assertEquals(
+            [2, 0, 1, 0],
+            np.round(pg.coordinate_mode_reduction(coords), 8).tolist()
+        )
         # return
 
         pg = CharacterTable.point_group("Cv", 3)
+        rep = pg.axis_representation()
+        decomp = pg.decompose_representation(rep).T
+        self.assertEquals(
+            [
+                np.round(decomp[0] + decomp[1], 8).tolist(),
+                np.round(decomp[2], 8).tolist()
+            ],
+            [
+                [0, 0, 1], # 3rd irrep is x-y
+                [1, 0, 0] # 1st irrep is z
+            ]
+        )
+        self.assertEquals(
+            [
+                np.round(decomp[3] + decomp[4], 8).tolist(),
+                np.round(decomp[5], 8).tolist()
+            ],
+            [
+                [0, 0, 1], # 3rd irrep is x-y rotation
+                [0, 1, 0] # 2nd irrep is z rotation
+            ]
+        )
+
+
         pg = CharacterTable.point_group("Td")
 
-        print(pg.format())
+        # print(pg.format())
         rep = pg.axis_representation()
-        print(np.round(rep, 8))
+        # print(np.round(rep, 8))
 
         decomp = pg.decompose_representation(rep).T
+
+        self.assertEquals(
+            [
+                np.round(np.sum(decomp[:3], axis=0), 8).tolist(),
+                np.round(np.sum(decomp[3:], axis=0), 8).tolist()
+            ],
+            [
+                [0, 0, 0, 0, 1], # triply degenerate irreps
+                [0, 0, 0, 1, 0] # triply degenerate irreps
+            ]
+        )
         print(np.round(np.sum(decomp[:3], axis=0), 8))
         print(np.round(np.sum(decomp[3:], axis=0), 8))
+
+    @debugTest
+    def test_CharacterSymmetries(self):
+        # print(
+        #     nput.enumerate_permutations([
+        #         [0, 1, 2, 3],
+        #         [0, 3, 1, 2],
+        #         [0, 1, 3, 2]
+        #     ])
+        # )
+        # return
+        # mats = point_group_data("Cv", 3, prop="matrices")
+        # uhh = nput.vec_tensordiag(np.eye(3))
+        # print()
+        # print(CharacterTable.point_group('Cv', 3).format())
+        # print(CharacterTable.point_group('Cv', 3).axis_representation(include_rotations=False))
+        # woof = np.tensordot(mats, nput.vec_tensordiag(np.eye(3)), axes=[-1, -1])
+        # print(np.trace(woof, axis1=1, axis2=-1))
         #
         #
-        # # base_rep = np.sum(c2v.coordinate_representation(coords), axis=0)
-        # # print(base_rep)
-        # # print(c2v.decompose_representation(base_rep))
-        # #
-        # mats = nput.vec_tensordiag(np.eye(3))
-        # rep = pg.space_representation(mats)
-        # print(np.round(rep, 8))
-        # # rot_rep = cart_rep[(1, 2, 0), ] * cart_rep[(2, 0, 1), ]
-        # # rep = np.concatenate([cart_rep, rot_rep], axis=0)
-        # # rep = cart_rep
         #
-        #
-        #
-        # # rep = pg.space_representation(pg.matrices)
-        # decomp = pg.decompose_representation(rep)
-        # # print(np.round(decomp.T, 8))
-        #
-        # rot_z = rep[2] * (np.sign(rep[1]) * np.sign(rep[0]))
-        # print(rot_z)
-        #
-        # decomp = pg.decompose_representation([
-        #     rot_z
-        # ])
-        # print(np.round(decomp.T, 8))
+        # return
+        p = CharacterTable.point_group('Cv', 3)
+        coords = np.concatenate(
+            [
+                [[0, 0, 1]],
+                nput.apply_symmetries([1, 0, 0], p.matrices)
+            ],
+            axis=0
+        )
+        # character_coeffs = p.symmetrized_coordinate_coefficients(coords, normalize=True)
+        # self.assertAlmostEqual(np.sum(character_coeffs[0, 0]), 0)
+        # self.assertAlmostEqual(np.sum(character_coeffs[0, 1]), 0)
+        # self.assertAlmostEqual(np.sum(character_coeffs[0, 2]), 1) # nitrogen z coordinate
 
-        return
+        character_coeffs2 = p.symmetrized_coordinate_coefficients(coords, as_characters=False)
+        # return
 
-        mats = nput.rotation_matrix(np.eye(3), np.pi)
-        rep = c2v.space_representation(mats)
-        print(rep)
-        print(c2v.decompose_representation(rep))
+        print(
+            np.round(np.sum(character_coeffs2[:6, 3], axis=0).reshape(4, 3), 8)
+        )
+        print(
+            np.round(np.sum(character_coeffs2[:6, 6], axis=0).reshape(4, 3), 8)
+        )
+        print(
+            np.round(np.sum(character_coeffs2[:6, 9], axis=0).reshape(4, 3), 8)
+        )
+        # self.assertAlmostEqual(np.sum(character_coeffs[0, 0]), 0)
 
-        print(np.round(c2v.matrix_from_representation([1, 1, 1, 1]), 8))
-
-        # mats = np.array([[1, 1, 0], [-1, 1, 0], [0, 0, 1]])
-        # rep = c2v.space_representation(mats)
-        # print(rep)
-        # print(c2v.decompose_representation(rep))
-
-        return
-
-        base_rep = np.sum(c2v.translation_representation(coords), axis=0)
-        print(base_rep)
-        print(c2v.decompose_representation(base_rep))
-
-        disps = nput.internal_coordinate_tensors(coords, [
-            (0, 1),
-            (0, 2)
-        ])
-        mode = 1 / np.sqrt(2) * (disps[:, 0] + disps[:, 1]).reshape(coords.shape)
-        base_rep = c2v.coordinate_representation(coords, mode)
-        print(np.round(c2v.decompose_representation(base_rep), 8))
-
+        # raise Exception(coords)
+        # p.symmetry_permutations(coords)
+        # perms = [nput.symmetry_permutation(coords, m) for m in p.matrices]
+        # print(perms)
 
     @validationTest
     def test_IntegerPartitions(self):

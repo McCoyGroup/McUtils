@@ -230,6 +230,7 @@ def dihedral_group_classes(n):
             np.arange(n, 2 * n, 2),
             np.arange(n+1, 2 * n, 2)
         ]
+    print("??", classes)
     return elements, classes
 
 def dihedral_group_operation_representation(n, elements=None):
@@ -2069,9 +2070,11 @@ def point_group_data(key, n=None, prop=None, **etc):
             return gen(n, **etc)
 
 class CharacterTable:
-    def __init__(self, characters,
+    def __init__(self,
+                 characters,
                  group_name=None,
-                 class_names=None, irrep_names=None,
+                 class_names=None,
+                 irrep_names=None,
                  permutations=None,
                  classes=None,
                  matrices=None
@@ -2154,7 +2157,7 @@ class CharacterTable:
             elements = classes = mats = None
         return cls(
             point_group_data(key, n=n, prop='characters'),
-            group_name=f"{key}_{n}" if n is not None else f"{key}",
+            group_name=(key, n) if n is not None else key,
             classes=classes,
             permutations=elements,
             matrices=mats
@@ -2175,6 +2178,7 @@ class CharacterTable:
 
         table = table.tolist()
         if group_name is not None:
+            group_name = str(group_name)
             if irrep_names is None:
                 irrep_names = [""] * len(table)
             if classes is None:
@@ -2215,6 +2219,18 @@ class CharacterTable:
         # print(self.table * weights[np.newaxis, :])
         return self.table * weights[np.newaxis, :]
 
+    def extend_class_representation(self, rep):
+        full = np.empty((rep.shape[0], self.group_order), dtype=rep.dtype)
+        p = 0
+        for i in range(rep.shape[1]):
+            e = p+self.class_sizes[i]
+            full[:, p:e] = rep[:, (i,)]
+            p = e
+        return full
+
+    def get_extended_character_table(self):
+        return self.extend_class_representation(self.table)
+
     def decompose_representation(self, rep):
         rep = np.asanyarray(rep)
         t = self.character_basis
@@ -2222,8 +2238,10 @@ class CharacterTable:
             t = np.conj(t)
         return np.tensordot(t, rep, axes=[-1, -1])
 
-    def space_representation(self, mats):
-        if self.matrices is None:
+    def space_representation(self, mats, symms=None):
+        if symms is None:
+            symms = self.matrices
+        if symms is None:
             raise ValueError("need `matrices` to construct concrete space representation")
         mats = np.asanyarray(mats)
         if mats.ndim == 1:
@@ -2231,7 +2249,6 @@ class CharacterTable:
         elif mats.shape[-1] != mats.shape[-2]:
             raise ValueError("matrices required, if stack of vectors used, wrap input with `nput.vec_tensordiag`")
 
-        symms = self.matrices
         rep_dim = (mats.shape[-1] - (mats.shape[-1] % 3)) // 3
         if affine := mats.shape[-1] % 3 != 0: # affine transform for fixed atom comparisons
             symms = nput.vec_block_diag(
@@ -2275,32 +2292,15 @@ class CharacterTable:
             np.tensordot(chars, self.character_basis, axes=[-1, -2])
         )
 
-    def coordinate_representation(self, coords, modes=None):
-        coords = np.asanyarray(coords).flatten()
-        if modes is None:
-            mats = nput.affine_matrix(
-                nput.vec_tensordiag(np.eye(len(coords))),
-                np.broadcast_to(coords[np.newaxis], (len(coords), len(coords)))
-            )
-        else:
-            modes = np.asanyarray(modes)
-            if (modes.shape[-1] * modes.shape[-2]) == coords.shape[-1]:
-                modes = modes.reshape(modes.shape[:-2] + (-1,))
-            if modes.ndim > 1:
-                coords = np.expand_dims(coords, list(range(modes.ndim - 1)))
-                coords = np.broadcast_to(coords, modes.shape[:-1] + (coords.shape[-1],))
-                modes = nput.vec_tensordiag(modes)
-            else:
-                modes = np.diag(modes)
-            mats = nput.affine_matrix(modes, coords)
-        if smol := mats.ndim == 2:
-            mats = mats[np.newaxis]
-        rep = self.space_representation(mats)
-        if smol: rep = rep[0]
-        return rep
+    def symmetry_permutations(self, coords):
+        return np.array([
+            nput.symmetry_permutation(coords, m)
+            for m in self.matrices
+        ]).T
 
-    def axis_representation(self):
+    def axis_representation(self, include_rotations=True):
         carts = self.space_representation(nput.vec_tensordiag(np.eye(3)))
+        if not include_rotations: return carts
         reflection_pos = np.where(np.linalg.det(self.matrices) < 0)
         rots = carts.copy()
         if len(reflection_pos) > 0:
@@ -2310,8 +2310,99 @@ class CharacterTable:
             rots[..., reflection_pos[0]] *= -1
         return np.concatenate([carts, rots], axis=0)
 
+    def fixed_permutation_representation(self, base_rep, perms):
+        nc = len(perms)
+        nrep = len(base_rep)
+        mask = np.arange(nc)[:, np.newaxis] == perms
+        bcast_mask = np.repeat(mask[:, np.newaxis, :], len(base_rep), axis=1).reshape(nc*nrep, -1)
+        bcast_rep = np.repeat(base_rep[np.newaxis, :, :], nc, axis=0).reshape(nc*nrep, -1)
+        return bcast_rep * bcast_mask
+
+    def symmetry_coefficients(self, permutations, signs):
+        """
+        Constructs symmetry coefficients given a specific permutation symmetry
+        on the class members.
+        There should be `nxk` permutations where `n` is the number of coordinates and `k` is the number of classes.
+
+        :param permutations:
+        :return:
+        """
+        coeff_order = np.argsort(permutations, axis=0)
+        perm_signs = np.vstack([s[c] for s,c in zip(signs.T, coeff_order.T)])
+        # print()
+        # print(permutations)
+        # print(signs)
+        # print(perm_signs.T)
+        # return
+        base_mat = np.moveaxis(np.tensordot(self.extended_character_table, perm_signs, axes=[-1, 0]), 0, -1)
+        return base_mat
+        # now we need to permute base_mat (a `kxn` matrix) so that each `n` is ordered appropriately
+        #TODO: speed this part up...
+        wtf = np.vstack([base_mat[coeff_order[i], :] for i in range(coeff_order.shape[1])])
+        print(coeff_order.shape)
+        print(base_mat.shape)
+        raise Exception("???")
+        return np.vstack([base_mat[coeff_order[i], :] for i in range(coeff_order.shape[1])])
+
+    def coordinate_representation(self, coords):
+        coords = np.asanyarray(coords)
+        perms = self.symmetry_permutations(coords)
+        base_rep = self.axis_representation(include_rotations=False)
+        return self.fixed_permutation_representation(base_rep, perms)
+
     def coordinate_mode_reduction(self, coords):
         base_rep = np.sum(self.coordinate_representation(coords), axis=0)
         reduced = self.decompose_representation(base_rep)
         axes = self.decompose_representation(np.sum(self.axis_representation(), axis=0))
         return reduced - axes
+
+    def get_full_matrices(self):
+        gn = self.group_name
+        if isinstance(gn, str): gn = (gn,)
+        return point_group_data(*gn, prop="matrices")
+
+    def symmetrized_coordinate_coefficients(self, coords,
+                                            as_characters=True,
+                                            normalize=False,
+                                            perms=None,
+                                            ops=None
+                                            ):
+        # print(self.class_sizes)
+        # if perms is None:
+        #     coords = np.asanyarray(coords)
+        #     perms1 = self.symmetry_permutations(coords)
+        #     print(perms1.T)
+        #     perms1 = np.concatenate(nput.enumerate_permutations(perms1.T), axis=0)
+
+        if ops is None:
+            ops = self.get_full_matrices()
+            class_perm = np.concatenate(self.classes, axis=0)
+            ops = ops[class_perm,]
+        if perms is None:
+            #TODO: find a cleaner way to do this...
+            perms = np.array([
+                nput.symmetry_permutation(coords, m)
+                for m in ops
+            ])
+            # print(ops)
+            print(perms)
+            # print(self.symmetry_permutations(coords))
+            # return
+            # raise Exception(perms.shape)
+        full_modes = np.zeros((3*perms.shape[1],) + coords.shape + (len(ops),))
+
+        inv = np.argsort(perms, axis=1)
+        for n,(p,m) in enumerate(zip(inv, ops)):
+            for i,j in enumerate(p):
+                full_modes[3*i:(3*i+3), j, :, n] = m
+
+        if as_characters:
+            full_modes = np.tensordot(self.extend_class_representation(self.table), full_modes, axes=[-1, -1])
+        else:
+            full_modes = np.moveaxis(full_modes, -1, 0)
+        if normalize:
+            full_modes = nput.vec_normalize(
+                full_modes.reshape(full_modes.shape[:2] + (-1,)),
+                axis=-1
+            ).reshape(full_modes.shape)
+        return full_modes

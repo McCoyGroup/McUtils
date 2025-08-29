@@ -238,19 +238,40 @@ def enumerate_zmatrices(coords, natoms=None,
                 for z in zm
             ]
 
-def extract_zmatrix_internals(zmat, strip_embedding=True):
+def extract_zmatrix_internals(zmat, strip_embedding=True, canonicalize=True):
     specs = []
     if len(zmat[0]) == 3:
-        zmat = np.asanyarray(zmat)
-        return np.delete(zmat.flatten(), zmatrix_embedding_coords(len(zmat)))
+        return extract_zmatrix_internals(
+            [[0, -1, -1, -1]]
+            + [
+                [i + 1] + list(z)
+                for i, z in enumerate(zmat)
+            ],
+            strip_embedding=strip_embedding,
+            canonicalize=canonicalize
+        )
+        # zmat = np.asanyarray(zmat)
+        # return np.delete(zmat.flatten(), zmatrix_embedding_coords(len(zmat)))
     else:
         for n,row in enumerate(zmat):
             if strip_embedding and n == 0: continue
-            specs.append(tuple(row[:2]))
+            if canonicalize:
+                coord = canonicalize_internal(row[:2])
+            else:
+                coord = tuple(row[:2])
+            specs.append(coord)
             if strip_embedding and n == 1: continue
-            specs.append(tuple(row[:3]))
+            if canonicalize:
+                coord = canonicalize_internal(row[:3])
+            else:
+                coord = tuple(row[:3])
+            specs.append(coord)
             if strip_embedding and n == 2: continue
-            specs.append(tuple(row[:4]))
+            if canonicalize:
+                coord = canonicalize_internal(row[:4])
+            else:
+                coord = tuple(row[:4])
+            specs.append(coord)
     return specs
 
 scan_spec = collections.namedtuple('scan_spec', ['value', 'steps', 'amount'])
