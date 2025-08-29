@@ -5,7 +5,7 @@
 </div>
 
 ```python
-extract_zmatrix_internals(zmat, strip_embedding=True): 
+extract_zmatrix_internals(zmat, strip_embedding=True, canonicalize=True): 
 ```
 
 
