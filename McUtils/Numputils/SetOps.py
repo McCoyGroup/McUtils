@@ -12,6 +12,8 @@ __all__ = [
     'contained',
     'difference',
     'find',
+    "fast_first_nonzero",
+    "fast_first_zero",
     'argsort',
     'group_by',
     'grouping_info',
@@ -751,3 +753,23 @@ def take_where_groups(arr, where, presorted=True, return_rows=False):
     else:
         return vals
 
+def fast_first_nonzero(arr, axis=-1):
+    arr = np.asanyarray(arr)
+    if not np.issubdtype(arr.dtype, np.integer):
+        raise TypeError(f"array of dtype {arr.dtype} can't be found with fast_first_nonzero")
+    arr = np.moveaxis(arr, axis, -1)
+    v = np.argmax(arr.view(bool), axis=-1)
+    r = v // arr.itemsize
+    mask = vector_take(arr, r[..., np.newaxis], shared=r.ndim) == 0
+    r[mask[..., 0]] = -1
+    return r
+
+def fast_first_zero(arr, axis=-1):
+    arr = np.moveaxis(arr, axis, -1)
+    if not np.issubdtype(arr.dtype, np.integer):
+        raise TypeError(f"array of dtype {arr.dtype} can't be found with fast_first_nonzero")
+    v = np.argmin(np.logical_nor(arr.view(bool)), axis=-1) # might not work...
+    r = v // arr.itemsize
+    mask = vector_take(arr, r) == 0
+    r[mask] = -1
+    return r

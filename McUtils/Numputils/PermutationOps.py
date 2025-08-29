@@ -14,7 +14,8 @@ __all__ = [
     "normalize_commutators",
     "commutator_terms",
     "commutator_evaluate",
-    "permutation_cycles"
+    "permutation_cycles",
+    "enumerate_permutations"
 ]
 
 
@@ -309,3 +310,49 @@ def permutation_cycles(perms, return_groups=False):
             return cycle_lists
 
     return labels
+def permutation_from_cycles(cycle):
+    base_concat = np.concatenate(cycle, axis=-1)
+    subconcat = np.concatenate([np.roll(p, 1, axis=-1) for p in cycle])
+    sort = np.argsort(base_concat, axis=-1)
+    return subconcat[sort]
+
+def compute_cycle_orders(perms):
+    perms = np.asanyarray(perms)
+    if perms.ndim == 1:
+        groups = permutation_cycles(perms, return_groups=True)
+        cycle_orders = np.prod([len(g) for g in groups], dtype=int)
+    else:
+        cycles = permutation_cycles(perms, return_groups=False).view('uint64')  # want underflow
+        max_cycle_size = np.max(cycles)
+        cycle_orders = np.ones(perms.shape[:-1], dtype=int)
+        cycles = np.sort(cycles)
+        for i in range(max_cycle_size):
+            subcounts = sets.fast_first_nonzero(cycles)
+            subcounts[subcounts < 0] = perms.shape[-1]
+            subcounts[subcounts == 0] = 1
+            cycle_orders *= subcounts
+            cycles = np.sort(cycles - 1)  # yes I should do this better but...
+    return cycle_orders
+
+def enumerate_permutations(perm, cycle_orders=None):
+    perm = np.asanyarray(perm)
+    if perm.ndim == 1:
+        if cycle_orders is None:
+            groups = permutation_cycles(perm, return_groups=True)
+            cycle_orders = np.prod([len(g) for g in groups], dtype=int)
+        perms = np.empty((cycle_orders, perm.shape[-1]), dtype=perm.dtype)
+        perms[0, :] = perm
+        for i in range(1, cycle_orders):
+            perms[i, :] = perms[i-1, :][perm,]
+        return perms
+    elif perm.ndim > 2:
+        raise NotImplementedError("too annoying to do ndim > 2")
+    else:
+        if cycle_orders is None:
+            cycle_orders = compute_cycle_orders(perm)
+        return [
+            enumerate_permutations(p, c)
+            for p,c in zip(perm, cycle_orders)
+        ]
+
+

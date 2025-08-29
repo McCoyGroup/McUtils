@@ -5,7 +5,7 @@ import scipy.linalg
 from .VectorOps import vec_normalize, vec_angles
 from . import VectorOps as vec_ops
 from . import Misc as misc
-from . import SetOps as setops
+from . import PermutationOps as perm_ops
 import math, numpy as np, scipy as sp
 
 __all__ = [
@@ -21,9 +21,11 @@ __all__ = [
     "affine_matrix",
     "reflection_matrix",
     "permutation_matrix",
-    "symmetry_permutation",
     "extract_rotation_angle_axis",
-    "view_matrix"
+    "view_matrix",
+    "symmetry_permutation",
+    "apply_symmetries",
+    "symmetry_reduce"
 ]
 
 #######################################################################################################################
@@ -606,6 +608,7 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
     op = op.reshape((-1,) + op.shape[-2:])
     new_coords = coords @ op
     dm = np.linalg.norm(coords[:, :, np.newaxis] - new_coords[:, np.newaxis, :], axis=-1)
+    # quick_test = np.where(dm < 1e-2)
 
     # iteratively find best matches and map them onto each other
     perm_rows = np.repeat(np.arange(coords.shape[1])[np.newaxis], coords.shape[0], axis=0)
@@ -623,6 +626,7 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         min_pos = np.argmin(dm, axis=-1) # min across columns
         min_vals = dm[a1, sel, min_pos]
         ord = np.argsort(min_vals, axis=-1) # min across rows
+        # ord = np.argsort(ord, axis=-1)
         # assign row permutation
         perm_next = perm_rows[:, i:][a1[:, np.newaxis], ord[:, 0]]
         perm_rows[:, i+1:] = perm_rows[:, i:][a1[:, np.newaxis], ord[:, 1:]]
@@ -637,8 +641,7 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         perm_cols[:, i+1:] = perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 1:]]
         perm_cols[:, i] = perm_next
 
-        dm = dm[a1, ord[:, np.newaxis, 1:], min_pos[:, 1:, np.newaxis]]
-        # print(dm.shape)
+        dm = dm[a1, ord[:, 1:, np.newaxis], np.sort(min_pos[:, np.newaxis, 1:], axis=-1)]
 
     if return_row_ordering:
         return perm_rows.reshape(base_shape), perm_cols.reshape(base_shape)
@@ -647,9 +650,64 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         perms = perm_cols[a1, row_sort].reshape(base_shape + perm_cols.shape[1:])
         return perms
 
-def symmetry_reduce(coords, op:np.ndarray):
-    base_perms = symmetry_permutation(coords, op)
-    # compute cycles for each permutation
-    permutation_cycles(base_perms)
-    #
-    ...
+def apply_symmetries(coords, symmetry_elements: 'list[np.ndarray]', labels=None, tol=1e-1):
+    coords = np.asanyarray(coords)
+    if coords.ndim == 1:
+        coords = coords[np.newaxis]
+    elif coords.ndim > 2:
+        raise NotImplementedError("currently don't have good batching on coord symmetry application")
+    og_labels = labels
+    if labels is not None:
+        if labels is True:
+            labels = np.arange(len(coords))
+        else:
+            labels = np.arange(len(labels))
+    # symmetry_elements = prep_symmetry_operations(symmetry_elements)
+
+    for e in symmetry_elements:
+        new_coords = coords @ e
+        coord_diffs = np.linalg.norm(coords[:, np.newaxis, :] - new_coords[np.newaxis, :, :], axis=-1)
+        dupe_pos = np.where(coord_diffs < tol)
+        new_labs = None
+        if len(dupe_pos) > 0 and len(dupe_pos[0]) > 0:
+            rem = np.setdiff1d(np.arange(len(new_coords)), dupe_pos[0])
+            if labels is not None:
+                new_labs = labels[rem,]
+            new_coords = new_coords[rem,]
+        elif labels is not None:
+            new_labs = labels
+        if labels is not None:
+            labels = np.concatenate([labels, new_labs])
+        coords = np.concatenate([coords, new_coords], axis=0)
+
+    if labels is not None:
+        if og_labels is not True:
+            labels = [og_labels[i] for i in labels]
+        return coords, labels
+    else:
+        return coords
+
+def symmetry_reduce(coords, op:np.ndarray, labels=None):
+    coords = np.asarray(coords)
+    if coords.ndim == 1:
+        if labels is not None:
+            return coords, labels
+        else:
+            return coords
+    elif coords.ndim > 2:
+        raise NotImplementedError("currently don't have good batching on coord symmetry reduction")
+
+    perm = symmetry_permutation(coords, op)
+    cycles = perm_ops.permutation_cycles(perm, return_groups=True)
+    coords = np.array([
+        coords[p[0]]
+        for p in cycles
+    ])
+    if labels is not None:
+        labels = [
+            labels[p[0]]
+            for p in cycles
+        ]
+        return coords, labels
+    else:
+        return coords

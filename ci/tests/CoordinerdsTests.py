@@ -704,3 +704,18 @@ class ConverterTest(TestCase):
             coords - new_coords.convert(CartesianCoordinates3D)
         )
     #endregion
+
+    @debugTest
+    def test_InternalSymmetryies(self):
+        print()
+        coords = extract_zmatrix_internals([
+            [0, -1, -1, -1],
+            [1,  0, -1, -1],
+            [2,  0,  1, -1],
+            [3,  0,  2,  1],
+            [4,  1,  3,  2]
+        ], canonicalize=True)
+
+
+        print(coords)
+        print(permute_internals(coords, [0, 2, 1, 4, 3]))

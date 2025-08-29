@@ -138,21 +138,8 @@ def iterative_step_minimize_step(step_predictor,
             mask = np.delete(mask, done)
             if len(mask) == 0:
                 return step, errs, [], done
-    if unitary:
-        step = step[rem,]
-        norms = np.linalg.norm(step, axis=1)
-        # norms = norms[rem,]
-        v = np.linalg.norm(guess[rem,], axis=-1)
-        r = np.sqrt(norms ** 2 + v ** 2)
-        step = guess[rem,] * (1/r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
-        if generate_rotation:
-            raise NotImplementedError(">3D rotations are complicated")
-            axis = vec_ops.vec_crosses(g, guess[mask,])[0]
-            ang = np.arctan2(norms / r, v / r)
-            rot = tfs.rotation_matrix(axis, ang)
-            rotations = rot @ rotations
-    else:
-        step = step[rem,]
+
+    step = step[rem,]
 
     if prev_steps is not None:
         prev_steps = prev_steps[mask,]
@@ -177,13 +164,22 @@ def iterative_step_minimize_step(step_predictor,
                 osc = osc[0][osc2]
                 scaling = np.min([cur_norms[osc2], -dist[osc2] / 2], axis=0) / cur_norms[osc2]
                 step[osc,] = step[osc,] * scaling
-                if unitary:
-                    g = guess[rem,][osc,]
-                    norms = np.linalg.norm(step[osc], axis=1)
-                    # norms = norms[rem,]
-                    v = np.linalg.norm(g, axis=-1)
-                    r = np.sqrt(norms ** 2 + v ** 2)
-                    step = g * (1 / r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+
+    if unitary:
+        step = step
+        norms = np.linalg.norm(step, axis=1)
+        # norms = norms[rem,]
+        v = np.linalg.norm(guess[rem,], axis=-1)
+        r = np.sqrt(norms ** 2 + v ** 2)
+        step = guess[rem,] * (1/r[:, np.newaxis] - 1) + step / r[:, np.newaxis]
+        if generate_rotation:
+            raise NotImplementedError(">3D rotations are complicated")
+            axis = vec_ops.vec_crosses(g, guess[mask,])[0]
+            ang = np.arctan2(norms / r, v / r)
+            rot = tfs.rotation_matrix(axis, ang)
+            rotations = rot @ rotations
+    else:
+        step = step[rem,]
 
 
     return step, errs, mask, done
@@ -201,7 +197,7 @@ def iterative_step_minimize(
         orthogonal_directions=None,
         orthogonal_projection_generator=None,
         region_constraints=None,
-        convergence_metric=None,
+        function=None,
         max_displacement=None,
         max_displacement_norm=None,
         oscillation_damping_factor=None,
@@ -226,9 +222,14 @@ def iterative_step_minimize(
     if track_best:
         best = guess.copy()
         best_errs = np.full(guess.shape[0], -1, dtype=float)
+        if function is not None:
+            best_vals = np.full(guess.shape[0], np.inf, dtype=float)
+        else:
+            best_vals = None
     else:
         best = None
         best_errs = None
+        best_vals = None
     its = np.zeros(guess.shape[0], dtype=int)
     errs = np.zeros(guess.shape[0], dtype=float)
     mask = np.arange(guess.shape[0])
@@ -262,14 +263,26 @@ def iterative_step_minimize(
             )
             if best is not None:
                 if i == 0:
+                    if best_vals is not None:
+                        best_vals[mask,] = function(guess[mask,], mask)
                     best_errs[mask,] = step_errs
                     best[mask,] = guess[mask,]
                 else:
-                    improved = np.where(step_errs < best_errs[mask,])
-                    if len(improved[0]) > 0:
-                        imp_mask = mask[improved]
-                        best_errs[imp_mask,] = step_errs[improved,]
-                        best[imp_mask,] = guess[imp_mask,]
+                    if best_vals is not None:
+                        new_vals = function(guess[mask,], mask)
+                        improved = np.where(new_vals < best_vals[mask,])
+                        if len(improved[0]) > 0:
+                            imp_mask = mask[improved]
+                            best_vals[imp_mask,] = new_vals[improved,]
+                            best[imp_mask,] = guess[imp_mask,]
+                            best_errs[imp_mask,] = step_errs[improved,]
+                    else:
+                        improved = np.where(step_errs < best_errs[mask,])
+                        if len(improved[0]) > 0:
+                            imp_mask = mask[improved]
+                            best_errs[imp_mask,] = step_errs[improved,]
+                            best[imp_mask,] = guess[imp_mask,]
+
 
             logger.log_print("Predicted steps: {step}", step=step)
             logger.log_print("Step errors: {errs}", errs=step_errs)
@@ -278,7 +291,7 @@ def iterative_step_minimize(
                     prev_step = np.random.uniform(size=(step.shape[0], prevent_oscillations, step.shape[1])).astype(step.dtype)
                 p = i % prevent_oscillations
                 prev_step[new_mask, p] = step
-            if oscillation_damping_factor is not None:
+            if (not unitary) and oscillation_damping_factor is not None:
                 if prev_errs is None:
                     prev_errs = step_errs
                 else:
@@ -298,9 +311,6 @@ def iterative_step_minimize(
 
             mask = new_mask
             guess[mask,] += step
-            if unitary:
-                # unitarization strategy breaking down and I don't quite know why...
-                guess[mask,] /= np.linalg.norm(guess[mask,], axis=-1)
             its[mask,] += 1
     else:
         converged = False
