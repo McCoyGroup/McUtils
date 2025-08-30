@@ -1,5 +1,7 @@
 import itertools
 import numpy as np
+import scipy as scipy
+
 from .YoungTableaux import YoungTableauxGenerator
 from .Permutations import IntegerPartitioner
 from .Sequences import stable_factorial_ratio, prime_factorize
@@ -2371,7 +2373,9 @@ class CharacterTable:
                                             as_characters=True,
                                             normalize=False,
                                             perms=None,
-                                            ops=None
+                                            ops=None,
+                                            return_basis=None,
+                                            merge_equivalents=True
                                             ):
 
         if ops is None:
@@ -2392,8 +2396,25 @@ class CharacterTable:
             for n,(p,m) in enumerate(zip(inv, ops)):
                 for i,j in enumerate(p):
                     full_modes[3*i:(3*i+3), j, :, n] = m
+            full_basis = None
         else:
-            full_modes = permutation_basis(perms)
+            full_modes, full_basis = permutation_basis(perms)
+
+        if merge_equivalents:
+            mask = np.moveaxis(np.abs(full_modes) > 1e-6, -1, 0)
+            graph = mask[0]
+            for m in mask:
+                graph = np.logical_or(graph, m) # TODO: speed this up with better masks
+
+            _, comps = scipy.sparse.csgraph.connected_components(graph.reshape(graph.shape[0], -1))
+            (_, equivalent_coords) = nput.group_by(
+                np.arange(len(graph)),
+                comps
+            )[0]
+
+            comp_bits = [c[0] for c in equivalent_coords]
+            full_modes = full_modes.reshape((full_modes.shape[0], -1, full_modes.shape[-1]))
+            full_modes = full_modes[:, comp_bits, :]
 
         if as_characters:
             full_modes = np.tensordot(self.extend_class_representation(self.table), full_modes, axes=[-1, -1])
@@ -2404,7 +2425,14 @@ class CharacterTable:
                 full_modes.reshape(full_modes.shape[:2] + (-1,)),
                 axis=-1
             ).reshape(full_modes.shape)
-        return full_modes
+
+        if return_basis is None:
+            return_basis = full_basis is not None
+
+        if return_basis:
+            return full_modes, full_basis
+        else:
+            return full_modes
 
     def __repr__(self):
         cls = type(self)

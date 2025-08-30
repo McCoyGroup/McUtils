@@ -738,7 +738,6 @@ class ConverterTest(TestCase):
         # self.assertEquals(mats.shape, (len(ints), len(ints), 1))
 
 
-
         p = comb.CharacterTable.point_group('Cv', 3)
         coords = np.concatenate(
             [
@@ -747,6 +746,13 @@ class ConverterTest(TestCase):
             ],
             axis=0
         )
+
+
+        symm_modes = p.symmetrized_coordinate_coefficients(coords, as_characters=True, normalize=False)
+        modes = np.reshape(symm_modes, symm_modes.shape[:2] + (-1,))
+        # comb_modes = np.sum(np.reshape(modes, (modes.shape[0], -1, 3, modes.shape[-1])), axis=1)
+        # print(np.round(modes[0], 8))
+        # return
 
 
         internals = extract_zmatrix_internals([
@@ -760,5 +766,5 @@ class ConverterTest(TestCase):
 
         coeffs, full_internals = symmetrize_internals(p, internals, coords)
         print(full_internals)
-        print(coeffs[0])
-
+        for c in coeffs:
+            print(c)
