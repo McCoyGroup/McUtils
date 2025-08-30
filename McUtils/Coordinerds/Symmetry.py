@@ -15,14 +15,18 @@ def get_internal_permutation_symmetry_matrices(internals, permutations):
     }
     internals = list(map.keys())
     basis = []
-    for p in permutations:
-        subbasis = [
-            [0] * len(internals)
-            for _ in range(len(internals))
-        ]
-        p_coords = internals
-        while len(p_coords) > 0:
-            new_coords = []
+    p_coords = internals
+    while len(p_coords) > 0:
+        new_coords = []
+        for n,p in enumerate(permutations):
+            if len(basis) < n+1:
+                subbasis = [
+                    [0] * len(internals)
+                    for _ in range(len(internals))
+                ]
+                basis.append(subbasis) # take advantage of mutability
+            else:
+                subbasis = basis[n]
             new_ints = permute_internals(p_coords, p, canonicalize=True)
             for old,new in zip(p_coords, new_ints):
                 j = map[old]
@@ -30,16 +34,15 @@ def get_internal_permutation_symmetry_matrices(internals, permutations):
                     subbasis[j][j] = 1
                 else:
                     if (i := map.get(new)) is None:
+                        for sb in basis:
+                            sb.append([0] * (len(internals)))
+                            for b in sb: b.append(0)
                         i = len(internals)
                         map[new] = i
                         internals.append(new)
                         new_coords.append(new)
-                        for b in subbasis[j:]:
-                            b.append(0)
-                        subbasis.append([0] * len(internals))
                     subbasis[j][i] = 1 if len(old) < 3 else -1
-            p_coords = new_coords
-        basis.append(subbasis)
+        p_coords = new_coords
 
     #TODO: handle newly add internals, we need their permutation symmetries too
 
@@ -72,11 +75,11 @@ def symmetrize_internals(point_group, internals,
     if perms is None and cartesians is None:
         raise ValueError("either Cartesians or explicit set of atom permutations required")
     symm_coeffs = point_group.symmetrized_coordinate_coefficients(
-                                            cartesians,
-                                            permutation_basis=symm,
-                                            as_characters=as_characters,
-                                            normalize=normalize,
-                                            perms=perms,
-                                            ops=ops
-                                            )
+        cartesians,
+        permutation_basis=symm,
+        as_characters=as_characters,
+        normalize=normalize,
+        perms=perms,
+        ops=ops
+    )
     return symm_coeffs, storage[1]

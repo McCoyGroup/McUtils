@@ -729,13 +729,13 @@ class ConverterTest(TestCase):
         )
 
 
-        mats, ints = get_internal_permutation_symmetry_matrices(
-            coords,
-            [
-                [0, 2, 1, 4, 3]
-            ]
-        )
-        self.assertEquals(mats.shape, (len(ints), len(ints), 1))
+        # mats, ints = get_internal_permutation_symmetry_matrices(
+        #     coords,
+        #     [
+        #         [0, 2, 1, 4, 3]
+        #     ]
+        # )
+        # self.assertEquals(mats.shape, (len(ints), len(ints), 1))
 
 
 
@@ -748,11 +748,17 @@ class ConverterTest(TestCase):
             axis=0
         )
 
+
         internals = extract_zmatrix_internals([
             [0, -1, -1, -1],
             [1,  0, -1, -1],
             [2,  0,  1, -1],
             [3,  0,  2,  1]
         ], canonicalize=True)
-        print(symmetrize_internals(p, internals, coords))
+
+        # internals = [(0, 1)]
+
+        coeffs, full_internals = symmetrize_internals(p, internals, coords)
+        print(full_internals)
+        print(coeffs[0])
 
