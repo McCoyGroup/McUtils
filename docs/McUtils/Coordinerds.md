@@ -305,9 +305,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-0bac97" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0bac97"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-539239" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-539239"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0bac97" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-539239" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -344,9 +344,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e23366" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e23366"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-f365bf" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f365bf"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e23366" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f365bf" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1126,13 +1126,13 @@ class ConverterTest(TestCase):
         )
 
 
-        mats, ints = get_internal_permutation_symmetry_matrices(
-            coords,
-            [
-                [0, 2, 1, 4, 3]
-            ]
-        )
-        self.assertEquals(mats.shape, (len(ints), len(ints), 1))
+        # mats, ints = get_internal_permutation_symmetry_matrices(
+        #     coords,
+        #     [
+        #         [0, 2, 1, 4, 3]
+        #     ]
+        # )
+        # self.assertEquals(mats.shape, (len(ints), len(ints), 1))
 
 
 
@@ -1145,13 +1145,19 @@ class ConverterTest(TestCase):
             axis=0
         )
 
+
         internals = extract_zmatrix_internals([
             [0, -1, -1, -1],
             [1,  0, -1, -1],
             [2,  0,  1, -1],
             [3,  0,  2,  1]
         ], canonicalize=True)
-        print(symmetrize_internals(p, internals, coords))
+
+        # internals = [(0, 1)]
+
+        coeffs, full_internals = symmetrize_internals(p, internals, coords)
+        print(full_internals)
+        print(coeffs[0])
 ```
 
  </div>
