@@ -33,3 +33,5 @@ from .Pruning import *; from .Pruning import __all__ as exposed
 __all__ += exposed
 from .Redundant import *; from .Redundant import __all__ as exposed
 __all__ += exposed
+from .Symmetry import *; from .Symmetry import __all__ as exposed
+__all__ += exposed

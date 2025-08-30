@@ -12,18 +12,21 @@ __all__ = [
     "find_internal"
 ]
 
-def canonicalize_internal(coord):
+def canonicalize_internal(coord, return_sign=False):
+    sign = 1
     if len(coord) == 2:
         i, j = coord
         if i == j: return None # faster to just do the cases
         if i > j:
             j, i = i, j
+            sign = -1
         coord = (i, j)
     elif len(coord) == 3:
         i, j, k = coord
         if i == j or j == k or i == k: return None
         if i > k:
             i, j, k = k, j, i
+            sign = -1
         coord = (i, j, k)
     elif len(coord) == 4:
         i, j, k, l = coord
@@ -33,12 +36,19 @@ def canonicalize_internal(coord):
         ): return None
         if i > l:
             i, j, k, l = l, k, j, i
+            sign = -1
         coord = (i, j, k, l)
-    elif coord[0] > coord[-1]:
-        dupes = len(np.unique(coord)) < len(coord)
-        if dupes: return None
-        coord = tuple(reversed(coord))
-    return coord
+    else:
+        if len(np.unique(coord)) < len(coord): return None
+        if coord[0] > coord[-1]:
+            coord = tuple(reversed(coord))
+            sign = -1
+        else:
+            coord = tuple(coord)
+    if return_sign:
+        return coord, sign
+    else:
+        return coord
 
 def is_valid_coordinate(coord):
     return (
