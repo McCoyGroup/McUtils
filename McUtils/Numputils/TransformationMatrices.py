@@ -623,6 +623,7 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         else:
             sel = a2[np.newaxis, :]
 
+        # print(np.round(dm, 8))
         min_pos = np.argmin(dm, axis=-1) # min across columns
         min_vals = dm[a1, sel, min_pos]
         ord = np.argsort(min_vals, axis=-1) # min across rows
@@ -632,16 +633,20 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         perm_rows[:, i+1:] = perm_rows[:, i:][a1[:, np.newaxis], ord[:, 1:]]
         perm_rows[:, i] = perm_next
 
-        # column can be duplicated, so we reorder just based on the minimum row
+        # # column can be duplicated, so we reorder just based on the minimum row
         min_pos = np.argsort(dm[a, ord[:, 0]], axis=-1) # min across columns
-        # print("?", ord[:, 0].shape, dm[a1, ord[:, 0]].shape)
-        # min_pos = min_pos[a1, ord]
+        # # print("?", ord[:, 0].shape, dm[a1, ord[:, 0]].shape)
+        # # min_pos = min_pos[a1, ord]
         perm_next = perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 0]]
         # print(perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 1:]])
         perm_cols[:, i+1:] = perm_cols[:, i:][a1[:, np.newaxis], min_pos[:, 1:]]
         perm_cols[:, i] = perm_next
 
-        dm = dm[a1, ord[:, 1:, np.newaxis], np.sort(min_pos[:, np.newaxis, 1:], axis=-1)]
+        # print("?", perm_rows)
+        # print(">", np.sort(min_pos[:, 1:], axis=-1))
+        # print(ord)
+        dm = dm[a1, ord[:, 1:, np.newaxis], min_pos[:, np.newaxis, 1:]]
+
 
     if return_row_ordering:
         return perm_rows.reshape(base_shape), perm_cols.reshape(base_shape)
