@@ -1,7 +1,7 @@
 
 import numpy as np
-from .Internals import canonicalize_internal, permute_internals
-# from ..Numputils import permutation_cycles
+from .Internals import canonicalize_internal, permute_internals#, coordinate_sign
+from ..Numputils import permutation_sign
 
 __all__ = [
     "get_internal_permutation_symmetry_matrices",
@@ -32,16 +32,37 @@ def get_internal_permutation_symmetry_matrices(internals, permutations):
                 j = map[old]
                 if new == old:
                     subbasis[j][j] = 1
+                elif (
+                        len(new) == 4
+                        and new[0] == old[0] and new[3] == old[3]
+                        and new[1] == old[2] and new[2] == old[1]
+                ):
+                    subbasis[j][j] = 1
                 else:
+                    if len(old) < 4:
+                        sign = 1
+                    else:
+                        sign = 1
+
                     if (i := map.get(new)) is None:
-                        for sb in basis:
-                            sb.append([0] * (len(internals)))
-                            for b in sb: b.append(0)
-                        i = len(internals)
-                        map[new] = i
-                        internals.append(new)
-                        new_coords.append(new)
-                    subbasis[j][i] = 1 if len(old) < 3 else -1
+                        if len(new) == 4:
+                            for o,k in map.items():
+                                if (
+                                        len(o) == 4
+                                        and new[0] == o[0] and o[3] == o[3]
+                                        and new[1] == o[2] and new[2] == o[1]
+                                ):
+                                    i = k
+                                    # sign *= -1
+                        if i is None:
+                            for sb in basis:
+                                sb.append([0] * (len(internals)))
+                                for b in sb: b.append(0)
+                            i = len(internals)
+                            map[new] = i
+                            internals.append(new)
+                            new_coords.append(new)
+                    subbasis[j][i] = sign
         p_coords = new_coords
 
     #TODO: handle newly add internals, we need their permutation symmetries too
@@ -67,14 +88,10 @@ def symmetrize_internals(point_group, internals,
                          normalize=False,
                          perms=None,
                          ops=None):
-    storage = []
-    symm = lambda p: (
-        storage.extend(get_internal_permutation_symmetry_matrices(internals, p)),
-        storage[0]
-    )[1]
+    symm = lambda p: get_internal_permutation_symmetry_matrices(internals, p)
     if perms is None and cartesians is None:
         raise ValueError("either Cartesians or explicit set of atom permutations required")
-    symm_coeffs = point_group.symmetrized_coordinate_coefficients(
+    return point_group.symmetrized_coordinate_coefficients(
         cartesians,
         permutation_basis=symm,
         as_characters=as_characters,
@@ -82,4 +99,4 @@ def symmetrize_internals(point_group, internals,
         perms=perms,
         ops=ops
     )
-    return symm_coeffs, storage[1]
+    # return symm_coeffs, storage[1]

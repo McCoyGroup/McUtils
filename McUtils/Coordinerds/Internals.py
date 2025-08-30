@@ -9,7 +9,8 @@ __all__ = [
     "is_coordinate_list_like",
     "is_valid_coordinate",
     "permute_internals",
-    "find_internal"
+    "find_internal",
+    "coordinate_sign"
 ]
 
 def canonicalize_internal(coord, return_sign=False):
@@ -206,3 +207,45 @@ def permute_internals(coords, perm, canonicalize=True):
             tuple(perm[c] for c in coord)
             for coord in coords
         ]
+
+def coordinate_sign(old, new, canonicalize=True):
+    if len(old) != len(new): return 0
+    if len(old) == 2:
+        i,j = old
+        m,n = new
+        if i == n:
+            return int(j == m)
+        elif i == m:
+            return int(i == n)
+        else:
+            return 0
+    elif len(old) == 3:
+        i,j,k = old
+        m,n,o = new
+        if j != n:
+            return 0
+        elif i == m:
+            return int(k == o)
+        elif i == o:
+            return int(k == m)
+        else:
+            return 0
+    elif len(old) == 4:
+        # all pairwise comparisons now too slow
+        if canonicalize:
+            old = canonicalize_internal(old)
+            new = canonicalize_internal(new)
+
+        i,j,k,l = old
+        m,n,o,p = new
+
+        if i != m or l != p:
+            return 0
+        elif j == n:
+            return int(k == o)
+        elif j == o:
+            return -int(k == n)
+        else:
+            return 0
+    else:
+        raise ValueError(f"can't compare coordinates {old} and {new}")
