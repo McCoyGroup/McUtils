@@ -266,6 +266,17 @@ Chained conversions are not _currently_ supported, but might well become support
 [RedundantCoordinateGenerator](Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
 </div>
    <div class="col" markdown="1">
+[get_internal_permutation_symmetry_matrices](Coordinerds/Symmetry/get_internal_permutation_symmetry_matrices.md)   
+</div>
+   <div class="col" markdown="1">
+[symmetrize_internals](Coordinerds/Symmetry/symmetrize_internals.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
    
 </div>
    <div class="col" markdown="1">
@@ -294,9 +305,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-eb4ebf" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-eb4ebf"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-0bac97" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0bac97"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-eb4ebf" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0bac97" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -333,9 +344,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-1cb114" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1cb114"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e23366" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e23366"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1cb114" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e23366" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1093,6 +1104,9 @@ class ConverterTest(TestCase):
 #### <a name="InternalSymmetryies">InternalSymmetryies</a>
 ```python
     def test_InternalSymmetryies(self):
+        import McUtils.Combinatorics as comb
+        import McUtils.Numputils as nput
+
         print()
         coords = extract_zmatrix_internals([
             [0, -1, -1, -1],
@@ -1103,8 +1117,41 @@ class ConverterTest(TestCase):
         ], canonicalize=True)
 
 
-        print(coords)
-        print(permute_internals(coords, [0, 2, 1, 4, 3]))
+        self.assertEquals(
+            coords,
+            permute_internals(
+                permute_internals(coords, [0, 2, 1, 4, 3]),
+                np.argsort([0, 2, 1, 4, 3])
+            )
+        )
+
+
+        mats, ints = get_internal_permutation_symmetry_matrices(
+            coords,
+            [
+                [0, 2, 1, 4, 3]
+            ]
+        )
+        self.assertEquals(mats.shape, (len(ints), len(ints), 1))
+
+
+
+        p = comb.CharacterTable.point_group('Cv', 3)
+        coords = np.concatenate(
+            [
+                [[0, 0, 1]],
+                nput.apply_symmetries([1, 0, 0], p.matrices)
+            ],
+            axis=0
+        )
+
+        internals = extract_zmatrix_internals([
+            [0, -1, -1, -1],
+            [1,  0, -1, -1],
+            [2,  0,  1, -1],
+            [3,  0,  2,  1]
+        ], canonicalize=True)
+        print(symmetrize_internals(p, internals, coords))
 ```
 
  </div>

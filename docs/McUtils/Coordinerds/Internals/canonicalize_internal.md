@@ -5,7 +5,7 @@
 </div>
 
 ```python
-canonicalize_internal(coord): 
+canonicalize_internal(coord, return_sign=False): 
 ```
 
 
