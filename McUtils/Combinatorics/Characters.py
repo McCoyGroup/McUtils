@@ -230,7 +230,6 @@ def dihedral_group_classes(n):
             np.arange(n, 2 * n, 2),
             np.arange(n+1, 2 * n, 2)
         ]
-    print("??", classes)
     return elements, classes
 
 def dihedral_group_operation_representation(n, elements=None):
@@ -2197,13 +2196,25 @@ class CharacterTable:
             column_join=[" | "] + [" "]*len(table[0]) if irrep_names is not None else None
         ).format(table)
 
+    @property
+    def group_key(self):
+        if self.group_name is not None:
+            if (
+                    isinstance(self.group_name, tuple)
+                    and len(self.group_name) == 2
+                    and isinstance(self.group_name[0], str)
+                    and nput.is_int(self.group_name[1])
+            ):
+                return self.group_name[0][:1] + str(self.group_name[1]) + self.group_name[0][1:]
+            else:
+                return self.group_name
     def format(self, classes=None, irrep_names=None, group_name=None):
         if classes is None:
             classes = self.class_names
         if irrep_names is None:
             irrep_names = self.irrep_names
         if group_name is None:
-            group_name = self.group_name
+            group_name = self.group_key
         return self.format_character_table(
             self.table,
             group_name=group_name,
@@ -2318,31 +2329,24 @@ class CharacterTable:
         bcast_rep = np.repeat(base_rep[np.newaxis, :, :], nc, axis=0).reshape(nc*nrep, -1)
         return bcast_rep * bcast_mask
 
-    def symmetry_coefficients(self, permutations, signs):
-        """
-        Constructs symmetry coefficients given a specific permutation symmetry
-        on the class members.
-        There should be `nxk` permutations where `n` is the number of coordinates and `k` is the number of classes.
-
-        :param permutations:
-        :return:
-        """
-        coeff_order = np.argsort(permutations, axis=0)
-        perm_signs = np.vstack([s[c] for s,c in zip(signs.T, coeff_order.T)])
-        # print()
-        # print(permutations)
-        # print(signs)
-        # print(perm_signs.T)
-        # return
-        base_mat = np.moveaxis(np.tensordot(self.extended_character_table, perm_signs, axes=[-1, 0]), 0, -1)
-        return base_mat
-        # now we need to permute base_mat (a `kxn` matrix) so that each `n` is ordered appropriately
-        #TODO: speed this part up...
-        wtf = np.vstack([base_mat[coeff_order[i], :] for i in range(coeff_order.shape[1])])
-        print(coeff_order.shape)
-        print(base_mat.shape)
-        raise Exception("???")
-        return np.vstack([base_mat[coeff_order[i], :] for i in range(coeff_order.shape[1])])
+    # def symmetry_coefficients(self, permutations, signs):
+    #     """
+    #     Constructs symmetry coefficients given a specific permutation symmetry
+    #     on the class members.
+    #     There should be `nxk` permutations where `n` is the number of coordinates and `k` is the number of classes.
+    #
+    #     :param permutations:
+    #     :return:
+    #     """
+    #     coeff_order = np.argsort(permutations, axis=0)
+    #     perm_signs = np.vstack([s[c] for s,c in zip(signs.T, coeff_order.T)])
+    #     # print()
+    #     # print(permutations)
+    #     # print(signs)
+    #     # print(perm_signs.T)
+    #     # return
+    #     base_mat = np.moveaxis(np.tensordot(self.extended_character_table, perm_signs, axes=[-1, 0]), 0, -1)
+    #     return base_mat
 
     def coordinate_representation(self, coords):
         coords = np.asanyarray(coords)
@@ -2361,18 +2365,14 @@ class CharacterTable:
         if isinstance(gn, str): gn = (gn,)
         return point_group_data(*gn, prop="matrices")
 
-    def symmetrized_coordinate_coefficients(self, coords,
+    def symmetrized_coordinate_coefficients(self,
+                                            coords,
+                                            permutation_basis=None,
                                             as_characters=True,
                                             normalize=False,
                                             perms=None,
                                             ops=None
                                             ):
-        # print(self.class_sizes)
-        # if perms is None:
-        #     coords = np.asanyarray(coords)
-        #     perms1 = self.symmetry_permutations(coords)
-        #     print(perms1.T)
-        #     perms1 = np.concatenate(nput.enumerate_permutations(perms1.T), axis=0)
 
         if ops is None:
             ops = self.get_full_matrices()
@@ -2384,17 +2384,16 @@ class CharacterTable:
                 nput.symmetry_permutation(coords, m)
                 for m in ops
             ])
-            # print(ops)
-            print(perms)
-            # print(self.symmetry_permutations(coords))
-            # return
-            # raise Exception(perms.shape)
-        full_modes = np.zeros((3*perms.shape[1],) + coords.shape + (len(ops),))
 
-        inv = np.argsort(perms, axis=1)
-        for n,(p,m) in enumerate(zip(inv, ops)):
-            for i,j in enumerate(p):
-                full_modes[3*i:(3*i+3), j, :, n] = m
+        if permutation_basis is None:
+            full_modes = np.zeros((3*perms.shape[1],) + coords.shape + (len(ops),))
+
+            inv = np.argsort(perms, axis=1)
+            for n,(p,m) in enumerate(zip(inv, ops)):
+                for i,j in enumerate(p):
+                    full_modes[3*i:(3*i+3), j, :, n] = m
+        else:
+            full_modes = permutation_basis(perms)
 
         if as_characters:
             full_modes = np.tensordot(self.extend_class_representation(self.table), full_modes, axes=[-1, -1])
@@ -2406,3 +2405,10 @@ class CharacterTable:
                 axis=-1
             ).reshape(full_modes.shape)
         return full_modes
+
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}<{self.group_key}>"
+    def _ipython_display_(self):
+        from ..Jupyter import NoLineWrapFormatter
+        return NoLineWrapFormatter(self.format())._ipython_display_()

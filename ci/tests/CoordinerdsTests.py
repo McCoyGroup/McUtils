@@ -707,6 +707,9 @@ class ConverterTest(TestCase):
 
     @debugTest
     def test_InternalSymmetryies(self):
+        import McUtils.Combinatorics as comb
+        import McUtils.Numputils as nput
+
         print()
         coords = extract_zmatrix_internals([
             [0, -1, -1, -1],
@@ -717,5 +720,39 @@ class ConverterTest(TestCase):
         ], canonicalize=True)
 
 
-        print(coords)
-        print(permute_internals(coords, [0, 2, 1, 4, 3]))
+        self.assertEquals(
+            coords,
+            permute_internals(
+                permute_internals(coords, [0, 2, 1, 4, 3]),
+                np.argsort([0, 2, 1, 4, 3])
+            )
+        )
+
+
+        mats, ints = get_internal_permutation_symmetry_matrices(
+            coords,
+            [
+                [0, 2, 1, 4, 3]
+            ]
+        )
+        self.assertEquals(mats.shape, (len(ints), len(ints), 1))
+
+
+
+        p = comb.CharacterTable.point_group('Cv', 3)
+        coords = np.concatenate(
+            [
+                [[0, 0, 1]],
+                nput.apply_symmetries([1, 0, 0], p.matrices)
+            ],
+            axis=0
+        )
+
+        internals = extract_zmatrix_internals([
+            [0, -1, -1, -1],
+            [1,  0, -1, -1],
+            [2,  0,  1, -1],
+            [3,  0,  2,  1]
+        ], canonicalize=True)
+        print(symmetrize_internals(p, internals, coords))
+
