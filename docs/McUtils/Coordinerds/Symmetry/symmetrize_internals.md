@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds.Symmetry.symmetrize_internals">symmetrize_internals</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Symmetry.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Symmetry.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Symmetry.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Symmetry.py#L85?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ symmetrize_internals(point_group, internals, cartesians=None, *, as_characters=T
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Symmetry/symmetrize_internals.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Symmetry/symmetrize_internals.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Symmetry.py#L64?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Symmetry.py#L85?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
