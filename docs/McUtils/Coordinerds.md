@@ -305,9 +305,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-96e4fe" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-96e4fe"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-bb7070" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-bb7070"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-96e4fe" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-bb7070" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -340,14 +340,13 @@ Chained conversions are not _currently_ supported, but might well become support
 - [GenerateZMatrix](#GenerateZMatrix)
 - [fragmentZMatrix](#fragmentZMatrix)
 - [GenericInternals](#GenericInternals)
-- [TransformationMatrices](#TransformationMatrices)
 - [InternalSymmetryies](#InternalSymmetryies)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-67939c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-67939c"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c06483" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c06483"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-67939c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c06483" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -357,6 +356,7 @@ All tests are wrapped in a test class
 ```python
 class ConverterTest(TestCase):
     def setUp(self):
+        np.set_printoptions(linewidth=1e8)
         super().setUp()
         self.initialize_data()
         self.load()
@@ -1102,42 +1102,6 @@ class ConverterTest(TestCase):
         )
 ```
 
-#### <a name="TransformationMatrices">TransformationMatrices</a>
-```python
-    def test_TransformationMatrices(self):
-        # yes this is the wrong spot but I don't want to open up the other tests
-        import McUtils.Numputils as nput
-
-        ax = nput.vec_normalize(np.random.rand(3))
-        test_rot = nput.rotation_matrix(ax, np.pi/7)
-        purrf = nput.reflection_matrix(ax)
-        refl = test_rot @ purrf
-        # print(test_rot)
-        # print(refl)
-
-        scalings, types, axes, roots, orders = nput.identify_cartesian_transformation_type([
-            test_rot,
-            purrf,
-            refl
-        ])
-
-        self.assertEquals(types.tolist(), [2, 3, 4])
-
-        # print(types)
-        # print(axes)
-        # print(orders)
-
-
-        rax = np.random.rand(4, 3, 3)
-        scalings, types, axes, roots, orders = nput.identify_cartesian_transformation_type(rax)
-
-        # print(types)
-        # print(orders)
-
-        tf = nput.cartesian_transformation_from_data(scalings, types, axes, roots, orders)
-        self.assertLess(np.max(np.abs(tf - rax)), 1e-2)
-```
-
 #### <a name="InternalSymmetryies">InternalSymmetryies</a>
 ```python
     def test_InternalSymmetryies(self):
@@ -1173,7 +1137,6 @@ class ConverterTest(TestCase):
 
 
         p = comb.CharacterTable.point_group('Cv', 3)
-        print(nput.identify_cartesian_transformation_type(p.matrices))
 
         coords = np.concatenate(
             [
@@ -1183,12 +1146,12 @@ class ConverterTest(TestCase):
             axis=0
         )
 
-
-        symm_modes = p.symmetrized_coordinate_coefficients(coords, as_characters=True, normalize=False)
-        modes = np.reshape(symm_modes, symm_modes.shape[:2] + (-1,))
-        # comb_modes = np.sum(np.reshape(modes, (modes.shape[0], -1, 3, modes.shape[-1])), axis=1)
-        # print(np.round(modes[0], 8))
-        # return
+        symm_modes = p.symmetrized_coordinate_coefficients(coords)#, as_characters=True, normalize=False)
+        # print(np.round(symm_modes[2], 8))
+        self.assertEquals(
+            [s.shape for s in symm_modes],
+            [(12, 4), (12, 4), (12, 7)] # z-component of nitrogen has no symmetry equivalents
+        )
 
 
         internals = extract_zmatrix_internals([
@@ -1201,9 +1164,11 @@ class ConverterTest(TestCase):
         # internals = [(0, 1)]
 
         coeffs, full_internals = symmetrize_internals(p, internals, coords)
-        print(full_internals)
-        for c in coeffs:
-            print(c)
+        self.assertEquals(len(full_internals), 9)
+        self.assertEquals(
+            [s.shape for s in coeffs],
+            [(9, 3), (9, 3), (9, 6)]
+        )
 ```
 
  </div>
