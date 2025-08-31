@@ -146,10 +146,24 @@ class CombinatoricsTests(TestCase):
             stable_factorial_ratio([math.factorial(7)], [3, 4, 7])
         )
 
-    @validationTest
+    @debugTest
     def test_Characters(self):
         print()
-        elements, classes = point_group_data("Cv", 5)
+
+        ct = CharacterTable.point_group("Dh", 4)
+        print(ct.format())
+        # ct = CharacterTable.point_group("Oh")
+        # print(ct.format())
+        # ct = CharacterTable.point_group("Cv", 2)
+        # print(ct.format())
+        # ct = CharacterTable.point_group("Td")
+        # print(ct.format())
+        # ct = CharacterTable.point_group("S", 4)
+        # print(ct.format())
+        # ct = CharacterTable.point_group("C", 3)
+        # print(ct.format())
+
+        elements, classes = point_group_data("Cv", 5, prop="classes")
         self.assertEquals(
             np.sort(np.concatenate(classes)).tolist(),
             np.arange(sum(len(l) for l in classes)).tolist()
@@ -253,7 +267,7 @@ class CombinatoricsTests(TestCase):
         print(np.round(np.sum(decomp[:3], axis=0), 8))
         print(np.round(np.sum(decomp[3:], axis=0), 8))
 
-    @debugTest
+    @validationTest
     def test_CharacterSymmetries(self):
         # print(
         #     nput.enumerate_permutations([

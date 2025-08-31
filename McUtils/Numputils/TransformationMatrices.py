@@ -1,3 +1,4 @@
+import enum
 import itertools
 
 import scipy.linalg
@@ -22,10 +23,14 @@ __all__ = [
     "reflection_matrix",
     "permutation_matrix",
     "extract_rotation_angle_axis",
+    "extract_reflection_axis",
     "view_matrix",
     "symmetry_permutation",
     "apply_symmetries",
-    "symmetry_reduce"
+    "symmetry_reduce",
+    "identify_cartesian_transformation_type",
+    "TransformationTypes",
+    "cartesian_transformation_from_data"
 ]
 
 #######################################################################################################################
@@ -238,14 +243,14 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
         rows, cols = (np.array([2, 0, 1]), np.array([1, 2, 0]))
         skew = (rot_mat[:, rows, cols] - rot_mat[:, cols, rows]) / 2
 
-        ax = np.zeros(rot_mat.shape[:-1])
-        ang = np.zeros(rot_mat.shape[:-2])
+        ax = np.empty(rot_mat.shape[:-1], dtype=float)
+        ang = np.empty(rot_mat.shape[:-2], dtype=float)
 
         pos_mask = np.linalg.norm(skew, axis=-1) < 1e-6
         bad_pos = np.where(pos_mask)[0]
         rem_pos = np.arange(len(rot_mat))
         if len(bad_pos) > 0:
-            rem_pos = np.setdiff1d(rem_pos, bad_pos[0])
+            rem_pos = np.setdiff1d(rem_pos, bad_pos)
             shift_rot = 1/2 * (rot_mat[bad_pos,] + vec_ops.identity_tensors((len(bad_pos),), rot_mat.shape[-1]))
             for b,r in zip(bad_pos, shift_rot):
                 ord = np.lexsort(r)
@@ -320,6 +325,26 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
         axes = np.array(axes)
 
         return angles.reshape(base_shape + angles.shape[-1:]), axes.reshape(base_shape + axes.shape[-2:])
+
+def extract_reflection_axis(reflection_mat):
+    reflection_mat = np.asarray(reflection_mat)
+    base_shape = reflection_mat.shape[:-2]
+    reflection_mat = np.reshape(reflection_mat, (-1,) + reflection_mat.shape[-2:])
+    # if reflection_mat.shape[-1] < 3:
+    pt = vec_ops.vec_normalize(np.random.rand(1, reflection_mat.shape[-1]), axis=-1)
+    tf_pts = np.reshape(reflection_mat @ pt[:, :, np.newaxis], (reflection_mat.shape[0], reflection_mat.shape[-1]))
+    vecs = (pt - tf_pts)
+    norms = vec_ops.vec_norms(vecs)
+    in_planes = np.where(norms < 1e-4)
+    if len(in_planes) > 0 and len(in_planes[0]) > 0: # might have randomly ended up in the reflection plane
+        subpt = pt[in_planes]
+        subref = reflection_mat[in_planes]
+        pt2 = vec_ops.vec_normalize(np.random.rand(1, reflection_mat.shape[-1]), axis=-1)
+        pt2 = pt2 - vec_ops.vec_dots(pt[in_planes], pt2)[:, np.newaxis]*pt[in_planes]
+        tf_pts = np.reshape(subref @ subpt[:, :, np.newaxis], (subref.shape[0], reflection_mat.shape[-1]))
+        vecs[in_planes] = (pt2 - tf_pts)
+        norms[in_planes] = vec_ops.vec_norms(vecs[in_planes])
+    return vec_ops.vec_normalize(vecs, norms).reshape(base_shape + (reflection_mat.shape[-1],))
 
 def youla_skew_decomp(A):
     n = len(A)
@@ -716,3 +741,205 @@ def symmetry_reduce(coords, op:np.ndarray, labels=None):
         return coords, labels
     else:
         return coords
+
+class TransformationTypes(enum.Enum):
+    Identity = 0
+    Inversion = 1
+    Rotation = 2
+    Reflection = 3
+    ImproperRotation = 4
+    Scaling = 5
+
+def identify_cartesian_transformation_type(x, max_rotation_order=None):
+        # check unitary
+        x = np.asanyarray(x)
+        base_shape = x.shape[:-2]
+        x = x.reshape((-1,) + x.shape[-2:])
+        scalings, x = vec_ops.polar_decomposition(x)
+
+        types = np.zeros(x.shape[0], dtype=int)
+        axes = np.zeros((x.shape[0], 3))
+        orders = np.full(x.shape[0], -1, dtype=float)
+        roots = np.full(x.shape[0], -1, dtype=float)
+
+        rem_pos = np.arange(x.shape[0])
+        t = np.trace(x, axis1=-2, axis2=-1)
+        inversion_mask = t < -3 + 1e-2
+        types[inversion_mask] = 1
+
+        rem = np.logical_not(inversion_mask)
+        rem_pos = rem_pos[rem]
+        x = x[rem]
+        t = t[rem]
+
+
+        if len(rem_pos) > 0:
+            # identity by default
+            rem = t < 3 - 1e-2
+            rem_pos = rem_pos[rem]
+            x = x[rem]
+
+
+        if len(rem_pos) > 0:
+            d = np.linalg.det(x)
+            rotation_mask = d > 1-1e-2
+
+            rotations = x[rotation_mask]
+
+            rot_sel = rem_pos[rotation_mask]
+            types[rot_sel,] = 2
+            ang, ax = extract_rotation_angle_axis(rotations)
+            axes[rot_sel,] = ax
+
+            rationals = ang / (2 * np.pi)
+            if max_rotation_order is None:
+                roots[rot_sel,] = 1
+                orders[rot_sel,] = 1 / rationals
+            else:
+                for rational, i in zip(rationals, rot_sel):
+                    for o in range(1, max_rotation_order + 1):
+                        root = rational * o
+                        if abs(root - np.round(root)) < 1e-6:
+                            roots[i] = int(np.round(root))
+                            orders[i] = o
+                            break
+                    else:
+                        #TODO: don't just terminate...
+                        raise ValueError(
+                            f"angle ratio {ang} doesn't correspond to a rational number up to order {max_rotation_order} rotations"
+                        )
+
+            rem = np.logical_not(rotation_mask)
+            x = x[rem]
+            rem_pos = rem_pos[rem]
+
+        if len(rem_pos) > 0:
+            reflection_mask = np.max(np.max(x - np.moveaxis(x, -1, -2), axis=-1), axis=-1) < 1e-6 # symmetric
+            ref_sel = rem_pos[reflection_mask]
+            types[ref_sel,] = 3
+            axes[ref_sel,] = extract_reflection_axis(x[reflection_mask])
+
+            rem = np.logical_not(reflection_mask)
+            x = x[rem]
+            rem_pos = rem_pos[rem]
+
+        if len(rem_pos) > 0:
+            # it turns out the same axis trick works for improper rotations
+            types[rem_pos,] = 4
+
+            ang, ax = extract_rotation_angle_axis(x)
+            axes[rem_pos,] = ax
+
+            rationals = ang / (2 * np.pi)
+            if max_rotation_order is None:
+                roots[rem_pos,] = 1
+                orders[rem_pos,] = 1 / rationals
+            else:
+                for rational, i in zip(rationals, rem_pos):
+                    for o in range(1, max_rotation_order + 1):
+                        root = rational * o
+                        if abs(root - np.round(root)) < 1e-6:
+                            roots[i] = int(np.round(root))
+                            orders[i] = o
+                            break
+                    else:
+                        # TODO: don't just terminate...
+                        raise ValueError(
+                            f"angle ratio {ang} doesn't correspond to a rational number up to order {max_rotation_order} rotations"
+                        )
+
+        return scalings, types, axes, roots, orders
+
+def cartesian_transformation_from_data(scalings, types, axes, roots, orders):
+    if scalings is not None:
+        scalings = np.asanyarray(scalings)
+        if scalings.ndim == 1:
+            scalings = np.diag(scalings)
+        elif scalings.shape[-1] != scalings.shape[-2]:
+            scalings = vec_ops.vec_tensordiag(scalings)
+    types = np.asanyarray(types)
+    axes = np.asanyarray(axes)
+    roots = np.asanyarray(roots)
+    orders = np.asanyarray(orders)
+
+    base_shape = types.shape
+    if scalings is not None:
+        scalings = np.reshape(scalings, (-1,) + scalings.shape[-2:])
+    types = np.reshape(types, (-1,))
+    axes = np.reshape(axes, (-1,) + axes.shape[-1:])
+    roots = np.reshape(roots, (-1,))
+    orders = np.reshape(orders, (-1,))
+
+    unitary_tfs = np.empty((types.shape[0], axes.shape[-1], axes.shape[-1]), dtype=float)
+    rem_pos = np.arange(types.shape[0])
+
+    identity_mask = types == 0
+    sel = rem_pos[identity_mask]
+    if len(sel) > 0:
+        unitary_tfs[sel,] = np.eye(3)[np.newaxis]
+        rem = np.logical_not(identity_mask)
+        rem_pos = rem_pos[rem]
+
+        types = types[rem]
+        axes = axes[rem]
+        roots = roots[rem]
+        orders = orders[rem]
+
+    if len(types) > 0:
+        inverse_mask = types == 1
+        sel = rem_pos[inverse_mask]
+        if len(sel) > 0:
+            unitary_tfs[sel,] = -np.eye(3)[np.newaxis]
+            rem = np.logical_not(inverse_mask)
+            rem_pos = rem_pos[rem]
+
+            types = types[rem]
+            axes = axes[rem]
+            roots = roots[rem]
+            orders = orders[rem]
+
+    if len(types) > 0:
+        rotation_mask = types == 2
+        sel = rem_pos[rotation_mask]
+        if len(sel) > 0:
+            angles = 2*np.pi*roots[rotation_mask]/orders[rotation_mask]
+            unitary_tfs[sel,] = rotation_matrix_ER_vec(axes[rotation_mask], angles)
+            rem = np.logical_not(rotation_mask)
+            rem_pos = rem_pos[rem]
+
+            types = types[rem]
+            axes = axes[rem]
+            roots = roots[rem]
+            orders = orders[rem]
+
+    if len(types) > 0:
+        reflection_mask = types == 3
+        sel = rem_pos[reflection_mask]
+        if len(sel) > 0:
+            unitary_tfs[sel,] = reflection_matrix(axes[reflection_mask,])
+            rem = np.logical_not(reflection_mask)
+            rem_pos = rem_pos[rem]
+
+            types = types[rem]
+            axes = axes[rem]
+            roots = roots[rem]
+            orders = orders[rem]
+
+    if len(types) > 0:
+        # improt_mask = types == 4
+        angles = 2*np.pi*roots/orders
+        unitary_tfs[rem_pos,] = reflection_matrix(axes) @ rotation_matrix_ER_vec(axes, angles)
+        # rem = np.logical_not(reflection_mask)
+        # rem_pos = rem_pos[rem]
+        #
+        # types = types[rem]
+        # axes = axes[rem]
+        # orders = orders[rem]
+
+    if scalings is not None:
+        unitary_tfs = scalings @ unitary_tfs
+
+    return unitary_tfs.reshape(base_shape + unitary_tfs.shape[-2:])
+
+
+

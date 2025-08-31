@@ -51,6 +51,7 @@ __all__ = [
     "fractional_power",
     "unitarize_transformation",
     "maximum_similarity_transformation",
+    "polar_decomposition",
     "matrix_transform_from_eigs",
     "symmetric_matrix_exp",
     "imaginary_symmetric_matrix_exp",
@@ -1430,6 +1431,13 @@ def unitarize_transformation(tf):
     u, s, v = np.linalg.svd(tf)
     shared_dim = min((u.shape[-1], v.shape[-2]))
     return u[..., :, :shared_dim] @ v[..., :shared_dim, :]
+
+def polar_decomposition(tf):
+    u, s, v = np.linalg.svd(tf)
+    shared_dim = min((u.shape[-1], v.shape[-2]))
+    Q = u[..., :, :shared_dim] @ v[..., :shared_dim, :]
+    P = u @ vec_tensordiag(s) @ np.moveaxis(u, -1, -2)
+    return P, Q
 
 def maximum_similarity_transformation(basis, target, apply_transformation=True):
     lstsq_tf = np.linalg.lstsq(basis, target, rcond=None)[0]
