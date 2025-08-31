@@ -2546,7 +2546,7 @@ class CharacterTable:
                                             perms=None,
                                             ops=None,
                                             return_basis=None,
-                                            merge_equivalents=True
+                                            merge_equivalents=None
                                             ):
 
         if ops is None:
@@ -2571,7 +2571,10 @@ class CharacterTable:
         else:
             full_modes, full_basis = permutation_basis(perms)
 
-        if merge_equivalents:
+        equivalent_coords = None
+        if merge_equivalents is None:
+            merge_equivalents = as_characters
+        if merge_equivalents is True:
             mask = np.moveaxis(np.abs(full_modes) > 1e-6, -1, 0)
             graph = mask[0]
             for m in mask:
@@ -2583,19 +2586,35 @@ class CharacterTable:
                 comps
             )[0]
 
-            comp_bits = [c[0] for c in equivalent_coords]
-            full_modes = full_modes.reshape((full_modes.shape[0], -1, full_modes.shape[-1]))
-            full_modes = full_modes[:, comp_bits, :]
-
         if as_characters:
             full_modes = np.tensordot(self.extend_class_representation(self.table), full_modes, axes=[-1, -1])
+            if normalize:
+                full_modes = nput.vec_normalize(
+                    full_modes.reshape(full_modes.shape[:2] + (-1,)),
+                    axis=-1
+                ).reshape(full_modes.shape)
+
+            if equivalent_coords is not None:
+                full_modes = full_modes.reshape(full_modes.shape[:2] + (-1,))
+                rep_dims = self.table[:, 0]
+
+                new_modes = []
+                for character_modes, character_dim in zip(full_modes, rep_dims):
+                    comp_bits = [x for c in equivalent_coords for x in c[:character_dim]]
+                    new_modes.append(character_modes[:, comp_bits])
+                full_modes = new_modes
         else:
             full_modes = np.moveaxis(full_modes, -1, 0)
-        if normalize:
-            full_modes = nput.vec_normalize(
-                full_modes.reshape(full_modes.shape[:2] + (-1,)),
-                axis=-1
-            ).reshape(full_modes.shape)
+            if normalize:
+                full_modes = nput.vec_normalize(
+                    full_modes.reshape(full_modes.shape[:2] + (-1,)),
+                    axis=-1
+                ).reshape(full_modes.shape)
+
+            if equivalent_coords is not None:
+                comp_bits = [c[0] for c in equivalent_coords]
+                full_modes = full_modes.reshape((full_modes.shape[0], full_modes.shape[-1], -1))
+                full_modes = full_modes[:, :, comp_bits]
 
         if return_basis is None:
             return_basis = full_basis is not None

@@ -146,22 +146,22 @@ class CombinatoricsTests(TestCase):
             stable_factorial_ratio([math.factorial(7)], [3, 4, 7])
         )
 
-    @debugTest
+    @validationTest
     def test_Characters(self):
         print()
 
         ct = CharacterTable.point_group("Dh", 4)
         print(ct.format())
-        # ct = CharacterTable.point_group("Oh")
-        # print(ct.format())
-        # ct = CharacterTable.point_group("Cv", 2)
-        # print(ct.format())
-        # ct = CharacterTable.point_group("Td")
-        # print(ct.format())
-        # ct = CharacterTable.point_group("S", 4)
-        # print(ct.format())
-        # ct = CharacterTable.point_group("C", 3)
-        # print(ct.format())
+        ct = CharacterTable.point_group("Oh")
+        print(ct.format())
+        ct = CharacterTable.point_group("Cv", 2)
+        print(ct.format())
+        ct = CharacterTable.point_group("Td")
+        print(ct.format())
+        ct = CharacterTable.point_group("S", 4)
+        print(ct.format())
+        ct = CharacterTable.point_group("C", 3)
+        print(ct.format())
 
         elements, classes = point_group_data("Cv", 5, prop="classes")
         self.assertEquals(
@@ -1599,3 +1599,75 @@ class CombinatoricsTests(TestCase):
             new = graph.build_state_graph(part_perms[:100], max_iterations=1, raise_iteration_error=False)
             raise Exception([len(n) for n in new], sum([len(n) for n in new]))
 
+
+    @validationTest
+    def test_YoungTableaux(self):
+        # import McUtils.Iterators as itut
+        # import McUtils.Combinatorics as comb
+        # from McUtils.McUtils.Numputils.TensorDerivatives import nca_partition_terms
+
+
+        perm_inds, perms = UniquePermutations([2, 2, 1, 1]).permutations(return_indices=True)
+        print(
+            np.concatenate([
+                np.array([
+                    np.min(perm_inds[:, :2], axis=1),
+                    np.min(perm_inds[:, 2:], axis=1)
+                ]).T,
+                perms
+            ], axis=1)
+        )
+
+        return
+
+        print(nca_partition_terms((2, 2)))
+        return
+
+        comb.UniquePermutations([0, 0, 1, 1]).permutations(position_blocks=[0, ])
+
+
+
+        def populate_sst_frame_from_components(
+                frame_shape,
+                offsets,
+                sub_ssts
+        ):
+            frame = np.zeros(frame_shape, dtype=int)
+            for i,(o,ss) in enumerate(zip(offsets, sub_ssts)):
+                n = len(ss)
+                frame[o:o+n] = ss
+            return frame
+
+
+        # print(
+        #     split_frame(
+        #         np.array([3, 2]),
+        #         np.array([1, 0])
+        #     )
+        # )
+        # return
+
+        def validate_frame(frame):
+            if np.any(np.diff([f[0] for f in frame]) < 0):
+                return False
+
+        # parts = comb.IntegerPartitioner2D.get_partitions([4, 3], [4, 3])
+        # print(offsets)
+        # print(valid)
+
+        yt = comb.YoungTableauxGenerator(6)
+        p = [3, 2, 1]
+        tabs = yt.get_standard_tableaux(partitions=[p])[0]
+        print(len(tabs[0]))
+        for t in zip(*tabs):
+            print("-" * 10)
+            for s in t:
+                print(s)
+
+        print("="*20)
+        bf_tabs = yt.get_standard_tableaux(partitions=[p], brute_force=True)[0]
+        print(len(bf_tabs[0]))
+        for t in zip(*bf_tabs):
+            print("-" * 10)
+            for s in t:
+                print(s)

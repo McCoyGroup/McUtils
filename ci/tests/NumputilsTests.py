@@ -2048,77 +2048,37 @@ class NumputilsTests(TestCase):
         c = tensor_reexpand(a[:2], b[:2], axes=[-1, -1])
         print([cc.shape for cc in c])
 
+    @debugTest
+    def test_TransformationMatrices(self):
 
-    @validationTest
-    def test_YoungTableaux(self):
-        import McUtils.Iterators as itut
-        import McUtils.Combinatorics as comb
-        from McUtils.McUtils.Numputils.TensorDerivatives import nca_partition_terms
+        ax = vec_normalize(np.random.rand(3))
+        test_rot = rotation_matrix(ax, np.pi/7)
+        purrf = reflection_matrix(ax)
+        refl = test_rot @ purrf
+        # print(test_rot)
+        # print(refl)
 
+        scalings, types, axes, roots, orders = identify_cartesian_transformation_type([
+            test_rot,
+            purrf,
+            refl
+        ])
 
-        perm_inds, perms = comb.UniquePermutations([2, 2, 1, 1]).permutations(return_indices=True)
-        print(
-            np.concatenate([
-                np.array([
-                    np.min(perm_inds[:, :2], axis=1),
-                    np.min(perm_inds[:, 2:], axis=1)
-                ]).T,
-                perms
-            ], axis=1)
-        )
+        self.assertEquals(types.tolist(), [2, 3, 4])
 
-        return
-
-        print(nca_partition_terms((2, 2)))
-        return
-
-        comb.UniquePermutations([0, 0, 1, 1]).permutations(position_blocks=[0, ])
+        # print(types)
+        # print(axes)
+        # print(orders)
 
 
+        rax = np.random.rand(4, 3, 3)
+        scalings, types, axes, roots, orders = identify_cartesian_transformation_type(rax)
 
-        def populate_sst_frame_from_components(
-                frame_shape,
-                offsets,
-                sub_ssts
-        ):
-            frame = np.zeros(frame_shape, dtype=int)
-            for i,(o,ss) in enumerate(zip(offsets, sub_ssts)):
-                n = len(ss)
-                frame[o:o+n] = ss
-            return frame
+        # print(types)
+        # print(orders)
 
+        tf = cartesian_transformation_from_data(scalings, types, axes, roots, orders)
+        self.assertLess(np.max(np.abs(tf - rax)), 1e-2)
 
-        # print(
-        #     split_frame(
-        #         np.array([3, 2]),
-        #         np.array([1, 0])
-        #     )
-        # )
-        # return
-
-        def validate_frame(frame):
-            if np.any(np.diff([f[0] for f in frame]) < 0):
-                return False
-
-        # parts = comb.IntegerPartitioner2D.get_partitions([4, 3], [4, 3])
-        # print(offsets)
-        # print(valid)
-
-        yt = comb.YoungTableauxGenerator(6)
-        p = [3, 2, 1]
-        tabs = yt.get_standard_tableaux(partitions=[p])[0]
-        print(len(tabs[0]))
-        for t in zip(*tabs):
-            print("-" * 10)
-            for s in t:
-                print(s)
-
-        print("="*20)
-        bf_tabs = yt.get_standard_tableaux(partitions=[p], brute_force=True)[0]
-        print(len(bf_tabs[0]))
-        for t in zip(*bf_tabs):
-            print("-" * 10)
-            for s in t:
-                print(s)
 
 
