@@ -705,7 +705,42 @@ class ConverterTest(TestCase):
         )
     #endregion
 
-    @debugTest
+    @validationTest
+    def test_TransformationMatrices(self):
+        # yes this is the wrong spot but I don't want to open up the other tests
+        import McUtils.Numputils as nput
+
+        ax = nput.vec_normalize(np.random.rand(3))
+        test_rot = nput.rotation_matrix(ax, np.pi/7)
+        purrf = nput.reflection_matrix(ax)
+        refl = test_rot @ purrf
+        # print(test_rot)
+        # print(refl)
+
+        scalings, types, axes, roots, orders = nput.identify_cartesian_transformation_type([
+            test_rot,
+            purrf,
+            refl
+        ])
+
+        self.assertEquals(types.tolist(), [2, 3, 4])
+
+        # print(types)
+        # print(axes)
+        # print(orders)
+
+
+        rax = np.random.rand(4, 3, 3)
+        scalings, types, axes, roots, orders = nput.identify_cartesian_transformation_type(rax)
+
+        # print(types)
+        # print(orders)
+
+        tf = nput.cartesian_transformation_from_data(scalings, types, axes, roots, orders)
+        self.assertLess(np.max(np.abs(tf - rax)), 1e-2)
+
+
+    @validationTest
     def test_InternalSymmetryies(self):
         import McUtils.Combinatorics as comb
         import McUtils.Numputils as nput
@@ -739,6 +774,8 @@ class ConverterTest(TestCase):
 
 
         p = comb.CharacterTable.point_group('Cv', 3)
+        print(nput.identify_cartesian_transformation_type(p.matrices))
+
         coords = np.concatenate(
             [
                 [[0, 0, 1]],
