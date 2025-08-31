@@ -11,6 +11,7 @@ import sys, numpy as np, os
 class ConverterTest(TestCase):
 
     def setUp(self):
+        np.set_printoptions(linewidth=1e8)
         super().setUp()
         self.initialize_data()
         self.load()
@@ -705,42 +706,7 @@ class ConverterTest(TestCase):
         )
     #endregion
 
-    @validationTest
-    def test_TransformationMatrices(self):
-        # yes this is the wrong spot but I don't want to open up the other tests
-        import McUtils.Numputils as nput
-
-        ax = nput.vec_normalize(np.random.rand(3))
-        test_rot = nput.rotation_matrix(ax, np.pi/7)
-        purrf = nput.reflection_matrix(ax)
-        refl = test_rot @ purrf
-        # print(test_rot)
-        # print(refl)
-
-        scalings, types, axes, roots, orders = nput.identify_cartesian_transformation_type([
-            test_rot,
-            purrf,
-            refl
-        ])
-
-        self.assertEquals(types.tolist(), [2, 3, 4])
-
-        # print(types)
-        # print(axes)
-        # print(orders)
-
-
-        rax = np.random.rand(4, 3, 3)
-        scalings, types, axes, roots, orders = nput.identify_cartesian_transformation_type(rax)
-
-        # print(types)
-        # print(orders)
-
-        tf = nput.cartesian_transformation_from_data(scalings, types, axes, roots, orders)
-        self.assertLess(np.max(np.abs(tf - rax)), 1e-2)
-
-
-    @validationTest
+    @debugTest
     def test_InternalSymmetryies(self):
         import McUtils.Combinatorics as comb
         import McUtils.Numputils as nput
@@ -774,7 +740,6 @@ class ConverterTest(TestCase):
 
 
         p = comb.CharacterTable.point_group('Cv', 3)
-        print(nput.identify_cartesian_transformation_type(p.matrices))
 
         coords = np.concatenate(
             [
@@ -784,12 +749,12 @@ class ConverterTest(TestCase):
             axis=0
         )
 
-
-        symm_modes = p.symmetrized_coordinate_coefficients(coords, as_characters=True, normalize=False)
-        modes = np.reshape(symm_modes, symm_modes.shape[:2] + (-1,))
-        # comb_modes = np.sum(np.reshape(modes, (modes.shape[0], -1, 3, modes.shape[-1])), axis=1)
-        # print(np.round(modes[0], 8))
-        # return
+        symm_modes = p.symmetrized_coordinate_coefficients(coords)#, as_characters=True, normalize=False)
+        # print(np.round(symm_modes[2], 8))
+        self.assertEquals(
+            [s.shape for s in symm_modes],
+            [(12, 4), (12, 4), (12, 7)] # z-component of nitrogen has no symmetry equivalents
+        )
 
 
         internals = extract_zmatrix_internals([
@@ -802,6 +767,8 @@ class ConverterTest(TestCase):
         # internals = [(0, 1)]
 
         coeffs, full_internals = symmetrize_internals(p, internals, coords)
-        print(full_internals)
-        for c in coeffs:
-            print(c)
+        self.assertEquals(len(full_internals), 9)
+        self.assertEquals(
+            [s.shape for s in coeffs],
+            [(9, 3), (9, 3), (9, 6)]
+        )
