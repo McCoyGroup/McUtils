@@ -766,9 +766,18 @@ class ConverterTest(TestCase):
 
         # internals = [(0, 1)]
 
-        coeffs, full_internals = symmetrize_internals(p, internals, coords)
+        coeffs, full_internals, expansions, base = symmetrize_internals(p, internals, coords,
+                                                                        return_expansions=True,
+                                                                        return_base_expansion=True)
         self.assertEquals(len(full_internals), 9)
         self.assertEquals(
             [s.shape for s in coeffs],
             [(9, 3), (9, 3), (9, 6)]
         )
+        a1_coeffs, a1_inv = expansions[0]
+        int_vals, _ = base
+        self.assertAlmostEquals(a1_coeffs[0][0], int_vals[0][0] * np.sqrt(3))
+        # print(coeffs[0])
+        # print(a1_coeffs[0])
+        # print(int_vals[0])
+        # print(a1_coeffs[1].shape)

@@ -1,7 +1,7 @@
 
 import numpy as np
-from .Internals import canonicalize_internal, permute_internals#, coordinate_sign
-from ..Numputils import permutation_sign
+from .Internals import canonicalize_internal, permute_internals, coordinate_indices
+from .. import Numputils as nput
 
 __all__ = [
     "get_internal_permutation_symmetry_matrices",
@@ -82,16 +82,43 @@ def get_internal_permutation_symmetry_matrices(internals, permutations):
 
     return np.moveaxis(np.array(full_basis, dtype=int), 0, -1), internals
 
-def symmetrize_internals(point_group, internals,
-                         cartesians=None, *,
+def symmetrize_internals(point_group,
+                         internals,
+                         cartesians=None,
+                         *,
                          as_characters=True,
-                         normalize=False,
+                         normalize=None,
                          perms=None,
+                         return_expansions=False,
+                         return_base_expansion=False,
                          ops=None):
     symm = lambda p: get_internal_permutation_symmetry_matrices(internals, p)
+    if cartesians is not None:
+        cartesians = np.asanyarray(cartesians)
+        if np.issubdtype(cartesians.dtype, np.integer):
+            # we'll support permutations as Cartesians even if it feels like a bad idea
+            # it's just so convenient...
+            atom_list = coordinate_indices(internals)
+            nats = len(atom_list)
+            if cartesians.shape != (nats, 3):
+                if nats == 3:
+                    # we'll check to see if we have permutations...
+                    test = np.sort(cartesians, axis=0)
+                    if np.sum(np.abs(test - np.arange(nats)[:, np.newaxis])) < 1e-8:
+                        perms, cartesians = cartesians, None
+            elif cartesians.shape[-1] == nats:
+                perms, cartesians = cartesians, None
+        # if cartesians.shape ==
     if perms is None and cartesians is None:
         raise ValueError("either Cartesians or explicit set of atom permutations required")
-    return point_group.symmetrized_coordinate_coefficients(
+
+    if return_expansions and cartesians is None:
+        raise ValueError("Cartesians are required to return coordinate expansions")
+
+    if normalize is None:
+        normalize = return_expansions
+
+    coeffs, full_basis = point_group.symmetrized_coordinate_coefficients(
         cartesians,
         permutation_basis=symm,
         as_characters=as_characters,
@@ -99,4 +126,34 @@ def symmetrize_internals(point_group, internals,
         perms=perms,
         ops=ops
     )
+
+    res = (coeffs, full_basis)
+    if return_expansions:
+        if return_expansions is True: return_expansions = 1
+        exp, inv = nput.internal_coordinate_tensors(cartesians, full_basis,
+                                                    return_inverse=True,
+                                                    order=return_expansions
+                                                    )
+
+        coeff_inv = [
+            c.T
+                if (normalize is not False and (as_characters or normalize)) else
+            np.linalg.pinv(c)
+            for c in coeffs
+        ]
+
+        expansions = [
+            (
+                [np.dot(exp[0], c)] + nput.tensor_reexpand(exp[1:], [c]),
+                nput.tensor_reexpand([ci], inv)
+            )
+            for c,ci in zip(coeffs, coeff_inv)
+        ]
+
+        res = res + (expansions,)
+        if return_base_expansion:
+            res = res + ((exp, inv),)
+
+    return res
+
     # return symm_coeffs, storage[1]
