@@ -5,7 +5,7 @@
 </div>
 
 ```python
-symmetrize_internals(point_group, internals, cartesians=None, *, as_characters=True, normalize=False, perms=None, ops=None): 
+symmetrize_internals(point_group, internals, cartesians=None, *, as_characters=True, normalize=None, perms=None, return_expansions=False, return_base_expansion=False, ops=None): 
 ```
 
 
