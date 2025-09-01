@@ -10,7 +10,8 @@ __all__ = [
     "is_valid_coordinate",
     "permute_internals",
     "find_internal",
-    "coordinate_sign"
+    "coordinate_sign",
+    "coordinate_indices"
 ]
 
 def canonicalize_internal(coord, return_sign=False):
@@ -66,9 +67,9 @@ class InternalsSet:
     def __init__(self, coord_specs:'list[tuple[int]]', prepped_data=None):
         self.specs = coord_specs
         if prepped_data is not None:
-            self._indicator, self.ind_map, self.coord_map = prepped_data
+            self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = prepped_data
         else:
-            self._indicator, self.ind_map, self.coord_map = self.prep_coords(coord_specs)
+            self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = self.prep_coords(coord_specs)
 
     IndicatorMap = collections.namedtuple("IndicatorMap", ['primary', 'child'])
     IndsMap = collections.namedtuple("IndsMap", ['dists', 'angles', 'diheds'])
@@ -83,9 +84,11 @@ class InternalsSet:
         diheds = []
         indicator = []
         subindicator = []
+        atoms = {}
 
         for i,c in coord_specs:
             c = canonicalize_internal(c)
+            atoms.update(c)
             if len(c) == 2:
                 indicator.append(0)
                 subindicator.append(len(dists))
@@ -106,6 +109,7 @@ class InternalsSet:
 
         return (
             cls.IndicatorMap(np.array(indicator), np.array(subindicator)),
+            tuple(sorted(atoms)),
             cls.IndsMap(np.array(dist_inds), np.array(angle_inds), np.array(dihed_inds)),
             cls.InternalsMap(np.array(dists), np.array(angles), np.array(diheds))
         )
@@ -182,7 +186,7 @@ class InternalsSet:
         if canonicalize:
             return cls(self._create_coord_list(self._indicator, self.ind_map, int_map))
         else:
-            return cls(None, prepped_data=[self._indicator, self.ind_map, int_map])
+            return cls(None, prepped_data=[self._indicator, self.coordinate_indices, self.ind_map, int_map])
 
 def find_internal(coords, coord):
     if isinstance(coords, InternalsSet):
@@ -249,3 +253,11 @@ def coordinate_sign(old, new, canonicalize=True):
             return 0
     else:
         raise ValueError(f"can't compare coordinates {old} and {new}")
+
+def coordinate_indices(coords):
+    if isinstance(coords, InternalsSet):
+        return coords.coordinate_indices
+    else:
+        return tuple(sorted(
+            {x for c in coords for x in c}
+        ))
