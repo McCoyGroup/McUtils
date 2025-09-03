@@ -49,5 +49,3 @@ from .Sequences import *; from .Sequences import __all__ as exposed
 __all__ += exposed
 from .YoungTableaux import *; from .YoungTableaux import __all__ as exposed
 __all__ += exposed
-from .Characters import *; from .Characters import __all__ as exposed
-__all__ += exposed

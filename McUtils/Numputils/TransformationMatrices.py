@@ -759,7 +759,7 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
 
         types = np.zeros(x.shape[0], dtype=int)
         axes = np.zeros((x.shape[0], 3))
-        orders = np.full(x.shape[0], -1, dtype=float)
+        orders = np.full(x.shape[0], -1, dtype=int)
         roots = np.full(x.shape[0], -1, dtype=float)
 
         rem_pos = np.arange(x.shape[0])
@@ -793,8 +793,8 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
 
             rationals = ang / (2 * np.pi)
             if max_rotation_order is None:
-                roots[rot_sel,] = 1
-                orders[rot_sel,] = 1 / rationals
+                roots[rot_sel,] = rationals
+                orders[rot_sel,] = 1
             else:
                 for rational, i in zip(rationals, rot_sel):
                     for o in range(1, max_rotation_order + 1):
@@ -832,8 +832,8 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
 
             rationals = ang / (2 * np.pi)
             if max_rotation_order is None:
-                roots[rem_pos,] = 1
-                orders[rem_pos,] = 1 / rationals
+                roots[rem_pos,] = rationals
+                orders[rem_pos,] = 1
             else:
                 for rational, i in zip(rationals, rem_pos):
                     for o in range(1, max_rotation_order + 1):
@@ -848,6 +848,12 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
                             f"angle ratio {ang} doesn't correspond to a rational number up to order {max_rotation_order} rotations"
                         )
 
+        if scalings is not None:
+            scalings.reshape(base_shape + scalings.shape[-2:])
+        types = types.reshape(base_shape)
+        axes = axes.reshape(base_shape + axes.shape[-1:])
+        roots = roots.reshape(base_shape)
+        orders = orders.reshape(base_shape)
         return scalings, types, axes, roots, orders
 
 def cartesian_transformation_from_data(scalings, types, axes, roots, orders):

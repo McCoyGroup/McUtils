@@ -597,8 +597,11 @@ def functionalized_zmatrix(
         zm = [
             list(x) for x in base_zm
         ]
-    if attachments is None: attachments = {}
-    for attachment_points, fragment in attachments.items():
+    if attachments is None:
+        attachments = {}
+    if hasattr(attachments, 'items'):
+        attachments = attachments.items()
+    for attachment_points, fragment in attachments:
         if nput.is_numeric(fragment):
             fragment = chain_zmatrix(fragment)
         zm = zm + attached_zmatrix_fragment(
@@ -842,11 +845,13 @@ def bond_graph_zmatrix(
 
 def sort_complex_attachment_points(
         fragment_inds,
-        attachment_points: dict
+        attachment_points: 'dict|tuple[tuple[int], list[list[int]]]'
 ):
     new_attachments = [None] * len(fragment_inds)
     fragment_inds = list(fragment_inds)
-    for start, end in attachment_points.items():
+    if hasattr(attachment_points, 'items'):
+        attachment_points = attachment_points.items()
+    for start, end in attachment_points:
         if nput.is_int(start):
             start = [start]
         if nput.is_int(end):

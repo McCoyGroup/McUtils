@@ -1,10 +1,8 @@
 import itertools
 import numpy as np
-import scipy as scipy
+# import scipy as scipy
 
-from .YoungTableaux import YoungTableauxGenerator
-from .Permutations import IntegerPartitioner
-from .Sequences import stable_factorial_ratio, prime_factorize
+from .. import Combinatorics as comb
 from .. import Numputils as nput
 
 __all__ = [
@@ -63,21 +61,21 @@ def _group_size(n, p):
         ([pp]*cc + list(range(cc+1))[2:] for pp, cc in zip(p, c)),
         []
     )
-    return stable_factorial_ratio(num_terms, denom_terms)
+    return comb.stable_factorial_ratio(num_terms, denom_terms)
 
 def symmetric_group_class_sizes(n, partitions=None):
     if partitions is None:
-        partitions = reversed(list(itertools.chain(*IntegerPartitioner.partitions(n))))
+        partitions = reversed(list(itertools.chain(*comb.IntegerPartitioner.partitions(n))))
     return np.array([_group_size(n, p) for p in partitions])
 
 def symmetric_group_character_table(n, tableaux=None, partitions=None, return_partitions=False, return_weights=False):
     if tableaux is None:
-        tableaux, _ = YoungTableauxGenerator(n).get_standard_tableaux(return_partitions=True)
+        tableaux, _ = comb.YoungTableauxGenerator(n).get_standard_tableaux(return_partitions=True)
         if partitions is None:
             partitions = list(reversed(_))
     characters = []
     if partitions is None:
-        partitions = list(reversed(list(itertools.chain(*IntegerPartitioner.partitions(n)))))
+        partitions = list(reversed(list(itertools.chain(*comb.IntegerPartitioner.partitions(n)))))
 
     for p in partitions:
         vals = list(range(1, len(p)+1))
@@ -537,7 +535,7 @@ def _permutation_product(perms_lists):
         yield np.concatenate(p)
 
 def cycle_decomposition_permutation_product(n):
-    primes, orders = prime_factorize(n)
+    primes, orders = comb.prime_factorize(n)
     primes = np.array(primes)
     orders = np.array(orders)
     mask = np.where(orders > 0)
@@ -2537,92 +2535,6 @@ class CharacterTable:
         gn = self.group_name
         if isinstance(gn, str): gn = (gn,)
         return point_group_data(*gn, prop="matrices")
-
-    def symmetrized_coordinate_coefficients(self,
-                                            coords,
-                                            permutation_basis=None,
-                                            as_characters=True,
-                                            normalize=False,
-                                            perms=None,
-                                            ops=None,
-                                            return_basis=None,
-                                            merge_equivalents=None
-                                            ):
-
-        if ops is None:
-            ops = self.get_full_matrices()
-            class_perm = np.concatenate(self.classes, axis=0)
-            ops = ops[class_perm,]
-        if perms is None:
-            #TODO: find a cleaner way to do this...
-            perms = np.array([
-                nput.symmetry_permutation(coords, m)
-                for m in ops
-            ])
-
-        if permutation_basis is None:
-            full_modes = np.zeros((3*perms.shape[1],) + coords.shape + (len(ops),))
-
-            inv = np.argsort(perms, axis=1)
-            for n,(p,m) in enumerate(zip(inv, ops)):
-                for i,j in enumerate(p):
-                    full_modes[3*i:(3*i+3), j, :, n] = m
-            full_basis = None
-        else:
-            full_modes, full_basis = permutation_basis(perms)
-
-        equivalent_coords = None
-        if merge_equivalents is None:
-            merge_equivalents = as_characters
-        if merge_equivalents is True:
-            mask = np.moveaxis(np.abs(full_modes) > 1e-6, -1, 0)
-            graph = mask[0]
-            for m in mask:
-                graph = np.logical_or(graph, m) # TODO: speed this up with better masks
-
-            _, comps = scipy.sparse.csgraph.connected_components(graph.reshape(graph.shape[0], -1))
-            (_, equivalent_coords) = nput.group_by(
-                np.arange(len(graph)),
-                comps
-            )[0]
-
-        if as_characters:
-            full_modes = np.tensordot(self.extend_class_representation(self.table), full_modes, axes=[-1, -1])
-            if normalize:
-                full_modes = nput.vec_normalize(
-                    full_modes.reshape(full_modes.shape[:2] + (-1,)),
-                    axis=-1
-                ).reshape(full_modes.shape)
-
-            if equivalent_coords is not None:
-                full_modes = full_modes.reshape(full_modes.shape[:2] + (-1,))
-                rep_dims = self.table[:, 0]
-
-                new_modes = []
-                for character_modes, character_dim in zip(full_modes, rep_dims):
-                    comp_bits = [x for c in equivalent_coords for x in c[:character_dim]]
-                    new_modes.append(character_modes[:, comp_bits])
-                full_modes = new_modes
-        else:
-            full_modes = np.moveaxis(full_modes, -1, 0)
-            if normalize:
-                full_modes = nput.vec_normalize(
-                    full_modes.reshape(full_modes.shape[:2] + (-1,)),
-                    axis=-1
-                ).reshape(full_modes.shape)
-
-            if equivalent_coords is not None:
-                comp_bits = [c[0] for c in equivalent_coords]
-                full_modes = full_modes.reshape((full_modes.shape[0], full_modes.shape[-1], -1))
-                full_modes = full_modes[:, :, comp_bits]
-
-        if return_basis is None:
-            return_basis = full_basis is not None
-
-        if return_basis:
-            return full_modes, full_basis
-        else:
-            return full_modes
 
     def __repr__(self):
         cls = type(self)

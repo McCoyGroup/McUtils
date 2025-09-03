@@ -707,10 +707,7 @@ class ConverterTest(TestCase):
     #endregion
 
     @debugTest
-    def test_InternalSymmetryies(self):
-        import McUtils.Combinatorics as comb
-        import McUtils.Numputils as nput
-
+    def test_Permutations(self):
         print()
         coords = extract_zmatrix_internals([
             [0, -1, -1, -1],
@@ -728,56 +725,3 @@ class ConverterTest(TestCase):
                 np.argsort([0, 2, 1, 4, 3])
             )
         )
-
-
-        # mats, ints = get_internal_permutation_symmetry_matrices(
-        #     coords,
-        #     [
-        #         [0, 2, 1, 4, 3]
-        #     ]
-        # )
-        # self.assertEquals(mats.shape, (len(ints), len(ints), 1))
-
-
-        p = comb.CharacterTable.point_group('Cv', 3)
-
-        coords = np.concatenate(
-            [
-                [[0, 0, 1]],
-                nput.apply_symmetries([1, 0, 0], p.matrices)
-            ],
-            axis=0
-        )
-
-        symm_modes = p.symmetrized_coordinate_coefficients(coords)#, as_characters=True, normalize=False)
-        # print(np.round(symm_modes[2], 8))
-        self.assertEquals(
-            [s.shape for s in symm_modes],
-            [(12, 4), (12, 4), (12, 7)] # z-component of nitrogen has no symmetry equivalents
-        )
-
-
-        internals = extract_zmatrix_internals([
-            [0, -1, -1, -1],
-            [1,  0, -1, -1],
-            [2,  0,  1, -1],
-            [3,  0,  2,  1]
-        ], canonicalize=True)
-
-        # internals = [(0, 1)]
-
-        coeffs, full_internals, expansions, base = symmetrize_internals(p, internals, coords,
-                                                                        return_expansions=True,
-                                                                        return_base_expansion=True)
-        self.assertEquals(len(full_internals), 9)
-        self.assertEquals(
-            [s.shape for s in coeffs],
-            [(9, 3), (9, 3), (9, 6)]
-        )
-        a1_coeffs, a1_inv = expansions[0]
-        int_vals, _ = base
-        self.assertAlmostEquals(a1_coeffs[0][0], int_vals[0][0] * np.sqrt(3))
-        # print(coeffs[0])
-        # print(a1_coeffs[0])
-        # print(int_vals[0])
-        # print(a1_coeffs[1].shape)

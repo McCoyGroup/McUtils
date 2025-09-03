@@ -170,6 +170,7 @@ class InternalsSet:
         full = vals.diheds.tolist() + vals.angles.tolist() + vals.diheds.tolist()
         return [ tuple(full[i]) for i in map ]
     def permute(self, perm, canonicalize=True):
+        #TODO: handle padding this
         inv = np.argsort(perm)
         dists = self.coord_map.dists
         if len(dists) > 0:
@@ -206,9 +207,9 @@ def permute_internals(coords, perm, canonicalize=True):
         return coords.permute(perm, canonicalize=canonicalize)
     else:
         return [
-            canonicalize_internal([perm[c] for c in coord])
+            canonicalize_internal([perm[c] if c < len(perm) else c for c in coord])
                 if canonicalize else
-            tuple(perm[c] for c in coord)
+            tuple(perm[c] if c < len(perm) else c for c in coord)
             for coord in coords
         ]
 
