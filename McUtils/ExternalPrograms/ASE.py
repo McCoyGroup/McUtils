@@ -28,15 +28,24 @@ class ASEMolecule(ExternalMolecule):
         return self.mol.charges
 
     @classmethod
-    def from_coords(cls, atoms, coords, charge=None, calculator=None, **etc):
+    def from_coords(cls, atoms, coords, charge=None, spin=None, info=None, calculator=None, **etc):
         if calculator is not None and charge is not None:
-            calculator.set_charge(charge)
+            if hasattr(calculator, 'set_charge'):
+                calculator.set_charge(charge)
+
+        if info is None and charge is not None or spin is not None:
+            info = {}
+        if charge is not None:
+            info['charge'] = charge
+        if spin is not None:
+            info['spin'] = spin
 
         return cls(
             ASEInterface.Atoms(
                 atoms,
                 coords,
                 calculator=calculator,
+                info=info,
                 **etc
             )
         )
@@ -79,6 +88,58 @@ class ASEMolecule(ExternalMolecule):
     #         return self.calc.copy()
     #     else:
     #         return self.load_class()(self.calc.base_calc)
+    def calculate_props(self, props, geoms=None, calc=None, extra_calcs=None):
+        if calc is None:
+            calc = self.mol.calc
+        if geoms is None:
+            calc.calculate(self.mol, props)
+            base = {
+                k:calc.results[k]
+                for k in props
+            }
+            if extra_calcs is not None:
+                updates = extra_calcs(self.mol)
+                base.update(updates)
+            return base
+        else:
+            cur_geom = self.mol.positions
+            geoms = np.asanyarray(geoms)
+            base_shape = geoms.shape[:-2]
+            geoms = geoms.reshape((-1,) + cur_geom.shape)
+            prop_arrays = {}
+
+            try:
+                for i, g in enumerate(geoms):
+                    self.mol.positions = g
+                    calc.calculate(self.mol, props)
+                    for k in props:
+                        res = calc.results[k]
+                        if k not in prop_arrays:
+                            if hasattr(res, 'shape'):
+                                shp = res.shape
+                            else:
+                                shp = ()
+                            prop_arrays[k] = np.empty(
+                                (len(geoms),) + shp,
+                                dtype=type(res) if not hasattr(res, 'dtype') else res.dtype
+                            )
+                        prop_arrays[k][i] = res
+                    if extra_calcs is not None:
+                        updates = extra_calcs(self.mol)
+                        for k,res in updates.items():
+                            if k not in prop_arrays:
+                                prop_arrays[k] = np.empty(
+                                    (len(geoms),) + res.shape,
+                                    dtype=res.dtype
+                                )
+                            prop_arrays[k][i] = res
+            finally:
+                self.mol.positions = cur_geom
+
+            return {
+                k:r.reshape(base_shape + r.shape[1:])
+                for k,r in prop_arrays.items()
+            }
 
     def calculate_energy(self, geoms=None, order=None, calc=None):
         if calc is None:
@@ -88,45 +149,24 @@ class ASEMolecule(ExternalMolecule):
         props = ['energy']
         if order > 0:
             props.append('forces')
+        extra_calcs = None
         if order > 1:
-            raise ValueError("ASE calculators only need to implement forces")
-        if geoms is None:
-            calc.calculate(self.mol, props)
-            res = [
-                calc.results[k]
-                for k in props
-            ]
-            if order > 0:
-                res[1] *= -1
-        else:
-            cur_geom = self.mol.positions
-            geoms = np.asanyarray(geoms)
-            base_shape = geoms.shape[:-2]
-            geoms = geoms.reshape((-1,) + cur_geom.shape)
-            engs = np.empty((len(geoms),), dtype=float)
-            if order > 0:
-                grads = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
+            if hasattr(calc, 'get_hessian'):
+                extra_calcs = lambda m:{'hessian':calc.get_hessian(m)}
             else:
-                grads = None
-            try:
-                for i, g in enumerate(geoms):
-                    self.mol.positions = g
-                    calc.calculate(self.mol, props)
-                    vals = [
-                        calc.results[k]
-                        for k in props
-                    ]
-                    engs[i] = vals[0]
-                    if order > 0:
-                        grads[i] = -vals[1]
-            finally:
-                self.mol.positions = cur_geom
-            res = [engs]
-            if order > 0:
-                res.append(grads)
+                raise ValueError("ASE calculators only need to implement forces")
+        if order > 2:
+            raise ValueError("ASE calculators don't support 3rd derivatives by default")
+        res = self.calculate_props(props, geoms=geoms, calc=calc, extra_calcs=extra_calcs)
         if just_eng:
-            res = res[0]
-        return res
+            return res['energy']
+
+        ret_tup = (res['energy'],)
+        if order > 0:
+            ret_tup = ret_tup + (-res['forces'],)
+        if order > 1:
+            ret_tup = ret_tup + (res['hessian'],)
+        return ret_tup
 
 
     convergence_criterion = 1e-4
