@@ -40,7 +40,9 @@ def identify_symmetry_equivalent_atoms(coords,
             base_groups = [np.arange(len(coords))]
     full_groups = []
     for g in base_groups:
-        if len(g) < 2: continue
+        if len(g) < 2:
+            full_groups.append(g)
+            continue
         subcoords = coords[g,]
         dists = nput.distance_matrix(subcoords)
         dists = np.sort(dists, axis=1)
@@ -56,7 +58,7 @@ def identify_symmetry_equivalent_atoms(coords,
             for j,d2 in enumerate(dists[i+1:]):
                 if np.max(np.abs(d - d2)) < tol:
                     subgroup.add(i+j+1)
-            if new_sg and len(subgroup) > 1:
+            if new_sg:
                 subgroups.append(subgroup)
 
         merged_groups = []
@@ -95,7 +97,9 @@ def identify_symmetry_equivalent_atoms(coords,
 
 class PointGroupIdentifier:
     def __init__(self, coords, masses=None, groups=None,
-                 tol=1e-2, mass_tol=1, mom_tol=1,
+                 tol=1e-2,
+                 mass_tol=1,
+                 mom_tol=1,
                  grouping_tol=1e-2,
                  verbose=False
                  ):
@@ -121,7 +125,9 @@ class PointGroupIdentifier:
     def get_groups(self, coords, base_groups):
         full_groups = []
         for g in base_groups:
-            if len(g) < 2: continue
+            if len(g) < 2:
+                full_groups.append(g)
+                continue
             subcoords = coords[g,]
             dists = nput.distance_matrix(subcoords)
             dists = np.sort(dists, axis=1)
@@ -242,7 +248,13 @@ class PointGroupIdentifier:
     def prep_coords(self, coords, masses=None):
         coords = np.asanyarray(coords)
         if len(coords) == 1:
-            return np.zeros(3), np.array([1, 0, 0]), np.eye(3)
+            return SymmetryEquivalentAtomData(
+                np.zeros((1,3)), coords[0],
+                np.array([0, 0, 1]),
+                np.eye(3),
+                RotorTypes.Atom,
+                True
+            )
         com = nput.center_of_mass(coords, masses)
         coords = coords - com[np.newaxis]
         inerts = nput.inertia_tensors(coords, masses)
@@ -597,9 +609,10 @@ class PointGroupIdentifier:
                 if self.verbose:
                     print("Checking for perpendicular C2")
                 for ax in self.rotation_axis_iterator():
-                    if np.abs(np.dot(ax, primary_axis)) < self.tol: # has to be parallel
+                    if np.abs(np.dot(ax, primary_axis)) < 1e-2: # has to be perp
                         elem = RotationElement(2, ax)
                         if self.check_element(elem, verbose=False):
+                            print(ax, primary_axis)
                             ax = np.cross(np.cross(ax, primary_axis), primary_axis) # remove any tolerances
                             c2_axis = ax
                             elements.append(elem)
@@ -650,7 +663,7 @@ class PointGroupIdentifier:
                         #TODO: throw in a special case for C2v
                         sv_axis = None
                         for ax in self.reflection_plane_iterator():
-                            if np.abs(np.dot(ax, primary_axis)) < 1 - self.tol:  # not parallel
+                            if np.abs(np.dot(ax, primary_axis)) < 1 - 1e-2:  # not parallel
                                 ax = np.cross(primary_axis, ax)
                             else:
                                 ax = np.cross(np.cross(ax, primary_axis), primary_axis) # remove any tolerances
@@ -684,7 +697,7 @@ class PointGroupIdentifier:
                     primary_axis = np.array([0, 0, 1])
                     sd_axis = None
                     for ax in self.reflection_plane_iterator():
-                        if np.abs(np.dot(ax, primary_axis)) < 1 - self.tol:  # not parallel
+                        if np.abs(np.dot(ax, primary_axis)) < 1 - 1e-2:  # not parallel
                             ax = np.cross(primary_axis, ax)
                         else:
                             ax = np.cross(np.cross(ax, primary_axis), primary_axis) # remove any tolerances

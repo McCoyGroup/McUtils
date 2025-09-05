@@ -268,12 +268,15 @@ class PointGroup(metaclass=abc.ABCMeta):
 
         return nput.view_matrix(primary_axis, secondary_axis, output_order=(0, 2, 1))
 
-    def get_axes(self, elements=None):
+    def get_axes(self, elements=None, base_axes=False):
         # could use point group identity for short circuiting, but don't want to
-
+        if base_axes:
+            elements = tuple(
+                SymmetryElement.from_transformation_matrix(x)
+                for x in self.character_table.matrices
+            )
         if elements is None:
             elements = self.elements
-
         return self.get_axes_from_symmetry_elements(elements)
         # tertiary_axis = nput.vec_crosses(primary_axis, secondary_axis, normalize=True)
         # secondary_axis = nput.vec_crosses(tertiary_axis, primary_axis, normalize=True)
@@ -285,6 +288,12 @@ class PointGroup(metaclass=abc.ABCMeta):
         if self._axes is None:
             self._axes = self.get_axes()
         return self._axes
+
+    @property
+    def base_axes(self):
+        if self._base_axes is None:
+            self._base_axes = self.get_axes(base_axes=True)
+        return self._base_axes
 
     def align(self, axes):
         tf = axes @ self.axes.T
@@ -298,14 +307,14 @@ class PointGroup(metaclass=abc.ABCMeta):
             elements=[e.transform(tf) for e in self.elements]
         )
 
-    def get_matrices(self):
-        mats = self.get_all_character_matrices()
+    def get_matrices(self, only_class_representatives=True):
+        if only_class_representatives:
+            mats = self.character_table.matrices
+        else:
+            mats = self.get_all_character_matrices()
         if self._axes is not None:
-            if self._base_axes is not None:
-                tf = self._axes @ self._base_axes.T
-            else:
-                tf = self._axes
-            mats = tf[np.newaxis] @ mats
+            tf = self._axes @ self.base_axes.T
+            mats = tf[np.newaxis] @ mats @ tf.T[np.newaxis]
         return mats
 
     def plot(self,
@@ -324,6 +333,8 @@ class PointGroup(metaclass=abc.ABCMeta):
 
         if elements is None:
             elements = self.elements
+        elif dev.str_is(elements, 'all'):
+            elements = self.get_symmetry_elements(only_class_representatives=False)
         if inversion_styles is None:
             inversion_styles = {}
         if rotation_styles is None:

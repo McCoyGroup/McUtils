@@ -2186,8 +2186,8 @@ class CharacterTable:
             col_weights = np.real(nput.vec_dots(self.table.T, np.conj(self.table.T)))
         else:
             col_weights = nput.vec_dots(self.table.T, self.table.T)
-        self.group_order = col_weights[0]
-        self.class_sizes = col_weights[0] // col_weights
+        self.group_order = int(col_weights[0])
+        self.class_sizes = (col_weights[0] // col_weights).astype(int)
         self.group_name = group_name
         self.class_names = class_names
         self.irrep_names = irrep_names

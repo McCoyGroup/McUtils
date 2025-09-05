@@ -369,7 +369,6 @@ class SymmetryTests(TestCase):
         a1_coeffs, a1_inv = expansions[0]
         int_vals, _ = base
         self.assertAlmostEquals(a1_coeffs[0][0], int_vals[0][0] * np.sqrt(3))
-        # print(coeffs[0])
         # print(a1_coeffs[0])
         # print(int_vals[0])
         # print(a1_coeffs[1].shape)
@@ -380,4 +379,6 @@ class SymmetryTests(TestCase):
                                                                         return_base_expansion=True,
                                                                         atom_selection=[1, 2, 3]
                                                                         )
+        # print("-"*100)
+        # print(coeffs[0])
 

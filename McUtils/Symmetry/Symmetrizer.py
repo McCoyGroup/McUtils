@@ -132,6 +132,7 @@ def symmetrized_coordinate_coefficients(point_group,
                                         return_basis=None,
                                         merge_equivalents=None,
                                         realign=True,
+                                        permutation_tol=1e-2,
                                         **pg_tols
                                         ):
 
@@ -146,7 +147,7 @@ def symmetrized_coordinate_coefficients(point_group,
             if hasattr(point_group, "character_table"):
                 if realign:
                     point_group = id.embed_point_group(point_group)
-                ops = point_group.get_matrices()
+                ops = point_group.get_matrices(only_class_representatives=False)
                 class_perm = np.concatenate(point_group.character_table.classes, axis=0)
             elif hasattr(point_group, 'get_full_matrices'):
                 ops = point_group.get_full_matrices()
@@ -168,7 +169,7 @@ def symmetrized_coordinate_coefficients(point_group,
 
         # TODO: find a cleaner way to do this...
         perms = np.array([
-            nput.symmetry_permutation(coords, m)
+            nput.symmetry_permutation(coords, m, tol=permutation_tol)
             for m in ops
         ])
 
@@ -199,7 +200,11 @@ def symmetrized_coordinate_coefficients(point_group,
         )[0]
 
     if as_characters:
-        full_modes = np.tensordot(point_group.extend_class_representation(point_group.table), full_modes, axes=[-1, -1])
+        ct = point_group
+        if hasattr(ct, "character_table"):
+            ct = point_group.character_table
+
+        full_modes = np.tensordot(ct.extend_class_representation(ct.table), full_modes, axes=[-1, -1])
         if normalize:
             full_modes = nput.vec_normalize(
                 full_modes.reshape(full_modes.shape[:2] + (-1,)),
@@ -208,7 +213,7 @@ def symmetrized_coordinate_coefficients(point_group,
 
         if equivalent_coords is not None:
             full_modes = full_modes.reshape(full_modes.shape[:2] + (-1,))
-            rep_dims = point_group.table[:, 0]
+            rep_dims = ct.table[:, 0].astype(int)
 
             new_modes = []
             for character_modes, character_dim in zip(full_modes, rep_dims):
@@ -314,13 +319,15 @@ def symmetrize_internals(point_group,
                          internals,
                          cartesians=None,
                          *,
+                         masses=None,
                          as_characters=True,
                          normalize=None,
                          perms=None,
                          return_expansions=False,
                          return_base_expansion=False,
                          ops=None,
-                         atom_selection=None
+                         atom_selection=None,
+                         **etc
                          ):
     if cartesians is not None:
         cartesians = np.asanyarray(cartesians)
@@ -348,6 +355,7 @@ def symmetrize_internals(point_group,
         normalize = return_expansions
 
     base_carts = cartesians
+    base_masses = masses
     if atom_selection is not None and cartesians is not None:
         internal_reindexing = np.argsort(np.concatenate([
             atom_selection,
@@ -355,6 +363,8 @@ def symmetrize_internals(point_group,
         ]))
         cartesians = cartesians[atom_selection,]
         internals = coordops.permute_internals(internals, internal_reindexing)
+        if masses is not None:
+            masses = np.asanyarray(masses)[atom_selection,]
     else:
         internal_reindexing = None
 
@@ -363,11 +373,13 @@ def symmetrize_internals(point_group,
     coeffs, full_basis = symmetrized_coordinate_coefficients(
         point_group,
         cartesians,
+        masses=masses,
         permutation_basis=symm,
         as_characters=as_characters,
         normalize=normalize,
         perms=perms,
-        ops=ops
+        ops=ops,
+        **etc
     )
 
     if internal_reindexing is not None:
@@ -377,31 +389,65 @@ def symmetrize_internals(point_group,
     res = (coeffs, full_basis)
     if return_expansions:
         if return_expansions is True: return_expansions = 1
-        exp, inv = nput.internal_coordinate_tensors(base_carts, full_basis,
-                                                    return_inverse=True,
-                                                    order=return_expansions
-                                                    )
+        normalized_coefficients = normalize is not False and (as_characters or normalize)
+        expansions = symmetrized_internal_coordinate_expansions(
+            coeffs,
+            base_carts,
+            full_basis,
+            order=return_expansions,
+            masses=base_masses,
+            normalized_coefficients=normalized_coefficients,
+            return_base_expansion=return_base_expansion,
+            return_inverse=True
+        )
 
+        if return_base_expansion:
+            res = res + expansions
+        else:
+            res = res + (expansions,)
+
+    return res
+
+def symmetrized_internal_coordinate_expansions(coeffs, cartesians, full_basis,
+                                               order=1,
+                                               masses=None,
+                                               return_inverse=False,
+                                               normalized_coefficients=True,
+                                               return_base_expansion=False,
+                                               ):
+
+    exps = nput.internal_coordinate_tensors(cartesians, full_basis,
+                                                return_inverse=return_inverse,
+                                                masses=masses,
+                                                order=order
+                                                )
+
+    if return_inverse:
+        exp, inv = exps
         coeff_inv = [
             c.T
-                if (normalize is not False and (as_characters or normalize)) else
+                if normalized_coefficients else
             np.linalg.pinv(c)
             for c in coeffs
         ]
-
         expansions = [
             (
                 [np.dot(exp[0], c)] + nput.tensor_reexpand(exp[1:], [c]),
                 nput.tensor_reexpand([ci], inv)
             )
-            for c,ci in zip(coeffs, coeff_inv)
+            for c, ci in zip(coeffs, coeff_inv)
+        ]
+    else:
+        exp = exps
+        expansions = [
+            [np.dot(exp[0], c)] + nput.tensor_reexpand(exp[1:], [c])
+            for c in coeffs
         ]
 
-        res = res + (expansions,)
-        if return_base_expansion:
-            res = res + ((exp, inv),)
-
-    return res
+    if return_base_expansion:
+        return expansions, exps
+    else:
+        return expansions
 
     # return symm_coeffs, storage[1]
 
