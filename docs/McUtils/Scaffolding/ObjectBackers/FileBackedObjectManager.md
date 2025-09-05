@@ -20,7 +20,7 @@ a serializer
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
-default_directory: PersistenceLocation
+default_directory: NoneType
 ```
 <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
@@ -41,14 +41,25 @@ __init__(self, obj, chk=None, loc=None, checkpoint_class=<class 'McUtils.Scaffol
     > a subclass of Checkpointer that implements the actual writing to disk
 
 
+<a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.get_default_directory" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+get_default_directory(cls): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L108)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L108?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.basename" class="docs-object-method">&nbsp;</a> 
 ```python
 @property
 basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L114?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +68,8 @@ basename(self):
 get_basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L123?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +78,8 @@ get_basename(self):
 save_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L130?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +88,8 @@ save_attr(self, attr):
 load_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L135?message=Update%20Docs)]
 </div>
  </div>
 </div>

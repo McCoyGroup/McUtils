@@ -1,11 +1,11 @@
 # <a id="McUtils.Coordinerds.ZMatrices.functionalized_zmatrix">functionalized_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L587)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L587?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L589)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L589?message=Update%20Docs)]
 </div>
 
 ```python
-functionalized_zmatrix(base_zm, attachments: dict = None, single_atoms: list[int] = None, methyl_positions: list[int] = None, ethyl_positions: list[int] = None): 
+functionalized_zmatrix(base_zm, attachments: 'dict|list[list[int], list[int]]' = None, single_atoms: list[int] = None, methyl_positions: list[int] = None, ethyl_positions: list[int] = None): 
 ```
 
 
@@ -59,7 +59,7 @@ functionalized_zmatrix(base_zm, attachments: dict = None, single_atoms: list[int
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/functionalized_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/functionalized_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L587?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L589?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.TransformationMatrices.symmetry_permutation">symmetry_permutation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L626)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L626?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L682)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L682?message=Update%20Docs)]
 </div>
 
 ```python
-symmetry_permutation(coords, op: numpy.ndarray, return_row_ordering=False): 
+symmetry_permutation(coords, op: numpy.ndarray, return_row_ordering=False, tol=None): 
 ```
 
 
@@ -59,7 +59,7 @@ symmetry_permutation(coords, op: numpy.ndarray, return_row_ordering=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/symmetry_permutation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/symmetry_permutation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L626?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L682?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
