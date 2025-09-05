@@ -58,7 +58,7 @@ charges(self):
 <a id="McUtils.ExternalPrograms.ASE.ASEMolecule.from_coords" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-from_coords(cls, atoms, coords, charge=None, calculator=None, **etc): 
+from_coords(cls, atoms, coords, charge=None, spin=None, info=None, calculator=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L30)/
@@ -72,8 +72,18 @@ from_coords(cls, atoms, coords, charge=None, calculator=None, **etc):
 from_mol(cls, mol, coord_unit='Angstroms', calculator=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L53)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L53?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.ASE.ASEMolecule.calculate_props" class="docs-object-method">&nbsp;</a> 
+```python
+calculate_props(self, props, geoms=None, calc=None, extra_calcs=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L91?message=Update%20Docs)]
 </div>
 
 
@@ -82,8 +92,8 @@ from_mol(cls, mol, coord_unit='Angstroms', calculator=None):
 calculate_energy(self, geoms=None, order=None, calc=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L144)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L144?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +102,8 @@ calculate_energy(self, geoms=None, order=None, calc=None):
 optimize_structure(self, geoms=None, calc=None, quiet=True, logfile=None, fmax=None, steps=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L174)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE/ASEMolecule.py#L174?message=Update%20Docs)]
 </div>
  </div>
 </div>
