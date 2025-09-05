@@ -343,9 +343,16 @@ class RDMolecule(ExternalMolecule):
                 conf_id = mol.mol.GetId()
             mol = mol.rdmol
         else:
-            mol = conf.GetOwningMol()
+            if mol is None:
+                mol = conf.GetOwningMol()
             if conf_id is None:
                 conf_id = conf.GetId()
+            if np.sum(np.abs(conf.GetPositions() - mol.GetConformer(conf_id).GetPositions())) > 1e-6:
+                print(mol)
+                print(self.rdmol)
+                raise ValueError(
+                    conf, mol.GetConformer(conf_id)
+                )
 
         force_field_type = self.get_force_field_type(force_field_type)
         if isinstance(force_field_type, (list, tuple)):
@@ -376,7 +383,10 @@ class RDMolecule(ExternalMolecule):
 
     def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
         Chem = self.chem_api()
-        conf = Chem.Conformer(self.mol)
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        mol = Chem.Mol(self.rdmol, confId=conf_id)
+        conf = mol.GetConformer(0)
 
         if force_field_generator is None:
             force_field_generator = self.get_force_field
@@ -388,11 +398,11 @@ class RDMolecule(ExternalMolecule):
             vals = np.empty(len(geoms), dtype=float)
             try:
                 for i,g in enumerate(geoms):
-                    self.mol.SetPositions(g.copy())
-                    ff = force_field_generator(force_field_type, conf=conf)
+                    conf.SetPositions(g.copy())
+                    ff = force_field_generator(force_field_type, conf=conf, mol=mol)
                     vals[i] = ff.CalcEnergy()
             finally:
-                self.mol.SetPositions(cur_geom)
+                conf.SetPositions(cur_geom)
             return vals.reshape(base_shape)
         else:
             ff = force_field_generator(force_field_type, conf_id=conf_id)
@@ -403,9 +413,10 @@ class RDMolecule(ExternalMolecule):
             force_field_generator = self.get_force_field
 
         Chem = self.chem_api()
-        conf = Chem.Conformer(self.mol)
-        mol = conf.GetOwningMol()
-        Chem.AddHs(mol)
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        mol = Chem.Mol(self.rdmol, confId=conf_id)
+        conf = mol.GetConformer(0)
 
         cur_geom = np.array(conf.GetPositions()).reshape(-1, 3)
         if geoms is not None:
@@ -415,14 +426,15 @@ class RDMolecule(ExternalMolecule):
             vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
             try:
                 for i, g in enumerate(geoms):
-                    conf.SetPositions(g.copy())
-                    ff = force_field_generator(force_field_type, conf=conf)
+                    new_geom = g.copy().view(np.ndarray)
+                    conf.SetPositions(new_geom)
+                    ff = force_field_generator(force_field_type, conf=conf, mol=mol)
                     vals[i] = ff.CalcGrad()
             finally:
                 conf.SetPositions(cur_geom)
             return vals.reshape(base_shape + (-1,))
         else:
-            ff = force_field_generator(force_field_type, conf_id=conf_id)
+            ff = force_field_generator(force_field_type, conf_id=conf_id, conf=conf, mol=mol)
             return np.array(ff.CalcGrad()).reshape(-1)
 
     def calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=.01, **fd_opts):

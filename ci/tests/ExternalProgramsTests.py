@@ -8,13 +8,14 @@ class ExternalProgramsTest(TestCase):
 
     # other format tests are covered in Psience.Molecools, don't really need here
     # api work is covered in Psience.PotentialRegistry
-    @validationTest
+    @debugTest
     def test_CIFFiles(self):
         print()
         with CIFParser(TestManager.test_data('samp.cif'), ignore_comments=True) as cif:
             structs = cif.parse()
             struct = next(iter(structs[0].values()))
             res = CIFConverter(struct)#.find_all('cell_*', strict=False)
+            pprint.pp(res.atom_properties)
             pprint.pp(res.cell_properties)
             # print(cif.parse())
 
@@ -36,7 +37,7 @@ class ExternalProgramsTest(TestCase):
         with GaussianLogReader(TestManager.test_data('methanol_vpt_scan.log')) as parser:
             res = parser.parse(['SCFCoordinatesEnergies'])['SCFCoordinatesEnergies']
 
-    @debugTest
+    @validationTest
     def test_ParseReports(self):
         with GaussianLogReader(TestManager.test_data('molec1_tdcis_b3lyp.log')) as parser:
             parse = parser.parse(['Reports', 'ExcitedStates'])

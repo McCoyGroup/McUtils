@@ -20,6 +20,8 @@ __all__ = [
     "format_zmatrix_string",
     "validate_zmatrix",
     "chain_zmatrix",
+    "center_bound_zmatrix",
+    "spoke_zmatrix",
     # "methyl_zmatrix",
     # "ethyl_zmatrix",
     "attached_zmatrix_fragment",
@@ -586,7 +588,7 @@ def set_zmatrix_embedding(zmat, embedding=None):
 
 def functionalized_zmatrix(
         base_zm,
-        attachments:dict=None,
+        attachments:'dict|list[list[int], list[int]]'=None,
         single_atoms:list[int]=None, # individual components, embedding doesn't matter
         methyl_positions:list[int]=None, # all bonds attached to central atom, angles relative to eachother
         ethyl_positions:list[int]=None, # all bonds attached to central atom, angles relative to eachother
@@ -597,8 +599,11 @@ def functionalized_zmatrix(
         zm = [
             list(x) for x in base_zm
         ]
-    if attachments is None: attachments = {}
-    for attachment_points, fragment in attachments.items():
+    if attachments is None:
+        attachments = {}
+    if hasattr(attachments, 'items'):
+        attachments = attachments.items()
+    for attachment_points, fragment in attachments:
         if nput.is_numeric(fragment):
             fragment = chain_zmatrix(fragment)
         zm = zm + attached_zmatrix_fragment(
@@ -644,6 +649,70 @@ def functionalized_zmatrix(
                 ]
             )
     return zm
+
+
+def spoke_zmatrix(m, spoke=1, root=1):
+    if nput.is_int(spoke):
+        spoke = chain_zmatrix(spoke)
+
+    if nput.is_int(root):
+        root = chain_zmatrix(root)
+
+    nroot = len(root) - 1
+    if len(root) < 3:
+        nrem = (3 - len(root))
+        # no need for any moduli or floors, we just know
+        if len(spoke) == 1:
+            nspoke = nrem
+        else:
+            nspoke = 1
+
+        for i in range(nspoke):
+            if len(root) > 1:
+                mroot = nroot + 1
+            else:
+                mroot = -1
+
+            if len(root) > 2:
+                proot = nroot + 2
+            elif len(root) > 1:
+                proot = nroot - 1
+            else:
+                proot = nroot - 2
+            root = functionalized_zmatrix(
+                root,
+                [
+                    [_attachment_point([
+                        nroot,
+                        mroot,
+                        proot
+                    ]), spoke]
+                ]
+            )
+        if nspoke == 1:
+            if nrem == 1:
+                a = nroot - 1
+                b = nroot + 1
+            else:
+                a = nroot + 1
+                b = nroot + 2
+        else:
+            a = nroot + 1
+            b = nroot + 2
+        m = m - nspoke
+    else:
+        a = nroot - 1
+        b = nroot - 2
+
+
+
+    return functionalized_zmatrix(
+        root,
+        [
+            [_attachment_point([nroot, a, b]), spoke]
+            for _ in range(m)
+        ]
+    )
 
 
 def reindex_zmatrix(zm, perm):
@@ -842,11 +911,13 @@ def bond_graph_zmatrix(
 
 def sort_complex_attachment_points(
         fragment_inds,
-        attachment_points: dict
+        attachment_points: 'dict|tuple[tuple[int], list[list[int]]]'
 ):
     new_attachments = [None] * len(fragment_inds)
     fragment_inds = list(fragment_inds)
-    for start, end in attachment_points.items():
+    if hasattr(attachment_points, 'items'):
+        attachment_points = attachment_points.items()
+    for start, end in attachment_points:
         if nput.is_int(start):
             start = [start]
         if nput.is_int(end):

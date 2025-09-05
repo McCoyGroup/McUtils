@@ -742,7 +742,8 @@ class DerivativeGenerator:
                 for which, o in enumerate(order):
                     pos = [
                         slice(None, None, None)
-                            if a is None else a
+                            if a is None else
+                        a
                         for a in pos
                     ]
                     if coordinates is None:

@@ -206,6 +206,7 @@ def iterative_step_minimize(
         tol=1e-8,
         use_max_for_error=True,
         max_iterations=100,
+        convergence_metric=None,
         track_best=False,
         logger=None
 ):

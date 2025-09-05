@@ -77,7 +77,7 @@ class FileBackedObjectManager(BaseObjectManager):
     a serializer
     """
 
-    default_directory=PersistenceLocation("file_backed_objects")
+    default_directory = None
     def __init__(self,
                  obj,
                  chk=None,
@@ -97,13 +97,19 @@ class FileBackedObjectManager(BaseObjectManager):
         super().__init__(obj)
         if chk is None:
             if loc is None:
-                loc = self.default_directory.loc
+                loc = self.get_default_directory().loc
             obj_file = os.path.join(loc, self.basename+checkpoint_class.default_extension)
             chk = checkpoint_class(obj_file)
 
         self.chk = chk
         self._id = None
         self._cache = {}
+
+    @classmethod
+    def get_default_directory(cls):
+        if cls.default_directory is None:
+            cls.default_directory = PersistenceLocation("file_backed_objects")
+        return cls.default_directory
 
     @property
     def basename(self):

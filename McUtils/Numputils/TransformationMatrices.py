@@ -25,6 +25,7 @@ __all__ = [
     "extract_rotation_angle_axis",
     "extract_reflection_axis",
     "view_matrix",
+    "find_coordinate_matching_permutation",
     "symmetry_permutation",
     "apply_symmetries",
     "symmetry_reduce",
@@ -623,18 +624,12 @@ def permutation_matrix(perm):
 
     return mats
 
-def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
-    # converts a symmetry operation into a permutation of the coords
-    coords = np.asanyarray(coords)
-    op = np.asanyarray(op)
-
+def find_coordinate_matching_permutation(coords, new_coords, return_row_ordering=False, tol=None):
     base_shape = coords.shape[:-2]
     coords = coords.reshape((-1,) + coords.shape[-2:])
-    op = op.reshape((-1,) + op.shape[-2:])
-    new_coords = coords @ op
+    new_coords = new_coords.reshape((-1,) + new_coords.shape[-2:])
     dm = np.linalg.norm(coords[:, :, np.newaxis] - new_coords[:, np.newaxis, :], axis=-1)
     # quick_test = np.where(dm < 1e-2)
-
     # iteratively find best matches and map them onto each other
     perm_rows = np.repeat(np.arange(coords.shape[1])[np.newaxis], coords.shape[0], axis=0)
     perm_cols = np.repeat(np.arange(coords.shape[1])[np.newaxis], coords.shape[0], axis=0)
@@ -652,6 +647,10 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         min_pos = np.argmin(dm, axis=-1) # min across columns
         min_vals = dm[a1, sel, min_pos]
         ord = np.argsort(min_vals, axis=-1) # min across rows
+        if tol is not None:
+            max_min = np.max(min_vals)
+            if max_min > tol:
+                raise ValueError(f"maximum minimum deviation too large {max_min} > {tol}")
         # ord = np.argsort(ord, axis=-1)
         # assign row permutation
         perm_next = perm_rows[:, i:][a1[:, np.newaxis], ord[:, 0]]
@@ -679,6 +678,26 @@ def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False):
         row_sort = np.argsort(perm_rows, axis=1)
         perms = perm_cols[a1, row_sort].reshape(base_shape + perm_cols.shape[1:])
         return perms
+
+def symmetry_permutation(coords, op:np.ndarray, return_row_ordering=False, tol=None):
+    # converts a symmetry operation into a permutation of the coords
+    coords = np.asanyarray(coords)
+    op = np.asanyarray(op)
+
+    base_shape = coords.shape[:-2]
+    coords = coords.reshape((-1,) + coords.shape[-2:])
+    op = op.reshape((-1,) + op.shape[-2:])
+    new_coords = coords @ op
+
+    perm_data = find_coordinate_matching_permutation(coords, new_coords,
+                                                     return_row_ordering=return_row_ordering, tol=tol
+                                                     )
+
+    if return_row_ordering:
+        perm_rows, perm_cols = perm_data
+        return perm_rows.reshape(base_shape + perm_rows.shape[-1:]), perm_cols.reshape(base_shape + perm_cols.shape[-1:])
+    else:
+        return perm_data.reshape(base_shape + perm_data.shape[-1:])
 
 def apply_symmetries(coords, symmetry_elements: 'list[np.ndarray]', labels=None, tol=1e-1):
     coords = np.asanyarray(coords)
@@ -759,7 +778,7 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
 
         types = np.zeros(x.shape[0], dtype=int)
         axes = np.zeros((x.shape[0], 3))
-        orders = np.full(x.shape[0], -1, dtype=float)
+        orders = np.full(x.shape[0], -1, dtype=int)
         roots = np.full(x.shape[0], -1, dtype=float)
 
         rem_pos = np.arange(x.shape[0])
@@ -793,8 +812,8 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
 
             rationals = ang / (2 * np.pi)
             if max_rotation_order is None:
-                roots[rot_sel,] = 1
-                orders[rot_sel,] = 1 / rationals
+                roots[rot_sel,] = rationals
+                orders[rot_sel,] = 1
             else:
                 for rational, i in zip(rationals, rot_sel):
                     for o in range(1, max_rotation_order + 1):
@@ -832,8 +851,8 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
 
             rationals = ang / (2 * np.pi)
             if max_rotation_order is None:
-                roots[rem_pos,] = 1
-                orders[rem_pos,] = 1 / rationals
+                roots[rem_pos,] = rationals
+                orders[rem_pos,] = 1
             else:
                 for rational, i in zip(rationals, rem_pos):
                     for o in range(1, max_rotation_order + 1):
@@ -848,6 +867,12 @@ def identify_cartesian_transformation_type(x, max_rotation_order=None):
                             f"angle ratio {ang} doesn't correspond to a rational number up to order {max_rotation_order} rotations"
                         )
 
+        if scalings is not None:
+            scalings.reshape(base_shape + scalings.shape[-2:])
+        types = types.reshape(base_shape)
+        axes = axes.reshape(base_shape + axes.shape[-1:])
+        roots = roots.reshape(base_shape)
+        orders = orders.reshape(base_shape)
         return scalings, types, axes, roots, orders
 
 def cartesian_transformation_from_data(scalings, types, axes, roots, orders):

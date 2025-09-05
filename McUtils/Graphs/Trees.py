@@ -4,7 +4,7 @@ import pprint, collections, enum
 from .. import Devutils as dev
 from .. import Numputils as nput
 
-__all__ = ["TreeWrapper", "tree_traversal"]
+__all__ = ["TreeWrapper", "tree_traversal", "tree_iter", "TreeSentinels"]
 
 class TreeTraversalOrder(enum.Enum):
     BreadthFirst = 'bfs'
@@ -14,6 +14,10 @@ class TreeCallOrder(enum.Enum):
     PreVisit = "pre"
     PostVisit = "post"
     PostChildren = "final"
+
+class TreeSentinels(enum.Enum):
+    Stop = "stop"
+    Skip = "skip"
 
 def _get_tree_children(tree):
     if hasattr(tree, 'keys'):
@@ -92,6 +96,64 @@ def tree_traversal(tree, callback,
             res = callback(parent, head, visited)
             if res is not None:
                 return res
+
+def tree_iter(tree,
+              root=None,
+              get_item=None,
+              get_children=None,
+              visited: set=None,
+              check_visited=None,
+              traversal_ordering='bfs'
+              ):
+    if get_children is None and get_item is None:
+        get_children, get_item = _get_tree_children, _get_tree_item
+    elif get_children is not None and get_item is None:
+        raise ValueError("`get_children` must be implemented if `get_item` is provided")
+    elif get_children is None and get_item is not None:
+        raise ValueError("`get_item` must be implemented if `get_children` is provided")
+
+    if root is dev.default:
+        root = get_children(tree)[0]
+    if root in visited:
+        return
+
+    if check_visited is None:
+        check_visited = visited is not None
+    if check_visited and visited is None:
+        visited = set()
+
+    queue = collections.deque([[None, root]])
+    if isinstance(traversal_ordering, str):
+        traversal_ordering = TreeTraversalOrder(traversal_ordering)
+    if traversal_ordering is traversal_ordering.BreadthFirst:
+        pop = queue.popleft
+        extend = queue.extend
+    else:
+        pop = queue.popleft
+        extend = queue.extendleft
+
+    while queue:
+        parent, head = pop()
+        res = yield parent
+        if res is TreeSentinels.Skip:
+            continue
+        elif res is TreeSentinels.Stop:
+            break
+
+        if check_visited:
+            visited.add(head)
+
+        if check_visited:
+            extend(
+                [head, get_item(head, h)]
+                for h in get_children(head)
+                if h not in visited
+            )
+        else:
+            extend(
+                [head, get_item(head, h)]
+                for h in get_children(head)
+            )
 
 class TreeWrapper:
     def __init__(self, tree):
