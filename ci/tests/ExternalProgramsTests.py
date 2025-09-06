@@ -8,7 +8,7 @@ class ExternalProgramsTest(TestCase):
 
     # other format tests are covered in Psience.Molecools, don't really need here
     # api work is covered in Psience.PotentialRegistry
-    @debugTest
+    @validationTest
     def test_CIFFiles(self):
         print()
         with CIFParser(TestManager.test_data('samp.cif'), ignore_comments=True) as cif:
@@ -105,3 +105,30 @@ class ExternalProgramsTest(TestCase):
                 cartesians=mol.coords * UnitsData.convert("BohrRadius", "Angstroms")
             ).format()
         )
+
+    class BoringEvaluators(EvaluationHandler):
+        def add_vals(cls, coords, **kwargs):
+            return np.sum(coords, axis=0)
+        def get_evaluators(self) -> 'dict[str,method]':
+            return {
+                "add":self.add_vals
+            }
+
+
+    @debugTest
+    def test_EvaluationServer(self):
+        connection = ('localhost', 12345)
+        # with GitHandler.start_multiprocessing_server(connection=connection, timeout=2):
+        #     client = NodeCommClient(connection)
+        #     res = client.call('pwd')
+        #     client.print_response(res)
+        #     res = client.call('git', 'status')
+        #     client.print_response(res)
+
+        with self.BoringEvaluators.start_multiprocessing_server(connection=connection, timeout=2):
+            client = EvaluationClient(connection)
+            res = client.call('add', np.array([[1, 2], [3, 4]]))
+            if isinstance(res, dict):
+               client.print_response(res)
+            else:
+                pprint.pprint(res)

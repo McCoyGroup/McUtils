@@ -89,10 +89,11 @@ class ASEMolecule(ExternalMolecule):
     #     else:
     #         return self.load_class()(self.calc.base_calc)
     def calculate_props(self, props, geoms=None, calc=None, extra_calcs=None):
+        from ase.calculators.calculator import all_changes
         if calc is None:
             calc = self.mol.calc
         if geoms is None:
-            calc.calculate(self.mol, props)
+            calc.calculate(self.mol, properties=props, system_changes=all_changes)
             base = {
                 k:calc.results[k]
                 for k in props
@@ -111,7 +112,7 @@ class ASEMolecule(ExternalMolecule):
             try:
                 for i, g in enumerate(geoms):
                     self.mol.positions = g
-                    calc.calculate(self.mol, props)
+                    calc.calculate(self.mol, properties=props, system_changes=all_changes)
                     for k in props:
                         res = calc.results[k]
                         if k not in prop_arrays:
