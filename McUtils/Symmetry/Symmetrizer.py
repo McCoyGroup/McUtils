@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 from .. import Numputils as nput
 from .. import Coordinerds as coordops
+from .. import Iterators as itut
 from .Elements import *
 from .PointGroups import PointGroup
 from .SymmetryIdentifier import PointGroupIdentifier
@@ -131,6 +132,7 @@ def symmetrized_coordinate_coefficients(point_group,
                                         ops=None,
                                         return_basis=None,
                                         merge_equivalents=None,
+                                        drop_empty_modes=None,
                                         realign=True,
                                         permutation_tol=1e-2,
                                         **pg_tols
@@ -158,8 +160,8 @@ def symmetrized_coordinate_coefficients(point_group,
                     ]
                     axes = id.find_point_group_alignment_axes(elems)
                     base_axes = PointGroup.get_axes_from_symmetry_elements(elems)
-                    tf = axes @ base_axes.T
-                    ops = tf[np.newaxis] @ ops
+                    tf = axes.T @ base_axes
+                    ops = tf[np.newaxis] @ ops @ tf.T[np.newaxis]
                 class_perm = np.concatenate(point_group.classes, axis=0)
             else:
                 ops = point_group
@@ -211,6 +213,9 @@ def symmetrized_coordinate_coefficients(point_group,
                 axis=-1
             ).reshape(full_modes.shape)
 
+        if drop_empty_modes is None:
+            drop_empty_modes = normalize
+
         if equivalent_coords is not None:
             full_modes = full_modes.reshape(full_modes.shape[:2] + (-1,))
             rep_dims = ct.table[:, 0].astype(int)
@@ -220,6 +225,13 @@ def symmetrized_coordinate_coefficients(point_group,
                 comp_bits = [x for c in equivalent_coords for x in c[:character_dim]]
                 new_modes.append(character_modes[:, comp_bits])
             full_modes = new_modes
+
+        if drop_empty_modes:
+            where_pos = lambda m:np.where(np.linalg.norm(m, axis=0) > 1e-12)[0]
+            full_modes = [
+                modes[:, where_pos(modes)]
+                for modes in full_modes
+            ]
     else:
         full_modes = np.moveaxis(full_modes, -1, 0)
         if normalize:
@@ -228,10 +240,20 @@ def symmetrized_coordinate_coefficients(point_group,
                 axis=-1
             ).reshape(full_modes.shape)
 
+        if drop_empty_modes is None:
+            drop_empty_modes = normalize
+
         if equivalent_coords is not None:
             comp_bits = [c[0] for c in equivalent_coords]
             full_modes = full_modes.reshape((full_modes.shape[0], full_modes.shape[-1], -1))
             full_modes = full_modes[:, :, comp_bits]
+
+        if drop_empty_modes:
+            where_pos = lambda modes:np.where(np.linalg.norm(modes, axis=0) > 1e-12)[0]
+            full_modes = [
+                modes[:, where_pos(modes)]
+                for modes in full_modes
+            ]
 
     if return_basis is None:
         return_basis = full_basis is not None
@@ -327,6 +349,7 @@ def symmetrize_internals(point_group,
                          return_base_expansion=False,
                          ops=None,
                          atom_selection=None,
+                         reduce_redundant_coordinates=None,
                          **etc
                          ):
     if cartesians is not None:
@@ -348,11 +371,16 @@ def symmetrize_internals(point_group,
     if perms is None and cartesians is None:
         raise ValueError("either Cartesians or explicit set of atom permutations required")
 
-    if return_expansions and cartesians is None:
-        raise ValueError("Cartesians are required to return coordinate expansions")
-
     if normalize is None:
         normalize = return_expansions
+
+    if reduce_redundant_coordinates is None:
+        reduce_redundant_coordinates = return_expansions and normalize
+
+    if return_expansions and cartesians is None:
+        raise ValueError("Cartesians are required to return coordinate expansions")
+    if reduce_redundant_coordinates and not return_expansions:
+        raise ValueError("Expansions are required to generate redundant coordinates")
 
     base_carts = cartesians
     base_masses = masses
@@ -401,10 +429,27 @@ def symmetrize_internals(point_group,
             return_inverse=True
         )
 
-        if return_base_expansion:
-            res = res + expansions
-        else:
-            res = res + (expansions,)
+        if reduce_redundant_coordinates:
+            if return_base_expansion:
+                expansions, base_expansions = expansions
+            else:
+                base_expansions = None
+            all_exps = [e[0] for e in expansions]
+            all_tfs = [np.concatenate(e, axis=-1) for e in itut.transpose(all_exps)]
+            all_inv = [np.concatenate(e, axis=0) for e in itut.transpose([e[1] for e in expansions])]
+            # all_coeffs = np.concatenate(coeffs, axis=-1)
+            red_exps = coordops.RedundantCoordinateGenerator.get_redundant_transformation(
+                (all_tfs[1:], all_inv),
+                masses=base_masses,
+                relocalize=True
+            )
+            expansions = (red_exps, expansions)
+            if base_expansions is not None:
+                expansions = expansions + (base_expansions,)
+        elif not return_base_expansion:
+            expansions = (expansions,)
+
+        res = res + expansions
 
     return res
 

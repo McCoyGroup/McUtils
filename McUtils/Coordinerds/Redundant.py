@@ -151,6 +151,14 @@ class RedundantCoordinateGenerator:
                                      relocalize=False):
         if isinstance(base_expansions, np.ndarray) and base_expansions.ndim == 2:
             base_expansions = [base_expansions]
+            base_inv = None
+        elif (
+                len(base_expansions) == 2
+                and not nput.is_numeric_array_like(base_expansions[0], ndim=2)
+        ):
+            base_expansions, base_inv = base_expansions
+        else:
+            base_inv = None
         redund_tf = cls.base_redundant_transformation(base_expansions,
                                                       untransformed_coordinates=untransformed_coordinates,
                                                       masses=masses,
@@ -160,11 +168,20 @@ class RedundantCoordinateGenerator:
         # dQ/dR, which we can transform with dR/dX to get dQ/dX
         if isinstance(redund_tf, np.ndarray):
             redund_expansions = nput.tensor_reexpand(base_expansions, [redund_tf], order=len(base_expansions))
+            if base_inv is not None:
+                redund_inv = nput.tensor_reexpand([redund_tf.T], base_inv, order=len(base_inv))
+                redund_expansions = (redund_expansions, redund_inv)
         else:
             redund_expansions = [
                 nput.tensor_reexpand(base_expansions, [tf], order=len(base_expansions))
                 for tf in redund_tf
             ]
+            if base_inv is not None:
+                redund_inv = [
+                    nput.tensor_reexpand([tf.T], base_inv, order=len(base_inv))
+                    for tf in redund_tf
+                ]
+                redund_expansions = (redund_expansions, redund_inv)
 
         return redund_tf, redund_expansions
 

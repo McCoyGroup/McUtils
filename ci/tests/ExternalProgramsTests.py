@@ -115,15 +115,15 @@ class ExternalProgramsTest(TestCase):
             }
 
 
-    @debugTest
+    @validationTest
     def test_EvaluationServer(self):
         connection = ('localhost', 12345)
-        # with GitHandler.start_multiprocessing_server(connection=connection, timeout=2):
-        #     client = NodeCommClient(connection)
-        #     res = client.call('pwd')
-        #     client.print_response(res)
-        #     res = client.call('git', 'status')
-        #     client.print_response(res)
+        with GitHandler.start_multiprocessing_server(connection=connection, timeout=2):
+            client = NodeCommClient(connection)
+            res = client.call('pwd')
+            client.print_response(res)
+            res = client.call('git', 'status')
+            client.print_response(res)
 
         with self.BoringEvaluators.start_multiprocessing_server(connection=connection, timeout=2):
             client = EvaluationClient(connection)
