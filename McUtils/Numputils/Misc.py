@@ -37,9 +37,12 @@ def is_int(obj, types=None):
 def is_zero(obj, numeric_types=None):
     return is_numeric(obj, types=numeric_types) and obj == 0
 
-def is_array_like(obj, valid_dtypes=None):
+def is_array_like(obj, valid_dtypes=None, ndim=None):
     if isinstance(obj, np.ndarray):
-        return True
+        if ndim is None:
+            return True
+        else:
+            return obj.ndim == ndim
     elif is_atomic(obj):
         return False
     else:
@@ -48,12 +51,19 @@ def is_array_like(obj, valid_dtypes=None):
         except ValueError:
             return False
         else:
-            if valid_dtypes is not None:
-                return any(np.issubdtype(arr.dtype, dt) for dt in valid_dtypes)
+            if (
+                    valid_dtypes is not None
+                    and not any(np.issubdtype(arr.dtype, dt) for dt in valid_dtypes)
+            ):
+                return False
+            elif arr.dtype == np.dtype(object):
+                return False
+            elif ndim is None:
+                return True
             else:
-                return arr.dtype != np.dtype(object)
-def is_numeric_array_like(obj):
-    return is_array_like(obj, [np.number])
+                return arr.ndim == ndim
+def is_numeric_array_like(obj, ndim=None):
+    return is_array_like(obj, [np.number], ndim=ndim)
 
 def downcast_index_array(a, max_val):
     return a.astype(infer_inds_dtype(max_val))

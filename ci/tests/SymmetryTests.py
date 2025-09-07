@@ -341,8 +341,11 @@ class SymmetryTests(TestCase):
             ],
             axis=0
         )
+        # print(p.matrices)
+        # print(coords)
 
-        symm_modes = symmetrized_coordinate_coefficients(p, coords)#, as_characters=True, normalize=False)
+
+        symm_modes = symmetrized_coordinate_coefficients(p, coords, drop_empty_modes=False)#, as_characters=True, normalize=False)
         # print(np.round(symm_modes[2], 8))
         self.assertEquals(
             [s.shape for s in symm_modes],
@@ -358,9 +361,10 @@ class SymmetryTests(TestCase):
 
         # internals = [(0, 1)]
 
-        coeffs, full_internals, expansions, base = symmetrize_internals(p, internals, coords,
-                                                                        return_expansions=True,
-                                                                        return_base_expansion=True)
+        coeffs, full_internals, red_exps, expansions, base = symmetrize_internals(p, internals, coords,
+                                                                                 return_expansions=True,
+                                                                                 return_base_expansion=True,
+                                                                                 reduce_redundant_coordinates=True)
         self.assertEquals(len(full_internals), 9)
         self.assertEquals(
             [s.shape for s in coeffs],
@@ -372,6 +376,7 @@ class SymmetryTests(TestCase):
         # print(a1_coeffs[0])
         # print(int_vals[0])
         # print(a1_coeffs[1].shape)
+        print(red_exps[1].shape)
 
 
         coeffs, full_internals, expansions, base = symmetrize_internals(p, internals, coords,
