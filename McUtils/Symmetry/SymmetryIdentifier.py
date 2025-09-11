@@ -612,7 +612,6 @@ class PointGroupIdentifier:
                     if np.abs(np.dot(ax, primary_axis)) < 1e-2: # has to be perp
                         elem = RotationElement(2, ax)
                         if self.check_element(elem, verbose=False):
-                            print(ax, primary_axis)
                             ax = np.cross(np.cross(ax, primary_axis), primary_axis) # remove any tolerances
                             c2_axis = ax
                             elements.append(elem)

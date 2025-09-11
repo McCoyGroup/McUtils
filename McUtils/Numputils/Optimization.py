@@ -807,6 +807,7 @@ class _WolfeLineSearch(LineSearcher):
         return derphi
 
     def prep_search(self, initial_geom, search_dir):
+        raise NotImplementedError()
         a_guess, opts, phi = super().prep_search(initial_geom, search_dir)
         derphi = self._grad_func(self.grad, initial_geom, search_dir)
         gfk = self.grad(initial_geom)
@@ -974,12 +975,12 @@ class QuasiNewtonStepFinder:
         return self.hess_appx(guess, mask, projector=projector)
 
 class QuasiNetwonHessianApproximator:
-    orthogonal_dirs_cutoff = 1e-8
+    orthogonal_dirs_cutoff = 1e-16#1e-8
     line_search = ArmijoSearch
     def __init__(self, func, jacobian, initial_beta=1,
                  damping_parameter=None, damping_exponent=None,
                  line_search=True, restart_interval=10,
-                 restart_hessian_norm=1e-5,
+                 restart_hessian_norm=1e-12,
                  # approximation_mode='direct'
                  approximation_mode='inverse'
                  ):
@@ -1022,8 +1023,10 @@ class QuasiNetwonHessianApproximator:
         if cutoff is None:
             cutoff = cls.orthogonal_dirs_cutoff
         mask = np.full(norms[0].reshape(-1,).shape, True)
-        for n in norms:
-            mask = np.logical_and(mask, np.abs(n.reshape(-1)) > cutoff)
+        if cutoff is not None:
+            for n in norms:
+                mask = np.logical_and(mask, np.abs(n.reshape(-1)) > cutoff)
+
         # good_pos = np.where(np.logical_and(*[
         #     np.abs(n.reshape(-1, )) > cutoff
         #     for n in norms
@@ -1095,7 +1098,7 @@ class QuasiNetwonHessianApproximator:
 
 class BFGSApproximator(QuasiNetwonHessianApproximator):
 
-    orthogonal_dirs_cutoff = 1e-8
+    orthogonal_dirs_cutoff = 1e-16 #1e-8
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
         I = identities
         dx = prev_steps[:, :, np.newaxis]
@@ -1429,13 +1432,14 @@ class SchelgelApproximator(BofillApproximator):
 class ConjugateGradientStepFinder:
     supports_hessian = False
 
-    def __init__(self, func, jacobian, approximation_type='fletcher-reeves', logger=None, **generator_opts):
+    def __init__(self, func, jacobian, approximation_type='polak-ribiere', logger=None, **generator_opts):
         self.step_appx = self.beta_approximations[approximation_type.lower()](func, jacobian, **generator_opts)
         self.logger = logger
     @property
     def beta_approximations(self):
         return {
-            'fletcher-reeves':FletcherReevesApproximator
+            'fletcher-reeves':FletcherReevesApproximator,
+            'polak-ribiere':PolakRibiereApproximator
         }
 
     def __call__(self, guess, mask, projector=None):
@@ -1449,7 +1453,7 @@ class ConjugateGradientStepApproximator:
 
     def __init__(self, func, jacobian,
                  damping_parameter=None, damping_exponent=None,
-                 restart_interval=50, restart_parameter=.1,
+                 restart_interval=50, restart_parameter=0.9,
                  line_search=True):
         self.func = func
         self.jac = jacobian
@@ -1525,7 +1529,14 @@ class ConjugateGradientStepApproximator:
 class FletcherReevesApproximator(ConjugateGradientStepApproximator):
     def get_beta(self, new_jacs, prev_jac, prev_step_dir):
         return (
-                (new_jacs[:, np.newaxis, :] @new_jacs[:, :, np.newaxis]) /
+                (new_jacs[:, np.newaxis, :] @ new_jacs[:, :, np.newaxis]) /
+                (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis])
+        ).reshape(len(new_jacs))
+
+class PolakRibiereApproximator(ConjugateGradientStepApproximator):
+    def get_beta(self, new_jacs, prev_jac, prev_step_dir):
+        return (
+                (new_jacs[:, np.newaxis, :] @ (new_jacs[:, :, np.newaxis] - prev_jac[:, :, np.newaxis])) /
                 (prev_jac[:, np.newaxis, :] @ prev_jac[:, :, np.newaxis])
         ).reshape(len(new_jacs))
 

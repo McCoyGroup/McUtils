@@ -1,3 +1,5 @@
+import collections
+
 import numpy as np
 import scipy
 from .. import Numputils as nput
@@ -429,6 +431,12 @@ def symmetrize_internals(point_group,
             return_inverse=True
         )
 
+        if isinstance(reduce_redundant_coordinates, dict):
+            redundant_opts = reduce_redundant_coordinates
+            reduce_redundant_coordinates = True
+        else:
+            redundant_opts = {}
+
         if reduce_redundant_coordinates:
             if return_base_expansion:
                 expansions, base_expansions = expansions
@@ -438,11 +446,18 @@ def symmetrize_internals(point_group,
             all_tfs = [np.concatenate(e, axis=-1) for e in itut.transpose(all_exps)]
             all_inv = [np.concatenate(e, axis=0) for e in itut.transpose([e[1] for e in expansions])]
             # all_coeffs = np.concatenate(coeffs, axis=-1)
-            red_exps = coordops.RedundantCoordinateGenerator.get_redundant_transformation(
-                (all_tfs[1:], all_inv),
+            red_coeffs, red_exps = coordops.RedundantCoordinateGenerator.get_redundant_transformation(
+                all_tfs[1:],
                 masses=base_masses,
-                relocalize=True
+                **collections.ChainMap(redundant_opts, dict(relocalize=True))
             )
+            red_inv = nput.inverse_internal_coordinate_tensors(
+                red_exps,
+                base_carts,
+                masses=base_masses,
+                remove_translation_rotation=True
+            )
+            red_exps = red_coeffs, (red_exps, red_inv)
             expansions = (red_exps, expansions)
             if base_expansions is not None:
                 expansions = expansions + (base_expansions,)

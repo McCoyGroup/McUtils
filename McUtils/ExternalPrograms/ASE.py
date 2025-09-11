@@ -162,11 +162,18 @@ class ASEMolecule(ExternalMolecule):
         if just_eng:
             return res['energy']
 
+        base_ndim = 0 if geoms is None else np.asarray(geoms).ndim - 2
+        ncoord = 3 * len(self.masses)
+
         ret_tup = (res['energy'],)
         if order > 0:
-            ret_tup = ret_tup + (-res['forces'],)
+            ret_tup = ret_tup + (
+                -res['forces'].reshape(res['forces'].shape[:base_ndim] + (ncoord,)),
+            )
         if order > 1:
-            ret_tup = ret_tup + (res['hessian'],)
+            ret_tup = ret_tup + (
+                res['hessian'].reshape(res['forces'].shape[:base_ndim] + (ncoord, ncoord)),
+            )
         return ret_tup
 
 
