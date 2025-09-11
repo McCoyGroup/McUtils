@@ -289,14 +289,26 @@ class ReflectionElement(SymmetryElement):
         origin = np.asarray(origin)
         if disk_type is None:
             disk_type = Disk
-        disk = disk_type(
-            origin,
-            radius=radius,
-            normal=self.axis,
-            color=color,
-            transparency=disk_transparency
-        )
-        return disk.plot(figure)
+        objs = [
+            disk_type(
+                origin,
+                radius=radius,
+                normal=self.axis,
+                color=color,
+                transparency=disk_transparency
+            ),
+            disk_type(
+                origin,
+                radius=radius,
+                normal=self.axis,
+                color=None,
+                line_color='black'
+                # transparency=disk_transparency
+            )
+        ]
+        for o in objs:
+            o.plot(figure)
+        return objs
 
 class ImproperRotationElement(SymmetryElement):
     def __init__(self, order, axis, root=1):

@@ -12,7 +12,8 @@ __all__ = [
     "dict_diff",
     "transpose",
     "riffle",
-    "flatten"
+    "flatten",
+    "delete_duplicates"
 ]
 
 def is_fixed_size(iterable):
@@ -174,3 +175,27 @@ def flatten(iterable, atomic_types=None):
         else:
             for f in flatten(o, atomic_types=atomic_types):
                 yield f
+
+def delete_duplicates(iterable, key=None, hashable=None, cache=None):
+    hashable = hashable
+    if cache is None:
+        cache = set() if (hashable or hashable is None) else []
+    elif hashable is None:
+        hashable = hasattr(cache, 'add')
+    if key is None:
+        key = lambda x:x
+    for o in iterable:
+        test = key(o)
+        if test in cache: continue
+        if hashable is None:
+            try:
+                cache.add(test)
+            except TypeError:
+                cache = list(cache)
+                hashable = False
+        elif hashable:
+            cache.add(test)
+        else:
+            cache.append(test)
+
+        yield o

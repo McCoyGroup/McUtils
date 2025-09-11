@@ -189,7 +189,10 @@ class PointGroup(metaclass=abc.ABCMeta):
             all_mats = self.get_all_character_matrices()
             elems = tuple(SymmetryElement.from_transformation_matrix(x) for x in all_mats)
             if self._axes is not None:
-                base_elems = self.elements
+                mats = ct.matrices
+                if mats is None:
+                    raise NotImplementedError(f"no implementation for operator matrices for point group {self}")
+                base_elems = tuple(SymmetryElement.from_transformation_matrix(x) for x in mats)
                 base_axes = self._base_axes
                 if base_axes is None:
                     base_axes = self.get_axes(base_elems)
