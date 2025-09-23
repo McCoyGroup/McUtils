@@ -486,8 +486,11 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
             ]:
                 if k in variable_modifications:
                     vr = fmt.format(i=i)
+                    val = variables.get(vr, zmat[i][j])
+                    if not isinstance(val, str):
+                        val = float_fmt.format(val)
+                    variables[vr] = val + " " + variable_modifications[k]
                     zmat[i][j] = vr
-                    variables[vr] = vr + " " + variable_modifications[k]
                     break
 
     zmat = [
