@@ -396,14 +396,14 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,
 def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
                           in_radians=False,
                           float_fmt="{:11.8f}",
-                          index_padding=1
+                          index_padding=1,
+                          variables=None,
+                          variable_modifications=None,
+                          distance_variable_format="r{i}",
+                          angle_variable_format="a{i}",
+                          dihedral_variable_format="d{i}"
                           ):
     from ..Data import UnitsData
-    zmat = np.asanyarray(zmat).copy()
-    zmat[:, 0] *= UnitsData.convert("BohrRadius", units)
-    zmat[:, 1] = zmat[:, 1] if in_radians else np.rad2deg(zmat[:, 1])
-    zmat[:, 2] = zmat[:, 2] if in_radians else np.rad2deg(zmat[:, 2])
-
     if ordering is None:
         if len(zmat) == len(atoms):
             zmat = zmat[1:]
@@ -423,12 +423,72 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
             [z[1], -1, -1]
             for i, z in enumerate(zmat)
         ]
+
+    if isinstance(zmat, np.ndarray):
+        zmat = zmat.copy()
+        zmat[:, 0] *= UnitsData.convert("BohrRadius", units)
+        zmat[:, 1] = zmat[:, 1] if in_radians else np.rad2deg(zmat[:, 1])
+        zmat[:, 2] = zmat[:, 2] if in_radians else np.rad2deg(zmat[:, 2])
+        zmat = zmat.tolist()
+    else:
+        cr = UnitsData.convert("BohrRadius", units)
+        zmat = [
+            [
+                r * cr if nput.is_numeric(r) else r,
+                np.rad2deg(a) if not in_radians and nput.is_numeric(a) else a,
+                np.rad2deg(d) if not in_radians and nput.is_numeric(d) else d
+            ]
+            for r, a, d in zmat
+        ]
+
+    if variables is True:
+        variables = {}
+        _ = []
+        for i,(r,a,d) in enumerate(zmat):
+            s = []
+            vr = distance_variable_format.format(i=i)
+            variables[vr] = r
+            s.append(vr)
+            if i > 0:
+                va = angle_variable_format.format(i=i)
+                variables[va] = a
+                s.append(va)
+            else:
+                s.append("")
+            if i > 1:
+                vd = dihedral_variable_format.format(i=i)
+                variables[vd] = d
+                s.append(vd)
+            else:
+                s.append("")
+            _.append(s)
+        zmat = _
+
     includes_atom_list = len(ordering[0]) == 4
     if not includes_atom_list:
         if len(ordering) < len(atoms):
-            ordering = [[-1, -1, -1]] + list(ordering)
+            ordering = [[-1, -1, -1, -1]] + list(ordering)
         if len(zmat) < len(atoms):
             zmat = [[-1, -1, -1]] + list(zmat)
+
+    if variable_modifications is not None:
+        if variables is None:
+            variables = {}
+        includes_atom_list = len(ordering[0]) == 4
+        for i,(x,r,a,d) in enumerate(ordering):
+            for k,fmt,j in [
+                [(x, r), distance_variable_format, 0],
+                [(r, x), distance_variable_format, 0],
+                [(x, r, a), angle_variable_format, 1],
+                [(a, r, x), angle_variable_format, 1],
+                [(x, r, a, d), dihedral_variable_format, 2],
+                [(d, a, r, x), dihedral_variable_format, 2],
+            ]:
+                if k in variable_modifications:
+                    vr = fmt.format(i=i)
+                    zmat[i][j] = vr
+                    variables[vr] = vr + " " + variable_modifications[k]
+                    break
 
     zmat = [
         ["", "", ""]
@@ -489,8 +549,9 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
         max([len(xyz[i]) for xyz in zmat])
         for i in range(3)
     ]
+
     fmt_string = f"{{a:<{max_at_len}}} {{n[0]:>{nls[0]}}} {{r[0]:>{zls[0]}}} {{n[1]:>{nls[1]}}} {{r[1]:>{zls[1]}}} {{n[2]:>{nls[2]}}} {{r[2]:>{zls[2]}}}"
-    return "\n".join(
+    zm = "\n".join(
         fmt_string.format(
             a=a,
             n=n,
@@ -498,6 +559,22 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
         )
         for a, n, r in zip(atoms, ordering, zmat)
     )
+    if variables is not None:
+        max_symbol_len = max(len(s.split()[0]) for s in variables)
+        variables = {
+            k: v if isinstance(v, str) else float_fmt.format(v)
+            for k, v in variables.items()
+        }
+        max_v_len = max(len(s) for s in variables.values())
+        variables_fmt = f" {{:<{max_symbol_len}}} = {{:>{max_v_len}}}"
+        variables_block = "\n".join(
+            variables_fmt.format(k, v if isinstance(v, str) else float_fmt.format(v))
+            for k,v in variables.items()
+        )
+        zm = zm + "\nVariables:\n" + variables_block
+
+    return zm
+
 
 def validate_zmatrix(ordering,
                      allow_reordering=True,
