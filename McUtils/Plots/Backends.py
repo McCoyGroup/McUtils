@@ -13,6 +13,7 @@ import enum, abc, contextlib, numpy as np
 import uuid
 
 from .. import Numputils as nput
+from .. import Devutils as dev
 
 from . import VTKInterface as vtk
 from ..ExternalPrograms import VPythonInterface as vpython
@@ -1044,11 +1045,21 @@ class MPLFigure(GraphicsFigure):
         raise NotImplementedError(...)
     def close(self, *, backend):
         return backend.plt.close(self.obj)
+
+    _cb_opts = ("orientation", "extendfrac", "extendrect", "drawedges", "boundaries", "spacing")
     def create_colorbar(self, graphics, axes, norm=None, cmap=None, **kw):
         if graphics is None:
             import matplotlib.cm as cm
             graphics = cm.ScalarMappable(norm=norm, cmap=cmap)
-        self.obj.colorbar(graphics, cax=axes.obj, **kw)
+        cb_opts, fig_opts = dev.OptionsSet(kw).split(None, self._cb_opts)
+        self.obj.colorbar(graphics, cax=axes.obj, **cb_opts)
+        if len(fig_opts) > 0:
+            from .Graphics import Graphics
+            Graphics(
+                # parent=self,
+                figure=self,
+                axes=axes
+            ).set_options(**fig_opts)
         return axes
     def get_figure_label(self):
         return self.obj.suptitle()

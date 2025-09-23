@@ -8,6 +8,8 @@ from .Properties import GraphicsPropertyManager, GraphicsPropertyManager3D
 from .Styling import Styled, ThemeManager, PlotLegend
 from .Backends import GraphicsBackend, GraphicsFigure, GraphicsAxes, DPI_SCALING
 
+from .. import Devutils as dev
+
 __all__ = ["GraphicsBase", "Graphics", "Graphics3D", "GraphicsGrid"]
 __reload_hook__ = ['.Properties', ".Styling", ".Backends"]
 
@@ -716,7 +718,10 @@ class GraphicsBase(metaclass=ABCMeta):
     def create_colorbar_axis(self,
                              figure=None,
                              size=(20, 200),
-                             tick_padding=40
+                             tick_padding=40,
+                             origin=None,
+                             orientation='vertical',
+                             alignment=None
                              ):
         fig = self.figure if figure is None else figure
         # if self._colorbar_axis is None:
@@ -726,15 +731,45 @@ class GraphicsBase(metaclass=ABCMeta):
         if size[0] < 1:
             size = (W * size[0], H * size[1])
         size = (size[0] + tick_padding, size[1])
+        if origin is None:
+            if orientation == 'vertical':
+                origin = (W, H / 2)
+            else:
+                origin = (W / 2, 0)
+        if alignment is None:
+            if orientation == 'vertical':
+                alignment = (0, .5)
+            else:
+                alignment = (.5, 0)
+        if isinstance(tick_padding, (int, float, np.integer, np.floating)):
+            if orientation == 'vertical':
+                tick_padding = (tick_padding, 0)
+            else:
+                tick_padding = (0, tick_padding)
         cur_padding = self.padding
-        if cur_padding[0][1] < size[0] + 5:
-            self.padding_right = size[0] + 5
+        x_overrun = origin[0] + size[0] - (W + cur_padding[0][0])
+        if x_overrun > 5:
+            self.padding_right = x_overrun
             new_padding = self.padding
             wpad_old = cur_padding[0][0] + cur_padding[0][1]
             wpad_new = new_padding[0][0] + new_padding[0][1]
             wdiff = wpad_new - wpad_old
         else:
+            x_overrun = 0
             wdiff = 0
+
+
+        y_overrun = origin[1] + size[1] - (H + cur_padding[1][1])
+        if y_overrun > 5:
+            self.padding_top = y_overrun
+            new_padding = self.padding
+            wpad_old = cur_padding[1][0] + cur_padding[1][1]
+            wpad_new = new_padding[1][0] + new_padding[1][1]
+            hdiff = wpad_new - wpad_old
+        else:
+            y_overrun = 0
+            hdiff = 0
+
         # we need to now shrink the spacing by enough to compensate for this
         # it would be best to mess with the figure sizes themselves, but this is the easier
         # solution for the moment...
@@ -744,14 +779,18 @@ class GraphicsBase(metaclass=ABCMeta):
             nspaces = self.shape[1] - 1
             ws = ws - (wdiff / nspaces)
             ws = max(ws, 0)
+            nspaces = self.shape[0] - 1
+            hs = hs - (hdiff / nspaces)
+            hs = max(hs, 0)
             self.spacings = (ws, hs)
-        cbw = size[0] / W
-        tw = tick_padding / W
-        cbh = size[1] / H
-        xpos = 1 - cbw
-        ypos = .5 - cbh / 2  # new_padding[1][0]/H
+        cbw = (size[0]) / (W + x_overrun)
+        tw = tick_padding[0] / (W + x_overrun)
+        cbh = (size[1]) / (H + y_overrun)
+        th = tick_padding[1] / (H + y_overrun)
+        xpos = (origin[0] - alignment[0]*size[0]) / (W + x_overrun)
+        ypos = (origin[1] - alignment[1]*size[1]) / (H + x_overrun)  # new_padding[1][0]/H
 
-        bbox = [[xpos, ypos], [xpos + cbw - tw, ypos + cbh]]
+        bbox = [[xpos, ypos], [xpos + cbw, ypos + cbh]]
         theme = self.theme
         if self.theme is not None:
             with self.theme_manager.from_spec(theme, backend=self.backend):
@@ -759,11 +798,14 @@ class GraphicsBase(metaclass=ABCMeta):
         else:
             axis = fig.create_inset(bbox)
         return axis
+    _default_colorbar_size = (20, 200)
     def add_colorbar(self,
                      graphics=None,
                      norm=None,
                      cmap=None,
-                     size=(20, 200),
+                     size=None,
+                     orientation='vertical',
+                     origin=None,
                      tick_padding=40,
                      colorbar_axes=None,
                      cax=None,
@@ -772,13 +814,21 @@ class GraphicsBase(metaclass=ABCMeta):
         fig = self.figure  # type: GraphicsBackend.Figure
         ax = self.axes  # type: GraphicsBackend.Figure.Axes
 
+        if size is None:
+            if orientation == 'vertical':
+                size = self._default_colorbar_size
+            else:
+                size = (self._default_colorbar_size[1], self._default_colorbar_size[0])
+
         if cax is not None:
             graphics = cax
         if colorbar_axes is None:
             if self._colorbar_axis is None:
                 colorbar_axes = self.create_colorbar_axis(
-                    size=(20, 200),
-                    tick_padding=40,
+                    size=size,
+                    tick_padding=tick_padding,
+                    origin=origin,
+                    orientation=orientation
                 )
         if self._colorbar_axis is None:
             self._colorbar_axis = colorbar_axes
@@ -789,6 +839,7 @@ class GraphicsBase(metaclass=ABCMeta):
         return fig.create_colorbar(graphics, colorbar_axes,
                                    norm=norm,
                                    cmap=cmap,
+                                   orientation=orientation,
                                    **kw)
 
     axes_params = {"adjustable", "agg_filter", "alpha", "anchor", "animated", "aspect",

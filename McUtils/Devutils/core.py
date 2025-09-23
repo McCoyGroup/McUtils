@@ -220,19 +220,19 @@ def str_elide(long_str, width=80, placeholder='...'):
         long_str = long_str[:l] + placeholder + long_str[-r:]
     return long_str
 
-def resolve_key_collision(a, b, k):
+def resolve_key_collision(a, b, k, merge_iterables=True):
     if is_dict_like(a[k]):
         if not is_dict_like(b[k]):
             return b[k]
             # raise ValueError(f"can't resolve key collision on key {k} between {a[k]} and {b[k]}")
-        return merge_dicts(a[k], b[k], resolve_key_collision)
-    elif isinstance(a[k], set):
+        return merge_dicts(a[k], b[k], resolve_key_collision, merge_iterables=merge_iterables)
+    elif merge_iterables and isinstance(a[k], set):
         if not isinstance(b[k], set):
             return b[k]
         a = set(a[k])
         a.update(b)
         return a
-    elif is_list_like(a[k]):
+    elif merge_iterables and is_list_like(a[k]):
         if not is_list_like(b[k]):
             return type(a[k])(
                 itertools.chain(a[k], b[k])
@@ -241,18 +241,14 @@ def resolve_key_collision(a, b, k):
             return type(a[k])(
                 itertools.chain(a[k], [b[k]])
             )
+    elif merge_iterables and is_list_like(b[k]):
+        return type(b[k])(
+            itertools.chain([a[k]], b[k])
+        )
     else:
-        if is_dict_like(b[k]):
-            return b[k]
-            # raise ValueError(f"can't resolve key collision on key {k} between {a[k]} and {b[k]}")
-        elif is_list_like(b[k]):
-            return type(b[k])(
-                itertools.chain([a[k]], b[k])
-            )
-        else:
-            return b[k]
+        return b[k]
 
-def merge_dicts(a, b, collision_handler=None):
+def merge_dicts(a, b, collision_handler=None, merge_iterables=True):
     key_inter = a.keys() & b.keys()
     diff_a = a.keys() - key_inter
     diff_b = b.keys() - key_inter
@@ -260,7 +256,7 @@ def merge_dicts(a, b, collision_handler=None):
     dd.update((k, b[k]) for k in diff_b)
     if len(key_inter) > 0:
         if collision_handler is None:
-            collision_handler = resolve_key_collision
+            collision_handler = lambda a, b, k:resolve_key_collision(a, b, k, merge_iterables=merge_iterables)
         dd.update(
             (k, collision_handler(a, b, k))
             for k in key_inter
