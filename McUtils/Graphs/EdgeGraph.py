@@ -427,7 +427,7 @@ class EdgeGraph:
         return self.find_longest_chain_from_breakpoints(
             self.map,
             graph=self.graph,
-            rings=self.rings,
+            rings=rings,
             use_highest_valencies=use_highest_valencies,
             shortest_path_data=self.shortest_path_data
         )
@@ -535,7 +535,7 @@ class EdgeGraph:
 
         for frag in fragments:
             if len(frag) == 1:
-                return [frag]
+                segments.append((tuple(frag),))
             else:
                 remapping = {k:i for i,k in enumerate(frag)}
                 inverse_mapping = {i:base_inv[k] for i,k in enumerate(frag)}
@@ -546,10 +546,8 @@ class EdgeGraph:
                     },
                     use_highest_valencies=use_highest_valencies
                 )
-                segments.append(
-                    cls._reindex_segmentss(subbones, inverse_mapping)
-                )
-
+                reind = cls._reindex_segmentss(subbones, inverse_mapping)
+                segments.append(reind)
 
         return segments
 

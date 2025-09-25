@@ -582,13 +582,15 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
 def validate_zmatrix(ordering,
                      allow_reordering=True,
                      ensure_nonnegative=True,
-                     # raise_exception=False
+                     raise_exception=False
                      ):
     proxy_order = np.array([o[0] for o in ordering])
     if allow_reordering:
         order_sorting = np.argsort(proxy_order)
         proxy_order = proxy_order[order_sorting,]
         if ensure_nonnegative and proxy_order[0] < 0:
+            if raise_exception:
+                raise ValueError("atom indices not all nonnegative")
             return False
         new_order = [
             [order_sorting[i] if i >= 0 else i for i in row]
@@ -596,8 +598,8 @@ def validate_zmatrix(ordering,
         ]
         return validate_zmatrix(new_order, allow_reordering=False)
     if ensure_nonnegative and proxy_order[0] < 0:
-        # if raise_exception:
-        #     raise ValueError("Z-matrix atom spec {} is non-zero")
+        if raise_exception:
+            raise ValueError("Z-matrix atom spec {} is non-zero")
         return False
 
     for n,row in enumerate(ordering):
@@ -606,6 +608,8 @@ def validate_zmatrix(ordering,
                 or any(i > row[0] for i in row[1:])
                 or len(set(row)) < len(row)
         ):
+            if raise_exception:
+                raise ValueError(f"Z-matrix line {n} invalid {row}")
             return False
 
     return True
