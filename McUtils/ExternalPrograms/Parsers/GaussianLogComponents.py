@@ -894,7 +894,7 @@ GaussianLogComponents["Hessians"] = {
 }
 
 
-tag_start = """Full mass-weighted force constant matrix:"""
+tag_start = """Harmonic frequencies (cm**-1)"""
 tag_end = """
 
 """
@@ -1121,6 +1121,7 @@ def parse_reports(blocks,
                 defs = chunk.split('=')
                 if len(defs) == 1:
                     v = defs[0]
+                    if len(v.strip()) == 0: continue
                     if numblock_pattern.fullmatch(v):
                         v = np.array(v.split(',')).astype(float)
                     res['results'].append(v)
@@ -1134,7 +1135,7 @@ def parse_reports(blocks,
                     elif numblock_pattern.fullmatch(v):
                         v = np.array(v.split(',')).astype(float)
                     res[defs[0]] = v
-                else:
+                elif len(chunk.strip()) > 0:
                     res['results'].append(chunk)
 
         if res['job'] == 'Freq':
