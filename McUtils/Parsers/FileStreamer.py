@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 from mmap import mmap
 import abc, io

@@ -3,8 +3,8 @@ A simple handler interprocess communication on HPC systems
 """
 import abc
 import os
+import threading, time
 import socket, socketserver, json, traceback, subprocess
-import psutil, signal, threading, time
 import sys
 import multiprocessing as mp
 
@@ -22,6 +22,7 @@ __all__ = [
 
 # PUT HERE TO CHECK IF THE PROCESS SHOULD DIE OR NOT
 def check_kill_process(w_pid, cur_pid):
+    import psutil, signal
     if not psutil.pid_exists(w_pid):
         os.kill(cur_pid, signal.SIGKILL)  # maybe make this less dramatic
         exit(1)

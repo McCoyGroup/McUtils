@@ -14,8 +14,7 @@ __all__ = [
     "symmetrize_structure",
     "symmetrized_coordinate_coefficients",
     "get_internal_permutation_symmetry_matrices",
-    "symmetrize_internals",
-    "symmetry_projected_coordinates"
+    "symmetrize_internals"
 ]
 
 def _symmetry_reduce(coords, op:np.ndarray, labels=None):
@@ -511,7 +510,7 @@ def symmetrized_internal_coordinate_expansions(coeffs, cartesians, full_basis,
 
     # return symm_coeffs, storage[1]
 
-def symmetry_projected_coordinates():
-    # get a relocalized delocalized coordinate set projected in the space of symmetric
-    # coordinates
-    ...
+# def symmetry_projected_coordinates():
+#     # get a relocalized delocalized coordinate set projected in the space of symmetric
+#     # coordinates
+#     ...

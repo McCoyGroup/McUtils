@@ -113,6 +113,15 @@ def vec_norms(vecs, axis=-1):
     #     raise NotImplementedError("Norm along not-the-last axis not there yet...")
     return np.linalg.norm(vecs, axis=axis)
 
+def points_from_distance_matrix(dist_mat, test_idx=0, zero_cutoff=1e-8):
+    dist_mat = np.asanyarray(dist_mat)
+    d2 = dist_mat ** 2
+    dd = (d2[..., test_idx, :, np.newaxis] + d2[..., test_idx, np.newaxis, :] - d2[..., :, :])/2
+    s, u = np.linalg.eigh(dd)
+    ndim = np.max(np.sum(s > zero_cutoff, axis=-1))
+    vecs = u[..., :, -ndim:] * np.sqrt(s[..., np.newaxis, -ndim:])
+    return vecs
+
 def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False):
     pts = np.asanyarray(pts)
     if axis2 is None:
@@ -564,7 +573,7 @@ def block_array(blocks, ndim=2, padding=0):
     for k in range(blocks.ndim-ndim-padding):
         blocks = np.concatenate(blocks, axis=-(k+1))
     return blocks
-def vec_block_diag(mats):
+def vec_block_diag(mats, kroneckerize=True):
     mats = np.asanyarray(mats)
     base_shape = mats.shape[:-3]
     stack_shape = mats.shape[-3]
@@ -572,7 +581,9 @@ def vec_block_diag(mats):
     arr = np.zeros(base_shape + (stack_shape, stack_shape) + arr_shape)
     inds = diag_indices(base_shape, stack_shape, k=2)
     arr[inds] = mats
-    return np.moveaxis(arr, -2, -3).reshape(base_shape + (stack_shape*arr_shape[-1], stack_shape*arr_shape[-2]))
+    if kroneckerize:
+        arr = np.moveaxis(arr, -2, -3).reshape(base_shape + (stack_shape*arr_shape[-1], stack_shape*arr_shape[-2]))
+    return arr
 
 
 def identity_tensors(base_shape, ndim):

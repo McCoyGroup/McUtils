@@ -2,8 +2,9 @@
 Just a simple text table formatter with support for headers, separators, any kind of python formatting spec
 etc.
 """
-import itertools
+from __future__ import annotations
 
+import itertools
 import numpy as np
 
 __all__ = [
@@ -208,7 +209,8 @@ class TableFormatter:
     def resolve_aligner(cls, alignment): return getattr(cls, cls.supported_alignments[alignment])
     @classmethod
     def align_column(cls,
-                     header_data, cols_data, header_alignment, column_alignment, join_width,
+                     header_data, cols_data, header_alignment, column_alignment,
+                     join_widths:list[int],
                      header_widths
                      ):
         if header_data is not None:
@@ -230,17 +232,21 @@ class TableFormatter:
         ]
 
 
-        max_width = sum(col_widths)
-        width = max([header_width, max_width]) + join_width*max(len(col_widths)-1, 0)
         if header_data is not None:
+            join_widths = list(join_widths)
+            join_widths = (join_widths * len(col_widths))[:len(col_widths)]
+            join_widths[0] = 0
+            max_width = sum(col_widths)
+            width = max([header_width, max_width]) + sum(join_widths)
             header_data = cls.resolve_aligner(header_alignment)(header_data, width)
+
 
             if len(col_widths) == 1:
                 header_width = max(len(c) for c in header_data)
-                width = max([header_width, max_width]) + join_width*max(len(col_widths)-1, 0)
+                width = max([header_width, max_width])# + sum(join_widths)*max(len(col_widths)-1, 0)
                 cols_data = [
-                    cls.resolve_aligner(al)(c, width)
-                    for c, al in zip(cols_data, column_alignment)
+                    cls.resolve_aligner(al)(c, width+j)
+                    for c, al,j in zip(cols_data, column_alignment, join_widths)
                 ]
 
         # if format_data:
@@ -346,7 +352,16 @@ class TableFormatter:
             header_rows = []
             col_ = []
 
-            join_width = len(column_join) if isinstance(column_join, str) else 0
+            join_width = (
+               [len(column_join)]
+                    if isinstance(column_join, str) else
+                [len(j) for j in column_join]
+                    if hasattr(column_join, "__getitem__") else
+                [0]
+            )
+
+            join_width = [0] + (join_width * len(data_columns))
+            join_width = join_width[:len(data_columns)]
 
             for i,sp in enumerate(header_spans):
                 subcol = []
@@ -358,22 +373,25 @@ class TableFormatter:
 
                 split_cols = []
                 split_alignments = []
+                split_joins = []
                 p = 0
                 for s in sp:
                     split_alignments.append(column_alignments[p:p + s])
                     split_cols.append(data_columns[p:p + s])
+                    split_joins.append(join_width[p:p + s])
                     p += s
 
                 subrow = []
                 # format_cols = i == 0
-                for h,c,hal,cal in zip(
+                for h,c,hal,cal,jw in zip(
                         header_subcol, split_cols,
-                        header_alignments, split_alignments
+                        header_alignments, split_alignments,
+                        split_joins
                 ):
                     hc, dc = self.align_column(
                         h, c,
                         hal, cal,
-                        join_width, True
+                        jw, True
                     )
                     subrow.extend(hc)
                     subcol.extend(dc)
@@ -394,22 +412,25 @@ class TableFormatter:
 
                 split_cols = []
                 split_alignments = []
+                split_joins = []
                 p = 0
                 for s in sp:
                     split_alignments.append(column_alignments[p:p + s])
                     split_cols.append(data_columns[p:p + s])
+                    split_joins.append(join_width[p:p + s])
                     p += s
 
                 subrow = []
                 # format_cols = i == 0
-                for h, c, hal, cal in zip(
+                for h, c, hal, cal, jw in zip(
                         header_subcol, split_cols,
-                        header_alignments, split_alignments
+                        header_alignments, split_alignments,
+                        split_joins
                 ):
                     hc, dc = self.align_column(
                         h, c,
                         hal, cal,
-                        join_width, True
+                        jw, True
                     )
                     subrow.extend(hc)
                 header_rows.append(subrow)

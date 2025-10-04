@@ -136,7 +136,7 @@ CartParser = StringParser(
         (
             Named(
                 Repeating(
-                    Capturing(PositiveInteger),
+                    Capturing(Integer),
                     min=3, max=3,
                     prefix=Optional(Whitespace),
                     suffix=Whitespace
@@ -160,14 +160,25 @@ CartParser = StringParser(
 
 # raise Exception(CartParser.regex)
 
-def cartesian_coordinates_parser(strs):
-    strss = "\n\n".join(strs)
+label_pattern = RegexPattern([" ", Integer, " "])
+def cartesian_coordinates_parser(strs, label_pattern=label_pattern):
+    # strss = "\n\n".join(strs)
 
-    parse = CartParser.parse_all(strss)
+    # dummy atoms come and go...so we need to loop, annoyingly
+
+    int_data = [
+        np.array(label_pattern.findall(s)).astype(int).reshape(-1, 3)
+        for s in strs
+    ]
+
+    coords = [
+        np.array(Number.findall(s)).astype(float).reshape(-1, 3)
+        for s in strs
+    ]
 
     coords = (
-        parse["GaussianStuff", 0],
-        parse["Coordinates"].array
+        int_data,
+        coords
     )
 
     return coords
@@ -881,6 +892,59 @@ GaussianLogComponents["AIMDTrajectory"] = {
     "mode"     : mode
 }
 
+force_block_tags = (
+    'Forces (Hartrees/Bohr)',
+    'Cartesian Forces:'
+)
+
+ForceParser = StringParser(
+    Repeating(
+        (
+            Named(
+                Repeating(
+                    Capturing(Integer),
+                    min=2, max=2,
+                    prefix=Optional(Whitespace),
+                    suffix=Whitespace
+                ),
+                "GaussianStuff", handler=StringParser.array_handler(dtype=int)
+            ),
+            Named(
+                Repeating(
+                    Capturing(Number),
+                    min = 3,
+                    max = 3,
+                    prefix=Optional(Whitespace),
+                    joiner = Whitespace
+                ),
+                "Forces", handler=StringParser.array_handler(dtype=float)
+            )
+        ),
+        suffix = Optional(Newline)
+    )
+)
+
+def parse_force_list(strs):
+
+    strss = "\n\n".join(strs)
+
+    parse = ForceParser.parse_all(strss)
+
+    coords = (
+        parse["GaussianStuff", 0],
+        parse["Forces"].array
+    )
+
+    return coords
+
+mode = "List"
+GaussianLogComponents["Gradients"] = {
+    "tag_start": force_block_tags[0],
+    "tag_end"  : force_block_tags[1],
+    "parser"   : parse_force_list,
+    "mode"     : mode
+}
+
 
 def parse_hessian_list(hessias):
     return [parse_weird_mat(h) for h in hessias]
@@ -890,6 +954,63 @@ GaussianLogComponents["Hessians"] = {
     "tag_start": HessianBlockTags[0],
     "tag_end"  : HessianBlockTags[1],
     "parser"   : parse_hessian_list,
+    "mode"     : mode
+}
+
+
+cubic_block_tags = (
+    'Final third derivatives:',
+    'Diagonal'
+)
+label_pattern = RegexPattern([" ", PositiveInteger, " "])
+def parse_cubic_mat(pars, label_pattern=label_pattern): # identical to X-matrix parser...
+    """Parses the Hessian matrix block and returns stuff --> huge pain in the ass function"""
+    import numpy as np
+
+    energies = np.array([x.replace("D", "E") for x in DNumberPattern.findall(pars)])
+    l = np.max(np.array(label_pattern.findall(pars)).astype(int))
+    n = int( (-1 + np.sqrt(1 + 8*l))/2 )
+    k = len(energies) // l
+    X = np.empty((n, n, k))
+    # gaussian returns the data as blocks of 5 columns in the lower-triangle, annoyingly,
+    # so we need to rearrange the indices so that they are sorted to make this work
+    i, j = np.tril_indices(n)
+    energies_taken = 0
+    blocks = int(np.ceil(k/5))
+    for b in range(blocks):
+        bs = b * 5
+        be = min((b+1) * 5, k)
+        e_new=energies_taken+l*(be-bs)
+        e = energies[energies_taken:e_new]
+        energies_taken=e_new
+        X[i, j, bs:be] = e.reshape(-1, be-bs)
+        X[j, i, bs:be] = e.reshape(-1, be-bs)
+
+    return X
+
+def parse_cubics_list(hessias):
+    return [parse_cubic_mat(h) for h in hessias]
+
+mode = "List"
+GaussianLogComponents["CubicDerivs"] = {
+    "tag_start": cubic_block_tags[0],
+    "tag_end"  : cubic_block_tags[1],
+    "parser"   : parse_cubics_list,
+    "mode"     : mode
+}
+
+quartic_block_tags = (
+    'nuclear 4th derivatives',
+    'Numerical'
+)
+def parse_quartics_list(hessias):
+    return [parse_cubic_mat(h) for h in hessias]
+
+mode = "List"
+GaussianLogComponents["QuarticDerivs"] = {
+    "tag_start": quartic_block_tags[0],
+    "tag_end"  : quartic_block_tags[1],
+    "parser"   : parse_quartics_list,
     "mode"     : mode
 }
 
@@ -1105,6 +1226,9 @@ def parse_reports(blocks,
         stuff = skip_report_header(stuff)
         if stuff[0].startswith('GINC-'):
             res['node'] = stuff[0][5:]
+            stuff = stuff[1:]
+        elif not Word.match(stuff[0]):
+            res['node'] = stuff[0]
             stuff = stuff[1:]
 
         for k in ['job', 'level_of_theory', 'basis', 'formula', 'user', 'date']:

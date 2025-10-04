@@ -43,9 +43,12 @@ class SingletonType:
     __slots__ = []
     def __eq__(self, other):
         return self is other or (
-            type(self).__name__ == type(other).__name__
-            and self.__module__ == other.__module__
+                hasattr(other, '__module__')
+                and type(self).__name__ == type(other).__name__
+                and self.__module__ == other.__module__
         )
+    def __hash__(self):
+        return hash(self.__module__ +'.'+ type(self).__name__)
 
 class DefaultType(SingletonType):
     """

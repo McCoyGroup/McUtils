@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 import abc
 import numpy as np
@@ -459,7 +460,7 @@ class PointGroupIdentifier:
         return self.coord_data.axes @ axes
 
 
-    def identify_point_group(self, realign=True):
+    def identify_point_group(self, realign=True) -> tuple[list[SymmetryElement], PointGroup]:
         elements = []
         elem = InversionElement()
         has_inversion = self.check_element(elem)
