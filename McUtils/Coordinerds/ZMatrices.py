@@ -696,15 +696,31 @@ def functionalized_zmatrix(
             attachment_points
         )
     if single_atoms is not None:
+        #TODO: make this bond graph relevant
         for atom in single_atoms:
-            zm = zm + attached_zmatrix_fragment(
-                len(zm),
-                [[0, -1, -2, -3]],
-                [
-                    (atom - i) if i < 0 else i
-                    for i in range(atom, atom - 4, -1)
+            key = [z for z in zm if z[0] == atom]
+            bonds = [z[0] for z in zm if z[1] == atom]
+            if len(key) > 0:
+                key = [
+                    bonds[-(k+1)]
+                        if k < 0 and abs(k) <= len(bonds) else
+                    k
+                    for k in key[0][:-1]
                 ]
-            )
+                zm = zm + [
+                    [len(zm)] + key
+                ]
+            else:
+                zm = zm + attached_zmatrix_fragment(
+                    len(zm),
+                    [[0, -1, -2, -3]],
+                    [
+                        (atom - i)
+                            if i < 0 and (atom - i) < len(zm) else
+                        i
+                        for i in range(atom, atom - 4, -1)
+                    ]
+                )
     if methyl_positions is not None:
         for atom in methyl_positions:
             zm = zm + attached_zmatrix_fragment(

@@ -6,7 +6,8 @@ __all__ = [
     "format_tensor_element_table",
     "format_symmetric_tensor_elements",
     "format_mode_labels",
-    "format_zmatrix"
+    "format_zmatrix",
+    "format_state_vector_frequency_table"
 ]
 
 def format_tensor_element_table(inds, vals,
@@ -145,3 +146,41 @@ def format_zmatrix(zm, preserve_embedding=True, preserve_indices=True, list_form
         base = "[" + base[1:] + "]]"
 
     return base
+
+def format_state_vector_frequency_table(state_list, freq_data,
+                                        state_header="State",
+                                        freq_header="Freq.",
+                                        freq_fmt='{:.3f}',
+                                        sep=" | ",
+                                        join=" "
+                                        ):
+    state_cols = (
+            len(state_list[0])
+                if not isinstance(state_list[0], str) else
+            1
+    )
+    freq_data = np.asanyarray(freq_data)
+    if freq_data.ndim == 1:
+        freq_data = freq_data[:, np.newaxis]
+    freq_cols = freq_data.shape[-1]
+    if isinstance(freq_fmt, str):
+        freq_fmt = [freq_fmt] * freq_cols
+    else:
+        freq_fmt = list(freq_fmt) * freq_cols
+        freq_fmt = freq_fmt[:freq_cols]
+
+    if isinstance(freq_header, str):
+        freq_header = [freq_header] * freq_cols
+    else:
+        freq_header = list(freq_header) * freq_cols
+        freq_header = freq_header[:freq_cols]
+
+    formatter = TableFormatter(
+        [""] * state_cols + freq_fmt,
+        headers=[state_header] + freq_header,
+        header_spans=[state_cols] + [1] * freq_cols,
+        column_join=[" "] * (state_cols - 1) + [sep] + [join] * (freq_cols - 1)
+    )
+    return formatter.format(
+        [list(x) + v for x, v in zip(state_list, freq_data.tolist())]
+    )

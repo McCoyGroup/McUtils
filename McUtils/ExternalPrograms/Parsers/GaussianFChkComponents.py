@@ -24,7 +24,7 @@ FormattedCheckpointComponents = { } # we'll register on this bit by bit
 #region IInt Atom Types
 
 def get_names(atom_ints, reader=None):
-    from ..Data import AtomData
+    from ...Data import AtomData
     return [ AtomData[x, "Symbol"] for x in atom_ints ]
 FormattedCheckpointComponents["Int Atom Types"] = get_names
 

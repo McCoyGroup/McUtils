@@ -56,6 +56,7 @@ class X3D(X3DObject):
     X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
     X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
 
+    @classmethod
     def get_export_script(self, id):
         return f"""
 (function(){{
@@ -67,6 +68,7 @@ class X3D(X3DObject):
 }})()
        """
 
+    @classmethod
     def get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'):
             return f"""
     (function(){{
@@ -104,12 +106,12 @@ class X3D(X3DObject):
         mediaRecorder.start()
     }})()
            """
-
+    @classmethod
     def set_animation_duration_script(self, id):
         return f"""
     (function(){{
         let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
-        let input = document.getElementById('{id}-input');
+        let input = document.getElementById('{id}-duration-input');
         
         canvas.recordingDuration = input.value;
     }})()
@@ -161,7 +163,7 @@ class X3D(X3DObject):
         if include_record_button:
             elems.extend([
                 JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id)),
-                JHTML.Input(value="2", id=self.id+'-input', oninput=self.set_animation_duration_script(self.id))
+                JHTML.Input(value="2", id=self.id+'-duration-input', oninput=self.set_animation_duration_script(self.id))
             ])
 
         if len(elems) > 1:
