@@ -1,11 +1,11 @@
 # <a id="McUtils.Devutils.core.merge_dicts">merge_dicts</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L255)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L255?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L254)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L254?message=Update%20Docs)]
 </div>
 
 ```python
-merge_dicts(a, b, collision_handler=None): 
+merge_dicts(a, b, collision_handler=None, merge_iterables=True): 
 ```
 
 
@@ -59,7 +59,7 @@ merge_dicts(a, b, collision_handler=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/merge_dicts.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/merge_dicts.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L255?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L254?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

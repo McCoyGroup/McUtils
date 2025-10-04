@@ -123,7 +123,7 @@ Defines a set of formatting utilities
 [format_zmatrix](Formatters/Conveniences/format_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-   
+[format_state_vector_frequency_table](Formatters/Conveniences/format_state_vector_frequency_table.md)   
 </div>
    <div class="col" markdown="1">
    

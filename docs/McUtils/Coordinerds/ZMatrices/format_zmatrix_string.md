@@ -5,7 +5,7 @@
 </div>
 
 ```python
-format_zmatrix_string(atoms, zmat, ordering=None, units='Angstroms', in_radians=False, float_fmt='{:11.8f}', index_padding=1): 
+format_zmatrix_string(atoms, zmat, ordering=None, units='Angstroms', in_radians=False, float_fmt='{:11.8f}', index_padding=1, variables=None, variable_modifications=None, distance_variable_format='r{i}', angle_variable_format='a{i}', dihedral_variable_format='d{i}'): 
 ```
 
 

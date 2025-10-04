@@ -5,7 +5,7 @@
 </div>
 
 ```python
-is_array_like(obj, valid_dtypes=None): 
+is_array_like(obj, valid_dtypes=None, ndim=None): 
 ```
 
 

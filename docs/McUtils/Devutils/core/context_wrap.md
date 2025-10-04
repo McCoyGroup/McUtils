@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.core.context_wrap">context_wrap</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L271)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L271?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L270)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L270?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L272)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L272?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L271?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, obj):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L273)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L273?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L279)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L279?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L278)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L278?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -100,7 +100,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/context_wrap.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/context_wrap.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L271?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L270?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.core.slice_dict">slice_dict</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L283)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L283?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L282?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ dict_obj: member_descriptor
 __init__(self, dict_obj: mappingproxy): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L285)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L285?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L284)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L284?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, dict_obj: mappingproxy):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/slice_dict.py#L287)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/slice_dict.py#L287?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/slice_dict.py#L286)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/slice_dict.py#L286?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -92,7 +92,7 @@ __getitem__(self, item):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/slice_dict.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/slice_dict.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L283?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L282?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
