@@ -1227,6 +1227,7 @@ class SphereUnionSurface:
             sphere_style = etc if color is None else {}
             if sphere_color is not None:
                 sphere_style['color'] = sphere_color
+        if len(sphere_style) > 0:
             for c,r in zip(centers,radii):
                 objs.append(
                     plt.Sphere(c, r, **sphere_style)

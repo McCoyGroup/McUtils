@@ -29,7 +29,7 @@ class JSMol:
             if target is None:
                 target = id
 
-            injection = "applet._code"
+            injection = ""
             if include_script_interface:
                 from ..Plots.X3DInterface import X3D
 
@@ -80,7 +80,7 @@ class JSMol:
             wrapper.innerHTML = applet._code;
             Jmol._appletNameMap['{id}'] = applet;
             wrapper.ondelete = function() {{ delete Jmol._appletNameMap['{id}'] }};
-            if ('{interface_target}'.length) {{
+            if ('{interface_target}'.length > 0) {{
                 document.getElementById('{interface_target}').innerHTML = {injection};
             }}
         }}
