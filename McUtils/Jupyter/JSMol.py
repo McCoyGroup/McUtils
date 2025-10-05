@@ -29,7 +29,7 @@ class JSMol:
             if target is None:
                 target = id
 
-            injection = ""
+            injection = "''"
             if include_script_interface:
                 from ..Plots.X3DInterface import X3D
 
