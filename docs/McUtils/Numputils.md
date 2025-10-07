@@ -801,9 +801,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-2a877c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2a877c"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-5fb560" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-5fb560"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2a877c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-5fb560" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -837,9 +837,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-9b8770" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-9b8770"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-9db361" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-9db361"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-9b8770" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-9db361" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -2982,9 +2982,9 @@ class NumputilsTests(TestCase):
 #### <a name="DihedralConversions">DihedralConversions</a>
 ```python
     def test_DihedralConversions(self):
-        np.random.seed(15432)
-        for _ in range(25):
-            dihed_points = np.random.rand(4, 3)
+        np.random.seed(123123)
+        for _ in range(1):
+            dihed_points = np.random.rand(4, 3)[(2, 1, 0, 3),]
             ssssss = distance_matrix(dihed_points, return_triu=True)[(0, 3, 5, 1, 4, 2),]
             t = dihedral_from_distance(ssssss, "ssssst")
             self.assertAlmostEqual(t, abs(pts_dihedrals(*dihed_points)))

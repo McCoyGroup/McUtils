@@ -328,9 +328,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-d45aca" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d45aca"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-f7b7b1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f7b7b1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d45aca" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f7b7b1" markdown="1">
  - [GetLogInfo](#GetLogInfo)
 - [DefaultLogParse](#DefaultLogParse)
 - [GetDipoles](#GetDipoles)
@@ -352,9 +352,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-39b4ed" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-39b4ed"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-fea5ff" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fea5ff"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-39b4ed" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fea5ff" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

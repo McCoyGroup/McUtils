@@ -18,9 +18,9 @@ provides documentation in a Jupyter-friendly environment
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Details-241c96" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-241c96"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Details-2ce4b6" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-2ce4b6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse " id="Details-241c96" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse " id="Details-2ce4b6" markdown="1">
  Makes use of the `JHTML` system to nicely format documentation as well as the
 documentation utilities found in `McUtils.Docs` (which were orginally written
 as part of the `Peeves` package).
