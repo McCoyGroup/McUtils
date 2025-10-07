@@ -577,22 +577,30 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
                     int_args=int_args,
                     dist_args=dist_args,
                     converter=dist_converter):
-            return converter(*[
+            args = [
                 internal_values[..., n]
                     if n is not None else
                 distance_values[..., m]
                 for n,m in zip(int_args, dist_args)
-            ])
+            ]
+            return converter(*args)
     return convert
-def get_internal_distance_conversion(internals, canonicalize=True):
+def get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True):
     base_conv = get_internal_distance_conversion_spec(internals, canonicalize=canonicalize)
     final_inds = list(sorted(base_conv.keys(), key=lambda k:base_conv[k].mapped_pos))
     rordered_conversion = list(sorted(base_conv.values(), key=lambda v:v.mapped_pos))
     convs = [
         _prep_interal_distance_conversion(v) for v in rordered_conversion
     ]
-    def convert(internal_values, inds=final_inds, convs=convs):
+    dihedral_pos = [i for i,v in enumerate(internals) if len(v) == 4]
+    def convert(internal_values,
+                inds=final_inds, convs=convs,
+                dihedral_pos=dihedral_pos,
+                shift_dihedrals=shift_dihedrals):
         internal_values = np.asanyarray(internal_values)
+        if shift_dihedrals:
+            internal_values = internal_values.copy()
+            internal_values[..., dihedral_pos] = np.pi - internal_values[..., dihedral_pos]
         dists = np.zeros(internal_values.shape[:-1] + (len(convs),))
         for n,c in enumerate(convs):
             dists[..., n] = c(internal_values, dists)
@@ -600,6 +608,9 @@ def get_internal_distance_conversion(internals, canonicalize=True):
         return dists
 
     return convert
-def internal_distance_convert(coords, specs, canonicalize=True):
-    converter = get_internal_distance_conversion(specs, canonicalize=canonicalize)
+def internal_distance_convert(coords, specs, canonicalize=True, shift_dihedrals=True):
+    converter = get_internal_distance_conversion(specs,
+                                                 canonicalize=canonicalize,
+                                                 shift_dihedrals=shift_dihedrals
+                                                 )
     return converter(coords)

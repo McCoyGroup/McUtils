@@ -746,7 +746,7 @@ class ConverterTest(TestCase):
         print()
         print("Internals:", ints)
         print("Distances:", dists)
-        dists2 = internal_distance_convert(ints, specs)
+        dists2 = internal_distance_convert(ints, specs, shift_dihedrals=True)
         print("Int Dists:", dists2)
 
         return
