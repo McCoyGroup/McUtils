@@ -310,7 +310,7 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True):
             dihedrals.append((coord, n))
 
     #TODO: add in multiple passes until we stop picking up new distances
-
+    #TODO: prune out ssa rules...these are ambiguous
     for n,((i,j,k),m) in enumerate(angles):
         a = canonicalize_internal((i,j))
         b = canonicalize_internal((j,k))
@@ -327,32 +327,32 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True):
                     tri_conv('sas', (a, C, b), 2),
                     len(dists)
                 )
-        elif a in dists and c in dists:
-            # ssa triangle, angle at `i`
-            if b not in dists:
-                C = (i,j,k)
-                d1 = dists[c]
-                d2 = dists[a]
-                # sas triangle
-                dists[b] = dm_conv_data(
-                    (_get_input_ind(d1), _get_input_ind(d2), m),
-                    (_get_pregen_ind(d1), _get_pregen_ind(d2), None),
-                    tri_conv('ssa', (c, a, C), 2),
-                    len(dists)
-                )
-        elif b in dists and c in dists:
-            # ssa triangle, angle at `k`
-            if a not in dists:
-                B = (i,j,k)
-                d1 = dists[b]
-                d2 = dists[c]
-                # sas triangle
-                dists[a] = dm_conv_data(
-                    (_get_input_ind(d1), _get_input_ind(d2), m),
-                    (_get_pregen_ind(d1), _get_pregen_ind(d2), None),
-                    tri_conv('ssa', (b, c, B), 2),
-                    len(dists)
-                )
+        # elif a in dists and c in dists:
+        #     # ssa triangle, angle at `i`
+        #     if b not in dists:
+        #         C = (i,j,k)
+        #         d1 = dists[c]
+        #         d2 = dists[a]
+        #         # sas triangle
+        #         dists[b] = dm_conv_data(
+        #             (_get_input_ind(d1), _get_input_ind(d2), m),
+        #             (_get_pregen_ind(d1), _get_pregen_ind(d2), None),
+        #             tri_conv('ssa', (c, a, C), 2),
+        #             len(dists)
+        #         )
+        # elif b in dists and c in dists:
+        #     # ssa triangle, angle at `k`
+        #     if a not in dists:
+        #         B = (i,j,k)
+        #         d1 = dists[b]
+        #         d2 = dists[c]
+        #         # sas triangle
+        #         dists[a] = dm_conv_data(
+        #             (_get_input_ind(d1), _get_input_ind(d2), m),
+        #             (_get_pregen_ind(d1), _get_pregen_ind(d2), None),
+        #             tri_conv('ssa', (b, c, B), 2),
+        #             len(dists)
+        #         )
         else:
             # try to another angle triangle coordinates that can be converted back to sss form
             for (ii,jj,kk),m2 in angles[n+1:]:
@@ -498,7 +498,7 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True):
                         dists[d] = dm_conv_data(
                             (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), m1, m2, m),
                             (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), None, None, None),
-                            dihed_conv('sssaa', (a, b, c, A, B, (i,j,k,l))),
+                            dihed_conv('sssaat', (a, b, c, A, B, (i,j,k,l))),
                             len(dists)
                         )
                     elif y in dists:
@@ -510,7 +510,7 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True):
                         dists[d] = dm_conv_data(
                             (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), m1, m),
                             (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), None, None, None),
-                            dihed_conv('ssssa', (c, b, a, y, A, (i,j,k,l))),
+                            dihed_conv('ssssat', (c, b, a, y, A, (i,j,k,l))),
                             len(dists)
                         )
                 elif B in angle_dict:
@@ -523,7 +523,7 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True):
                         dists[d] = dm_conv_data(
                             (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), m1, m),
                             (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), None, None),
-                            dihed_conv('ssssa', (a, b, c, x, B, (i,j,k,l))),
+                            dihed_conv('ssssat', (a, b, c, x, B, (i,j,k,l))),
                             len(dists)
                         )
                 elif x in dists and y in dists:
@@ -536,7 +536,7 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True):
                         (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), _get_input_ind(d5), m),
                         (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), _get_pregen_ind(d5), None,
                          None),
-                        dihed_conv('sssss', (a, b, c, x, y, (i, j, k, l))),
+                        dihed_conv('ssssst', (a, b, c, x, y, (i, j, k, l))),
                         len(dists)
                     )
 
