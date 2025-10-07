@@ -316,9 +316,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-13b37a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-13b37a"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-3e9f4e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3e9f4e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-13b37a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3e9f4e" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -356,9 +356,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-74d396" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-74d396"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-7d9f5e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7d9f5e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-74d396" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7d9f5e" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1140,19 +1140,6 @@ class ConverterTest(TestCase):
 ```python
     def test_DistsFromInternals(self):
         import McUtils.Numputils as nput
-        # test = np.array(
-        #     [[0.799673, 0.800962, 0.704717],
-        #      [0.172961, 0.740208, 0.372798],
-        #      [0.0908716, 0.544543, 0.534767],
-        #      [0.00792744, 0.626499, 0.928667]])
-        # print(
-        #     nput.pts_norms(test[0], test[1]),
-        #     nput.pts_norms(test[1], test[2]),
-        #     nput.pts_norms(test[2], test[3]),
-        #     nput.pts_angles(test[0], test[1], test[2])[0],
-        #     nput.pts_angles(test[1], test[2], test[3])[0],
-        #     nput.pts_dihedrals(*test)
-        # )
 
         specs = [
             (0, 1),
@@ -1160,7 +1147,7 @@ class ConverterTest(TestCase):
             (0, 3),
             (1, 0, 2),
             (1, 0, 3),
-            (2, 0, 3)
+            (3, 0, 1, 2)
         ]
         np.random.seed(123123)
         coords = np.random.rand(4, 3)
