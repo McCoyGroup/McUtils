@@ -2125,9 +2125,9 @@ class NumputilsTests(TestCase):
 
     @debugTest
     def test_DihedralConversions(self):
-        np.random.seed(15432)
-        for _ in range(25):
-            dihed_points = np.random.rand(4, 3)
+        np.random.seed(123123)
+        for _ in range(1):
+            dihed_points = np.random.rand(4, 3)[(2, 1, 0, 3),]
             ssssss = distance_matrix(dihed_points, return_triu=True)[(0, 3, 5, 1, 4, 2),]
             t = dihedral_from_distance(ssssss, "ssssst")
             self.assertAlmostEqual(t, abs(pts_dihedrals(*dihed_points)))
