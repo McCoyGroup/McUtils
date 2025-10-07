@@ -29,7 +29,8 @@ __all__ = [
     "vec_anglecos_deriv",
     "vec_anglesin_deriv",
     "vec_dihed_deriv",
-    "vec_plane_angle_deriv"
+    "vec_plane_angle_deriv",
+    # "law_of_cosines_deriv"
 ]
 
 # levi_cevita3.__name__ = "levi_cevita3"
@@ -985,9 +986,13 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
     # )
 
     # print("=oooo"*50)
-    sc_expansion = scalarprod_deriv(cos_expansion, sin_expansion[1:], order-1)
-    # print("=bbbb"*50)
-    cs_expansion = scalarprod_deriv(sin_expansion, cos_expansion[1:], order-1)
+    if order > 0:
+        sc_expansion = scalarprod_deriv(cos_expansion, sin_expansion[1:], order-1)
+        # print("=bbbb"*50)
+        cs_expansion = scalarprod_deriv(sin_expansion, cos_expansion[1:], order-1)
+    else:
+        sc_expansion = []
+        cs_expansion = []
     return [ang] + [
         s - c
         for s,c in zip(sc_expansion, cs_expansion)
@@ -1559,3 +1564,29 @@ def tensorops_deriv(
     ]
 
     return derivs
+
+
+def law_of_cosines_cos_deriv(a_expansion, b_expansion, c_expansion, order,
+                         return_components=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         abinv_expansion=None
+                         ):
+    if a2_expansion is None:
+        a2_expansion = scalarprod_deriv(a_expansion, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = scalarprod_deriv(b_expansion, b_expansion, order)
+    if c2_expansion is None:
+        c2_expansion = scalarprod_deriv(c_expansion, c_expansion, order)
+    if abinv_expansion is None:
+        abinv_expansion = scalarinv_deriv(scalarprod_deriv(a_expansion, b_expansion, order), order)
+    term = scalarprod_deriv(
+        (c2_expansion - (a2_expansion + b2_expansion)),
+        abinv_expansion,
+        order
+    )
+    if return_components:
+        return term, (a2_expansion, b2_expansion, c2_expansion, abinv_expansion)
+    else:
+        return term

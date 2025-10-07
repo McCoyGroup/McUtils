@@ -11,7 +11,9 @@ __all__ = [
     "permute_internals",
     "find_internal",
     "coordinate_sign",
-    "coordinate_indices"
+    "coordinate_indices",
+    "get_internal_distance_conversion",
+    "internal_distance_convert"
 ]
 
 def canonicalize_internal(coord, return_sign=False):
@@ -65,11 +67,17 @@ def is_coordinate_list_like(clist):
 
 class InternalsSet:
     def __init__(self, coord_specs:'list[tuple[int]]', prepped_data=None):
-        self.specs = coord_specs
+        self._specs = tuple(coord_specs) if coord_specs is not None else coord_specs
         if prepped_data is not None:
             self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = prepped_data
         else:
             self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = self.prep_coords(coord_specs)
+
+    @property
+    def specs(self):
+        if self._specs is None:
+            self._specs = tuple(self._create_coord_list(self._indicator, self.ind_map, self.coord_map))
+        return self._specs
 
     IndicatorMap = collections.namedtuple("IndicatorMap", ['primary', 'child'])
     IndsMap = collections.namedtuple("IndsMap", ['dists', 'angles', 'diheds'])
@@ -262,3 +270,336 @@ def coordinate_indices(coords):
         return tuple(sorted(
             {x for c in coords for x in c}
         ))
+
+dm_conv_data = collections.namedtuple("dm_conv_data",
+                                      ['input_indices', 'pregen_indices', 'conversion', 'mapped_pos'])
+tri_conv = collections.namedtuple("tri_conv", ['type', 'coords', 'val'])
+dihed_conv = collections.namedtuple("dihed_conv", ['type', 'coords'])
+def _get_input_ind(dm_data):
+    return (
+        dm_data.input_indices[0]
+            if dm_data.conversion is None else
+        None
+    )
+def _get_pregen_ind(dm_data):
+    return (
+        None
+            if dm_data.conversion is None else
+        dm_data.mapped_pos
+    )
+def get_internal_distance_conversion_spec(internals, canonicalize=True):
+    if isinstance(internals, InternalsSet):
+        internals = internals.specs
+    dists:dict[tuple[int,int], dm_conv_data] = {}
+    # we do an initial pass to separate out dists, angles, and dihedrals
+    # for checking
+    angles:list[tuple[tuple[int,int,int], int]] = []
+    dihedrals:list[tuple[tuple[int,int,int,int], int]] = []
+    for n,coord in enumerate(internals):
+        if canonicalize:
+            coord = canonicalize_internal(coord)
+            if coord is None: continue
+        if len(coord) == 2:
+            coord:tuple[int,int]
+            dists[coord] = dm_conv_data([n], [None], None, len(dists))
+        elif len(coord) == 3:
+            coord:tuple[int,int,int]
+            angles.append((coord, n))
+        else:
+            coord:tuple[int,int,int,int]
+            dihedrals.append((coord, n))
+
+    #TODO: add in multiple passes until we stop picking up new distances
+
+    for n,((i,j,k),m) in enumerate(angles):
+        a = canonicalize_internal((i,j))
+        b = canonicalize_internal((j,k))
+        c = (i,k)
+        if a in dists and b in dists:
+            if c not in dists:
+                C = (i,j,k)
+                d1 = dists[a]
+                d2 = dists[b]
+                # sas triangle
+                dists[c] = dm_conv_data(
+                    (_get_input_ind(d1), m, _get_input_ind(d2)),
+                    (_get_pregen_ind(d1), None, _get_pregen_ind(d2)),
+                    tri_conv('sas', (a, C, b), 2),
+                    len(dists)
+                )
+        elif a in dists and c in dists:
+            # ssa triangle, angle at `i`
+            if b not in dists:
+                C = (i,j,k)
+                d1 = dists[c]
+                d2 = dists[a]
+                # sas triangle
+                dists[b] = dm_conv_data(
+                    (_get_input_ind(d1), _get_input_ind(d2), m),
+                    (_get_pregen_ind(d1), _get_pregen_ind(d2), None),
+                    tri_conv('ssa', (c, a, C), 2),
+                    len(dists)
+                )
+        elif b in dists and c in dists:
+            # ssa triangle, angle at `k`
+            if a not in dists:
+                B = (i,j,k)
+                d1 = dists[b]
+                d2 = dists[c]
+                # sas triangle
+                dists[a] = dm_conv_data(
+                    (_get_input_ind(d1), _get_input_ind(d2), m),
+                    (_get_pregen_ind(d1), _get_pregen_ind(d2), None),
+                    tri_conv('ssa', (b, c, B), 2),
+                    len(dists)
+                )
+        else:
+            # try to another angle triangle coordinates that can be converted back to sss form
+            for (ii,jj,kk),m2 in angles[n+1:]:
+                # all points must be shared
+                if k == jj and (
+                        i == ii and j == kk
+                        or i == kk and j == ii
+                ):
+                    C = (i, j, k)
+                    A = (i, k, j)
+                    if a in dists: # (i,j)
+                        # we have saa
+                        d = dists[a]
+                        if b not in dists:
+                            dists[b] = dm_conv_data(
+                                (_get_input_ind(d), m, m2),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (a, C, A), 2),
+                                len(dists)
+                            )
+                        if c not in dists:
+                            dists[c] = dm_conv_data(
+                                (_get_input_ind(d), m, m2),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (a, C, A), 1),
+                                len(dists)
+                            )
+                    elif b in dists: # (k, j)
+                        d = dists[b]
+                        if a not in dists:
+                            dists[a] = dm_conv_data(
+                                (m, _get_input_ind(d), m2),
+                                (None, _get_pregen_ind(d), None),
+                                tri_conv('asa', (C, b, A), 1),
+                                len(dists)
+                            )
+                        if c not in dists:
+                            dists[c] = dm_conv_data(
+                                (m, _get_input_ind(d), m2),
+                                (None, _get_pregen_ind(d), None),
+                                tri_conv('asa', (C, b, A), 2),
+                                len(dists)
+                            )
+                    elif c in dists: # (i, k)
+                        d = dists[c]
+                        if b not in dists:
+                            dists[b] = dm_conv_data(
+                                (_get_input_ind(d), m2, m),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (c, A, C), 2),
+                                len(dists)
+                            )
+                        if c not in dists:
+                            dists[a] = dm_conv_data(
+                                (_get_input_ind(d), m2, m),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (c, A, C), 1),
+                                len(dists)
+                            )
+                elif i == jj and (
+                        k == ii and j == kk
+                        or k == kk and j == ii
+                ):
+                    C = (i, j, k)
+                    B = (j, i, k)
+                    if a in dists: # (i,j)
+                        d = dists[a]
+                        if b not in dists:
+                            dists[b] = dm_conv_data(
+                                (m, _get_input_ind(d), m2),
+                                (None, _get_pregen_ind(d), None),
+                                tri_conv('asa', (C, a, B), 1),
+                                len(dists)
+                            )
+                        if c not in dists:
+                            dists[c] = dm_conv_data(
+                                (m, _get_input_ind(d), m2),
+                                (None, _get_pregen_ind(d), None),
+                                tri_conv('asa', (C, a, B), 2),
+                                len(dists)
+                            )
+                    elif b in dists: # (k, j)
+                        d = dists[b]
+                        if a not in dists:
+                            dists[a] = dm_conv_data(
+                                (_get_input_ind(d), m, m2),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (b, C, B), 2),
+                                len(dists)
+                            )
+                        if c not in dists:
+                            dists[c] =  dm_conv_data(
+                                (_get_input_ind(d), m, m2),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (b, C, B), 1),
+                                len(dists)
+                            )
+                    elif c in dists: # (i, k)
+                        d = dists[c]
+                        if a not in dists:
+                            dists[a] = dm_conv_data(
+                                (_get_input_ind(d), m2, m),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (c, B, C), 2),
+                                len(dists)
+                            )
+                        if b not in dists:
+                            dists[b] = dm_conv_data(
+                                (_get_input_ind(d), m2, m),
+                                (_get_pregen_ind(d), None, None),
+                                tri_conv('saa', (c, B, C), 1),
+                                len(dists)
+                            )
+                # x = canonicalize_internal((ii, jj))
+                # y = canonicalize_internal((jj, kk))
+                # z = (ii, kk)
+                # if x == a:
+                #     ...
+
+    angle_dict = dict(angles)
+    for n,((i,j,k,l),m) in enumerate(dihedrals):
+        d = canonicalize_internal((i,l))
+        if d not in dists:
+            a = canonicalize_internal((i,j))
+            b = canonicalize_internal((j,k))
+            c = canonicalize_internal((k,l))
+            x = canonicalize_internal((i,k))
+            y = canonicalize_internal((j,l))
+            if (
+                    a in dists
+                    and b in dists
+                    and c in dists
+            ):
+                A = canonicalize_internal((i,j,k))
+                B = canonicalize_internal((j,k,l))
+                if A in angle_dict:
+                    if B in angle_dict:
+                        d1 = dists[a]
+                        d2 = dists[b]
+                        d3 = dists[c]
+                        m1 = angle_dict[A]
+                        m2 = angle_dict[B]
+                        dists[d] = dm_conv_data(
+                            (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), m1, m2, m),
+                            (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), None, None, None),
+                            dihed_conv('sssaa', (a, b, c, A, B, (i,j,k,l))),
+                            len(dists)
+                        )
+                    elif y in dists:
+                        d1 = dists[c]
+                        d2 = dists[b]
+                        d3 = dists[a]
+                        d4 = dists[y]
+                        m1 = angle_dict[A]
+                        dists[d] = dm_conv_data(
+                            (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), m1, m),
+                            (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), None, None, None),
+                            dihed_conv('ssssa', (c, b, a, y, A, (i,j,k,l))),
+                            len(dists)
+                        )
+                elif B in angle_dict:
+                    if x in dists:
+                        d1 = dists[a]
+                        d2 = dists[b]
+                        d3 = dists[c]
+                        d4 = dists[x]
+                        m1 = angle_dict[B]
+                        dists[d] = dm_conv_data(
+                            (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), m1, m),
+                            (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), None, None),
+                            dihed_conv('ssssa', (a, b, c, x, B, (i,j,k,l))),
+                            len(dists)
+                        )
+                elif x in dists and y in dists:
+                    d1 = dists[a]
+                    d2 = dists[b]
+                    d3 = dists[c]
+                    d4 = dists[x]
+                    d5 = dists[y]
+                    dists[d] = dm_conv_data(
+                        (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), _get_input_ind(d5), m),
+                        (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), _get_pregen_ind(d5), None,
+                         None),
+                        dihed_conv('sssss', (a, b, c, x, y, (i, j, k, l))),
+                        len(dists)
+                    )
+
+
+    return dists
+
+def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
+    if conversion_spec.conversion is None:
+        def convert(internal_values, _, n=conversion_spec.input_indices[0]):
+            return internal_values[..., n]
+    elif hasattr(conversion_spec.conversion, 'val'):
+        # a triangle to convert
+        #TODO: allow triangle conversions to share context
+        conversion:tri_conv = conversion_spec.conversion
+        triangle_converter = nput.triangle_converter(conversion.type, 'sss')
+        val = conversion.val
+        int_args = conversion_spec.input_indices
+        dist_args = conversion_spec.pregen_indices
+        def convert(internal_values, distance_values,
+                    int_args=int_args,
+                    dist_args=dist_args,
+                    converter=triangle_converter,
+                    val=val):
+            args = [
+                internal_values[..., n]
+                    if n is not None else
+                distance_values[..., m]
+                for n,m in zip(int_args, dist_args)
+            ]
+            return converter(*args)[val]
+    else:
+        # a dihedral to convert
+        conversion:dihed_conv = conversion_spec.conversion
+        dist_converter = nput.dihedral_distance_converter(conversion.type)
+        int_args = conversion_spec.input_indices
+        dist_args = conversion_spec.pregen_indices
+        def convert(internal_values, distance_values,
+                    int_args=int_args,
+                    dist_args=dist_args,
+                    converter=dist_converter):
+            return converter(*[
+                internal_values[..., n]
+                    if n is not None else
+                distance_values[..., m]
+                for n,m in zip(int_args, dist_args)
+            ])
+    return convert
+def get_internal_distance_conversion(internals, canonicalize=True):
+    base_conv = get_internal_distance_conversion_spec(internals, canonicalize=canonicalize)
+    final_inds = list(sorted(base_conv.keys(), key=lambda k:base_conv[k].mapped_pos))
+    rordered_conversion = list(sorted(base_conv.values(), key=lambda v:v.mapped_pos))
+    convs = [
+        _prep_interal_distance_conversion(v) for v in rordered_conversion
+    ]
+    def convert(internal_values, inds=final_inds, convs=convs):
+        internal_values = np.asanyarray(internal_values)
+        dists = np.zeros(internal_values.shape[:-1] + (len(convs),))
+        for n,c in enumerate(convs):
+            dists[..., n] = c(internal_values, dists)
+
+        return dists
+
+    return convert
+def internal_distance_convert(coords, specs, canonicalize=True):
+    converter = get_internal_distance_conversion(specs, canonicalize=canonicalize)
+    return converter(coords)
