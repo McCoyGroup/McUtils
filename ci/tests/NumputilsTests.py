@@ -230,7 +230,7 @@ class NumputilsTests(TestCase):
         print(guess, np.linalg.norm(guess, axis=-1))
         print(minimum, np.linalg.norm(minimum, axis=-1))
 
-    @debugTest
+    @validationTest
     def test_coordBases(self):
         coords = np.random.rand(6, 3)
 
@@ -2048,7 +2048,7 @@ class NumputilsTests(TestCase):
         c = tensor_reexpand(a[:2], b[:2], axes=[-1, -1])
         print([cc.shape for cc in c])
 
-    @debugTest
+    @validationTest
     def test_TransformationMatrices(self):
 
         ax = vec_normalize(np.random.rand(3))
@@ -2081,4 +2081,71 @@ class NumputilsTests(TestCase):
         self.assertLess(np.max(np.abs(tf - rax)), 1e-2)
 
 
+    @validationTest
+    def test_TriangleConversions(self):
+        # # ssa is ambiguous
+        # tri_points = np.array([[0.52643455, 0.72202215, 0.60467149],
+        #                        [0.43076037, 0.52406765, 0.98888271],
+        #                        [0.61566397, 0.88490246, 0.09814231]])
+        # sss = distance_matrix(tri_points, return_triu=True)[(0, 2, 1),]
+        # new = np.array(triangle_convert(sss, "sss", "ssa"))
+        # new3 = np.array(triangle_convert(new, "ssa", "sas"))
+        # new4 = np.array(triangle_convert(sss, "sss", "sas"))
+        # ccc = np.array(triangle_convert(sss, "sss", "saa"))
+        # new5 = np.array(triangle_convert(ccc, "saa", "sas"))
+        # print(new3)
+        # print(new4)
+        # print(new5)
+        # self.assertTrue(np.allclose(new5, new4), msg=f"ssa: {new5} {new4}")
+        # sss2 = np.array(triangle_convert(new, "ssa", "sss"))
+        # self.assertTrue(np.allclose(sss, sss2), msg=f"ssa: {sss} {sss2}")
+        #
+        # return
 
+        np.random.seed(15432)
+        for _ in range(25):
+            tri_points = np.random.rand(3, 3)
+            sss = distance_matrix(tri_points, return_triu=True)[(0, 2, 1),]
+            sas = np.array(triangle_convert(sss, "sss", "sas"))
+            a = pts_angles(*tri_points,  return_crosses=False)
+            self.assertTrue(np.allclose(sas, [sss[0], a, sss[1]]))
+            sss2 = triangle_convert(sas, "sas", "sss")
+            self.assertTrue(np.allclose(sss, sss2))
+
+            conv_tris = {}
+            for conversion in ["sas", "saa", "asa"]:
+                new = np.array(triangle_convert(sss, "sss", conversion))
+                conv_tris[conversion] = new
+                sss2 = np.array(triangle_convert(new, conversion, "sss"))
+                self.assertTrue(np.allclose(sss, sss2), msg=f"{conversion}: {sss} {sss2}")
+            for conversion in ["sas", "saa", "asa"]:
+                for conversion2 in ["sas", "saa", "asa"]:
+                    new = np.array(triangle_convert(conv_tris[conversion], conversion, conversion2))
+                    self.assertTrue(np.allclose(new, conv_tris[conversion2]), msg=conversion+"+"+conversion2)
+
+    @debugTest
+    def test_DihedralConversions(self):
+        np.random.seed(15432)
+        for _ in range(25):
+            dihed_points = np.random.rand(4, 3)
+            ssssss = distance_matrix(dihed_points, return_triu=True)[(0, 3, 5, 1, 4, 2),]
+            t = dihedral_from_distance(ssssss, "ssssst")
+            self.assertAlmostEqual(t, abs(pts_dihedrals(*dihed_points)))
+            s = dihedral_distance(list(ssssss[:5]) + [t], "ssssst")
+            self.assertAlmostEqual(s, ssssss[-1])
+            a1 = pts_angles(*dihed_points[:3], return_crosses=False)
+            a2 = pts_angles(*dihed_points[1:], return_crosses=False)
+
+            sssaas = list(ssssss[:3]) + [a1, a2, t]
+            s2 = dihedral_distance(sssaas, "sssaat")
+            self.assertAlmostEqual(s, s2)
+            sssaat = list(ssssss[:3]) + [a1, a2, s]
+            t2 = dihedral_from_distance(sssaat, "sssaat")
+            self.assertAlmostEqual(t, t2)
+
+            ssssas = list(ssssss[:4]) + [a2, t]
+            s3 = dihedral_distance(ssssas, "ssssat")
+            self.assertAlmostEqual(s, s3)
+            ssssat = list(ssssss[:4]) + [a2, s]
+            t2 = dihedral_from_distance(ssssat, "ssssat")
+            self.assertAlmostEqual(t, t2)

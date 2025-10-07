@@ -1206,7 +1206,7 @@ class TriangleType(enum.Enum):
     SAA = "saa"
     ASA = "asa"
 def law_of_cosines_cos(a, b, c):
-    return (c**2 - (a**2 + b**2)) / (2*a*b)
+    return ((a**2 + b**2) - c**2) / (2*a*b)
 def law_of_sines_sin(a, b, A):
     return np.sin(A) * b / a
 def law_of_sines_dist(a, B, A):
@@ -1423,9 +1423,7 @@ def dihedral_from_ssssaa(a, b, c, alpha, beta, r, use_cos=False):
     cb = np.cos(beta)
     sa = np.sin(alpha)
     sb = np.sin(beta)
-    ct = (
-        (a**2+b**2+c**2-r**2 - 2*(a*b*ca + b*c*cb -a*c*ca*cb))/(a*c*sa*sb)
-    )
+    ct = ((a**2 + b**2 + c**2) - r**2 - 2*a*b*ca - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
     if use_cos:
         return ct
     else:
@@ -1439,7 +1437,7 @@ def dihedral_from_sssssa(a, b, c, x, beta, r, use_cos=False):
     sa = np.sqrt(1-ca**2)
     sb = np.sin(beta)
     r2 = r**2
-    ct = (((r2-(x2 + c**2))/2 - b*c*cb)/(a*c) + ca*cb)/ (sa*sb)
+    ct = ((x2+c**2) - r2 - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
     if use_cos:
         return ct
     else:

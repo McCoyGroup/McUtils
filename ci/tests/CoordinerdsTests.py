@@ -730,19 +730,6 @@ class ConverterTest(TestCase):
     @debugTest
     def test_DistsFromInternals(self):
         import McUtils.Numputils as nput
-        # test = np.array(
-        #     [[0.799673, 0.800962, 0.704717],
-        #      [0.172961, 0.740208, 0.372798],
-        #      [0.0908716, 0.544543, 0.534767],
-        #      [0.00792744, 0.626499, 0.928667]])
-        # print(
-        #     nput.pts_norms(test[0], test[1]),
-        #     nput.pts_norms(test[1], test[2]),
-        #     nput.pts_norms(test[2], test[3]),
-        #     nput.pts_angles(test[0], test[1], test[2])[0],
-        #     nput.pts_angles(test[1], test[2], test[3])[0],
-        #     nput.pts_dihedrals(*test)
-        # )
 
         specs = [
             (0, 1),
@@ -750,7 +737,7 @@ class ConverterTest(TestCase):
             (0, 3),
             (1, 0, 2),
             (1, 0, 3),
-            (2, 0, 3)
+            (3, 0, 1, 2)
         ]
         np.random.seed(123123)
         coords = np.random.rand(4, 3)
