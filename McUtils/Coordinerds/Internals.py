@@ -1,4 +1,5 @@
 import collections
+import itertools
 
 import numpy as np
 from .. import Devutils as dev
@@ -585,7 +586,7 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
             ]
             return converter(*args)
     return convert
-def get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True):
+def get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True, abs_dihedrals=True):
     base_conv = get_internal_distance_conversion_spec(internals, canonicalize=canonicalize)
     final_inds = list(sorted(base_conv.keys(), key=lambda k:base_conv[k].mapped_pos))
     rordered_conversion = list(sorted(base_conv.values(), key=lambda v:v.mapped_pos))
@@ -600,17 +601,54 @@ def get_internal_distance_conversion(internals, canonicalize=True, shift_dihedra
         internal_values = np.asanyarray(internal_values)
         if shift_dihedrals:
             internal_values = internal_values.copy()
-            internal_values[..., dihedral_pos] = np.pi - internal_values[..., dihedral_pos]
+            # force to be positive, push back onto appro
+            internal_values[..., dihedral_pos] = np.pi - np.abs(internal_values[..., dihedral_pos])
+        elif abs_dihedrals:
+            internal_values = internal_values.copy()
+            # force to be positive, push back onto appro
+            internal_values[..., dihedral_pos] = np.abs(internal_values[..., dihedral_pos])
         dists = np.zeros(internal_values.shape[:-1] + (len(convs),))
         for n,c in enumerate(convs):
             dists[..., n] = c(internal_values, dists)
 
         return dists
 
-    return convert
-def internal_distance_convert(coords, specs, canonicalize=True, shift_dihedrals=True):
-    converter = get_internal_distance_conversion(specs,
-                                                 canonicalize=canonicalize,
-                                                 shift_dihedrals=shift_dihedrals
-                                                 )
-    return converter(coords)
+    return final_inds, convert
+def _check_complete_distances(final_dists):
+    ds = set(final_dists)
+    final_dists = list(final_dists)
+    inds = np.unique([x for y in final_dists for x in y])
+    targs = list(itertools.combinations(inds, 2))
+    missing = []
+    ord = []
+    for i,j in targs:
+        if (i,j) in ds:
+            ord.append(final_dists.index((i,j)))
+        elif (j,i) in ds:
+            ord.append(final_dists.index((j,i)))
+        else:
+            missing.append((i,j))
+
+    if len(missing) > 0:
+        raise ValueError(f"distance set missing: {missing}")
+
+    return ord
+def internal_distance_convert(coords, specs,
+                              canonicalize=True,
+                              shift_dihedrals=True,
+                              abs_dihedrals=True,
+                              check_distance_spec=True):
+    final_dists, converter = get_internal_distance_conversion(specs,
+                                                              canonicalize=canonicalize,
+                                                              shift_dihedrals=shift_dihedrals,
+                                                              abs_dihedrals=abs_dihedrals
+                                                              )
+    if check_distance_spec:
+        ord = _check_complete_distances(final_dists)
+    else:
+        ord = None
+    conv = converter(coords)
+    if ord is not None:
+        conv = conv[..., ord]
+        final_dists = [final_dists[i] for i in ord]
+    return final_dists, conv

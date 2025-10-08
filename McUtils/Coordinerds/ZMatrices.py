@@ -16,6 +16,7 @@ __all__ = [
     "set_zmatrix_embedding",
     "enumerate_zmatrices",
     "extract_zmatrix_internals",
+    "extract_zmatrix_values",
     "parse_zmatrix_string",
     "format_zmatrix_string",
     "validate_zmatrix",
@@ -275,6 +276,25 @@ def extract_zmatrix_internals(zmat, strip_embedding=True, canonicalize=True):
                 coord = tuple(row[:4])
             specs.append(coord)
     return specs
+
+def extract_zmatrix_values(zmat, inds=None, strip_embedding=True):
+    zmat = np.asanyarray(zmat)
+    if zmat.shape[-1] == 4:
+        zmat = zmat[1:, 1:]
+    if inds is None:
+        n = zmat.shape[-1]*zmat.shape[-2]
+        inds = np.arange(n)
+        if strip_embedding:
+            inds = np.delete(inds, zmatrix_embedding_coords(zmat))
+    elif strip_embedding:
+        real_coords = np.delete(
+            np.arange(zmat.shape[-1]*zmat.shape[-2]),
+            zmatrix_embedding_coords(zmat)
+        )
+        inds = real_coords[inds,]
+    flat_mat = np.reshape(zmat, zmat.shape[:-2] + (zmat.shape[-1]*zmat.shape[-2],))
+    return flat_mat[..., inds]
+
 
 scan_spec = collections.namedtuple('scan_spec', ['value', 'steps', 'amount'])
 def _prep_var_spec(v):
