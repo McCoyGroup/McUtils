@@ -2218,9 +2218,9 @@ class X3DAxes(GraphicsAxes3D):
                   edgecolors=None, color=None, glow=None, **styles):
         if color is None: color = edgecolors
         if color is None: color = 'black'
-        if line_thickness is None and s is not None:
-            if not nput.is_numeric(s): s = s[0]
-            line_thickness = s / 1000
+        # if line_thickness is None and s is not None:
+        #     if not nput.is_numeric(s): s = s[0]
+        #     line_thickness = s / 1000
         points = np.asanyarray(points)
         if riffle:
             if indices is not None:
@@ -2240,13 +2240,26 @@ class X3DAxes(GraphicsAxes3D):
                     points[..., riff_start, np.newaxis, :],
                     points[..., riff_end, np.newaxis, :]
                 ], axis=-2).reshape((-1, 2, 3))
-        if glow is None:
-            glow = color
 
-        if indices is not None:
-            line_set = x3d.X3DIndexedLineSet(points, indices, line_thickness=line_thickness, glow=glow, **styles)
+        if line_thickness is not None:
+            if indices is not None:
+                raise NotImplementedError(indices)
+            else:
+                # line_set = x3d.X3DGroup([
+                #     x3d.X3DCylinder(p1, p2, line_thickness=line_thickness, color=glow, **styles)
+                #     for p1, p2 in zip(points[:-1], points[1:])
+                # ])
+                line_set = x3d.X3DCylinder(points[:-1], points[1:], radius=line_thickness,
+                                           glow=glow,
+                                           color=color,
+                                           **styles)
         else:
-            line_set = x3d.X3DLine(points, line_thickness=line_thickness, glow=glow, **styles)
+            if glow is None:
+                glow = color
+            if indices is not None:
+                line_set = x3d.X3DIndexedLineSet(points, indices, line_thickness=line_thickness, glow=glow, **styles)
+            else:
+                line_set = x3d.X3DLine(points, line_thickness=line_thickness, glow=glow, **styles)
         self.children.append(line_set)
 
         return line_set

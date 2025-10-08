@@ -108,7 +108,17 @@ class X3DHTML:
     class Field(X3DElement): tag = "Field"
     class FloatVertexAttribute(X3DElement): tag = "FloatVertexAttribute"
     class Fog(X3DElement): tag = "Fog"
-    class FontStyle(X3DElement): tag = "FontStyle"
+    class FontStyle(X3DElement):
+        class FSManager(HTML.TagElement.context):
+            class FakeCSS:
+                __slots__ = ["props"]
+                def __init__(self, props):
+                    self.props = props
+            @classmethod
+            def manage_styles(cls, styles):
+                return cls.FakeCSS(styles)
+        context = FSManager
+        tag = "FontStyle"
     class GeneratedCubeMapTexture(X3DElement): tag = "GeneratedCubeMapTexture"
     class GeoCoordinate(X3DElement): tag = "GeoCoordinate"
     class GeoElevationGrid(X3DElement): tag = "GeoElevationGrid"

@@ -579,6 +579,7 @@ class X3DGeometryObject(X3DPrimitive):
                       scale=None,
                       normal=None,
                       up_vector=None,
+                      bbox_center=None,
                       **core_opts):
         base_obj = self.create_tag_object(**core_opts)
         tf = {}
@@ -594,7 +595,7 @@ class X3DGeometryObject(X3DPrimitive):
                         @ nput.rotation_matrix(rotation[:3], rotation[3])
                 )
             rotation = np.concatenate([crosses, [angs]])
-        for k,v in [["translation",translation], ["rotation",rotation], ["scale", scale]]:
+        for k,v in [["translation",translation], ["rotation",rotation], ["scale", scale], ['bboxcenter', bbox_center]]:
             if v is not None:
                 tf[k] = np.round(v, 4) if not isinstance(v, str) else v
         if len(tf) == 0:
@@ -788,6 +789,33 @@ class X3DCappedCylinder(X3DGroup):
 class X3DText(X3DGeometryGroup):
     tag_class = X3DHTML.Text
 
+    def __init__(self, *args, billboard=True, billboard_opts=None, **opts):
+        if billboard:
+            if billboard_opts is None:
+                billboard_opts = {'axisOfRotation':'0 0 0'}
+            self.wrapper_class = lambda *x,**y:X3DHTML.Billboard(X3DHTML.Shape(*x, **y), **billboard_opts)
+        super().__init__(*args, **opts)
+    def create_tag_object(self, font_style=None, **core_opts):
+        body = []
+        if font_style is not None:
+            body.append(font_style)
+        return self.tag_class(body, **core_opts)
+    def prep_geometry_opts(self, centers, text, font_style=None, rotation=None, normal=None, **opts):
+        centers = self.prep_vecs(centers)
+        rotation = self.prep_vecs(rotation, len(centers))
+        normal = self.prep_vecs(normal, len(centers))
+        text = self.prep_const(text, len(centers))
+        font_style = [
+            X3DHTML.FontStyle(**fs)
+                if fs is not None else
+            None
+            for fs in self.prep_const(font_style, len(centers))
+        ]
+        return [
+            {"translation": c, 'string': t, 'length': len(t), 'font_style':fs, 'rotation':r, 'normal':n}
+            for c, t, fs, r, n in zip(centers, text, font_style, rotation, normal)
+        ]
+
 class X3DTorus(X3DGeometryGroup):
     tag_class = X3DHTML.Torus
 
@@ -795,8 +823,6 @@ class X3DTorus(X3DGeometryGroup):
                            normal=None, rotation=None, scale=None,
                            angle=None,
                            **opts):
-        centers = self.prep_vecs(centers)
-        normal = self.prep_vecs(normal, centers.shape[0])
         if angle is not None and angle < 0:
             if rotation is None:
                 rotation = [0, 0, 1, 0]
@@ -804,6 +830,8 @@ class X3DTorus(X3DGeometryGroup):
                 rotation = np.array(rotation.split()).astype(float)
             rotation = list(rotation[:3]) + [rotation[3] + angle]
             angle = abs(angle)
+        centers = self.prep_vecs(centers)
+        normal = self.prep_vecs(normal, centers.shape[0])
         rotation = self.prep_vecs(rotation, centers.shape[0])
         scale = self.prep_vecs(scale, centers.shape[0])
         radius = self.prep_const(radius, centers.shape[0])

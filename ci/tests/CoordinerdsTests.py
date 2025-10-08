@@ -730,23 +730,40 @@ class ConverterTest(TestCase):
     @debugTest
     def test_DistsFromInternals(self):
         import McUtils.Numputils as nput
+        from McUtils.Data import UnitsData
 
-        specs = [
-            (0, 1),
-            (0, 2,),
-            (0, 3),
-            (1, 0, 2),
-            (1, 0, 3),
-            (3, 0, 1, 2)
-        ]
-        np.random.seed(123123)
-        coords = np.random.rand(4, 3)
+        # specs = [
+        #     (0, 1),
+        #     (0, 2,),
+        #     (0, 3),
+        #     (1, 0, 2),
+        #     (1, 0, 3),
+        #     (3, 0, 1, 2)
+        # ]
+        # np.random.seed(123123)
+        # coords = np.random.rand(4, 3)
+        # dists = nput.distance_matrix(coords, return_triu=True)
+        # ints = nput.internal_coordinate_tensors(coords, specs, order=0)[0]
+        # print()
+        # print("Internals:", ints)
+        # print("Distances:", dists)
+        # dinds, dists2 = internal_distance_convert(ints, specs, shift_dihedrals=True)
+        # print("Int Dists:", dists2)
+
+
+        specs = [(0, 1), (1, 2), (0, 1, 2), (1, 3), (0, 1, 3), (2, 0, 1, 3)]
+        coords = np.array(
+            [[-0.6536668184,  0.1833576293, 0.0000000000],
+             [ 0.6547582273, -0.1845709190, 0.0000000000],
+             [-1.4819024331, -0.5299427478, 0.0000000000],
+             [ 1.4831016243,  0.5285859096, 0.0000000000]]
+        ) / UnitsData.bohr_to_angstroms
         dists = nput.distance_matrix(coords, return_triu=True)
         ints = nput.internal_coordinate_tensors(coords, specs, order=0)[0]
         print()
         print("Internals:", ints)
         print("Distances:", dists)
-        dists2 = internal_distance_convert(ints, specs, shift_dihedrals=True)
+        dinds, dists2 = internal_distance_convert(ints, specs, shift_dihedrals=True)
         print("Int Dists:", dists2)
 
         return
