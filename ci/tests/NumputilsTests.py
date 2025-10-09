@@ -2123,7 +2123,7 @@ class NumputilsTests(TestCase):
                     new = np.array(triangle_convert(conv_tris[conversion], conversion, conversion2))
                     self.assertTrue(np.allclose(new, conv_tris[conversion2]), msg=conversion+"+"+conversion2)
 
-    @debugTest
+    @validationTest
     def test_DihedralConversions(self):
         np.random.seed(123123)
         for _ in range(1):
@@ -2149,3 +2149,23 @@ class NumputilsTests(TestCase):
             ssssat = list(ssssss[:4]) + [a2, s]
             t2 = dihedral_from_distance(ssssat, "ssssat")
             self.assertAlmostEqual(t, t2)
+
+    @validationTest
+    def test_LegendreCoeffs(self):
+        print(legendre_integer_coefficients(7))
+
+    @debugTest
+    def test_TriangleDerivs(self):
+        np.random.seed(123321)
+        tri_points = np.random.rand(3, 3)
+        sss = distance_matrix(tri_points, return_triu=True)[(0, 2, 1),]
+        sas = triangle_convert(sss, "sss", "sas")
+        print(sas)
+        # local_derivs = [[z,o] for z,o in zip(sas, np.eye(3))]
+        # sss_derivs = triangle_convert(local_derivs, "sss", "sas", order=1)
+        # for exp in sss_derivs:
+        #     print(exp)
+        local_derivs = [[z,o] for z,o in zip(sas, np.eye(3))]
+        sss_derivs = triangle_convert(local_derivs, "sas", "sss", order=1)
+        for exp in sss_derivs:
+            print(exp)
