@@ -42,13 +42,6 @@ __all__ = [
     "mat_vec_muls",
     "one_pad_vecs",
     "affine_multiply",
-    "triangle_convert",
-    "triangle_converter",
-    "triangle_area",
-    "dihedral_distance",
-    "dihedral_distance_converter",
-    "dihedral_from_distance",
-    "dihedral_from_distance_converter",
     "cartesian_from_rad",
     "polar_to_cartesian",
     "apply_by_coordinates",
@@ -68,7 +61,8 @@ __all__ = [
     "symmetric_matrix_log",
     "imaginary_symmetric_matrix_log",
     "sylvester_solve",
-    "symmetrize_array"
+    "symmetrize_array",
+    "integer_exponent"
 ]
 
 ##
@@ -1199,294 +1193,6 @@ def polar_to_cartesian(center, v, u, r, a, d):
     return newstuff
 
 
-class TriangleType(enum.Enum):
-    SSS = "sss"
-    SAS = "sas"
-    SSA = "ssa"
-    SAA = "saa"
-    ASA = "asa"
-def law_of_cosines_cos(a, b, c):
-    return ((a**2 + b**2) - c**2) / (2*a*b)
-def law_of_sines_sin(a, b, A):
-    return np.sin(A) * b / a
-def law_of_sines_dist(a, B, A):
-    return a * np.sin(B) / np.sin(A)
-def law_of_cosines_dist(a, b, C):
-    return np.sqrt(a**2 + b**2 - 2*a*b*np.cos(C))
-def tri_sss_area(a, b, c):
-    s = (a + b + c) / 2
-    tris = np.sqrt(s * (s - a) * (s - b) * (s - c))
-    return tris
-def tri_sas_area(a, C, b):
-    return 1/2 * (a * b * np.sin(C))
-def tri_sss_to_sas(a, b, c):
-    C = np.arccos(law_of_cosines_cos(a, b, c))
-    return (a, C, b)
-def tri_sss_to_ssa(a, b, c):
-    A = np.arccos(law_of_cosines_cos(b, c, a))
-    return (a, b, A)
-def tri_sss_to_saa(a, b, c):
-    A = np.arccos(law_of_cosines_cos(b, c, a))
-    B = np.arccos(law_of_cosines_cos(a, c, b))
-    return (a, B, A)
-def tri_sss_to_asa(a, b, c):
-    B = np.arccos(law_of_cosines_cos(a, c, b))
-    C = np.arccos(law_of_cosines_cos(a, b, c))
-    return (C, a, B)
-def tri_sas_to_sss(a, C, b):
-    c = law_of_cosines_dist(a, b, C)
-    return (a, b, c)
-def tri_sas_to_ssa(a, C, b):
-    return tri_sss_to_ssa(*tri_sas_to_sss(a,C,b))
-def tri_sas_to_saa(a, C, b):
-    return tri_sss_to_saa(*tri_sas_to_sss(a,C,b))
-def tri_sas_to_asa(a, C, b):
-    return tri_sss_to_asa(*tri_sas_to_sss(a,C,b))
-def tri_ssa_to_sas(a, b, A):
-    B = np.arcsin(law_of_sines_sin(a, b, A))
-    C = np.pi - (A + B)
-    return (a, C, b)
-def tri_ssa_to_saa(a, b, A):
-    B = np.arcsin(law_of_sines_sin(a, b, A))
-    return (a, B, A)
-def tri_ssa_to_asa(a, b, A):
-    B = np.arcsin(law_of_sines_sin(a, b, A))
-    C = np.pi - (A + B)
-    return (C, a, B)
-def tri_ssa_to_sss(a, b, A):
-    return tri_sas_to_sss(*tri_ssa_to_sas(a, b, A))
-def tri_saa_to_ssa(a, B, A):
-    b = law_of_sines_dist(a, B, A)
-    return (a, b, A)
-def tri_saa_to_sas(a, B, A):
-    b = law_of_sines_dist(a, B, A)
-    C = np.pi - (A + B)
-    return (a, C, b)
-def tri_saa_to_asa(a, B, A):
-    C = np.pi - (A + B)
-    return (C, a, B)
-def tri_saa_to_sss(a, B, A):
-    return tri_sas_to_sss(*tri_saa_to_sas(a, B, A))
-def tri_asa_to_saa(C, a, B):
-    A = np.pi - (B + C)
-    return (a, B, A)
-def tri_asa_to_sas(C, a, B):
-    A = np.pi - (B + C)
-    b = law_of_sines_dist(a, B, A)
-    return (a, C, b)
-def tri_asa_to_ssa(C, a, B):
-    A = np.pi - (B + C)
-    b = law_of_sines_dist(a, B, A)
-    return (a, b, A)
-def tri_asa_to_sss(C, a, B):
-    return tri_sas_to_sss(*tri_asa_to_sas(C, a, B))
-def triangle_converter(type1:str|TriangleType, type2:str|TriangleType):
-    # only 9 possible conversions, let's just write them down
-    type1 = TriangleType(type1)
-    type2 = TriangleType(type2)
-    if type1 == TriangleType.SSS:
-        if type2 == TriangleType.SSS:
-            return lambda x,y,z:(x,y,z)
-        elif type2 == TriangleType.SAS:
-            return tri_sss_to_sas
-        elif type2 == TriangleType.SSA:
-            return tri_sss_to_ssa
-        elif type2 == TriangleType.SAA:
-            return tri_sss_to_saa
-        elif type2 == TriangleType.ASA:
-            return tri_sss_to_asa
-    elif type1 == TriangleType.SAS:
-        if type2 == TriangleType.SSS:
-            return tri_sas_to_sss
-        elif type2 == TriangleType.SAS:
-            return lambda x,y,z:(x,y,z)
-        elif type2 == TriangleType.SSA:
-            return tri_sas_to_ssa
-        elif type2 == TriangleType.SAA:
-            return tri_sas_to_saa
-        elif type2 == TriangleType.ASA:
-            return tri_sas_to_asa
-    elif type1 == TriangleType.SSA:
-        if type2 == TriangleType.SSS:
-            return tri_ssa_to_sss
-        elif type2 == TriangleType.SAS:
-            return tri_ssa_to_sas
-        elif type2 == TriangleType.SSA:
-            return lambda x,y,z:(x,y,z)
-        elif type2 == TriangleType.SAA:
-            return tri_ssa_to_saa
-        elif type2 == TriangleType.ASA:
-            return tri_ssa_to_asa
-    elif type1 == TriangleType.SAA:
-        if type2 == TriangleType.SSS:
-            return tri_saa_to_sss
-        elif type2 == TriangleType.SAS:
-            return tri_saa_to_sas
-        elif type2 == TriangleType.SSA:
-            return tri_saa_to_ssa
-        elif type2 == TriangleType.SAA:
-            return lambda x,y,z:(x,y,z)
-        elif type2 == TriangleType.ASA:
-            return tri_saa_to_asa
-    elif type1 == TriangleType.ASA:
-        if type2 == TriangleType.SSS:
-            return tri_asa_to_sss
-        elif type2 == TriangleType.SAS:
-            return tri_asa_to_sas
-        elif type2 == TriangleType.SSA:
-            return tri_asa_to_ssa
-        elif type2 == TriangleType.SAA:
-            return tri_asa_to_saa
-        elif type2 == TriangleType.ASA:
-            return lambda x,y,z:(x,y,z)
-    return None
-def triangle_convert(tri_spec, type1:str|TriangleType, type2:str|TriangleType):
-    converter = triangle_converter(type1, type2)
-    if converter is None:
-        raise ValueError(f"can't convert from triangle type {type1} to triangle type {type2}")
-    b1,b2,b3 = tri_spec
-    b1 = np.asanyarray(b1)
-    b2 = np.asanyarray(b2)
-    b3 = np.asanyarray(b3)
-    return converter(b1, b2, b3)
-def triangle_area(tri_spec, type:str|TriangleType):
-    type = TriangleType(type)
-    b1,b2,b3 = tri_spec
-    b1 = np.asanyarray(b1)
-    b2 = np.asanyarray(b2)
-    b3 = np.asanyarray(b3)
-    if type == TriangleType.SSS:
-        return tri_sss_area(b1, b2, b3)
-    elif type == TriangleType.SAS:
-        return tri_sas_area(b1, b2, b3)
-    else:
-        return tri_sas_area(*triangle_convert(tri_spec, type, TriangleType.SAS))
-
-def dihedral_sssaa_distance(a, b, c, alpha, beta, tau, use_cos=False):
-    """
-    a^2 + b^2 + c^2 - 2 (
-        a b Cos[\[Alpha]] + b c Cos[\[Beta]]
-        + a c (Cos[\[Tau]] Sin[\[Alpha]] Sin[\[Beta]] - Cos[\[Alpha]] Cos[\[Beta]])
-       )
-    """
-    ca = np.cos(alpha)
-    cb = np.cos(beta)
-    sa = np.sin(alpha)
-    sb = np.sin(beta)
-    if use_cos:
-        ct = tau
-    else:
-        ct = np.cos(tau)
-    return np.sqrt(
-        a**2+b**2+c**2
-        - 2*(a*b*ca + b*c*cb + a*c*(ct*sa*sb-ca*cb))
-    )
-def dihedral_ssssa_distance(a, b, c, x, beta, tau, use_cos=False):
-    a2 = a**2
-    b2 = b**2
-    x2 = x**2
-    ca = (a2+b2-x2)/(2*a*b)
-    cb = np.cos(beta)
-    sa = np.sqrt(1-ca**2)
-    sb = np.sin(beta)
-    if use_cos:
-        ct = tau
-    else:
-        ct = np.cos(tau)
-    return np.sqrt(
-        x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
-    )
-def dihedral_sssss_distance(a,b, c, x, y, tau, use_cos=False):
-    # potentially more stable than just computing the sin and cos in the usual way...
-    xp = (a+b)**2
-    xm = (a-b)**2
-    yp = (b+c)**2
-    ym = (b-c)**2
-    x2 = x**2
-    y2 = y**2
-    a2 = a**2
-    b2 = b**2
-    c2 = c**2
-    if use_cos:
-        ct = tau
-    else:
-        ct = np.cos(tau)
-    return np.sqrt(
-        x2+y2-b2
-        + (
-                (a2+b2-x2)*(b2+c2-y2)
-                -np.sqrt((xm - x2)*(xp - x2)*(ym - y2)*(yp - y2))*ct
-        )/(2*b2)
-    )
-def dihedral_from_ssssaa(a, b, c, alpha, beta, r, use_cos=False):
-    ca = np.cos(alpha)
-    cb = np.cos(beta)
-    sa = np.sin(alpha)
-    sb = np.sin(beta)
-    ct = ((a**2 + b**2 + c**2) - r**2 - 2*a*b*ca - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
-    if use_cos:
-        return ct
-    else:
-        return np.arccos(ct)
-def dihedral_from_sssssa(a, b, c, x, beta, r, use_cos=False):
-    a2 = a**2
-    b2 = b**2
-    x2 = x**2
-    ca = (a2+b2-x2)/(2*a*b)
-    cb = np.cos(beta)
-    sa = np.sqrt(1-ca**2)
-    sb = np.sin(beta)
-    r2 = r**2
-    ct = ((x2+c**2) - r2 - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
-    if use_cos:
-        return ct
-    else:
-        return np.arccos(ct)
-def dihedral_from_ssssss(a, b, c, x, y, r, use_cos=False):
-    xp = (a + b) ** 2
-    xm = (a - b) ** 2
-    yp = (b + c) ** 2
-    ym = (b - c) ** 2
-    x2 = x ** 2
-    y2 = y ** 2
-    a2 = a ** 2
-    b2 = b ** 2
-    c2 = c ** 2
-    r2 = r ** 2
-    ct = (
-            (a2 + b2 - x2) * (b2 + c2 - y2)
-            - ((r2 - (x2 + y2 - b2)) * (2 * b2))
-    ) / np.sqrt((xm - x2) * (xp - x2) * (ym - y2) * (yp - y2))
-    if use_cos:
-        return ct
-    else:
-        return np.arccos(ct)
-
-class DihedralSpecifierType(enum.Enum):
-    SSSAAT = "sssaat"
-    SSSSAT = "ssssat"
-    SSSSST = "ssssst"
-def dihedral_distance_converter(dihedral_type:str|DihedralSpecifierType):
-    dihedral_type = DihedralSpecifierType(dihedral_type)
-    if dihedral_type == DihedralSpecifierType.SSSSST:
-        return dihedral_sssss_distance
-    elif dihedral_type == DihedralSpecifierType.SSSSAT:
-        return dihedral_ssssa_distance
-    else:
-        return dihedral_sssaa_distance
-def dihedral_distance(spec, dihedral_type:str|DihedralSpecifierType, use_cos=False) -> float|np.ndarray:
-    return dihedral_distance_converter(dihedral_type)(*spec, use_cos=use_cos)
-def dihedral_from_distance_converter(dihedral_type:str|DihedralSpecifierType):
-    dihedral_type = DihedralSpecifierType(dihedral_type)
-    if dihedral_type == DihedralSpecifierType.SSSSST:
-        return dihedral_from_ssssss
-    elif dihedral_type == DihedralSpecifierType.SSSSAT:
-        return dihedral_from_sssssa
-    else:
-        return dihedral_from_ssssaa
-def dihedral_from_distance(spec, dihedral_type:str|DihedralSpecifierType, use_cos=False) -> float|np.ndarray:
-    return dihedral_from_distance_converter(dihedral_type)(*spec, use_cos=use_cos)
-
 ##############################################################################
 #
 #       apply_pointwise
@@ -1941,3 +1647,27 @@ def symmetrize_array(a,
                 b[new_pos] = val
 
     return b
+
+def integer_exponent(ints, k, max_its=None):
+    ints = np.asanyarray(ints, dtype=int)
+    base_shape = ints.shape
+    ints = ints.reshape(-1)
+    sel = np.arange(ints.shape[0])
+    counts = np.zeros(ints.shape[0], dtype=int)
+    if max_its is None:
+        if k == 2:
+            test_its = np.log2(ints)
+        elif k == 10:
+            test_its = np.log10(ints)
+        else:
+            test_its = np.log(ints) / np.log(k)
+        max_its = int(np.ceil(np.max(test_its)))
+    for i in range(max_its):
+        mask = np.where(ints[sel,] % k == 0)
+        if len(mask) == 0 or len(mask[0]) == 0:
+            break
+
+        sel = sel[mask[0],]
+        counts[sel,] += 1
+        ints[sel,] //= k
+    return ints.reshape(base_shape), counts.reshape(base_shape)

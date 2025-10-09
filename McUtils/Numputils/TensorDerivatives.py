@@ -1,4 +1,4 @@
-
+import collections
 import itertools, numpy as np, math
 # import uuid
 
@@ -29,8 +29,7 @@ __all__ = [
     "vec_anglecos_deriv",
     "vec_anglesin_deriv",
     "vec_dihed_deriv",
-    "vec_plane_angle_deriv",
-    # "law_of_cosines_deriv"
+    "vec_plane_angle_deriv"
 ]
 
 # levi_cevita3.__name__ = "levi_cevita3"
@@ -362,6 +361,10 @@ def scalarprod_deriv(s_expansion, A_expansion,
             final_expansion.append(high_order_expansion[n])
             n += 1
     return final_expansion
+
+def scalarfunc_deriv(scalar_func, arg_expansion, order):
+    scalar_expansion = [scalar_func(arg_expansion[0], i) for i in range(order+1)]
+    return [scalar_expansion[0]] + scalarprod_deriv(scalar_expansion[1:], arg_expansion[1:], order)
 
 def inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False):
     if reverse_expansion is None:
@@ -1029,6 +1032,8 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, unitized=False
                                   unit_expansions=[B_norms, n1_norms, n2_norms],
                                   component_vectors=[A_expansion, B_expansion, C_expansion]
                                   )
+    # add in the np.pi shift to account for imposed sign flip in standard imp. to match Gaussian
+    base_derivs[0] = np.pi - base_derivs[0]
     return base_derivs
     # return [-x for x in base_derivs]
 
@@ -1564,29 +1569,3 @@ def tensorops_deriv(
     ]
 
     return derivs
-
-
-def law_of_cosines_cos_deriv(a_expansion, b_expansion, c_expansion, order,
-                         return_components=False,
-                         a2_expansion=None,
-                         b2_expansion=None,
-                         c2_expansion=None,
-                         abinv_expansion=None
-                         ):
-    if a2_expansion is None:
-        a2_expansion = scalarprod_deriv(a_expansion, a_expansion, order)
-    if b2_expansion is None:
-        b2_expansion = scalarprod_deriv(b_expansion, b_expansion, order)
-    if c2_expansion is None:
-        c2_expansion = scalarprod_deriv(c_expansion, c_expansion, order)
-    if abinv_expansion is None:
-        abinv_expansion = scalarinv_deriv(scalarprod_deriv(a_expansion, b_expansion, order), order)
-    term = scalarprod_deriv(
-        (c2_expansion - (a2_expansion + b2_expansion)),
-        abinv_expansion,
-        order
-    )
-    if return_components:
-        return term, (a2_expansion, b2_expansion, c2_expansion, abinv_expansion)
-    else:
-        return term

@@ -3,7 +3,7 @@ Provides analytic derivatives for some common base terms with the hope that we c
 """
 import itertools
 import math
-
+import enum
 import numpy as np
 from .VectorOps import *
 from . import TensorDerivatives as td
@@ -44,7 +44,15 @@ __all__ = [
     "metric_tensor",
     "delocalized_internal_coordinate_transformation",
     "relocalize_coordinate_transformation",
-    "transform_cartesian_derivatives"
+    "transform_cartesian_derivatives",
+    "legendre_integer_coefficients",
+    "triangle_convert",
+    "triangle_converter",
+    "triangle_area",
+    "dihedral_distance",
+    "dihedral_distance_converter",
+    "dihedral_from_distance",
+    "dihedral_from_distance_converter",
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -2312,3 +2320,1217 @@ def transform_cartesian_derivatives(
             new_derivs.append(d)
 
     return new_derivs
+
+
+def law_of_cosines_cos(a, b, c):
+    return ((a**2 + b**2) - c**2) / (2*a*b)
+def law_of_sines_sin(a, b, A):
+    return np.sin(A) * b / a
+def law_of_sines_dist(a, B, A):
+    return a * np.sin(B) / np.sin(A)
+def law_of_cosines_dist(a, b, C):
+    return np.sqrt(a**2 + b**2 - 2*a*b*np.cos(C))
+def tri_sss_area(a, b, c):
+    s = (a + b + c) / 2
+    tris = np.sqrt(s * (s - a) * (s - b) * (s - c))
+    return tris
+def tri_sas_area(a, C, b):
+    return 1/2 * (a * b * np.sin(C))
+def tri_sss_to_sas(a, b, c):
+    C = np.arccos(law_of_cosines_cos(a, b, c))
+    return (a, C, b)
+def tri_sss_to_ssa(a, b, c):
+    A = np.arccos(law_of_cosines_cos(b, c, a))
+    return (a, b, A)
+def tri_sss_to_saa(a, b, c):
+    A = np.arccos(law_of_cosines_cos(b, c, a))
+    B = np.arccos(law_of_cosines_cos(a, c, b))
+    return (a, B, A)
+def tri_sss_to_asa(a, b, c):
+    B = np.arccos(law_of_cosines_cos(a, c, b))
+    C = np.arccos(law_of_cosines_cos(a, b, c))
+    return (C, a, B)
+def tri_sas_to_sss(a, C, b):
+    c = law_of_cosines_dist(a, b, C)
+    return (a, b, c)
+def tri_sas_to_ssa(a, C, b):
+    return tri_sss_to_ssa(*tri_sas_to_sss(a,C,b))
+def tri_sas_to_saa(a, C, b):
+    return tri_sss_to_saa(*tri_sas_to_sss(a,C,b))
+def tri_sas_to_asa(a, C, b):
+    return tri_sss_to_asa(*tri_sas_to_sss(a,C,b))
+def tri_ssa_to_sas(a, b, A):
+    B = np.arcsin(law_of_sines_sin(a, b, A))
+    C = np.pi - (A + B)
+    return (a, C, b)
+def tri_ssa_to_saa(a, b, A):
+    B = np.arcsin(law_of_sines_sin(a, b, A))
+    return (a, B, A)
+def tri_ssa_to_asa(a, b, A):
+    B = np.arcsin(law_of_sines_sin(a, b, A))
+    C = np.pi - (A + B)
+    return (C, a, B)
+def tri_ssa_to_sss(a, b, A):
+    return tri_sas_to_sss(*tri_ssa_to_sas(a, b, A))
+def tri_saa_to_ssa(a, B, A):
+    b = law_of_sines_dist(a, B, A)
+    return (a, b, A)
+def tri_saa_to_sas(a, B, A):
+    b = law_of_sines_dist(a, B, A)
+    C = np.pi - (A + B)
+    return (a, C, b)
+def tri_saa_to_asa(a, B, A):
+    C = np.pi - (A + B)
+    return (C, a, B)
+def tri_saa_to_sss(a, B, A):
+    return tri_sas_to_sss(*tri_saa_to_sas(a, B, A))
+def tri_asa_to_saa(C, a, B):
+    A = np.pi - (B + C)
+    return (a, B, A)
+def tri_asa_to_sas(C, a, B):
+    A = np.pi - (B + C)
+    b = law_of_sines_dist(a, B, A)
+    return (a, C, b)
+def tri_asa_to_ssa(C, a, B):
+    A = np.pi - (B + C)
+    b = law_of_sines_dist(a, B, A)
+    return (a, b, A)
+def tri_asa_to_sss(C, a, B):
+    return tri_sas_to_sss(*tri_asa_to_sas(C, a, B))
+
+
+def law_of_cosines_cos_deriv(a_expansion, b_expansion, c_expansion, order,
+                             return_components=False,
+                             a2_expansion=None,
+                             b2_expansion=None,
+                             c2_expansion=None,
+                             abinv_expansion=None,
+                             ab_expansion=None
+                             ):
+    if a2_expansion is None:
+        a2_expansion = td.scalarprod_deriv(a_expansion, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarprod_deriv(b_expansion, b_expansion, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarprod_deriv(c_expansion, c_expansion, order)
+    if abinv_expansion is None:
+        if ab_expansion is None:
+            ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
+        abinv_expansion = td.scalarinv_deriv(ab_expansion, order)
+    term = td.scalarprod_deriv(
+        (c2_expansion - (a2_expansion + b2_expansion)),
+        abinv_expansion,
+        order
+    )
+    if return_components:
+        return term, (a2_expansion, b2_expansion, c2_expansion, abinv_expansion, ab_expansion)
+    else:
+        return term
+
+def power_deriv(term, p, order):
+    scaling = np.prod(p - np.arange(order))
+    if scaling == 0:
+        return np.zeros_like(term)
+    else:
+        return scaling * np.power(term, p - order)
+def square_deriv(term, order):
+    return power_deriv(term, 2, order)
+def sqrt_deriv(term, order):
+    return power_deriv(term, 1/2, order)
+def cos_deriv(term, order):
+    return np.cos(order*np.pi/2 + term)
+def sin_deriv(term, order):
+    return np.cos(order*np.pi/2 + term)
+def legendre_scaling(n):
+    rems, _ = integer_exponent(np.arange(1, n+1), 2)
+    return np.prod(rems)
+def legendre_integer_coefficients(n):
+    coeffs = np.zeros((n, n+1), dtype=int)
+    coeffs[0, 0] = 1
+    coeffs[1, 1] = 1
+    ind_sets = np.arange(2, n+1)
+    ind_sets = ind_sets - (ind_sets % 2)
+    _, indicators = integer_exponent(ind_sets, 2)
+    for i in range(n-2):
+        m = (i+2)
+        p1 = (2*m - 1) * np.roll(coeffs[i+1], 1)
+        p2 = (m - 1) * coeffs[i]
+        s2 = 2 ** indicators[i] # already shifted by a few bits
+        s1 = s2 if i % 2 == 0 else 1
+        coeffs[i+2] = (s1*p1 - s2*p2) // m
+    return coeffs
+def arcsin_deriv(term, order):
+    #TODO: cache these
+    coeffs = np.abs(legendre_integer_coefficients(order))
+    scaling = legendre_scaling(order)
+    sec_exp = np.cos(term)**(-(order+1))
+    tan_exp = np.tan(term)**np.arange(order+1)
+    return scaling*sec_exp*np.dot(tan_exp, coeffs[-1])
+def arccos_deriv(term, order):
+    #TODO: cache these
+    coeffs = np.abs(legendre_integer_coefficients(order))
+    scaling = legendre_scaling(order)
+    s = np.sin(term)
+    c = np.cos(term)
+    csc_exp = np.sin(term)**(-(order+1))
+    cot_exp = (c/s)**np.arange(order+1)
+    return scaling*csc_exp*np.dot(cot_exp, coeffs[-1])
+def law_of_cosines_dist_deriv(a_expansion, b_expansion, C_expansion, order,
+                              return_components=False,
+                              a2_expansion=None,
+                              b2_expansion=None,
+                              abcosC_expansion=None,
+                              ab_expansion=None,
+                              cosC_expansion=None,
+                              return_square=False
+                              ):
+    if a2_expansion is None:
+        a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarfunc_deriv(square_deriv, b_expansion, order)
+    if abcosC_expansion is None:
+        if ab_expansion is None:
+            ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
+        if cosC_expansion is None:
+            cosC_expansion = td.scalarfunc_deriv(cos_deriv, C_expansion, order)
+        abcosC_expansion = td.scalarprod_deriv(ab_expansion, cosC_expansion, order)
+    cosC_test = np.arccos(C_expansion[0])
+    ab_test = a_expansion[0] * b_expansion[0]
+    term = [a+b-2*c for a,b,c in zip(a2_expansion, b2_expansion, abcosC_expansion)]
+    if not return_square:
+        term = td.scalarfunc_deriv(sqrt_deriv, term, order)
+    if return_components:
+        return term, (a2_expansion, b2_expansion, abcosC_expansion, ab_expansion, abcosC_expansion, cosC_expansion)
+    else:
+        return term
+
+def law_of_sines_sin_deriv(a_expansion, b_expansion, A_expansion, order,
+                           return_components=False,
+                           sinA_expansion=None,
+                           binva_expansion=None,
+                           ainv_expansion=None
+                           ):
+    if binva_expansion is None:
+        if ainv_expansion is None:
+            ainv_expansion = td.scalarinv_deriv(a_expansion, order)
+        binva_expansion = td.scalarprod_deriv(b_expansion, ainv_expansion, order)
+    if sinA_expansion is None:
+        sinA_expansion = td.scalarfunc_deriv(sin_deriv, A_expansion, order)
+    term = td.scalarprod_deriv(sinA_expansion, binva_expansion, order)
+
+    if return_components:
+        return term, (sinA_expansion, binva_expansion, ainv_expansion)
+    else:
+        return term
+def law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order,
+                              return_components=False,
+                              sinBinvsinA_expansion=None,
+                              sinA_expansion=None,
+                              sinB_expansion=None,
+                              sinAinv_expansion=None
+                              ):
+    if sinBinvsinA_expansion is None:
+        if sinB_expansion is None:
+            sinB_expansion = td.scalarfunc_deriv(sin_deriv, B_expansion, order)
+        if sinAinv_expansion is None:
+            if sinA_expansion is None:
+                sinA_expansion = td.scalarfunc_deriv(sin_deriv, A_expansion, order)
+            sinAinv_expansion = td.scalarinv_deriv(sinAinv_expansion, order)
+        sinBinvsinA_expansion = td.scalarprod_deriv(sinB_expansion, sinAinv_expansion, order)
+    term = td.scalarprod_deriv(a_expansion, sinBinvsinA_expansion, order)
+
+    if return_components:
+        return term, (sinBinvsinA_expansion, sinA_expansion, sinB_expansion, sinAinv_expansion)
+    else:
+        return term
+
+def tri_sss_to_sas_deriv(a_expansion, b_expansion, c_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         abinv_expansion=None,
+                         ab_expansion=None,
+                         cosC_expansion=None
+                         ):
+    if cosC_expansion is None:
+        cosC_expansion, (a2_expansion, b2_expansion, c2_expansion, abinv_expansion, ab_expansion) = law_of_cosines_cos_deriv(
+            a_expansion, b_expansion, c_expansion, order,
+            return_components=True,
+            a2_expansion=a2_expansion,
+            b2_expansion=b2_expansion,
+            c2_expansion=c2_expansion,
+            abinv_expansion=abinv_expansion,
+            ab_expansion=ab_expansion
+        )
+
+    bits = (a2_expansion, b2_expansion, c2_expansion, abinv_expansion, ab_expansion, cosC_expansion)
+    if not return_cos:
+        C_expansion = td.scalarfunc_deriv(arccos_deriv, cosC_expansion, order)
+    else:
+        C_expansion = cosC_expansion
+
+    if return_components:
+        return (a_expansion, C_expansion, b_expansion), bits
+    else:
+        return (a_expansion, C_expansion, b_expansion)
+def tri_sss_to_ssa_deriv(a_expansion, b_expansion, c_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         bcinv_expansion=None,
+                         bc_expansion=None,
+                         cosA_expansion=None
+                         ):
+    if cosA_expansion is None:
+        cosA_expansion, bits = law_of_cosines_cos_deriv(
+            b_expansion, c_expansion, a_expansion, order,
+            return_components=True,
+            a2_expansion=a2_expansion,
+            b2_expansion=b2_expansion,
+            c2_expansion=c2_expansion,
+            abinv_expansion=bcinv_expansion,
+            ab_expansion=bc_expansion
+        )
+    else:
+        bits = (a2_expansion, b2_expansion, c2_expansion, bcinv_expansion, bc_expansion)
+    bits = bits + (cosA_expansion,)
+    if not return_cos:
+        A_expansion = td.scalarfunc_deriv(arccos_deriv, cosA_expansion, order)
+    else:
+        A_expansion = cosA_expansion
+
+    if return_components:
+        return (a_expansion, b_expansion, A_expansion), bits
+    else:
+        return (a_expansion, b_expansion, A_expansion)
+def tri_sss_to_saa_deriv(a_expansion, b_expansion, c_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         acinv_expansion=None,
+                         ac_expansion=None,
+                         bcinv_expansion=None,
+                         bc_expansion=None,
+                         cosA_expansion=None,
+                         cosB_expansion=None
+                         ):
+    if cosA_expansion is None:
+        cosA_expansion, (b2_expansion, c2_expansion, a2_expansion, bcinv_expansion, bc_expansion) = law_of_cosines_cos_deriv(
+            b_expansion, c_expansion, a_expansion, order,
+            return_components=True,
+            a2_expansion=a2_expansion,
+            b2_expansion=b2_expansion,
+            c2_expansion=c2_expansion,
+            abinv_expansion=bcinv_expansion,
+            ab_expansion=bc_expansion
+        )
+    if cosB_expansion is None:
+        cosB_expansion, (a2_expansion, c2_expansion, b2_expansion, acinv_expansion, ac_expansion) = law_of_cosines_cos_deriv(
+            a_expansion, c_expansion, b_expansion, order,
+            return_components=True,
+            a2_expansion=a2_expansion,
+            b2_expansion=b2_expansion,
+            c2_expansion=c2_expansion,
+            abinv_expansion=acinv_expansion,
+            ab_expansion=ac_expansion
+        )
+
+    bits = (
+        a2_expansion,
+        b2_expansion,
+        c2_expansion,
+        acinv_expansion,
+        ac_expansion,
+        bcinv_expansion,
+        bc_expansion,
+        cosA_expansion,
+        cosB_expansion
+    )
+
+    if not return_cos:
+        A_expansion = td.scalarfunc_deriv(arccos_deriv, cosA_expansion, order)
+        B_expansion = td.scalarfunc_deriv(arccos_deriv, cosB_expansion, order)
+    else:
+        A_expansion = cosA_expansion
+        B_expansion = cosB_expansion
+
+    if return_components:
+        return (a_expansion, B_expansion, A_expansion), bits
+    else:
+        return(a_expansion, B_expansion, A_expansion)
+def tri_sss_to_asa_deriv(a_expansion, b_expansion, c_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         abinv_expansion=None,
+                         ab_expansion=None,
+                         acinv_expansion=None,
+                         ac_expansion=None,
+                         cosB_expansion=None,
+                         cosC_expansion=None
+                         ):
+    if cosB_expansion is None:
+        cosB_expansion, (a2_expansion, c2_expansion, b2_expansion, acinv_expansion, ac_expansion) = law_of_cosines_cos_deriv(
+            a_expansion, c_expansion, b_expansion, order,
+            return_components=True,
+            a2_expansion=a2_expansion,
+            b2_expansion=b2_expansion,
+            c2_expansion=c2_expansion,
+            abinv_expansion=acinv_expansion,
+            ab_expansion=ac_expansion
+        )
+    if cosC_expansion is None:
+        cosC_expansion, (a2_expansion, b2_expansion, c2_expansion, acinv_expansion, ac_expansion) = law_of_cosines_cos_deriv(
+            a_expansion, b_expansion, c_expansion, order,
+            return_components=True,
+            a2_expansion=a2_expansion,
+            b2_expansion=b2_expansion,
+            c2_expansion=c2_expansion,
+            abinv_expansion=abinv_expansion,
+            ab_expansion=ab_expansion
+        )
+
+    bits = (
+        a2_expansion,
+        b2_expansion,
+        c2_expansion,
+        abinv_expansion,
+        ab_expansion,
+        acinv_expansion,
+        ac_expansion,
+        cosB_expansion,
+        cosC_expansion
+    )
+
+    if not return_cos:
+        C_expansion = td.scalarfunc_deriv(arccos_deriv, cosC_expansion, order)
+        B_expansion = td.scalarfunc_deriv(arccos_deriv, cosB_expansion, order)
+    else:
+        C_expansion = cosC_expansion
+        B_expansion = cosB_expansion
+
+    if return_components:
+        return (C_expansion, a_expansion, B_expansion), bits
+    else:
+        return (C_expansion, a_expansion, B_expansion)
+def tri_sas_to_sss_deriv(a_expansion, C_expansion, b_expansion, order,
+                         return_components=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         abcosC_expansion=None,
+                         ab_expansion=None,
+                         cosC_expansion=None,
+                         return_square=False
+                         ):
+    c_expansion, bits = law_of_cosines_dist_deriv(a_expansion, b_expansion, C_expansion, order,
+                                                  a2_expansion=a2_expansion,
+                                                  b2_expansion=b2_expansion,
+                                                  abcosC_expansion=abcosC_expansion,
+                                                  ab_expansion=ab_expansion,
+                                                  cosC_expansion=cosC_expansion,
+                                                  return_components=True,
+                                                  return_square=return_square)
+    if return_components:
+        return (a_expansion, b_expansion, c_expansion), bits
+    else:
+        return (a_expansion, b_expansion, c_expansion)
+def tri_sas_to_ssa_deriv(a_expansion, b_expansion, C_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         abcosC_expansion=None,
+                         ab_expansion=None,
+                         cosC_expansion=None,
+                         bcinv_expansion=None,
+                         bc_expansion=None,
+                         cosA_expansion=None,
+                         ):
+    (a_expansion, b_expansion, c_expansion), (
+        a2_expansion,
+        b2_expansion,
+        abcosC_expansion,
+        ab_expansion,
+        cosC_expansion
+    ) = tri_sas_to_sss_deriv(a_expansion, b_expansion, C_expansion, order,
+                                                                   return_components=True,
+                                                                   a2_expansion=a2_expansion,
+                                                                   b2_expansion=b2_expansion,
+                                                                   abcosC_expansion=abcosC_expansion,
+                                                                   ab_expansion=ab_expansion,
+                                                                   cosC_expansion=cosC_expansion
+                                                                   )
+    (a_expansion, b_expansion, A_expansion), (
+        a2_expansion,
+        b2_expansion,
+        c2_expansion,
+        bcinv_expansion,
+        bc_expansion,
+        cosA_expansion
+    ) = tri_sss_to_ssa_deriv(a_expansion, b_expansion, c_expansion, order,
+                             return_components=False,
+                             return_cos=return_cos,
+                             a2_expansion=a2_expansion,
+                             b2_expansion=b2_expansion,
+                             c2_expansion=c2_expansion,
+                             bcinv_expansion=bcinv_expansion,
+                             bc_expansion=bc_expansion,
+                             cosA_expansion=cosA_expansion
+                             )
+    if return_components:
+        return (a_expansion, b_expansion, A_expansion), (
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            abcosC_expansion,
+            ab_expansion,
+            cosC_expansion,
+            bcinv_expansion,
+            bc_expansion,
+            cosA_expansion
+        )
+    else:
+        return (a_expansion, b_expansion, A_expansion)
+def tri_sas_to_saa_deriv(a_expansion, b_expansion, C_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         abcosC_expansion=None,
+                         ab_expansion=None,
+                         cosC_expansion=None,
+                         acinv_expansion=None,
+                         ac_expansion=None,
+                         bcinv_expansion=None,
+                         bc_expansion=None,
+                         cosA_expansion=None,
+                         cosB_expansion=None
+                         ):
+    (a_expansion, b_expansion, c_expansion), (
+        a2_expansion,
+        b2_expansion,
+        abcosC_expansion,
+        ab_expansion,
+        cosC_expansion
+    ) = tri_sas_to_sss_deriv(a_expansion, b_expansion, C_expansion, order,
+                                                                   return_components=True,
+                                                                   a2_expansion=a2_expansion,
+                                                                   b2_expansion=b2_expansion,
+                                                                   abcosC_expansion=abcosC_expansion,
+                                                                   ab_expansion=ab_expansion,
+                                                                   cosC_expansion=cosC_expansion
+                                                                   )
+    (a_expansion, B_expansion, A_expansion), (
+        a2_expansion,
+        b2_expansion,
+        c2_expansion,
+        acinv_expansion,
+        ac_expansion,
+        bcinv_expansion,
+        bc_expansion,
+        cosA_expansion,
+        cosB_expansion
+    ) = tri_sss_to_saa_deriv(a_expansion, b_expansion, c_expansion, order,
+                             return_components=True,
+                             return_cos=return_cos,
+                             a2_expansion=a2_expansion,
+                             b2_expansion=b2_expansion,
+                             c2_expansion=c2_expansion,
+                             acinv_expansion=acinv_expansion,
+                             ac_expansion=ac_expansion,
+                             bcinv_expansion=bcinv_expansion,
+                             bc_expansion=bc_expansion,
+                             cosA_expansion=cosA_expansion,
+                             cosB_expansion=cosB_expansion
+                             )
+    if return_components:
+        return (a_expansion, B_expansion, A_expansion), (
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            abcosC_expansion,
+            ab_expansion,
+            cosC_expansion,
+            acinv_expansion,
+            ac_expansion,
+            bcinv_expansion,
+            bc_expansion,
+            cosA_expansion,
+            cosB_expansion
+        )
+    else:
+        return (a_expansion, B_expansion, A_expansion)
+def tri_sas_to_asa_deriv(a_expansion, b_expansion, C_expansion, order,
+                         return_components=False,
+                         return_cos=False,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         c2_expansion=None,
+                         abcosC_expansion=None,
+                         ab_expansion=None,
+                         cosC_expansion=None,
+                         abinv_expansion=None,
+                         acinv_expansion=None,
+                         ac_expansion=None,
+                         cosB_expansion=None
+                         ):
+    (a_expansion, b_expansion, c_expansion), (
+        a2_expansion,
+        b2_expansion,
+        abcosC_expansion,
+        ab_expansion,
+        cosC_expansion
+    ) = tri_sas_to_sss_deriv(a_expansion, b_expansion, C_expansion, order,
+                                                                   return_components=True,
+                                                                   a2_expansion=a2_expansion,
+                                                                   b2_expansion=b2_expansion,
+                                                                   abcosC_expansion=abcosC_expansion,
+                                                                   ab_expansion=ab_expansion,
+                                                                   cosC_expansion=cosC_expansion
+                                                                   )
+    (C_expansion, a_expansion, B_expansion), (
+        a2_expansion,
+        b2_expansion,
+        c2_expansion,
+        abinv_expansion,
+        ab_expansion,
+        acinv_expansion,
+        ac_expansion,
+        cosB_expansion,
+        cosC_expansion
+    ) = tri_sss_to_asa_deriv(a_expansion, b_expansion, c_expansion, order,
+                             return_components=True,
+                             return_cos=return_cos,
+                             a2_expansion=a2_expansion,
+                             b2_expansion=b2_expansion,
+                             c2_expansion=c2_expansion,
+                             abinv_expansion=abinv_expansion,
+                             ab_expansion=ab_expansion,
+                             acinv_expansion=acinv_expansion,
+                             ac_expansion=ac_expansion,
+                             cosB_expansion=cosB_expansion,
+                             cosC_expansion=cosC_expansion
+                             )
+
+    if return_components:
+        return (C_expansion, a_expansion, B_expansion), (
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            abcosC_expansion,
+            ab_expansion,
+            cosC_expansion,
+            abinv_expansion,
+            acinv_expansion,
+            ac_expansion,
+            cosB_expansion
+        )
+    else:
+        return (C_expansion, a_expansion, B_expansion)
+def tri_ssa_to_sas_deriv(a_expansion, b_expansion, A_expansion, order,
+                         return_components=False,
+                         sinA_expansion=None,
+                         binva_expansion=None,
+                         ainv_expansion=None,
+                         B_expansion=None,
+                         sinB_expansion=None
+                         ):
+    if B_expansion is None:
+        if sinB_expansion is None:
+            sinB_expansion = law_of_sines_sin_deriv(a_expansion, b_expansion, A_expansion, order,
+                                                    return_components=True,
+                                                    sinA_expansion=sinA_expansion,
+                                                    binva_expansion=binva_expansion,
+                                                    ainv_expansion=ainv_expansion
+                                                    )
+        B_expansion = td.scalarfunc_deriv(arcsin_deriv, sinB_expansion, order)
+
+    bits = (
+        sinA_expansion,
+        binva_expansion,
+        ainv_expansion,
+        B_expansion,
+        sinB_expansion
+    )
+
+    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
+        Aa + Bb
+        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
+    ]
+
+    if return_components:
+        return (a_expansion, C_expansion, b_expansion), bits
+    else:
+        return (a_expansion, C_expansion, b_expansion)
+def tri_ssa_to_saa_deriv(a_expansion, b_expansion, A_expansion, order,
+                         return_components=False,
+                         sinA_expansion=None,
+                         binva_expansion=None,
+                         ainv_expansion=None,
+                         B_expansion=None,
+                         sinB_expansion=None
+                         ):
+    if B_expansion is None:
+        if sinB_expansion is None:
+            sinB_expansion = law_of_sines_sin_deriv(a_expansion, b_expansion, A_expansion, order,
+                                                    return_components=True,
+                                                    sinA_expansion=sinA_expansion,
+                                                    binva_expansion=binva_expansion,
+                                                    ainv_expansion=ainv_expansion
+                                                    )
+        B_expansion = td.scalarfunc_deriv(arcsin_deriv, sinB_expansion, order)
+
+    bits = (
+        sinA_expansion,
+        binva_expansion,
+        ainv_expansion,
+        B_expansion,
+        sinB_expansion
+    )
+
+    if return_components:
+        return (a_expansion, B_expansion, A_expansion), bits
+    else:
+        return (a_expansion, B_expansion, A_expansion)
+def tri_ssa_to_asa_deriv(a_expansion, b_expansion, A_expansion, order,
+                         return_components=False,
+                         sinA_expansion=None,
+                         binva_expansion=None,
+                         ainv_expansion=None,
+                         B_expansion=None,
+                         sinB_expansion=None
+                         ):
+    if B_expansion is None:
+        if sinB_expansion is None:
+            sinB_expansion = law_of_sines_sin_deriv(a_expansion, b_expansion, A_expansion, order,
+                                                    return_components=True,
+                                                    sinA_expansion=sinA_expansion,
+                                                    binva_expansion=binva_expansion,
+                                                    ainv_expansion=ainv_expansion
+                                                    )
+        B_expansion = td.scalarfunc_deriv(arcsin_deriv, sinB_expansion, order)
+
+    bits = (
+        sinA_expansion,
+        binva_expansion,
+        ainv_expansion,
+        B_expansion,
+        sinB_expansion
+    )
+
+    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
+        Aa + Bb
+        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
+    ]
+
+    if return_components:
+        return (C_expansion, a_expansion, B_expansion), bits
+    else:
+        return (C_expansion, a_expansion, B_expansion)
+def tri_ssa_to_sss_deriv(
+        a_expansion, b_expansion, A_expansion, order,
+        return_components=False,
+        sinA_expansion=None,
+        binva_expansion=None,
+        ainv_expansion=None,
+        B_expansion=None,
+        sinB_expansion=None,
+        a2_expansion=None,
+        b2_expansion=None,
+        abcosC_expansion=None,
+        ab_expansion=None,
+        cosC_expansion=None,
+):
+    (a_expansion, C_expansion, b_expansion), (
+        sinA_expansion,
+        binva_expansion,
+        ainv_expansion,
+        B_expansion,
+        sinB_expansion
+    ) = tri_ssa_to_sas_deriv(a_expansion, b_expansion, A_expansion, order,
+                             return_components=True,
+                             sinA_expansion=sinA_expansion,
+                             binva_expansion=binva_expansion,
+                             ainv_expansion=ainv_expansion,
+                             B_expansion=B_expansion,
+                             sinB_expansion=sinB_expansion
+                             )
+
+    (a_expansion, b_expansion, c_expansion), (
+        a2_expansion,
+        b2_expansion,
+        abcosC_expansion,
+        ab_expansion,
+        cosC_expansion,
+    ) = tri_sas_to_sss_deriv(a_expansion, C_expansion, b_expansion, order,
+                             return_components=True,
+                             a2_expansion=a2_expansion,
+                             b2_expansion=b2_expansion,
+                             abcosC_expansion=abcosC_expansion,
+                             ab_expansion=ab_expansion,
+                             cosC_expansion=cosC_expansion,
+                             return_square=False
+                             )
+    if return_components:
+        return (a_expansion, b_expansion, c_expansion), (
+            sinA_expansion,
+            binva_expansion,
+            ainv_expansion,
+            B_expansion,
+            sinB_expansion,
+            a2_expansion,
+            b2_expansion,
+            abcosC_expansion,
+            ab_expansion,
+            cosC_expansion
+        )
+    else:
+        return (a_expansion, b_expansion, c_expansion)
+def tri_saa_to_ssa_deriv(a_expansion, B_expansion, A_expansion, order,
+                         return_components=False,
+                         sinBinvsinA_expansion=None,
+                         sinA_expansion=None,
+                         sinB_expansion=None,
+                         sinAinv_expansion=None):
+    b_expansion, bits = law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order,
+                                                return_components=True,
+                                                sinBinvsinA_expansion=sinBinvsinA_expansion,
+                                                sinA_expansion=sinA_expansion,
+                                                sinB_expansion=sinB_expansion,
+                                                sinAinv_expansion=sinAinv_expansion
+                                                )
+    if return_components:
+        return (a_expansion, b_expansion, A_expansion), bits
+    else:
+        return (a_expansion, b_expansion, A_expansion)
+def tri_saa_to_sas_deriv(a_expansion, B_expansion, A_expansion, order,
+                         return_components=False,
+                         sinBinvsinA_expansion=None,
+                         sinA_expansion=None,
+                         sinB_expansion=None,
+                         sinAinv_expansion=None):
+    b_expansion, bits = law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order,
+                                                return_components=True,
+                                                sinBinvsinA_expansion=sinBinvsinA_expansion,
+                                                sinA_expansion=sinA_expansion,
+                                                sinB_expansion=sinB_expansion,
+                                                sinAinv_expansion=sinAinv_expansion
+                                                )
+    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
+        Aa + Bb
+        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
+    ]
+    if return_components:
+        return (a_expansion, C_expansion, b_expansion), bits
+    else:
+        return (a_expansion, C_expansion, b_expansion)
+def tri_saa_to_asa_deriv(a_expansion, B_expansion, A_expansion, order):
+    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
+        Aa + Bb
+        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
+    ]
+    return (C_expansion, a_expansion, B_expansion)
+def tri_saa_to_sss_deriv(a_expansion, B_expansion, A_expansion, order,
+                         return_components=False,
+                         sinBinvsinA_expansion=None,
+                         sinA_expansion=None,
+                         sinB_expansion=None,
+                         sinAinv_expansion=None,
+                         a2_expansion=None,
+                         b2_expansion=None,
+                         abcosC_expansion=None,
+                         ab_expansion=None,
+                         cosC_expansion=None,
+                         return_square=False
+                         ):
+    (a_expansion, C_expansion, b_expansion), (
+        sinBinvsinA_expansion,
+        sinA_expansion,
+        sinB_expansion,
+        sinAinv_expansion
+    ) = tri_saa_to_sas_deriv(a_expansion, B_expansion, A_expansion,
+                             order,
+                             return_components=True,
+                             sinBinvsinA_expansion=sinBinvsinA_expansion,
+                             sinA_expansion=sinA_expansion,
+                             sinB_expansion=sinB_expansion,
+                             sinAinv_expansion=sinAinv_expansion,
+                             )
+    (a_expansion, b_expansion, c_expansion), (
+        a2_expansion,
+        b2_expansion,
+        abcosC_expansion,
+        ab_expansion,
+        cosC_expansion,
+    ) = tri_sas_to_sss_deriv(
+        a_expansion, C_expansion, b_expansion, order,
+        return_components=True,
+        a2_expansion=a2_expansion,
+        b2_expansion=b2_expansion,
+        abcosC_expansion=abcosC_expansion,
+        ab_expansion=ab_expansion,
+        cosC_expansion=cosC_expansion,
+        return_square=return_square
+    )
+
+    if return_components:
+        return (a_expansion, b_expansion, c_expansion), (
+            sinBinvsinA_expansion,
+            sinA_expansion,
+            sinB_expansion,
+            sinAinv_expansion,
+            a2_expansion,
+            b2_expansion,
+            abcosC_expansion,
+            ab_expansion,
+            cosC_expansion
+        )
+    else:
+        return (a_expansion, b_expansion, c_expansion)
+def tri_asa_to_saa_deriv(C_expansion, a_expansion, B_expansion, order):
+    A_expansion = [np.pi - (C_expansion[0] + B_expansion[0])] + [
+        Cc + Bb
+        for Cc, Bb in zip(C_expansion[1:], B_expansion[1:])
+    ]
+    return (a_expansion, B_expansion, A_expansion)
+def tri_asa_to_sas_deriv(C_expansion, a_expansion, B_expansion, order,
+                         return_components=False,
+                         A_expansion=None,
+                         sinBinvsinA_expansion=None,
+                         sinA_expansion=None,
+                         sinB_expansion=None,
+                         sinAinv_expansion=None
+                         ):
+    if A_expansion is None:  # TODO: skip this if other components are supplied
+        A_expansion = [np.pi - (C_expansion[0] + B_expansion[0])] + [
+            Cc + Bb
+            for Cc, Bb in zip(C_expansion[1:], B_expansion[1:])
+        ]
+    b_expansion, (
+        sinBinvsinA_expansion,
+        sinA_expansion,
+        sinB_expansion,
+        sinAinv_expansion
+    ) = law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order,
+                                                sinBinvsinA_expansion=sinBinvsinA_expansion,
+                                                sinA_expansion=sinA_expansion,
+                                                sinB_expansion=sinB_expansion,
+                                                sinAinv_expansion=sinAinv_expansion,
+                                                return_components=True
+                                                )
+    if return_components:
+        return (a_expansion, C_expansion, b_expansion), (
+            A_expansion,
+            sinBinvsinA_expansion,
+            sinA_expansion,
+            sinB_expansion,
+            sinAinv_expansion
+        )
+    else:
+        return (a_expansion, C_expansion, b_expansion)
+def tri_asa_to_ssa_deriv(C_expansion, a_expansion, B_expansion, order,
+                         return_components=False,
+                         A_expansion=None,
+                         sinBinvsinA_expansion=None,
+                         sinA_expansion=None,
+                         sinB_expansion=None,
+                         sinAinv_expansion=None
+                         ):
+    if A_expansion is None:  # TODO: skip this if other components are supplied
+        A_expansion = [np.pi - (C_expansion[0] + B_expansion[0])] + [
+            Cc + Bb
+            for Cc, Bb in zip(C_expansion[1:], B_expansion[1:])
+        ]
+    b_expansion, (
+        sinBinvsinA_expansion,
+        sinA_expansion,
+        sinB_expansion,
+        sinAinv_expansion
+    ) = law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order,
+                                sinBinvsinA_expansion=sinBinvsinA_expansion,
+                                sinA_expansion=sinA_expansion,
+                                sinB_expansion=sinB_expansion,
+                                sinAinv_expansion=sinAinv_expansion,
+                                return_components=True
+                                )
+    if return_components:
+        return (a_expansion, b_expansion, A_expansion), (
+            sinBinvsinA_expansion,
+            sinA_expansion,
+            sinB_expansion,
+            sinAinv_expansion
+        )
+    else:
+        return (a_expansion, b_expansion, A_expansion)
+def tri_asa_to_sss_deriv(C_expansion, a_expansion, B_expansion, order,
+                   return_components=False,
+                   A_expansion=None,
+                   sinBinvsinA_expansion=None,
+                   sinA_expansion=None,
+                   sinB_expansion=None,
+                   sinAinv_expansion=None,
+                   a2_expansion=None,
+                   b2_expansion=None,
+                   abcosC_expansion=None,
+                   ab_expansion=None,
+                   cosC_expansion=None,
+                   return_square=False
+                   ):
+    (a_expansion, C_expansion, b_expansion), bits = tri_asa_to_sas_deriv(C_expansion, a_expansion, B_expansion, order,
+                         return_components=True,
+                         A_expansion=A_expansion,
+                         sinBinvsinA_expansion=sinBinvsinA_expansion,
+                         sinA_expansion=sinA_expansion,
+                         sinB_expansion=sinB_expansion,
+                         sinAinv_expansion=sinAinv_expansion
+                         )
+    (a_expansion, b_expansion, c_expansion), bits2 = tri_sas_to_sss_deriv(
+        a_expansion, C_expansion, b_expansion, order,
+        return_components=True,
+        a2_expansion=a2_expansion,
+        b2_expansion=b2_expansion,
+        abcosC_expansion=abcosC_expansion,
+        ab_expansion=ab_expansion,
+        cosC_expansion=cosC_expansion,
+        return_square=return_square
+    )
+    if return_components:
+        return (a_expansion, b_expansion, c_expansion), bits + bits2
+    else:
+        return (a_expansion, b_expansion, c_expansion)
+
+class TriangleType(enum.Enum):
+    SSS = "sss"
+    SAS = "sas"
+    SSA = "ssa"
+    SAA = "saa"
+    ASA = "asa"
+def _echo_tri_args(x, y, z):
+    return (x, y, z)
+def _echo_tri_deriv_args(x_expansion, y_expansion, z_expansion, order, return_components=False, **kwargs):
+    if return_components:
+        return (x_expansion, y_expansion, z_expansion), kwargs
+    else:
+        return (x_expansion, y_expansion, z_expansion)
+def triangle_converter(type1:str|TriangleType, type2:str|TriangleType):
+    # only 9 possible conversions, let's just write them down
+    type1 = TriangleType(type1)
+    type2 = TriangleType(type2)
+    if type1 == TriangleType.SSS:
+        if type2 == TriangleType.SSS:
+            return (_echo_tri_args, _echo_tri_deriv_args)
+        elif type2 == TriangleType.SAS:
+            return (tri_sss_to_sas, tri_sss_to_sas_deriv)
+        elif type2 == TriangleType.SSA:
+            return (tri_sss_to_ssa, tri_sss_to_ssa_deriv)
+        elif type2 == TriangleType.SAA:
+            return (tri_sss_to_saa, tri_sss_to_saa_deriv)
+        elif type2 == TriangleType.ASA:
+            return (tri_sss_to_asa, tri_sss_to_asa_deriv)
+    elif type1 == TriangleType.SAS:
+        if type2 == TriangleType.SSS:
+            return (tri_sas_to_sss, tri_sas_to_sss_deriv)
+        elif type2 == TriangleType.SAS:
+            return (_echo_tri_args, _echo_tri_deriv_args)
+        elif type2 == TriangleType.SSA:
+            return (tri_sas_to_ssa, tri_sas_to_ssa_deriv)
+        elif type2 == TriangleType.SAA:
+            return (tri_sas_to_saa, tri_sas_to_saa_deriv)
+        elif type2 == TriangleType.ASA:
+            return (tri_sas_to_saa, tri_sas_to_asa_deriv)
+    elif type1 == TriangleType.SSA:
+        if type2 == TriangleType.SSS:
+            return (tri_ssa_to_sss, tri_ssa_to_sss_deriv)
+        elif type2 == TriangleType.SAS:
+            return (tri_ssa_to_sas, tri_ssa_to_sas_deriv)
+        elif type2 == TriangleType.SSA:
+            return (_echo_tri_args, _echo_tri_deriv_args)
+        elif type2 == TriangleType.SAA:
+            return (tri_ssa_to_saa, tri_ssa_to_saa_deriv)
+        elif type2 == TriangleType.ASA:
+            return (tri_ssa_to_asa, tri_ssa_to_asa_deriv)
+    elif type1 == TriangleType.SAA:
+        if type2 == TriangleType.SSS:
+            return (tri_saa_to_sss, tri_saa_to_sss_deriv)
+        elif type2 == TriangleType.SAS:
+            return (tri_saa_to_sas, tri_saa_to_sas_deriv)
+        elif type2 == TriangleType.SSA:
+            return (tri_saa_to_ssa, tri_saa_to_ssa_deriv)
+        elif type2 == TriangleType.SAA:
+            return (_echo_tri_args, _echo_tri_deriv_args)
+        elif type2 == TriangleType.ASA:
+            return (tri_ssa_to_sss, tri_ssa_to_sss_deriv)
+    elif type1 == TriangleType.ASA:
+        if type2 == TriangleType.SSS:
+            return (tri_asa_to_sss, tri_asa_to_sss_deriv)
+        elif type2 == TriangleType.SAS:
+            return (tri_asa_to_sas, tri_asa_to_sas_deriv)
+        elif type2 == TriangleType.SSA:
+            return (tri_asa_to_ssa, tri_asa_to_ssa_deriv)
+        elif type2 == TriangleType.SAA:
+            return (tri_asa_to_saa, tri_asa_to_saa_deriv)
+        elif type2 == TriangleType.ASA:
+            return (_echo_tri_args, _echo_tri_deriv_args)
+    return None
+def triangle_convert(tri_spec, type1:str|TriangleType, type2:str|TriangleType, order=None, **kwargs):
+    converter, deriv_converter = triangle_converter(type1, type2)
+    if converter is None:
+        raise ValueError(f"can't convert from triangle type {type1} to triangle type {type2}")
+    b1,b2,b3 = tri_spec
+    if order is None:
+        b1 = np.asanyarray(b1)
+        b2 = np.asanyarray(b2)
+        b3 = np.asanyarray(b3)
+        return converter(b1, b2, b3)
+    else:
+        b1 = [np.asanyarray(b) for b in b1]
+        b2 = [np.asanyarray(b) for b in b2]
+        b3 = [np.asanyarray(b) for b in b3]
+        return deriv_converter(b1, b2, b3, order, **kwargs)
+def triangle_area(tri_spec, type:str|TriangleType):
+    type = TriangleType(type)
+    b1,b2,b3 = tri_spec
+    b1 = np.asanyarray(b1)
+    b2 = np.asanyarray(b2)
+    b3 = np.asanyarray(b3)
+    if type == TriangleType.SSS:
+        return tri_sss_area(b1, b2, b3)
+    elif type == TriangleType.SAS:
+        return tri_sas_area(b1, b2, b3)
+    else:
+        return tri_sas_area(*triangle_convert(tri_spec, type, TriangleType.SAS))
+
+def dihedral_sssaa_distance(a, b, c, alpha, beta, tau, use_cos=False):
+    """
+    a^2 + b^2 + c^2 - 2 (
+        a b Cos[\[Alpha]] + b c Cos[\[Beta]]
+        + a c (Cos[\[Tau]] Sin[\[Alpha]] Sin[\[Beta]] - Cos[\[Alpha]] Cos[\[Beta]])
+       )
+    """
+    ca = np.cos(alpha)
+    cb = np.cos(beta)
+    sa = np.sin(alpha)
+    sb = np.sin(beta)
+    if use_cos:
+        ct = tau
+    else:
+        ct = np.cos(tau)
+    return np.sqrt(
+        a**2+b**2+c**2
+        - 2*(a*b*ca + b*c*cb + a*c*(ct*sa*sb-ca*cb))
+    )
+def dihedral_ssssa_distance(a, b, c, x, beta, tau, use_cos=False):
+    a2 = a**2
+    b2 = b**2
+    x2 = x**2
+    ca = (a2+b2-x2)/(2*a*b)
+    cb = np.cos(beta)
+    sa = np.sqrt(1-ca**2)
+    sb = np.sin(beta)
+    if use_cos:
+        ct = tau
+    else:
+        ct = np.cos(tau)
+    return np.sqrt(
+        x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
+    )
+def dihedral_sssss_distance(a,b, c, x, y, tau, use_cos=False):
+    # potentially more stable than just computing the sin and cos in the usual way...
+    xp = (a+b)**2
+    xm = (a-b)**2
+    yp = (b+c)**2
+    ym = (b-c)**2
+    x2 = x**2
+    y2 = y**2
+    a2 = a**2
+    b2 = b**2
+    c2 = c**2
+    if use_cos:
+        ct = tau
+    else:
+        ct = np.cos(tau)
+    return np.sqrt(
+        x2+y2-b2
+        + (
+                (a2+b2-x2)*(b2+c2-y2)
+                -np.sqrt((xm - x2)*(xp - x2)*(ym - y2)*(yp - y2))*ct
+        )/(2*b2)
+    )
+def dihedral_from_ssssaa(a, b, c, alpha, beta, r, use_cos=False):
+    ca = np.cos(alpha)
+    cb = np.cos(beta)
+    sa = np.sin(alpha)
+    sb = np.sin(beta)
+    ct = ((a**2 + b**2 + c**2) - r**2 - 2*a*b*ca - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
+    if use_cos:
+        return ct
+    else:
+        return np.arccos(ct)
+def dihedral_from_sssssa(a, b, c, x, beta, r, use_cos=False):
+    a2 = a**2
+    b2 = b**2
+    x2 = x**2
+    ca = (a2+b2-x2)/(2*a*b)
+    cb = np.cos(beta)
+    sa = np.sqrt(1-ca**2)
+    sb = np.sin(beta)
+    r2 = r**2
+    ct = ((x2+c**2) - r2 - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
+    if use_cos:
+        return ct
+    else:
+        return np.arccos(ct)
+def dihedral_from_ssssss(a, b, c, x, y, r, use_cos=False):
+    xp = (a + b) ** 2
+    xm = (a - b) ** 2
+    yp = (b + c) ** 2
+    ym = (b - c) ** 2
+    x2 = x ** 2
+    y2 = y ** 2
+    a2 = a ** 2
+    b2 = b ** 2
+    c2 = c ** 2
+    r2 = r ** 2
+    ct = (
+            (a2 + b2 - x2) * (b2 + c2 - y2)
+            - ((r2 - (x2 + y2 - b2)) * (2 * b2))
+    ) / np.sqrt((xm - x2) * (xp - x2) * (ym - y2) * (yp - y2))
+    if use_cos:
+        return ct
+    else:
+        return np.arccos(ct)
+
+class DihedralSpecifierType(enum.Enum):
+    SSSAAT = "sssaat"
+    SSSSAT = "ssssat"
+    SSSSST = "ssssst"
+def dihedral_distance_converter(dihedral_type:str|DihedralSpecifierType):
+    dihedral_type = DihedralSpecifierType(dihedral_type)
+    if dihedral_type == DihedralSpecifierType.SSSSST:
+        return dihedral_sssss_distance
+    elif dihedral_type == DihedralSpecifierType.SSSSAT:
+        return dihedral_ssssa_distance
+    else:
+        return dihedral_sssaa_distance
+def dihedral_distance(spec, dihedral_type:str|DihedralSpecifierType, use_cos=False) -> float|np.ndarray:
+    return dihedral_distance_converter(dihedral_type)(*spec, use_cos=use_cos)
+def dihedral_from_distance_converter(dihedral_type:str|DihedralSpecifierType):
+    dihedral_type = DihedralSpecifierType(dihedral_type)
+    if dihedral_type == DihedralSpecifierType.SSSSST:
+        return dihedral_from_ssssss
+    elif dihedral_type == DihedralSpecifierType.SSSSAT:
+        return dihedral_from_sssssa
+    else:
+        return dihedral_from_ssssaa
+def dihedral_from_distance(spec, dihedral_type:str|DihedralSpecifierType, use_cos=False) -> float|np.ndarray:
+    return dihedral_from_distance_converter(dihedral_type)(*spec, use_cos=use_cos)
