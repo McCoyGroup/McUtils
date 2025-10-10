@@ -2442,22 +2442,27 @@ def cos_deriv(term, order):
 def sin_deriv(term, order):
     return np.cos(order*np.pi/2 + term)
 def legendre_scaling(n):
-    rems, _ = integer_exponent(np.arange(1, n+1), 2)
-    return np.prod(rems)
+    if n > 1:
+        rems, _ = integer_exponent(np.arange(1, n+1), 2)
+        return np.prod(rems)
+    else:
+        return 1
 def legendre_integer_coefficients(n):
-    coeffs = np.zeros((n, n+1), dtype=int)
+    coeffs = np.zeros((n+1, n+1), dtype=int)
     coeffs[0, 0] = 1
-    coeffs[1, 1] = 1
-    ind_sets = np.arange(2, n+1)
-    ind_sets = ind_sets - (ind_sets % 2)
-    _, indicators = integer_exponent(ind_sets, 2)
-    for i in range(n-2):
-        m = (i+2)
-        p1 = (2*m - 1) * np.roll(coeffs[i+1], 1)
-        p2 = (m - 1) * coeffs[i]
-        s2 = 2 ** indicators[i] # already shifted by a few bits
-        s1 = s2 if i % 2 == 0 else 1
-        coeffs[i+2] = (s1*p1 - s2*p2) // m
+    if n > 0:
+        coeffs[1, 1] = 1
+        if n > 1:
+            ind_sets = np.arange(2, n+1)
+            ind_sets = ind_sets - (ind_sets % 2)
+            _, indicators = integer_exponent(ind_sets, 2)
+            for i in range(n-2):
+                m = (i+2)
+                p1 = (2*m - 1) * np.roll(coeffs[i+1], 1)
+                p2 = (m - 1) * coeffs[i]
+                s2 = 2 ** indicators[i] # already shifted by a few bits
+                s1 = s2 if i % 2 == 0 else 1
+                coeffs[i+2] = (s1*p1 - s2*p2) // m
     return coeffs
 def arcsin_deriv(term, order):
     #TODO: cache these
@@ -2494,8 +2499,6 @@ def law_of_cosines_dist_deriv(a_expansion, b_expansion, C_expansion, order,
         if cosC_expansion is None:
             cosC_expansion = td.scalarfunc_deriv(cos_deriv, C_expansion, order)
         abcosC_expansion = td.scalarprod_deriv(ab_expansion, cosC_expansion, order)
-    cosC_test = np.arccos(C_expansion[0])
-    ab_test = a_expansion[0] * b_expansion[0]
     term = [a+b-2*c for a,b,c in zip(a2_expansion, b2_expansion, abcosC_expansion)]
     if not return_square:
         term = td.scalarfunc_deriv(sqrt_deriv, term, order)
@@ -2543,6 +2546,12 @@ def law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order,
         return term, (sinBinvsinA_expansion, sinA_expansion, sinB_expansion, sinAinv_expansion)
     else:
         return term
+
+def _angle_complement_expansion(A_expansion, B_expansion):
+    return td.shift_expansion(
+        td.scale_expansion(td.add_expansions(A_expansion, B_expansion), -1),
+        np.pi
+    )
 
 def tri_sss_to_sas_deriv(a_expansion, b_expansion, c_expansion, order,
                          return_components=False,
@@ -2963,10 +2972,7 @@ def tri_ssa_to_sas_deriv(a_expansion, b_expansion, A_expansion, order,
         sinB_expansion
     )
 
-    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
-        Aa + Bb
-        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
-    ]
+    C_expansion = _angle_complement_expansion(A_expansion, B_expansion)
 
     if return_components:
         return (a_expansion, C_expansion, b_expansion), bits
@@ -3028,10 +3034,7 @@ def tri_ssa_to_asa_deriv(a_expansion, b_expansion, A_expansion, order,
         sinB_expansion
     )
 
-    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
-        Aa + Bb
-        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
-    ]
+    C_expansion = _angle_complement_expansion(A_expansion, B_expansion)
 
     if return_components:
         return (C_expansion, a_expansion, B_expansion), bits
@@ -3126,19 +3129,15 @@ def tri_saa_to_sas_deriv(a_expansion, B_expansion, A_expansion, order,
                                                 sinB_expansion=sinB_expansion,
                                                 sinAinv_expansion=sinAinv_expansion
                                                 )
-    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
-        Aa + Bb
-        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
-    ]
+
+    C_expansion = _angle_complement_expansion(A_expansion, B_expansion)
+
     if return_components:
         return (a_expansion, C_expansion, b_expansion), bits
     else:
         return (a_expansion, C_expansion, b_expansion)
 def tri_saa_to_asa_deriv(a_expansion, B_expansion, A_expansion, order):
-    C_expansion = [np.pi - (A_expansion[0] + B_expansion[0])] + [
-        Aa + Bb
-        for Aa, Bb in zip(A_expansion[1:], B_expansion[1:])
-    ]
+    C_expansion = _angle_complement_expansion(A_expansion, B_expansion)
     return (C_expansion, a_expansion, B_expansion)
 def tri_saa_to_sss_deriv(a_expansion, B_expansion, A_expansion, order,
                          return_components=False,
@@ -3198,10 +3197,7 @@ def tri_saa_to_sss_deriv(a_expansion, B_expansion, A_expansion, order,
     else:
         return (a_expansion, b_expansion, c_expansion)
 def tri_asa_to_saa_deriv(C_expansion, a_expansion, B_expansion, order):
-    A_expansion = [np.pi - (C_expansion[0] + B_expansion[0])] + [
-        Cc + Bb
-        for Cc, Bb in zip(C_expansion[1:], B_expansion[1:])
-    ]
+    A_expansion = _angle_complement_expansion(C_expansion, B_expansion)
     return (a_expansion, B_expansion, A_expansion)
 def tri_asa_to_sas_deriv(C_expansion, a_expansion, B_expansion, order,
                          return_components=False,
@@ -3212,10 +3208,7 @@ def tri_asa_to_sas_deriv(C_expansion, a_expansion, B_expansion, order,
                          sinAinv_expansion=None
                          ):
     if A_expansion is None:  # TODO: skip this if other components are supplied
-        A_expansion = [np.pi - (C_expansion[0] + B_expansion[0])] + [
-            Cc + Bb
-            for Cc, Bb in zip(C_expansion[1:], B_expansion[1:])
-        ]
+        A_expansion = _angle_complement_expansion(C_expansion, B_expansion)
     b_expansion, (
         sinBinvsinA_expansion,
         sinA_expansion,
@@ -3247,10 +3240,7 @@ def tri_asa_to_ssa_deriv(C_expansion, a_expansion, B_expansion, order,
                          sinAinv_expansion=None
                          ):
     if A_expansion is None:  # TODO: skip this if other components are supplied
-        A_expansion = [np.pi - (C_expansion[0] + B_expansion[0])] + [
-            Cc + Bb
-            for Cc, Bb in zip(C_expansion[1:], B_expansion[1:])
-        ]
+        A_expansion = _angle_complement_expansion(C_expansion, B_expansion)
     b_expansion, (
         sinBinvsinA_expansion,
         sinA_expansion,
@@ -3429,6 +3419,133 @@ def dihedral_sssaa_distance(a, b, c, alpha, beta, tau, use_cos=False):
         a**2+b**2+c**2
         - 2*(a*b*ca + b*c*cb + a*c*(ct*sa*sb-ca*cb))
     )
+
+def dihedral_sssaa_distance_deriv(a_expansion, b_expansion, c_expansion,
+                                  alpha_expansion, beta_expansion, tau_expansion,
+                                  order,
+                                  return_components=False,
+                                  return_square=False,
+                                  cos_alpha_expansion=None,
+                                  cos_beta_expansion=None,
+                                  sin_alpha_expansion=None,
+                                  sin_beta_expansion=None,
+                                  cos_tau_expansion=None,
+                                  a2_expansion=None,
+                                  b2_expansion=None,
+                                  c2_expansion=None,
+                                  ab_cos_alpha_expansion=None,
+                                  ab_expansion=None,
+                                  bc_cos_beta_expansion=None,
+                                  bc_expansion=None,
+                                  ac_expansion=None,
+                                  cos_alpha_cos_beta_expansion=None,
+                                  sin_alpha_sin_beta_expansion=None
+                                  ):
+
+    if ab_cos_alpha_expansion is None:
+        if ab_expansion is None:
+            ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
+        if cos_alpha_expansion is None:
+            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
+        ab_cos_alpha_expansion = td.scalarprod_deriv(
+            ab_expansion,
+            cos_alpha_expansion,
+            order
+        )
+
+    if bc_cos_beta_expansion is None:
+        if bc_expansion is None:
+            bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        bc_cos_beta_expansion = td.scalarprod_deriv(
+            bc_expansion,
+            cos_beta_expansion,
+            order
+        )
+
+    if cos_alpha_cos_beta_expansion is None:
+        if cos_alpha_expansion is None:
+            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(
+            cos_alpha_expansion,
+            cos_beta_expansion,
+            order
+        )
+
+    if sin_alpha_sin_beta_expansion is None:
+        if sin_alpha_expansion is None:
+            sin_alpha_expansion = td.scalarfunc_deriv(sin_deriv, alpha_expansion, order)
+        if sin_beta_expansion is None:
+            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
+        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(
+            sin_alpha_expansion,
+            sin_beta_expansion,
+            order
+        )
+
+    if cos_tau_expansion is None:
+        cos_tau_expansion = td.scalarfunc_deriv(cos_deriv, tau_expansion, order)
+
+    if a2_expansion is None:
+        a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarfunc_deriv(square_deriv, b_expansion, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarfunc_deriv(square_deriv, c_expansion, order)
+
+    if ac_expansion is None:
+        ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
+    extra_cos_term = td.scalarprod_deriv(
+        ac_expansion,
+        td.subtract_expansions(
+            td.scalarprod_deriv(cos_tau_expansion, sin_alpha_sin_beta_expansion, order),
+            cos_alpha_cos_beta_expansion
+        ),
+        order
+    )
+
+    r2_term = td.add_expansions(a2_expansion, b2_expansion, c2_expansion)
+    radj_term = td.scale_expansion(
+        td.add_expansions(
+            ab_cos_alpha_expansion,
+            bc_cos_beta_expansion,
+            extra_cos_term
+        ),
+        2
+    )
+
+    # np.sqrt(
+    #     a ** 2 + b ** 2 + c ** 2
+    #     - 2 * (a * b * ca + b * c * cb + a * c * (ct * sa * sb - ca * cb))
+    # )
+
+    term = td.subtract_expansions(r2_term, radj_term)
+    if not return_square:
+        term = td.scalarfunc_deriv(sqrt_deriv, term, order)
+
+    if return_components:
+        return term, (
+            cos_alpha_expansion,
+            cos_beta_expansion,
+            sin_alpha_expansion,
+            sin_beta_expansion,
+            cos_tau_expansion,
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            ab_cos_alpha_expansion,
+            ab_expansion,
+            bc_cos_beta_expansion,
+            bc_expansion,
+            ac_expansion,
+            cos_alpha_cos_beta_expansion,
+            sin_alpha_sin_beta_expansion
+        )
+    else:
+        return term
 def dihedral_ssssa_distance(a, b, c, x, beta, tau, use_cos=False):
     a2 = a**2
     b2 = b**2
@@ -3444,6 +3561,116 @@ def dihedral_ssssa_distance(a, b, c, x, beta, tau, use_cos=False):
     return np.sqrt(
         x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
     )
+def _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order):
+    # (a2+b2-x2)/(2*a*b)
+    return td.scale_expansion(
+        td.scalarprod_deriv(
+            td.subtract_expansions(td.add_expansions(a2_expansion, b2_expansion), x2_expansion),
+            td.scalarinv_deriv(ab_expansion, order),
+            order
+        ),
+        1 / 2
+    )
+def dihedral_ssssa_distance_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
+                                  beta_expansion, tau_expansion, order,
+                                  return_components=False,
+                                  return_square=False,
+                                  cos_alpha_expansion=None,
+                                  cos_beta_expansion=None,
+                                  sin_alpha_expansion=None,
+                                  sin_beta_expansion=None,
+                                  cos_tau_expansion=None,
+                                  a2_expansion=None,
+                                  b2_expansion=None,
+                                  c2_expansion=None,
+                                  x2_expansion=None,
+                                  ab_expansion=None,
+                                  bc_cos_beta_expansion=None,
+                                  bc_expansion=None,
+                                  ac_expansion=None,
+                                  cos_alpha_cos_beta_expansion=None,
+                                  sin_alpha_sin_beta_expansion=None
+                                  ):
+    if a2_expansion is None:
+        a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarfunc_deriv(square_deriv, b_expansion, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarfunc_deriv(square_deriv, c_expansion, order)
+    if x2_expansion is None:
+        x2_expansion = td.scalarfunc_deriv(square_deriv, x_expansion, order)
+    if cos_alpha_cos_beta_expansion is None:
+        if cos_alpha_expansion is None:
+            if ab_expansion is None:
+                ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
+            cos_alpha_expansion = _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(cos_alpha_expansion, cos_beta_expansion, order)
+    if sin_alpha_sin_beta_expansion is None:
+        if sin_alpha_expansion is None:
+            ca2 = td.scalarfunc_deriv(square_deriv, cos_alpha_expansion, order)
+            sin_alpha_expansion = td.scalarfunc_deriv(
+                sqrt_deriv,
+                td.shift_expansion(td.scale_expansion(ca2, -1), 1),
+                order
+            )
+        if sin_beta_expansion is None:
+            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
+        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(sin_alpha_expansion, sin_beta_expansion, order)
+    if cos_tau_expansion is None:
+        cos_tau_expansion = td.scalarfunc_deriv(cos_deriv, tau_expansion, order)
+
+    if bc_cos_beta_expansion is None:
+        if bc_expansion is None:
+            bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        bc_cos_beta_expansion = td.scalarprod_deriv(bc_expansion, cos_beta_expansion, order)
+    # x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
+    if ac_expansion is None:
+        ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
+    extra_cos_term = td.scalarprod_deriv(
+        ac_expansion,
+        td.subtract_expansions(
+            td.scalarprod_deriv(cos_tau_expansion, sin_alpha_sin_beta_expansion, order),
+            cos_alpha_cos_beta_expansion
+        ),
+        order
+    )
+    r2_term = td.add_expansions(x2_expansion, c2_expansion)
+    radj_term = td.scale_expansion(
+        td.add_expansions(
+            bc_cos_beta_expansion,
+            extra_cos_term
+        ),
+        2
+    )
+
+    term = td.subtract_expansions(r2_term, radj_term)
+    if not return_square:
+        term = td.scalarfunc_deriv(sqrt_deriv, term, order)
+
+    if return_components:
+        return term, (
+            cos_alpha_expansion,
+            cos_beta_expansion,
+            sin_alpha_expansion,
+            sin_beta_expansion,
+            cos_tau_expansion,
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            x2_expansion,
+            ab_expansion,
+            bc_cos_beta_expansion,
+            bc_expansion,
+            ac_expansion,
+            cos_alpha_cos_beta_expansion,
+            sin_alpha_sin_beta_expansion
+        )
+    else:
+        return term
 def dihedral_sssss_distance(a,b, c, x, y, tau, use_cos=False):
     # potentially more stable than just computing the sin and cos in the usual way...
     xp = (a+b)**2
@@ -3466,6 +3693,102 @@ def dihedral_sssss_distance(a,b, c, x, y, tau, use_cos=False):
                 -np.sqrt((xm - x2)*(xp - x2)*(ym - y2)*(yp - y2))*ct
         )/(2*b2)
     )
+
+def dihedral_sssss_distance_deriv(
+        a_expansion, b_expansion, c_expansion, x_expansion, y_expansion, order,
+        tau_expansion,
+        return_components=False,
+        return_square=False,
+        a2_expansion=None,
+        b2_expansion=None,
+        c2_expansion=None,
+        x2_expansion=None,
+        y2_expansion=None,
+        cos_tau_expansion=None,
+        abplus_expansion=None,
+        abminus_expansion=None,
+        bcplus_expansion=None,
+        bcminus_expansion=None,
+        det_expansion=None,
+):
+    # potentially more stable than just computing the sin and cos in the usual way...
+    if x2_expansion is None:
+        x2_expansion = td.scalarpow_deriv(x_expansion, 2, order)
+    if y2_expansion is None:
+        y2_expansion = td.scalarpow_deriv(y_expansion, 2, order)
+    if a2_expansion is None:
+        a2_expansion = td.scalarpow_deriv(a_expansion, 2, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarpow_deriv(b_expansion, 2, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarpow_deriv(c_expansion, 2, order)
+    if cos_tau_expansion is None:
+        cos_tau_expansion = td.scalarfunc_deriv(cos_deriv, tau_expansion, order)
+
+    if det_expansion is None:
+        if abplus_expansion is None:
+            abplus_expansion = td.scalarpow_deriv(td.add_expansions(a_expansion, b_expansion), 2, order)
+        if abminus_expansion is None:
+            abminus_expansion = td.scalarpow_deriv(td.subtract_expansions(a_expansion, b_expansion), 2, order)
+        if bcplus_expansion is None:
+            bcplus_expansion = td.scalarpow_deriv(td.add_expansions(b_expansion, c_expansion), 2, order)
+        if bcminus_expansion is None:
+            bcminus_expansion = td.scalarpow_deriv(td.subtract_expansions(b_expansion, c_expansion), 2, order)
+        # np.sqrt((xm - x2)*(xp - x2)*(ym - y2)*(yp - y2))
+        abp = td.subtract_expansions(abplus_expansion, x2_expansion)
+        abm = td.subtract_expansions(abminus_expansion, x2_expansion)
+        bcp = td.subtract_expansions(bcplus_expansion, y2_expansion)
+        bcm = td.subtract_expansions(bcminus_expansion, y2_expansion)
+        det_expansion = td.scalarfunc_deriv(sqrt_deriv,
+                                            td.scalarprod_deriv(
+                                                td.scalarprod_deriv(abm, abp, order),
+                                                td.scalarprod_deriv(bcm, bcp, order),
+                                                order
+                                            ),
+                                            order
+                                            )
+    det_cos_expansion = td.scalarprod_deriv(det_expansion, cos_tau_expansion, order)
+    num_expansion = td.scalarprod_deriv(
+        td.subtract_expansions(td.add_expansions(a2_expansion, b2_expansion), x2_expansion),
+        td.subtract_expansions(td.add_expansions(b2_expansion, c2_expansion), y2_expansion),
+        order
+    )
+    invb2_expansion = td.scale_expansion(td.scalarinv_deriv(b2_expansion, order), 1/2)
+    r2_term = td.subtract_expansions(td.add_expansions(x2_expansion, y2_expansion), b2_expansion)
+
+    term = td.add_expansions(
+        r2_term,
+        td.scalarprod_deriv(
+            td.subtract_expansions(num_expansion, det_cos_expansion),
+            invb2_expansion,
+            order
+        )
+    )
+    if not return_square:
+        term = td.scalarfunc_deriv(sqrt_deriv, term, order)
+
+    # x2+y2-b2
+    #         + (
+    #                 (a2+b2-x2)*(b2+c2-y2)
+    #                 -np.sqrt((xm - x2)*(xp - x2)*(ym - y2)*(yp - y2))*ct
+    #         )/(2*b2)
+
+    if return_components:
+        return term, (
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            x2_expansion,
+            y2_expansion,
+            cos_tau_expansion,
+            abplus_expansion,
+            abminus_expansion,
+            bcplus_expansion,
+            bcminus_expansion,
+            det_expansion
+        )
+    else:
+        return term
 def dihedral_from_ssssaa(a, b, c, alpha, beta, r, use_cos=False):
     ca = np.cos(alpha)
     cb = np.cos(beta)
@@ -3476,6 +3799,129 @@ def dihedral_from_ssssaa(a, b, c, alpha, beta, r, use_cos=False):
         return ct
     else:
         return np.arccos(ct)
+def dihedral_from_ssssaa_deriv(
+        a_expansion, b_expansion, c_expansion,
+        alpha_expansion, beta_expansion, r_expansion,
+        order,
+        return_components=False,
+        return_cos=False,
+        cos_alpha_expansion=None,
+        cos_beta_expansion=None,
+        sin_alpha_expansion=None,
+        sin_beta_expansion=None,
+        a2_expansion=None,
+        b2_expansion=None,
+        c2_expansion=None,
+        r2_expansion=None,
+        ab_cos_alpha_expansion=None,
+        ab_expansion=None,
+        bc_cos_beta_expansion=None,
+        bc_expansion=None,
+        ac_expansion=None,
+        cos_alpha_cos_beta_expansion=None,
+        sin_alpha_sin_beta_expansion=None
+):
+    if ab_cos_alpha_expansion is None:
+        if ab_expansion is None:
+            ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
+        if cos_alpha_expansion is None:
+            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
+        ab_cos_alpha_expansion = td.scalarprod_deriv(
+            ab_expansion,
+            cos_alpha_expansion,
+            order
+        )
+
+    if bc_cos_beta_expansion is None:
+        if bc_expansion is None:
+            bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        bc_cos_beta_expansion = td.scalarprod_deriv(
+            bc_expansion,
+            cos_beta_expansion,
+            order
+        )
+
+    if cos_alpha_cos_beta_expansion is None:
+        if cos_alpha_expansion is None:
+            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(
+            cos_alpha_expansion,
+            cos_beta_expansion,
+            order
+        )
+
+    if sin_alpha_sin_beta_expansion is None:
+        if sin_alpha_expansion is None:
+            sin_alpha_expansion = td.scalarfunc_deriv(sin_deriv, alpha_expansion, order)
+        if sin_beta_expansion is None:
+            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
+        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(
+            sin_alpha_expansion,
+            sin_beta_expansion,
+            order
+        )
+
+    if a2_expansion is None:
+        a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarfunc_deriv(square_deriv, b_expansion, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarfunc_deriv(square_deriv, c_expansion, order)
+    if r2_expansion is None:
+        r2_expansion = td.scalarfunc_deriv(square_deriv, r_expansion, order)
+
+    if ac_expansion is None:
+        ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
+
+    ac_cos_cos_expansion = td.scalarprod_deriv(ac_expansion, cos_alpha_cos_beta_expansion, order)
+    ac_sin_sin_expansion = td.scalarprod_deriv(ac_expansion, sin_alpha_sin_beta_expansion, order)
+
+    # ((a**2 + b**2 + c**2) - r**2 - 2*a*b*ca - 2*b*c*cb + 2*a*c*ca*cb)
+    rd_expansion = td.subtract_expansions(
+        td.add_expansions(a2_expansion, b2_expansion, c2_expansion),
+        td.add_expansions(r2_expansion,
+                          td.scale_expansion(
+                              td.subtract_expansions(
+                                  td.add_expansions(ab_cos_alpha_expansion, bc_cos_beta_expansion),
+                                  ac_cos_cos_expansion
+                              ),
+                              2
+                          )
+                          )
+    )
+    ac_denom_expansion = td.scale_expansion(td.scalarinv_deriv(ac_sin_sin_expansion, order), 1 / 2 )
+    term = td.scalarprod_deriv(
+        rd_expansion,
+        ac_denom_expansion
+    )
+    if not return_cos:
+        term = td.scalarfunc_deriv(arccos_deriv, term, order)
+
+    if return_components:
+        return term, (
+            cos_alpha_expansion,
+            cos_beta_expansion,
+            sin_alpha_expansion,
+            sin_beta_expansion,
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            r2_expansion,
+            ab_cos_alpha_expansion,
+            ab_expansion,
+            bc_cos_beta_expansion,
+            bc_expansion,
+            ac_expansion,
+            cos_alpha_cos_beta_expansion,
+            sin_alpha_sin_beta_expansion
+        )
+    else:
+        return term
+
 def dihedral_from_sssssa(a, b, c, x, beta, r, use_cos=False):
     a2 = a**2
     b2 = b**2
@@ -3490,6 +3936,110 @@ def dihedral_from_sssssa(a, b, c, x, beta, r, use_cos=False):
         return ct
     else:
         return np.arccos(ct)
+def dihedral_from_sssssa_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
+                               beta_expansion, r_expansion, order,
+                               return_components=False,
+                               return_cos=False,
+                               cos_alpha_expansion=None,
+                               cos_beta_expansion=None,
+                               sin_alpha_expansion=None,
+                               sin_beta_expansion=None,
+                               a2_expansion=None,
+                               b2_expansion=None,
+                               c2_expansion=None,
+                               x2_expansion=None,
+                               r2_expansion=None,
+                               ab_expansion=None,
+                               bc_cos_beta_expansion=None,
+                               bc_expansion=None,
+                               ac_expansion=None,
+                               cos_alpha_cos_beta_expansion=None,
+                               sin_alpha_sin_beta_expansion=None
+                               ):
+    if a2_expansion is None:
+        a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarfunc_deriv(square_deriv, b_expansion, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarfunc_deriv(square_deriv, c_expansion, order)
+    if r2_expansion is None:
+        r2_expansion = td.scalarfunc_deriv(square_deriv, r_expansion, order)
+    if x2_expansion is None:
+        x2_expansion = td.scalarfunc_deriv(square_deriv, x_expansion, order)
+    if cos_alpha_cos_beta_expansion is None:
+        if cos_alpha_expansion is None:
+            if ab_expansion is None:
+                ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
+            cos_alpha_expansion = _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(cos_alpha_expansion, cos_beta_expansion, order)
+    if sin_alpha_sin_beta_expansion is None:
+        if sin_alpha_expansion is None:
+            ca2 = td.scalarfunc_deriv(square_deriv, cos_alpha_expansion, order)
+            sin_alpha_expansion = td.scalarfunc_deriv(
+                sqrt_deriv,
+                td.shift_expansion(td.scale_expansion(ca2, -1), 1),
+                order
+            )
+        if sin_beta_expansion is None:
+            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
+        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(sin_alpha_expansion, sin_beta_expansion, order)
+
+    if bc_cos_beta_expansion is None:
+        if bc_expansion is None:
+            bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
+        if cos_beta_expansion is None:
+            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
+        bc_cos_beta_expansion = td.scalarprod_deriv(bc_expansion, cos_beta_expansion, order)
+    # x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
+    if ac_expansion is None:
+        ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
+
+    ac_cos_cos_expansion = td.scalarprod_deriv(ac_expansion, cos_alpha_cos_beta_expansion, order)
+    ac_sin_sin_expansion = td.scalarprod_deriv(ac_expansion, sin_alpha_sin_beta_expansion, order)
+
+    # ct = ((x2+c**2) - r2 - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
+    numerator = td.subtract_expansions(
+        td.add_expansions(x2_expansion, c2_expansion),
+        td.add_expansions(
+            r2_expansion,
+            td.scale_expansion(
+                td.subtract_expansions(bc_cos_beta_expansion, ac_cos_cos_expansion),
+                2
+            )
+        )
+    )
+    denom = td.scale_expansion(
+        td.scalarinv_deriv(ac_sin_sin_expansion),
+        2
+    )
+
+    term = td.scalarprod_deriv(numerator, denom, order)
+    if not return_cos:
+        term = td.scalarfunc_deriv(arccos_deriv, term, order)
+
+    if return_components:
+        return term, (
+            cos_alpha_expansion,
+            cos_beta_expansion,
+            sin_alpha_expansion,
+            sin_beta_expansion,
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            x2_expansion,
+            r2_expansion,
+            ab_expansion,
+            bc_cos_beta_expansion,
+            bc_expansion,
+            ac_expansion,
+            cos_alpha_cos_beta_expansion,
+            sin_alpha_sin_beta_expansion
+        )
+    else:
+        return term
+
 def dihedral_from_ssssss(a, b, c, x, y, r, use_cos=False):
     xp = (a + b) ** 2
     xm = (a - b) ** 2
@@ -3509,6 +4059,105 @@ def dihedral_from_ssssss(a, b, c, x, y, r, use_cos=False):
         return ct
     else:
         return np.arccos(ct)
+def dihedral_from_ssssss_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
+                               y_expansion, r_expansion, order,
+                               return_components=False,
+                               return_cos=False,
+                               a2_expansion=None,
+                               b2_expansion=None,
+                               c2_expansion=None,
+                               x2_expansion=None,
+                               y2_expansion=None,
+                               r2_expansion=None,
+                               abplus_expansion=None,
+                               abminus_expansion=None,
+                               bcplus_expansion=None,
+                               bcminus_expansion=None,
+                               det_expansion=None,
+                               ):
+    # potentially more stable than just computing the sin and cos in the usual way...
+    if x2_expansion is None:
+        x2_expansion = td.scalarpow_deriv(x_expansion, 2, order)
+    if y2_expansion is None:
+        y2_expansion = td.scalarpow_deriv(y_expansion, 2, order)
+    if a2_expansion is None:
+        a2_expansion = td.scalarpow_deriv(a_expansion, 2, order)
+    if b2_expansion is None:
+        b2_expansion = td.scalarpow_deriv(b_expansion, 2, order)
+    if c2_expansion is None:
+        c2_expansion = td.scalarpow_deriv(c_expansion, 2, order)
+    if r2_expansion is None:
+        r2_expansion = td.scalarpow_deriv(r_expansion, 2, order)
+
+    if det_expansion is None:
+        if abplus_expansion is None:
+            abplus_expansion = td.scalarpow_deriv(td.add_expansions(a_expansion, b_expansion), 2, order)
+        if abminus_expansion is None:
+            abminus_expansion = td.scalarpow_deriv(td.subtract_expansions(a_expansion, b_expansion), 2, order)
+        if bcplus_expansion is None:
+            bcplus_expansion = td.scalarpow_deriv(td.add_expansions(b_expansion, c_expansion), 2, order)
+        if bcminus_expansion is None:
+            bcminus_expansion = td.scalarpow_deriv(td.subtract_expansions(b_expansion, c_expansion), 2, order)
+        # np.sqrt((xm - x2)*(xp - x2)*(ym - y2)*(yp - y2))
+        abp = td.subtract_expansions(abplus_expansion, x2_expansion)
+        abm = td.subtract_expansions(abminus_expansion, x2_expansion)
+        bcp = td.subtract_expansions(bcplus_expansion, y2_expansion)
+        bcm = td.subtract_expansions(bcminus_expansion, y2_expansion)
+        det_expansion = td.scalarfunc_deriv(sqrt_deriv,
+                                            td.scalarprod_deriv(
+                                                td.scalarprod_deriv(abm, abp, order),
+                                                td.scalarprod_deriv(bcm, bcp, order),
+                                                order
+                                            ),
+                                            order
+                                            )
+
+    #     ct = (
+    #             (a2 + b2 - x2) * (b2 + c2 - y2)
+    #             - ((r2 - (x2 + y2 - b2)) * (2 * b2))
+    #     ) / np.sqrt((xm - x2) * (xp - x2) * (ym - y2) * (yp - y2))
+    det_inv_expansion = td.scalarinv_deriv(det_expansion, order)
+    num_expansion_1 = td.scalarprod_deriv(
+        td.subtract_expansions(td.add_expansions(a2_expansion, b2_expansion), x2_expansion),
+        td.subtract_expansions(td.add_expansions(b2_expansion, c2_expansion), y2_expansion),
+        order
+
+    )
+    # ((r2 - (x2 + y2 - b2)) * (2 * b2))
+    num_expansion_2 = td.scalarprod_deriv(
+        td.subtract_expansions(
+            td.add_expansions(r2_expansion, b2_expansion),
+            td.add_expansions(x2_expansion, y2_expansion)
+        ),
+        td.scale_expansion(b2_expansion, 2),
+        order
+    )
+    term = td.scalarprod_deriv(
+        td.subtract_expansions(num_expansion_1, num_expansion_2),
+        det_inv_expansion,
+        order
+    )
+
+    if not return_cos:
+        term = td.scalarfunc_deriv(arccos_deriv, term, order)
+
+    if return_components:
+        return term, (
+            a2_expansion,
+            b2_expansion,
+            c2_expansion,
+            x2_expansion,
+            y2_expansion,
+            r2_expansion,
+            abplus_expansion,
+            abminus_expansion,
+            bcplus_expansion,
+            bcminus_expansion,
+            det_expansion
+        )
+    else:
+        return term
+
 
 class DihedralSpecifierType(enum.Enum):
     SSSAAT = "sssaat"
@@ -3517,20 +4166,39 @@ class DihedralSpecifierType(enum.Enum):
 def dihedral_distance_converter(dihedral_type:str|DihedralSpecifierType):
     dihedral_type = DihedralSpecifierType(dihedral_type)
     if dihedral_type == DihedralSpecifierType.SSSSST:
-        return dihedral_sssss_distance
+        return (dihedral_sssss_distance, dihedral_sssss_distance_deriv)
     elif dihedral_type == DihedralSpecifierType.SSSSAT:
-        return dihedral_ssssa_distance
+        return (dihedral_ssssa_distance, dihedral_ssssa_distance_deriv)
     else:
-        return dihedral_sssaa_distance
-def dihedral_distance(spec, dihedral_type:str|DihedralSpecifierType, use_cos=False) -> float|np.ndarray:
-    return dihedral_distance_converter(dihedral_type)(*spec, use_cos=use_cos)
+        return (dihedral_sssaa_distance, dihedral_sssaa_distance_deriv)
+def dihedral_distance(spec, dihedral_type:str|DihedralSpecifierType,
+                      order=None,
+                      use_cos=False,
+                      **deriv_kwargs
+                      ) -> float|np.ndarray:
+    converter, deriv_converter = dihedral_distance_converter(dihedral_type)
+    if order is None:
+        return converter(*spec, use_cos=use_cos)
+    else:
+        x,y,z,a,b,t = spec
+        return deriv_converter(x,y,z,a,b,t, order, **deriv_kwargs)
 def dihedral_from_distance_converter(dihedral_type:str|DihedralSpecifierType):
     dihedral_type = DihedralSpecifierType(dihedral_type)
     if dihedral_type == DihedralSpecifierType.SSSSST:
-        return dihedral_from_ssssss
+        return (dihedral_from_ssssss, dihedral_from_ssssss_deriv)
     elif dihedral_type == DihedralSpecifierType.SSSSAT:
-        return dihedral_from_sssssa
+        return (dihedral_from_sssssa, dihedral_from_sssssa_deriv)
     else:
-        return dihedral_from_ssssaa
-def dihedral_from_distance(spec, dihedral_type:str|DihedralSpecifierType, use_cos=False) -> float|np.ndarray:
-    return dihedral_from_distance_converter(dihedral_type)(*spec, use_cos=use_cos)
+        return (dihedral_from_ssssaa, dihedral_from_ssssaa_deriv)
+def dihedral_from_distance(spec, dihedral_type:str|DihedralSpecifierType,
+                           order=None,
+                           use_cos=False,
+                           **deriv_kwargs
+                           ) -> float|np.ndarray:
+
+    converter, deriv_converter = dihedral_from_distance_converter(dihedral_type)
+    if order is None:
+        return converter(*spec, use_cos=use_cos)
+    else:
+        x,y,z,a,b,r = spec
+        return deriv_converter(x,y,z,a,b,r, order, **deriv_kwargs)
