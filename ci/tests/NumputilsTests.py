@@ -2154,7 +2154,7 @@ class NumputilsTests(TestCase):
     def test_LegendreCoeffs(self):
         print(legendre_integer_coefficients(7))
 
-    @debugTest
+    @validationTest
     def test_TriangleDerivs(self):
         np.random.seed(123321)
         tri_points = np.random.rand(3, 3)
@@ -2169,3 +2169,16 @@ class NumputilsTests(TestCase):
         sss_derivs = triangle_convert(local_derivs, "sas", "sss", order=1)
         for exp in sss_derivs:
             print(exp)
+
+    @debugTest
+    def test_DihedralDerivs(self):
+        np.random.seed(153234)
+        dihed_points = np.random.rand(4, 3)[(2, 1, 0, 3),]
+        ssssss = distance_matrix(dihed_points, return_triu=True)[(0, 3, 5, 1, 4, 2),]
+        t = dihedral_from_distance(ssssss, "ssssst", use_cos=True)
+        ssssss_expansion = [
+            [z,o] for z,o in zip(ssssss, np.eye(6))
+        ]
+        t_expansion = dihedral_from_distance(ssssss_expansion, "ssssst", order=1, return_cos=True)
+        print(t)
+        print(t_expansion)

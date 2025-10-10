@@ -29,7 +29,11 @@ __all__ = [
     "vec_anglecos_deriv",
     "vec_anglesin_deriv",
     "vec_dihed_deriv",
-    "vec_plane_angle_deriv"
+    "vec_plane_angle_deriv",
+    "shift_expansion",
+    "scale_expansion",
+    "add_expansions",
+    "subtract_expansions"
 ]
 
 # levi_cevita3.__name__ = "levi_cevita3"
@@ -366,6 +370,45 @@ def scalarfunc_deriv(scalar_func, arg_expansion, order):
     scalar_expansion = [scalar_func(arg_expansion[0], i) for i in range(order+1)]
     return [scalar_expansion[0]] + scalarprod_deriv(scalar_expansion[1:], arg_expansion[1:], order)
 
+def shift_expansion(expansion, scalar):
+    return [expansion[0] + scalar] + list(expansion[1:])
+
+def scale_expansion(expansion, scalar):
+    if scalar == -1:
+        return [-e for e in expansion] # can be faster
+    elif is_zero(scalar):
+        return [0 for e in expansion]
+    else:
+        return [scalar * e for e in expansion]
+
+def add_expansions(*expansions, order=None):
+    if order is None:
+        order = max(len(e) for e in expansions) - 1
+    o = order + 1
+    pad_expansions = [
+        list(e) + [0]*(o - len(e))
+        for e in expansions
+    ]
+    return [
+        sum(x for x in e if not is_zero(x))
+        for e in zip(*pad_expansions)
+    ]
+
+def subtract_expansions(a_expansion, b_expansion, order=None):
+    if order is None:
+        order = max([len(a_expansion), len(b_expansion)]) - 1
+    o = order + 1
+    a_expansion, b_expansion = [
+        list(e) + [0]*(o - len(e))
+        for e in [a_expansion, b_expansion]
+    ]
+    return [
+        a - b
+        for a,b in zip(a_expansion, b_expansion)
+    ]
+
+#TODO: add a DifferentiableExpansion class so I can have nicer overloads on all of this...
+
 def inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False):
     if reverse_expansion is None:
         if allow_pseudoinverse and forward_expansion[0].shape[0] != forward_expansion[0].shape[1]:
@@ -561,6 +604,7 @@ def _scalarpow_deriv(scalar_expansion, exp, o):
     return term
 
 def scalarpow_deriv(scalar_expansion, exp, order):
+    scalar_expansion = [np.asanyarray(s) for s in scalar_expansion]
     return _deriv_construct(
         lambda : np.power(scalar_expansion[0], exp),
         lambda ords: [_scalarpow_deriv(scalar_expansion, exp, o) for o in ords],
