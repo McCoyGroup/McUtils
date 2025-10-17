@@ -673,7 +673,7 @@ class GraphicsBase(metaclass=ABCMeta):
         # hacky, but hopefully enough to make it work?
         return self.figure._repr_html_()
 
-    def savefig(self, where, format=None, **kw):
+    def savefig(self, where, expanduser=True, format=None, **kw):
         """
         Saves the image to file
         :param where:
@@ -690,10 +690,9 @@ class GraphicsBase(metaclass=ABCMeta):
         if format is None:
             format = os.path.splitext(where)[1].split('.')[-1]
         self.prep_show()
-        return self.figure.savefig(where,
-                    format=format,
-                    **kw
-                    )
+        if isinstance(where, str) and expanduser:
+            where = os.path.expanduser(where)
+        return self.figure.savefig(where, format=format, **kw)
     def to_png(self):
         """
         Used by Jupyter and friends to make a version of the image that they can display, hence the extra 'tight_layout' call

@@ -229,34 +229,102 @@ class GraphicsPropertyManager:
     @property
     def ticks(self):
         return self._ticks
-    def _set_ticks(self, x, set_ticks=None, set_locator=None, set_minor_locator=None, **opts):
+    def _set_ticks(self, x,
+                   *,
+                   set_ticks, set_locator, set_minor_locator,
+                   set_formatter, set_minor_formatter,
+                   **opts):
+        #TODO: make this backend independent
         import matplotlib.ticker as ticks
+        inherit_opts = dict(
+            set_ticks = set_ticks,
+            set_locator = set_locator,
+            set_minor_locator = set_minor_locator,
+            set_formatter=set_formatter,
+            set_minor_formatter=set_minor_formatter
+        )
 
         if isinstance(x, Styled):
             self._set_ticks(*x.val,
-                            set_ticks=set_ticks,
-                            set_locator=set_locator, set_minor_locator=set_minor_locator,
-                            **x.opts
+                            **inherit_opts,
+                            **dict(opts, **x.opts)
                             )
         elif Styled.could_be(x):
             x = Styled.construct(x)
             self._set_ticks(*x.val,
-                            set_ticks=set_ticks,
-                            set_locator=set_locator, set_minor_locator=set_minor_locator,
-                            **x.opts
+                            **inherit_opts,
+                            **dict(opts, **x.opts)
                             )
         elif isinstance(x, ticks.Locator):
-            set_locator(x)
-        elif isinstance(x, (list, tuple)):
-            if len(x) == 2 and isinstance(x[0], ticks.Locator):
-                set_locator(x[0])
-                set_minor_locator(x[1])
-            if len(x) == 2 and isinstance(x[0], (list, tuple)):
-                set_ticks(*x, **opts)
+            if set_locator is not None:
+                set_locator(x)
+
+            minor = opts.get('minor', False)
+            if minor is not False and minor is not None:
+                if minor is True:
+                    minor = ticks.AutoMinorLocator()
+                elif dev.is_list_like(minor):
+                    minor = ticks.FixedLocator(minor)
+                elif dev.is_number(minor):
+                    minor = ticks.MultipleLocator(minor)
+                if set_minor_locator is not None:
+                    set_minor_locator(minor)
+
+            labels = opts.get('labels', True)
+            if labels is not True:
+                if isinstance(labels, str):
+                    labels = ticks.StrMethodFormatter(labels)
+                elif labels is False:
+                    labels = ticks.NullFormatter()
+                elif dev.is_list_like(labels):
+                    labels = ticks.FixedFormatter(labels)
+                elif dev.is_dict_like(labels):
+                    labels = ticks.ScalarFormatter(**labels)
+                if set_formatter is not None:
+                    set_formatter(labels)
+
+            minor_labels = opts.get('minor_labels', False)
+            if minor_labels is not False:
+                if isinstance(minor_labels, str):
+                    minor_labels = ticks.StrMethodFormatter(minor_labels)
+                elif minor_labels is True:
+                    minor_labels = ticks.ScalarFormatter()
+                elif dev.is_list_like(minor_labels):
+                    minor_labels = ticks.FixedFormatter(minor_labels)
+                elif dev.is_dict_like(minor_labels):
+                    minor_labels = ticks.ScalarFormatter(**minor_labels)
+                if set_minor_formatter is not None:
+                    set_minor_formatter(minor_labels)
+            # set_ticks(**opts)
+        elif dev.str_is(x, 'auto'):
+            self._set_ticks(ticks.AutoLocator(),
+                            **inherit_opts,
+                            **opts
+                            )
+        elif dev.is_list_like(x):
+            if len(x) == 2 and dev.is_dict_like(x[1]):
+                self._set_ticks(x[0],
+                            **inherit_opts,
+                                **dict(opts, **x[1])
+                                )
+            elif len(x) == 2 and isinstance(x[0], ticks.Locator):
+                self._set_ticks(x[0],
+                            **inherit_opts,
+                                **dict(opts, minor=x[1])
+                                )
+            elif len(x) == 2 and dev.is_list_like(x[0]):
+                self._set_ticks(ticks.FixedLocator(x[0]),
+                            **inherit_opts,
+                                labels=x[1],
+                                **opts)
             else:
-                set_ticks(x, **opts)
-        elif isinstance(x, (float, int)):
-            set_ticks(ticks.MultipleLocator(x), **opts)
+                self._set_ticks(ticks.FixedLocator(x),
+                            **inherit_opts,
+                                **opts)
+        elif dev.is_number(x):
+            self._set_ticks(ticks.MultipleLocator(x),
+                            **inherit_opts,
+                            **opts)
         elif x is not None:
             set_ticks(x, **opts)
     def _set_xticks(self, x, **opts):
@@ -264,6 +332,8 @@ class GraphicsPropertyManager:
                                set_ticks=self.axes.set_xticks,
                                set_locator=self.axes.xaxis.set_major_locator,
                                set_minor_locator=self.axes.xaxis.set_minor_locator,
+                               set_formatter=self.axes.xaxis.set_major_formatter,
+                               set_minor_formatter=self.axes.xaxis.set_minor_formatter,
                                **opts
                                )
 
@@ -272,6 +342,9 @@ class GraphicsPropertyManager:
                                set_ticks=self.axes.set_yticks,
                                set_locator=self.axes.yaxis.set_major_locator,
                                set_minor_locator=self.axes.yaxis.set_minor_locator,
+                               set_formatter=self.axes.yaxis.set_major_formatter,
+                               set_minor_formatter=self.axes.yaxis.set_minor_formatter,
+                               # set_minor_locator=self.axes.yaxis.set_minor_locator,
                                **opts
                                )
 
@@ -286,10 +359,21 @@ class GraphicsPropertyManager:
                 x, y = ticks = (ticks, ticks)
             else:
                 x, y = ticks = (self._ticks[0], ticks)
+        if isinstance(y, dict):
+            opts = y
+            try:
+                x, y = x
+            except (ValueError, TypeError):
+                if isinstance(x, bool):
+                    x, y = ticks = (x, x)
+                else:
+                    x, y = ticks = (self._ticks[0], x)
+        else:
+            opts = {}
 
         self._ticks = ticks
-        self._set_xticks(x)
-        self._set_yticks(y)
+        self._set_xticks(x, **opts)
+        self._set_yticks(y, **opts)
 
     @property
     def ticks_style(self):
@@ -776,26 +860,13 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
         if b is None:
             b = self.axes.get_ylim()
         return a, b
-
-    def _set_xticks(self, x, **opts):
-        return self._set_ticks(x,
-                               set_ticks=self.axes.set_xticks,
-                               set_locator=self.axes.xaxis.set_major_locator,
-                               set_minor_locator=self.axes.xaxis.set_minor_locator,
-                               **opts
-                               )
-    def _set_yticks(self, y, **opts):
-        return self._set_ticks(y,
-                               set_ticks=self.axes.set_yticks,
-                               set_locator=self.axes.yaxis.set_major_locator,
-                               set_minor_locator=self.axes.yaxis.set_minor_locator,
-                               **opts
-                               )
     def _set_zticks(self, z, **opts):
         return self._set_ticks(z,
                                set_ticks=self.axes.set_zticks,
                                set_locator=self.axes.zaxis.set_major_locator,
                                set_minor_locator=self.axes.zaxis.set_minor_locator,
+                               set_formatter=self.axes.zaxis.set_major_formatter,
+                               set_minor_formatter=self.axes.zaxis.set_minor_formatter,
                                **opts
                                )
 
