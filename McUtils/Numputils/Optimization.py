@@ -208,7 +208,8 @@ def iterative_step_minimize(
         max_iterations=100,
         convergence_metric=None,
         track_best=False,
-        logger=None
+        logger=None,
+        log_guess=True
 ):
     logger = dev.Logger.lookup(logger)
 
@@ -262,15 +263,18 @@ def iterative_step_minimize(
                 region_constraints, unitary, max_displacement, max_displacement_norm,
                 generate_rotation, prev_step, use_max_for_error, termination_function
             )
+            fvals = None
             if best is not None:
                 if i == 0:
                     if best_vals is not None:
-                        best_vals[mask,] = function(guess[mask,], mask)
+                        fvals = function(guess[mask,], mask)
+                        best_vals[mask,] = fvals
                     best_errs[mask,] = step_errs
                     best[mask,] = guess[mask,]
                 else:
                     if best_vals is not None:
-                        new_vals = function(guess[mask,], mask)
+                        fvals = function(guess[mask,], mask)
+                        new_vals = fvals
                         improved = np.where(new_vals < best_vals[mask,])
                         if len(improved[0]) > 0:
                             imp_mask = mask[improved]
@@ -285,8 +289,16 @@ def iterative_step_minimize(
                             best[imp_mask,] = guess[imp_mask,]
 
 
+            if log_guess:
+                logger.log_print("Guess: {guess}", guess=guess[mask,])
             logger.log_print("Predicted steps: {step}", step=step)
             logger.log_print("Step errors: {errs}", errs=step_errs)
+            if fvals is not None:
+                logger.log_print("Function values: {fvals}", fvals=fvals)
+            if best_vals is not None:
+                logger.log_print("Best value found: {mins}", mins=best_vals[mask,])
+            elif best_errs is not None:
+                logger.log_print("Best error found: {mins}", mins=best_errs[mask,])
             if prevent_oscillations:
                 if prev_step is None:
                     prev_step = np.random.uniform(size=(step.shape[0], prevent_oscillations, step.shape[1])).astype(step.dtype)
@@ -1047,9 +1059,10 @@ class QuasiNetwonHessianApproximator:
         return new_jacs, jac_diffs
 
     def restart_hessian_approximation(self):
-        restart = np.any(
-            np.linalg.norm(self.prev_step, axis=-1) < self.restart_hessian_norm
-        )
+        if np.any(self.prev_step > 1e80): # a divide by zero in a previous Hessian update
+            return True
+        prev_norm = np.linalg.norm(self.prev_step, axis=-1)
+        restart = np.any(prev_norm < self.restart_hessian_norm)
         return restart
 
     def __call__(self, guess, mask, projector=None):
@@ -1059,6 +1072,7 @@ class QuasiNetwonHessianApproximator:
         else:
             prev_steps = self.prev_step[mask,]
             prev_hess = self.prev_hess_inv[mask,]
+            #TODO: check the update to make sure the Hessian approx. isn't crashing
             new_hess = self.get_hessian_update(self.identities(guess, mask), jacobian_diffs, prev_steps, prev_hess)
 
         if self.approximation_mode == 'direct':

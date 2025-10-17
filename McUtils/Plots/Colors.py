@@ -7,7 +7,8 @@ from .. import Numputils as nput
 from .. import Devutils as dev
 
 __all__ = [
-    "ColorPalette"
+    "ColorPalette",
+    "prep_color"
 ]
 
 #TODO: add ColorSpaces enum for validation
@@ -69,6 +70,61 @@ class ColorPalette:
             color_lists = [cls.rgb_code(c, 2) for c in rgb_colors]
 
         return tuple(color_lists), lab_colors
+
+    @classmethod
+    def prep_color(cls,
+                   base=None,
+                   palette=None,
+                   blending=None,
+                   index=None,
+                   lighten=None,
+                   modifier=None,
+                   shift=False,
+                   absolute=False,
+                   clip=True,
+                   color_space='rgb',
+                   modification_space='lab',
+                   cycle=None
+                   ):
+        if base is None:
+            if palette is None:
+                raise ValueError("can't compose color without base color or palette")
+            palette:ColorPalette
+            if not isinstance(palette, ColorPalette):
+                if cycle is None:
+                    cycle = index is not None
+                palette = cls(palette, cycle=cycle)
+            if index is not None:
+                base = palette[index]
+                if hasattr(base, 'color_strings'):
+                    base = base.color_strings
+            elif blending is not None:
+                base = palette(blending, return_color_code=True)
+            else:
+                base = palette.color_strings
+
+        smol = isinstance(base, str) or not isinstance(base[0], str)
+        if smol: base = [base]
+        final = []
+        for b in base:
+            if lighten is not None:
+                b = cls.color_lighten(b, lighten,
+                                      color_space=color_space,
+                                      modification_space=modification_space,
+                                      shift=shift,
+                                      absolute=absolute,
+                                      clip=clip
+                                      )
+            if modifier is not None:
+                b = cls.color_modify(b, modifier,
+                                      color_space=color_space,
+                                      modification_space=modification_space,
+                                      clip=clip
+                                      )
+            final.append(b)
+        if smol:
+            final = final[0]
+        return final
 
     @classmethod
     def resolve_color_palette(cls, cmap_name):
@@ -323,7 +379,7 @@ class ColorPalette:
                 return self.color_strings[item % len(self.color_strings)]
         else:
             return type(self)(
-                self.color_strings[item],
+                np.asanyarray(self.color_strings)[item],
                 blend_spacings=self.abcissae[item],
                 lab_colors=self.lab_colors[item]
             )
@@ -695,3 +751,32 @@ class ColorPalette:
     @classmethod
     def lab_to_rgb(cls, l, a, b, xyz_scaling=None):
         return cls.xyz_to_rgb(*cls.lab_to_xyz(l, a, b, scaling=xyz_scaling))
+
+def prep_color(
+        base=None,
+        palette=None,
+        blending=None,
+        index=None,
+        lighten=None,
+        modifier=None,
+        shift=False,
+        absolute=False,
+        clip=True,
+        color_space='rgb',
+        modification_space='lab',
+        cycle=None
+):
+    return ColorPalette.prep_color(
+        base=base,
+        palette=palette,
+        blending=blending,
+        index=index,
+        lighten=lighten,
+        modifier=modifier,
+        shift=shift,
+        absolute=absolute,
+        clip=clip,
+        color_space=color_space,
+        modification_space=modification_space,
+        cycle=cycle
+    )

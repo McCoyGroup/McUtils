@@ -29,6 +29,9 @@ class Styled:
     @classmethod
     def construct(cls, data):
         return cls(data[0], **data[1])
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}({self.val}, {self.opts})"
 
 class PlotLegend(list):
     known_styles = {"handles", "labels", "loc", "bbox_to_anchor", "ncol", "prop", "fontsize",

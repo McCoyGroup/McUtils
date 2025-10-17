@@ -4,7 +4,9 @@ Provides various types of plots and plotting utilities
 
 from .Graphics import Graphics, Graphics3D, GraphicsGrid
 from .Backends import GraphicsAxes, GraphicsFigure
+from .. import Devutils as dev
 import numpy as np
+import itertools
 # import matplotlib.figure
 # import matplotlib.axes
 
@@ -13,6 +15,9 @@ __all__ = [
     "Plot2D", "ListPlot2D",
     "Plot3D", "ListPlot3D",
     "CompositePlot",
+    "resolve_plotter",
+    "plot_generic",
+    "plot_multi"
 ]
 
 ######################################################################################################
@@ -1252,6 +1257,69 @@ class ListTriPlot3D(ListPlot3D):
     method = 'plot_trisurf'
     default_plot_style = {}
 
+def resolve_plotter(tag):
+    if isinstance(tag, str):
+        plotter = Plot.plot_classes.get(tag,Plot3D.plot_classes.get(tag))
+        if plotter is None:
+            plotter = Plot.plot_classes.get(tag.lower(), Plot3D.plot_classes.get(tag.lower()))
+        if plotter is None:
+            for v in itertools.chain(Plot.plot_classes.values(), Plot3D.plot_classes.values()):
+                if v.method == tag:
+                    plotter = v
+                    break
+        return plotter
+    else:
+        return tag
+def plot_generic(*, x, type='plot', y=None, z=None, func=None, **kwargs):
+    plotter = resolve_plotter(type)
+    if plotter is None:
+        raise ValueError(f"unknown plot type {plotter}")
+    if func is not None:
+        if y is not None:
+            args = [func, x, y]
+        else:
+            args = [func, x]
+    elif z is not None:
+        if y is None:
+            raise ValueError("need `x` and `y` values when supplied `z`")
+        args = [x, y, z]
+    else:
+        if y is None:
+            raise ValueError("need `x` and `y` values when no `func` supplied")
+        args = [x, y]
+    return plotter(*args, **kwargs)
+plot_spec_schema = {'type':str, 'args':list, 'opts':dict}
+def plot_multi(
+        *plot_specs: dict,
+        figure=None,
+        plot_type_styles=None,
+        default_type='plot',
+        **global_settings
+):
+    if plot_type_styles is None:
+        plot_type_styles = {}
+    for i,f in enumerate(plot_specs):
+        f = dict(
+            plot_type_styles.get(f.get('type', default_type), {}),
+            **f
+        )
+        f['type'] = f.get('type', default_type)
+        f['figure'] = f.get('figure', figure)
+        func = f.get('func')
+        if not dev.is_list_like(func):
+            if i == 0:
+                figure = plot_generic(**f, **global_settings)
+            else:
+                _ = plot_generic(**f)  # TDB if I prefer to update the object each iteration or not
+        else:
+            for j, c in enumerate(func):
+                if i == 0 and j == 0:
+                    figure = plot_generic(**dict(f, func=c), **global_settings)
+                    if f['figure'] is None:
+                        f['figure'] = figure
+                else:
+                    _ = plot_generic(**dict(f, func=c))  # TDB if I prefer to update the object each iteration or not
+    return figure
 
 # add classes to __all__
 for c in Plot.plot_classes.values():
@@ -1260,3 +1328,4 @@ for c in Plot.plot_classes.values():
 for c in Plot3D.plot_classes.values():
     if c.__name__ not in __all__:
         __all__.append(c.__name__)
+del c

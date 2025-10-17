@@ -22,41 +22,40 @@ from .SceneJSON import SceneJSON as sceneJSON
 
 DPI_SCALING = 72
 
-class XAxisManager:
+class AxisManager:
     def __init__(self,
                  tick_getter,
                  tick_setter,
                  tick_locator,
-                 minor_tick_locator
+                 minor_tick_locator,
+                 tick_formatter,
+                 minor_tick_formatter
                  ):
-        self.get_xticks = tick_getter
-        self.set_xticks = tick_setter
+        self.get_ticks = tick_getter
+        self.set_ticks = tick_setter
         self.set_major_locator = tick_locator
         self.set_minor_locator = minor_tick_locator
+        self.set_major_formatter = tick_formatter
+        self.set_minor_formatter = minor_tick_formatter
 
-class YAxisManager:
-    def __init__(self,
-                 tick_getter,
-                 tick_setter,
-                 tick_locator,
-                 minor_tick_locator
-                 ):
-        self.get_yticks = tick_getter
-        self.set_yticks = tick_setter
-        self.set_major_locator = tick_locator
-        self.set_minor_locator = minor_tick_locator
 
-class ZAxisManager:
-    def __init__(self,
-                 tick_getter,
-                 tick_setter,
-                 tick_locator,
-                 minor_tick_locator
-                 ):
-        self.get_zticks = tick_getter
-        self.set_zticks = tick_setter
-        self.set_major_locator = tick_locator
-        self.set_minor_locator = minor_tick_locator
+class XAxisManager(AxisManager):
+    def get_xticks(self):
+        return self.get_ticks()
+    def set_xticks(self, ticks, **kwargs):
+        return self.set_ticks(ticks, **kwargs)
+
+class YAxisManager(AxisManager):
+    def get_yticks(self):
+        return self.get_ticks()
+    def set_yticks(self, ticks, **kwargs):
+        return self.set_ticks(ticks, **kwargs)
+
+class ZAxisManager(AxisManager):
+    def get_zticks(self):
+        return self.get_ticks()
+    def set_zticks(self, ticks, **kwargs):
+        return self.set_ticks(ticks, **kwargs)
 
 class GraphicsAxes(metaclass=abc.ABCMeta):
     """
@@ -68,11 +67,15 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
             self.get_xticks,
             self.set_xticks,
             None,
+            None,
+            None,
             None
         )
         self.yaxis = YAxisManager(
             self.get_yticks,
             self.set_yticks,
+            None,
+            None,
             None,
             None
         )
@@ -221,6 +224,8 @@ class GraphicsAxes3D(GraphicsAxes):
         self.zaxis = ZAxisManager(
             self.get_zticks,
             self.set_zticks,
+            None,
+            None,
             None,
             None
         )

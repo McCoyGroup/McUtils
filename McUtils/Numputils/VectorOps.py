@@ -1363,21 +1363,26 @@ def find_basis(mat, nonzero_cutoff=1e-8, method='svd'):
     else:
         raise ValueError(f"method `{method}`")
 
-def projection_matrix(basis, orthonormal=False):
+def projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False):
     basis = np.asanyarray(basis)
     if basis.ndim == 1:
         basis = basis[np.newaxis]
-    if not orthonormal:
-        basis, _ = np.linalg.qr(basis)
+    if inverse is None:
+        if allow_pinv:
+            inverse = np.linalg.pinv(basis)
+        else:
+            if not orthonormal:
+                basis, _ = np.linalg.qr(basis)
+            inverse = np.moveaxis(basis, -2, -1)
 
-    return basis @ np.moveaxis(basis, -2, -1)
+    return basis @ inverse
 
-def orthogonal_projection_matrix(basis, orthonormal=False):
-    proj = projection_matrix(basis, orthonormal=orthonormal)
+def orthogonal_projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False):
+    proj = projection_matrix(basis, inverse=inverse, orthonormal=orthonormal, allow_pinv=allow_pinv)
     identities = identity_tensors(proj.shape[:-2], proj.shape[-1])
     return identities - proj
 
-def _proj(projection_type, vecs, basis, ndim=None, orthonormal=False):
+def _proj(projection_type, vecs, basis, ndim=None, orthonormal=False, inverse=None, allow_pinv=False):
     vecs = np.asanyarray(vecs)
     basis = np.asanyarray(basis)
     if vecs.shape[-1] != basis.shape[-2]:
@@ -1390,7 +1395,7 @@ def _proj(projection_type, vecs, basis, ndim=None, orthonormal=False):
             ndim = vecs.ndim - len(base_shape)
     base_shape = vecs.shape[:-ndim]
 
-    proj = projection_type(basis, orthonormal=orthonormal)
+    proj = projection_type(basis, orthonormal=orthonormal, inverse=inverse, allow_pinv=allow_pinv)
     if ndim == 1:
         vecs = (vecs[..., np.newaxis, :] @ proj).reshape(vecs.shape)
     else:
@@ -1399,11 +1404,13 @@ def _proj(projection_type, vecs, basis, ndim=None, orthonormal=False):
 
     return vecs
 
-def project_onto(vecs, basis, ndim=None, orthonormal=False):
-    return _proj(projection_matrix, vecs, basis, ndim=ndim, orthonormal=orthonormal)
+def project_onto(vecs, basis, ndim=None, orthonormal=False, inverse=None, allow_pinv=False):
+    return _proj(projection_matrix, vecs, basis, ndim=ndim,
+                 orthonormal=orthonormal, inverse=inverse, allow_pinv=allow_pinv)
 
-def project_out(vecs, basis, ndim=None, orthonormal=False):
-    return _proj(orthogonal_projection_matrix, vecs, basis, ndim=ndim, orthonormal=orthonormal)
+def project_out(vecs, basis, ndim=None, orthonormal=False, inverse=None, allow_pinv=False):
+    return _proj(orthogonal_projection_matrix, vecs, basis, ndim=ndim,
+                 orthonormal=orthonormal, inverse=inverse, allow_pinv=allow_pinv)
 
 def fractional_power(A, pow, zero_cutoff=1e-8):
     # only applies to symmetric A
