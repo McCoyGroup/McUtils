@@ -5,6 +5,7 @@ import os.path
 
 from Peeves.TestUtils import *
 from Peeves import BlockProfiler
+import McUtils.Numputils as nput
 from McUtils.Numputils import *
 from McUtils.Zachary import FiniteDifferenceDerivative
 from unittest import TestCase
@@ -2170,7 +2171,7 @@ class NumputilsTests(TestCase):
         for exp in sss_derivs:
             print(exp)
 
-    @debugTest
+    @validationTest
     def test_DihedralDerivs(self):
         np.random.seed(153234)
         dihed_points = np.random.rand(4, 3)[(2, 1, 0, 3),]
@@ -2182,3 +2183,36 @@ class NumputilsTests(TestCase):
         t_expansion = dihedral_from_distance(ssssss_expansion, "ssssst", order=1, return_cos=True)
         print(t)
         print(t_expansion)
+
+    @debugTest
+    def test_MoreGeometry(self):
+        tri = nput.make_triangle(np.random.rand(3, 3))
+        A, tnew = nput.triangle_property(tri, 'A')
+        tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
+        C, tnew = nput.triangle_property(tri2, 'C')
+        tri2 = nput.make_triangle(A=tnew.A, c=tnew.b, C=tnew.C)
+        C, tnew = nput.triangle_property(tri2, 'B')
+
+        np.random.seed(123123)
+        pts = np.random.rand(4, 3)
+        dd = nput.make_dihedron(
+            a=nput.pts_norms(pts[0], pts[1]),
+            b=nput.pts_norms(pts[1], pts[2]),
+            c=nput.pts_norms(pts[2], pts[3]),
+            X=nput.pts_angles(pts[0], pts[1], pts[2], return_crosses=False),
+            Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
+            Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
+        )
+        z, dd = nput.dihedron_property(dd, 'z')
+        print(z, nput.pts_norms(pts[0], pts[3]))
+        x, dd = nput.dihedron_property(dd, 'x')
+        print(x, nput.pts_norms(pts[0], pts[2]))
+        y, dd = nput.dihedron_property(dd, 'y')
+        print(y, nput.pts_norms(pts[1], pts[3]))
+        # dl = []
+        # a, x, z, b, y, c = nput.distance_matrix(pts, return_triu=True)
+        # for field in ['a', 'x', 'z', 'b', 'y', 'c']:
+        #     z, dd = nput.dihedron_property(dd, field)
+        #     dl.append(z)
+        # print()
+        # print(z, )

@@ -1,9 +1,12 @@
 """
 Provides analytic derivatives for some common base terms with the hope that we can reuse them elsewhere
 """
+import collections
 import itertools
 import math
 import enum
+import warnings
+
 import numpy as np
 from .VectorOps import *
 from . import TensorDerivatives as td
@@ -45,14 +48,25 @@ __all__ = [
     "delocalized_internal_coordinate_transformation",
     "relocalize_coordinate_transformation",
     "transform_cartesian_derivatives",
+    "cos_deriv",
+    "sin_deriv",
+    "arccos_deriv",
+    "arcsin_deriv",
+    "tan_deriv",
+    "arctan_deriv",
     "legendre_integer_coefficients",
+    "tan_integer_coefficients",
     "triangle_convert",
     "triangle_converter",
     "triangle_area",
+    "make_triangle",
+    "triangle_property",
     "dihedral_distance",
     "dihedral_distance_converter",
     "dihedral_from_distance",
     "dihedral_from_distance_converter",
+    "make_dihedron",
+    "dihedron_property"
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -2359,14 +2373,28 @@ def tri_sas_to_saa(a, C, b):
     return tri_sss_to_saa(*tri_sas_to_sss(a,C,b))
 def tri_sas_to_asa(a, C, b):
     return tri_sss_to_asa(*tri_sas_to_sss(a,C,b))
+def _check_ssa(a, b, A):
+    bs = b * np.sin(A)
+    return np.logical_and(bs < a, a < b)
+class SSAWarning(UserWarning):
+    ...
 def tri_ssa_to_sas(a, b, A):
+    bad_pos = _check_ssa(a, b, A)
+    if np.any(bad_pos):
+        warnings.warn('SSA triangle provided non-unique solution, minimum chosen', SSAWarning)
     B = np.arcsin(law_of_sines_sin(a, b, A))
     C = np.pi - (A + B)
     return (a, C, b)
 def tri_ssa_to_saa(a, b, A):
+    bad_pos = _check_ssa(a, b, A)
+    if np.any(bad_pos):
+        warnings.warn('SSA triangle provided non-unique solution, minimum chosen', SSAWarning)
     B = np.arcsin(law_of_sines_sin(a, b, A))
     return (a, B, A)
 def tri_ssa_to_asa(a, b, A):
+    bad_pos = _check_ssa(a, b, A)
+    if np.any(bad_pos):
+        warnings.warn('SSA triangle provided non-unique solution, minimum chosen', SSAWarning)
     B = np.arcsin(law_of_sines_sin(a, b, A))
     C = np.pi - (A + B)
     return (C, a, B)
@@ -2397,7 +2425,6 @@ def tri_asa_to_ssa(C, a, B):
     return (a, b, A)
 def tri_asa_to_sss(C, a, B):
     return tri_sas_to_sss(*tri_asa_to_sas(C, a, B))
-
 
 def law_of_cosines_cos_deriv(a_expansion, b_expansion, c_expansion, order,
                              return_components=False,
@@ -2480,6 +2507,55 @@ def arccos_deriv(term, order):
     csc_exp = np.sin(term)**(-(order+1))
     cot_exp = (c/s)**np.arange(order+1)
     return scaling*csc_exp*np.dot(cot_exp, coeffs[-1])
+def tan_integer_coefficients(n):
+    coeffs = np.zeros((n, n), dtype=int)
+    coeffs[0, 0] = 1
+    if n > 0:
+        ind_sets = np.arange(2, n+1)
+        _, indicators = integer_exponent(ind_sets[::2], 2)
+        k_odd = np.arange(1, n+1)
+        break_point = (n-(n%2))//2
+        indicators = indicators - 1 # divided out a two from the scalings
+        indicator_scalings = np.zeros_like(k_odd)
+        indicator_scalings[::2] = indicators
+        # used to figure out how many divisions the c_new terms can take
+        indicator_subscalings = np.zeros_like(k_odd)
+        k_rem, subscalings = integer_exponent(k_odd[:break_point], 2)
+        k_even = np.zeros_like(k_odd)
+        k_even[1::2] = k_rem
+        indicator_subscalings[1::2] = subscalings
+        for i in range(n-1):
+            c = coeffs[i]
+            c_new = np.roll(c, 1) + np.pad(c[1:], [0, 1])
+            if i%2 == 1:
+                coeffs[i + 1] = k_odd * c_new
+            else:
+                divs = indicator_scalings[i]
+                div_diffs = indicator_subscalings - divs
+                num = 2**np.clip(div_diffs, 0, np.inf)
+                denom = 2**np.clip(-div_diffs, 0, np.inf)
+                c_new = c_new // denom
+                coeffs[i + 1] = k_even * num * c_new
+    return coeffs
+def tan_deriv(term, order):
+    #TODO: cache these
+    coeffs = tan_integer_coefficients(order)[-1]
+    _, inds = integer_exponent(np.arange(1, order+1), 2)
+    scaling = 2**np.sum(inds)
+    t = np.tan(term)
+    tan_exp = t**np.arange(order)
+    return scaling*(1+t**2)*np.dot(tan_exp, coeffs)
+def cot_deriv(term, order):
+    return tan_deriv(np.pi/2 - term, order)
+def arctan_deriv(term, order):
+    powers = 2*np.arange(order//2 + (order%2)) + ((order + 1) % 2)
+    fac = math.factorial(order-1)
+    coeffs = np.array([math.comb(order, p) for p in powers]) #TODO: could speed this up...
+    signs = (-1)**((order+powers)//2)
+    coeffs = signs * coeffs
+    d = (1+term**2)
+    exps = powers
+    return fac * np.dot(term**exps, coeffs) / d**order
 def law_of_cosines_dist_deriv(a_expansion, b_expansion, C_expansion, order,
                               return_components=False,
                               a2_expansion=None,
@@ -3400,89 +3476,219 @@ def triangle_area(tri_spec, type:str|TriangleType):
     else:
         return tri_sas_area(*triangle_convert(tri_spec, type, TriangleType.SAS))
 
-def dihedral_sssaa_distance(a, b, c, alpha, beta, tau, use_cos=False):
+
+TriangleData = collections.namedtuple("TriangleData",
+                                      ["a", "b", "c", "A", "B", "C"]
+                                      )
+def make_triangle(points=None, *, a=None, b=None, c=None, A=None, B=None, C=None):
+    if points is not None:
+        a,c,b = distance_matrix(points, return_triu=True)
+    return TriangleData(a, b, c, A, B, C)
+_tdata_name_map = {'a':0,'b':1,'c':2,'A':3,'B':4,'C':5}
+def _check_triangle_type(tdata, inds):
+    return all(
+        tdata[i if not isinstance(i, str) else _tdata_name_map[i]]
+        is not None
+        for i in inds
+    )
+def _triangle_data_permute(tdata:TriangleData, perm):
+    a,b,c,A,B,C = tdata
+    bls = [a,b,c]
+    ang = [A,B,C]
+    bls = [bls[p] for p in perm]
+    ang = [ang[p] for p in perm]
+    return TriangleData(*bls, *ang)
+def _triangle_property_c(tdata:TriangleData):
+    if tdata.c is not None:
+        return tdata.c, tdata
+    else:
+        updates = {}
+        #TODO: support getting intermediate properties
+        if _check_triangle_type(tdata, ['a','C','b']):
+            c = triangle_convert([tdata.a,tdata.C,tdata.b], 'sas', 'sss')[2]
+            updates['c'] = c
+        elif _check_triangle_type(tdata, ['a','B','A']):
+            _, b, c = triangle_convert([tdata.a,tdata.B,tdata.A], 'saa', 'sss')
+            updates['b'] = b
+            updates['c'] = c
+        elif _check_triangle_type(tdata, ['b', 'A', 'B']):
+            _, a, c = triangle_convert([tdata.b, tdata.A, tdata.B], 'saa', 'sss')
+            updates['a'] = a
+            updates['c'] = c
+        elif _check_triangle_type(tdata, ['C', 'a', 'B']):
+            _, b, c = triangle_convert([tdata.C, tdata.a, tdata.B], 'asa', 'sss')
+            updates['b'] = b
+            updates['c'] = c
+        elif _check_triangle_type(tdata, ['C', 'b', 'A']):
+            _, a, c = triangle_convert([tdata.C, tdata.b, tdata.A], 'asa', 'sss')
+            updates['a'] = a
+            updates['c'] = c
+        elif _check_triangle_type(tdata, ['a', 'b', 'A']):
+            c = triangle_convert([tdata.b, tdata.A, tdata.B], 'ssa', 'sss')[2]
+            updates['c'] = c
+        elif _check_triangle_type(tdata, ['b', 'a', 'B']):
+            c = triangle_convert([tdata.b, tdata.A, tdata.B], 'ssa', 'sss')[2]
+            updates['c'] = c
+        else:
+            raise ValueError("not enough information to complete triangle")
+        return c, triangle_modify(tdata, updates)
+def _triangle_property_a(tdata):
+    c, tnew = _triangle_property_c(_triangle_data_permute(tdata, [2, 1, 0]))
+    return c, _triangle_data_permute(tnew, [2, 1, 0])
+def _triangle_property_b(tdata):
+    c, tnew = _triangle_property_c(_triangle_data_permute(tdata, [0, 2, 1]))
+    return c, _triangle_data_permute(tnew, [0, 2, 1])
+def _triangle_property_C(tdata:TriangleData):
+    if tdata.C is not None:
+        return tdata.C, tdata
+    else:
+        updates = {}
+        #TODO: support getting intermediate properties
+        if _check_triangle_type(tdata, ['a','b','c']):
+            C = triangle_convert([tdata.a,tdata.b,tdata.c], 'sss', 'sas')[1]
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['a','B','c']):
+            _, C, A = triangle_convert([tdata.a,tdata.B,tdata.c], 'sas', 'saa')
+            updates['A'] = A
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['b','A','c']):
+            _, C, B = triangle_convert([tdata.b,tdata.A,tdata.c], 'sas', 'saa')
+            updates['B'] = B
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['a','B','A']):
+            _, C, b = triangle_convert([tdata.a,tdata.B,tdata.A], 'saa', 'sas')
+            updates['b'] = b
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['b', 'A', 'B']):
+            _, C, a = triangle_convert([tdata.b, tdata.A, tdata.B], 'saa', 'sas')
+            updates['a'] = a
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['A', 'c', 'B']):
+            _, _, C = triangle_convert([tdata.A, tdata.c, tdata.B], 'asa', 'saa')
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['a', 'b', 'A']):
+            C = triangle_convert([tdata.b, tdata.A, tdata.B], 'ssa', 'sas')[1]
+            updates['C'] = C
+        elif _check_triangle_type(tdata, ['b', 'a', 'B']):
+            C = triangle_convert([tdata.b, tdata.A, tdata.B], 'ssa', 'sas')[1]
+            updates['C'] = C
+        else:
+            raise ValueError("not enough information to complete triangle")
+        return C, triangle_modify(tdata, updates)
+def _triangle_property_A(tdata):
+    C, tnew = _triangle_property_C(_triangle_data_permute(tdata, [2, 1, 0]))
+    return C, _triangle_data_permute(tnew, [2, 1, 0])
+def _triangle_property_B(tdata):
+    C, tnew = _triangle_property_C(_triangle_data_permute(tdata, [0, 2, 1]))
+    return C, _triangle_data_permute(tnew, [0, 2, 1])
+def triangle_modify(tdata:TriangleData, updates:dict):
+    a, b, c, A, B, C = tdata
+    new_data = [a, b, c, A, B, C]
+    for k,v in updates.items():
+        if isinstance(k, str):
+            k = _tdata_name_map[k]
+        new_data[k] = v
+    return TriangleData(*new_data)
+def triangle_property(tdata:TriangleData, field_name):
+    if field_name == "a":
+        return _triangle_property_a(tdata)
+    elif field_name == "b":
+        return _triangle_property_b(tdata)
+    elif field_name == "c":
+        return _triangle_property_c(tdata)
+    elif field_name == "A":
+        return _triangle_property_A(tdata)
+    elif field_name == "B":
+        return _triangle_property_B(tdata)
+    elif field_name == "C":
+        return _triangle_property_C(tdata)
+    else:
+        raise ValueError(f"bad property name {field_name}")
+
+def dihedral_z_from_abcXYt(a, b, c, X, Y, tau, use_cos=False):
     """
     a^2 + b^2 + c^2 - 2 (
         a b Cos[\[Alpha]] + b c Cos[\[Beta]]
         + a c (Cos[\[Tau]] Sin[\[Alpha]] Sin[\[Beta]] - Cos[\[Alpha]] Cos[\[Beta]])
        )
     """
-    ca = np.cos(alpha)
-    cb = np.cos(beta)
-    sa = np.sin(alpha)
-    sb = np.sin(beta)
+    ca = np.cos(X)
+    cb = np.cos(Y)
+    sa = np.sin(X)
+    sb = np.sin(Y)
     if use_cos:
         ct = tau
     else:
         ct = np.cos(tau)
+    # distinct from just computing the missing triangle and applying the law of cosines, but very similar
     return np.sqrt(
         a**2+b**2+c**2
         - 2*(a*b*ca + b*c*cb + a*c*(ct*sa*sb-ca*cb))
     )
 
-def dihedral_sssaa_distance_deriv(a_expansion, b_expansion, c_expansion,
-                                  alpha_expansion, beta_expansion, tau_expansion,
-                                  order,
-                                  return_components=False,
-                                  return_square=False,
-                                  cos_alpha_expansion=None,
-                                  cos_beta_expansion=None,
-                                  sin_alpha_expansion=None,
-                                  sin_beta_expansion=None,
-                                  cos_tau_expansion=None,
-                                  a2_expansion=None,
-                                  b2_expansion=None,
-                                  c2_expansion=None,
-                                  ab_cos_alpha_expansion=None,
-                                  ab_expansion=None,
-                                  bc_cos_beta_expansion=None,
-                                  bc_expansion=None,
-                                  ac_expansion=None,
-                                  cos_alpha_cos_beta_expansion=None,
-                                  sin_alpha_sin_beta_expansion=None
-                                  ):
+def dihedral_z_from_abcXYt_deriv(a_expansion, b_expansion, c_expansion,
+                                 X_expansion, Y_expansion, tau_expansion,
+                                 order,
+                                 return_components=False,
+                                 return_square=False,
+                                 cos_X_expansion=None,
+                                 cos_Y_expansion=None,
+                                 sin_X_expansion=None,
+                                 sin_Y_expansion=None,
+                                 cos_tau_expansion=None,
+                                 a2_expansion=None,
+                                 b2_expansion=None,
+                                 c2_expansion=None,
+                                 ab_cos_X_expansion=None,
+                                 ab_expansion=None,
+                                 bc_cos_Y_expansion=None,
+                                 bc_expansion=None,
+                                 ac_expansion=None,
+                                 cos_X_cos_Y_expansion=None,
+                                 sin_X_sin_Y_expansion=None
+                                 ):
 
-    if ab_cos_alpha_expansion is None:
+    if ab_cos_X_expansion is None:
         if ab_expansion is None:
             ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
-        if cos_alpha_expansion is None:
-            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
-        ab_cos_alpha_expansion = td.scalarprod_deriv(
+        if cos_X_expansion is None:
+            cos_X_expansion = td.scalarfunc_deriv(cos_deriv, X_expansion, order)
+        ab_cos_X_expansion = td.scalarprod_deriv(
             ab_expansion,
-            cos_alpha_expansion,
+            cos_X_expansion,
             order
         )
 
-    if bc_cos_beta_expansion is None:
+    if bc_cos_Y_expansion is None:
         if bc_expansion is None:
             bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        bc_cos_beta_expansion = td.scalarprod_deriv(
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        bc_cos_Y_expansion = td.scalarprod_deriv(
             bc_expansion,
-            cos_beta_expansion,
+            cos_Y_expansion,
             order
         )
 
-    if cos_alpha_cos_beta_expansion is None:
-        if cos_alpha_expansion is None:
-            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(
-            cos_alpha_expansion,
-            cos_beta_expansion,
+    if cos_X_cos_Y_expansion is None:
+        if cos_X_expansion is None:
+            cos_X_expansion = td.scalarfunc_deriv(cos_deriv, X_expansion, order)
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        cos_X_cos_Y_expansion = td.scalarprod_deriv(
+            cos_X_expansion,
+            cos_Y_expansion,
             order
         )
 
-    if sin_alpha_sin_beta_expansion is None:
-        if sin_alpha_expansion is None:
-            sin_alpha_expansion = td.scalarfunc_deriv(sin_deriv, alpha_expansion, order)
-        if sin_beta_expansion is None:
-            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
-        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(
-            sin_alpha_expansion,
-            sin_beta_expansion,
+    if sin_X_sin_Y_expansion is None:
+        if sin_X_expansion is None:
+            sin_X_expansion = td.scalarfunc_deriv(sin_deriv, X_expansion, order)
+        if sin_Y_expansion is None:
+            sin_Y_expansion = td.scalarfunc_deriv(sin_deriv, Y_expansion, order)
+        sin_X_sin_Y_expansion = td.scalarprod_deriv(
+            sin_X_expansion,
+            sin_Y_expansion,
             order
         )
 
@@ -3501,8 +3707,8 @@ def dihedral_sssaa_distance_deriv(a_expansion, b_expansion, c_expansion,
     extra_cos_term = td.scalarprod_deriv(
         ac_expansion,
         td.subtract_expansions(
-            td.scalarprod_deriv(cos_tau_expansion, sin_alpha_sin_beta_expansion, order),
-            cos_alpha_cos_beta_expansion
+            td.scalarprod_deriv(cos_tau_expansion, sin_X_sin_Y_expansion, order),
+            cos_X_cos_Y_expansion
         ),
         order
     )
@@ -3510,8 +3716,8 @@ def dihedral_sssaa_distance_deriv(a_expansion, b_expansion, c_expansion,
     r2_term = td.add_expansions(a2_expansion, b2_expansion, c2_expansion)
     radj_term = td.scale_expansion(
         td.add_expansions(
-            ab_cos_alpha_expansion,
-            bc_cos_beta_expansion,
+            ab_cos_X_expansion,
+            bc_cos_Y_expansion,
             extra_cos_term
         ),
         2
@@ -3528,32 +3734,32 @@ def dihedral_sssaa_distance_deriv(a_expansion, b_expansion, c_expansion,
 
     if return_components:
         return term, (
-            cos_alpha_expansion,
-            cos_beta_expansion,
-            sin_alpha_expansion,
-            sin_beta_expansion,
+            cos_X_expansion,
+            cos_Y_expansion,
+            sin_X_expansion,
+            sin_Y_expansion,
             cos_tau_expansion,
             a2_expansion,
             b2_expansion,
             c2_expansion,
-            ab_cos_alpha_expansion,
+            ab_cos_X_expansion,
             ab_expansion,
-            bc_cos_beta_expansion,
+            bc_cos_Y_expansion,
             bc_expansion,
             ac_expansion,
-            cos_alpha_cos_beta_expansion,
-            sin_alpha_sin_beta_expansion
+            cos_X_cos_Y_expansion,
+            sin_X_sin_Y_expansion
         )
     else:
         return term
-def dihedral_ssssa_distance(a, b, c, x, beta, tau, use_cos=False):
+def dihedral_z_from_abcxYt(a, b, c, x, Y, tau, use_cos=False):
     a2 = a**2
     b2 = b**2
     x2 = x**2
     ca = (a2+b2-x2)/(2*a*b)
-    cb = np.cos(beta)
+    cb = np.cos(Y)
     sa = np.sqrt(1-ca**2)
-    sb = np.sin(beta)
+    sb = np.sin(Y)
     if use_cos:
         ct = tau
     else:
@@ -3571,26 +3777,26 @@ def _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, 
         ),
         1 / 2
     )
-def dihedral_ssssa_distance_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
-                                  beta_expansion, tau_expansion, order,
-                                  return_components=False,
-                                  return_square=False,
-                                  cos_alpha_expansion=None,
-                                  cos_beta_expansion=None,
-                                  sin_alpha_expansion=None,
-                                  sin_beta_expansion=None,
-                                  cos_tau_expansion=None,
-                                  a2_expansion=None,
-                                  b2_expansion=None,
-                                  c2_expansion=None,
-                                  x2_expansion=None,
-                                  ab_expansion=None,
-                                  bc_cos_beta_expansion=None,
-                                  bc_expansion=None,
-                                  ac_expansion=None,
-                                  cos_alpha_cos_beta_expansion=None,
-                                  sin_alpha_sin_beta_expansion=None
-                                  ):
+def dihedral_z_from_abcxYt_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
+                                 Y_expansion, tau_expansion, order,
+                                 return_components=False,
+                                 return_square=False,
+                                 cos_X_expansion=None,
+                                 cos_Y_expansion=None,
+                                 sin_X_expansion=None,
+                                 sin_Y_expansion=None,
+                                 cos_tau_expansion=None,
+                                 a2_expansion=None,
+                                 b2_expansion=None,
+                                 c2_expansion=None,
+                                 x2_expansion=None,
+                                 ab_expansion=None,
+                                 bc_cos_Y_expansion=None,
+                                 bc_expansion=None,
+                                 ac_expansion=None,
+                                 cos_X_cos_Y_expansion=None,
+                                 sin_X_sin_Y_expansion=None
+                                 ):
     if a2_expansion is None:
         a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
     if b2_expansion is None:
@@ -3599,49 +3805,49 @@ def dihedral_ssssa_distance_deriv(a_expansion, b_expansion, c_expansion, x_expan
         c2_expansion = td.scalarfunc_deriv(square_deriv, c_expansion, order)
     if x2_expansion is None:
         x2_expansion = td.scalarfunc_deriv(square_deriv, x_expansion, order)
-    if cos_alpha_cos_beta_expansion is None:
-        if cos_alpha_expansion is None:
+    if cos_X_cos_Y_expansion is None:
+        if cos_X_expansion is None:
             if ab_expansion is None:
                 ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
-            cos_alpha_expansion = _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(cos_alpha_expansion, cos_beta_expansion, order)
-    if sin_alpha_sin_beta_expansion is None:
-        if sin_alpha_expansion is None:
-            ca2 = td.scalarfunc_deriv(square_deriv, cos_alpha_expansion, order)
-            sin_alpha_expansion = td.scalarfunc_deriv(
+            cos_X_expansion = _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order)
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        cos_X_cos_Y_expansion = td.scalarprod_deriv(cos_X_expansion, cos_Y_expansion, order)
+    if sin_X_sin_Y_expansion is None:
+        if sin_X_expansion is None:
+            ca2 = td.scalarfunc_deriv(square_deriv, cos_X_expansion, order)
+            sin_X_expansion = td.scalarfunc_deriv(
                 sqrt_deriv,
                 td.shift_expansion(td.scale_expansion(ca2, -1), 1),
                 order
             )
-        if sin_beta_expansion is None:
-            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
-        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(sin_alpha_expansion, sin_beta_expansion, order)
+        if sin_Y_expansion is None:
+            sin_Y_expansion = td.scalarfunc_deriv(sin_deriv, Y_expansion, order)
+        sin_X_sin_Y_expansion = td.scalarprod_deriv(sin_X_expansion, sin_Y_expansion, order)
     if cos_tau_expansion is None:
         cos_tau_expansion = td.scalarfunc_deriv(cos_deriv, tau_expansion, order)
 
-    if bc_cos_beta_expansion is None:
+    if bc_cos_Y_expansion is None:
         if bc_expansion is None:
             bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        bc_cos_beta_expansion = td.scalarprod_deriv(bc_expansion, cos_beta_expansion, order)
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        bc_cos_Y_expansion = td.scalarprod_deriv(bc_expansion, cos_Y_expansion, order)
     # x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
     if ac_expansion is None:
         ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
     extra_cos_term = td.scalarprod_deriv(
         ac_expansion,
         td.subtract_expansions(
-            td.scalarprod_deriv(cos_tau_expansion, sin_alpha_sin_beta_expansion, order),
-            cos_alpha_cos_beta_expansion
+            td.scalarprod_deriv(cos_tau_expansion, sin_X_sin_Y_expansion, order),
+            cos_X_cos_Y_expansion
         ),
         order
     )
     r2_term = td.add_expansions(x2_expansion, c2_expansion)
     radj_term = td.scale_expansion(
         td.add_expansions(
-            bc_cos_beta_expansion,
+            bc_cos_Y_expansion,
             extra_cos_term
         ),
         2
@@ -3653,25 +3859,25 @@ def dihedral_ssssa_distance_deriv(a_expansion, b_expansion, c_expansion, x_expan
 
     if return_components:
         return term, (
-            cos_alpha_expansion,
-            cos_beta_expansion,
-            sin_alpha_expansion,
-            sin_beta_expansion,
+            cos_X_expansion,
+            cos_Y_expansion,
+            sin_X_expansion,
+            sin_Y_expansion,
             cos_tau_expansion,
             a2_expansion,
             b2_expansion,
             c2_expansion,
             x2_expansion,
             ab_expansion,
-            bc_cos_beta_expansion,
+            bc_cos_Y_expansion,
             bc_expansion,
             ac_expansion,
-            cos_alpha_cos_beta_expansion,
-            sin_alpha_sin_beta_expansion
+            cos_X_cos_Y_expansion,
+            sin_X_sin_Y_expansion
         )
     else:
         return term
-def dihedral_sssss_distance(a,b, c, x, y, tau, use_cos=False):
+def dihedral_z_from_abcxyt(a,b, c, x, y, tau, use_cos=False):
     # potentially more stable than just computing the sin and cos in the usual way...
     xp = (a+b)**2
     xm = (a-b)**2
@@ -3694,9 +3900,9 @@ def dihedral_sssss_distance(a,b, c, x, y, tau, use_cos=False):
         )/(2*b2)
     )
 
-def dihedral_sssss_distance_deriv(
-        a_expansion, b_expansion, c_expansion, x_expansion, y_expansion, order,
-        tau_expansion,
+def dihedral_z_from_abcxyt_deriv(
+        a_expansion, b_expansion, c_expansion, x_expansion, y_expansion, tau_expansion,
+        order,
         return_components=False,
         return_square=False,
         a2_expansion=None,
@@ -3789,79 +3995,79 @@ def dihedral_sssss_distance_deriv(
         )
     else:
         return term
-def dihedral_from_ssssaa(a, b, c, alpha, beta, r, use_cos=False):
-    ca = np.cos(alpha)
-    cb = np.cos(beta)
-    sa = np.sin(alpha)
-    sb = np.sin(beta)
+def dihedral_from_abcXYz(a, b, c, X, Y, r, use_cos=False):
+    ca = np.cos(X)
+    cb = np.cos(Y)
+    sa = np.sin(X)
+    sb = np.sin(Y)
     ct = ((a**2 + b**2 + c**2) - r**2 - 2*a*b*ca - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
     if use_cos:
         return ct
     else:
         return np.arccos(ct)
-def dihedral_from_ssssaa_deriv(
+def dihedral_from_abcXYz_deriv(
         a_expansion, b_expansion, c_expansion,
-        alpha_expansion, beta_expansion, r_expansion,
+        X_expansion, Y_expansion, r_expansion,
         order,
         return_components=False,
         return_cos=False,
-        cos_alpha_expansion=None,
-        cos_beta_expansion=None,
-        sin_alpha_expansion=None,
-        sin_beta_expansion=None,
+        cos_X_expansion=None,
+        cos_Y_expansion=None,
+        sin_X_expansion=None,
+        sin_Y_expansion=None,
         a2_expansion=None,
         b2_expansion=None,
         c2_expansion=None,
         r2_expansion=None,
-        ab_cos_alpha_expansion=None,
+        ab_cos_X_expansion=None,
         ab_expansion=None,
-        bc_cos_beta_expansion=None,
+        bc_cos_Y_expansion=None,
         bc_expansion=None,
         ac_expansion=None,
-        cos_alpha_cos_beta_expansion=None,
-        sin_alpha_sin_beta_expansion=None
+        cos_X_cos_Y_expansion=None,
+        sin_X_sin_Y_expansion=None
 ):
-    if ab_cos_alpha_expansion is None:
+    if ab_cos_X_expansion is None:
         if ab_expansion is None:
             ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
-        if cos_alpha_expansion is None:
-            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
-        ab_cos_alpha_expansion = td.scalarprod_deriv(
+        if cos_X_expansion is None:
+            cos_X_expansion = td.scalarfunc_deriv(cos_deriv, X_expansion, order)
+        ab_cos_X_expansion = td.scalarprod_deriv(
             ab_expansion,
-            cos_alpha_expansion,
+            cos_X_expansion,
             order
         )
 
-    if bc_cos_beta_expansion is None:
+    if bc_cos_Y_expansion is None:
         if bc_expansion is None:
             bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        bc_cos_beta_expansion = td.scalarprod_deriv(
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        bc_cos_Y_expansion = td.scalarprod_deriv(
             bc_expansion,
-            cos_beta_expansion,
+            cos_Y_expansion,
             order
         )
 
-    if cos_alpha_cos_beta_expansion is None:
-        if cos_alpha_expansion is None:
-            cos_alpha_expansion = td.scalarfunc_deriv(cos_deriv, alpha_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(
-            cos_alpha_expansion,
-            cos_beta_expansion,
+    if cos_X_cos_Y_expansion is None:
+        if cos_X_expansion is None:
+            cos_X_expansion = td.scalarfunc_deriv(cos_deriv, X_expansion, order)
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        cos_X_cos_Y_expansion = td.scalarprod_deriv(
+            cos_X_expansion,
+            cos_Y_expansion,
             order
         )
 
-    if sin_alpha_sin_beta_expansion is None:
-        if sin_alpha_expansion is None:
-            sin_alpha_expansion = td.scalarfunc_deriv(sin_deriv, alpha_expansion, order)
-        if sin_beta_expansion is None:
-            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
-        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(
-            sin_alpha_expansion,
-            sin_beta_expansion,
+    if sin_X_sin_Y_expansion is None:
+        if sin_X_expansion is None:
+            sin_X_expansion = td.scalarfunc_deriv(sin_deriv, X_expansion, order)
+        if sin_Y_expansion is None:
+            sin_Y_expansion = td.scalarfunc_deriv(sin_deriv, Y_expansion, order)
+        sin_X_sin_Y_expansion = td.scalarprod_deriv(
+            sin_X_expansion,
+            sin_Y_expansion,
             order
         )
 
@@ -3877,8 +4083,8 @@ def dihedral_from_ssssaa_deriv(
     if ac_expansion is None:
         ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
 
-    ac_cos_cos_expansion = td.scalarprod_deriv(ac_expansion, cos_alpha_cos_beta_expansion, order)
-    ac_sin_sin_expansion = td.scalarprod_deriv(ac_expansion, sin_alpha_sin_beta_expansion, order)
+    ac_cos_cos_expansion = td.scalarprod_deriv(ac_expansion, cos_X_cos_Y_expansion, order)
+    ac_sin_sin_expansion = td.scalarprod_deriv(ac_expansion, sin_X_sin_Y_expansion, order)
 
     # ((a**2 + b**2 + c**2) - r**2 - 2*a*b*ca - 2*b*c*cb + 2*a*c*ca*cb)
     rd_expansion = td.subtract_expansions(
@@ -3886,7 +4092,7 @@ def dihedral_from_ssssaa_deriv(
         td.add_expansions(r2_expansion,
                           td.scale_expansion(
                               td.subtract_expansions(
-                                  td.add_expansions(ab_cos_alpha_expansion, bc_cos_beta_expansion),
+                                  td.add_expansions(ab_cos_X_expansion, bc_cos_Y_expansion),
                                   ac_cos_cos_expansion
                               ),
                               2
@@ -3903,58 +4109,58 @@ def dihedral_from_ssssaa_deriv(
 
     if return_components:
         return term, (
-            cos_alpha_expansion,
-            cos_beta_expansion,
-            sin_alpha_expansion,
-            sin_beta_expansion,
+            cos_X_expansion,
+            cos_Y_expansion,
+            sin_X_expansion,
+            sin_Y_expansion,
             a2_expansion,
             b2_expansion,
             c2_expansion,
             r2_expansion,
-            ab_cos_alpha_expansion,
+            ab_cos_X_expansion,
             ab_expansion,
-            bc_cos_beta_expansion,
+            bc_cos_Y_expansion,
             bc_expansion,
             ac_expansion,
-            cos_alpha_cos_beta_expansion,
-            sin_alpha_sin_beta_expansion
+            cos_X_cos_Y_expansion,
+            sin_X_sin_Y_expansion
         )
     else:
         return term
 
-def dihedral_from_sssssa(a, b, c, x, beta, r, use_cos=False):
+def dihedral_from_abcxYz(a, b, c, x, Y, r, use_cos=False):
     a2 = a**2
     b2 = b**2
     x2 = x**2
     ca = (a2+b2-x2)/(2*a*b)
-    cb = np.cos(beta)
+    cb = np.cos(Y)
     sa = np.sqrt(1-ca**2)
-    sb = np.sin(beta)
+    sb = np.sin(Y)
     r2 = r**2
     ct = ((x2+c**2) - r2 - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
     if use_cos:
         return ct
     else:
         return np.arccos(ct)
-def dihedral_from_sssssa_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
-                               beta_expansion, r_expansion, order,
+def dihedral_from_abcxYz_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
+                               Y_expansion, r_expansion, order,
                                return_components=False,
                                return_cos=False,
-                               cos_alpha_expansion=None,
-                               cos_beta_expansion=None,
-                               sin_alpha_expansion=None,
-                               sin_beta_expansion=None,
+                               cos_X_expansion=None,
+                               cos_Y_expansion=None,
+                               sin_X_expansion=None,
+                               sin_Y_expansion=None,
                                a2_expansion=None,
                                b2_expansion=None,
                                c2_expansion=None,
                                x2_expansion=None,
                                r2_expansion=None,
                                ab_expansion=None,
-                               bc_cos_beta_expansion=None,
+                               bc_cos_Y_expansion=None,
                                bc_expansion=None,
                                ac_expansion=None,
-                               cos_alpha_cos_beta_expansion=None,
-                               sin_alpha_sin_beta_expansion=None
+                               cos_X_cos_Y_expansion=None,
+                               sin_X_sin_Y_expansion=None
                                ):
     if a2_expansion is None:
         a2_expansion = td.scalarfunc_deriv(square_deriv, a_expansion, order)
@@ -3966,38 +4172,38 @@ def dihedral_from_sssssa_deriv(a_expansion, b_expansion, c_expansion, x_expansio
         r2_expansion = td.scalarfunc_deriv(square_deriv, r_expansion, order)
     if x2_expansion is None:
         x2_expansion = td.scalarfunc_deriv(square_deriv, x_expansion, order)
-    if cos_alpha_cos_beta_expansion is None:
-        if cos_alpha_expansion is None:
+    if cos_X_cos_Y_expansion is None:
+        if cos_X_expansion is None:
             if ab_expansion is None:
                 ab_expansion = td.scalarprod_deriv(a_expansion, b_expansion, order)
-            cos_alpha_expansion = _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        cos_alpha_cos_beta_expansion = td.scalarprod_deriv(cos_alpha_expansion, cos_beta_expansion, order)
-    if sin_alpha_sin_beta_expansion is None:
-        if sin_alpha_expansion is None:
-            ca2 = td.scalarfunc_deriv(square_deriv, cos_alpha_expansion, order)
-            sin_alpha_expansion = td.scalarfunc_deriv(
+            cos_X_expansion = _dist_cos_expansion(a2_expansion, b2_expansion, x2_expansion, ab_expansion, order)
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        cos_X_cos_Y_expansion = td.scalarprod_deriv(cos_X_expansion, cos_Y_expansion, order)
+    if sin_X_sin_Y_expansion is None:
+        if sin_X_expansion is None:
+            ca2 = td.scalarfunc_deriv(square_deriv, cos_X_expansion, order)
+            sin_X_expansion = td.scalarfunc_deriv(
                 sqrt_deriv,
                 td.shift_expansion(td.scale_expansion(ca2, -1), 1),
                 order
             )
-        if sin_beta_expansion is None:
-            sin_beta_expansion = td.scalarfunc_deriv(sin_deriv, beta_expansion, order)
-        sin_alpha_sin_beta_expansion = td.scalarprod_deriv(sin_alpha_expansion, sin_beta_expansion, order)
+        if sin_Y_expansion is None:
+            sin_Y_expansion = td.scalarfunc_deriv(sin_deriv, Y_expansion, order)
+        sin_X_sin_Y_expansion = td.scalarprod_deriv(sin_X_expansion, sin_Y_expansion, order)
 
-    if bc_cos_beta_expansion is None:
+    if bc_cos_Y_expansion is None:
         if bc_expansion is None:
             bc_expansion = td.scalarprod_deriv(b_expansion, c_expansion, order)
-        if cos_beta_expansion is None:
-            cos_beta_expansion = td.scalarfunc_deriv(cos_deriv, beta_expansion, order)
-        bc_cos_beta_expansion = td.scalarprod_deriv(bc_expansion, cos_beta_expansion, order)
+        if cos_Y_expansion is None:
+            cos_Y_expansion = td.scalarfunc_deriv(cos_deriv, Y_expansion, order)
+        bc_cos_Y_expansion = td.scalarprod_deriv(bc_expansion, cos_Y_expansion, order)
     # x2+c**2 - 2*(b*c*cb + a*c*(ct*sa*sb-ca*cb))
     if ac_expansion is None:
         ac_expansion = td.scalarprod_deriv(a_expansion, c_expansion, order)
 
-    ac_cos_cos_expansion = td.scalarprod_deriv(ac_expansion, cos_alpha_cos_beta_expansion, order)
-    ac_sin_sin_expansion = td.scalarprod_deriv(ac_expansion, sin_alpha_sin_beta_expansion, order)
+    ac_cos_cos_expansion = td.scalarprod_deriv(ac_expansion, cos_X_cos_Y_expansion, order)
+    ac_sin_sin_expansion = td.scalarprod_deriv(ac_expansion, sin_X_sin_Y_expansion, order)
 
     # ct = ((x2+c**2) - r2 - 2*b*c*cb + 2*a*c*ca*cb) / (2*a*c*sa*sb)
     numerator = td.subtract_expansions(
@@ -4005,7 +4211,7 @@ def dihedral_from_sssssa_deriv(a_expansion, b_expansion, c_expansion, x_expansio
         td.add_expansions(
             r2_expansion,
             td.scale_expansion(
-                td.subtract_expansions(bc_cos_beta_expansion, ac_cos_cos_expansion),
+                td.subtract_expansions(bc_cos_Y_expansion, ac_cos_cos_expansion),
                 2
             )
         )
@@ -4021,26 +4227,26 @@ def dihedral_from_sssssa_deriv(a_expansion, b_expansion, c_expansion, x_expansio
 
     if return_components:
         return term, (
-            cos_alpha_expansion,
-            cos_beta_expansion,
-            sin_alpha_expansion,
-            sin_beta_expansion,
+            cos_X_expansion,
+            cos_Y_expansion,
+            sin_X_expansion,
+            sin_Y_expansion,
             a2_expansion,
             b2_expansion,
             c2_expansion,
             x2_expansion,
             r2_expansion,
             ab_expansion,
-            bc_cos_beta_expansion,
+            bc_cos_Y_expansion,
             bc_expansion,
             ac_expansion,
-            cos_alpha_cos_beta_expansion,
-            sin_alpha_sin_beta_expansion
+            cos_X_cos_Y_expansion,
+            sin_X_sin_Y_expansion
         )
     else:
         return term
 
-def dihedral_from_ssssss(a, b, c, x, y, r, use_cos=False):
+def dihedral_from_abcxyz(a, b, c, x, y, r, use_cos=False):
     xp = (a + b) ** 2
     xm = (a - b) ** 2
     yp = (b + c) ** 2
@@ -4059,7 +4265,7 @@ def dihedral_from_ssssss(a, b, c, x, y, r, use_cos=False):
         return ct
     else:
         return np.arccos(ct)
-def dihedral_from_ssssss_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
+def dihedral_from_abcxyz_deriv(a_expansion, b_expansion, c_expansion, x_expansion,
                                y_expansion, r_expansion, order,
                                return_components=False,
                                return_cos=False,
@@ -4158,6 +4364,59 @@ def dihedral_from_ssssss_deriv(a_expansion, b_expansion, c_expansion, x_expansio
     else:
         return term
 
+def dihedral_from_XZC(X, Z, C, use_cos=False):
+    """
+    cos of dihedral with three angles defining a pyramid,
+    X = theta_(i,j,k)
+    Z = theta_(i,j,l)
+    C = theta_(k,j,l)
+    """
+    cA, cB, cC = [np.cos(x) for x in [X, Z, C]]
+    sA, sC = [np.sin(x) for x in [X, C]]
+    cost = (cB - cA * cC) / (sA * sC)
+    cost = cost * np.sign(np.sin(X) * np.sin(C))
+    if use_cos:
+        return cost
+    else:
+        return np.arccos(cost)
+def dihedral_Z_from_XtC(X, t, C, use_cos=False):
+    cA, cC = [np.cos(x) for x in [X, C]]
+    sA, sC = [np.sin(x) for x in [X, C]]
+    if use_cos:
+        cost = t
+    else:
+        cost = np.cos(t)
+    cost = cost * np.sign(np.sin(X) * np.sin(C))
+    cB = cost * (sA * sC) + cA * cC
+    return np.arccos(cB)
+
+def dihedral_z_from_ayXCt(a, y, X, C, t, use_cos=False, return_square=False):
+    if use_cos:
+        cost = t
+    else:
+        cost = np.cos(t)
+
+    z2 = a**2 + y**2 - 2*a*y*(cost*np.sin(X)*np.sin(C) + np.cos(X)*np.cos(C))
+    if return_square:
+        z = z2
+    else:
+        z = np.sqrt(z2)
+    return z
+def dihedral_z_from_bAXYCt(b, A, X, Y, C, t, use_cos=False, return_square=False):
+    a = law_of_sines_dist(b, X+A, A)
+    y = law_of_sines_dist(b, Y+C, Y)
+    return dihedral_z_from_ayXCt(a, y, X, C, t, use_cos=use_cos, return_square=return_square)
+def dihedral_from_ayXCz(a, y, X, C, z, use_cos=False):
+    cost = ((a**2 + y**2 - z**2)/ (2*a*y) - np.cos(X)*np.cos(C)) / (np.sin(X)*np.sin(C))
+    if use_cos:
+        t = cost
+    else:
+        t = np.arccos(cost)
+    return z
+def dihedral_from_bAXYCz(b, A, X, Y, C, z, use_cos=False):
+    a = law_of_sines_dist(b, X+A, A)
+    y = law_of_sines_dist(b, Y+C, Y)
+    return dihedral_from_ayXCz(a, y, X, C, z, use_cos=use_cos)
 
 class DihedralSpecifierType(enum.Enum):
     SSSAAT = "sssaat"
@@ -4166,11 +4425,11 @@ class DihedralSpecifierType(enum.Enum):
 def dihedral_distance_converter(dihedral_type:str|DihedralSpecifierType):
     dihedral_type = DihedralSpecifierType(dihedral_type)
     if dihedral_type == DihedralSpecifierType.SSSSST:
-        return (dihedral_sssss_distance, dihedral_sssss_distance_deriv)
+        return (dihedral_z_from_abcxyt, dihedral_z_from_abcxyt_deriv)
     elif dihedral_type == DihedralSpecifierType.SSSSAT:
-        return (dihedral_ssssa_distance, dihedral_ssssa_distance_deriv)
+        return (dihedral_z_from_abcxYt, dihedral_z_from_abcxYt_deriv)
     else:
-        return (dihedral_sssaa_distance, dihedral_sssaa_distance_deriv)
+        return (dihedral_z_from_abcXYt, dihedral_z_from_abcXYt_deriv)
 def dihedral_distance(spec, dihedral_type:str|DihedralSpecifierType,
                       order=None,
                       use_cos=False,
@@ -4185,11 +4444,11 @@ def dihedral_distance(spec, dihedral_type:str|DihedralSpecifierType,
 def dihedral_from_distance_converter(dihedral_type:str|DihedralSpecifierType):
     dihedral_type = DihedralSpecifierType(dihedral_type)
     if dihedral_type == DihedralSpecifierType.SSSSST:
-        return (dihedral_from_ssssss, dihedral_from_ssssss_deriv)
+        return (dihedral_from_abcxyz, dihedral_from_abcxyz_deriv)
     elif dihedral_type == DihedralSpecifierType.SSSSAT:
-        return (dihedral_from_sssssa, dihedral_from_sssssa_deriv)
+        return (dihedral_from_abcxYz, dihedral_from_abcxYz_deriv)
     else:
-        return (dihedral_from_ssssaa, dihedral_from_ssssaa_deriv)
+        return (dihedral_from_abcXYz, dihedral_from_abcXYz_deriv)
 def dihedral_from_distance(spec, dihedral_type:str|DihedralSpecifierType,
                            order=None,
                            use_cos=False,
@@ -4202,3 +4461,257 @@ def dihedral_from_distance(spec, dihedral_type:str|DihedralSpecifierType,
     else:
         x,y,z,a,b,r = spec
         return deriv_converter(x,y,z,a,b,r, order, **deriv_kwargs)
+
+DihedralTetrahedronData = collections.namedtuple("DihedralTetrahedronData",
+                                                 ["a", "b", "c", "x", "y", "z",
+                                                  "X", "Y", "A", "B1", "B2", "C", "Z", "Z2",
+                                                  "A3", "Y3", "C4", "X4",
+                                                  "Ta", "Tb", "Tc", "Tx", "Ty", "Tz"
+                                                  ])
+_ddata_name_map = {
+    "a":0, "b":1, "c":2, "x":3, "y":4, "z":5,
+    "X":6, "Y":7, "A":8, "B1":9, "B2":10, "C":11, "Z":12, "Z2":13,
+    "A3":14, "Y3":15, "C4":16, "X4":17,
+    "Ta":18, "Tb":19, "Tc":20, "Tx":21, "Ty":22, "Tz":23
+}
+_dihedron_point_map = {
+    'a': (0, 1),
+    'b': (1, 2),
+    'c': (2, 3),
+    'x': (0, 2),
+    'y': (1, 3),
+    'z': (0, 3),
+    'X': (0, 1, 2),
+    'Y': (1, 2, 3),
+    'A': (0, 2, 1),
+    'B1': (1, 0, 2),
+    'C': (2, 1, 3),
+    'B2': (1, 3, 2),
+    'Z': (0, 1, 3),
+    'Z2': (0, 2, 3),
+    'A3': (0, 3, 1),
+    'Y3': (1, 0, 3),
+    'C4': (0, 3, 2),
+    'X4': (2, 0, 3),
+    'Tb':(0, 1, 2, 3),
+    'Ta':(2, 0, 1, 3),
+    'Tc':(0, 2, 3, 1),
+    'Tx':(1, 0, 2, 3),
+    'Ty':(0, 1, 3, 2),
+    'Tz':(1, 0, 3, 2),
+}
+def _check_dihedron_type(ddata, inds):
+    return all(
+        ddata[i if not isinstance(i, str) else _ddata_name_map[i]]
+        is not None
+        for i in inds
+    )
+def make_dihedron(points=None, *,
+                  a=None, b=None, c=None, x=None, y=None, z=None,
+                  X=None, Y=None, A=None, B1=None, B2=None, C=None,
+                  Z=None, Z2=None, A3=None, Y3=None, C4=None, X4=None,
+                  Ta=None, Tb=None, Tc=None, Tx=None, Ty=None, Tz=None
+                  ):
+    if points is not None:
+        a, x, z, b, y, c = distance_matrix(points, return_triu=True)
+    return DihedralTetrahedronData(
+        a, b, c, x, y, z,
+        X, Y, A, B1, B2, C,
+        Z, Z2, A3, Y3, C4, X4,
+        Ta, Tb, Tc, Tx, Ty, Tz
+    )
+def dihedron_triangle_1(dd:DihedralTetrahedronData):
+    return make_triangle(a=dd.a, b=dd.b, c=dd.x, A=dd.A, B=dd.B1, C=dd.X)
+def dihedron_triangle_2(dd:DihedralTetrahedronData):
+    return make_triangle(a=dd.y, b=dd.b, c=dd.c, A=dd.Y, B=dd.B2, C=dd.C)
+def dihedron_triangle_3(dd:DihedralTetrahedronData):
+    return make_triangle(a=dd.a, b=dd.y, c=dd.z, A=dd.A3, B=dd.Y3, C=dd.Z)
+def dihedron_triangle_4(dd:DihedralTetrahedronData):
+    return make_triangle(a=dd.x, b=dd.z, c=dd.c, A=dd.X4, B=dd.Z2, C=dd.C4)
+def _check_bond_valid_triangle(td_1):
+    bc_1 = sum(x is not None for x in [td_1.a, td_1.b, td_1.c])
+    ac_1 = sum(x is not None for x in [td_1.A, td_1.B, td_1.C])
+    return (
+            bc_1 == 3
+            or (bc_1 == 2 and ac_1 >= 1)
+            or (bc_1 == 1 and ac_1 >= 2)
+    )
+def _check_angle_valid_triangle(td_1):
+    bc_1 = sum(x is not None for x in [td_1.a, td_1.b, td_1.c])
+    ac_1 = sum(x is not None for x in [td_1.A, td_1.B, td_1.C])
+    return (
+            ac_1 >= 2
+            or bc_1 == 3
+            or (bc_1 == 2 and ac_1 == 1)
+    )
+def _dihedron_data_permute(dd, perm):
+    inv_map = {v:k for k,v in _dihedron_point_map.items()}
+    inv_perm = np.argsort(perm)
+    new_inds = []
+    for c in _dihedron_point_map.values():
+        c1 = c
+        c = [inv_perm[k2] for k2 in c]
+        if len(c) == 2:
+            i,j = c
+            if j < i:
+                i,j = j,i
+            c = (i,j)
+        elif len(c) == 3:
+            i,j,k = c
+            if k < i:
+                i,k = k,i
+            c = (i,j,k)
+        else:
+            i,j,k,l = c
+            if l < i:
+                i,l = l,i
+            if k < j:
+                j,k = k,j
+            c = (i,j,k,l)
+        new_inds.append([inv_map[c1], c])
+    updates = {
+        inv_map[c]:dd[_ddata_name_map[o]]
+        for o,c in new_inds
+    }
+    return make_dihedron(**updates)
+def dihedron_modify(dd, updates):
+    new_data = list(dd)
+    for k, v in updates.items():
+        if isinstance(k, str):
+            k = _ddata_name_map[k]
+        new_data[k] = v
+    return DihedralTetrahedronData(*new_data)
+def _dihedron_property_z(dd:DihedralTetrahedronData):
+    if dd.z is not None:
+        return dd.z, dd
+    else:
+        td_3 = dihedron_triangle_3(dd)
+        td_4 = dihedron_triangle_4(dd)
+        if _check_bond_valid_triangle(td_3):
+            z, td_new = triangle_property(td_3, 'c')
+            updates = dict(zip(['a', 'y', 'z', 'A3', 'Y3', 'Z'], td_new))
+            return z, dihedron_modify(dd, updates)
+        elif _check_bond_valid_triangle(td_4):
+            z, td_new = triangle_property(td_4, 'b')
+            updates = dict(zip(['x', 'z', 'c', 'X4', 'Z2', 'C4'], td_new))
+            return z, dihedron_modify(dd, updates)
+        elif _check_dihedron_type(dd, ['a', 'y', 'X', 'C', 'Tb']):
+            z = dihedral_z_from_ayXCt(dd.a, dd.y, dd.X, dd.C, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        elif _check_dihedron_type(dd, ['b', 'x', 'Y', 'A', 'Tb']):
+            z = dihedral_z_from_ayXCt(dd.b, dd.x, dd.Y, dd.A, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'x', 'y', 'Tb']):
+            z = dihedral_z_from_abcxyt(dd.a, dd.b, dd.c, dd.x, dd.y, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'x', 'Y', 'Tb']):
+            z = dihedral_z_from_abcxYt(dd.a, dd.b, dd.c, dd.x, dd.Y, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'X', 'y', 'Tb']):
+            z = dihedral_z_from_abcxYt(dd.a, dd.b, dd.c, dd.y, dd.X, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'X', 'Y', 'Tb']):
+            z = dihedral_z_from_abcXYt(dd.a, dd.b, dd.c, dd.X, dd.Y, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        elif _check_dihedron_type(dd, ['x', 'b', 'y', 'A', 'C', 'Tb']):
+            z = dihedral_z_from_abcXYt(dd.x, dd.b, dd.y, dd.A, dd.C, dd.Tb)
+            return z, dihedron_modify(dd, {'z':z})
+        else:
+            raise ValueError(f"can't get z from dihedral data {dd}")
+def _dihedron_property_a(dd:DihedralTetrahedronData):
+    if dd.a is not None:
+        return dd.a, dd
+    else:
+        p = [0, 2, 3, 1]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_x(dd:DihedralTetrahedronData):
+    if dd.x is not None:
+        return dd.x, dd
+    else:
+        p = [0, 1, 3, 2]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_b(dd:DihedralTetrahedronData):
+    if dd.b is not None:
+        return dd.b, dd
+    else:
+        p = [1, 0, 3, 2]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_c(dd:DihedralTetrahedronData):
+    if dd.c is not None:
+        return dd.c, dd
+    else:
+        p = [2, 0, 1, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_y(dd:DihedralTetrahedronData):
+    if dd.y is not None:
+        return dd.y, dd
+    else:
+        p = [1, 0, 2, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+
+def dihedron_property(ddata:DihedralTetrahedronData, field_name):
+    if field_name == "a":
+        return _dihedron_property_a(ddata)
+    elif field_name == "b":
+        return _dihedron_property_b(ddata)
+    elif field_name == "c":
+        return _dihedron_property_c(ddata)
+    elif field_name == "x":
+        return _dihedron_property_x(ddata)
+    elif field_name == "y":
+        return _dihedron_property_y(ddata)
+    elif field_name == "z":
+        return _dihedron_property_z(ddata)
+    elif field_name == "X":
+        return _dihedron_property_X(ddata)
+    elif field_name == "Y":
+        return _dihedron_property_Y(ddata)
+    elif field_name == "A":
+        return _dihedron_property_A(ddata)
+    elif field_name == "B1":
+        return _dihedron_property_B1(ddata)
+    elif field_name == "B2":
+        return _dihedron_property_B2(ddata)
+    elif field_name == "C":
+        return _dihedron_property_C(ddata)
+    elif field_name == "Z":
+        return _dihedron_property_Z(ddata)
+    elif field_name == "Z2":
+        return _dihedron_property_Z2(ddata)
+    elif field_name == "A3":
+        return _dihedron_property_A3(ddata)
+    elif field_name == "Y3":
+        return _dihedron_property_Y3(ddata)
+    elif field_name == "C4":
+        return _dihedron_property_C4(ddata)
+    elif field_name == "X4":
+        return _dihedron_property_X4(ddata)
+    elif field_name == "Ta":
+        return _dihedron_property_Ta(ddata)
+    elif field_name == "Tb":
+        return _dihedron_property_Tb(ddata)
+    elif field_name == "Tc":
+        return _dihedron_property_Tc(ddata)
+    elif field_name == "Tx":
+        return _dihedron_property_Tx(ddata)
+    elif field_name == "Ty":
+        return _dihedron_property_Ty(ddata)
+    elif field_name == "Tz":
+        return _dihedron_property_Tz(ddata)
+    else:
+        raise ValueError(f"bad property name {field_name}")

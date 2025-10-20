@@ -2,9 +2,63 @@ import sys, os
 import tempfile as tf, io
 
 __all__ = [
+    "StreamRedirect",
     "OutputRedirect",
     "DefaultDirectory"
 ]
+
+class StreamRedirect:
+    def __init__(self, logger, base_stream=None, line_join=True, strip_empty=True):
+        self._redirect = logger
+        if line_join is True:
+            line_join = ""
+        self._line_join = line_join
+        self.strip_empty = strip_empty
+        self.base_stream = base_stream
+    def write(self, data):
+        if self.strip_empty and len(data.strip()) == 0:
+            ...
+        else:
+            self._redirect(data)
+    def writelines(self, lines):
+        if self._line_join is not None:
+            lj = self._line_join
+            if not isinstance(lines[0], str) and isinstance(lj, str):
+                lj = lj.encode()
+            self.write(lj.join(lines))
+        else:
+            if self.strip_empty and len(lines) == 0:
+                ...
+            else:
+                self._redirect(lines)
+    def flush(self):
+        if self.base_stream is not None:
+            self.base_stream.flush()
+    def seek(self, offset: int, whence: int = 0):
+        if self.base_stream is not None:
+            return self.base_stream.seek(offset, whence)
+        else:
+            return None
+    def seekable(self):
+        if self.base_stream is not None:
+            return self.base_stream.seekable()
+        else:
+            return False
+    def read(self, size):
+        if self.base_stream is not None:
+            return self.base_stream.read(size)
+        else:
+            return None
+    def readline(self, limit:int=-1):
+        if self.base_stream is not None:
+            return self.base_stream.readline(limit)
+        else:
+            return None
+    def readlines(self, hint: int=-1):
+        if self.base_stream is not None:
+            return self.base_stream.readlines(hint)
+        else:
+            return None
 
 class OutputRedirect:
     def __init__(self,

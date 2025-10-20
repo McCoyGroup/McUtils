@@ -727,7 +727,7 @@ class ConverterTest(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_DistsFromInternals(self):
         import McUtils.Numputils as nput
         from McUtils.Data import UnitsData
@@ -778,3 +778,15 @@ class ConverterTest(TestCase):
             (2, 0, 3)
         ])
         pprint.pprint(conv)
+
+    @debugTest
+    def test_ZMatrixInterConversion(self):
+        import McUtils.Numputils as nput
+        # print(nput.arctan_deriv(3.8, 2))
+        # return
+        tri = nput.make_triangle(np.random.rand(3, 3))
+        A, tnew = nput.triangle_property(tri, 'A')
+        tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
+        C, tnew = nput.triangle_property(tri2, 'C')
+        tri2 = nput.make_triangle(A=tnew.A, c=tnew.b, C=tnew.C)
+        C, tnew = nput.triangle_property(tri2, 'B')
