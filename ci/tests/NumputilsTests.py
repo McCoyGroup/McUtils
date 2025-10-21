@@ -2191,7 +2191,7 @@ class NumputilsTests(TestCase):
         tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
         C, tnew = nput.triangle_property(tri2, 'C')
         tri2 = nput.make_triangle(A=tnew.A, c=tnew.b, C=tnew.C)
-        C, tnew = nput.triangle_property(tri2, 'B')
+        B, tnew = nput.triangle_property(tri2, 'B')
 
         np.random.seed(123123)
         pts = np.random.rand(4, 3)
@@ -2216,3 +2216,50 @@ class NumputilsTests(TestCase):
         #     dl.append(z)
         # print()
         # print(z, )
+
+        dd = nput.make_dihedron(
+            a=nput.pts_norms(pts[0], pts[1]),
+            b=nput.pts_norms(pts[1], pts[2]),
+            c=nput.pts_norms(pts[2], pts[3]),
+            X=nput.pts_angles(pts[0], pts[1], pts[2], return_crosses=False),
+            Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
+            Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
+        )
+        coords_map = {
+            'a': (0, 1),
+            'b': (1, 2),
+            'c': (2, 3),
+            'x': (0, 2),
+            'y': (1, 3),
+            'z': (0, 3),
+            'X': (0, 1, 2),
+            'Y': (1, 2, 3),
+            'A': (0, 2, 1),
+            'B1': (1, 0, 2),
+            'C': (2, 1, 3),
+            'B2': (1, 3, 2),
+            'Z': (0, 1, 3),
+            'Z2': (0, 2, 3),
+            'A3': (0, 3, 1),
+            'Y3': (1, 0, 3),
+            'C4': (2, 0, 3),
+            'X4': (0, 3, 2),
+            'Tb': (0, 1, 2, 3),
+            'Ta': (2, 0, 1, 3),
+            'Tc': (0, 2, 3, 1),
+            'Tx': (1, 0, 2, 3),
+            'Ty': (0, 1, 3, 2),
+            'Tz': (1, 0, 3, 2),
+        }
+        for prop,inds in coords_map.items():
+            print(f"{prop}:", end=" ")
+            Z, _ = nput.dihedron_property(dd, prop)
+            if len(inds) == 2:
+                val = nput.pts_norms(pts[inds[0]], pts[inds[1]])
+            elif len(inds) == 3:
+                val = nput.pts_angles(pts[inds[0]], pts[inds[1]], pts[inds[2]], return_crosses=False)
+            else:
+                val = nput.pts_dihedrals(pts[inds[0]], pts[inds[1]], pts[inds[2]], pts[inds[3]])
+            print(Z, val)
+        # X, _ = nput.dihedron_property(dd, 'X')
+        # print(Z, nput.pts_angles(pts[0], pts[1], pts[3], return_crosses=False))

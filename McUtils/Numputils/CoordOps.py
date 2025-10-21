@@ -3491,6 +3491,92 @@ def _check_triangle_type(tdata, inds):
         is not None
         for i in inds
     )
+def _check_bond_valid_triangle(td_1):
+    bc_1 = sum(x is not None for x in [td_1.a, td_1.b, td_1.c])
+    ac_1 = sum(x is not None for x in [td_1.A, td_1.B, td_1.C])
+    return (
+            bc_1 == 3
+            or (bc_1 == 2 and ac_1 >= 1)
+            or (bc_1 == 1 and ac_1 >= 2)
+    )
+def _check_angle_valid_triangle(td_1):
+    bc_1 = sum(x is not None for x in [td_1.a, td_1.b, td_1.c])
+    ac_1 = sum(x is not None for x in [td_1.A, td_1.B, td_1.C])
+    return (
+            ac_1 >= 2
+            or bc_1 == 3
+            or (bc_1 == 2 and ac_1 == 1)
+    )
+def _get_triangle_completions(tri:TriangleData):
+    # omits the SSA triangles, should add in via flag
+    bc_1 = sum(x is not None for x in [tri.a, tri.b, tri.c])
+    ac_1 = sum(x is not None for x in [tri.A, tri.B, tri.C])
+    if _check_bond_valid_triangle(tri): # TODO: reuse args
+        return None
+    elif bc_1 == 2: # ac_1 == 0
+        if tri.a is not None:
+            if tri.b is not None:
+                return [('c',), ('C',)]
+            else:
+                return [('b',), ('B',)]
+        else: # b and c are not none by exclusion
+            return [('a',), ('A',)]
+    elif bc_1 == 1: # ac_1 <= 1
+        if tri.a is not None:
+            if ac_1 == 0:
+                return [('b', 'c'), ('b', 'C'), ('c','B'), ('B', 'C'), ('A', 'B'), ('C', 'A')]
+            elif tri.A is not None:
+                return [('B',), ('C',)]
+            elif tri.B is not None:
+                return [("c",), ('A',), ('C',)]
+            else: #tri.C is not None
+                return [("b",), ('A',), ('B',)]
+        elif tri.b is not None:
+            if ac_1 == 0:
+                return [('a', 'c'), ('a', 'C'), ('c','A'), ('A', 'C'), ('A', 'B'), ('C', 'B')]
+            elif tri.A is not None:
+                return [('c',), ('B',), ('C',)]
+            elif tri.B is not None:
+                return [('A',), ('C',)]
+            else: #tri.C is not None
+                return [("a",), ('A',), ('B',)]
+        else: #tri.c is not None
+            if ac_1 == 0:
+                return [('a', 'b'), ('a', 'B'), ('b','A'), ('A', 'B'), ('A', 'C'), ('B', 'C')]
+            elif tri.A is not None:
+                return [('b',), ('B',), ('C',)]
+            elif tri.B is not None:
+                return [('a',), ('A',), ('C',)]
+            else: #tri.C is not None
+                return [('A',), ('B',)]
+    elif ac_1 == 2: # bc_1 == 0
+        # any side length works, no angle works
+        return [('a',), ('b',), ('c',)]
+    elif ac_1 == 1:
+        if tri.A is not None:
+            return [('b', 'c'), ('b', 'B'), ('c', 'C'), ('a', 'B'), ('a', 'C'), ('b', 'C'), ('c', 'B')]
+        elif tri.B is not None:
+            return [('a', 'c'), ('a', 'A'), ('c', 'C'), ('b', 'A'), ('b', 'C'), ('a', 'C'), ('c', 'A')]
+        else: # tri.C is not None
+            return [('a', 'b'), ('a', 'A'), ('b', 'B'), ('c', 'A'), ('c', 'B'), ('a', 'B'), ('b', 'A')]
+    else: # literally nothing supplied...we'll omit the ssa triangles
+        return [
+            ('a', 'b', 'c'), # sss
+            ('a', 'b', 'C'), # sas
+            ('a', 'B', 'c'),
+            ('A', 'b', 'c'),
+            ('a', 'B', 'C'), # asa
+            ('A', 'b', 'C'),
+            ('A', 'B', 'c'),
+            ('a', 'B', 'A'), # saa
+            ('a', 'C', 'A'),
+            ('b', 'A', 'B'),
+            ('b', 'C', 'B'),
+            ('c', 'A', 'C'),
+            ('c', 'B', 'C')
+        ]
+
+
 def _triangle_data_permute(tdata:TriangleData, perm):
     a,b,c,A,B,C = tdata
     bls = [a,b,c]
@@ -3589,6 +3675,10 @@ def triangle_modify(tdata:TriangleData, updates:dict):
             k = _tdata_name_map[k]
         new_data[k] = v
     return TriangleData(*new_data)
+def _tri_prop(tdata:TriangleData, field_name):
+    return tdata[_tdata_name_map[field_name]]
+def _triangle_has_prop(tdata:TriangleData, field_name):
+    return tdata[_tdata_name_map[field_name]] is not None
 def triangle_property(tdata:TriangleData, field_name):
     if field_name == "a":
         return _triangle_property_a(tdata)
@@ -4491,14 +4581,20 @@ _dihedron_point_map = {
     'Z2': (0, 2, 3),
     'A3': (0, 3, 1),
     'Y3': (1, 0, 3),
-    'C4': (0, 3, 2),
-    'X4': (2, 0, 3),
+    'C4': (2, 0, 3),
+    'X4': (0, 3, 2),
     'Tb':(0, 1, 2, 3),
+    'Tb_inv':(0, 2, 1, 3),
     'Ta':(2, 0, 1, 3),
+    'Ta_inv':(2, 1, 0, 3),
     'Tc':(0, 2, 3, 1),
+    'Tc_inv':(0, 3, 2, 1),
     'Tx':(1, 0, 2, 3),
+    'Tx_inv':(1, 2, 0, 3),
     'Ty':(0, 1, 3, 2),
+    'Ty_inv':(0, 3, 1, 2),
     'Tz':(1, 0, 3, 2),
+    'Tz_inv':(1, 3, 0, 2)
 }
 def _check_dihedron_type(ddata, inds):
     return all(
@@ -4520,6 +4616,22 @@ def make_dihedron(points=None, *,
         Z, Z2, A3, Y3, C4, X4,
         Ta, Tb, Tc, Tx, Ty, Tz
     )
+dihedron_triangle_fields = [
+    ['a', 'b', 'x', 'A', 'B1', 'X'],
+    ['y', 'b', 'c', 'Y', 'B2', 'C'],
+    ['a', 'y', 'z', 'A3', 'Y3', 'Z'],
+    ['x', 'z', 'c', 'X4', 'Z2', 'C4']
+]
+dihedron_angle_triples = {
+    # the set (i,j,k), (k,j,l), and (i,j,l)
+    # ordered so that if the angle without (i,j) is in the middle
+    'a':(['X', 'C', 'Z'], ['B1', 'C4', 'Y3']),
+    'b':(['X', 'Z', 'C'], ['A', 'Z2', 'Y']),
+    'c':(['Y', 'A', 'Z2'], ['B2', 'A3', 'X4']),
+    'x':(['A', 'Y', 'Z2'], ['B1', 'Y3', 'C4']),
+    'y':(['Z', 'X', 'C'], ['A3', 'X4', 'B2']),
+    'z':(['C4', 'B1', 'Y3'],['A3', 'B2', 'X4'])
+}
 def dihedron_triangle_1(dd:DihedralTetrahedronData):
     return make_triangle(a=dd.a, b=dd.b, c=dd.x, A=dd.A, B=dd.B1, C=dd.X)
 def dihedron_triangle_2(dd:DihedralTetrahedronData):
@@ -4528,23 +4640,17 @@ def dihedron_triangle_3(dd:DihedralTetrahedronData):
     return make_triangle(a=dd.a, b=dd.y, c=dd.z, A=dd.A3, B=dd.Y3, C=dd.Z)
 def dihedron_triangle_4(dd:DihedralTetrahedronData):
     return make_triangle(a=dd.x, b=dd.z, c=dd.c, A=dd.X4, B=dd.Z2, C=dd.C4)
-def _check_bond_valid_triangle(td_1):
-    bc_1 = sum(x is not None for x in [td_1.a, td_1.b, td_1.c])
-    ac_1 = sum(x is not None for x in [td_1.A, td_1.B, td_1.C])
-    return (
-            bc_1 == 3
-            or (bc_1 == 2 and ac_1 >= 1)
-            or (bc_1 == 1 and ac_1 >= 2)
-    )
-def _check_angle_valid_triangle(td_1):
-    bc_1 = sum(x is not None for x in [td_1.a, td_1.b, td_1.c])
-    ac_1 = sum(x is not None for x in [td_1.A, td_1.B, td_1.C])
-    return (
-            ac_1 >= 2
-            or bc_1 == 3
-            or (bc_1 == 2 and ac_1 == 1)
-    )
-def _dihedron_data_permute(dd, perm):
+def dihedron_triangle(dd:DihedralTetrahedronData, i):
+    if i == 0:
+        return dihedron_triangle_1(dd)
+    elif i == 1:
+        return dihedron_triangle_2(dd)
+    elif i == 2:
+        return dihedron_triangle_3(dd)
+    else:
+        return dihedron_triangle_4(dd)
+def _dihedron_permutation_relabeling(perm):
+    #TODO: cache the relabeling
     inv_map = {v:k for k,v in _dihedron_point_map.items()}
     inv_perm = np.argsort(perm)
     new_inds = []
@@ -4564,14 +4670,18 @@ def _dihedron_data_permute(dd, perm):
         else:
             i,j,k,l = c
             if l < i:
-                i,l = l,i
-            if k < j:
-                j,k = k,j
+                i,j,k,l = l,k,j,i
             c = (i,j,k,l)
         new_inds.append([inv_map[c1], c])
+    return {
+        inv_map[c]: _ddata_name_map[o.split("_inv")[0]]
+        for o, c in new_inds
+    }
+def _dihedron_data_permute(dd, perm):
     updates = {
-        inv_map[c]:dd[_ddata_name_map[o]]
-        for o,c in new_inds
+        #TODO: how to handle flipped dihedrals?
+        k.split("_inv")[0]:dd[i] #if not k.endswith("_inv") or dd[i] is None else (2*np.pi - dd[i])
+        for k,i in _dihedron_permutation_relabeling(perm).items()
     }
     return make_dihedron(**updates)
 def dihedron_modify(dd, updates):
@@ -4663,7 +4773,498 @@ def _dihedron_property_y(dd:DihedralTetrahedronData):
         dd = _dihedron_data_permute(dd, p)
         a, dd = _dihedron_property_z(dd)
         return a, _dihedron_data_permute(dd, inv)
+def _dihedron_complete_dihedral_angle_data(Tb, X, C,
+                                           td_1, names_1, field_1,
+                                           td_2, names_2, field_2
+                                           ):
+    a2 = _check_angle_valid_triangle(td_2)
+    a1 = _check_angle_valid_triangle(td_1)
+    needs_C = C is None
+    needs_X = X is None
 
+    has_C = not needs_C or a2
+    has_X = not needs_X or a1
+
+    if has_C and has_X:
+        updates = {}
+        if needs_X:
+            X, td_1 = triangle_property(td_1, field_1)
+            updates.update(dict(zip(names_1, td_1)))
+        if needs_C:
+            C, td_2 = triangle_property(td_2, field_2)
+            updates.update(dict(zip(names_2, td_2)))
+        Z = dihedral_Z_from_XtC(X, Tb, C)
+        return Z, updates
+    else:
+        return None, None
+def _dihedron_complete_dihedral_angle_data_imp(dd, T, f, x, A, y, B):
+    if T is not None:
+        td_2 = dihedron_triangle(dd, x)
+        td_4 = dihedron_triangle(dd, y)
+        A3_test, updates = _dihedron_complete_dihedral_angle_data(
+            T, _tri_prop(td_2, A), _tri_prop(td_4, B),
+            td_2, dihedron_triangle_fields[x], A,
+            td_4, dihedron_triangle_fields[y], B
+        )
+        if A3_test is not None:
+            updates[f] = A3_test
+            dd = dihedron_modify(dd, updates)
+    return dd
+def _dihedron_complete_dihedral_angle_Ta_C(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Ta, 'C', 0, 'C', 2, 'C'
+    )
+def _dihedron_complete_dihedral_angle_Ta_C4(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Ta, 'C4', 0, 'B', 2, 'B'
+    )
+def _dihedron_complete_dihedral_angle_Tb_Z(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tb, 'Z', 0, 'C', 1, 'C'
+    )
+def _dihedron_complete_dihedral_angle_Tb_Z2(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tb, 'Z2', 0, 'A', 1, 'A'
+    )
+def _dihedron_complete_dihedral_angle_Tc_A(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tc, 'A', 1, 'C', 3, 'B'
+    )
+def _dihedron_complete_dihedral_angle_Tc_A3(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tc, 'A3', 1, 'B', 3, 'A'
+    )
+def _dihedron_complete_dihedral_angle_Tx_Y(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tx, 'Y', 0, 'A', 3, 'B'
+    )
+def _dihedron_complete_dihedral_angle_Tx_Y3(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tx, 'Y3', 0, 'B', 3, 'C'
+    )
+def _dihedron_complete_dihedral_angle_Ty_X(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Ty, 'X', 2, 'C', 1, 'C'
+    )
+def _dihedron_complete_dihedral_angle_Ty_X4(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Ty, 'X4', 2, 'A', 1, 'B'
+    )
+def _dihedron_complete_dihedral_angle_Tz_B1(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tz, 'B1', 3, 'C', 2, 'B'
+    )
+def _dihedron_complete_dihedral_angle_Tz_B2(dd:DihedralTetrahedronData):
+    return _dihedron_complete_dihedral_angle_data_imp(
+        dd, dd.Tz, 'B2', 2, 'A', 3, 'A'
+    )
+def _dihedron_property_Z(dd:DihedralTetrahedronData):
+    if dd.Z is not None:
+        return dd.Z, dd
+    else:
+        td_1 = dihedron_triangle_1(dd)
+        td_2 = dihedron_triangle_2(dd)
+        td_3 = dihedron_triangle_3(dd)
+        td_4 = dihedron_triangle_4(dd)
+        if _check_bond_valid_triangle(td_3):
+            Z, td_new = triangle_property(td_3, 'C')
+            updates = dict(zip(['a', 'y', 'z', 'A3', 'Y3', 'Z'], td_new))
+            return Z, dihedron_modify(dd, updates)
+        elif _check_dihedron_type(dd, ['X', 'Tb', 'C']):
+            Z = dihedral_Z_from_XtC(dd.X, dd.Tb, dd.C)
+            return Z, dihedron_modify(dd, {'Z': Z})
+        # check if we can complete triangle 3 using extra dihedral relations
+        else:
+            if dd.Tb is not None:
+                Z_test, updates = _dihedron_complete_dihedral_angle_data(
+                    dd.Tb, dd.X, dd.C,
+                    td_1, ['a', 'b', 'x', 'A', 'B1', 'X'], 'C',
+                    td_2, ['y', 'b', 'c', 'Y', 'B2', 'C'], 'C'
+                )
+                if Z_test is not None:
+                    updates['Z'] = Z_test
+                    return Z_test, dihedron_modify(dd, updates)
+            # dihedron_triangle_fields = [
+            #     ['a', 'b', 'x', 'A', 'B1', 'X'],
+            #     ['y', 'b', 'c', 'Y', 'B2', 'C'],
+            #     ['a', 'y', 'z', 'A3', 'Y3', 'Z'],
+            #     ['x', 'z', 'c', 'X4', 'Z2', 'C4']
+            # ]
+            if dd.Tc is not None and dd.A3 is None:
+                A3_test, updates = _dihedron_complete_dihedral_angle_data(
+                    dd.Tc, dd.B2, dd.X4,
+                    td_2, dihedron_triangle_fields[1], 'B',
+                    td_4, dihedron_triangle_fields[3], 'A'
+                )
+                if A3_test is not None:
+                    updates['A3'] = A3_test
+                    dd = dihedron_modify(dd, updates)
+            if dd.Tx is not None and dd.Y3 is None:
+                Y3_test, updates = _dihedron_complete_dihedral_angle_data(
+                    dd.Tx, dd.B1, dd.C4,
+                    td_1, dihedron_triangle_fields[0], 'B',
+                    td_4, dihedron_triangle_fields[3], 'C'
+                )
+                if Y3_test is not None:
+                    updates['Y3'] = Y3_test
+                    dd = dihedron_modify(dd, updates)
+
+            if dd.y is None:
+                td_2 = dihedron_triangle_2(dd)
+                if _check_bond_valid_triangle(td_2):
+                    _, td_2 = triangle_property(td_2, 'a')
+                    dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[1], td_2)))
+
+            if dd.a is None:
+                td_1 = dihedron_triangle_1(dd)
+                if _check_bond_valid_triangle(td_1):
+                    _, td_1 = triangle_property(td_1, 'a')
+                    dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[0], td_1)))
+
+            if dd.z is None:
+                td_4 = dihedron_triangle_4(dd)
+                if _check_bond_valid_triangle(td_4):
+                    _, td_4 = triangle_property(td_4, 'b')
+                    dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[3], td_4)))
+
+            # check again after completing triangles
+            td_3 = dihedron_triangle_3(dd)
+            if _check_bond_valid_triangle(td_3):
+                Z, td_new = triangle_property(td_3, 'C')
+                updates = dict(zip(dihedron_triangle_fields[2], td_new))
+                return Z, dihedron_modify(dd, updates)
+            raise ValueError(f"can't get Z from dihedral data {dd}")
+def _dihedron_property_A(dd:DihedralTetrahedronData):
+    if dd.A is not None:
+        return dd.A, dd
+    else:
+        p = [0, 2, 3, 1]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        Z, dd = _dihedron_property_Z(dd)
+        return Z, _dihedron_data_permute(dd, inv)
+def _dihedron_property_X(dd:DihedralTetrahedronData):
+    if dd.X is not None:
+        return dd.X, dd
+    else:
+        p = [0, 1, 3, 2]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        X, dd = _dihedron_property_Z(dd)
+        return X, _dihedron_data_permute(dd, inv)
+def _dihedron_property_B1(dd:DihedralTetrahedronData):
+    if dd.B1 is not None:
+        return dd.B1, dd
+    else:
+        p = [1, 0, 3, 2]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_C(dd:DihedralTetrahedronData):
+    if dd.C is not None:
+        return dd.C, dd
+    else:
+        p = [2, 1, 0, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Y(dd:DihedralTetrahedronData):
+    if dd.Y is not None:
+        return dd.Y, dd
+    else:
+        p = [1, 0, 2, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_B2(dd:DihedralTetrahedronData):
+    if dd.B2 is not None:
+        return dd.B2, dd
+    else:
+        p = [1, 3, 0, 2]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Z2(dd:DihedralTetrahedronData):
+    if dd.Z2 is not None:
+        return dd.Z2, dd
+    else:
+        p = [0, 2, 1, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_A3(dd:DihedralTetrahedronData):
+    if dd.A3 is not None:
+        return dd.A3, dd
+    else:
+        p = [0, 3, 2, 1]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Y3(dd:DihedralTetrahedronData):
+    if dd.Y3 is not None:
+        return dd.Y3, dd
+    else:
+        p = [1, 0, 2, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_C4(dd:DihedralTetrahedronData):
+    if dd.C4 is not None:
+        return dd.C4, dd
+    else:
+        p = [2, 0, 1, 3]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_X4(dd:DihedralTetrahedronData):
+    if dd.X4 is not None:
+        return dd.X4, dd
+    else:
+        p = [0, 3, 1, 2]
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Z(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_complete_dihedral_from_angle_data(Z, X, C,
+                                                 td_1, names_1, field_1,
+                                                 td_2, names_2, field_2
+                                                 ):
+    a2 = _check_angle_valid_triangle(td_2)
+    a1 = _check_angle_valid_triangle(td_1)
+    needs_C = C is None
+    needs_X = X is None
+
+    has_C = not needs_C or a2
+    has_X = not needs_X or a1
+
+    if has_C and has_X:
+        updates = {}
+        if needs_X:
+            X, td_1 = triangle_property(td_1, field_1)
+            updates.update(dict(zip(names_1, td_1)))
+        if needs_C:
+            C, td_2 = triangle_property(td_2, field_2)
+            updates.update(dict(zip(names_2, td_2)))
+        Tb = dihedral_from_XZC(X, Z, C)
+        return Tb, updates
+    else:
+        return None, None
+def _get_dihedron_triangle_completions(tri,
+                                       complements,
+                                       fields,
+                                       comps,
+                                       properties
+                                       ):
+    updates = {}
+    can_complete = set()
+    for t,c,p in zip(complements, comps, properties):
+        if _check_bond_valid_triangle(t) or _triangle_has_prop(t, p):
+            can_complete.add(c)
+    completions_list = _get_triangle_completions(tri)
+    if completions_list is not None:
+        for completions in completions_list:
+            completions = set(completions)
+            if len(completions - can_complete) == 0:  # TODO: use faster short circuiting
+                for t,c,f,p in zip(complements, comps, fields, properties):
+                    if c in completions:
+                        v, t = triangle_property(t, p)
+                        updates.update(dict(zip(f, t)))
+                break
+    return updates
+
+def _complete_dihedron_triangle_1(dd):
+    updates = _get_dihedron_triangle_completions(dihedron_triangle_1(dd),
+                                       [dihedron_triangle_3(dd), dihedron_triangle_2(dd), dihedron_triangle_4(dd)],
+                                       [dihedron_triangle_fields[2], dihedron_triangle_fields[1], dihedron_triangle_fields[3]],
+                                       ['a', 'b', 'c'],
+                                       ['a', 'b', 'a']
+                                       )
+    if len(updates) > 0:
+        return dihedron_modify(dd, updates)
+    else:
+        return dd
+def _complete_dihedron_triangle_2(dd):
+    updates = _get_dihedron_triangle_completions(dihedron_triangle_2(dd),
+                                       [dihedron_triangle_3(dd), dihedron_triangle_1(dd), dihedron_triangle_4(dd)],
+                                       [dihedron_triangle_fields[2], dihedron_triangle_fields[0], dihedron_triangle_fields[3]],
+                                       ['a', 'b', 'c'],
+                                       ['b', 'b', 'c']
+                                       )
+    if len(updates) > 0:
+        return dihedron_modify(dd, updates)
+    else:
+        return dd
+def _complete_dihedron_triangle_3(dd):
+    updates = _get_dihedron_triangle_completions(dihedron_triangle_3(dd),
+                                       [dihedron_triangle_1(dd), dihedron_triangle_2(dd), dihedron_triangle_4(dd)],
+                                       [dihedron_triangle_fields[0], dihedron_triangle_fields[1], dihedron_triangle_fields[3]],
+                                       ['a', 'b', 'c'],
+                                       ['a', 'a', 'b']
+                                       )
+    if len(updates) > 0:
+        return dihedron_modify(dd, updates)
+    else:
+        return dd
+def _complete_dihedron_triangle_4(dd):
+    updates = _get_dihedron_triangle_completions(dihedron_triangle_4(dd),
+                                       [dihedron_triangle_1(dd), dihedron_triangle_3(dd), dihedron_triangle_2(dd)],
+                                       [dihedron_triangle_fields[0], dihedron_triangle_fields[2], dihedron_triangle_fields[1]],
+                                       ['a', 'b', 'c'],
+                                       ['c', 'c', 'c']
+                                       )
+    if len(updates) > 0:
+        return dihedron_modify(dd, updates)
+    else:
+        return dd
+
+def _dihedron_property_Tb(dd):
+    if dd.Tb is not None:
+        return dd.Tb, dd
+    else:
+        if dd.Z is not None:
+            td_1 = dihedron_triangle_1(dd)
+            td_2 = dihedron_triangle_2(dd)
+            Tb_test, updates = _dihedron_complete_dihedral_from_angle_data(
+                dd.Z, dd.X, dd.C,
+                td_1, ['a', 'b', 'x', 'A', 'B1', 'X'], 'C',
+                td_2, ['y', 'b', 'c', 'Y', 'B2', 'C'], 'C'
+            )
+            if Tb_test is not None:
+                updates['Tb'] = Tb_test
+                return Tb_test, dihedron_modify(dd, updates)
+
+        if _check_dihedron_type(dd, ['a', 'y', 'X', 'C', 'z']):
+            Tb = dihedral_from_ayXCz(dd.a, dd.y, dd.X, dd.C, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb':Tb})
+        elif _check_dihedron_type(dd, ['b', 'x', 'Y', 'A', 'z']):
+            Tb = dihedral_from_ayXCz(dd.b, dd.x, dd.Y, dd.A, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb': Tb})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'x', 'y', 'z']):
+            Tb = dihedral_from_abcxyz(dd.a, dd.b, dd.c, dd.x, dd.y, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb': Tb})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'x', 'Y', 'z']):
+            Tb = dihedral_from_abcxYz(dd.a, dd.b, dd.c, dd.x, dd.Y, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb': Tb})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'X', 'y', 'z']):
+            Tb = dihedral_from_abcxYz(dd.a, dd.b, dd.c, dd.y, dd.X, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb': Tb})
+        elif _check_dihedron_type(dd, ['a', 'b', 'c', 'X', 'Y', 'z']):
+            Tb = dihedral_from_abcXYz(dd.a, dd.b, dd.c, dd.X, dd.Y, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb': Tb})
+        elif _check_dihedron_type(dd, ['x', 'b', 'y', 'A', 'C', 'z']):
+            Tb = dihedral_from_abcXYz(dd.x, dd.b, dd.y, dd.A, dd.C, dd.z)
+            return Tb, dihedron_modify(dd, {'Tb': Tb})
+        else:
+            # populate anything that can generate the necessary components
+            #TODO: add short circuiting logic to make sure we add the minimal amount
+            dd = _dihedron_complete_dihedral_angle_Ta_C(dd)
+            dd = _dihedron_complete_dihedral_angle_Ta_C4(dd)
+            dd = _dihedron_complete_dihedral_angle_Tc_A(dd)
+            dd = _dihedron_complete_dihedral_angle_Tc_A3(dd)
+            dd = _dihedron_complete_dihedral_angle_Tx_Y(dd)
+            dd = _dihedron_complete_dihedral_angle_Tx_Y3(dd)
+            dd = _dihedron_complete_dihedral_angle_Ty_X(dd)
+            dd = _dihedron_complete_dihedral_angle_Ty_X4(dd)
+            dd = _dihedron_complete_dihedral_angle_Tz_B1(dd)
+            dd = _dihedron_complete_dihedral_angle_Tz_B2(dd)
+            dd = _complete_dihedron_triangle_1(dd)
+            dd = _complete_dihedron_triangle_2(dd)
+            dd = _complete_dihedron_triangle_3(dd)
+            dd = _complete_dihedron_triangle_4(dd)
+            # dd = _complete_dihedron_triangle_3(dd)
+            # dd = _complete_dihedron_triangle_4(dd)
+            td_1 = dihedron_triangle_1(dd)
+            if _check_angle_valid_triangle(td_1):
+                _, td_1 = triangle_property(td_1, 'C')
+                dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[0], td_1)))
+            else:
+                dd = _complete_dihedron_triangle_1(dd)
+            td_2 = dihedron_triangle_2(dd)
+            if _check_angle_valid_triangle(td_2):
+                _, td_2 = triangle_property(td_2, 'C')
+                dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[1], td_2)))
+            else:
+                dd = _complete_dihedron_triangle_2(dd)
+            td_3 = dihedron_triangle_3(dd)
+            if _check_angle_valid_triangle(td_3):
+                _, td_3 = triangle_property(td_3, 'C')
+                dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[2], td_3)))
+            else:
+                dd = _complete_dihedron_triangle_3(dd)
+
+            # dd = _complete_dihedron_triangle_1(dd)
+            # dd = _complete_dihedron_triangle_2(dd)
+            td_3 = dihedron_triangle_3(dd)
+            if _check_angle_valid_triangle(td_3):
+                _, td_3 = triangle_property(td_3, 'C')
+                dd = dihedron_modify(dd, dict(zip(dihedron_triangle_fields[2], td_3)))
+
+            if dd.Z is not None:
+                td_1 = dihedron_triangle_1(dd)
+                td_2 = dihedron_triangle_2(dd)
+                Tb_test, updates = _dihedron_complete_dihedral_from_angle_data(
+                    dd.Z, dd.X, dd.C,
+                    td_1, dihedron_triangle_fields[0], 'C',
+                    td_2, dihedron_triangle_fields[1], 'C'
+                )
+                if Tb_test is not None:
+                    updates['Tb'] = Tb_test
+                    return Tb_test, dihedron_modify(dd, updates)
+
+            raise ValueError(f"can't get Tb from dihedral data {dd}")
+def _dihedron_property_Ta(dd:DihedralTetrahedronData):
+    if dd.Ta is not None:
+        return dd.Ta, dd
+    else:
+        p = _dihedron_point_map['Ta']
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Tb(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Tc(dd:DihedralTetrahedronData):
+    if dd.Tc is not None:
+        return dd.Tc, dd
+    else:
+        p = _dihedron_point_map['Tc']
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Tb(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Tx(dd:DihedralTetrahedronData):
+    if dd.Tx is not None:
+        return dd.Tx, dd
+    else:
+        p = _dihedron_point_map['Tx']
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Tb(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Ty(dd:DihedralTetrahedronData):
+    if dd.Ty is not None:
+        return dd.Ty, dd
+    else:
+        p = _dihedron_point_map['Ty']
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Tb(dd)
+        return a, _dihedron_data_permute(dd, inv)
+def _dihedron_property_Tz(dd:DihedralTetrahedronData):
+    if dd.Tz is not None:
+        return dd.Tz, dd
+    else:
+        p = _dihedron_point_map['Tz']
+        inv = np.argsort(p)
+        dd = _dihedron_data_permute(dd, p)
+        a, dd = _dihedron_property_Tb(dd)
+        return a, _dihedron_data_permute(dd, inv)
 def dihedron_property(ddata:DihedralTetrahedronData, field_name):
     if field_name == "a":
         return _dihedron_property_a(ddata)
