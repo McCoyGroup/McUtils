@@ -146,8 +146,8 @@ class InternalsSet:
         return self._map_dispatch(self.coord_map, coord)
     def _ind_map_dispatch(self, i):
         return self._map_dispatch(self.ind_map, i)
-    def find(self, coord):
-        return nput.find(self._coord_map_dispatch(coord), coord)
+    def find(self, coord, missing_val='raise'):
+        return nput.find(self._coord_map_dispatch(coord), coord, missing_val=missing_val)
 
     @classmethod
     def get_coord_from_maps(cls, item, indicator:IndicatorMap, ind_map, coord_map):
@@ -198,7 +198,7 @@ class InternalsSet:
         else:
             return cls(None, prepped_data=[self._indicator, self.coordinate_indices, self.ind_map, int_map])
 
-def find_internal(coords, coord):
+def find_internal(coords, coord, missing_val:'Any'='raise'):
     if isinstance(coords, InternalsSet):
         return coords.find(coord)
     else:
@@ -208,7 +208,10 @@ def find_internal(coords, coord):
             idx = None
 
         if idx is None:
-            idx = coords.index(canonicalize_internal(coord))
+            if dev.str_is(missing_val, 'raise'):
+                raise IndexError("{} not in coordinate set".format(coord))
+            else:
+                idx = missing_val
         return idx
 
 def permute_internals(coords, perm, canonicalize=True):
@@ -652,3 +655,63 @@ def internal_distance_convert(coords, specs,
         conv = conv[..., ord]
         final_dists = [final_dists[i] for i in ord]
     return final_dists, conv
+
+def _find_coord_comp(coord, a, internals, prior_coords, missing_val):
+    a_idx = find_internal(internals, a, missing_val=None)
+    found_main = True
+    if a_idx is None:
+        found_main = False
+        a_idx = find_internal(prior_coords, a, missing_val=None)
+    if a_idx is None:
+        if dev.str_is(missing_val, 'raise'):
+            raise ValueError(f"can't construct {coord} from internals (requires {a})")
+    return a_idx, found_main
+int_conv_data = collections.namedtuple("int_conv_data",
+                                      ['input_indices', 'pregen_indices', 'conversion'])
+def find_internal_conversion(target_coord, internals, prior_coords=None, canonicalize=True, missing_val='raise'):
+    idx = find_internal(internals, target_coord, missing_val=None)
+    if idx is not None:
+        return int_conv_data([idx], [None], None)
+    if prior_coords is None:
+        prior_coords = {}
+    if isinstance(internals, InternalsSet):
+        internals = internals.specs
+    if canonicalize:
+        target_coord = canonicalize_internal(target_coord)
+        internals = [canonicalize_internal(c) for c in internals]
+    if len(target_coord) == 2:
+        # TODO: search for anything that can build this distance in the previous internals or the prior coords
+        ...
+    elif len(target_coord) == 3:
+        ...
+    elif len(target_coord) == 4:
+        # TODO: a fairly constrained search
+        i,j,k,l = target_coord
+        a = canonicalize_internal((i,j))
+        b = canonicalize_internal((j,k))
+        c = canonicalize_internal((k,l))
+        a_idx, a_main = _find_coord_comp((i,j,k,l), a, internals, prior_coords, missing_val)
+        b_idx, b_main = _find_coord_comp((i,j,k,l), b, internals, prior_coords, missing_val)
+        c_idx, c_main = _find_coord_comp((i,j,k,l), c, internals, prior_coords, missing_val)
+
+
+        x = canonicalize_internal((i,k))
+        x_idx, x_main = _find_coord_comp((i,j,k,l), x, internals, prior_coords, None)
+        s = canonicalize_internal((i,k))
+        s_idx, s_main = _find_coord_comp((i,j,k,l), s, internals, prior_coords, None)
+
+        if r_idx is not None:
+            if s_idx is not None:
+                return dm_conv_data(
+                        (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), _get_input_ind(d5), m),
+                        (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), _get_pregen_ind(d5), None,
+                         None),
+                        dihed_conv('ssssst', (a, b, c, x, y, (i, j, k, l))),
+                        len(dists)
+                    )
+
+
+        A = canonicalize_internal((i,j,k))
+        B = canonicalize_internal((j,k,l))
+    else:
+        raise ValueError(f"can't understand coordinate {target_coord}")

@@ -1,4 +1,5 @@
-import os, enum, weakref
+import os, enum, weakref, sys
+from . import Redirects as redirects
 
 __all__ = [
     "Logger",
@@ -70,6 +71,10 @@ class LoggingBlock:
                  prompt=None,
                  closer=None,
                  printoptions=None,
+                 captured_output_tag="",
+                 capture_output=True,
+                 captured_error_tag="",
+                 capture_errors=None,
                  **tag_vars
                  ):
         self.logger = logger
@@ -95,6 +100,13 @@ class LoggingBlock:
 
         self._print_manager=None
         self.printopts = printoptions
+        self.captured_output_tag = captured_output_tag
+        self._capture_output = capture_output
+        if capture_errors is None:
+            capture_errors = capture_output
+        self.captured_error_tag = captured_error_tag
+        self._capture_errors = capture_errors
+        self._redirect = None
 
     @property
     def tag(self):
@@ -115,10 +127,33 @@ class LoggingBlock:
 
         return self._tag
 
+    def stream_redirect(self, tag, base_stream):
+        return redirects.StreamRedirect(
+                lambda msg,
+                       logger=self.logger: logger.log_print(tag+msg, file=base_stream)
+            )
+
     def __enter__(self):
         if self.log_level <= self.logger.verbosity:
             self._in_block = True
             self.logger.log_print(self.opener, tag=self.tag, padding="")
+            if self._capture_output or self._capture_errors:
+                self._redirect = redirects.OutputRedirect(
+                    stdout=(
+                        self.stream_redirect(self.captured_output_tag, sys.stdout)
+                            if self._capture_output else
+                        None
+                    ),
+                    capture_output=self._capture_output,
+                    stderr=(
+                        self.stream_redirect(self.captured_error_tag, sys.stderr)
+                            if self._capture_errors else
+                        None
+                    ),
+                    capture_errors=self._capture_errors
+                )
+                self._redirect.__enter__()
+
             self._old_prompt = self.logger.padding
             self.logger.padding = self.prompt
             self._old_loglev = self.logger.verbosity
@@ -133,16 +168,21 @@ class LoggingBlock:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._in_block:
             self._in_block = False
-            self.logger.log_print(self.closer, tag=self.tag, padding="")
-            self.logger.padding = self._old_prompt
-            self._old_prompt = None
-            self.logger.verbosity = self._old_loglev
-            self._old_loglev = None
-            self.logger.block_level -= 1
+            try:
+                if self._redirect is not None:
+                    self._redirect.__exit__(exc_type, exc_val, exc_tb)
+                    self._redirect = None
+            finally:
+                self.logger.log_print(self.closer, tag=self.tag, padding="")
+                self.logger.padding = self._old_prompt
+                self._old_prompt = None
+                self.logger.verbosity = self._old_loglev
+                self._old_loglev = None
+                self.logger.block_level -= 1
 
-            if self._print_manager is not None:
-                self._print_manager.__exit__(exc_type, exc_val, exc_tb)
-                self._print_manager = None
+                if self._print_manager is not None:
+                    self._print_manager.__exit__(exc_type, exc_val, exc_tb)
+                    self._print_manager = None
 
 class Logger:
     """
@@ -159,7 +199,8 @@ class Logger:
                  print_function=None,
                  padding="",
                  newline="\n",
-                 repad_messages=True
+                 repad_messages=True,
+                 block_options=None
                  ):
         self.log_file = log_file
         self.verbosity = log_level if log_level is not None else self.default_verbosity
@@ -172,6 +213,7 @@ class Logger:
             print_function = print
         self.print_function = print_function
         self.active = True
+        self.block_options = {} if block_options is None else block_options
 
     def to_state(self, serializer=None):
         return {
@@ -186,7 +228,7 @@ class Logger:
         return cls(**state)
 
     def block(self, **kwargs):
-        return LoggingBlock(self, block_level=self.block_level, **kwargs)
+        return LoggingBlock(self, block_level=self.block_level, **dict(self.block_options, **kwargs))
 
     def register(self, key):
         """
@@ -404,11 +446,11 @@ class Logger:
                     pass
             # O_NONBLOCK is *nix only
             with open(log, mode="a", buffering=1 if print_options['flush'] else -1) as lf:  # this is potentially quite slow but I am also quite lazy
-                print_function(msg, file=lf, **print_options)
+                print_function(msg, **dict(print_options, file=lf))
         elif log is None:
             print_function(msg, **print_options)
         else:
-            print_function(msg, file=log, **print_options)
+            print_function(msg, **dict(print_options, file=log))
 
     def __repr__(self):
         return "{}({}, {})".format(
