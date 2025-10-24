@@ -2214,7 +2214,9 @@ class NumputilsTests(TestCase):
             Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
             Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
         )
-        print(nput.dihedron_property_function(dd, "z"))
+        converter = nput.dihedron_property_function(dd, "Z")
+        print(nput.dihedron_property(dd, "Z"))
+        print(converter(dd))
         return
 
 
