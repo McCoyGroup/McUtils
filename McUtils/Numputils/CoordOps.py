@@ -75,7 +75,8 @@ __all__ = [
     "dihedral_completion_paths",
     "triangle_completions",
     "triangle_completion_paths",
-    "triangle_property_function"
+    "triangle_property_function",
+    "dihedron_property_function"
 ]
 
 def _prod_deriv(op, a, b, da, db):
@@ -3872,6 +3873,8 @@ def _triangle_property_c_from_asa(C, a, B):
     return tri_asa_to_sas(B, a, C)[2]
 def _triangle_property_C_from_sss(a, b, c):
     return tri_sss_to_sas(a, b, c)[1]
+def _triangle_property_C_from_sas(a, B, c):
+    return tri_sas_to_saa(a, B, c)[1]
 def _triangle_property_C_from_saa(a, B, A):
     return tri_saa_to_sas(a, B, A)[1]
 def _triangle_property_C_from_asa(A, c, B):
@@ -3890,6 +3893,8 @@ def triangle_completions_C(a, b, c, A, B):
     return _permutation_trie(
             [
                 ([a, b, c], _triangle_property_C_from_sss),
+                ([a, B, c], _triangle_property_C_from_sas),
+                ([b, A, c], _triangle_property_C_from_sas),
                 ([a, B, A], _triangle_property_C_from_saa),
                 ([b, A, B], _triangle_property_C_from_saa),
                 ([A, c, B], _triangle_property_c_from_asa)
@@ -3977,7 +3982,13 @@ def triangle_property_function(sample_tri: TriangleData, field_name):
             return_args=True
         )
         if complete:
-            inds, func = conversion_specs
+            args, func = conversion_specs
+            inds = [
+                _ddata_name_map[a]
+                    if isinstance(a, str) else
+                a
+                for a in args
+            ]
             def convert(tdata):
                 return func(*(tdata[i] for i in inds))
             return convert
@@ -5677,6 +5688,7 @@ def dihedral_b_completions_trie(a, x, A, X, B1,
                                 y, c, Y, C, B2,
                                 z, Y3, C4, A3, X4,
                                 Tz):
+    b = object()
     dihed_comps = _permutation_trie(
             [
                 ([x, a, Y3, C4, Tz], dihedral_z_from_ayXCt),
@@ -5691,18 +5703,19 @@ def dihedral_b_completions_trie(a, x, A, X, B1,
     return _trie_merge(
         dihed_comps,
         _trie_merge(
-            triangle_completions_trie(make_triangle(a=a, b=None, c=x, A=A, B=B1, C=X), "b"),
-            triangle_completions_trie(make_triangle(a=y, b=None, c=c, A=Y, B=B2, C=C), "b"),
+            triangle_completions_trie(make_triangle(a=a, b=b, c=x, A=A, B=B1, C=X), b),
+            triangle_completions_trie(make_triangle(a=y, b=b, c=c, A=Y, B=B2, C=C), b),
         )
     )
 def dihedral_Z_completions_trie(X, C, Tb, z, a, y, A3, Y3):
+    Z = object()
     return _trie_merge(
         _permutation_trie(
             [
                 ([X, Tb, C], dihedral_Z_from_XtC),
             ]
         ),
-        triangle_completions_trie(make_triangle(a=a, b=y, c=z, A=A3, B=Y3, C=None), "C")
+        triangle_completions_trie(make_triangle(a=a, b=y, c=z, A=A3, B=Y3, C=Z), Z)
     )
 
 class DihedronCoordinateType(enum.Enum):
@@ -5834,27 +5847,81 @@ def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
 #         conversion_path = dihedral_completion_paths(ddata, field_name, return_trie=False)
 #         raise ValueError(f"can't obtain {field_name}, possible completions are {conversion_path} for {ddata}")
 
-# def dihedron_property_function(dample_dihed: DihedralTetrahedronData, field_name):
-#     if _tri_prop(sample_tri, field_name) is not None:
-#         if isinstance(field_name, str):
-#             field_name = _tdata_name_map[field_name]
-#
-#         ind = field_name
-#         def convert(tdata):
-#             return tdata[ind]
-#         return convert
-#     else:
-#         args, (complete, conversion_specs) = triangle_completion_paths(
-#             sample_tri,
-#             field_name,
-#             return_trie=True,
-#             return_args=True
-#         )
-#         if complete:
-#             inds, func = conversion_specs
-#             def convert(tdata):
-#                 return func(*(tdata[i] for i in inds))
-#             return convert
-#         else:
-#             raise ValueError(f"can't get property '{field_name}' from {sample_tri}")
-#             # try to find conversions for subterms
+def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name,
+                               disallowed_conversions=None,
+                               allow_completion=True,
+                               raise_on_missing=True):
+    if _dihed_prop(sample_dihed, field_name) is not None:
+        if isinstance(field_name, str):
+            field_name = _tdata_name_map[field_name]
+
+        ind = field_name
+        def convert(tdata):
+            return tdata[ind]
+        return convert
+    else:
+        args, (complete, conversion_specs) = dihedral_completion_paths(
+            sample_dihed,
+            field_name,
+            return_trie=True,
+            return_args=True
+        )
+        if complete:
+            args, func = conversion_specs
+            inds = [
+                _ddata_name_map[a]
+                if isinstance(a, str) else
+                a
+                for a in args
+            ]
+            def convert(tdata):
+                return func(*(tdata[i] for i in inds))
+            return convert
+        else:
+            if allow_completion:
+                possible_conversions = {}
+                convertable_keys = {}
+                for base_args, trie in conversion_specs:
+                    for l,f in _expand_trie(trie).items():
+                        rem_inds = [i for i,j in enumerate(l) if j not in base_args]
+                        base_inds = [i for i,j in enumerate(l) if j in base_args]
+                        rem_list = tuple(l[i] for i in rem_inds)
+                        possible_conversions[rem_list] = (l, base_args, rem_inds, base_inds, f)
+                pref_keys = list(sorted(possible_conversions.keys(), key=len))
+                if disallowed_conversions is None:
+                    disallowed_conversions = {field_name}
+                for kl in pref_keys:
+                    for k in kl:
+                        if k not in convertable_keys and k not in disallowed_conversions:
+                            d2 = dihedron_property_function(sample_dihed, k,
+                                                            disallowed_conversions=disallowed_conversions,
+                                                            allow_completion=False,
+                                                            raise_on_missing=False)
+                            if d2 is None:
+                                disallowed_conversions.add(k)
+                                break
+                            else:
+                                convertable_keys[k] = d2
+                    else:
+                        full_args, base_args, rem_inds, base_inds, func = possible_conversions[kl]
+                        completions = [convertable_keys[k] for k in kl]
+                        base_arg_inds = [
+                            _ddata_name_map[a]
+                                if isinstance(a, str) else
+                            a
+                            for a in base_args
+                        ]
+                        nargs = len(full_args)
+                        def convert(tdata):
+                            args = [None] * nargs
+                            for i,j in zip(base_inds, base_arg_inds):
+                                args[i] = tdata[j]
+                            for i,g in zip(rem_inds, completions):
+                                args[i] = g(tdata)
+                            return func(*args)
+                        return convert
+            if raise_on_missing:
+                raise ValueError(f"can't get property '{field_name}' from {sample_dihed}")
+            else:
+                return None
+            # try to find conversions for subterms
