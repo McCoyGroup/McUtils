@@ -2186,6 +2186,38 @@ class NumputilsTests(TestCase):
 
     @debugTest
     def test_MoreGeometry(self):
+        # np.random.seed(123123)
+        # pts = np.random.rand(3, 3)
+        # tri = nput.make_triangle(pts)
+        # # print(nput.triangle_completions("a"))
+        # print(nput.triangle_property_function(tri, "A"))
+
+
+        # base_trie = nput.dihedral_completions_trie(
+        #     'b', 'a', 'x', 'c', 'y', 'A', 'X', 'B1', 'C', 'Y', 'B2',
+        #     'z', 'Z', 'Z2')
+        # print(base_trie)
+
+        # tb_comps = nput.dihedral_completions('Tb', return_trie=True)
+        # print(tb_comps["X"])
+        # return
+
+        # print(nput.dihedral_completions('Tb'))
+        # print(nput.dihedral_completions((0, 1, 2, 3), indices=True))
+        np.random.seed(123123)
+        pts = np.random.rand(4, 3)
+        dd = nput.make_dihedron(
+            a=nput.pts_norms(pts[0], pts[1]),
+            b=nput.pts_norms(pts[1], pts[2]),
+            c=nput.pts_norms(pts[2], pts[3]),
+            X=nput.pts_angles(pts[0], pts[1], pts[2], return_crosses=False),
+            Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
+            Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
+        )
+        print(nput.dihedron_property_function(dd, "z"))
+        return
+
+
         tri = nput.make_triangle(np.random.rand(3, 3))
         A, tnew = nput.triangle_property(tri, 'A')
         tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
