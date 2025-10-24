@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Loggers.Logger">Logger</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L147)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L147?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L187)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L187?message=Update%20Docs)]
 </div>
 
 Defines a simple logger object to write log data to a file based on log levels.
@@ -24,11 +24,11 @@ default_verbosity: LogLevel
 ```
 <a id="McUtils.Devutils.Loggers.Logger.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, log_file=None, log_level=None, print_function=None, padding='', newline='\n', repad_messages=True): 
+__init__(self, log_file=None, log_level=None, print_function=None, padding='', newline='\n', repad_messages=True, block_options=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L156)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L156?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L196)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L196?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, log_file=None, log_level=None, print_function=None, padding='', n
 to_state(self, serializer=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L218?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ to_state(self, serializer=None):
 from_state(cls, state, serializer=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L226)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L226?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ from_state(cls, state, serializer=None):
 block(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L230)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L230?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ block(self, **kwargs):
 register(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L233)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L233?message=Update%20Docs)]
 </div>
 Registers the logger under the given key
   - `key`: `Any`
@@ -84,8 +84,8 @@ Registers the logger under the given key
 lookup(cls, key, construct=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L200)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L200?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L242)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L242?message=Update%20Docs)]
 </div>
 Looks up a logger. Has the convenient, but potentially surprising
 behavior that if no logger is found a `NullLogger` is returned.
@@ -101,8 +101,8 @@ behavior that if no logger is found a `NullLogger` is returned.
 preformat_keys(key_functions): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L276?message=Update%20Docs)]
 </div>
 Generates a closure that will take the supplied
 keys/function pairs and update them appropriately
@@ -117,8 +117,8 @@ keys/function pairs and update them appropriately
 format_message(self, message, *params, preformatter=None, _repad=None, _newline=None, _padding=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L255)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L255?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L297)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L297?message=Update%20Docs)]
 </div>
 
 
@@ -127,8 +127,8 @@ format_message(self, message, *params, preformatter=None, _repad=None, _newline=
 format_metainfo(self, metainfo): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L288)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L288?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L330)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L330?message=Update%20Docs)]
 </div>
 
 
@@ -137,8 +137,8 @@ format_metainfo(self, metainfo):
 pad_newlines(self, obj, padding=None, newline=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L295)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L295?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L337)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L337?message=Update%20Docs)]
 </div>
 
 
@@ -148,8 +148,8 @@ pad_newlines(self, obj, padding=None, newline=None, **kwargs):
 split_lines(obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L301)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L301?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L343)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L343?message=Update%20Docs)]
 </div>
 
 
@@ -159,8 +159,8 @@ split_lines(obj):
 prep_array(obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L304)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L304?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L346)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L346?message=Update%20Docs)]
 </div>
 
 
@@ -170,8 +170,8 @@ prep_array(obj):
 prep_dict(obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L309)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L309?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L351)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L351?message=Update%20Docs)]
 </div>
 
 
@@ -180,8 +180,8 @@ prep_dict(obj):
 log_print(self, message, *messrest, message_prepper=None, padding=None, newline=None, log_level=None, metainfo=None, print_function=None, print_options=None, sep=None, end=None, file=None, flush=None, preformatter=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L355)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L355?message=Update%20Docs)]
 </div>
 
   - `message`: `str | Iterable[str]`
@@ -201,8 +201,8 @@ log_print(self, message, *messrest, message_prepper=None, padding=None, newline=
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L413)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L413?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/Logger.py#L455)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/Logger.py#L455?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -257,7 +257,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Loggers/Logger.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Loggers/Logger.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L147?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L187?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

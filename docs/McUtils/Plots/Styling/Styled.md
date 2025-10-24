@@ -49,6 +49,16 @@ construct(cls, data):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L29)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L29?message=Update%20Docs)]
 </div>
+
+
+<a id="McUtils.Plots.Styling.Styled.__repr__" class="docs-object-method">&nbsp;</a> 
+```python
+__repr__(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/Styled.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/Styled.py#L32?message=Update%20Docs)]
+</div>
  </div>
 </div>
 

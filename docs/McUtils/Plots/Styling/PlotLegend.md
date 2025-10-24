@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Styling.PlotLegend">PlotLegend</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L36?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,8 @@ marker_synonyms: dict
 __init__(self, components, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L45?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ __init__(self, components, **styles):
 check_styles(cls, styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L54)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L54?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +50,8 @@ check_styles(cls, styles):
 could_be_legend(cls, bits): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L56)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L56?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L59?message=Update%20Docs)]
 </div>
 
 
@@ -61,8 +61,8 @@ could_be_legend(cls, bits):
 construct(cls, bits): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L68)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L68?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ construct(cls, bits):
 construct_line_marker(cls, lw=4, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L78?message=Update%20Docs)]
 </div>
 
 
@@ -83,8 +83,8 @@ construct_line_marker(cls, lw=4, **opts):
 construct_dot_marker(cls, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L82)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L82?message=Update%20Docs)]
 </div>
 
 
@@ -94,8 +94,8 @@ construct_dot_marker(cls, **opts):
 load_constructors(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L86)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L86?message=Update%20Docs)]
 </div>
 
 
@@ -105,8 +105,8 @@ load_constructors(cls):
 canonicalize_bit(cls, marker='-', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L93?message=Update%20Docs)]
 </div>
 
 
@@ -115,8 +115,8 @@ canonicalize_bit(cls, marker='-', **opts):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/PlotLegend.py#L98)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/PlotLegend.py#L98?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/PlotLegend.py#L101)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/PlotLegend.py#L101?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -171,7 +171,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Styling/PlotLegend.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Styling/PlotLegend.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L33?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L36?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Redirects.DefaultDirectory">DefaultDirectory</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L155?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, output_dir=None, chdir=True, **tempdir_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L156)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L156?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, output_dir=None, chdir=True, **tempdir_opts):
 get_temp_dir(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L109)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L109?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L163)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L163?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +45,8 @@ get_temp_dir(self):
 dirname(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L166?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ dirname(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L121)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L121?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L175)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L175?message=Update%20Docs)]
 </div>
 
 
@@ -65,8 +65,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L185)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L185?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -121,7 +121,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/DefaultDirectory.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/DefaultDirectory.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L101?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L155?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

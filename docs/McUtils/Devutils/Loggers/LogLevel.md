@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Loggers.LogLevel">LogLevel</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers.py#L12)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L12?message=Update%20Docs)]
 </div>
 
 A simple log level object to standardize more pieces of the logger interface
@@ -32,8 +32,8 @@ Never: LogLevel
 __eq__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L24)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L24?message=Update%20Docs)]
 </div>
 
 
@@ -42,8 +42,8 @@ __eq__(self, other):
 __le__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L28)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L28?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +52,8 @@ __le__(self, other):
 __ge__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L32?message=Update%20Docs)]
 </div>
 
 
@@ -62,8 +62,8 @@ __ge__(self, other):
 __lt__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L36?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ __lt__(self, other):
 __gt__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L40?message=Update%20Docs)]
 </div>
 
 
@@ -131,7 +131,7 @@ __gt__(self, other):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Loggers/LogLevel.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Loggers/LogLevel.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L11?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers.py#L12?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.NudgedElasticBandStepFinder">NudgedElasticBandStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1764)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1764?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1778)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1778?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, func, jacobian, hessian=None, spring_constants=0.1, distance_function=None, step_finder='gradient-descent', logger=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1765)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1765?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1779)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1779?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ __init__(self, func, jacobian, hessian=None, spring_constants=0.1, distance_func
 get_dist(self, p1, p2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1783)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1783?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1797)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1797?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ get_dist(self, p1, p2):
 get_tangent(self, guess, mask, cur, prev, next): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1786)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1786?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1800)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1800?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ get_tangent(self, guess, mask, cur, prev, next):
 adjust_jacobian(self, jac, guess, mask, cur, prev, next): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1809)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1809?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1823)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1823?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ adjust_jacobian(self, jac, guess, mask, cur, prev, next):
 image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1815)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1815?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1829)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.py#L1829?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -120,7 +120,7 @@ image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/NudgedElasticBandStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1764?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1778?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -316,9 +316,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-1797d6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-1797d6"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-af18a6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-af18a6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-1797d6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-af18a6" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -353,12 +353,13 @@ Chained conversions are not _currently_ supported, but might well become support
 - [GenericInternals](#GenericInternals)
 - [Permutations](#Permutations)
 - [DistsFromInternals](#DistsFromInternals)
+- [ZMatrixInterConversion](#ZMatrixInterConversion)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-573d7a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-573d7a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-009929" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-009929"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-573d7a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-009929" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1188,6 +1189,20 @@ class ConverterTest(TestCase):
             (2, 0, 3)
         ])
         pprint.pprint(conv)
+```
+
+#### <a name="ZMatrixInterConversion">ZMatrixInterConversion</a>
+```python
+    def test_ZMatrixInterConversion(self):
+        import McUtils.Numputils as nput
+        # print(nput.arctan_deriv(3.8, 2))
+        # return
+        tri = nput.make_triangle(np.random.rand(3, 3))
+        A, tnew = nput.triangle_property(tri, 'A')
+        tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
+        C, tnew = nput.triangle_property(tri2, 'C')
+        tri2 = nput.make_triangle(A=tnew.A, c=tnew.b, C=tnew.C)
+        C, tnew = nput.triangle_property(tri2, 'B')
 ```
 
  </div>

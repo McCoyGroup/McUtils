@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.QuasiNewtonStepFinder">QuasiNewtonStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L950)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L950?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L962)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L962?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ supports_hessian: bool
 __init__(self, func, jacobian, approximation_type='bfgs', logger=None, **generator_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L953)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L953?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L965)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L965?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, func, jacobian, approximation_type='bfgs', logger=None, **generat
 get_hessian_approximations(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L955)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L955?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L967)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L967?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ get_hessian_approximations(cls):
 hessian_approximations(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L967)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L967?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L979)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L979?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ hessian_approximations(self):
 __call__(self, guess, mask, projector=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L971)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L971?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L983)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L983?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -114,7 +114,7 @@ __call__(self, guess, mask, projector=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L950?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L962?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

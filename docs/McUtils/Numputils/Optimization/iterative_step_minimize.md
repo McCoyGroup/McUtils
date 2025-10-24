@@ -5,7 +5,7 @@
 </div>
 
 ```python
-iterative_step_minimize(guess, step_predictor, jacobian=None, hessian=None, *, method=None, unitary=False, generate_rotation=False, dtype='float64', orthogonal_directions=None, orthogonal_projection_generator=None, region_constraints=None, function=None, max_displacement=None, max_displacement_norm=None, oscillation_damping_factor=None, termination_function=None, prevent_oscillations=None, tol=1e-08, use_max_for_error=True, max_iterations=100, convergence_metric=None, track_best=False, logger=None): 
+iterative_step_minimize(guess, step_predictor, jacobian=None, hessian=None, *, method=None, unitary=False, generate_rotation=False, dtype='float64', orthogonal_directions=None, orthogonal_projection_generator=None, region_constraints=None, function=None, max_displacement=None, max_displacement_norm=None, oscillation_damping_factor=None, termination_function=None, prevent_oscillations=None, tol=1e-08, use_max_for_error=True, max_iterations=100, convergence_metric=None, track_best=False, logger=None, log_guess=True): 
 ```
 
 

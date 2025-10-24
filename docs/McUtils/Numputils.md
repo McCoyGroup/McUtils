@@ -215,103 +215,81 @@ Any lowish-level numerical operations that need to be shared go here.
 [affine_multiply](Numputils/VectorOps/affine_multiply.md)   
 </div>
    <div class="col" markdown="1">
-[triangle_convert](Numputils/VectorOps/triangle_convert.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[triangle_converter](Numputils/VectorOps/triangle_converter.md)   
-</div>
-   <div class="col" markdown="1">
-[triangle_area](Numputils/VectorOps/triangle_area.md)   
-</div>
-   <div class="col" markdown="1">
-[dihedral_distance](Numputils/VectorOps/dihedral_distance.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[dihedral_distance_converter](Numputils/VectorOps/dihedral_distance_converter.md)   
-</div>
-   <div class="col" markdown="1">
-[dihedral_from_distance](Numputils/VectorOps/dihedral_from_distance.md)   
-</div>
-   <div class="col" markdown="1">
-[dihedral_from_distance_converter](Numputils/VectorOps/dihedral_from_distance_converter.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
 [cartesian_from_rad](Numputils/VectorOps/cartesian_from_rad.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [polar_to_cartesian](Numputils/VectorOps/polar_to_cartesian.md)   
 </div>
    <div class="col" markdown="1">
 [apply_by_coordinates](Numputils/VectorOps/apply_by_coordinates.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [apply_by_structures](Numputils/VectorOps/apply_by_structures.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [find_basis](Numputils/VectorOps/find_basis.md)   
 </div>
    <div class="col" markdown="1">
 [projection_matrix](Numputils/VectorOps/projection_matrix.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [orthogonal_projection_matrix](Numputils/VectorOps/orthogonal_projection_matrix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [project_onto](Numputils/VectorOps/project_onto.md)   
 </div>
    <div class="col" markdown="1">
 [project_out](Numputils/VectorOps/project_out.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [fractional_power](Numputils/VectorOps/fractional_power.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [unitarize_transformation](Numputils/VectorOps/unitarize_transformation.md)   
 </div>
    <div class="col" markdown="1">
 [maximum_similarity_transformation](Numputils/VectorOps/maximum_similarity_transformation.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [polar_decomposition](Numputils/VectorOps/polar_decomposition.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [matrix_transform_from_eigs](Numputils/VectorOps/matrix_transform_from_eigs.md)   
 </div>
    <div class="col" markdown="1">
 [symmetric_matrix_exp](Numputils/VectorOps/symmetric_matrix_exp.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [imaginary_symmetric_matrix_exp](Numputils/VectorOps/imaginary_symmetric_matrix_exp.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [symmetric_matrix_log](Numputils/VectorOps/symmetric_matrix_log.md)   
 </div>
    <div class="col" markdown="1">
 [imaginary_symmetric_matrix_log](Numputils/VectorOps/imaginary_symmetric_matrix_log.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [sylvester_solve](Numputils/VectorOps/sylvester_solve.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [symmetrize_array](Numputils/VectorOps/symmetrize_array.md)   
+</div>
+   <div class="col" markdown="1">
+[integer_exponent](Numputils/VectorOps/integer_exponent.md)   
 </div>
    <div class="col" markdown="1">
 [rot_deriv](Numputils/CoordOps/rot_deriv.md)   
@@ -425,6 +403,94 @@ Any lowish-level numerical operations that need to be shared go here.
 </div>
    <div class="col" markdown="1">
 [transform_cartesian_derivatives](Numputils/CoordOps/transform_cartesian_derivatives.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[cos_deriv](Numputils/CoordOps/cos_deriv.md)   
+</div>
+   <div class="col" markdown="1">
+[sin_deriv](Numputils/CoordOps/sin_deriv.md)   
+</div>
+   <div class="col" markdown="1">
+[arccos_deriv](Numputils/CoordOps/arccos_deriv.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[arcsin_deriv](Numputils/CoordOps/arcsin_deriv.md)   
+</div>
+   <div class="col" markdown="1">
+[tan_deriv](Numputils/CoordOps/tan_deriv.md)   
+</div>
+   <div class="col" markdown="1">
+[arctan_deriv](Numputils/CoordOps/arctan_deriv.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[legendre_integer_coefficients](Numputils/CoordOps/legendre_integer_coefficients.md)   
+</div>
+   <div class="col" markdown="1">
+[tan_integer_coefficients](Numputils/CoordOps/tan_integer_coefficients.md)   
+</div>
+   <div class="col" markdown="1">
+[triangle_convert](Numputils/CoordOps/triangle_convert.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[triangle_converter](Numputils/CoordOps/triangle_converter.md)   
+</div>
+   <div class="col" markdown="1">
+[triangle_area](Numputils/CoordOps/triangle_area.md)   
+</div>
+   <div class="col" markdown="1">
+[make_triangle](Numputils/CoordOps/make_triangle.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[triangle_property](Numputils/CoordOps/triangle_property.md)   
+</div>
+   <div class="col" markdown="1">
+[dihedral_distance](Numputils/CoordOps/dihedral_distance.md)   
+</div>
+   <div class="col" markdown="1">
+[dihedral_distance_converter](Numputils/CoordOps/dihedral_distance_converter.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[dihedral_from_distance](Numputils/CoordOps/dihedral_from_distance.md)   
+</div>
+   <div class="col" markdown="1">
+[dihedral_from_distance_converter](Numputils/CoordOps/dihedral_from_distance_converter.md)   
+</div>
+   <div class="col" markdown="1">
+[make_dihedron](Numputils/CoordOps/make_dihedron.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[dihedron_property](Numputils/CoordOps/dihedron_property.md)   
+</div>
+   <div class="col" markdown="1">
+[dihedral_completions](Numputils/CoordOps/dihedral_completions.md)   
+</div>
+   <div class="col" markdown="1">
+[dihedral_completion_paths](Numputils/CoordOps/dihedral_completion_paths.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[triangle_completions](Numputils/CoordOps/triangle_completions.md)   
+</div>
+   <div class="col" markdown="1">
+[triangle_completion_paths](Numputils/CoordOps/triangle_completion_paths.md)   
+</div>
+   <div class="col" markdown="1">
+[triangle_property_function](Numputils/CoordOps/triangle_property_function.md)   
 </div>
 </div>
   <div class="row">
@@ -638,142 +704,153 @@ Any lowish-level numerical operations that need to be shared go here.
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[shift_expansion](Numputils/TensorDerivatives/shift_expansion.md)   
+</div>
+   <div class="col" markdown="1">
+[scale_expansion](Numputils/TensorDerivatives/scale_expansion.md)   
+</div>
+   <div class="col" markdown="1">
+[add_expansions](Numputils/TensorDerivatives/add_expansions.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[subtract_expansions](Numputils/TensorDerivatives/subtract_expansions.md)   
+</div>
+   <div class="col" markdown="1">
 [center_of_mass](Numputils/CoordinateFrames/center_of_mass.md)   
 </div>
    <div class="col" markdown="1">
 [inertia_tensors](Numputils/CoordinateFrames/inertia_tensors.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [moments_of_inertia](Numputils/CoordinateFrames/moments_of_inertia.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [inertial_frame_derivatives](Numputils/CoordinateFrames/inertial_frame_derivatives.md)   
 </div>
    <div class="col" markdown="1">
 [translation_rotation_eigenvectors](Numputils/CoordinateFrames/translation_rotation_eigenvectors.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [translation_rotation_projector](Numputils/CoordinateFrames/translation_rotation_projector.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [remove_translation_rotations](Numputils/CoordinateFrames/remove_translation_rotations.md)   
 </div>
    <div class="col" markdown="1">
 [translation_rotation_invariant_transformation](Numputils/CoordinateFrames/translation_rotation_invariant_transformation.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [eckart_embedding](Numputils/CoordinateFrames/eckart_embedding.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [eckart_permutation](Numputils/CoordinateFrames/eckart_permutation.md)   
 </div>
    <div class="col" markdown="1">
 [iterative_step_minimize](Numputils/Optimization/iterative_step_minimize.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [iterative_chain_minimize](Numputils/Optimization/iterative_chain_minimize.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GradientDescentStepFinder](Numputils/Optimization/GradientDescentStepFinder.md)   
 </div>
    <div class="col" markdown="1">
 [NewtonStepFinder](Numputils/Optimization/NewtonStepFinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [QuasiNewtonStepFinder](Numputils/Optimization/QuasiNewtonStepFinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ConjugateGradientStepFinder](Numputils/Optimization/ConjugateGradientStepFinder.md)   
 </div>
    <div class="col" markdown="1">
 [EigenvalueFollowingStepFinder](Numputils/Optimization/EigenvalueFollowingStepFinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NudgedElasticBandStepFinder](Numputils/Optimization/NudgedElasticBandStepFinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [jacobi_maximize](Numputils/Optimization/jacobi_maximize.md)   
 </div>
    <div class="col" markdown="1">
 [LineSearchRotationGenerator](Numputils/Optimization/LineSearchRotationGenerator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GradientDescentRotationGenerator](Numputils/Optimization/GradientDescentRotationGenerator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OperatorMatrixRotationGenerator](Numputils/Optimization/OperatorMatrixRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
 [displacement_localizing_rotation_generator](Numputils/Optimization/displacement_localizing_rotation_generator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GeometricTransformation](Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [TransformationFunction](Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.md)   
 </div>
    <div class="col" markdown="1">
 [AffineTransform](Numputils/GeometricTransformations/AffineTransform/AffineTransform.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TranslationTransform](Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RotationTransform](Numputils/GeometricTransformations/RotationTransform/RotationTransform.md)   
 </div>
    <div class="col" markdown="1">
 [permutation_sign](Numputils/PermutationOps/permutation_sign.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [levi_cevita_maps](Numputils/PermutationOps/levi_cevita_maps.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [levi_cevita_tensor](Numputils/PermutationOps/levi_cevita_tensor.md)   
 </div>
    <div class="col" markdown="1">
 [levi_cevita_dot](Numputils/PermutationOps/levi_cevita_dot.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [normalize_commutators](Numputils/PermutationOps/normalize_commutators.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [commutator_terms](Numputils/PermutationOps/commutator_terms.md)   
 </div>
    <div class="col" markdown="1">
 [commutator_evaluate](Numputils/PermutationOps/commutator_evaluate.md)   
 </div>
-   <div class="col" markdown="1">
-[permutation_cycles](Numputils/PermutationOps/permutation_cycles.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[enumerate_permutations](Numputils/PermutationOps/enumerate_permutations.md)   
+[permutation_cycles](Numputils/PermutationOps/permutation_cycles.md)   
 </div>
    <div class="col" markdown="1">
-   
+[enumerate_permutations](Numputils/PermutationOps/enumerate_permutations.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -801,9 +878,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-24efe9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-24efe9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-ed1fa0" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ed1fa0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-24efe9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ed1fa0" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -834,12 +911,16 @@ Any lowish-level numerical operations that need to be shared go here.
 - [TransformationMatrices](#TransformationMatrices)
 - [TriangleConversions](#TriangleConversions)
 - [DihedralConversions](#DihedralConversions)
+- [LegendreCoeffs](#LegendreCoeffs)
+- [TriangleDerivs](#TriangleDerivs)
+- [DihedralDerivs](#DihedralDerivs)
+- [MoreGeometry](#MoreGeometry)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-593d1c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-593d1c"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-697ea6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-697ea6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-593d1c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-697ea6" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -3006,6 +3087,157 @@ class NumputilsTests(TestCase):
             ssssat = list(ssssss[:4]) + [a2, s]
             t2 = dihedral_from_distance(ssssat, "ssssat")
             self.assertAlmostEqual(t, t2)
+```
+
+#### <a name="LegendreCoeffs">LegendreCoeffs</a>
+```python
+    def test_LegendreCoeffs(self):
+        print(legendre_integer_coefficients(7))
+```
+
+#### <a name="TriangleDerivs">TriangleDerivs</a>
+```python
+    def test_TriangleDerivs(self):
+        np.random.seed(123321)
+        tri_points = np.random.rand(3, 3)
+        sss = distance_matrix(tri_points, return_triu=True)[(0, 2, 1),]
+        sas = triangle_convert(sss, "sss", "sas")
+        print(sas)
+        # local_derivs = [[z,o] for z,o in zip(sas, np.eye(3))]
+        # sss_derivs = triangle_convert(local_derivs, "sss", "sas", order=1)
+        # for exp in sss_derivs:
+        #     print(exp)
+        local_derivs = [[z,o] for z,o in zip(sas, np.eye(3))]
+        sss_derivs = triangle_convert(local_derivs, "sas", "sss", order=1)
+        for exp in sss_derivs:
+            print(exp)
+```
+
+#### <a name="DihedralDerivs">DihedralDerivs</a>
+```python
+    def test_DihedralDerivs(self):
+        np.random.seed(153234)
+        dihed_points = np.random.rand(4, 3)[(2, 1, 0, 3),]
+        ssssss = distance_matrix(dihed_points, return_triu=True)[(0, 3, 5, 1, 4, 2),]
+        t = dihedral_from_distance(ssssss, "ssssst", use_cos=True)
+        ssssss_expansion = [
+            [z,o] for z,o in zip(ssssss, np.eye(6))
+        ]
+        t_expansion = dihedral_from_distance(ssssss_expansion, "ssssst", order=1, return_cos=True)
+        print(t)
+        print(t_expansion)
+```
+
+#### <a name="MoreGeometry">MoreGeometry</a>
+```python
+    def test_MoreGeometry(self):
+        # np.random.seed(123123)
+        # pts = np.random.rand(3, 3)
+        # tri = nput.make_triangle(pts)
+        # # print(nput.triangle_completions("a"))
+        # print(nput.triangle_property_function(tri, "A"))
+
+
+        # base_trie = nput.dihedral_completions_trie(
+        #     'b', 'a', 'x', 'c', 'y', 'A', 'X', 'B1', 'C', 'Y', 'B2',
+        #     'z', 'Z', 'Z2')
+        # print(base_trie)
+
+        # tb_comps = nput.dihedral_completions('Tb', return_trie=True)
+        # print(tb_comps["X"])
+        # return
+
+        # print(nput.dihedral_completions('Tb'))
+        # print(nput.dihedral_completions((0, 1, 2, 3), indices=True))
+        np.random.seed(123123)
+        pts = np.random.rand(4, 3)
+        dd = nput.make_dihedron(
+            a=nput.pts_norms(pts[0], pts[1]),
+            b=nput.pts_norms(pts[1], pts[2]),
+            c=nput.pts_norms(pts[2], pts[3]),
+            X=nput.pts_angles(pts[0], pts[1], pts[2], return_crosses=False),
+            Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
+            Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
+        )
+        print(nput.dihedron_property_function(dd, "z"))
+        return
+
+
+        tri = nput.make_triangle(np.random.rand(3, 3))
+        A, tnew = nput.triangle_property(tri, 'A')
+        tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
+        C, tnew = nput.triangle_property(tri2, 'C')
+        tri2 = nput.make_triangle(A=tnew.A, c=tnew.b, C=tnew.C)
+        B, tnew = nput.triangle_property(tri2, 'B')
+
+        np.random.seed(123123)
+        pts = np.random.rand(4, 3)
+        dd = nput.make_dihedron(
+            a=nput.pts_norms(pts[0], pts[1]),
+            b=nput.pts_norms(pts[1], pts[2]),
+            c=nput.pts_norms(pts[2], pts[3]),
+            X=nput.pts_angles(pts[0], pts[1], pts[2], return_crosses=False),
+            Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
+            Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
+        )
+        z, dd = nput.dihedron_property(dd, 'z')
+        print(z, nput.pts_norms(pts[0], pts[3]))
+        x, dd = nput.dihedron_property(dd, 'x')
+        print(x, nput.pts_norms(pts[0], pts[2]))
+        y, dd = nput.dihedron_property(dd, 'y')
+        print(y, nput.pts_norms(pts[1], pts[3]))
+        # dl = []
+        # a, x, z, b, y, c = nput.distance_matrix(pts, return_triu=True)
+        # for field in ['a', 'x', 'z', 'b', 'y', 'c']:
+        #     z, dd = nput.dihedron_property(dd, field)
+        #     dl.append(z)
+        # print()
+        # print(z, )
+
+        dd = nput.make_dihedron(
+            a=nput.pts_norms(pts[0], pts[1]),
+            b=nput.pts_norms(pts[1], pts[2]),
+            c=nput.pts_norms(pts[2], pts[3]),
+            X=nput.pts_angles(pts[0], pts[1], pts[2], return_crosses=False),
+            Y=nput.pts_angles(pts[1], pts[2], pts[3], return_crosses=False),
+            Tb=nput.pts_dihedrals(pts[0], pts[1], pts[2], pts[3]),
+        )
+        coords_map = {
+            'a': (0, 1),
+            'b': (1, 2),
+            'c': (2, 3),
+            'x': (0, 2),
+            'y': (1, 3),
+            'z': (0, 3),
+            'X': (0, 1, 2),
+            'Y': (1, 2, 3),
+            'A': (0, 2, 1),
+            'B1': (1, 0, 2),
+            'C': (2, 1, 3),
+            'B2': (1, 3, 2),
+            'Z': (0, 1, 3),
+            'Z2': (0, 2, 3),
+            'A3': (0, 3, 1),
+            'Y3': (1, 0, 3),
+            'C4': (2, 0, 3),
+            'X4': (0, 3, 2),
+            'Tb': (0, 1, 2, 3),
+            'Ta': (2, 0, 1, 3),
+            'Tc': (0, 2, 3, 1),
+            'Tx': (1, 0, 2, 3),
+            'Ty': (0, 1, 3, 2),
+            'Tz': (1, 0, 3, 2),
+        }
+        for prop,inds in coords_map.items():
+            print(f"{prop}:", end=" ")
+            Z, _ = nput.dihedron_property(dd, prop)
+            if len(inds) == 2:
+                val = nput.pts_norms(pts[inds[0]], pts[inds[1]])
+            elif len(inds) == 3:
+                val = nput.pts_angles(pts[inds[0]], pts[inds[1]], pts[inds[2]], return_crosses=False)
+            else:
+                val = nput.pts_dihedrals(pts[inds[0]], pts[inds[1]], pts[inds[2]], pts[inds[3]])
+            print(Z, val)
 ```
 
  </div>

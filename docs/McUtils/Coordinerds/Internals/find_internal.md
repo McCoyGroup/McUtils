@@ -5,7 +5,7 @@
 </div>
 
 ```python
-find_internal(coords, coord): 
+find_internal(coords, coord, missing_val: 'Any' = 'raise'): 
 ```
 
 
