@@ -781,12 +781,35 @@ class ConverterTest(TestCase):
 
     @debugTest
     def test_ZMatrixInterConversion(self):
-        import McUtils.Numputils as nput
-        # print(nput.arctan_deriv(3.8, 2))
-        # return
-        tri = nput.make_triangle(np.random.rand(3, 3))
-        A, tnew = nput.triangle_property(tri, 'A')
-        tri2 = nput.make_triangle(b=tnew.b, A=tnew.A, c=tnew.c)
-        C, tnew = nput.triangle_property(tri2, 'C')
-        tri2 = nput.make_triangle(A=tnew.A, c=tnew.b, C=tnew.C)
-        C, tnew = nput.triangle_property(tri2, 'B')
+        spec = [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (1, 0, 2),
+                    (1, 0, 3),
+                    (2, 0, 3)
+                ]
+        # print(
+        #     get_internal_triangles_and_dihedrons(
+        #         [
+        #             (0, 1),
+        #             (0, 2),
+        #             (0, 3),
+        #             (1, 0, 2),
+        #             (1, 0, 3),
+        #             (2, 0, 3)
+        #         ]
+        #     )
+        # )
+        print(
+            find_internal_conversion(spec,
+                                     [
+                                         (0, 1),
+                                         (0, 2),
+                                         (0, 3),
+                                         (1, 0, 2),
+                                         (1, 0, 3),
+                                         (0, 1, 2, 3)
+                                     ]
+                                     )
+        )

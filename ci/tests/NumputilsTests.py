@@ -2186,11 +2186,13 @@ class NumputilsTests(TestCase):
 
     @debugTest
     def test_MoreGeometry(self):
-        # np.random.seed(123123)
-        # pts = np.random.rand(3, 3)
-        # tri = nput.make_triangle(pts)
-        # # print(nput.triangle_completions("a"))
-        # print(nput.triangle_property_function(tri, "A"))
+        np.random.seed(123123)
+        pts = np.random.rand(3, 3)
+        tri = nput.make_triangle(pts)
+        # print(nput.triangle_completions("a"))
+        tpf_A = nput.triangle_property_function(tri, "A")
+        print(nput.triangle_property(tri, "A"))
+        print(tpf_A(tri))
 
 
         # base_trie = nput.dihedral_completions_trie(

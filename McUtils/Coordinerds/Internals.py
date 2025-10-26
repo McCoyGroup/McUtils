@@ -14,7 +14,9 @@ __all__ = [
     "coordinate_sign",
     "coordinate_indices",
     "get_internal_distance_conversion",
-    "internal_distance_convert"
+    "internal_distance_convert",
+    "get_internal_triangles_and_dihedrons",
+    "find_internal_conversion"
 ]
 
 def canonicalize_internal(coord, return_sign=False):
@@ -204,12 +206,12 @@ def find_internal(coords, coord, missing_val:'Any'='raise'):
     else:
         try:
             idx = coords.index(coord)
-        except IndexError:
+        except ValueError:
             idx = None
 
         if idx is None:
             if dev.str_is(missing_val, 'raise'):
-                raise IndexError("{} not in coordinate set".format(coord))
+                raise ValueError("{} not in coordinate set".format(coord))
             else:
                 idx = missing_val
         return idx
@@ -666,52 +668,395 @@ def _find_coord_comp(coord, a, internals, prior_coords, missing_val):
         if dev.str_is(missing_val, 'raise'):
             raise ValueError(f"can't construct {coord} from internals (requires {a})")
     return a_idx, found_main
+
+def _get_dihedron_bond_key_name(mod_sets, a,b,c,d, i, j):
+    base = (a, b, c, d)
+    for perm in [
+        (0, 1, 2, 3),
+        (0, 2, 1, 3),
+        (0, 2, 3, 1),
+        (0, 3, 2, 1),
+        (0, 1, 3, 2),
+        (0, 3, 1, 2),
+        (1, 0, 2, 3),
+        (1, 2, 0, 3),
+        (1, 0, 3, 2),
+        (1, 3, 0, 2),
+        (2, 0, 1, 3),
+        (2, 1, 0, 3)
+    ]:
+        key = [base[_] for _ in perm]
+        key, sign = canonicalize_internal(key, return_sign=True)
+        if key in mod_sets:
+            break
+    else:
+        key = canonicalize_internal((a, b, c, d))
+
+    b = tuple(sorted(key.index(_) for _ in [i,j]))
+    return key, nput.dihedron_property_specifiers(b)["name"]
+def _get_dihedron_angle_key_name(mod_sets, a,b,c,d, i, j, k):
+    base = (a, b, c, d)
+    for perm in [
+        (0, 1, 2, 3),
+        (0, 2, 1, 3),
+        (0, 2, 3, 1),
+        (0, 3, 2, 1),
+        (0, 1, 3, 2),
+        (0, 3, 1, 2),
+        (1, 0, 2, 3),
+        (1, 2, 0, 3),
+        (1, 0, 3, 2),
+        (1, 3, 0, 2),
+        (2, 0, 1, 3),
+        (2, 1, 0, 3)
+    ]:
+        key = [base[_] for _ in perm]
+        key, sign = canonicalize_internal(key, return_sign=True)
+        if key in mod_sets:
+            break
+    else:
+        key = canonicalize_internal((a, b, c, d))
+
+    b = canonicalize_internal(tuple(key.index(_) for _ in [i,j,k]))
+    z = nput.dihedron_property_specifiers(b)["name"]
+    return key, z
+def get_internal_triangles_and_dihedrons(internals,
+                                         canonicalize=True,
+                                         construct_shapes=True,
+                                         prune_incomplete=True):
+    tri_sets:dict[tuple[int],set] = {}
+    dihed_sets:dict[tuple[int],set] = {}
+    for coord in internals:
+        if canonicalize:
+            coord = canonicalize_internal(coord)
+        if len(coord) == 2:
+            i,j = coord
+            for (k,l,m),v in tri_sets.items():
+                if i == k:
+                    if j == l:
+                        v.add("a")
+                        break
+                    elif j == m:
+                        v.add("c")
+                        break
+                    elif m is None:
+                        tri_sets[(k,l,j)] = {"a", "c"}
+                        break
+                elif i == l:
+                    if j == k:
+                        v.add("a")
+                        break
+                    elif j == m:
+                        v.add("b")
+                        break
+                    elif m is None:
+                        c = canonicalize_internal((j,l,k))
+                        tri_sets[c] = {"a", "b"}
+                        break
+                elif i == m and j == l:
+                    tri_sets[(k,l,m)].add("b")
+                    break
+            else:
+                tri_sets[(i,j,None)] = {"a"}
+
+            mod_sets = dihed_sets.copy()
+            for (k, l, m, n), v in dihed_sets.items():
+                if i == k:
+                    if j == l:
+                        v.add("a")
+                    elif j == m:
+                        v.add("x")
+                    elif j == n:
+                        v.add("z")
+                    elif m is None:
+                        key = (k, l, j, None)
+                        mod_sets[key] = mod_sets.get(key, v) | {"x"}
+                    elif n is None:
+                        key, z = _get_dihedron_bond_key_name(mod_sets, k,l,m,j, i, j)
+                        mod_sets[key] = mod_sets.get(key, v) | {z}
+                elif i == l:
+                    if j == k:
+                        v.add("a")
+                    elif j == m:
+                        v.add("b")
+                    elif j == n:
+                        v.add("y")
+                    elif m is None:
+                        key = (k,l,j,n)
+                        mod_sets[key] = mod_sets.get(key, v) | {"b"}
+                    elif n is None:
+                        key, z = _get_dihedron_bond_key_name(mod_sets, k,l,m,j, i, j)
+                        mod_sets[key] = mod_sets.get(key, v) | {z}
+                elif i == m:
+                    if j == l:
+                        mod_sets[(k,l,m,n)].add("b")
+                    elif j == n:
+                        mod_sets[(k,l,m,n)].add("c")
+                    elif n is None:
+                        key = (k,l,m,j)
+                        mod_sets[key] =mod_sets.get(key, v) | {"c"}
+                elif i == n:
+                    if j == l:
+                        mod_sets[(k,l,m,n)].add("y")
+                    elif j == m:
+                        mod_sets[(k,l,m,n)].add("c")
+                elif m is None:
+                    if j == k:
+                        key = (k,l,i,n)
+                        mod_sets[key] = mod_sets.get(key, v) | {"x"}
+                    elif j == l:
+                        key = (k,l,i,n)
+                        mod_sets[(k,l,i,n)] = mod_sets.get(key, v) | {"b"}
+                    else:
+                        key, z = _get_dihedron_bond_key_name(mod_sets, k, l, i, j, i, j)
+                        mod_sets[key] = mod_sets.get(key, v) | {z}
+                elif n is None:
+                    if j in (k,l,m):
+                        key, z = _get_dihedron_bond_key_name(mod_sets, k, l, m, i, i, j)
+                        mod_sets[key] = mod_sets.get(key, v) | {z}
+            else:
+                if (i, j, None, None) not in mod_sets:
+                    mod_sets[(i, j, None, None)] = {"a"}
+            dihed_sets = mod_sets
+        elif len(coord) == 3:
+            i,j,k = coord
+            C = i,j,k
+            A = canonicalize_internal((i,k,j))
+            B = canonicalize_internal((j,i,k))
+            if C in tri_sets:
+                tri_sets[C].add("C")
+            elif A in tri_sets:
+                tri_sets[A].add("A")
+            elif B in tri_sets:
+                tri_sets[B].add("B")
+            elif (A[0],A[2], None) in tri_sets:
+                if i < j:
+                    tri_sets[C] = {"a" if i < k else "b", "C"}
+                else:
+                    tri_sets[B] = {"a" if j < k else "b", "C"}
+            elif (B[0],B[2], None) in tri_sets:
+                if j < k:
+                    tri_sets[A] = {"b" if i < j else "a", "C"}
+                else:
+                    tri_sets[C] = ["b" if i < k else "a", "C"]
+            elif (C[0],C[2], None) in tri_sets:
+                if i < k:
+                    tri_sets[A] = {"a" if i < j else "b", "C"}
+                else:
+                    tri_sets[B] = {"a" if j < k else "b", "C"}
+
+            mod_sets = dihed_sets.copy()
+            for (a, l, m, n), v in dihed_sets.items():
+                if m is None:
+                    if i == a:
+                        if j == l:
+                            key = (a, l, k, n)
+                            mod_sets[key] = mod_sets.get(key, v) | {"X"}
+                        elif k == l:
+                            key = (a, l, j, n)
+                            mod_sets[key] = mod_sets.get(key, v) | {"A"}
+                        else:
+                            key, z = _get_dihedron_angle_key_name(mod_sets, a,l,j,k, i, j, k)
+                            mod_sets[key] = mod_sets.get(key, v) | {z}
+                    elif i == l:
+                        if j == a:
+                            key = (a, l, k, n)
+                            mod_sets[key] = mod_sets.get(key, v) | {"B1"}
+                        elif k == a:
+                            key = (a, l, j, n)
+                            mod_sets[key] = mod_sets.get(key, v) | {"A"}
+                        else:
+                            key, z = _get_dihedron_angle_key_name(mod_sets, a,l,j,k, i, j, k)
+                            mod_sets[key] = mod_sets.get(key, v) | {z}
+                    elif j == a:
+                        if k == l:
+                            key = (a, l, i, n)
+                            mod_sets[key] = mod_sets.get(key, v) | {"B1"}
+                        else:
+                            key, z = _get_dihedron_angle_key_name(mod_sets, a,l,i,k, i, j, k)
+                            mod_sets[key] = mod_sets.get(key, v) | {z}
+                    elif j == l:
+                        if k == a:
+                            key = (a, l, i, n)
+                            mod_sets[key] = mod_sets.get(key, v) | {"X"}
+                        else:
+                            key, z = _get_dihedron_angle_key_name(mod_sets, a,l,i,k, i, j, k)
+                            mod_sets[key] = mod_sets.get(key, v) | {z}
+                    elif k in {a,l}:
+                        key, z = _get_dihedron_angle_key_name(mod_sets, a,l,i,j, i, j, k)
+                        mod_sets[key] = mod_sets.get(key, v) | {z}
+                elif n is None:
+                    C1 = canonicalize_internal((a, l, m))
+                    if C == C1:
+                        mod_sets[(a, l, m, n)].add("X")
+                    elif A == C1: # i,k,j
+                        mod_sets[(a, l, m, n)].add("A")
+                    elif B == C1:
+                        mod_sets[(a, l, m, n)].add("B1")
+                    else:
+                        for (aa,ll) in itertools.combinations([a, l, m], 2):
+                            if i == aa:
+                                if j == ll:
+                                    key, z = _get_dihedron_angle_key_name(mod_sets, a, l, m, k, i, j, k)
+                                    mod_sets[key] = mod_sets.get(key, v) | {z}
+                                elif k == l:
+                                    key, z = _get_dihedron_angle_key_name(mod_sets, a, l, m, j, i, j, k)
+                                    mod_sets[key] = mod_sets.get(key, v) | {z}
+                            elif i == l:
+                                if j == a:
+                                    key, z = _get_dihedron_angle_key_name(mod_sets, a, l, m, k, i, j, k)
+                                    mod_sets[key] = mod_sets.get(key, v) | {z}
+                                elif k == a:
+                                    key, z = _get_dihedron_angle_key_name(mod_sets, a, l, m, j, i, j, k)
+                                    mod_sets[key] = mod_sets.get(key, v) | {z}
+                            elif j == a and k == l:
+                                key, z = _get_dihedron_angle_key_name(mod_sets, a, l, m, i, i, j, k)
+                                mod_sets[key] = mod_sets.get(key, v) | {z}
+                            elif j == l and k == a:
+                                key, z = _get_dihedron_angle_key_name(mod_sets, a, l, m, i, i, j, k)
+                                mod_sets[key] = mod_sets.get(key, v) | {z}
+                else:
+                    for (x, y, z), (_, _, _, X, Y, Z) in [
+                        [(a, l, m), ("a", "b", "x", "A", "B1", "X")],
+                        [(l, m, n), ("b", "c", "y", "B2", "C", "Y")],
+                        [(a, l, n), ("a", "y", "z", "A3", "Y3", "Z")],
+                        [(a, m, n), ("x", "c", "z", "X4", "C4", "Z4")]
+                    ]:
+                        C1 = canonicalize_internal((x, y, z))
+                        A1 = canonicalize_internal((x, z, y))
+                        B1 = canonicalize_internal((y, x, z))
+                        if C == C1:
+                            mod_sets[(a, l, m, n)].add(Z)
+                        elif C == A1:
+                            mod_sets[(a, l, m, n)].add(X)
+                        elif C == B1:
+                            mod_sets[(a, l, m, n)].add(Y)
+
+            else:
+                if (i, j, k, None) not in mod_sets:
+                    mod_sets[(i, j, k, None)] = {"X"}
+            dihed_sets = mod_sets
+
+    if prune_incomplete:
+        tri_sets, dihed_sets = (
+                {k:v for k,v in tri_sets.items() if None not in k},
+                # dihed_sets
+                {k:v for k,v in dihed_sets.items() if None not in k}
+            )
+        if construct_shapes:
+            _ = {}
+            for k,s in tri_sets.items():
+                vals = {}
+                for a in s:
+                    idx = nput.triangle_property_specifiers(a)["coord"]
+                    vals[a] = tuple(k[i] for i in idx)
+                _[k] = nput.make_triangle(**vals)
+            tri_sets = _
+
+            _ = {}
+            for k,s in dihed_sets.items():
+                vals = {}
+                for a in s:
+                    idx = nput.dihedron_property_specifiers(a)["coord"]
+                    vals[a] = tuple(k[i] for i in idx)
+                _[k] = nput.make_dihedron(**vals)
+            dihed_sets = _
+    return tri_sets, dihed_sets
+
+def _triangle_conversion_function(inds, tri, coord):
+    idx = []
+    for i in coord:
+        try:
+            ix = inds.index(i)
+        except:
+            return None
+        else:
+            idx.append(ix)
+    b = canonicalize_internal(idx)
+    target = nput.triangle_property_specifiers(b)
+    return nput.triangle_property_function(tri, target['name'])
+def _dihedral_conversion_function(inds, tri, coord):
+    idx = []
+    for i in coord:
+        try:
+            ix = inds.index(i)
+        except:
+            return None
+        else:
+            idx.append(ix)
+    b = canonicalize_internal(idx)
+    target = nput.dihedron_property_specifiers(b)
+    return nput.dihedron_property_function(tri, target['name'])
+
 int_conv_data = collections.namedtuple("int_conv_data",
                                       ['input_indices', 'pregen_indices', 'conversion'])
-def find_internal_conversion(target_coord, internals, prior_coords=None, canonicalize=True, missing_val='raise'):
-    idx = find_internal(internals, target_coord, missing_val=None)
-    if idx is not None:
-        return int_conv_data([idx], [None], None)
-    if prior_coords is None:
-        prior_coords = {}
-    if isinstance(internals, InternalsSet):
-        internals = internals.specs
-    if canonicalize:
-        target_coord = canonicalize_internal(target_coord)
-        internals = [canonicalize_internal(c) for c in internals]
-    if len(target_coord) == 2:
-        # TODO: search for anything that can build this distance in the previous internals or the prior coords
-        ...
-    elif len(target_coord) == 3:
-        ...
-    elif len(target_coord) == 4:
-        # TODO: a fairly constrained search
-        i,j,k,l = target_coord
-        a = canonicalize_internal((i,j))
-        b = canonicalize_internal((j,k))
-        c = canonicalize_internal((k,l))
-        a_idx, a_main = _find_coord_comp((i,j,k,l), a, internals, prior_coords, missing_val)
-        b_idx, b_main = _find_coord_comp((i,j,k,l), b, internals, prior_coords, missing_val)
-        c_idx, c_main = _find_coord_comp((i,j,k,l), c, internals, prior_coords, missing_val)
+def find_internal_conversion(internals, targets,
+                             triangles_and_dihedrons=None,
+                             # prior_coords=None,
+                             canonicalize=True,
+                             missing_val='raise'):
+    smol = nput.is_int(targets[0])
+    if smol: targets = [targets]
+    conversions = []
+    for target_coord in targets:
+        idx = find_internal(internals, target_coord, missing_val=None)
+        if idx is not None:
+            def convert(internal_list):
+                return internal_list[..., idx]
+            conversions.append(convert)
+            continue
 
+        if triangles_and_dihedrons is None:
+            if isinstance(internals, InternalsSet):
+                internals = internals.specs
+            if canonicalize:
+                target_coord = canonicalize_internal(target_coord)
+                internals = [canonicalize_internal(c) for c in internals]
+            triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
+        triangles, dihedrals = triangles_and_dihedrons
 
-        x = canonicalize_internal((i,k))
-        x_idx, x_main = _find_coord_comp((i,j,k,l), x, internals, prior_coords, None)
-        s = canonicalize_internal((i,k))
-        s_idx, s_main = _find_coord_comp((i,j,k,l), s, internals, prior_coords, None)
+        conv = None
+        tri = None
+        dihed = None
+        n = len(target_coord)
+        if n < 2 or n > 4:
+            raise ValueError(f"can't understand coordinate {target_coord}")
+        if len(target_coord) in {2, 3}:
+            for a, v in triangles.items():
+                tri = v
+                conv = _triangle_conversion_function(a, v, target_coord)
+                if conv is not None: break
+        if conv is None and len(target_coord) in {2, 3, 4}:
+            for a, v in dihedrals.items():
+                dihed = v
+                conv = _dihedral_conversion_function(a, v, target_coord)
+                if conv is not None: break
+        if conv is None:
+            if dev.str_is(missing_val, "raise"):
+                raise ValueError(f"can't find conversion for {target_coord}")
+            else:
+                conversions.append(missing_val)
+        else:
 
-        if r_idx is not None:
-            if s_idx is not None:
-                return dm_conv_data(
-                        (_get_input_ind(d1), _get_input_ind(d2), _get_input_ind(d3), _get_input_ind(d4), _get_input_ind(d5), m),
-                        (_get_pregen_ind(d1), _get_pregen_ind(d2), _get_pregen_ind(d3), _get_pregen_ind(d4), _get_pregen_ind(d5), None,
-                         None),
-                        dihed_conv('ssssst', (a, b, c, x, y, (i, j, k, l))),
-                        len(dists)
+            # prep conversion based on internal indices
+            if tri is not None:
+                args = {k:find_internal(internals, v) for k,v in tri._asdict().items() if v is not None}
+                def convert(internal_list):
+                    internal_list = np.asanyarray(internal_list)
+                    subtri = nput.make_triangle(
+                        **{k:internal_list[..., i] for k,i in args.items()}
                     )
+                    return conv(subtri)
+            else:
+                args = {k:find_internal(internals, v) for k,v in dihed._asdict().items() if v is not None}
+                def convert(internal_list):
+                    internal_list = np.asanyarray(internal_list)
+                    subtri = nput.make_dihedron(
+                        **{k:internal_list[..., i] for k,i in args.items()}
+                    )
+                    return conv(subtri)
+            conversions.append(convert)
 
-
-        A = canonicalize_internal((i,j,k))
-        B = canonicalize_internal((j,k,l))
-    else:
-        raise ValueError(f"can't understand coordinate {target_coord}")
+    if smol:
+        conversions = conversions[0]
+    return conversions
