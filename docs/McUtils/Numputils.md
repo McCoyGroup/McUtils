@@ -407,95 +407,73 @@ Any lowish-level numerical operations that need to be shared go here.
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[cos_deriv](Numputils/CoordOps/cos_deriv.md)   
+[triangle_convert](Numputils/Geometry/triangle_convert.md)   
 </div>
    <div class="col" markdown="1">
-[sin_deriv](Numputils/CoordOps/sin_deriv.md)   
+[triangle_converter](Numputils/Geometry/triangle_converter.md)   
 </div>
    <div class="col" markdown="1">
-[arccos_deriv](Numputils/CoordOps/arccos_deriv.md)   
+[triangle_area](Numputils/Geometry/triangle_area.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[arcsin_deriv](Numputils/CoordOps/arcsin_deriv.md)   
+[make_triangle](Numputils/Geometry/make_triangle.md)   
 </div>
    <div class="col" markdown="1">
-[tan_deriv](Numputils/CoordOps/tan_deriv.md)   
+[triangle_property](Numputils/Geometry/triangle_property.md)   
 </div>
    <div class="col" markdown="1">
-[arctan_deriv](Numputils/CoordOps/arctan_deriv.md)   
+[dihedral_distance](Numputils/Geometry/dihedral_distance.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[legendre_integer_coefficients](Numputils/CoordOps/legendre_integer_coefficients.md)   
+[dihedral_distance_converter](Numputils/Geometry/dihedral_distance_converter.md)   
 </div>
    <div class="col" markdown="1">
-[tan_integer_coefficients](Numputils/CoordOps/tan_integer_coefficients.md)   
+[dihedral_from_distance](Numputils/Geometry/dihedral_from_distance.md)   
 </div>
    <div class="col" markdown="1">
-[triangle_convert](Numputils/CoordOps/triangle_convert.md)   
+[dihedral_from_distance_converter](Numputils/Geometry/dihedral_from_distance_converter.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[triangle_converter](Numputils/CoordOps/triangle_converter.md)   
+[make_dihedron](Numputils/Geometry/make_dihedron.md)   
 </div>
    <div class="col" markdown="1">
-[triangle_area](Numputils/CoordOps/triangle_area.md)   
+[dihedron_property](Numputils/Geometry/dihedron_property.md)   
 </div>
    <div class="col" markdown="1">
-[make_triangle](Numputils/CoordOps/make_triangle.md)   
+[dihedral_completions](Numputils/Geometry/dihedral_completions.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[triangle_property](Numputils/CoordOps/triangle_property.md)   
+[dihedral_completion_paths](Numputils/Geometry/dihedral_completion_paths.md)   
 </div>
    <div class="col" markdown="1">
-[dihedral_distance](Numputils/CoordOps/dihedral_distance.md)   
+[triangle_property_specifiers](Numputils/Geometry/triangle_property_specifiers.md)   
 </div>
    <div class="col" markdown="1">
-[dihedral_distance_converter](Numputils/CoordOps/dihedral_distance_converter.md)   
+[triangle_completions](Numputils/Geometry/triangle_completions.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[dihedral_from_distance](Numputils/CoordOps/dihedral_from_distance.md)   
+[triangle_completion_paths](Numputils/Geometry/triangle_completion_paths.md)   
 </div>
    <div class="col" markdown="1">
-[dihedral_from_distance_converter](Numputils/CoordOps/dihedral_from_distance_converter.md)   
+[triangle_property_function](Numputils/Geometry/triangle_property_function.md)   
 </div>
    <div class="col" markdown="1">
-[make_dihedron](Numputils/CoordOps/make_dihedron.md)   
+[dihedron_property_specifiers](Numputils/Geometry/dihedron_property_specifiers.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[dihedron_property](Numputils/CoordOps/dihedron_property.md)   
-</div>
-   <div class="col" markdown="1">
-[dihedral_completions](Numputils/CoordOps/dihedral_completions.md)   
-</div>
-   <div class="col" markdown="1">
-[dihedral_completion_paths](Numputils/CoordOps/dihedral_completion_paths.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[triangle_completions](Numputils/CoordOps/triangle_completions.md)   
-</div>
-   <div class="col" markdown="1">
-[triangle_completion_paths](Numputils/CoordOps/triangle_completion_paths.md)   
-</div>
-   <div class="col" markdown="1">
-[triangle_property_function](Numputils/CoordOps/triangle_property_function.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[dihedron_property_function](Numputils/CoordOps/dihedron_property_function.md)   
+[dihedron_property_function](Numputils/Geometry/dihedron_property_function.md)   
 </div>
    <div class="col" markdown="1">
 [SparseArray](Numputils/Sparse/SparseArray.md)   
@@ -889,9 +867,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-194638" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-194638"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-50708d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-50708d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-194638" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-50708d" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -929,9 +907,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-467fb6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-467fb6"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ce25db" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ce25db"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-467fb6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ce25db" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -3142,11 +3120,13 @@ class NumputilsTests(TestCase):
 #### <a name="MoreGeometry">MoreGeometry</a>
 ```python
     def test_MoreGeometry(self):
-        # np.random.seed(123123)
-        # pts = np.random.rand(3, 3)
-        # tri = nput.make_triangle(pts)
-        # # print(nput.triangle_completions("a"))
-        # print(nput.triangle_property_function(tri, "A"))
+        np.random.seed(123123)
+        pts = np.random.rand(3, 3)
+        tri = nput.make_triangle(pts)
+        # print(nput.triangle_completions("a"))
+        tpf_A = nput.triangle_property_function(tri, "A")
+        print(nput.triangle_property(tri, "A"))
+        print(tpf_A(tri))
 
 
         # base_trie = nput.dihedral_completions_trie(
