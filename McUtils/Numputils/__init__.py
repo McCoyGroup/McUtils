@@ -14,6 +14,8 @@ from .VectorOps import *; from .VectorOps import __all__ as _all
 __all__ += _all
 from .CoordOps import *; from .CoordOps import __all__ as _all
 __all__ += _all
+from .Geometry import *; from .Geometry import __all__ as _all
+__all__ += _all
 from .Sparse import *; from .Sparse import __all__ as _all
 __all__ += _all
 from .SetOps import *; from .SetOps import __all__ as _all
