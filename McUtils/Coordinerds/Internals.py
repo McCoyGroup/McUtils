@@ -975,7 +975,7 @@ def _triangle_conversion_function(inds, tri, coord):
     b = canonicalize_internal(idx)
     target = nput.triangle_property_specifiers(b)
     return nput.triangle_property_function(tri, target['name'])
-def _dihedral_conversion_function(inds, tri, coord):
+def _dihedral_conversion_function(inds, dihed, coord):
     idx = []
     for i in coord:
         try:
@@ -986,7 +986,7 @@ def _dihedral_conversion_function(inds, tri, coord):
             idx.append(ix)
     b = canonicalize_internal(idx)
     target = nput.dihedron_property_specifiers(b)
-    return nput.dihedron_property_function(tri, target['name'])
+    return nput.dihedron_property_function(dihed, target['name'])
 
 int_conv_data = collections.namedtuple("int_conv_data",
                                       ['input_indices', 'pregen_indices', 'conversion'])
@@ -1001,7 +1001,8 @@ def find_internal_conversion(internals, targets,
     for target_coord in targets:
         idx = find_internal(internals, target_coord, missing_val=None)
         if idx is not None:
-            def convert(internal_list):
+            def convert(internal_list, idx=idx):
+                internal_list = np.asanyarray(internal_list)
                 return internal_list[..., idx]
             conversions.append(convert)
             continue
@@ -1014,6 +1015,7 @@ def find_internal_conversion(internals, targets,
                 internals = [canonicalize_internal(c) for c in internals]
             triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
         triangles, dihedrals = triangles_and_dihedrons
+        print(dihedrals)
 
         conv = None
         tri = None
@@ -1025,12 +1027,18 @@ def find_internal_conversion(internals, targets,
             for a, v in triangles.items():
                 tri = v
                 conv = _triangle_conversion_function(a, v, target_coord)
-                if conv is not None: break
+                if conv is not None:
+                    break
+                else:
+                    tri = None
         if conv is None and len(target_coord) in {2, 3, 4}:
             for a, v in dihedrals.items():
                 dihed = v
                 conv = _dihedral_conversion_function(a, v, target_coord)
-                if conv is not None: break
+                if conv is not None:
+                    break
+                else:
+                    dihed = None
         if conv is None:
             if dev.str_is(missing_val, "raise"):
                 raise ValueError(f"can't find conversion for {target_coord}")
@@ -1041,22 +1049,36 @@ def find_internal_conversion(internals, targets,
             # prep conversion based on internal indices
             if tri is not None:
                 args = {k:find_internal(internals, v) for k,v in tri._asdict().items() if v is not None}
-                def convert(internal_list):
+                def convert(internal_list, args=args, conv=conv,  **kwargs):
                     internal_list = np.asanyarray(internal_list)
                     subtri = nput.make_triangle(
                         **{k:internal_list[..., i] for k,i in args.items()}
                     )
                     return conv(subtri)
+                convert.__name__ = 'convert_' + conv.__name__
             else:
                 args = {k:find_internal(internals, v) for k,v in dihed._asdict().items() if v is not None}
-                def convert(internal_list):
+                def convert(internal_list, args=args, conv=conv, **kwargs):
                     internal_list = np.asanyarray(internal_list)
-                    subtri = nput.make_dihedron(
-                        **{k:internal_list[..., i] for k,i in args.items()}
-                    )
-                    return conv(subtri)
+                    subargs = {k:internal_list[..., i] for k,i in args.items()}
+                    subdihed = nput.make_dihedron(**subargs)
+                    return conv(subdihed)
+                convert.__name__ = 'convert_' + conv.__name__
             conversions.append(convert)
 
     if smol:
-        conversions = conversions[0]
-    return conversions
+        convert = conversions[0]
+    else:
+        def convert(internal_spec, order=None, conversions=conversions, **kwargs):
+            convs = [
+                c(internal_spec)
+                for c in conversions
+            ]
+            if order is None:
+                return np.moveaxis(np.array(convs), 0, -1)
+            else:
+                return [
+                    np.moveaxis(np.array([c[i] for c in convs]), 0, -1)
+                    for i in range(order + 1)
+                ]
+    return convert
