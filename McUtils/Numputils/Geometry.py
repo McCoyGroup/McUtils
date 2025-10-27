@@ -1183,7 +1183,7 @@ TriangleData = collections.namedtuple("TriangleData",
                                       ["a", "b", "c", "A", "B", "C"]
                                       )
 _tdata_name_map = {'a':0,'b':1,'c':2,'A':3,'B':4,'C':5}
-_triangle_point_map = {'a':(0,1),'b':(1,2),'c':(0,2),'A':(1,0,2),'B':(0,2,1),'C':(0,1,2)}
+_triangle_point_map = {'a':(0,1),'b':(1,2),'c':(0,2),'A':(0,2,1),'B':(1,0,2),'C':(0,1,2)}
 def triangle_property_specifiers(base_specifier=None):
     if base_specifier is None:
         return {
@@ -1704,7 +1704,7 @@ def triangle_property_function(sample_tri: TriangleData, field_name):
         if complete:
             args, func = conversion_specs
             inds = [
-                _ddata_name_map[a]
+                _tdata_name_map[a]
                     if isinstance(a, str) else
                 a
                 for a in args
@@ -3603,8 +3603,9 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
             field_name = _tdata_name_map[field_name]
 
         ind = field_name
-        def convert(tdata):
+        def convert(tdata, **kwargs):
             return tdata[ind]
+        convert.__name__ = 'convert_' + dihedron_property_specifiers(ind)['name']
         return convert
     else:
         args, (complete, conversion_specs) = dihedral_completion_paths(
@@ -3616,13 +3617,13 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
         if complete:
             args, func = conversion_specs
             inds = [
-                _ddata_name_map[a]
-                if isinstance(a, str) else
-                a
+                dihedron_property_specifiers(a)['index']
                 for a in args
             ]
-            def convert(tdata):
+            def convert(tdata, **kwargs):
                 return func(*(tdata[i] for i in inds))
+            prop_name = dihedron_property_specifiers(field_name)['name']
+            convert.__name__ = f'convert_{prop_name}_{func.__name__}'
             return convert
         else:
             if allow_completion:
@@ -3633,6 +3634,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                         rem_inds = [i for i,j in enumerate(l) if j not in base_args]
                         base_inds = [i for i,j in enumerate(l) if j in base_args]
                         rem_list = tuple(l[i] for i in rem_inds)
+                        base_args = tuple(sorted(base_args, key=lambda x:l.index(x)))
                         possible_conversions[rem_list] = (l, base_args, rem_inds, base_inds, f)
                 pref_keys = list(sorted(possible_conversions.keys(), key=len))
                 if disallowed_conversions is None:
@@ -3659,13 +3661,20 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                             for a in base_args
                         ]
                         nargs = len(full_args)
-                        def convert(tdata):
+                        def convert(tdata,
+                                    base_inds=base_inds,
+                                    rem_inds=rem_inds,
+                                    base_arg_inds=base_arg_inds,
+                                    completions=completions,
+                                    **kwargs):
                             args = [None] * nargs
                             for i,j in zip(base_inds, base_arg_inds):
                                 args[i] = tdata[j]
                             for i,g in zip(rem_inds, completions):
                                 args[i] = g(tdata)
                             return func(*args)
+                        prop_name = dihedron_property_specifiers(field_name)['name']
+                        convert.__name__ = f'convert_{prop_name}_{func.__name__}'
                         return convert
             if raise_on_missing:
                 raise ValueError(f"can't get property '{field_name}' from {sample_dihed}")

@@ -781,6 +781,7 @@ class ConverterTest(TestCase):
 
     @debugTest
     def test_ZMatrixInterConversion(self):
+        import McUtils.Numputils as nput
         spec = [
                     (0, 1),
                     (0, 2),
@@ -801,15 +802,25 @@ class ConverterTest(TestCase):
         #         ]
         #     )
         # )
+        new_spec = [
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 0, 2),
+            (1, 0, 3),
+            (0, 1, 2, 3)
+        ]
+
+        # import warnings
+        # warnings.filterwarnings("error")
+        # targ = [(1, 2), (2, 3)]
+        targ = new_spec
+        conv = find_internal_conversion(spec, targ)
+        pts = np.random.rand(4, 3)
+        base = nput.internal_coordinate_tensors(pts, spec, order=0)[0]
+        dists = nput.distance_matrix(pts, return_triu=True)
+        print(conv)
+        print(dists)
         print(
-            find_internal_conversion(spec,
-                                     [
-                                         (0, 1),
-                                         (0, 2),
-                                         (0, 3),
-                                         (1, 0, 2),
-                                         (1, 0, 3),
-                                         (0, 1, 2, 3)
-                                     ]
-                                     )
+            conv(base), nput.internal_coordinate_tensors(pts, targ, order=0)[0]
         )
