@@ -4,6 +4,7 @@ from Peeves.Timer import Timer
 from Peeves import BlockProfiler
 from unittest import TestCase
 from McUtils.Coordinerds import *
+import McUtils.Coordinerds as coordops
 from McUtils.Plots import *
 from McUtils.Numputils import *
 import sys, numpy as np, os
@@ -781,46 +782,47 @@ class ConverterTest(TestCase):
 
     @debugTest
     def test_ZMatrixInterConversion(self):
+
+        # import warnings
+        # warnings.filterwarnings("error")
+
+        import McUtils.Coordinerds as coordops
         import McUtils.Numputils as nput
         spec = [
-                    (0, 1),
-                    (0, 2),
-                    (0, 3),
-                    (1, 0, 2),
-                    (1, 0, 3),
-                    (2, 0, 3)
-                ]
-        # print(
-        #     get_internal_triangles_and_dihedrons(
-        #         [
-        #             (0, 1),
-        #             (0, 2),
-        #             (0, 3),
-        #             (1, 0, 2),
-        #             (1, 0, 3),
-        #             (2, 0, 3)
-        #         ]
-        #     )
-        # )
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 0, 2),
+            (1, 0, 3),
+            (2, 0, 3)
+        ]
         new_spec = [
             (0, 1),
             (0, 2),
             (0, 3),
             (1, 0, 2),
             (1, 0, 3),
-            (0, 1, 2, 3)
+            # (0, 1, 2, 3),
+            (3, 0, 1, 2)
         ]
 
-        # import warnings
-        # warnings.filterwarnings("error")
-        # targ = [(1, 2), (2, 3)]
-        targ = new_spec
-        conv = find_internal_conversion(spec, targ)
+        import warnings
+        warnings.filterwarnings('error')
+        print()
+        conv = coordops.find_internal_conversion(spec, new_spec)
         pts = np.random.rand(4, 3)
         base = nput.internal_coordinate_tensors(pts, spec, order=0)[0]
-        dists = nput.distance_matrix(pts, return_triu=True)
-        print(conv)
-        print(dists)
+        # dists = nput.distance_matrix(pts, return_triu=True)
+        new_coords = conv(base)
+        print(...)
+        print(new_coords,
+              nput.internal_coordinate_tensors(pts, new_spec, order=0)[0],
+              nput.pts_dihedrals(*[pts[i] for i in new_spec[-1]])
+              )
+
+        ix1, distance_rep1 = coordops.get_internal_distance_conversion(spec)
+        ix2, distance_rep2 = coordops.get_internal_distance_conversion(new_spec)
         print(
-            conv(base), nput.internal_coordinate_tensors(pts, targ, order=0)[0]
+            distance_rep1(base),
+            distance_rep2(new_coords)
         )

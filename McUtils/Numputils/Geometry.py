@@ -1383,18 +1383,17 @@ def _completion_paths(dd, completions_trie, prop_func, return_trie=False):
     res = None
     while res is None and queue:
         path, trie = queue.popleft()
-        has_subpath = False
+        subpaths = []
         for k,v in trie.items():
             test_prop = prop_func(dd, k)
             if test_prop is not None:
-                has_subpath = True
+                subpaths.append(k)
                 if not isinstance(v, dict):
                     res = v
                     break
                 queue.append([path+[k], v])
         else:
-            if not has_subpath:
-                fall_throughs.append([path, trie])
+            fall_throughs.append([path, trie])
     if res is not None:
         return True, res
     else:
@@ -2625,11 +2624,17 @@ def dihedron_property_specifiers(base_specifier=None):
         }
     else:
         if isinstance(base_specifier, str):
-            return {
-                "name":base_specifier,
-                "index":_ddata_name_map[base_specifier],
-                "coord":_dihedron_point_map[base_specifier]
-            }
+            if base_specifier.endswith("_inv"):
+                spec = dihedron_property_specifiers(base_specifier.split("_")[0])
+                spec['sign'] *= -1
+                return spec
+            else:
+                return {
+                    "name":base_specifier,
+                    "index":_ddata_name_map[base_specifier],
+                    "coord":_dihedron_point_map[base_specifier],
+                    "sign":1
+                }
         elif misc.is_int(base_specifier):
             for k,v in _ddata_name_map.items():
                 if v == base_specifier:
@@ -3358,9 +3363,8 @@ def _dihedron_property_Tz(dd:DihedralTetrahedronData):
         a, dd = _dihedron_property_Tb(dd)
         return a, _dihedron_data_permute(dd, inv)
 def _dihed_prop(ddata:DihedralTetrahedronData, field):
-    if isinstance(field, str):
-        field = _ddata_name_map[field]
-    return ddata[field]
+    props = dihedron_property_specifiers(field)
+    return ddata[props['index']]
 def dihedron_property(ddata:DihedralTetrahedronData, field_name, allow_completion=True):
     if allow_completion:
         if field_name == "a":
@@ -3416,6 +3420,14 @@ def dihedron_property(ddata:DihedralTetrahedronData, field_name, allow_completio
     else:
         return _dihed_prop(ddata, field_name)
 def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2):
+    """
+        elif field_name == dd.Tb:
+        args = [dd.b, dd.a, dd.x, dd.y, dd.c, dd.A, dd.X, dd.Y, dd.C, dd.z, dd.Z, dd.Z2]
+        completion_type = DihedronCoordinateType.Dihedral
+    elif field_name == dd.Ta:
+        args = [dd.a, dd.b, dd.x, dd.y, dd.z, dd.B1, dd.X, dd.Y3, dd.Z, dd.c, dd.C, dd.C4]
+        completion_type = DihedronCoordinateType.Dihedral
+    """
     return _permutation_trie(
         [
             ([X, Z, C], dihedral_from_XZC),
@@ -3581,6 +3593,7 @@ def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
 
     res = _completion_paths(dd, completions_trie, _dihed_prop, return_trie=return_trie)
 
+
     if return_args:
         return args, res
     else:
@@ -3597,16 +3610,20 @@ def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
 def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name,
                                disallowed_conversions=None,
                                allow_completion=True,
-                               raise_on_missing=True):
-    if _dihed_prop(sample_dihed, field_name) is not None:
-        if isinstance(field_name, str):
-            field_name = _tdata_name_map[field_name]
-
-        ind = field_name
+                               raise_on_missing=True,
+                               return_depth=False):
+    field_props = dihedron_property_specifiers(field_name)
+    field_name = field_props['name']
+    if sample_dihed[field_props['index']] is not None:
+        ind = field_props['index']
+        sign = field_props['sign']
         def convert(tdata, **kwargs):
-            return tdata[ind]
+            return sign*tdata[ind]
         convert.__name__ = 'convert_' + dihedron_property_specifiers(ind)['name']
-        return convert
+        if return_depth:
+            return 0, convert
+        else:
+            return convert
     else:
         args, (complete, conversion_specs) = dihedral_completion_paths(
             sample_dihed,
@@ -3616,65 +3633,88 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
         )
         if complete:
             args, func = conversion_specs
-            inds = [
-                dihedron_property_specifiers(a)['index']
+            specs = [
+                dihedron_property_specifiers(a)
                 for a in args
             ]
             def convert(tdata, **kwargs):
-                return func(*(tdata[i] for i in inds))
-            prop_name = dihedron_property_specifiers(field_name)['name']
-            convert.__name__ = f'convert_{prop_name}_{func.__name__}'
-            return convert
+                return field_props['sign']*func(*(s['sign']*tdata[s['index']] for s in specs))
+            convert.__name__ = f'convert_{field_props["name"]}_{func.__name__}'
+            if return_depth:
+                return 1, convert
+            else:
+                return convert
         else:
             if allow_completion:
                 possible_conversions = {}
                 convertable_keys = {}
                 for base_args, trie in conversion_specs:
                     for l,f in _expand_trie(trie).items():
-                        rem_inds = [i for i,j in enumerate(l) if j not in base_args]
-                        base_inds = [i for i,j in enumerate(l) if j in base_args]
-                        rem_list = tuple(l[i] for i in rem_inds)
+                        props = [_dihed_prop(sample_dihed, ll) is not None for ll in l]
+                        rem_inds = [i for i,j in enumerate(props) if not j]
+                        base_inds = [i for i,j in enumerate(props) if j]
+                        rem_list = tuple(sorted(l[i] for i in rem_inds))
                         base_args = tuple(sorted(base_args, key=lambda x:l.index(x)))
                         possible_conversions[rem_list] = (l, base_args, rem_inds, base_inds, f)
+                # print(field_name, possible_conversions)
                 pref_keys = list(sorted(possible_conversions.keys(), key=len))
                 if disallowed_conversions is None:
                     disallowed_conversions = {field_name}
+                else:
+                    disallowed_conversions.add(field_name)
+                complete_convs = []
                 for kl in pref_keys:
                     for k in kl:
-                        if k not in convertable_keys and k not in disallowed_conversions:
+                        if k not in convertable_keys:
+                            if k in disallowed_conversions: break
                             d2 = dihedron_property_function(sample_dihed, k,
                                                             disallowed_conversions=disallowed_conversions,
-                                                            allow_completion=False,
-                                                            raise_on_missing=False)
+                                                            allow_completion=True,
+                                                            raise_on_missing=False,
+                                                            return_depth=True)
                             if d2 is None:
                                 disallowed_conversions.add(k)
                                 break
                             else:
                                 convertable_keys[k] = d2
                     else:
-                        full_args, base_args, rem_inds, base_inds, func = possible_conversions[kl]
-                        completions = [convertable_keys[k] for k in kl]
-                        base_arg_inds = [
-                            _ddata_name_map[a]
-                                if isinstance(a, str) else
-                            a
-                            for a in base_args
-                        ]
-                        nargs = len(full_args)
-                        def convert(tdata,
-                                    base_inds=base_inds,
-                                    rem_inds=rem_inds,
-                                    base_arg_inds=base_arg_inds,
-                                    completions=completions,
-                                    **kwargs):
-                            args = [None] * nargs
-                            for i,j in zip(base_inds, base_arg_inds):
-                                args[i] = tdata[j]
-                            for i,g in zip(rem_inds, completions):
-                                args[i] = g(tdata)
-                            return func(*args)
-                        prop_name = dihedron_property_specifiers(field_name)['name']
-                        convert.__name__ = f'convert_{prop_name}_{func.__name__}'
+                        # print(field_name, kl,
+                        #       # possible_conversions[kl],
+                        #       {c: possible_conversions.get(c, None) for c in kl}
+                        #       )
+                        complete_convs.append([sum(convertable_keys[k][0] for k in kl), kl])
+                if len(complete_convs) > 0:
+                    depth, kl = sorted(complete_convs, key=lambda c:c[0])[0]
+                    full_args, base_args, rem_inds, base_inds, func = possible_conversions[kl]
+                    # print('!', field_name, kl, sample_dihed)#convertable_keys)
+                    completions = [convertable_keys[k][1] for k in kl]
+                    base_arg_inds = [
+                        _ddata_name_map[a]
+                            if isinstance(a, str) else
+                        a
+                        for a in base_args
+                    ]
+                    nargs = len(full_args)
+                    props = dihedron_property_specifiers(field_name)
+                    def convert(tdata,
+                                base_inds=base_inds,
+                                rem_inds=rem_inds,
+                                base_arg_inds=base_arg_inds,
+                                completions=completions,
+                                sign=props['sign'],
+                                **kwargs):
+                        args = [None] * nargs
+                        for i,j in zip(base_inds, base_arg_inds):
+                            args[i] = tdata[j]
+                        for i,g in zip(rem_inds, completions):
+                            args[i] = g(tdata)
+                        # print(tdata)
+                        # print(base_arg_inds, rem_inds, args)
+                        return sign*func(*args)
+                    convert.__name__ = f'convert_{props["name"]}_{func.__name__}'
+                    if return_depth:
+                        return depth + 1, convert
+                    else:
                         return convert
             if raise_on_missing:
                 raise ValueError(f"can't get property '{field_name}' from {sample_dihed}")
