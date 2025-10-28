@@ -1,4 +1,5 @@
 import collections
+import functools
 import itertools
 
 import numpy as np
@@ -200,21 +201,33 @@ class InternalsSet:
         else:
             return cls(None, prepped_data=[self._indicator, self.coordinate_indices, self.ind_map, int_map])
 
-def find_internal(coords, coord, missing_val:'Any'='raise'):
+def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False):
+    if canonicalize:
+        coord = canonicalize_internal(coord)
     if isinstance(coords, InternalsSet):
-        return coords.find(coord)
+        return coords.find(coord, allow_negation=allow_negation)
     else:
         try:
             idx = coords.index(coord)
         except ValueError:
             idx = None
 
+        sign = 1
+        if idx is None and allow_negation and len(coord) == 4:
+            test = (coord[0],coord[2],coord[1],coord[3])
+            idx = find_internal(coords, test, missing_val=None, canonicalize=False, allow_negation=False)
+            if idx is not None:
+                sign = -1
+
         if idx is None:
             if dev.str_is(missing_val, 'raise'):
                 raise ValueError("{} not in coordinate set".format(coord))
             else:
                 idx = missing_val
-        return idx
+        if allow_negation:
+            return idx, sign
+        else:
+            return idx
 
 def permute_internals(coords, perm, canonicalize=True):
     if isinstance(coords, InternalsSet):
@@ -562,17 +575,22 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
         int_args = conversion_spec.input_indices
         dist_args = conversion_spec.pregen_indices
         def convert(internal_values, distance_values,
+                    order=None,
                     int_args=int_args,
                     dist_args=dist_args,
                     converter=triangle_converter,
-                    val=val):
+                    val=val,
+                    **kwargs):
             args = [
                 internal_values[..., n]
                     if n is not None else
                 distance_values[..., m]
                 for n,m in zip(int_args, dist_args)
             ]
-            return converter(*args)[val]
+            if order is None:
+                return converter[0](*args)[val]
+            else:
+                return converter[1](*args, order=order, **kwargs)[val]
     else:
         # a dihedral to convert
         conversion:dihed_conv = conversion_spec.conversion
@@ -580,18 +598,24 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
         int_args = conversion_spec.input_indices
         dist_args = conversion_spec.pregen_indices
         def convert(internal_values, distance_values,
+                    order=None,
+                    *,
                     int_args=int_args,
                     dist_args=dist_args,
-                    converter=dist_converter):
+                    converter=dist_converter,
+                    **kwargs):
             args = [
                 internal_values[..., n]
                     if n is not None else
                 distance_values[..., m]
                 for n,m in zip(int_args, dist_args)
             ]
-            return converter(*args)
+            if order is None:
+                return converter[0](*args)[val]
+            else:
+                return converter[1](*args, order=order, **kwargs)[val]
     return convert
-def get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True, abs_dihedrals=True):
+def _get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True, abs_dihedrals=True):
     base_conv = get_internal_distance_conversion_spec(internals, canonicalize=canonicalize)
     final_inds = list(sorted(base_conv.keys(), key=lambda k:base_conv[k].mapped_pos))
     rordered_conversion = list(sorted(base_conv.values(), key=lambda v:v.mapped_pos))
@@ -718,6 +742,32 @@ def _get_dihedron_angle_key_name(mod_sets, a,b,c,d, i, j, k):
         key = canonicalize_internal((a, b, c, d))
 
     b = canonicalize_internal(tuple(key.index(_) for _ in [i,j,k]))
+    z = nput.dihedron_property_specifiers(b)["name"]
+    return key, z
+def _get_dihedron_dihed_key_name(mod_sets, a,b,c,d, i, j, k, l):
+    base = (a, b, c, d)
+    for perm in [
+        (0, 1, 2, 3),
+        (0, 2, 1, 3),
+        (0, 2, 3, 1),
+        (0, 3, 2, 1),
+        (0, 1, 3, 2),
+        (0, 3, 1, 2),
+        (1, 0, 2, 3),
+        (1, 2, 0, 3),
+        (1, 0, 3, 2),
+        (1, 3, 0, 2),
+        (2, 0, 1, 3),
+        (2, 1, 0, 3)
+    ]:
+        key = [base[_] for _ in perm]
+        key, sign = canonicalize_internal(key, return_sign=True)
+        if key in mod_sets:
+            break
+    else:
+        key = canonicalize_internal((a, b, c, d))
+
+    b = canonicalize_internal(tuple(key.index(_) for _ in [i,j,k,l]))
     z = nput.dihedron_property_specifiers(b)["name"]
     return key, z
 def get_internal_triangles_and_dihedrons(internals,
@@ -937,6 +987,43 @@ def get_internal_triangles_and_dihedrons(internals,
                     mod_sets[(i, j, k, None)] = {"X"}
             dihed_sets = mod_sets
 
+        elif len(coord) == 4:
+            mod_sets = dihed_sets.copy()
+            skey = tuple(sorted(coord))
+            for (a, l, m, n),v in dihed_sets.items():
+                if m is None:
+                    try:
+                        ix = coord.index(a)
+                    except:
+                        continue
+                    try:
+                        jx = coord.index(l)
+                    except:
+                        continue
+                    rem = np.setdiff1d([0, 1, 2, 3], [ix, jx])
+                    key, z = _get_dihedron_dihed_key_name(dihed_sets, a, l, coord[rem[0]], coord[rem[1]], *coord)
+                    mod_sets[key] = mod_sets.get(key, v) | {z}
+                elif n is None:
+                        try:
+                            ix = coord.index(a)
+                        except:
+                            continue
+                        try:
+                            jx = coord.index(l)
+                        except:
+                            continue
+                        try:
+                            kx = coord.index(m)
+                        except:
+                            continue
+                        rem = np.setdiff1d([0, 1, 2, 3], [ix, jx, kx])
+                        key, z = _get_dihedron_dihed_key_name(dihed_sets, a, l, m, coord[rem[0]], *coord)
+                        mod_sets[key] = mod_sets.get(key, v) | {z}
+                elif skey == tuple(sorted([a, l, m, n])):
+                    key, z = _get_dihedron_dihed_key_name(dihed_sets, a, l, m, n, *coord)
+                    mod_sets[key] = mod_sets.get(key, v) | {z}
+            dihed_sets = mod_sets
+
     if prune_incomplete:
         tri_sets, dihed_sets = (
                 {k:v for k,v in tri_sets.items() if None not in k},
@@ -985,8 +1072,7 @@ def _dihedral_conversion_function(inds, dihed, coord):
         else:
             idx.append(ix)
     b = canonicalize_internal(idx)
-    target = nput.dihedron_property_specifiers(b)
-    return nput.dihedron_property_function(dihed, target['name'])
+    return nput.dihedron_property_function(dihed, b)
 
 int_conv_data = collections.namedtuple("int_conv_data",
                                       ['input_indices', 'pregen_indices', 'conversion'])
@@ -997,25 +1083,25 @@ def find_internal_conversion(internals, targets,
                              missing_val='raise'):
     smol = nput.is_int(targets[0])
     if smol: targets = [targets]
+    if triangles_and_dihedrons is None:
+        if isinstance(internals, InternalsSet):
+            internals = internals.specs
+        if canonicalize:
+            internals = [canonicalize_internal(c) for c in internals]
+        triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
+    triangles, dihedrals = triangles_and_dihedrons
     conversions = []
     for target_coord in targets:
-        idx = find_internal(internals, target_coord, missing_val=None)
+
+        if canonicalize:
+            target_coord = canonicalize_internal(target_coord)
+        idx = find_internal(internals, target_coord, missing_val=None, canonicalize=False)
         if idx is not None:
             def convert(internal_list, idx=idx):
                 internal_list = np.asanyarray(internal_list)
                 return internal_list[..., idx]
             conversions.append(convert)
             continue
-
-        if triangles_and_dihedrons is None:
-            if isinstance(internals, InternalsSet):
-                internals = internals.specs
-            if canonicalize:
-                target_coord = canonicalize_internal(target_coord)
-                internals = [canonicalize_internal(c) for c in internals]
-            triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
-        triangles, dihedrals = triangles_and_dihedrons
-        print(dihedrals)
 
         conv = None
         tri = None
@@ -1057,10 +1143,14 @@ def find_internal_conversion(internals, targets,
                     return conv(subtri)
                 convert.__name__ = 'convert_' + conv.__name__
             else:
-                args = {k:find_internal(internals, v) for k,v in dihed._asdict().items() if v is not None}
+                args = {
+                    k:find_internal(internals, v, allow_negation=True)
+                        for k,v in dihed._asdict().items()
+                    if v is not None
+                }
                 def convert(internal_list, args=args, conv=conv, **kwargs):
                     internal_list = np.asanyarray(internal_list)
-                    subargs = {k:internal_list[..., i] for k,i in args.items()}
+                    subargs = {k:s*internal_list[..., i] for k,(i,s) in args.items()}
                     subdihed = nput.make_dihedron(**subargs)
                     return conv(subdihed)
                 convert.__name__ = 'convert_' + conv.__name__
@@ -1082,3 +1172,20 @@ def find_internal_conversion(internals, targets,
                     for i in range(order + 1)
                 ]
     return convert
+def enumerate_dists(internals):
+    for coord in internals:
+        for c in itertools.combinations(coord, 2):
+            yield canonicalize_internal(c)
+def get_internal_distance_conversion(
+        internals,
+        triangles_and_dihedrons=None,
+        # prior_coords=None,
+        canonicalize=True,
+        missing_val='raise'
+):
+    dist_set = list(sorted(set(enumerate_dists(internals)))) # remove dupes, sort
+    return dist_set, find_internal_conversion(internals, dist_set,
+                                    canonicalize=canonicalize,
+                                    triangles_and_dihedrons=triangles_and_dihedrons,
+                                    missing_val=missing_val
+                                    )
