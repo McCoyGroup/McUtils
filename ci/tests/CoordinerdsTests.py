@@ -826,3 +826,9 @@ class ConverterTest(TestCase):
             distance_rep1(base),
             distance_rep2(new_coords)
         )
+
+        carts = get_internal_cartesian_conversion(new_spec)
+        print(carts(new_coords))
+
+        carts = get_internal_cartesian_conversion(spec)
+        print(carts(base))

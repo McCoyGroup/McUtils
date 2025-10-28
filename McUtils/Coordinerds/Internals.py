@@ -17,7 +17,8 @@ __all__ = [
     "get_internal_distance_conversion",
     "internal_distance_convert",
     "get_internal_triangles_and_dihedrons",
-    "find_internal_conversion"
+    "find_internal_conversion",
+    "get_internal_cartesian_conversion"
 ]
 
 def canonicalize_internal(coord, return_sign=False):
@@ -1189,3 +1190,30 @@ def get_internal_distance_conversion(
                                     triangles_and_dihedrons=triangles_and_dihedrons,
                                     missing_val=missing_val
                                     )
+
+def get_internal_cartesian_conversion(
+        internals,
+        triangles_and_dihedrons=None,
+        # prior_coords=None,
+        canonicalize=True,
+        missing_val='raise'
+):
+    #TODO: add direct conversion through Z-matrix if can be enumerated
+    dists, dist_conv = get_internal_distance_conversion(internals,
+                                                        triangles_and_dihedrons=triangles_and_dihedrons,
+                                                        canonicalize=canonicalize,
+                                                        missing_val=missing_val)
+    n = (1 + np.sqrt(1 + 8 * len(dists))) / 2
+    if int(n) != n:
+        raise ValueError("fbad number of distances {len(dists)}")
+    n = int(n)
+    rows, cols = np.triu_indices(n, k=1)
+    def convert(internals):
+        internals = np.asanyarray(internals)
+        base_shape = internals.shape[:-1]
+        internal_dists = dist_conv(internals)
+        dm = np.zeros(base_shape + (n, n))
+        dm[..., rows, cols] = internal_dists
+        dm[..., cols, rows] = internal_dists
+        return nput.points_from_distance_matrix(dm)
+    return convert
