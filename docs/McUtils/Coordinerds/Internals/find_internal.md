@@ -1,11 +1,11 @@
 # <a id="McUtils.Coordinerds.Internals.find_internal">find_internal</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L203)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L203?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L204?message=Update%20Docs)]
 </div>
 
 ```python
-find_internal(coords, coord, missing_val: 'Any' = 'raise'): 
+find_internal(coords, coord, missing_val: 'Any' = 'raise', canonicalize=True, allow_negation=False): 
 ```
 
 
@@ -59,7 +59,7 @@ find_internal(coords, coord, missing_val: 'Any' = 'raise'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/find_internal.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/find_internal.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L203?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L204?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

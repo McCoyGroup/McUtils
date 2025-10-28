@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.Geometry.dihedral_distance">dihedral_distance</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L2544)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2544?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L2543)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2543?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ dihedral_distance(spec, dihedral_type: 'str | DihedralSpecifierType', order=None
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/dihedral_distance.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/dihedral_distance.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2544?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2543?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

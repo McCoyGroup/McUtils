@@ -1,11 +1,11 @@
 # <a id="McUtils.Coordinerds.Internals.get_internal_distance_conversion">get_internal_distance_conversion</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L594)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L594?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1179)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1179?message=Update%20Docs)]
 </div>
 
 ```python
-get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True, abs_dihedrals=True): 
+get_internal_distance_conversion(internals, triangles_and_dihedrons=None, canonicalize=True, missing_val='raise'): 
 ```
 
 
@@ -59,7 +59,7 @@ get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=T
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/get_internal_distance_conversion.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/get_internal_distance_conversion.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L594?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1179?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

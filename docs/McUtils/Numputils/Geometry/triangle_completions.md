@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.Geometry.triangle_completions">triangle_completions</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L1657)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L1657?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L1656)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L1656?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ triangle_completions(field_name, return_trie=False, return_args=False, **triangl
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/triangle_completions.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/triangle_completions.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L1657?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L1656?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

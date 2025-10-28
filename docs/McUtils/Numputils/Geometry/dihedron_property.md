@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.Geometry.dihedron_property">dihedron_property</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L3364)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3364?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L3368)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3368?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ dihedron_property(ddata: 'DihedralTetrahedronData', field_name, allow_completion
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/dihedron_property.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/dihedron_property.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3364?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3368?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
