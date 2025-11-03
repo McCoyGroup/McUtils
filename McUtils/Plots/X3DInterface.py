@@ -33,6 +33,9 @@ __all__ = [
     "X3DListAnimator"
 ]
 
+#TODO: cache these resources or put them on a path that is accessible by Jupyter
+#      might be pretty simple depending on what resource paths Jupyter naturally exposes
+
 class X3DObject(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def to_x3d(self):
@@ -43,7 +46,7 @@ class X3D(X3DObject):
         width=500,
         height=500
     )
-    def __init__(self, *children, id=None, dynamic_loading=True, **opts):
+    def __init__(self, *children, id=None, dynamic_loading=True, x3dom_path=None, x3dom_css_path=None, **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
@@ -52,6 +55,12 @@ class X3D(X3DObject):
             id = "x3d-" + str(uuid.uuid4())[:6]
         self.id = id
         self.dynamic_loading = dynamic_loading
+        if x3dom_path is not None:
+            self.X3DOM_JS = x3dom_path
+        if x3dom_css_path is not None:
+            self.X3DOM_CSS = x3dom_css_path
+
+        self._widg = None
 
     X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
     X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
@@ -120,6 +129,8 @@ class X3D(X3DObject):
     include_export_button = False
     include_record_button = False
     def to_widget(self, dynamic_loading=None, include_export_button=None, include_record_button=None):
+        if self._widg is not None:
+            return self._widg
         id = self.id
         x3d_embed = self.to_x3d()#.tostring()
 
@@ -135,7 +146,10 @@ class X3D(X3DObject):
                 JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
                 JHTML.Script(src=self.X3DOM_JS),
                 x3d_embed,
-                id=id
+                id=id,
+                width=x3d_embed['width'],
+                height=x3d_embed['height'],
+                can_be_dynamic=False
             )
         else:
             JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
@@ -149,12 +163,18 @@ class X3D(X3DObject):
                     id=kill_id,
                     onload=f"""
                     (function() {{
-                        document.getElementById("{kill_id}").remove();
-                        const frag = document.createRange().createContextualFragment(`{load_script}`);
-                        document.head.appendChild(frag);
+                        let killElem = document.getElementById("{kill_id}");
+                        if (killElem !== null) {{
+                            killElem.remove();
+                            const frag = document.createRange().createContextualFragment(`{load_script}`);
+                            document.head.appendChild(frag);
+                        }}
                     }})()"""
                     ),
-                id=id
+                id=id,
+                width=x3d_embed['width'],
+                height=x3d_embed['height'],
+                can_be_dynamic=False
             )
 
         elems = [base_fig]
@@ -167,11 +187,13 @@ class X3D(X3DObject):
             ])
 
         if len(elems) > 1:
-            return JHTML.Div(
+            self._widg = JHTML.Div(
                 *elems
             )
         else:
-            return elems[0]
+            self._widg = elems[0]
+
+        return self._widg
 
     def to_html(self, *base_elems, header_elems=None,
                 dynamic_loading=False,

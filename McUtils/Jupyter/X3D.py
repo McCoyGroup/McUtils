@@ -6,10 +6,24 @@ __all__ = [
 
 __reload_hooks__ = [".JHTML"]
 class X3DHTML:
+    _x3d_map = None
+    @classmethod
+    def get_x3d_map(cls):
+        if cls._x3d_map is None:
+            cls._x3d_map = {}
+            for v in cls.__dict__.values():
+                if isinstance(v, type) and hasattr(v, 'tag'):
+                    cls._x3d_map[v.tag] = v
+        return cls._x3d_map
 
     class X3DElement(HTML.TagElement):
         ignored_styles = {"height", "width", "position", "color"}
+        can_be_dynamic = False
         style_props = None
+
+        @classmethod
+        def get_class_map_updates(cls):
+            return X3DHTML.get_x3d_map()
 
         @classmethod
         def convert_attrs(cls, attrs:dict):

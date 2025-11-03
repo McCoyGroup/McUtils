@@ -711,6 +711,11 @@ class GraphicsBase(metaclass=ABCMeta):
         buf.seek(0)
         return buf
 
+    def to_widget(self):
+        self.prep_show()
+        self.figure.tight_layout()
+        return self.figure.to_widget()
+
     def _repr_png_(self):
         return self.to_png().read()
 

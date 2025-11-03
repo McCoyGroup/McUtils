@@ -329,7 +329,9 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
         ...
 
     def to_html(self):
-        ...
+        raise NotImplementedError("needs an overload")
+    def to_widget(self, **opts):
+        raise NotImplementedError("needs an overload")
     def _repr_html_(self):
         return self.to_html()
     def tight_layout(self):
@@ -1136,6 +1138,17 @@ class MPLFigure(GraphicsFigure):
         return animation
     def to_html(self):
         return self.obj._repr_html_()
+    def to_data_url(self):
+        import io
+        import base64
+        buf = io.BytesIO()
+        self.obj.savefig(buf, format='png')
+        buf.seek(0)
+        b64_img = base64.b64encode(buf.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{b64_img}"
+    def to_widget(self):
+        from .. import Jupyter as interactive
+        return interactive.JHTML.Image(src=self.to_data_url())
     def tight_layout(self):
         self.obj.tight_layout()
 
@@ -2497,6 +2510,8 @@ class X3DFigure(GraphicsFigure):
             *[a.to_x3d() for a in self.axes],
             **opts
         )
+    def to_widget(self, **opts):
+        return self.to_x3d(**opts).to_widget()
 
     def animate_frames(self, frames: list['X3DAxes'], **animation_opts):
         animator = X3DAxes(

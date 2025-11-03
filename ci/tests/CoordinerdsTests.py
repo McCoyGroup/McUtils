@@ -7,6 +7,7 @@ from McUtils.Coordinerds import *
 import McUtils.Coordinerds as coordops
 from McUtils.Plots import *
 from McUtils.Numputils import *
+import McUtils.Numputils as nput
 import sys, numpy as np, os
 import pprint
 
@@ -780,11 +781,11 @@ class ConverterTest(TestCase):
         ])
         pprint.pprint(conv)
 
-    @debugTest
-    def test_ZMatrixInterConversion(self):
-
-        # import warnings
-        # warnings.filterwarnings("error")
+    @validationTest
+    def test_InternalInterConversion(self):
+        import warnings
+        warnings.filterwarnings("error")
+        print()
 
         import McUtils.Coordinerds as coordops
         import McUtils.Numputils as nput
@@ -805,10 +806,19 @@ class ConverterTest(TestCase):
             # (0, 1, 2, 3),
             (3, 0, 1, 2)
         ]
+        new_spec2 = [
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 0, 2),
+            (1, 0, 3),
+            (0, 1, 2, 3),
+        ]
 
-        import warnings
-        warnings.filterwarnings('error')
-        print()
+        coordops.validate_internals(spec)
+        coordops.validate_internals(new_spec)
+        self.assertIs(coordops.validate_internals(new_spec2, raise_on_failure=False)[0], False)
+
         conv = coordops.find_internal_conversion(spec, new_spec)
         pts = np.random.rand(4, 3)
         base = nput.internal_coordinate_tensors(pts, spec, order=0)[0]
@@ -832,3 +842,87 @@ class ConverterTest(TestCase):
 
         carts = get_internal_cartesian_conversion(spec)
         print(carts(base))
+
+    @debugTest
+    def test_SmoothCoordinateInterpolation(self):
+
+        minimum_1 = [[-1.23525126,  0.3464957,  0.],
+                     [ 1.23731373, -0.34878849, 0.],
+                     [-2.80038974, -1.00144666, 0.],
+                     [ 2.80265588,  0.9988826,  0.]]
+        zm_1 = coordops.functionalized_zmatrix(
+            2,
+            single_atoms=[0, 1]
+        )
+        specs_1 = coordops.extract_zmatrix_internals(zm_1)
+
+        minimum_2 = [[ 0.,         0.,  1.53899513],
+                     [ 0.,         0., -0.89818466],
+                     [ 1.78011952, 0., -1.92243141],
+                     [-1.78011952, 0., -1.92243141]]
+        zm_2 = coordops.functionalized_zmatrix(
+            2,
+            ethyl_positions=[1]
+        )
+        specs_2 = coordops.extract_zmatrix_internals(zm_2)
+
+        ics_11 = nput.internal_coordinate_tensors(
+            minimum_1,
+            specs_1,
+            order=0
+        )[0]
+
+        ics_21 = nput.internal_coordinate_tensors(
+            minimum_2,
+            specs_1,
+            order=0
+        )[0]
+
+        ics_22 = nput.internal_coordinate_tensors(
+            minimum_2,
+            specs_2,
+            order=0
+        )[0]
+        ics_12 = nput.internal_coordinate_tensors(
+            minimum_1,
+            specs_2,
+            order=0
+        )[0]
+
+
+        print(ics_22, ics_12)
+        return
+
+        # print(specs_1)
+        # print(ics_11)
+        # print(specs_2)
+        # print(ics_22)
+
+        # _, dist_conv2 = get_internal_distance_conversion(specs_2)
+        # print(nput.distance_matrix(minimum_2, return_triu=True))
+        # print(dist_conv2(ics_22))
+        # return
+
+        iterp_x = np.linspace(0, 1, 10)
+        ic_interp_1 = ics_11[np.newaxis, :] * (1 - iterp_x[:, np.newaxis]) + ics_21[np.newaxis, :] * iterp_x[:, np.newaxis]
+        ic_interp_2 = ics_12[np.newaxis, :] * (1 - iterp_x[:, np.newaxis]) + ics_22[np.newaxis, :] * iterp_x[:, np.newaxis]
+
+        d_ic_1 = ic_interp_1 - ics_11[np.newaxis, :]
+        d_ic_2 = ic_interp_2 - ics_22[np.newaxis, :]
+
+        interp_norms = np.array([
+            np.linalg.norm(d_ic_1, axis=1),
+            np.linalg.norm(d_ic_2, axis=1)
+        ])
+        which_interp = np.argmin(interp_norms, axis=0)
+        conv_1 = coordops.get_internal_cartesian_conversion(specs_1)
+        conv_2 = coordops.get_internal_cartesian_conversion(specs_2)
+        geoms = np.concatenate(
+            [
+                conv_1(ic_interp_1[which_interp == 0]),
+                conv_2(ic_interp_2[which_interp == 1]),
+            ], axis=0)
+        # geoms = conv_1(ic_interp_1)
+
+        import pprint
+        pprint.pprint(geoms.tolist())

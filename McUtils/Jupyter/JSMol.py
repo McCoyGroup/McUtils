@@ -21,6 +21,7 @@ class JSMol:
             jmolInitialize('https://cdn.jsdelivr.net/gh/b3m2a1/jsmol-cdn@{version}/jsmol/');
         }};
         """
+        unsynced_properties = ['width', 'height']
         @classmethod
         def load_applet_script(cls, id, loader,
                                include_script_interface=False,
@@ -124,7 +125,6 @@ class JSMol:
             if dynamic_loading is None:
                 from ..Jupyter.JHTML import JupyterAPIs
                 dynamic_loading = JupyterAPIs().in_jupyter_environment()
-
             self.dynamic_loading = dynamic_loading
 
             self.load_script = load_script
@@ -174,9 +174,12 @@ class JSMol:
                         id=kill_id,
                         onload=f"""
                             (function() {{
-                                document.getElementById('{kill_id}').remove();
-                                const frag = document.createRange().createContextualFragment(`{load_script}`);
-                                document.head.appendChild(frag);
+                                let killElem = document.getElementById("{kill_id}");
+                                if (killElem !== null) {{
+                                    killElem.remove();
+                                    const frag = document.createRange().createContextualFragment(`{load_script}`);
+                                    document.head.appendChild(frag);
+                                }}
                             }})()"""
                     )
             else:

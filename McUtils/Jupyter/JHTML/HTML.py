@@ -1,6 +1,7 @@
 import itertools
 from xml.etree import ElementTree
 import weakref, numpy as np, copy, textwrap, inspect
+import contextlib
 
 __all__ = [
     "HTML",
@@ -602,6 +603,18 @@ class XMLBase:
                     cls._cls_map[v.tag] = v
         return cls._cls_map
 
+    @classmethod
+    @contextlib.contextmanager
+    def class_map_context(cls, extra_classes):
+        og_map = cls._cls_map
+        try:
+            base_map = cls.get_class_map().copy()
+            base_map.update(extra_classes)
+            cls._cls_map = base_map
+            yield base_map
+        finally:
+            cls._cls_map = og_map
+
     base_element = None
     @classmethod
     def convert(cls, etree:ElementTree.Element, strip=True, converter=None, **extra_attrs):
@@ -688,10 +701,20 @@ class HTML(XMLBase):
         """
 
         ignored_styles = None
+        unsynced_properties = None
+        can_be_dynamic = True
         style_props = None
         context = HTMLManager
 
-        def __init__(self, tag, *elems, on_update=None, style=None, activator=None, **attrs):
+        @classmethod
+        def get_class_map_updates(cls):
+            return {}
+
+        @classmethod
+        def expanded_class_map(cls):
+            return HTML.class_map_context(cls.get_class_map_updates())
+
+        def __init__(self, tag, *elems, on_update=None, style=None, activator=None, can_be_dynamic=None, **attrs):
             self.tag = tag
             self._elems = [
                 self.context.sanitize_value(v)
@@ -721,6 +744,8 @@ class HTML(XMLBase):
             self._json_cache = None
             self._on_update_callbacks = self._canonicalize_callback_dict(on_update)
             self.activator = activator
+            if can_be_dynamic is not None:
+                self.can_be_dynamic = can_be_dynamic
         class _update_callbacks:
             """
             Simple set of callbacks both weakly keyed and default
@@ -1013,6 +1038,13 @@ class HTML(XMLBase):
                 if self._tree_cache not in root:
                     root.append(self._tree_cache)
             return self._tree_cache
+        def clean_props(self, attr_converter=None):
+            if attr_converter is None:
+                attr_converter = self.attr_converter
+            return type(self)(
+                [e.clean_props() if hasattr(e, 'clean_props') else e for e in self.elems],
+                **(attr_converter(self.attrs) if attr_converter is not None else self.attrs)
+            )
         def to_json(self, root=None, parent=None, attr_converter=None):
             tree = self.to_tree(root=root, parent=parent, attr_converter=attr_converter)
             return self.context.xml_to_json(tree)

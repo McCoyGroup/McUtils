@@ -805,7 +805,8 @@ def prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
         if fixed_atoms is not None:
             if fast_proj:
                 _, fixed_atoms, _ = np.intersect1d(at_list, fixed_atoms, return_indices=True)
-            A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
+            if len(fixed_atoms) > 0:
+                A_d = fill_disp_jacob_atom(A_d, [[x, 0] for x in fixed_atoms], base_shape=coords.shape[:-2])
 
         return proj, [a, misc.flatten_inds(A_d, [-3, -2])]
     else:
@@ -1689,7 +1690,11 @@ def internal_conversion_function(specs,
     return convert
 
 
-def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None, **opts):
+def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None,
+                                fixed_inverse_atoms=None,
+                                fixed_coords=None,
+                                **opts):
+    coords = np.asanyarray(coords)
     base_tensors = internal_conversion_function(specs, **opts)(
         coords,
         order=order
@@ -1699,7 +1704,10 @@ def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False,
             bt = [base_tensors]
         else:
             bt = base_tensors[1:]
-        return base_tensors, inverse_internal_coordinate_tensors(bt, coords, masses=masses, order=order)
+        return base_tensors, inverse_internal_coordinate_tensors(bt, coords, masses=masses, order=order,
+                                                                 fixed_atoms=fixed_inverse_atoms,
+                                                                 fixed_coords=fixed_coords
+                                                                 )
     else:
         return base_tensors
 

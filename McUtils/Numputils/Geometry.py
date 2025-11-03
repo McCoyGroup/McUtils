@@ -20,21 +20,17 @@ __all__ = [
     "triangle_converter",
     "triangle_area",
     "make_triangle",
-    "triangle_property",
-    "dihedral_distance",
-    "dihedral_distance_converter",
-    "dihedral_from_distance",
-    "dihedral_from_distance_converter",
-    "make_dihedron",
-    "dihedron_property",
-    "dihedral_completions",
-    "dihedral_completion_paths",
     "triangle_property_specifiers",
     "triangle_completions",
     "triangle_completion_paths",
+    "triangle_is_complete",
     "triangle_property_function",
+    "make_dihedron",
     "dihedron_property_specifiers",
-    "dihedron_property_function"
+    "dihedral_completions",
+    "dihedral_completion_paths",
+    "dihedron_is_complete",
+    "dihedron_property_function",
 ]
 
 
@@ -1345,7 +1341,8 @@ def _get_triangle_completions(tri:TriangleData):
             ('c', 'A', 'C'),
             ('c', 'B', 'C')
         ]
-
+def triangle_is_complete(tri:TriangleData):
+    return _check_bond_valid_triangle(tri)
 def _permutation_trie(comb_lists):
     _ = []
     trie = {}
@@ -1684,7 +1681,9 @@ def triangle_completion_paths(tdata: TriangleData, field_name,
         return args, res
     else:
         return res
-def triangle_property_function(sample_tri: TriangleData, field_name):
+def triangle_property_function(sample_tri: TriangleData, field_name,
+                               raise_on_missing=True
+                               ):
     if _tri_prop(sample_tri, field_name) is not None:
         if isinstance(field_name, str):
             field_name = _tdata_name_map[field_name]
@@ -1712,7 +1711,10 @@ def triangle_property_function(sample_tri: TriangleData, field_name):
                 return func(*(tdata[i] for i in inds))
             return convert
         else:
-            raise ValueError(f"can't get property '{field_name}' from {sample_tri}")
+            if raise_on_missing:
+                raise ValueError(f"can't get property '{field_name}' from {sample_tri}")
+            else:
+                return None
             # try to find conversions for subterms
 
 def dihedral_z_from_abcXYt(a, b, c, X, Y, tau, use_cos=False):
@@ -2729,6 +2731,14 @@ dihedron_angle_triples = {
     'y':(['Z', 'X', 'C'], ['A3', 'X4', 'B2']),
     'z':(['C4', 'B1', 'Y3'],['A3', 'B2', 'X4'])
 }
+dihedron_triangle_pair_dihedrals = {
+    (0, 1): ("Tb", "z", "Z", "Z2"),
+    (0, 2): ("Ta", "c", "C", "C4"),
+    (0, 3): ("Tx", "y", "Y", "Y3"),
+    (1, 2): ("Ty", "x", "X", "X4"),
+    (1, 3): ("Tc", "a", "A", "A3"),
+    (2, 3): ("Tz", "b", "B1", "B2"),
+}
 def dihedron_triangle_1(dd:DihedralTetrahedronData):
     return make_triangle(a=dd.a, b=dd.b, c=dd.x, A=dd.A, B=dd.B1, C=dd.X)
 def dihedron_triangle_2(dd:DihedralTetrahedronData):
@@ -3451,12 +3461,16 @@ def dihedral_b_completions_trie(a, x, A, X, B1,
     dihed_comps = _permutation_trie(
             [
                 ([x, a, Y3, C4, Tz], dihedral_z_from_ayXCt),
-                ([c, y, A3, X4, Tz], dihedral_z_from_ayXCt),
-                # a b c X Y Tb -> a c z X4 Y3 T
-                ([c, a, z, X4, Y3, Tz], dihedral_z_from_abcXYt),
-                ([c, a, z, x, Y3, Tz], dihedral_z_from_abcxYt),
-                ([a, c, z, y, X4, Tz], dihedral_z_from_abcxYt),
-                ([c, a, z, x, y, Tz], dihedral_z_from_abcxyt),
+                ([y, c, A3, X4, Tz], dihedral_z_from_ayXCt),
+                # a b c X Y Tb -> z a c X4 Y3 T
+                ([a, z, c, Y3, X4, Tz], dihedral_z_from_abcXYt),
+                ([a, z, c, y, X4, Tz], dihedral_z_from_abcxYt),
+                ([c, z, a, x, Y3, Tz], dihedral_z_from_abcxYt),
+                ([a, z, c, y, x, Tz], dihedral_z_from_abcxyt),
+                # x b y A C Tb -> x a y C4 Z2 T
+                ([y, z, x, A3, C4, Tz], dihedral_z_from_abcXYt),
+                ([y, z, x, a, C4, Tz], dihedral_z_from_abcxYt),
+                ([x, z, y, c, A3, Tz], dihedral_z_from_abcxYt)
             ]
         )
     return _trie_merge(
@@ -3482,24 +3496,31 @@ class DihedronCoordinateType(enum.Enum):
     Angle = "angle"
     Dihedral = "dihedral"
 def dihedral_completions_trie(dd, field_name, return_args=True):
-    if field_name == 'a':
+    if field_name == 'a': # (01)
+        #       (21)  (20)                     (31)  (30)
         args = [dd.b, dd.x, dd.B1, dd.X, dd.A, dd.y, dd.z, dd.Y3, dd.Z, dd.A3, dd.c, dd.Y, dd.Z2, dd.B2, dd.X4, dd.Tc]
         completion_type = DihedronCoordinateType.Distance
-    elif field_name == 'b':
+    elif field_name == 'b': # (1, 2)
+        #      (01)   (02) (021)  (012) (102)  (13)  (23)  (123) (213) (132)  (03)  (103)  (203)
         args = [dd.a, dd.x, dd.A, dd.X, dd.B1, dd.y, dd.c, dd.Y, dd.C, dd.B2, dd.z, dd.Y3, dd.C4, dd.A3, dd.X4, dd.Tz]
         completion_type = DihedronCoordinateType.Distance
-    elif field_name == 'c':
-        args = [dd.y, dd.b, dd.Y, dd.B2, dd.C, dd.x, dd.z, dd.X4, dd.Z2, dd.C4, dd.a, dd.X, dd.Z, dd.Y3, dd.B1, dd.Ta]
+    elif field_name == 'c': # (2,3)
+        #       (13)  (12)                     (03)  (02)
+        args = [dd.y, dd.b, dd.Y, dd.B2, dd.C, dd.z, dd.x, dd.Z2, dd.X4, dd.C4, dd.a, dd.Z, dd.X, dd.Y3, dd.B1, dd.Ta]
         completion_type = DihedronCoordinateType.Distance
-    elif field_name == 'x':
+    elif field_name == 'x': # (0,2)
+        #       (10)  (12)                     (30)  (32)
         args = [dd.a, dd.b, dd.A, dd.B1, dd.X, dd.z, dd.c, dd.Z2, dd.C4, dd.X4, dd.y, dd.Z, dd.C, dd.A3, dd.B2, dd.Ty]
         completion_type = DihedronCoordinateType.Distance
-    elif field_name == 'y':
+    elif field_name == 'y': # (13)
+        #       (21)  (23)                     (01)  (03)
         args = [dd.b, dd.c, dd.B2, dd.C, dd.Y, dd.a, dd.z, dd.A3, dd.Z, dd.Y3, dd.x, dd.A, dd.Z2, dd.B1, dd.C4, dd.Tx]
         completion_type = DihedronCoordinateType.Distance
-    elif field_name == 'z':
+    elif field_name == 'z': # (03)
+        #       (10)  (13)                      (20)  (23)
         args = [dd.a, dd.y, dd.A3, dd.Y3, dd.Z, dd.x, dd.c, dd.X4, dd.C4, dd.Z2, dd.b, dd.X, dd.C, dd.A, dd.Y, dd.Tb]
         completion_type = DihedronCoordinateType.Distance
+    #TODO: check angle coordinate ordering is always clean...
     elif field_name == dd.Z:
         args = [dd.X, dd.C, dd.Tb, dd.z, dd.a, dd.y, dd.A3, dd.Y3]
         completion_type = DihedronCoordinateType.Angle
@@ -3598,14 +3619,20 @@ def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
         return args, res
     else:
         return res
-# def dihedron_property(ddata: DihedralTetrahedronData, field_name):
-#     (args, ctype), conversion_path = dihedral_completion_paths(ddata, field_name, return_trie=True, return_args=True, positions=True)
-#     if isinstance(conversion_path, list) and isinstance(conversion_path[0], int):
-#         conversion_path = list(sorted(conversion_path, key=lambda x:args.index(x)))
-#         return args, conversion_path, field_name
-#     else:
-#         conversion_path = dihedral_completion_paths(ddata, field_name, return_trie=False)
-#         raise ValueError(f"can't obtain {field_name}, possible completions are {conversion_path} for {ddata}")
+def dihedron_is_complete(dd: DihedralTetrahedronData):
+    tris = [
+        dihedron_triangle_1(dd),
+        dihedron_triangle_2(dd),
+        dihedron_triangle_3(dd),
+        dihedron_triangle_4(dd)
+    ]
+    comps = [triangle_is_complete(t) for t in tris]
+    for i,j in itertools.combinations(range(4), 2):
+        if comps[i] and comps[j]:
+            for x in dihedron_triangle_pair_dihedrals[(i,j)]:
+                if dihedron_property(dd, x, allow_completion=False) is not None:
+                    return True
+    return False
 
 def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name,
                                disallowed_conversions=None,

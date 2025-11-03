@@ -99,7 +99,14 @@ class LayoutManagerWidget extends widgets_1.Widget {
     }
     processMessage(msg) {
         super.processMessage(msg);
-        this._view.processPhosphorMessage(msg);
+        try {
+            //@ts-ignore
+            this._view.processPhosphorMessage(msg);
+        }
+        catch (_a) {
+            //@ts-ignore
+            this._view.processLuminoMessage(msg);
+        }
     }
     get widgets() {
         return this.layout.widgets;
@@ -140,7 +147,7 @@ class ActiveHTMLModel extends base_1.DOMWidgetModel {
         }
     }
     defaults() {
-        return Object.assign(Object.assign({}, super.defaults()), { _model_name: ActiveHTMLModel.model_name, _model_module: ActiveHTMLModel.model_module, _model_module_version: ActiveHTMLModel.model_module_version, _view_name: ActiveHTMLModel.view_name, _view_module: ActiveHTMLModel.view_module, _view_module_version: ActiveHTMLModel.view_module_version, tagName: 'div', children: [], classList: [], innerHTML: "", textContent: "", _bodyType: "", _debugPrint: false, styleDict: {}, elementAttributes: {}, id: "", value: "", trackInput: false, continuousUpdate: true, eventPropertiesDict: {}, defaultEventProperties: [
+        return Object.assign(Object.assign({}, super.defaults()), { _model_name: ActiveHTMLModel.model_name, _model_module: ActiveHTMLModel.model_module, _model_module_version: ActiveHTMLModel.model_module_version, _view_name: ActiveHTMLModel.view_name, _view_module: ActiveHTMLModel.view_module, _view_module_version: ActiveHTMLModel.view_module_version, tagName: 'div', children: [], classList: [], innerHTML: "", textContent: "", _bodyType: "", _debugPrint: false, styleDict: {}, unsyncedProperties: [], elementAttributes: {}, id: "", value: "", trackInput: false, continuousUpdate: true, eventPropertiesDict: {}, defaultEventProperties: [
                 "bubbles", "cancelable", "composed",
                 "target", "timestamp", "type",
                 "key", "repeat",
@@ -357,6 +364,7 @@ class ActiveHTMLView extends base_1.DOMWidgetView {
     setStyle(style, oldStyle) { } // null override
     setStyles() {
         let elementStyles = this.model.get("styleDict");
+        let unsyncedProperties = this.model.get("unsyncedProperties");
         let keys = Object.keys(elementStyles);
         if (keys.length === 0) {
             this._currentStyles.clear();
@@ -368,7 +376,7 @@ class ActiveHTMLView extends base_1.DOMWidgetView {
                 console.log(this.el, "Element Styles:", elementStyles);
             }
             return ActiveHTMLView._each(keys, (prop) => {
-                if (elementStyles.hasOwnProperty(prop)) {
+                if (elementStyles.hasOwnProperty(prop) && !unsyncedProperties.includes(prop)) {
                     // console.log(">>>", prop, elementStyles[prop], typeof prop);
                     this.el.style.setProperty(prop, elementStyles[prop]);
                     // console.log("<<<", prop, this.el.style.getPropertyValue(prop));
@@ -378,7 +386,7 @@ class ActiveHTMLView extends base_1.DOMWidgetView {
         }
     }
     updateStyles() {
-        return this.setStyles().then(() => this.removeStyles);
+        return this.setStyles().then(() => this.removeStyles());
     }
     setClasses() {
         if (this.model.get("_debugPrint")) {
@@ -643,11 +651,12 @@ class ActiveHTMLView extends base_1.DOMWidgetView {
     }
     updateAttributes() {
         let attrs = this.model.get('elementAttributes');
+        let unsyncedProperties = this.model.get('unsyncedProperties');
         let debug = this.model.get("_debugPrint");
         if (debug) {
             console.log(this.el, "Element Properties:", attrs);
         }
-        return ActiveHTMLView._each(Object.keys(attrs), (prop) => this._updateAttribute(prop, attrs));
+        return ActiveHTMLView._each(Object.keys(attrs), (prop) => (!unsyncedProperties.includes(prop) && this._updateAttribute(prop, attrs)));
     }
     notifyAttrUpdate(prop) {
         let key = "view-change:" + prop;
@@ -1070,4 +1079,4 @@ module.exports = JSON.parse('{"name":"ActiveHTMLWidget","version":"0.1.0","descr
 /***/ })
 
 }]);
-//# sourceMappingURL=lib_widget_js.30a16d4a69e1df38e624.js.map
+//# sourceMappingURL=lib_widget_js.dbc1be6f74ca02cd16b5.js.map

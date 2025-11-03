@@ -112,7 +112,7 @@ __webpack_require__.d(exports, {
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"vendors-node_modules_jquery_dist_jquery_js":"4405729320014649bb98","lib_widget_js":"30a16d4a69e1df38e624","lib_index_js":"bf6ffa79db984e284e73","lib_plugin_js":"b1c0c1ef97bb24e5f05c","css_index_css":"0a349ad0ce82fa2494b2","vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js":"cae8f50ef89487b19021"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"vendors-node_modules_jquery_dist_jquery_js":"4405729320014649bb98","lib_widget_js":"dbc1be6f74ca02cd16b5","lib_index_js":"bf6ffa79db984e284e73","lib_plugin_js":"b1c0c1ef97bb24e5f05c","css_index_css":"0a349ad0ce82fa2494b2","vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js":"cae8f50ef89487b19021"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -395,7 +395,7 @@ __webpack_require__.d(exports, {
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
 /******/ 			"webpack/sharing/consume/default/@jupyter-widgets/base": () => (loadSingletonVersionCheck("default", "@jupyter-widgets/base", [,[1,4,0,0],[1,3,0,0],[1,2,0,0],[1,1,1,10],1,1,1])),
-/******/ 			"webpack/sharing/consume/default/@lumino/widgets": () => (loadSingletonVersionCheck("default", "@lumino/widgets", [1,2,0,1])),
+/******/ 			"webpack/sharing/consume/default/@lumino/widgets": () => (loadSingletonVersionCheck("default", "@lumino/widgets", [1,2,3,1,,"alpha",0])),
 /******/ 			"webpack/sharing/consume/default/@lumino/algorithm": () => (loadSingletonVersionCheck("default", "@lumino/algorithm", [1,2,0,0])),
 /******/ 			"webpack/sharing/consume/default/@lumino/messaging": () => (loadSingletonVersionCheck("default", "@lumino/messaging", [1,2,0,0])),
 /******/ 			"webpack/sharing/consume/default/bootstrap/bootstrap": () => (loadStrictVersionCheckFallback("default", "bootstrap", [1,5,1,3], () => (__webpack_require__.e("vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js").then(() => (() => (__webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js")))))))
@@ -539,4 +539,4 @@ __webpack_require__.d(exports, {
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=remoteEntry.a0c0953eb91f05888297.js.map
+//# sourceMappingURL=remoteEntry.77e0a841fc6d6364b1d3.js.map

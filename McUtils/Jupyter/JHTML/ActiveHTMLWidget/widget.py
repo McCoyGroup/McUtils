@@ -20,6 +20,7 @@ class HTMLElement(DOMWidget):
     tagName = Unicode('div').tag(sync=True)
     classList = List().tag(sync=True)
     styleDict = Dict().tag(sync=True)
+    unsyncedProps = List().tag(sync=True)
     elementAttributes = Dict().tag(sync=True, **widget_serialization)
     innerHTML = Unicode('').tag(sync=True)
     textContent = Unicode('').tag(sync=True)
