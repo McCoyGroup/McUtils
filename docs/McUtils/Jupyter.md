@@ -383,17 +383,18 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-624f0e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-624f0e"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-35194d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-35194d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-624f0e" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-35194d" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
+- [WidgetConstruction](#WidgetConstruction)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-91b1e8" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-91b1e8"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-7cb5fd" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7cb5fd"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-91b1e8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7cb5fd" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -426,6 +427,15 @@ a {
   text-variant:none;
 }
         """)[0].tostring()
+```
+
+#### <a name="WidgetConstruction">WidgetConstruction</a>
+```python
+    def test_WidgetConstruction(self):
+        from Psience.Molecools import Molecule
+        water = Molecule.from_string('O', 'smi')
+        widg = interactive.JHTML.Div(water.plot(backend='x3d').figure.to_x3d(), dynamic=True)
+        print(widg.elem.children[0].children)
 ```
 
  </div>

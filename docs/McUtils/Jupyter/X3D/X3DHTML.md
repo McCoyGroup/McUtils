@@ -270,7 +270,15 @@ X3DViewpointNode: X3DViewpointNode
 X3DVolumeDataNode: X3DVolumeDataNode
 X3DVolumeRenderStyleNode: X3DVolumeRenderStyleNode
 ```
-
+<a id="McUtils.Jupyter.X3D.X3DHTML.get_x3d_map" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+get_x3d_map(cls): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L10?message=Update%20Docs)]
+</div>
  </div>
 </div>
 

@@ -5,7 +5,7 @@
 </div>
 
 ```python
-vec_rescale(vecs, target_range=None, cur_range=None, axis=-1): 
+vec_rescale(vecs, target_range=None, cur_range=None, midpoint=None, axis=-1): 
 ```
 
 

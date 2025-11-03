@@ -170,136 +170,147 @@ Chained conversions are not _currently_ supported, but might well become support
 [get_internal_cartesian_conversion](Coordinerds/Internals/get_internal_cartesian_conversion.md)   
 </div>
    <div class="col" markdown="1">
-[zmatrix_unit_convert](Coordinerds/ZMatrices/zmatrix_unit_convert.md)   
+[validate_internals](Coordinerds/Internals/validate_internals.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[zmatrix_unit_convert](Coordinerds/ZMatrices/zmatrix_unit_convert.md)   
+</div>
    <div class="col" markdown="1">
 [zmatrix_indices](Coordinerds/ZMatrices/zmatrix_indices.md)   
 </div>
    <div class="col" markdown="1">
 [num_zmatrix_coords](Coordinerds/ZMatrices/num_zmatrix_coords.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [zmatrix_embedding_coords](Coordinerds/ZMatrices/zmatrix_embedding_coords.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [set_zmatrix_embedding](Coordinerds/ZMatrices/set_zmatrix_embedding.md)   
 </div>
    <div class="col" markdown="1">
 [enumerate_zmatrices](Coordinerds/ZMatrices/enumerate_zmatrices.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [extract_zmatrix_internals](Coordinerds/ZMatrices/extract_zmatrix_internals.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [extract_zmatrix_values](Coordinerds/ZMatrices/extract_zmatrix_values.md)   
 </div>
    <div class="col" markdown="1">
 [parse_zmatrix_string](Coordinerds/ZMatrices/parse_zmatrix_string.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [format_zmatrix_string](Coordinerds/ZMatrices/format_zmatrix_string.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [validate_zmatrix](Coordinerds/ZMatrices/validate_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
 [chain_zmatrix](Coordinerds/ZMatrices/chain_zmatrix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [center_bound_zmatrix](Coordinerds/ZMatrices/center_bound_zmatrix.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [spoke_zmatrix](Coordinerds/ZMatrices/spoke_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
 [attached_zmatrix_fragment](Coordinerds/ZMatrices/attached_zmatrix_fragment.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [functionalized_zmatrix](Coordinerds/ZMatrices/functionalized_zmatrix.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [add_missing_zmatrix_bonds](Coordinerds/ZMatrices/add_missing_zmatrix_bonds.md)   
 </div>
    <div class="col" markdown="1">
 [bond_graph_zmatrix](Coordinerds/ZMatrices/bond_graph_zmatrix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [reindex_zmatrix](Coordinerds/ZMatrices/reindex_zmatrix.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [sort_complex_attachment_points](Coordinerds/ZMatrices/sort_complex_attachment_points.md)   
 </div>
    <div class="col" markdown="1">
 [complex_zmatrix](Coordinerds/ZMatrices/complex_zmatrix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [coordinate_label](Coordinerds/Labels/coordinate_label.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [get_coordinate_label](Coordinerds/Labels/get_coordinate_label.md)   
 </div>
    <div class="col" markdown="1">
 [mode_type](Coordinerds/Labels/mode_type.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [get_mode_labels](Coordinerds/Labels/get_mode_labels.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [coordinate_sorting_key](Coordinerds/Labels/coordinate_sorting_key.md)   
 </div>
    <div class="col" markdown="1">
 [sort_internal_coordinates](Coordinerds/Labels/sort_internal_coordinates.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [get_stretch_angles](Coordinerds/Generators/get_stretch_angles.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [get_angle_dihedrals](Coordinerds/Generators/get_angle_dihedrals.md)   
 </div>
    <div class="col" markdown="1">
 [get_angle_stretches](Coordinerds/Generators/get_angle_stretches.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [get_dihedral_stretches](Coordinerds/Generators/get_dihedral_stretches.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [get_stretch_angle_dihedrals](Coordinerds/Generators/get_stretch_angle_dihedrals.md)   
 </div>
    <div class="col" markdown="1">
 [get_stretch_coordinate_system](Coordinerds/Generators/get_stretch_coordinate_system.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PrimitiveCoordinatePicker](Coordinerds/Generators/PrimitiveCoordinatePicker.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [prune_internal_coordinates](Coordinerds/Pruning/prune_internal_coordinates.md)   
 </div>
    <div class="col" markdown="1">
 [RedundantCoordinateGenerator](Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -327,9 +338,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-08c352" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-08c352"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-b4cfe7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b4cfe7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-08c352" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b4cfe7" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -364,13 +375,14 @@ Chained conversions are not _currently_ supported, but might well become support
 - [GenericInternals](#GenericInternals)
 - [Permutations](#Permutations)
 - [DistsFromInternals](#DistsFromInternals)
-- [ZMatrixInterConversion](#ZMatrixInterConversion)
+- [InternalInterConversion](#InternalInterConversion)
+- [SmoothCoordinateInterpolation](#SmoothCoordinateInterpolation)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-49b9ce" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-49b9ce"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-f6fd8b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f6fd8b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-49b9ce" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f6fd8b" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1202,12 +1214,12 @@ class ConverterTest(TestCase):
         pprint.pprint(conv)
 ```
 
-#### <a name="ZMatrixInterConversion">ZMatrixInterConversion</a>
+#### <a name="InternalInterConversion">InternalInterConversion</a>
 ```python
-    def test_ZMatrixInterConversion(self):
-
-        # import warnings
-        # warnings.filterwarnings("error")
+    def test_InternalInterConversion(self):
+        import warnings
+        warnings.filterwarnings("error")
+        print()
 
         import McUtils.Coordinerds as coordops
         import McUtils.Numputils as nput
@@ -1228,10 +1240,19 @@ class ConverterTest(TestCase):
             # (0, 1, 2, 3),
             (3, 0, 1, 2)
         ]
+        new_spec2 = [
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 0, 2),
+            (1, 0, 3),
+            (0, 1, 2, 3),
+        ]
 
-        import warnings
-        warnings.filterwarnings('error')
-        print()
+        coordops.validate_internals(spec)
+        coordops.validate_internals(new_spec)
+        self.assertIs(coordops.validate_internals(new_spec2, raise_on_failure=False)[0], False)
+
         conv = coordops.find_internal_conversion(spec, new_spec)
         pts = np.random.rand(4, 3)
         base = nput.internal_coordinate_tensors(pts, spec, order=0)[0]
@@ -1255,6 +1276,92 @@ class ConverterTest(TestCase):
 
         carts = get_internal_cartesian_conversion(spec)
         print(carts(base))
+```
+
+#### <a name="SmoothCoordinateInterpolation">SmoothCoordinateInterpolation</a>
+```python
+    def test_SmoothCoordinateInterpolation(self):
+
+        minimum_1 = [[-1.23525126,  0.3464957,  0.],
+                     [ 1.23731373, -0.34878849, 0.],
+                     [-2.80038974, -1.00144666, 0.],
+                     [ 2.80265588,  0.9988826,  0.]]
+        zm_1 = coordops.functionalized_zmatrix(
+            2,
+            single_atoms=[0, 1]
+        )
+        specs_1 = coordops.extract_zmatrix_internals(zm_1)
+
+        minimum_2 = [[ 0.,         0.,  1.53899513],
+                     [ 0.,         0., -0.89818466],
+                     [ 1.78011952, 0., -1.92243141],
+                     [-1.78011952, 0., -1.92243141]]
+        zm_2 = coordops.functionalized_zmatrix(
+            2,
+            ethyl_positions=[1]
+        )
+        specs_2 = coordops.extract_zmatrix_internals(zm_2)
+
+        ics_11 = nput.internal_coordinate_tensors(
+            minimum_1,
+            specs_1,
+            order=0
+        )[0]
+
+        ics_21 = nput.internal_coordinate_tensors(
+            minimum_2,
+            specs_1,
+            order=0
+        )[0]
+
+        ics_22 = nput.internal_coordinate_tensors(
+            minimum_2,
+            specs_2,
+            order=0
+        )[0]
+        ics_12 = nput.internal_coordinate_tensors(
+            minimum_1,
+            specs_2,
+            order=0
+        )[0]
+
+
+        print(ics_22, ics_12)
+        return
+
+        # print(specs_1)
+        # print(ics_11)
+        # print(specs_2)
+        # print(ics_22)
+
+        # _, dist_conv2 = get_internal_distance_conversion(specs_2)
+        # print(nput.distance_matrix(minimum_2, return_triu=True))
+        # print(dist_conv2(ics_22))
+        # return
+
+        iterp_x = np.linspace(0, 1, 10)
+        ic_interp_1 = ics_11[np.newaxis, :] * (1 - iterp_x[:, np.newaxis]) + ics_21[np.newaxis, :] * iterp_x[:, np.newaxis]
+        ic_interp_2 = ics_12[np.newaxis, :] * (1 - iterp_x[:, np.newaxis]) + ics_22[np.newaxis, :] * iterp_x[:, np.newaxis]
+
+        d_ic_1 = ic_interp_1 - ics_11[np.newaxis, :]
+        d_ic_2 = ic_interp_2 - ics_22[np.newaxis, :]
+
+        interp_norms = np.array([
+            np.linalg.norm(d_ic_1, axis=1),
+            np.linalg.norm(d_ic_2, axis=1)
+        ])
+        which_interp = np.argmin(interp_norms, axis=0)
+        conv_1 = coordops.get_internal_cartesian_conversion(specs_1)
+        conv_2 = coordops.get_internal_cartesian_conversion(specs_2)
+        geoms = np.concatenate(
+            [
+                conv_1(ic_interp_1[which_interp == 0]),
+                conv_2(ic_interp_2[which_interp == 1]),
+            ], axis=0)
+        # geoms = conv_1(ic_interp_1)
+
+        import pprint
+        pprint.pprint(geoms.tolist())
 ```
 
  </div>
