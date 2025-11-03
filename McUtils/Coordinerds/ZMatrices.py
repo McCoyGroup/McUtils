@@ -721,11 +721,27 @@ def functionalized_zmatrix(
             key = [z for z in zm if z[0] == atom]
             bonds = [z[0] for z in zm if z[1] == atom]
             if len(key) > 0:
+                key = key[0]
+                # worth speeding this up I think...
+                adj_bonds = [
+                    z[0] for z in zm
+                    if (
+                            z[0] != atom
+                            and z[0] not in bonds
+                            and z[0] not in key
+                            and (z[1] in bonds or z[1] in key)
+                    )
+                ]
+                # remz = np.setdiff1d([z[0] for z in zm], list(key) + bonds + adj_bonds)
                 key = [
                     bonds[-(k+1)]
                         if k < 0 and abs(k) <= len(bonds) else
+                    adj_bonds[0] # we only have four positions to try, gotta terminate here I think...
+                        if k < 0 and len(adj_bonds) > 0 else
+                    # remz[0]
+                    #     if k < 0 and len(remz) > 0 else
                     k
-                    for k in key[0][:-1]
+                    for k in key[:-1]
                 ]
                 zm = zm + [
                     [len(zm)] + key

@@ -214,12 +214,19 @@ def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None, return_norms=Fals
     else:
         return vecs/e_norms
 
-def vec_rescale(vecs, target_range=None, cur_range=None, axis=-1):
+def vec_rescale(vecs, target_range=None, cur_range=None, midpoint=None, axis=-1):
     vecs = np.asanyarray(vecs)
     if cur_range is None:
         cur_mins = np.expand_dims(np.min(vecs, axis=axis), axis)
         cur_max = np.expand_dims(np.max(vecs, axis=axis), axis)
-        cur_range = cur_max - cur_mins
+        if midpoint is not None:
+            min_diff = midpoint - cur_mins
+            max_diff = cur_max - midpoint
+            abs_diff = np.max([np.abs(min_diff), max_diff], axis=0)
+            cur_mins = midpoint - abs_diff
+            cur_range = 2 * abs_diff
+        else:
+            cur_range = cur_max - cur_mins
     else:
         cur_mins = cur_range[0]
         cur_range = cur_range[1] - cur_range[0]

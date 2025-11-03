@@ -18,7 +18,9 @@ __all__ = [
     "internal_distance_convert",
     "get_internal_triangles_and_dihedrons",
     "find_internal_conversion",
-    "get_internal_cartesian_conversion"
+    "get_internal_cartesian_conversion",
+    "validate_internals",
+    # "InternalCoordinateSet"
 ]
 
 def canonicalize_internal(coord, return_sign=False):
@@ -70,13 +72,14 @@ def is_coordinate_list_like(clist):
         is_valid_coordinate(c) for c in clist
     )
 
-class InternalsSet:
-    def __init__(self, coord_specs:'list[tuple[int]]', prepped_data=None):
+class InternalCoordinateSet:
+    def __init__(self, coord_specs:'list[tuple[int]]', prepped_data=None, triangulation=None):
         self._specs = tuple(coord_specs) if coord_specs is not None else coord_specs
         if prepped_data is not None:
             self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = prepped_data
         else:
             self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = self.prep_coords(coord_specs)
+        self._triangulation = triangulation
 
     @property
     def specs(self):
@@ -202,10 +205,18 @@ class InternalsSet:
         else:
             return cls(None, prepped_data=[self._indicator, self.coordinate_indices, self.ind_map, int_map])
 
+    def get_triangulation(self):
+        return get_internal_triangles_and_dihedrons(self.specs, canonicalize=False)
+    @property
+    def triangulation(self):
+        if self._triangulation is None:
+            self._triangulation = self.get_triangulation()
+        return self._triangulation
+
 def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False):
     if canonicalize:
         coord = canonicalize_internal(coord)
-    if isinstance(coords, InternalsSet):
+    if isinstance(coords, InternalCoordinateSet):
         return coords.find(coord, allow_negation=allow_negation)
     else:
         try:
@@ -231,7 +242,7 @@ def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, a
             return idx
 
 def permute_internals(coords, perm, canonicalize=True):
-    if isinstance(coords, InternalsSet):
+    if isinstance(coords, InternalCoordinateSet):
         return coords.permute(perm, canonicalize=canonicalize)
     else:
         return [
@@ -284,7 +295,7 @@ def coordinate_sign(old, new, canonicalize=True):
         raise ValueError(f"can't compare coordinates {old} and {new}")
 
 def coordinate_indices(coords):
-    if isinstance(coords, InternalsSet):
+    if isinstance(coords, InternalCoordinateSet):
         return coords.coordinate_indices
     else:
         return tuple(sorted(
@@ -308,7 +319,7 @@ def _get_pregen_ind(dm_data):
         dm_data.mapped_pos
     )
 def get_internal_distance_conversion_spec(internals, canonicalize=True):
-    if isinstance(internals, InternalsSet):
+    if isinstance(internals, InternalCoordinateSet):
         internals = internals.specs
     dists:dict[tuple[int,int], dm_conv_data] = {}
     # we do an initial pass to separate out dists, angles, and dihedrals
@@ -971,7 +982,7 @@ def get_internal_triangles_and_dihedrons(internals,
                         [(a, l, m), ("a", "b", "x", "A", "B1", "X")],
                         [(l, m, n), ("b", "c", "y", "B2", "C", "Y")],
                         [(a, l, n), ("a", "y", "z", "A3", "Y3", "Z")],
-                        [(a, m, n), ("x", "c", "z", "X4", "C4", "Z4")]
+                        [(a, m, n), ("x", "c", "z", "X4", "C4", "Z2")]
                     ]:
                         C1 = canonicalize_internal((x, y, z))
                         A1 = canonicalize_internal((x, z, y))
@@ -1062,7 +1073,7 @@ def _triangle_conversion_function(inds, tri, coord):
             idx.append(ix)
     b = canonicalize_internal(idx)
     target = nput.triangle_property_specifiers(b)
-    return nput.triangle_property_function(tri, target['name'])
+    return nput.triangle_property_function(tri, target['name'], raise_on_missing=False)
 def _dihedral_conversion_function(inds, dihed, coord):
     idx = []
     for i in coord:
@@ -1073,7 +1084,7 @@ def _dihedral_conversion_function(inds, dihed, coord):
         else:
             idx.append(ix)
     b = canonicalize_internal(idx)
-    return nput.dihedron_property_function(dihed, b)
+    return nput.dihedron_property_function(dihed, b, raise_on_missing=False)
 
 int_conv_data = collections.namedtuple("int_conv_data",
                                       ['input_indices', 'pregen_indices', 'conversion'])
@@ -1085,11 +1096,13 @@ def find_internal_conversion(internals, targets,
     smol = nput.is_int(targets[0])
     if smol: targets = [targets]
     if triangles_and_dihedrons is None:
-        if isinstance(internals, InternalsSet):
+        if isinstance(internals, InternalCoordinateSet):
+            triangles_and_dihedrons = internals.triangulation
             internals = internals.specs
-        if canonicalize:
-            internals = [canonicalize_internal(c) for c in internals]
-        triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
+        else:
+            if canonicalize:
+                internals = [canonicalize_internal(c) for c in internals]
+            triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
     triangles, dihedrals = triangles_and_dihedrons
     conversions = []
     for target_coord in targets:
@@ -1215,5 +1228,33 @@ def get_internal_cartesian_conversion(
         dm = np.zeros(base_shape + (n, n))
         dm[..., rows, cols] = internal_dists
         dm[..., cols, rows] = internal_dists
-        return nput.points_from_distance_matrix(dm)
+        new_points = nput.points_from_distance_matrix(dm)
+        if new_points.shape[-1] < 3:
+            pad_shape = new_points.shape[:-1] + (3-new_points.shape[-1],)
+            new_points = np.concatenate([new_points, np.zeros(pad_shape, dtype=new_points.dtype)], axis=-1)
+        return new_points
     return convert
+
+def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure=True):
+    # detect whether or not they may be interconverted freely
+    if triangles_and_dihedrons is None:
+        if isinstance(internals, InternalCoordinateSet):
+            triangles_and_dihedrons = internals.triangulation
+            internals = internals.specs
+        else:
+            triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
+    triangle, dihedrons = triangles_and_dihedrons
+    for k,t in triangle.items():
+        if not nput.triangle_is_complete(t):
+            if raise_on_failure:
+                raise ValueError(f"triangle cannot be completed, {k}:{t}")
+            else:
+                return False, (k,t)
+    for k,t in dihedrons.items():
+        if not nput.dihedron_is_complete(t):
+            if raise_on_failure:
+                raise ValueError(f"dihedral tetrahedron cannot be completed, {k}:{t}")
+            else:
+                return False, (k,t)
+    return True, None
+

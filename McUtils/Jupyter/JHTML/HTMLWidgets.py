@@ -23,9 +23,11 @@ class ActiveHTMLWrapper:
                  value=None,
                  style=None,
                  event_handlers=None,
+                 inner_html=None,
                  javascript_handles=None,
                  onevents=None,
                  data=None,
+                 unsynced_properties=None,
                  debug_pane=None,
                  track_value=None,
                  continuous_update=None,
@@ -67,6 +69,9 @@ class ActiveHTMLWrapper:
                     attrs['jsAPI'] = javascript_handles['api'].elem
                     del javascript_handles['api']
                 attrs['jsHandlers'] = javascript_handles
+
+        if inner_html is not None:
+            attrs['innerHTML'] = inner_html
 
         if self.base is not None:
             shadow_el = self.base(cls=cls, style=style, **attributes)
@@ -190,6 +195,9 @@ class ActiveHTMLWrapper:
         if data is not None:
             attrs['exportData'] = data
 
+        if unsynced_properties is not None:
+            attrs['unsyncedProperties'] = unsynced_properties
+
         self.elem = HTMLElement(**attrs)
         self.link(self.elem)
         self._html_cache = None
@@ -234,6 +242,7 @@ class ActiveHTMLWrapper:
         elif isinstance(x, str):
             return cls.canonicalize_widget(HTML.parse(x, strict=False))
         elif isinstance(x, HTML.XMLElement):
+            # with x.expanded_class_map():
             subwrapper = ActiveHTMLWrapper.from_HTML(x)
             elem = subwrapper.elem
             cls._subwrappers[elem] = subwrapper
@@ -245,6 +254,31 @@ class ActiveHTMLWrapper:
                 x, type(x)
             ))
     @classmethod
+    def clean_props(cls, props, to_str=False):
+        return {
+            k:cls._prep_val(v, to_str=to_str)
+            for k,v in props.items()
+        }
+    @classmethod
+    def _prep_val(cls, y, to_str=False):
+        if hasattr(y, 'to_widget'):
+            while hasattr(y, 'to_widget'):
+                y = y.to_widget()
+            if hasattr(y, 'tostring'):
+                y = y.tostring()
+        elif not isinstance(y, HTML.XMLElement):
+            if hasattr(y, 'tostring'):
+                y = y.tostring()
+            elif hasattr(y, 'tolist'):
+                y = y.tolist()
+            elif isinstance(y, dict):
+                y = cls.clean_props(y, to_str=to_str)
+        elif to_str:
+            y = y.tostring()
+        else:
+            y = y.clean_props()
+        return y
+    @classmethod
     def from_HTML(cls, x:HTML.XMLElement, event_handlers=None, debug_pane=None, **props):
         attrs = x.attrs
         props["event_handlers"] = event_handlers
@@ -254,18 +288,27 @@ class ActiveHTMLWrapper:
                 props[key] = attrs[target]
                 del attrs[target]
         props = dict(props, **attrs)
-        body = []
-        for y in x.elems:
-            if hasattr(y, 'tostring'):
-                # if hasattr(y, 'to_widget'):
-                #     raise ValueError(y)
-                # try:
-                y = y.tostring()
-                # except:
-                #     raise Exception(y)
-            body.append(y)
-
-        new = cls(*body, tag=x.tag, **props)
+        if x.can_be_dynamic:
+            body = []
+            for y in x.elems:
+                if hasattr(y, 'to_widget'):
+                    while hasattr(y, 'to_widget'):
+                        y = y.to_widget()
+                elif not isinstance(y, HTML.XMLElement):
+                    if hasattr(y, 'tostring'):
+                        y = y.tostring()
+                    elif hasattr(y, 'tolist'):
+                        y = y.tolist()
+                else:
+                    y = y.clean_props()
+                body.append(y)
+            new = cls(*body, tag=x.tag, unsynced_properties=x.unsynced_properties, **cls.clean_props(props))
+        else:
+            new = cls(
+                tag=x.tag, unsynced_properties=x.unsynced_properties,
+                inner_html="\n".join([y.tostring() for y in x.elems]),
+                **props
+            )
         return new
 
     @classmethod

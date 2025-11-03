@@ -2184,7 +2184,7 @@ class NumputilsTests(TestCase):
         print(t)
         print(t_expansion)
 
-    @debugTest
+    @validationTest
     def test_MoreGeometry(self):
         np.random.seed(123123)
         pts = np.random.rand(3, 3)
@@ -2299,3 +2299,57 @@ class NumputilsTests(TestCase):
             print(Z, val)
         # X, _ = nput.dihedron_property(dd, 'X')
         # print(Z, nput.pts_angles(pts[0], pts[1], pts[3], return_crosses=False))
+
+    @debugTest
+    def test_InternalTensorsFixedAtoms(self):
+
+        np.random.seed(153234)
+        points = np.random.rand(32, 3)
+
+        specs = [
+            (22, 19, 18, 21),
+            (18, 19),
+            (18, 29),
+            (19, 18, 29),
+            (26, 29),
+            (18, 29, 26),
+            (19, 18, 29, 26),
+            (18, 22),
+            (19, 18, 22),
+            (22, 18, 19, 29),
+            (22, 23),
+            (23, 22, 26),
+            (23, 22, 26, 29),
+            (22, 24),
+            # (23, 22, 24),
+            # (24, 22, 23, 26),
+            # (22, 25),
+            # (23, 22, 25),
+            # (24, 23, 22, 25),
+            # (19, 20),
+            # (18, 19, 20),
+            # (20, 19, 18, 29),
+            # (19, 21),
+            # (20, 19, 21),
+            # (18, 20, 19, 21),
+            # (29, 30),
+            # (18, 29, 30),
+            # (19, 18, 29, 30),
+            # (29, 31),
+            # (30, 29, 31),
+            # (18, 30, 29, 31),
+            # (26, 27),
+            # (27, 26, 29),
+            # (18, 29, 26, 27),
+            # (26, 28),
+            # (27, 26, 28),
+            # (28, 26, 27, 29)
+        ]
+
+        nput.internal_coordinate_tensors(
+            points,
+            specs,
+            fixed_atoms=[18, 19, 20, 21, 26, 27, 28, 29, 30, 31],
+            fixed_inverse_atoms=[18, 19, 20, 21, 26, 27, 28, 29, 30, 31],
+            return_inverse=True
+        )
