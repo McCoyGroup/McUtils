@@ -1,8 +1,8 @@
 import abc
 import uuid
-
 import numpy as np
-
+import os
+from .. import Devutils as dev
 from ..Jupyter import JHTML, X3DHTML
 from .. import Numputils as nput
 
@@ -56,6 +56,12 @@ class X3D(X3DObject):
         self.id = id
         self.dynamic_loading = dynamic_loading
         if x3dom_path is not None:
+            if dev.str_is(x3dom_path, 'local') and not os.path.isfile('local'):
+                # get the relative path
+                x3dom_path = 'file://' + os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    'Jupyter', 'resources', 'x3dom-full.js'
+                )
             self.X3DOM_JS = x3dom_path
         if x3dom_css_path is not None:
             self.X3DOM_CSS = x3dom_css_path
@@ -76,6 +82,36 @@ class X3D(X3DObject):
   link.click();
 }})()
        """
+
+    @classmethod
+    def get_view_settings_script(self, id):
+        return f"""
+    (function(){{
+        let fig = document.getElementById('{id}');
+        let x3d = fig.getElementsByTagName("x3d")[0];
+        let vmObj = x3d.runtime.viewMatrix();
+        let vmA = [
+            [vmObj["_00"], vmObj["_01"], vmObj["_02"], vmObj["_03"]],
+            [vmObj["_10"], vmObj["_11"], vmObj["_12"], vmObj["_13"]],
+            [vmObj["_20"], vmObj["_21"], vmObj["_22"], vmObj["_23"]],
+            [vmObj["_30"], vmObj["_31"], vmObj["_32"], vmObj["_33"]]
+        ];
+        let out = document.getElementById('{id}-view-matrix');
+        out.value = JSON.stringify(vmA, 1);
+    }})()
+           """
+
+    @classmethod
+    def parse_view_matrix(cls, vs):
+        import json
+        if isinstance(vs, str):
+            vs = json.loads(vs)
+        vm = np.linalg.inv(vs)
+        ang, ax = nput.extract_rotation_angle_axis(vm[:3, :3])
+        v_pos = vm[:3, -1].tolist()
+        v_ort = np.array(list(ax) + [ang]).tolist()
+        opts = {"position": v_pos, "orientation": v_ort}
+        return opts
 
     @classmethod
     def get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'):
@@ -128,7 +164,12 @@ class X3D(X3DObject):
 
     include_export_button = False
     include_record_button = False
-    def to_widget(self, dynamic_loading=None, include_export_button=None, include_record_button=None):
+    include_view_settings_button = False
+    def to_widget(self, dynamic_loading=None,
+                  include_export_button=None,
+                  include_record_button=None,
+                  include_view_settings_button=None
+                  ):
         if self._widg is not None:
             return self._widg
         id = self.id
@@ -140,6 +181,8 @@ class X3D(X3DObject):
             include_export_button = self.include_export_button
         if include_record_button is None:
             include_record_button = self.include_record_button
+        if include_view_settings_button is None:
+            include_view_settings_button = self.include_view_settings_button
 
         if not dynamic_loading:
             base_fig = JHTML.Div(
@@ -183,8 +226,18 @@ class X3D(X3DObject):
         if include_record_button:
             elems.extend([
                 JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id)),
-                JHTML.Input(value="2", id=self.id+'-duration-input', oninput=self.set_animation_duration_script(self.id))
+                JHTML.Input(value="2", id=self.id+'-duration-input', width="50px", oninput=self.set_animation_duration_script(self.id))
             ])
+        if include_view_settings_button:
+            elems.append(
+                JHTML.Div(
+                    [
+                        JHTML.Button("Show View Matrix", onclick=self.get_view_settings_script(self.id)),
+                        JHTML.Textarea(id=self.id + '-view-matrix')
+                    ],
+                    display="block"
+                )
+            )
 
         if len(elems) > 1:
             self._widg = JHTML.Div(
@@ -467,7 +520,11 @@ class X3DScene(X3DPrimitive):
     @classmethod
     def get_view_settings(cls,
                           up_vector=None, view_vector=None, right_vector=None,
-                          view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc):
+                          view_distance=None,
+                          view_center=None,
+                          view_matrix=None,
+                          view_position=None,
+                          **etc):
         # CO = coords0[1] - coords0[0]
         # OH = coords0[5] - coords0[1]
         if view_matrix is None:
@@ -493,7 +550,13 @@ class X3DScene(X3DPrimitive):
                 if view_vector is None:
                     view_vector = cls.default_view_vector
                 up_vector = nput.vec_normalize(
-                    nput.vec_crosses(view_vector, right_vector)
+                    nput.vec_crosses(right_vector, view_vector)
+                )
+            elif up_vector is not None and view_vector is not None:
+                up_vector = nput.vec_crosses(
+                    view_vector,
+                    nput.vec_crosses(view_vector, up_vector),
+                    normalize=True
                 )
             if up_vector is not None:
                 m = m @ nput.rotation_matrix(
@@ -510,12 +573,18 @@ class X3DScene(X3DPrimitive):
                 view_distance = cls.default_view_distance
             view_position = view_distance * nput.vec_normalize(np.asanyarray(view_vector))
             if view_center is not None:
-                view_center = view_matrix @ np.asanyarray(view_center)
+                if isinstance(view_center, dict):
+                    view_center = view_center['untransformed']
+                else:
+                    view_center = view_matrix @ np.asanyarray(view_center)
                 view_position = view_distance * nput.vec_normalize(
                     view_position + view_center
                 )
         else:
-            view_position = view_matrix @ np.asanyarray(view_position)
+            if isinstance(view_position, dict):
+                view_position = view_position['untransformed']
+            else:
+                view_position = view_matrix @ np.asanyarray(view_position)
         return dict(
             {
                 'orientation': list(cross) + [ang],

@@ -1691,38 +1691,45 @@ def internal_conversion_function(specs,
 
 
 def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None,
-                                fixed_inverse_atoms=None,
+                                fixed_atoms=None,
+                                fixed_cartesians=None,
                                 fixed_coords=None,
+                                remove_inverse_translation_rotation=True,
                                 **opts):
     coords = np.asanyarray(coords)
     base_tensors = internal_conversion_function(specs, **opts)(
         coords,
         order=order
     )
+    if order is None:
+        bt = [base_tensors]
+    else:
+        bt = base_tensors[1:]
+    bt = prep_internal_derivatives(bt,
+                                   fixed_atoms=fixed_atoms,
+                                   fixed_cartesians=fixed_cartesians,
+                                   fixed_coords=fixed_coords
+                                   )
+    if order is None:
+        base_tensors = bt[0]
+    else:
+        base_tensors = base_tensors[:1] + bt
     if return_inverse:
         if order is None:
             bt = [base_tensors]
         else:
             bt = base_tensors[1:]
         return base_tensors, inverse_internal_coordinate_tensors(bt, coords, masses=masses, order=order,
-                                                                 fixed_atoms=fixed_inverse_atoms,
-                                                                 fixed_coords=fixed_coords
+                                                                 fixed_atoms=fixed_atoms,
+                                                                 fixed_coords=fixed_coords,
+                                                                 fixed_cartesians=fixed_cartesians,
+                                                                 remove_translation_rotation=remove_inverse_translation_rotation
                                                                  )
     else:
         return base_tensors
 
-def inverse_internal_coordinate_tensors(expansion,
-                                        coords=None, masses=None, order=None,
-                                        mass_weighted=True,
-                                        remove_translation_rotation=True,
-                                        fixed_atoms=None,
-                                        fixed_coords=None
-                                        ):
-    from .CoordinateFrames import translation_rotation_invariant_transformation
-
-    if order is None:
-        order = len(expansion)
-
+def prep_internal_derivatives(expansion, fixed_atoms=None, fixed_coords=None, fixed_cartesians=None):
+    copied = False
     if fixed_atoms is not None:
         atom_pos = np.reshape(
             (np.array(fixed_atoms) * 3)[:, np.newaxis]
@@ -1730,16 +1737,82 @@ def inverse_internal_coordinate_tensors(expansion,
             -1
         )
         expansion = [e.copy() for e in expansion]
+        copied = True
         for n, e in enumerate(expansion):
             idx = (...,) + np.ix_(*[atom_pos] * (n + 1)) + (slice(None),)
             e[idx] = 0
+    if fixed_cartesians is not None:
+        if not copied:
+            expansion = [e.copy() for e in expansion]
+            copied = True
+        fc = np.array(fixed_cartesians)
+        fc = 3*fc[:, 0] + fc[:, 1]
+        for n, e in enumerate(expansion):
+            idx = (...,) + np.ix_(*[fc] * (n + 1)) + (slice(None),)
+            e[idx] = 0
     if fixed_coords is not None:
-        expansion = [e.copy() for e in expansion]
+        if not copied:
+            expansion = [e.copy() for e in expansion]
+            copied = True
         for n, e in enumerate(expansion):
             e[..., fixed_coords] = 0
 
+    return expansion
+
+def prep_inverse_derivatives(expansion, fixed_atoms=None, fixed_coords=None, fixed_cartesians=None):
+    copied = False
+    if fixed_atoms is not None:
+        atom_pos = np.reshape(
+            (np.array(fixed_atoms) * 3)[:, np.newaxis]
+            + np.arange(3)[np.newaxis],
+            -1
+        )
+        expansion = [e.copy() for e in expansion]
+        copied = True
+        for n, e in enumerate(expansion):
+            e[..., atom_pos] = 0
+    if fixed_cartesians is not None:
+        if not copied:
+            expansion = [e.copy() for e in expansion]
+            copied = True
+        fc = np.array(fixed_cartesians)
+        fc = 3*fc[:, 0] + fc[:, 1]
+        for n, e in enumerate(expansion):
+            e[..., fc] = 0
+    if fixed_coords is not None:
+        if not copied:
+            expansion = [e.copy() for e in expansion]
+            copied = True
+        for n, e in enumerate(expansion):
+            idx = (...,) + np.ix_(*[fixed_coords] * (n + 1)) + (slice(None),)
+            e[idx] = 0
+
+    return expansion
+
+
+def inverse_internal_coordinate_tensors(expansion,
+                                        coords=None, masses=None, order=None,
+                                        mass_weighted=True,
+                                        remove_translation_rotation=True,
+                                        fixed_atoms=None,
+                                        fixed_coords=None,
+                                        fixed_cartesians=None,
+                                        ):
+    from .CoordinateFrames import translation_rotation_invariant_transformation
+
+    if order is None:
+        order = len(expansion)
+
+    expansion = prep_internal_derivatives(
+        expansion,
+        fixed_atoms=fixed_atoms,
+        fixed_coords=fixed_coords,
+        fixed_cartesians=fixed_cartesians
+    )
+
     if coords is not None and remove_translation_rotation:
         # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
+        #TODO: is this the correct definition? Do we want to project out before or after the inverse?
         L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
                                                                     mass_weighted=False, strip_embedding=True)
         new_tf = td.tensor_reexpand([L_inv], expansion, order)
@@ -1765,18 +1838,10 @@ def inverse_internal_coordinate_tensors(expansion,
     else:
         inverse_expansion = td.inverse_transformation(expansion, order=order, allow_pseudoinverse=True)
 
-    if fixed_atoms is not None:
-        atom_pos = np.reshape(
-            (np.array(fixed_atoms) * 3)[:, np.newaxis]
-            + np.arange(3)[np.newaxis],
-            -1
-        )
-        for n, e in enumerate(inverse_expansion):
-            e[..., atom_pos] = 0
-    if fixed_coords is not None:
-        for n, e in enumerate(inverse_expansion):
-            idx = (...,) + np.ix_(*[fixed_coords] * (n + 1)) + (slice(None),)
-            e[idx] = 0
+    inverse_expansion = prep_inverse_derivatives(inverse_expansion,
+                                                 fixed_atoms=fixed_atoms,
+                                                 fixed_coords=fixed_coords,
+                                                 fixed_cartesians=fixed_cartesians)
 
     return inverse_expansion
 
