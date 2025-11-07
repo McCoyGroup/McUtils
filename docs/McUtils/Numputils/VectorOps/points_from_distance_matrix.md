@@ -5,7 +5,7 @@
 </div>
 
 ```python
-points_from_distance_matrix(dist_mat, test_idx=0, zero_cutoff=1e-08): 
+points_from_distance_matrix(dist_mat, test_idx=0, target_dim=None, use_triu=False, zero_cutoff=1e-08): 
 ```
 
 

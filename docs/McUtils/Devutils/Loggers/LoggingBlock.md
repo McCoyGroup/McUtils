@@ -50,8 +50,8 @@ tag(self):
 stream_redirect(self, tag, base_stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L139?message=Update%20Docs)]
 </div>
 
 
@@ -60,8 +60,8 @@ stream_redirect(self, tag, base_stream):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L143?message=Update%20Docs)]
 </div>
 
 
@@ -70,8 +70,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LoggingBlock.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LoggingBlock.py#L177?message=Update%20Docs)]
 </div>
  </div>
 </div>

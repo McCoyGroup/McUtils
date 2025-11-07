@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup">X3DGeometryGroup</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L715)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L715?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 prep_geometry_opts(self, *args, **opts) -> list[dict]: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L647)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L647?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L716)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L716?message=Update%20Docs)]
 </div>
 
 
@@ -34,8 +34,8 @@ prep_geometry_opts(self, *args, **opts) -> list[dict]:
 prep_vecs(self, vecs, nstruct=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L650)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L650?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L719)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L719?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ prep_vecs(self, vecs, nstruct=None):
 prep_mats(self, mats, nstruct=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L660)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L660?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L729)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L729?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ prep_mats(self, mats, nstruct=None):
 prep_const(self, const, nstruct): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L670)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L670?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L739)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L739?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ prep_const(self, const, nstruct):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L679)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L679?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L748)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L748?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -120,7 +120,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DGeometryGroup.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DGeometryGroup.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L646?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L715?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

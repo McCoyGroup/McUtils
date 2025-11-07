@@ -28,8 +28,8 @@ method: str
 plot(self, *params, insert_default_styles=True, **plot_style): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/StickPlot.py#L469)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/StickPlot.py#L469?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/StickPlot.py#L472)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/StickPlot.py#L472?message=Update%20Docs)]
 </div>
 Plots a set of data | stores the result
   - `:returns`: `_`

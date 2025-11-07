@@ -5,7 +5,7 @@
 </div>
 
 ```python
-write_json(file, data, **opts): 
+write_json(file, data, mode='w+', **opts): 
 ```
 
 

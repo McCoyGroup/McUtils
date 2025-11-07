@@ -24,6 +24,7 @@ X3DOM_JS: str
 X3DOM_CSS: str
 include_export_button: bool
 include_record_button: bool
+include_view_settings_button: bool
 ```
 <a id="McUtils.Plots.X3DInterface.X3D.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
@@ -41,8 +42,30 @@ __init__(self, *children, id=None, dynamic_loading=True, x3dom_path=None, x3dom_
 get_export_script(self, id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L74?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3D.get_view_settings_script" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+get_view_settings_script(self, id): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L86)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L86?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3D.parse_view_matrix" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+parse_view_matrix(cls, vs): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L104)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L104?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +75,8 @@ get_export_script(self, id):
 get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L116?message=Update%20Docs)]
 </div>
 
 
@@ -63,18 +86,18 @@ get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_
 set_animation_duration_script(self, id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L154?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Plots.X3DInterface.X3D.to_widget" class="docs-object-method">&nbsp;</a> 
 ```python
-to_widget(self, dynamic_loading=None, include_export_button=None, include_record_button=None): 
+to_widget(self, dynamic_loading=None, include_export_button=None, include_record_button=None, include_view_settings_button=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L168)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L168?message=Update%20Docs)]
 </div>
 
 
@@ -83,8 +106,8 @@ to_widget(self, dynamic_loading=None, include_export_button=None, include_record
 to_html(self, *base_elems, header_elems=None, dynamic_loading=False, include_export_button=None, include_record_button=None, **header_info): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L251)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L251?message=Update%20Docs)]
 </div>
 
 
@@ -93,8 +116,8 @@ to_html(self, *base_elems, header_elems=None, dynamic_loading=False, include_exp
 get_mime_bundle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L279)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L279?message=Update%20Docs)]
 </div>
 
 
@@ -103,8 +126,8 @@ get_mime_bundle(self):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L228)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L228?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L281)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L281?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +136,8 @@ to_x3d(self):
 display(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L240)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L240?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L293?message=Update%20Docs)]
 </div>
 
 
@@ -123,8 +146,8 @@ display(self):
 show(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L243)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L243?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L296)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L296?message=Update%20Docs)]
 </div>
 
 
@@ -133,8 +156,8 @@ show(self):
 dump(self, file, write_html=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L248)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L248?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L301)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L301?message=Update%20Docs)]
 </div>
  </div>
 </div>

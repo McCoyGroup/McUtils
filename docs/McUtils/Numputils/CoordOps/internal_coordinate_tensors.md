@@ -5,7 +5,7 @@
 </div>
 
 ```python
-internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None, fixed_inverse_atoms=None, fixed_coords=None, **opts): 
+internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None, fixed_atoms=None, fixed_cartesians=None, fixed_coords=None, remove_inverse_translation_rotation=True, **opts): 
 ```
 
 
