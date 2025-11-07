@@ -117,13 +117,27 @@ def vec_norms(vecs, axis=-1):
     #     raise NotImplementedError("Norm along not-the-last axis not there yet...")
     return np.linalg.norm(vecs, axis=axis)
 
-def points_from_distance_matrix(dist_mat, test_idx=0, zero_cutoff=1e-8):
+def points_from_distance_matrix(dist_mat, test_idx=0, target_dim=None, use_triu=False, zero_cutoff=1e-8):
     dist_mat = np.asanyarray(dist_mat)
+    if use_triu:
+        #TODO: make this into a func
+        n = int(1 + np.sqrt(1 + 8 * dist_mat.shape[-1])) // 2
+        dm = np.zeros(dist_mat.shape[:-1] + (n, n), dtype=dist_mat.dtype)
+        row, col = np.triu_indices(n, k=1)
+        dm[..., row, col] = dist_mat
+        dm[..., col, row] = dist_mat
+        dist_mat = dm
     d2 = dist_mat ** 2
     dd = (d2[..., test_idx, :, np.newaxis] + d2[..., test_idx, np.newaxis, :] - d2[..., :, :])/2
     s, u = np.linalg.eigh(dd)
     ndim = np.max(np.sum(s > zero_cutoff, axis=-1))
     vecs = u[..., :, -ndim:] * np.sqrt(s[..., np.newaxis, -ndim:])
+    if target_dim is not None and ndim < target_dim:
+        vecs = np.concatenate([
+            vecs,
+            np.zeros(vecs.shape[:-1] + (target_dim - vecs.shape[-1],), dtype=vecs.dtype)
+            ], axis=-1)
+
     return vecs
 
 def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False):

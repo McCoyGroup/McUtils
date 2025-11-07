@@ -127,32 +127,41 @@ class LoggingBlock:
 
         return self._tag
 
-    def stream_redirect(self, tag, base_stream):
-        return redirects.StreamRedirect(
-                lambda msg,
-                       logger=self.logger: logger.log_print(tag+msg, file=base_stream)
-            )
+    @classmethod
+    def _print_capturing(cls, logger, tag, base_stream):
+        def _print(msg):
+            if Logger._in_log_print: #TODO: make thread safe
+                print(msg, file=base_stream)
+            else:
+                return logger.log_print("{tag}{msg}", tag=tag, msg=msg, file=base_stream)
+        return _print
 
+    def stream_redirect(self, tag, base_stream):
+        return redirects.StreamRedirect(self._print_capturing(self.logger, tag, base_stream))
+
+    _redirect_capture_manager_stack = []
     def __enter__(self):
         if self.log_level <= self.logger.verbosity:
             self._in_block = True
             self.logger.log_print(self.opener, tag=self.tag, padding="")
-            if self._capture_output or self._capture_errors:
-                self._redirect = redirects.OutputRedirect(
-                    stdout=(
-                        self.stream_redirect(self.captured_output_tag, sys.stdout)
-                            if self._capture_output else
-                        None
-                    ),
-                    capture_output=self._capture_output,
-                    stderr=(
-                        self.stream_redirect(self.captured_error_tag, sys.stderr)
-                            if self._capture_errors else
-                        None
-                    ),
-                    capture_errors=self._capture_errors
-                )
-                self._redirect.__enter__()
+            if len(self._redirect_capture_manager_stack) == 0: # only allow one at a time
+                if self._capture_output or self._capture_errors:
+                    self._redirect = redirects.OutputRedirect(
+                        stdout=(
+                            self.stream_redirect(self.captured_output_tag, sys.stdout)
+                                if self._capture_output else
+                            None
+                        ),
+                        capture_output=self._capture_output,
+                        stderr=(
+                            self.stream_redirect(self.captured_error_tag, sys.stderr)
+                                if self._capture_errors else
+                            None
+                        ),
+                        capture_errors=self._capture_errors
+                    )
+                    self._redirect.__enter__()
+                    self._redirect_capture_manager_stack.append(self)
 
             self._old_prompt = self.logger.padding
             self.logger.padding = self.prompt
@@ -170,6 +179,8 @@ class LoggingBlock:
             self._in_block = False
             try:
                 if self._redirect is not None:
+                    if self._redirect_capture_manager_stack[-1] is self:
+                        self._redirect_capture_manager_stack.pop()
                     self._redirect.__exit__(exc_type, exc_val, exc_tb)
                     self._redirect = None
             finally:
@@ -436,21 +447,27 @@ class Logger:
                     self._print_message(print, msg, None, print_options)
                 else:
                     self._print_message(print_function, msg, self.log_file, print_options)
-    @staticmethod
-    def _print_message(print_function, msg, log, print_options):
-        if isinstance(log, str):
-            if not os.path.isdir(os.path.dirname(log)):
-                try:
-                    os.makedirs(os.path.dirname(log))
-                except OSError:
-                    pass
-            # O_NONBLOCK is *nix only
-            with open(log, mode="a", buffering=1 if print_options['flush'] else -1) as lf:  # this is potentially quite slow but I am also quite lazy
-                print_function(msg, **dict(print_options, file=lf))
-        elif log is None:
-            print_function(msg, **print_options)
-        else:
-            print_function(msg, **dict(print_options, file=log))
+
+    _in_log_print = False
+    @classmethod
+    def _print_message(cls, print_function, msg, log, print_options):
+        try:
+            cls._in_log_print = True
+            if isinstance(log, str):
+                if not os.path.isdir(os.path.dirname(log)):
+                    try:
+                        os.makedirs(os.path.dirname(log))
+                    except OSError:
+                        pass
+                # O_NONBLOCK is *nix only
+                with open(log, mode="a", buffering=1 if print_options['flush'] else -1) as lf:  # this is potentially quite slow but I am also quite lazy
+                    print_function(msg, **dict(print_options, file=lf))
+            elif log is None:
+                print_function(msg, **print_options)
+            else:
+                print_function(msg, **dict(print_options, file=log))
+        finally:
+            cls._in_log_print = False
 
     def __repr__(self):
         return "{}({}, {})".format(
@@ -471,3 +488,5 @@ class NullLogger(Logger):
         pass
     def __bool__(self):
         return False
+    def block(self, capture_output=False, **kwargs):
+        return super().block(capture_output=capture_output, **kwargs)

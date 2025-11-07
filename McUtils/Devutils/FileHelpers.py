@@ -61,7 +61,7 @@ def read_json(file, **opts):
     with safe_open(file, **opts) as fs:
         return json.load(fs, **js_opts)
 
-def write_json(file, data, **opts):
+def write_json(file, data, mode="w+", **opts):
     opts, js_opts = opts_handler.OptionsSet(opts).split(open_opts)
-    with safe_open(file, **opts) as fs:
+    with safe_open(file, mode=mode, **opts) as fs:
         return json.dump(data, fs)

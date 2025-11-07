@@ -751,9 +751,14 @@ def functionalized_zmatrix(
                     len(zm),
                     [[0, -1, -2, -3]],
                     [
-                        (atom - i)
-                            if i < 0 and (atom - i) < len(zm) else
-                        i
+                        (
+                            (
+                                (atom - i)
+                                    if atom - i < len(zm) else
+                                i + len(zm) - 1
+                            ) if i < 0 else
+                            i
+                        )
                         for i in range(atom, atom - 4, -1)
                     ]
                 )
@@ -767,7 +772,14 @@ def functionalized_zmatrix(
                     [2, -1,  0,  1],
                 ],
                 [
-                    (atom - i) if i < 0 else i
+                    (
+                        (
+                            (atom - i)
+                                if atom - i < len(zm) else
+                            i + len(zm) - 1
+                        ) if i < 0 else
+                        i
+                    )
                     for i in range(atom, atom - 4, -1)
                 ]
             )
@@ -780,7 +792,14 @@ def functionalized_zmatrix(
                     [1, -1,  0, -2]
                 ],
                 [
-                    (atom - i) if i < 0 else i
+                    (
+                        (
+                            (atom - i)
+                                if atom - i < len(zm) else
+                            i + len(zm) - 1
+                        ) if i < 0 else
+                        i
+                    )
                     for i in range(atom, atom - 4, -1)
                 ]
             )
