@@ -152,7 +152,7 @@ def format_state_vector_frequency_table(state_list, freq_data,
                                         freq_header="Freq.",
                                         freq_fmt='{:.3f}',
                                         sep=" | ",
-                                        join=" "
+                                        join=" ",
                                         ):
     state_cols = (
             len(state_list[0])
@@ -183,4 +183,6 @@ def format_state_vector_frequency_table(state_list, freq_data,
     )
     return formatter.format(
         [list(x) + v for x, v in zip(state_list, freq_data.tolist())]
+            if not isinstance(state_list[0], str) else
+        [[x] + v for x, v in zip(state_list, freq_data.tolist())]
     )

@@ -953,7 +953,8 @@ def _attachment_point(i_pos):
 def add_missing_zmatrix_bonds(
         base_zmat,
         bonds,
-        max_iterations=None
+        max_iterations=None,
+        validate_additions=True
 ):
     atoms, zm = canonicalize_zmatrix(base_zmat)
     new_bonds = {}
@@ -979,19 +980,22 @@ def add_missing_zmatrix_bonds(
             ix = _attachment_point(i_pos)
             mods[ix] = center_bound_zmatrix(len(v))
 
-        new_zm = reindex_zmatrix(
-            functionalized_zmatrix(
+        new_zm = functionalized_zmatrix(
                 zm,
                 mods
-            ),
-            reindexing
-        )
+            )
+        if validate_additions and not validate_zmatrix(new_zm):
+            raise ValueError(f"invalid zmatrix after functionalization, {new_zm}")
+        new_zm = reindex_zmatrix(new_zm, reindexing)
+        if validate_additions and not validate_zmatrix(new_zm):
+            raise ValueError(f"invalid zmatrix after reindexing ({reindexing}), {new_zm}")
 
         if max_iterations is None or max_iterations > 0:
             new_zm, new_new_bonds = add_missing_zmatrix_bonds(
                 new_zm,
                 bonds,
-                max_iterations=max_iterations-1 if max_iterations is not None else max_iterations
+                max_iterations=max_iterations-1 if max_iterations is not None else max_iterations,
+                validate_additions=validate_additions
             )
 
             new_bonds.update(new_new_bonds)
@@ -1003,7 +1007,8 @@ def bond_graph_zmatrix(
         bonds,
         fragments,
         edge_map=None,
-        reindex=True
+        reindex=True,
+        validate_additions=True
 ):
     submats = []
     backbone = fragments[0]
@@ -1057,10 +1062,19 @@ def bond_graph_zmatrix(
             for ap,zmat in zip(attachment_points, submats)
         }
     )
+    if validate_additions and not validate_zmatrix(fused):
+        raise ValueError(f"base graph zmatrix {fused} invalid")
 
     if reindex:
         flat_frags = list(itut.flatten(fragments))
+        if validate_additions:
+            frag_counts = itut.counts(flat_frags)
+            bad_frags = {k:v for k,v in frag_counts.items() if v > 1}
+            if len(bad_frags) > 0:
+                raise ValueError(f"diplicate atoms {list(bad_frags.keys())} encountered in {fragments}")
         fused = reindex_zmatrix(fused, flat_frags)
+        if validate_additions and not validate_zmatrix(fused):
+            raise ValueError(f"after reindexing zmatrix {fused} invalid")
 
     return fused
 
@@ -1121,7 +1135,8 @@ def complex_zmatrix(
         attachment_points=None,
         check_attachment_points=True,
         graph=None,
-        reindex=True
+        reindex=True,
+        validate_additions=True
 ):
 
     if fragment_inds is None:
@@ -1153,11 +1168,17 @@ def complex_zmatrix(
 
     inds = np.asanyarray(fragment_inds[0])
     zm = fragment_zmats[0]
+    if validate_additions and not validate_zmatrix(zm):
+        raise ValueError(f"base zmatrix {zm} invalid")
     if attachment_points is None:
         attachment_points = [None] * len(fragment_inds)
     if len(attachment_points) < len(fragment_inds):
         raise ValueError("too few attachment points specified")
     for inds_2, zm_2, root in zip(fragment_inds[1:], fragment_zmats[1:], attachment_points[1:]):
+        if validate_additions:
+            valid2 = validate_zmatrix(zm_2)
+            if not valid2:
+                raise ValueError(f"fragment {zm_2} with attachement point {inds_2} invalid")
         if root is None:
             if distance_matrix is None:
                 subgraph = graph.take(inds)
@@ -1182,8 +1203,12 @@ def complex_zmatrix(
                 _attachment_point(root): zm_2
             }
         )
+        if validate_additions and not validate_zmatrix(zm):
+            raise ValueError(f"new_zmatrix {zm} invalid after attachment")
 
     if reindex:
         zm = reindex_zmatrix(zm, inds)
+        if validate_additions and not validate_zmatrix(zm):
+            raise ValueError(f"new_zmatrix {zm} invalid after reindexing")
 
     return zm
