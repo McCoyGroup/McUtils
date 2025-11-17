@@ -436,6 +436,7 @@ class EdgeGraph:
                           rings=None,
                           root=None,
                           use_highest_valencies=True,
+                          validate=True
                           ):
         return self.segment_graph_by_chains(
             self.map,
@@ -443,7 +444,8 @@ class EdgeGraph:
             graph=self.graph,
             rings=self.rings,
             use_highest_valencies=use_highest_valencies,
-            shortest_path_data=self.shortest_path_data
+            shortest_path_data=self.shortest_path_data,
+            validate=validate
         )
 
     @classmethod
@@ -493,7 +495,8 @@ class EdgeGraph:
                                 rings=None,
                                 root=None,
                                 use_highest_valencies=True,
-                                shortest_path_data=None
+                                shortest_path_data=None,
+                                validate=True
                                 ):
 
         if len(map) == 1:
@@ -513,6 +516,9 @@ class EdgeGraph:
             shortest_path_data=shortest_path_data
         )
 
+        segment_sets = set()
+        if validate:
+            segment_sets.add(backbone)
         segments.append(backbone)
 
         new_map = {k:v.copy() for k,v in map.items()}
@@ -533,21 +539,55 @@ class EdgeGraph:
             cls.get_edge_graph(new_map, num_nodes=len(rem))
         )
 
+        if validate:
+            flat_frag = list(itut.flatten(fragments))
+            flat_counts = itut.counts(flat_frag)
+            bad_bb = {k: v for k, v in flat_counts.items() if v > 1}
+            if len(bad_bb) > 0:
+                raise ValueError(f"duplicate elements {list(bad_bb.keys())} in fragment list {fragments}")
+
         for frag in fragments:
+            if validate:
+                flat_frag = list(itut.flatten(frag))
+                flat_counts = itut.counts(flat_frag)
+                bad_bb = {k: v for k, v in flat_counts.items() if v > 1}
+                if len(bad_bb) > 0:
+                    raise ValueError(f"duplicate elements {list(bad_bb.keys())} in backbone fragment {flat_frag}")
+
             if len(frag) == 1:
-                segments.append((tuple(frag),))
+                bb = ((base_inv[frag[0]],),)
             else:
                 remapping = {k:i for i,k in enumerate(frag)}
                 inverse_mapping = {i:base_inv[k] for i,k in enumerate(frag)}
+                subgraph = {
+                    remapping[k]: {remapping[j] for j in new_map[k]}
+                    for k in frag
+                }
                 subbones = cls.segment_graph_by_chains(
-                    {
-                        remapping[k]: {remapping[j] for j in new_map[k]}
-                        for k in frag
-                    },
+                    subgraph,
                     use_highest_valencies=use_highest_valencies
                 )
-                reind = cls._reindex_segmentss(subbones, inverse_mapping)
-                segments.append(reind)
+                if validate:
+                    flat_bb = list(itut.flatten(subbones))
+                    flat_counts = itut.counts(flat_bb)
+                    bad_bb = {k: v for k, v in flat_counts.items() if v > 1}
+                    if len(bad_bb) > 0:
+                        raise ValueError(
+                            f"duplicate elements {list(bad_bb.keys())} in backbone subfragment {subbones}")
+
+                bb = cls._reindex_segmentss(subbones, inverse_mapping)
+
+            if validate:
+                flat_bb = list(itut.flatten(bb))
+                flat_counts = itut.counts(flat_bb)
+                bad_bb = {k:v for k,v in flat_counts.items() if v > 1}
+                if len(bad_bb) > 0:
+                    raise ValueError(f"duplicate elements {list(bad_bb.keys())} in backbone fragment {bb} after reindexing")
+                inter_frag = flat_counts.keys() & segment_sets
+                if len(inter_frag) > 0:
+                    raise ValueError(f"duplicate elements in backbone segmentation {inter_frag}")
+                segment_sets.update(inter_frag)
+            segments.append(bb)
 
         return segments
 
@@ -1027,7 +1067,8 @@ class MoleculeEdgeGraph(EdgeGraph):
                           rings=None,
                           use_highest_valencies=True,
                           heavy_atoms=True,
-                          light_atoms=None
+                          light_atoms=None,
+                          validate=True
                           ):
         if heavy_atoms or (light_atoms is not None):
             if heavy_atoms is True: heavy_atoms = None
@@ -1039,7 +1080,8 @@ class MoleculeEdgeGraph(EdgeGraph):
             return graph.segment_by_chains(
                 root=0 if root is not None else None,
                 heavy_atoms=False,
-                light_atoms=None
+                light_atoms=None,
+                validate=validate
             )
         else:
-            return super().segment_by_chains(root=root)
+            return super().segment_by_chains(root=root, validate=validate)

@@ -946,7 +946,11 @@ class ContourPlot(Plot2D):
     method = 'contourf'
     known_styles = {"triangles", "mask", "levels", "colors",
                     "alpha", "cmap", "norm", "vmin", "vmax", "origin", "extent", "locator", "extend",
-                    "xunits, yunits", "antialiased", "linewidths", "linestyles"}
+                    "xunits, yunits", "antialiased"}
+@Plot.register
+class ContourLinePlot(ContourPlot):
+    method = 'contour'
+    known_styles = ContourPlot.known_styles | {"linewidths", "linestyles", "negative_linestyles"}
 @Plot.register
 class DensityPlot(Plot2D):
     method = 'pcolormesh'
