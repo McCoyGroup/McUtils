@@ -5,7 +5,7 @@
 </div>
 
 ```python
-add_missing_zmatrix_bonds(base_zmat, bonds, max_iterations=None): 
+add_missing_zmatrix_bonds(base_zmat, bonds, max_iterations=None, validate_additions=True): 
 ```
 
 

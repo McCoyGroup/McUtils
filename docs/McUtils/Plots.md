@@ -250,227 +250,227 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [ContourPlot](Plots/Plots/ContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[DensityPlot](Plots/Plots/DensityPlot.md)   
+[ContourLinePlot](Plots/Plots/ContourLinePlot.md)   
 </div>
    <div class="col" markdown="1">
-[HeatmapPlot](Plots/Plots/HeatmapPlot.md)   
+[DensityPlot](Plots/Plots/DensityPlot.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[HeatmapPlot](Plots/Plots/HeatmapPlot.md)   
+</div>
    <div class="col" markdown="1">
 [TriPlot](Plots/Plots/TriPlot.md)   
 </div>
    <div class="col" markdown="1">
 [TriDensityPlot](Plots/Plots/TriDensityPlot.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TriContourLinesPlot](Plots/Plots/TriContourLinesPlot.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [TriContourPlot](Plots/Plots/TriContourPlot.md)   
 </div>
    <div class="col" markdown="1">
 [ListContourPlot](Plots/Plots/ListContourPlot.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ListDensityPlot](Plots/Plots/ListDensityPlot.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ListTriContourPlot](Plots/Plots/ListTriContourPlot.md)   
 </div>
    <div class="col" markdown="1">
 [ListTriDensityPlot](Plots/Plots/ListTriDensityPlot.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ScatterPlot3D](Plots/Plots/ScatterPlot3D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WireframePlot3D](Plots/Plots/WireframePlot3D.md)   
 </div>
    <div class="col" markdown="1">
 [ContourPlot3D](Plots/Plots/ContourPlot3D.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ListTriPlot3D](Plots/Plots/ListTriPlot3D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GraphicsPrimitive](Plots/Primitives/GraphicsPrimitive.md)   
 </div>
    <div class="col" markdown="1">
 [Sphere](Plots/Primitives/Sphere.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Cylinder](Plots/Primitives/Cylinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Disk](Plots/Primitives/Disk.md)   
 </div>
    <div class="col" markdown="1">
 [Line](Plots/Primitives/Line.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Text](Plots/Primitives/Text.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Arrow](Plots/Primitives/Arrow.md)   
 </div>
    <div class="col" markdown="1">
 [Inset](Plots/Primitives/Inset.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Point](Plots/Primitives/Point.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Triangle](Plots/Primitives/Triangle.md)   
 </div>
    <div class="col" markdown="1">
 [Polygon](Plots/Primitives/Polygon.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [EventHandler](Plots/Interactive/EventHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Animator](Plots/Interactive/Animator.md)   
 </div>
    <div class="col" markdown="1">
 [Styled](Plots/Styling/Styled.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ThemeManager](Plots/Styling/ThemeManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PlotLegend](Plots/Styling/PlotLegend.md)   
 </div>
    <div class="col" markdown="1">
 [Image](Plots/Image/Image.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GraphicsPropertyManager](Plots/Properties/GraphicsPropertyManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GraphicsPropertyManager3D](Plots/Properties/GraphicsPropertyManager3D.md)   
 </div>
    <div class="col" markdown="1">
 [SceneJSON](Plots/SceneJSON/SceneJSON.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3D](Plots/X3DInterface/X3D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DPrimitive](Plots/X3DInterface/X3DPrimitive.md)   
 </div>
    <div class="col" markdown="1">
 [X3DGeometryObject](Plots/X3DInterface/X3DGeometryObject.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DGeometryGroup](Plots/X3DInterface/X3DGeometryGroup.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DGroup](Plots/X3DInterface/X3DGroup.md)   
 </div>
    <div class="col" markdown="1">
 [X3DScene](Plots/X3DInterface/X3DScene.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DBackground](Plots/X3DInterface/X3DBackground.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DMaterial](Plots/X3DInterface/X3DMaterial.md)   
 </div>
    <div class="col" markdown="1">
 [X3DLine](Plots/X3DInterface/X3DLine.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DSphere](Plots/X3DInterface/X3DSphere.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DCone](Plots/X3DInterface/X3DCone.md)   
 </div>
    <div class="col" markdown="1">
 [X3DCylinder](Plots/X3DInterface/X3DCylinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DCappedCylinder](Plots/X3DInterface/X3DCappedCylinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DArrow](Plots/X3DInterface/X3DArrow.md)   
 </div>
    <div class="col" markdown="1">
 [X3DTorus](Plots/X3DInterface/X3DTorus.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DRectangle2D](Plots/X3DInterface/X3DRectangle2D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DDisk2D](Plots/X3DInterface/X3DDisk2D.md)   
 </div>
    <div class="col" markdown="1">
 [X3DCircle2D](Plots/X3DInterface/X3DCircle2D.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DPolyline2D](Plots/X3DInterface/X3DPolyline2D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DTriangleSet](Plots/X3DInterface/X3DTriangleSet.md)   
 </div>
    <div class="col" markdown="1">
 [X3DIndexedTriangleSet](Plots/X3DInterface/X3DIndexedTriangleSet.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DIndexedLineSet](Plots/X3DInterface/X3DIndexedLineSet.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DSwitch](Plots/X3DInterface/X3DSwitch.md)   
 </div>
    <div class="col" markdown="1">
 [X3DListAnimator](Plots/X3DInterface/X3DListAnimator.md)   
 </div>
-   <div class="col" markdown="1">
-[ColorPalette](Plots/Colors/ColorPalette.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[prep_color](Plots/Colors/prep_color.md)   
+[ColorPalette](Plots/Colors/ColorPalette.md)   
 </div>
    <div class="col" markdown="1">
-   
+[prep_color](Plots/Colors/prep_color.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -498,9 +498,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e2307c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e2307c"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-64096c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-64096c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e2307c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-64096c" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -521,9 +521,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-f537eb" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f537eb"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-80ccd5" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-80ccd5"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f537eb" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-80ccd5" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
