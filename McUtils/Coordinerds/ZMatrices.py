@@ -602,25 +602,48 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
 def validate_zmatrix(ordering,
                      allow_reordering=True,
                      ensure_nonnegative=True,
-                     raise_exception=False
+                     raise_exception=False,
+                     return_reason=False
                      ):
+    ordering = set_zmatrix_embedding(ordering)
     proxy_order = np.array([o[0] for o in ordering])
-    if allow_reordering:
-        order_sorting = np.argsort(proxy_order)
-        proxy_order = proxy_order[order_sorting,]
-        if ensure_nonnegative and proxy_order[0] < 0:
-            if raise_exception:
-                raise ValueError("atom indices not all nonnegative")
+    all_rem = np.setdiff1d(np.unique(ordering), proxy_order)
+    all_rem = all_rem[all_rem >= 0]
+    if len(all_rem) > 0:
+        reason = f"Z-matrix contains indices {all_rem} not defined in the atom list {proxy_order}"
+        if raise_exception:
+            raise ValueError(reason)
+        if return_reason:
+            return False, reason
+        else:
             return False
+    if allow_reordering:
+        reindexing = dict(zip(proxy_order, np.arange(len(proxy_order))))
+        if ensure_nonnegative and np.min(proxy_order) < 0:
+            reason = f"atom indices not all nonnegative {proxy_order}"
+            if raise_exception:
+                raise ValueError(reason)
+            if return_reason:
+                return False, reason
+            else:
+                return False
         new_order = [
-            [order_sorting[i] if i >= 0 else i for i in row]
+            [reindexing[i] if i >= 0 else i for i in row]
             for row in ordering
         ]
-        return validate_zmatrix(new_order, allow_reordering=False)
+        return validate_zmatrix(new_order,
+                                allow_reordering=False,
+                                raise_exception=raise_exception,
+                                return_reason=return_reason
+                                )
     if ensure_nonnegative and proxy_order[0] < 0:
+        reason = f"atom indices not all nonnegative {proxy_order}"
         if raise_exception:
-            raise ValueError("Z-matrix atom spec {} is non-zero")
-        return False
+            raise ValueError(reason)
+        if return_reason:
+            return False, reason
+        else:
+            return False
 
     for n,row in enumerate(ordering):
         if (
@@ -628,11 +651,18 @@ def validate_zmatrix(ordering,
                 or any(i > row[0] for i in row[1:])
                 or len(set(row)) < len(row)
         ):
+            reason = f"Z-matrix line {n} invalid: {row}"
             if raise_exception:
-                raise ValueError(f"Z-matrix line {n} invalid {row}")
-            return False
+                raise ValueError(reason)
+            if return_reason:
+                return False, reason
+            else:
+                return False
 
-    return True
+    if return_reason:
+        return True, None
+    else:
+        return True
 
 def chain_zmatrix(n):
     return [
@@ -1062,8 +1092,10 @@ def bond_graph_zmatrix(
             for ap,zmat in zip(attachment_points, submats)
         }
     )
-    if validate_additions and not validate_zmatrix(fused):
-        raise ValueError(f"base graph zmatrix {fused} invalid")
+    if validate_additions:
+        is_valid, reason = validate_zmatrix(fused, return_reason=True)
+        if not is_valid:
+            raise ValueError(f"base graph zmatrix invalid ({reason}) in {fused}")
 
     if reindex:
         flat_frags = list(itut.flatten(fragments))
@@ -1073,8 +1105,10 @@ def bond_graph_zmatrix(
             if len(bad_frags) > 0:
                 raise ValueError(f"diplicate atoms {list(bad_frags.keys())} encountered in {fragments}")
         fused = reindex_zmatrix(fused, flat_frags)
-        if validate_additions and not validate_zmatrix(fused):
-            raise ValueError(f"after reindexing zmatrix {fused} invalid")
+        if validate_additions:
+            is_valid, reason = validate_zmatrix(fused, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
 
     return fused
 
@@ -1168,17 +1202,19 @@ def complex_zmatrix(
 
     inds = np.asanyarray(fragment_inds[0])
     zm = fragment_zmats[0]
-    if validate_additions and not validate_zmatrix(zm):
-        raise ValueError(f"base zmatrix {zm} invalid")
+    if validate_additions:
+        is_valid, reason = validate_zmatrix(zm, return_reason=True)
+        if not is_valid:
+            raise ValueError(f"base zmatrix invalid ({reason}) in {zm}")
     if attachment_points is None:
         attachment_points = [None] * len(fragment_inds)
     if len(attachment_points) < len(fragment_inds):
         raise ValueError("too few attachment points specified")
     for inds_2, zm_2, root in zip(fragment_inds[1:], fragment_zmats[1:], attachment_points[1:]):
         if validate_additions:
-            valid2 = validate_zmatrix(zm_2)
-            if not valid2:
-                raise ValueError(f"fragment {zm_2} with attachement point {inds_2} invalid")
+            is_valid, reason = validate_zmatrix(zm_2, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"fragment invalid ({reason}) in {zm_2} with attachement point {inds_2}")
         if root is None:
             if distance_matrix is None:
                 subgraph = graph.take(inds)
@@ -1203,12 +1239,16 @@ def complex_zmatrix(
                 _attachment_point(root): zm_2
             }
         )
-        if validate_additions and not validate_zmatrix(zm):
-            raise ValueError(f"new_zmatrix {zm} invalid after attachment")
+        if validate_additions:
+            is_valid, reason = validate_zmatrix(zm, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"new zmatrix after attachment invalid ({reason}) in {zm}")
 
     if reindex:
         zm = reindex_zmatrix(zm, inds)
-        if validate_additions and not validate_zmatrix(zm):
-            raise ValueError(f"new_zmatrix {zm} invalid after reindexing")
+        if validate_additions:
+            is_valid, reason = validate_zmatrix(zm, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"new zmatrix after reindexing invalid ({reason}) in {zm}")
 
     return zm
