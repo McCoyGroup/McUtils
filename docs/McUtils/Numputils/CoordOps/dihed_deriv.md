@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.dihed_deriv">dihed_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1152)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1152?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1276?message=Update%20Docs)]
 </div>
 
 ```python
-dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion', fixed_atoms=None, expanded_vectors=None): 
+dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion', fixed_atoms=None, cache=None, reproject=True, expanded_vectors=None): 
 ```
 Gives the derivative of the dihedral between i, j, k, and l with respect to the Cartesians
 Currently gives what are sometimes called the `psi` angles.
@@ -135,7 +135,7 @@ l
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/dihed_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/dihed_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1152?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1276?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

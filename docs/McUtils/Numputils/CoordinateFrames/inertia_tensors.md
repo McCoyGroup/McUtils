@@ -5,7 +5,7 @@
 </div>
 
 ```python
-inertia_tensors(coords, masses=None): 
+inertia_tensors(coords, masses=None, mass_weighted=False): 
 ```
 Computes the moment of intertia tensors for the walkers with coordinates coords (assumes all have the same masses)
   - `coords`: `CoordinateSet`

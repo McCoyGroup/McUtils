@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.angle_deriv">angle_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1008)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1008?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1114?message=Update%20Docs)]
 </div>
 
 ```python
-angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='jik', fixed_atoms=None, expanded_vectors=None, zero_thresh=None): 
+angle_deriv(coords, i, j, k, /, order=1, method='expansion', cache=None, angle_ordering='jik', fixed_atoms=None, expanded_vectors=None, reproject=True, zero_thresh=None): 
 ```
 Gives the derivative of the angle between i, j, and k with respect to the Cartesians
   - `coords`: `np.ndarray`
@@ -125,7 +125,7 @@ k
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/angle_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/angle_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1008?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1114?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

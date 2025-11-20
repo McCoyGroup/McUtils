@@ -5,7 +5,7 @@
 </div>
 
 ```python
-validate_zmatrix(ordering, allow_reordering=True, ensure_nonnegative=True, raise_exception=False): 
+validate_zmatrix(ordering, allow_reordering=True, ensure_nonnegative=True, raise_exception=False, return_reason=False): 
 ```
 
 

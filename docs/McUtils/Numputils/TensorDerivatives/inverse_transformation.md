@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.TensorDerivatives.inverse_transformation">inverse_transformation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L412)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L412?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L413)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L413?message=Update%20Docs)]
 </div>
 
 ```python
-inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False): 
+inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False, nonzero_cutoff=None): 
 ```
 
 
@@ -59,7 +59,7 @@ inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_p
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/inverse_transformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/inverse_transformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L412?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L413?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

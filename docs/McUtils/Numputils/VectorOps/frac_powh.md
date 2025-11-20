@@ -5,7 +5,7 @@
 </div>
 
 ```python
-frac_powh(A, k, eigsys=None, pow=None): 
+frac_powh(A, k, eigsys=None, pow=None, nonzero_cutoff=None): 
 ```
 
 
