@@ -3,6 +3,7 @@ __all__ = [
     "center_of_mass",
     "inertia_tensors",
     "moments_of_inertia",
+    "moments_of_inertia_expansion",
     "inertial_frame_derivatives",
     "translation_rotation_eigenvectors",
     "translation_rotation_projector",
@@ -10,9 +11,7 @@ __all__ = [
     "translation_rotation_invariant_transformation",
     "eckart_embedding",
     "rmsd_minimizing_transformation",
-    "eckart_permutation",
-
-
+    "eckart_permutation"
 ]
 
 import itertools, collections
@@ -20,6 +19,7 @@ import itertools, collections
 import numpy as np, scipy.optimize as opt
 from . import VectorOps as vec_ops
 from . import PermutationOps as perm_ops
+from . import TensorDerivatives as td
 # from . import SetOps as set_ops
 # from . import Misc as misc
 # from . import TransformationMatrices as tf_mats
@@ -43,7 +43,7 @@ def center_of_mass(coords, masses=None):
 
     return np.tensordot(masses / np.sum(masses), coords, axes=[0, -2])
 
-def inertia_tensors(coords, masses=None):
+def inertia_tensors(coords, masses=None, mass_weighted=False):
     """
     Computes the moment of intertia tensors for the walkers with coordinates coords (assumes all have the same masses)
 
@@ -54,6 +54,8 @@ def inertia_tensors(coords, masses=None):
     :return:
     :rtype:
     """
+    if mass_weighted:
+        raise ValueError("mass-weighted inertia tensor not supported yet")
 
     if masses is None:
         masses = np.ones(coords.shape[-2])
@@ -74,7 +76,7 @@ def inertia_tensors(coords, masses=None):
 
     return tens
 
-def inertial_frame_derivatives(coords, masses=None, sel=None):
+def inertial_frame_derivatives(coords, masses=None, sel=None, mass_weighted=True):
     if masses is None:
         masses = np.ones(coords.shape[-2])
 
@@ -97,8 +99,9 @@ def inertial_frame_derivatives(coords, masses=None, sel=None):
     masses = masses[..., real_pos]
     coords = coords[..., real_pos, :]
 
+    com = center_of_mass(coords, masses[0])
     masses = np.sqrt(masses)
-    carts = masses[..., :, np.newaxis] * coords  # mass-weighted Cartesian coordinates
+    carts = masses[..., :, np.newaxis] * (coords - com[..., np.newaxis, :])  # mass-weighted Cartesian coordinates
 
     ### compute basic inertia tensor derivatives
     # first derivs are computed as a full (nAt, 3, I_rows (3), I_cols (3)) tensor
@@ -129,13 +132,21 @@ def inertial_frame_derivatives(coords, masses=None, sel=None):
     I0YY = np.broadcast_to(I0YY[np.newaxis, :, :, :, :], (carts.shape[0],) + I0YY.shape)
     I0YY = np.reshape(I0YY, base_shape + (nY, nY, 3, 3))
 
+    if not mass_weighted:
+        g12 = np.diag(np.repeat(masses, 3))
+        I0Y = np.moveaxis(np.tensordot(I0Y, g12, axes=[-3, -1]), -1, -3)
+        I0YY = np.moveaxis(np.moveaxis(
+            np.tensordot(np.tensordot(I0YY, g12, axes=[-4, -1]), g12, axes=[-4, -1]),
+            -1, -4
+        ), -1, -4)
+
     if smol:
         I0Y = I0Y[0]
         I0YY = I0YY[0]
 
     return [I0Y, I0YY]
 
-def moments_of_inertia(coords, masses=None):
+def moments_of_inertia(coords, masses=None, force_rotation=True):
     """
     Computes the moment of inertia tensor for the walkers with coordinates coords (assumes all have the same masses)
 
@@ -168,12 +179,13 @@ def moments_of_inertia(coords, masses=None):
     # c = axes[..., :, 2]
     # b = nput.vec_crosses(a, c)  # force right-handedness to avoid inversions
     # axes[..., :, 1] = b
-    a = axes[..., :, 0]
-    b = axes[..., :, 1]
-    c = vec_ops.vec_crosses(b, a)  # force right-handedness to avoid inversions
-    axes[..., :, 2] = c
-    dets = np.linalg.det(axes) # ensure we have true rotation matrices to avoid inversions
-    axes[..., :, 2] /= dets[..., np.newaxis]
+    if force_rotation:
+        a = axes[..., :, 0]
+        b = axes[..., :, 1]
+        c = vec_ops.vec_crosses(b, a)  # force right-handedness to avoid inversions
+        axes[..., :, 2] = c
+        dets = np.linalg.det(axes) # ensure we have true rotation matrices to avoid inversions
+        axes[..., :, 2] /= dets[..., np.newaxis]
 
     if multiconfig:
         moms = moms.reshape(extra_shape + (3,))
@@ -183,7 +195,24 @@ def moments_of_inertia(coords, masses=None):
         axes = axes[0]
     return moms, axes
 
-def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
+def moments_of_inertia_expansion(coords, masses=None, order=1, force_rotation=True, mass_weighted=True):
+    inertia_base = inertia_tensors(coords, masses=masses, mass_weighted=mass_weighted)
+    inertia_higher = inertial_frame_derivatives(coords, masses=masses, mass_weighted=mass_weighted)
+    inertia_expansion = [inertia_base] + inertia_higher
+    vals, vecs = moments_of_inertia(coords, masses, force_rotation=force_rotation)
+    base_expansion = [
+        [vec_ops.vec_tensordiag(vals)],
+        [vecs]
+    ]
+    val_exp, vec_exp = td.mateigh_deriv(inertia_expansion, order, base_expansion=base_expansion)
+    r, c = np.diag_indices(3)
+    return [v[..., r, c] for v in val_exp], vec_exp
+
+def translation_rotation_eigenvectors(coords, masses=None,
+                                      mass_weighted=True,
+                                      return_com=False,
+                                      return_rot=True
+                                      ):
     """
     Returns the eigenvectors corresponding to translations and rotations
     in the system
@@ -220,39 +249,24 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
     coords = coords.reshape((-1,) + coords.shape[-2:])
 
     M = np.kron(mvec / mT, np.eye(3)).T  # translation eigenvectors
-    mom_rot, ax_rot = moments_of_inertia(coords, masses)
-    # if order > 0:
-    #     base_tensor = StructuralProperties.get_prop_inertia_tensors(coords, masses)
-    #     mom_expansion = StructuralProperties.get_prop_inertial_frame_derivatives(coords, masses)
-    #     inertia_expansion = [base_tensor] + mom_expansion
-    #     sqrt_expansion = nput.matsqrt_deriv(inertia_expansion, order)
-    #     inv_rot_expansion = nput.matinv_deriv(sqrt_expansion, order=order)
-    #     inv_rot_2 = inv_rot_expansion[0]
-    # else:
-    good_ax = np.abs(mom_rot) > 1e-8
-    nonlinear = good_ax.flatten().all()
-    if nonlinear:
-        inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot))
-        inv_rot_2 = vec_ops.vec_tensordot(
-            ax_rot,
-            vec_ops.vec_tensordot(
-                ax_rot,
-                inv_mom_2,
-                shared=1,
-                axes=[-1, -1]
-            ),
-            shared=1,
-            axes=[-1, -1]
-        )
-    else:
-        all_linear = len(good_ax)==0 or np.sum(np.abs(np.diff(good_ax, axis=0))) == 0
-        if all_linear:
-            good_ax = good_ax[0]
-            inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot[:, good_ax,]))
+    if return_rot:
+        mom_rot, ax_rot = moments_of_inertia(coords, masses)
+        # if order > 0:
+        #     base_tensor = StructuralProperties.get_prop_inertia_tensors(coords, masses)
+        #     mom_expansion = StructuralProperties.get_prop_inertial_frame_derivatives(coords, masses)
+        #     inertia_expansion = [base_tensor] + mom_expansion
+        #     sqrt_expansion = nput.matsqrt_deriv(inertia_expansion, order)
+        #     inv_rot_expansion = nput.matinv_deriv(sqrt_expansion, order=order)
+        #     inv_rot_2 = inv_rot_expansion[0]
+        # else:
+        good_ax = np.abs(mom_rot) > 1e-8
+        nonlinear = good_ax.flatten().all()
+        if nonlinear:
+            inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot))
             inv_rot_2 = vec_ops.vec_tensordot(
-                ax_rot[:, :, good_ax],
+                ax_rot,
                 vec_ops.vec_tensordot(
-                    ax_rot[:, :, good_ax],
+                    ax_rot,
                     inv_mom_2,
                     shared=1,
                     axes=[-1, -1]
@@ -261,53 +275,88 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True):
                 axes=[-1, -1]
             )
         else:
-            inv_rot_2 = []
-            for sel,moms,rot in zip(good_ax, mom_rot, ax_rot):
-                inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(moms[sel,]))
-                subinv = rot[:, sel] @ inv_mom_2 @ rot[:, sel].T
-                rem = np.array([0, 1, 2])[np.logical_not(sel)]
-                subinv[:, rem] = rot.T[:, rem]
-                inv_rot_2.append(subinv)
-            inv_rot_2 = np.array(inv_rot_2)
+            all_linear = len(good_ax)==0 or np.sum(np.abs(np.diff(good_ax, axis=0))) == 0
+            if all_linear:
+                good_ax = good_ax[0]
+                inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(mom_rot[:, good_ax,]))
+                inv_rot_2 = vec_ops.vec_tensordot(
+                    ax_rot[:, :, good_ax],
+                    vec_ops.vec_tensordot(
+                        ax_rot[:, :, good_ax],
+                        inv_mom_2,
+                        shared=1,
+                        axes=[-1, -1]
+                    ),
+                    shared=1,
+                    axes=[-1, -1]
+                )
+            else:
+                inv_rot_2 = []
+                for sel,moms,rot in zip(good_ax, mom_rot, ax_rot):
+                    inv_mom_2 = vec_ops.vec_tensordiag(1 / np.sqrt(moms[sel,]))
+                    subinv = rot[:, sel] @ inv_mom_2 @ rot[:, sel].T
+                    rem = np.array([0, 1, 2])[np.logical_not(sel)]
+                    subinv[:, rem] = rot.T[:, rem]
+                    inv_rot_2.append(subinv)
+                inv_rot_2 = np.array(inv_rot_2)
 
-    com = center_of_mass(coords, masses)
-    com = np.expand_dims(com, 1) # ???
-    shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[: np.newaxis, :])
-    cos_rot = perm_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
-    R = vec_ops.vec_tensordot(
-        shift_crds, cos_rot,
-        shared=1,
-        axes=[-1, 1]
-    ).reshape((coords.shape[0], 3 * n, 3))  # rotations
+        com = center_of_mass(coords, masses)
+        # com = np.expand_dims(com, 1) # ???
+        shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[: np.newaxis, :])
+        cos_rot = perm_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
+        R = vec_ops.vec_tensordot(
+            shift_crds, cos_rot,
+            shared=1,
+            axes=[-1, 1]
+        ).reshape((coords.shape[0], 3 * n, 3))  # rotations
 
-    if nonlinear:
-        freqs = np.concatenate([
-            np.broadcast_to([[1e-14, 1e-14, 1e-14]], mom_rot.shape),
-            (1 / (2 * mom_rot))
-            # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
-            # will be tiny
-        ], axis=-1)
-        M = np.broadcast_to(M[np.newaxis], R.shape)
-        eigs = np.concatenate([M, R], axis=2)
-    elif all_linear:
-        mom_rot = mom_rot[:, good_ax]
-        freqs = np.concatenate([
-            np.broadcast_to([[1e-14, 1e-14, 1e-14]], R.shape[:1] + (3,)),
-            (1 / (2 * mom_rot))
-            # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
-            # will be tiny
-        ], axis=-1)
-        R = R[:, :, good_ax]
-        M = np.broadcast_to(M[np.newaxis], R.shape[:1] + M.shape)
-        eigs = np.concatenate([M, R], axis=2)
+
+        if nonlinear:
+            if return_com:
+                t_freq = com
+            else:
+                t_freq = np.broadcast_to([[1e-14, 1e-14, 1e-14]], mom_rot.shape)
+            freqs = np.concatenate([
+                t_freq,
+                (1 / (2 * mom_rot))
+                # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
+                # will be tiny
+            ], axis=-1)
+            M = np.broadcast_to(M[np.newaxis], R.shape)
+            eigs = np.concatenate([M, R], axis=2)
+        elif all_linear:
+            mom_rot = mom_rot[:, good_ax]
+            if return_com:
+                t_freq = com
+            else:
+                t_freq = np.broadcast_to([[1e-14, 1e-14, 1e-14]], R.shape[:1] + (3,))
+            freqs = np.concatenate([
+                t_freq,
+                (1 / (2 * mom_rot))
+                # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
+                # will be tiny
+            ], axis=-1)
+            R = R[:, :, good_ax]
+            M = np.broadcast_to(M[np.newaxis], R.shape[:1] + M.shape)
+            eigs = np.concatenate([M, R], axis=2)
+        else:
+            freqs = []
+            eigs = []
+            if return_com:
+                t_freq = com
+            else:
+                t_freq = [1e-14, 1e-14, 1e-14]
+            for sel, moms, rot in zip(good_ax, mom_rot, R):
+                f = np.concatenate([t_freq, 1/(2*mom_rot[sel,])])
+                r = rot[:, sel]
+                freqs.append(f)
+                eigs.append(np.concatenate([M, r], axis=1))
     else:
-        freqs = []
-        eigs = []
-        for sel, moms, rot in zip(good_ax, mom_rot, R):
-            f = np.concatenate([[1e-14, 1e-14, 1e-14], 1/(2*mom_rot[sel,])])
-            r = rot[:, sel]
-            freqs.append(f)
-            eigs.append(np.concatenate([M, r], axis=1))
+        eigs = np.broadcast_to(M[np.newaxis], coords.shape[:-2] + M.shape)
+        if return_com:
+            freqs = center_of_mass(coords, masses)
+        else:
+            freqs = np.full(M.shape[:-2] + (3,), 1e-14)
 
     if not mass_weighted:
         W = np.diag(np.repeat(1/np.sqrt(masses), 3))
