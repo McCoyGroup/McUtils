@@ -804,7 +804,7 @@ class NumputilsTests(TestCase):
         self.assertEquals(td.shape, (4, 3, 4, 3))
         self.assertEquals(array.tensordot(array, axes=[[1, 2], [1, 2]]).shape, (4, 4))
 
-    @validationTest
+    @debugTest
     def test_Sparse(self):
 
         shape = (1000, 100, 50)
@@ -972,6 +972,24 @@ class NumputilsTests(TestCase):
             msg="concat along 1 failed: (ref) {} vs {}".format(
                 meh,
                 new3.asarray()
+            )
+        )
+
+        array_4 = SparseArray.empty(
+            shape=shape
+        )
+        # print("...???")
+        new2 = array_2.concatenate(array_3, array_4)
+        meh = np.concatenate([array_2.asarray(), array_3.asarray(), array_4.asarray()], axis=0)
+        self.assertEquals(new2.shape, meh.shape)
+        self.assertTrue(
+            np.allclose(
+                new2.asarray(),
+                meh
+            ),
+            msg="concat many failed: (ref) {} vs {}".format(
+                meh,
+                new2.asarray()
             )
         )
 
@@ -2415,7 +2433,7 @@ class NumputilsTests(TestCase):
                                 masses=masses,
                                 order=1)
 
-    @debugTest
+    @validationTest
     def test_DerivPerf(self):
         from Psience.Molecools import Molecule
         import McUtils.Coordinerds as coordops

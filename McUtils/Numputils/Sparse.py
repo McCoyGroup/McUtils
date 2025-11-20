@@ -1860,7 +1860,12 @@ class ScipySparseArray(SparseArray):
         :rtype:
         """
 
-        others = [ScipySparseArray(o) if not isinstance(o, ScipySparseArray) else o for o in others]
+        others = [
+            ScipySparseArray(o)
+                if not isinstance(o, ScipySparseArray) else
+            o
+            for o in others
+        ]
 
         # all_inds = [self.block_inds[1]] + [other.block_inds[1] for other in others]
         # all_vals = [self.block_vals] + [other.block_vals for other in others]
@@ -1880,9 +1885,11 @@ class ScipySparseArray(SparseArray):
                 self.fmt is sp.csr_matrix and axis == 0
                 or self.fmt is sp.csc_matrix and axis == 1
         ):
-            return self.concatenate_2d(*(o for o in others if o.non_zero_count > 0), axis=axis)
+            # return self.concatenate_2d(*(o for o in others if o.non_zero_count > 0), axis=axis)
+            # this was breaking the shape constraints
+            return self.concatenate_2d(*others, axis=axis)
         else:
-            return self.concatenate_coo(*(o for o in others if o.non_zero_count > 0), axis=axis)
+            return self.concatenate_coo(*others, axis=axis)
 
     # def broadcast_to(self, shp):
     #     """
