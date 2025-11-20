@@ -799,19 +799,33 @@ def semisparse_tensordot(sparse_data, a, /, axes, shared=None):
     return np.reshape(new, target_shape)
 
 
-def frac_powh(A, k, eigsys=None, pow=None):
+def frac_powh(A, k, eigsys=None, pow=None, nonzero_cutoff=None):
+    A = np.asanyarray(A)
     if eigsys is None:
+        if A.shape[-1] != A.shape[-2] and nonzero_cutoff is not None:
+            A = np.pad(A,
+                       [
+                           [0, max(A.shape[-1] - A.shape[-2], 0)],
+                           [0, max(A.shape[-2] - A.shape[-1], 0)]
+                       ])
         eigsys = np.linalg.eigh(A)
     eigvals, Q = eigsys
     if pow is None:
-        pow = np.pow
-    eigvals = pow(eigvals, k)
-    # TODO: speed up with semisparse dot products
-    if eigvals.ndim == 1:
-        return Q @ np.diag(eigvals) @ Q.T
+        pow = np.power
+
+    if nonzero_cutoff is not None:
+        bad_pos = np.abs(eigvals) < nonzero_cutoff
+        eigvals[bad_pos] = 1 # always well behaved
+        pow_vals = pow(eigvals, k)
+        pow_vals[bad_pos] = 0 # vanishes upon contraction
     else:
-        shared = eigvals.ndim - 1
-        v = vec_tensordiag(eigvals, extra_dims=shared)
+        pow_vals = pow(eigvals, k)
+    # TODO: speed up with semisparse dot products
+    if pow_vals.ndim == 1:
+        return Q @ np.diag(pow_vals) @ Q.T
+    else:
+        shared = pow_vals.ndim - 1
+        v = vec_tensordiag(pow_vals, extra_dims=shared)
         return vec_tensordot(vec_tensordot(Q, v, axes=[-1, -2], shared=shared), Q, axes=[-1, -2], shared=shared)
 ################################################
 #

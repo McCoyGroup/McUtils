@@ -19,6 +19,7 @@ __all__ = [
     "matinv_deriv",
     "matdet_deriv",
     "matsqrt_deriv",
+    "mateigh_deriv",
     "scalarinv_deriv",
     "scalarpow_deriv",
     "tensor_reexpand",
@@ -409,12 +410,20 @@ def subtract_expansions(a_expansion, b_expansion, order=None):
 
 #TODO: add a DifferentiableExpansion class so I can have nicer overloads on all of this...
 
-def inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False):
+def inverse_transformation(forward_expansion, order, reverse_expansion=None,
+                           allow_pseudoinverse=False,
+                           nonzero_cutoff=None
+                           ):
     if reverse_expansion is None:
-        if allow_pseudoinverse and forward_expansion[0].shape[0] != forward_expansion[0].shape[1]:
-            B = np.linalg.pinv(forward_expansion[0])
+        if nonzero_cutoff is None:
+            if allow_pseudoinverse and forward_expansion[0].shape[0] != forward_expansion[0].shape[1]:
+                B = np.linalg.pinv(forward_expansion[0])
+            else:
+                B = np.linalg.inv(forward_expansion[0])
         else:
-            B = np.linalg.inv(forward_expansion[0])
+            f0 = forward_expansion[0]
+            B = vec_ops.frac_powh(f0, -1, nonzero_cutoff=nonzero_cutoff)
+            B = B[..., :, :f0.shape[-2]]
         reverse_expansion = [B]
     else:
         reverse_expansion = list(reverse_expansion)
@@ -541,6 +550,88 @@ def matdet_deriv(forward_expansion, order):
     for o in range(0, order):
         det_exp = det_exp + [scalarprod_deriv(det_exp, tr_exp, [o])[-1]]
     return det_exp
+
+def mateigh_deriv(mat_exp, order, *, diagonal_only=True, base_expansion=None):
+    # I don't know if `diagonal_only=False` is meaningful in any way but I also
+    # don't know if any of this is right yet, so I'll leave it until I'm sure
+    if base_expansion is None:
+        vals, vecs = np.linalg.eigh(mat_exp[0])
+        vals = vec_ops.vec_tensordiag(vals)
+        base_expansion = [vals], [vecs]
+    val_exp, vec_exp = base_expansion
+    mat_diff_exp = [[] for _ in range(val_exp[0].shape[-1])] if diagonal_only else []
+    mat_diff_inv_exp = [None for _ in range(val_exp[0].shape[-1])] if diagonal_only else None
+    shared = mat_exp[0].ndim - 2
+    if len(mat_exp) > 1:
+        nc = mat_exp[1].shape[-3]
+        for o in range(1, order+1):
+            if diagonal_only:
+                new_diag = np.zeros(val_exp[-1].shape[:-2] + (nc,) + val_exp[-1].shape[-2:])
+                for i in range(vec_exp[0].shape[-1]):
+                    subvec_exp = [v[..., (i,)] for v in vec_exp]
+                    new_diag[..., i, i] = tensorops_deriv(
+                            mat_exp[1:],
+                                [-2, -2],
+                            subvec_exp,
+                                [-2, -2],
+                            subvec_exp,
+                            order=[o - 1],
+                            shared=shared
+                        )[-1][..., 0, 0]
+                val_exp.append(new_diag)
+            else:
+                val_exp.append(
+                    tensorops_deriv(
+                        mat_exp[1:],
+                            [-2, -2],
+                        vec_exp,
+                            [-2, -2],
+                        vec_exp,
+                        order=[o-1],
+                        shared=shared
+                    )[-1]
+                )
+
+            # add one order as we expand the difference expansion
+            if diagonal_only:
+                new_diag = np.zeros(vec_exp[-1].shape[:-2] + (nc,) + vec_exp[-1].shape[-2:])
+                i_mat = np.eye(val_exp[-1].shape[-1])
+                for i in range(vec_exp[0].shape[-1]):
+                    v_I = val_exp[o - 1][..., i, i] * i_mat
+                    mat_diff_exp[i].append(v_I - (mat_exp[o - 1] if o < len(mat_exp) else 0))
+                    if mat_diff_inv_exp[i] is None:
+                        mat_diff_inv_exp[i] = [
+                            vec_ops.frac_powh(mat_diff_exp[i][0], -1, nonzero_cutoff=1e-12)
+                        ]
+                    else:
+                        mat_diff_inv_exp[i] = matinv_deriv(mat_diff_exp[i], o-1, base_expansion=mat_diff_inv_exp[i])
+                    subvec_exp = [v[..., (i,)] for v in vec_exp]
+                    new_diag[..., i] = tensorops_deriv(
+                        mat_exp[1:],
+                            [-2, -1],
+                        mat_diff_inv_exp[i],
+                            [-2, -2],
+                        subvec_exp,
+                        order=[o-1],
+                        shared=shared
+                    )[-1][..., 0]
+                vec_exp.append(new_diag)
+            else:
+                mat_diff_exp.append(val_exp[o-1] - (mat_exp[o-1] if o < len(mat_exp) else 0))
+                mat_diff_inv_exp = matinv_deriv(mat_diff_exp, o-1, base_expansion=mat_diff_inv_exp)
+                vec_exp.append(
+                    tensorops_deriv(
+                        mat_exp[1:],
+                            [-2, -1],
+                        mat_diff_inv_exp,
+                            [-2, -2],
+                        vec_exp,
+                        order=[o-1],
+                        shared=shared
+                    )[-1]
+                )
+
+    return val_exp, vec_exp
 
 def _broadcast_mul(scalar, other):
     if (
@@ -1050,7 +1141,8 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
     # print([h.shape for h in huh])
     # print([h1.shape for h1 in huh_1])
 
-def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, unitized=False, planar=None, planar_threshold=1e-14):
+def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
+                    B_norms=None, planar=None, planar_threshold=1e-14):
     # quick check
 
     if is_numeric(order):
@@ -1058,7 +1150,8 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, unitized=False
     else:
         max_order = max(order)
 
-    B_norms, B_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
+    if B_norms is None:
+        B_norms, B_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
     # if not unitized:
     #     _, A_expansion = vec_norm_unit_deriv(A_expansion, len(A_expansion))
     #     _, B_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
@@ -1069,10 +1162,10 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, unitized=False
     # print(n1_expansion[0])
     n1_norms, axb_expansion = vec_norm_unit_deriv(n1_expansion, order)
     n2_norms, bxc_expansion = vec_norm_unit_deriv(n2_expansion, order)
-    B_norms, up_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
+    # B_norms, up_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
     base_derivs = vec_angle_deriv(axb_expansion, bxc_expansion, order, unitized=True,
                                   # up_vector=None
-                                  up_vector=up_expansion[0],
+                                  up_vector=B_expansion[0],
                                   unit_expansions=[B_norms, n1_norms, n2_norms],
                                   component_vectors=[A_expansion, B_expansion, C_expansion]
                                   )

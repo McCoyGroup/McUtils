@@ -4,14 +4,11 @@ from __future__ import annotations
 Provides analytic derivatives for some common base terms with the hope that we can reuse them elsewhere
 """
 
-import collections
 import itertools
 import math
-import enum
-import warnings
 import numpy as np
-from .. import Devutils as dev
 from .VectorOps import *
+from . import CoordinateFrames as frames
 from . import TensorDerivatives as td
 from . import Misc as misc
 from . import SetOps as setops
@@ -32,6 +29,10 @@ __all__ = [
     'book_deriv',
     'oop_deriv',
     'wag_deriv',
+    'transrot_deriv',
+    'com_dist_deriv',
+    "com_pos_diff_deriv",
+    'orientation_angle_deriv',
     'vec_norm_derivs',
     'vec_sin_cos_derivs',
     'vec_angle_derivs',
@@ -781,7 +782,7 @@ def disp_deriv_mat(coords, i, j, at_list, axes=None):
         proj = np.zeros(coords.shape + (3 * len(at_list),))
         mats = np.zeros(coords[..., at_list, :].shape + (3,))
         _, (a, b), _ = np.intersect1d(at_list, [i, j], return_indices=True)
-        a, b = np.sort([a,b])
+        # a, b = np.sort([a,b]) #TODO: check on this...I think I want this to be flipped?
         mats = fill_disp_jacob_atom(
             mats,
             [[a, 1], [b, -1]],
@@ -812,6 +813,101 @@ def prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
     else:
         return [a]
 
+def prep_expanded_mats_from_cache(expansion, i, j, at_list, root_dim=1, core_dim=0):
+    _, (a, b), _ = np.intersect1d(at_list, [i, j], return_indices=True)
+    # a, b = np.sort([a,b])
+    # print(at_list, (i, j), a, b)
+    natl = len(at_list) * 3
+    subpos = (np.array([a, b])[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
+    new = []
+    if core_dim > 0:
+        core_shape = expansion[0].shape[-core_dim:]
+    else:
+        core_shape = ()
+    pad_dim = expansion[0].ndim - (root_dim + core_dim)
+    base_shape = expansion[0].shape[:pad_dim]
+    for n,e in enumerate(expansion):
+        n = n + root_dim
+        if n > 0:
+            block = np.ix_(*[subpos]*n)
+            idx = (...,) + block + (slice(None),)*core_dim
+            new_sub = np.zeros(base_shape + (natl,) * n + core_shape)
+            new_sub[idx] = e
+        else:
+            new_sub = e
+        new.append(new_sub)
+    return new
+
+def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, expand, fixed_atoms):
+
+    if cache is None or fixed_atoms is not None or not expand:
+        proj, A_expansion = prep_disp_expansion(coords, i, j, at_list,
+                                                fixed_atoms=fixed_atoms,
+                                                expand=expand)
+        A_norms, A_expansion = td.vec_norm_unit_deriv(A_expansion, len(A_expansion))
+    else:
+        proj, A_base = prep_disp_expansion(coords, i, j, at_list,
+                                                fixed_atoms=None,
+                                                expand=True)
+
+        if i > j:
+            j, i = i, j
+            sign = -1
+        else:
+            sign = 1
+
+        key = ((i, j), expand, fixed_atoms)
+        if key in cache:
+            (A_raw, A_norms, A_expansion) = cache[key]
+        else:
+            _, A_raw = prep_disp_expansion(coords, i, j, [i, j],
+                                                    fixed_atoms=None,
+                                                    expand=True)
+            A_norms, A_expansion = td.vec_norm_unit_deriv(A_raw, len(A_raw))
+            cache[key] = (A_raw, A_norms, A_expansion)
+
+        # print(sign, i, j, at_list)
+        # print(sign*A_norms[1])
+        A_norms = prep_expanded_mats_from_cache(
+            [A_norms[0]] + [(sign ** (n + 1)) * a for n, a in enumerate(A_norms[1:])],
+            i, j, at_list,
+            root_dim=0,
+            core_dim=0
+        )
+        # print(A_norms[1])
+        # print("-"*50)
+        A_expansion = prep_expanded_mats_from_cache(
+            [(sign ** (n + 1)) * a for n, a in enumerate(A_expansion)], i, j, at_list,
+            root_dim=0,
+            core_dim=1
+        )
+        # A_raw = prep_expanded_mats_from_cache(A_raw, i, j, at_list,
+        #                                       root_dim=0,
+        #                                       core_dim=1
+        #                                       )
+        # if np.max(np.abs(A_raw[1] - A_base[1])) > 1e-12:
+        #     print(A_raw[1])
+        #     print(A_base[1])
+        #     raise ValueError(sign, i, j, at_list)
+        # A_norms2, A_expansion2 = td.vec_norm_unit_deriv(A_base, len(A_base))
+        # if np.max(np.abs(A_norms[1] - A_norms2[1])) > 1e-12:
+        #     print(A_norms[1])
+        #     print(A_norms2[1])
+        #     raise ValueError(sign, i, j, at_list)
+        # if np.max(np.abs(A_norms[2] - A_norms2[2])) > 1e-12:
+        #     print(A_norms[2])
+        #     print(A_norms2[2])
+        #     raise ValueError(sign, i, j, at_list)
+        # if np.max(np.abs(A_expansion[1] - A_expansion2[1])) > 1e-12:
+        #     print(A_expansion[1])
+        #     print(A_expansion2[1])
+        #     raise ValueError(sign, i, j, at_list)
+        # if np.max(np.abs(A_expansion[2] - A_expansion2[2])) > 1e-12:
+        #     print(A_expansion[2])
+        #     print(A_expansion2[2])
+        #     raise ValueError(sign, i, j, at_list)
+        # # (A_norms, A_expansion) = (A_norms2, A_expansion2)
+    return proj, (A_norms, A_expansion)
 
 def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_comps=False):
     """
@@ -959,7 +1055,11 @@ def vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_co
     else:
         return derivs
 
-def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None, zero_thresh=None):
+def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None,
+               cache=None,
+               expanded_vectors=None,
+               reproject=True,
+               zero_thresh=None):
     """
     Gives the derivative of the distance between i and j with respect to coords i and coords j
 
@@ -974,10 +1074,16 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, e
     """
 
     if method == 'expansion':
-        proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True)
-        base_deriv = td.vec_norm_unit_deriv(A_expansion, order=order)[0]
+        proj, (base_deriv, _) = prep_unit_vector_expansion_from_cache(
+            cache,
+            coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True
+        )
+        # proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True)
+        # base_deriv = td.vec_norm_unit_deriv(A_expansion, order=order)[0]
         if proj is None: return base_deriv
-        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        if reproject:
+            base_deriv = [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        return base_deriv
     else:
 
         if order > 2:
@@ -1005,9 +1111,12 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, e
 
         return derivs
 
-def angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='jik',
+def angle_deriv(coords, i, j, k, /, order=1, method='expansion',
+                cache=None,
+                angle_ordering='jik',
                 fixed_atoms=None,
                 expanded_vectors=None,
+                reproject=True,
                 zero_thresh=None
                 ):
     """
@@ -1029,17 +1138,31 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering=
         if expanded_vectors is None:
             expanded_vectors = [0, 1]
         if angle_ordering == 'ijk':
-            proj, A_expansion = prep_disp_expansion(coords, i, j, [j, i, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-            _, B_expansion = prep_disp_expansion(coords, k, j, [j, i, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+            proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, i, j, [j, i, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+            )
+            _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, k, j, [j, i, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            )
         else:
-            proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-            _, B_expansion = prep_disp_expansion(coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+            proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+            )
+            _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            )
 
         # A_expansion = [A_expansion[0], np.concatenate([np.eye(3), np.zeros((3, 3))], axis=0)]
         # B_expansion = [B_expansion[0], np.concatenate([np.zeros((3, 3)), np.eye(3)], axis=0)]
-        base_deriv = td.vec_angle_deriv(A_expansion, B_expansion, order=order)
+        base_deriv = td.vec_angle_deriv(A_expansion, B_expansion, order=order, unitized=True)
         if proj is None: return base_deriv
-        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        if reproject:
+            base_deriv = [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        return base_deriv
     else:
         if angle_ordering == 'ijk':
             # derivs = angle_deriv(coords, j, i, k, order=order, angle_ordering='jik',
@@ -1061,7 +1184,8 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering=
 
         derivs = []
 
-        derivs.append(d[0])
+        base_shape = coords.shape[:-2]
+        derivs.append(d[0].reshape(base_shape))
 
         if order >= 1:
             da = d[1][..., 0, :]; db = d[1][..., 1, :]
@@ -1151,6 +1275,8 @@ def rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='
 
 def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion',
                 fixed_atoms=None,
+                cache=None,
+                reproject=True,
                 expanded_vectors=None):
     """
     Gives the derivative of the dihedral between i, j, k, and l with respect to the Cartesians
@@ -1175,12 +1301,18 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         if expanded_vectors is None:
             expanded_vectors = [0, 1, 2]
         proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
-        _, B_expansion = prep_disp_expansion(coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors)
+        _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
+            cache,
+            coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+        )
         _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
-
-        base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order=order)
+        base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion,
+                                        B_norms=B_norms,
+                                        order=order)
         if proj is None: return base_deriv
-        return [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        if reproject:
+            base_deriv = [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        return base_deriv
 
     else:
         if fixed_atoms is not None:
@@ -1220,7 +1352,8 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
 
         derivs = []
 
-        derivs.append(d[0])
+        base_shape = coords.shape[:-2]
+        derivs.append(d[0].reshape(base_shape))
 
         if order >= 1:
             dn1 = d[1][..., 0, :]; dn2 = d[1][..., 1, :]
@@ -1423,6 +1556,136 @@ def wag_deriv(coords, i, j, k, l=None, m=None, n=None, /, order=1, method='expan
     else:
         raise NotImplementedError("too annoying")
 
+def transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, fixed_atoms=None):
+    coords = np.asanyarray(coords)
+    if len(pos) > 0:
+        if masses is not None:
+            masses = np.asanyarray(masses)[pos,]
+        subcoords = coords[..., pos, :]
+    else:
+        subcoords = coords
+    com, eigs = frames.translation_rotation_eigenvectors(
+        subcoords,
+        masses,
+        mass_weighted=False,
+        return_com=True,
+        return_rot=return_rot
+    )
+
+    nc = com.shape[-1]
+    expansion = [com]
+    if order > 0:
+        n = coords.shape[-2] * 3
+        if len(pos) > 0:
+            subpos = (np.asanyarray(pos)[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
+            _ = np.zeros(coords.shape[:-2] + (n, nc))
+            _[..., subpos, :] = eigs
+            eigs = _
+        if fixed_atoms is not None:
+            fixed_pos = (np.asanyarray(fixed_atoms)[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
+            eigs[..., fixed_pos, :] = 0
+        expansion.append(eigs)
+
+        for o in range(1, order):
+            # is this right? I guess probably given the form of the rotation generator...
+            expansion.append(
+                np.zeros(coords.shape[:-2] + (n,) * (o+1) + (nc,))
+            )
+    
+    return expansion
+
+def com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None):
+    #TODO: could also include the com vec if that was useful...
+    coords = np.asanyarray(coords)
+    com_deriv1 = transrot_deriv(coords, *frame_pos_1, masses=masses, order=order,
+                             return_rot=False,
+                             fixed_atoms=fixed_atoms)
+    com_deriv2 = transrot_deriv(coords, *frame_pos_2, masses=masses, order=order,
+                             return_rot=False,
+                             fixed_atoms=fixed_atoms)
+
+    #TODO: restrict the number of displaced positions for efficiency
+    disp_exp = [cd1 - cd2 for cd1, cd2 in zip(com_deriv1, com_deriv2)]
+
+    norm_deriv, _ = td.vec_norm_unit_deriv(disp_exp, order=order)
+    return norm_deriv
+
+def com_pos_diff_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None):
+    #TODO: could also include the com vec if that was useful...
+    coords = np.asanyarray(coords)
+    com_deriv1 = transrot_deriv(coords, *frame_pos_1, masses=masses, order=order,
+                             return_rot=False,
+                             fixed_atoms=fixed_atoms)
+    com_deriv2 = transrot_deriv(coords, *frame_pos_2, masses=masses, order=order,
+                             return_rot=False,
+                             fixed_atoms=fixed_atoms)
+    return [cd1 - cd2 for cd1, cd2 in zip(com_deriv1, com_deriv2)]
+
+def moment_of_inertia_expansion_deriv(coords, *pos, order=1, masses=None, fixed_atoms=None):
+    coords = np.asanyarray(coords)
+    if len(pos) > 0:
+        if masses is not None:
+            masses = np.asanyarray(masses)[pos,]
+        subcoords = coords[..., pos, :]
+    else:
+        subcoords = coords
+    vals, vecs = frames.moments_of_inertia_expansion(subcoords, order=order, masses=masses, mass_weighted=False)
+    if len(pos) > 0 and order > 0:
+        val_expansion = [vals[0]]
+        vec_expansion = [vecs[0]]
+
+        n = coords.shape[-2] * 3
+        subpos = (np.asanyarray(pos)[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
+        for i,(val_set, vec_set) in enumerate(zip(vals[1:], vecs[1:])):
+            new_vals = np.zeros(val_set.shape[:-(i+2)] + (n,)*(i+1) + val_set.shape[-1:])
+            idx = (...,) + np.ix_(*[subpos]*(i+1)) + (slice(None),)
+            new_vals[idx] = val_set
+            val_expansion.append(new_vals)
+
+            new_vecs = np.zeros(vec_set.shape[:-(i+3)] + (n,)*(i+1) + vec_set.shape[-2:])
+            idx = (...,) + np.ix_(*[subpos]*(i+1)) + (slice(None), slice(None),)
+            new_vecs[idx] = vec_set
+            vec_expansion.append(new_vecs)
+
+        vals = val_expansion
+        vecs = vec_expansion
+
+    if fixed_atoms is not None:
+        subpos = (np.asanyarray(fixed_atoms)[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
+        for i, (val_set, vec_set) in enumerate(zip(vals[1:], vecs[:1])):
+            idx = (...,) + np.ix_(*[subpos] * (i + 1)) + (slice(None),)
+            val_set[idx] = 0
+
+            idx = (...,) + np.ix_(*[subpos] * (i + 1)) + (slice(None),)
+            vec_set[idx] = 0
+
+    return vals, vecs
+
+def orientation_angle_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None,
+                            fixed_atoms=None,
+                            return_axes=False
+                            ):
+    #TODO: could also include the com vec if that was useful...
+    coords = np.asanyarray(coords)
+    _, vecs1 = moment_of_inertia_expansion_deriv(coords, *frame_pos_1, order=order, masses=masses,
+                                                 fixed_atoms=fixed_atoms)
+
+    _, vecs2 = moment_of_inertia_expansion_deriv(coords, *frame_pos_2, order=order, masses=masses,
+                                                 fixed_atoms=fixed_atoms)
+
+    angle_expansion = [
+        td.vec_angle_deriv(
+            [v[..., i] for v in vecs1],
+            [v[..., i] for v in vecs2],
+            up_vector=vecs1[0][..., 2],
+            order=order
+        )
+        for i in range(3)
+    ]
+    if return_axes:
+        return angle_expansion, (vecs1, vecs2)
+    else:
+        return angle_expansion
 
 
 def _pop_bond_vecs(bond_tf, i, j, coords):
@@ -1433,23 +1696,31 @@ def _pop_bond_vecs(bond_tf, i, j, coords):
     return bond_vectors.reshape(
         coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
     )
-def _fill_derivs(coords, idx, derivs):
+def _fill_derivs(coords, idx, derivs, method='old'):
     vals = []
     # nx = np.prod(coords.shape, dtype=int)
     nats = len(coords)
+    subpos = (np.array(idx)[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
+    base_shape = coords.shape[:-2]
     for n, d in enumerate(derivs):
         if n == 0:
             vals.append(d)
             continue
-        tensor = np.zeros((nats, 3) * n)
-        for pos in itertools.product(*[range(len(idx)) for _ in range(n)]):
-            actual = ()
-            for r in pos:
-                actual += (slice(None) if idx[r] is None else idx[r], slice(None))
-            tensor[actual] = d[pos]
+        if method == 'old':
+            tensor = np.zeros((nats, 3) * n)
+            for pos in itertools.product(*[range(len(idx)) for _ in range(n)]):
+                actual = ()
+                for r in pos:
+                    actual += (slice(None) if idx[r] is None else idx[r], slice(None))
+                tensor[actual] = d[pos]
+        else:
+            tensor = np.zeros(base_shape + (nats*3,) * n)
+            block = np.ix_(*[subpos] * n)
+            idx = (...,) + block #+ (slice(None),)*core_dim
+            tensor[idx] = d
         vals.append(tensor.reshape((nats * 3,) * n))
     return vals
-def dist_vec(coords, i, j, order=None, method='expansion', fixed_atoms=None):
+def dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of a bond displacement
 
@@ -1459,16 +1730,20 @@ def dist_vec(coords, i, j, order=None, method='expansion', fixed_atoms=None):
     :return:
     """
 
-    derivs = dist_deriv(coords, i, j, method=method, order=(1 if order is None else order), fixed_atoms=fixed_atoms)
-    if method == 'expansion':
+    derivs = dist_deriv(coords, i, j, method=method, order=(1 if order is None else order),
+                        cache=cache,
+                        reproject=reproject,
+                        fixed_atoms=fixed_atoms)
+    if reproject and method == 'expansion':
         return derivs[1] if order is None else derivs
     else:
         if order is None:
             return _pop_bond_vecs(derivs[1], i, j, coords)
         else:
-            return _fill_derivs(coords, (i,j), derivs)
+            return _fill_derivs(coords, (i,j), derivs, method=method)
 
-def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='ijk', fixed_atoms=None):
+def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='ijk',
+              cache=None, reproject=True, fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
 
@@ -1478,13 +1753,21 @@ def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='i
     :return:
     """
 
+    if method != "expansion" and angle_ordering == 'ijk':
+        i, j, k = j, i, k
+        angle_ordering = 'jik'
     derivs = angle_deriv(coords, i, j, k, order=(1 if order is None else order), method=method,
+                         cache=cache,
+                         reproject=reproject,
                          angle_ordering=angle_ordering,
                          fixed_atoms=fixed_atoms)
-    if method == 'expansion':
+    if reproject and method == 'expansion':
         return derivs[1] if order is None else derivs
     else:
-        full = _fill_derivs(coords, (i, j, k), derivs)
+        if angle_ordering == 'ijk':
+            full = _fill_derivs(coords, (j, i, k), derivs, method=method)
+        else:
+            full = _fill_derivs(coords, (i, j, k), derivs, method=method)
         if order is None:
             return full[1]
         else:
@@ -1510,7 +1793,7 @@ def rock_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None):
         else:
             return full
 
-def dihed_vec(coords, i, j, k, l, order=None, method='expansion', fixed_atoms=None):
+def dihed_vec(coords, i, j, k, l, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of a dihedral displacement
 
@@ -1519,11 +1802,14 @@ def dihed_vec(coords, i, j, k, l, order=None, method='expansion', fixed_atoms=No
     :param j:
     :return:
     """
-    derivs = dihed_deriv(coords, i, j, k, l, method=method, order=(1 if order is None else order), fixed_atoms=fixed_atoms)
-    if method == 'expansion':
+    derivs = dihed_deriv(coords, i, j, k, l, method=method, order=(1 if order is None else order),
+                         cache=cache,
+                         reproject=reproject,
+                         fixed_atoms=fixed_atoms)
+    if reproject and method == 'expansion':
         return derivs[1] if order is None else derivs
     else:
-        full = _fill_derivs(coords, (i, j, k, l), derivs)
+        full = _fill_derivs(coords, (i, j, k, l), derivs, method=method)
         if order is None:
             return full[1]
         else:
@@ -1648,12 +1934,22 @@ def internal_conversion_specs(specs, angle_ordering='ijk', coord_type_dispatch=N
 def internal_conversion_function(specs,
                                  base_transformation=None,
                                  reference_internals=None,
+                                 use_cache=True,
+                                 reproject=False,
                                  **opts):
     base_specs = internal_conversion_specs(specs, **opts)
-    def convert(coords, order=None, reference_internals=reference_internals, base_transformation=base_transformation):
+    def convert(coords, order=None,
+                use_cache=use_cache,
+                reference_internals=reference_internals, base_transformation=base_transformation):
         targets = []
+        #
+        if use_cache:
+            cache = {}
+        else:
+            cache = None
         for f, idx, subopts in base_specs:
-            targets.append(f(coords, *idx, **dict(subopts, order=order)))
+            res = f(coords, *idx, **dict(subopts, reproject=reproject, cache=cache, order=order))
+            targets.append(res)
 
         if order is None:
             base = np.moveaxis(np.array(targets), 0, -1)

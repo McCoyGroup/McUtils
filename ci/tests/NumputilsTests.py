@@ -2300,7 +2300,7 @@ class NumputilsTests(TestCase):
         # X, _ = nput.dihedron_property(dd, 'X')
         # print(Z, nput.pts_angles(pts[0], pts[1], pts[3], return_crosses=False))
 
-    @debugTest
+    @validationTest
     def test_InternalTensorsFixedAtoms(self):
 
         np.random.seed(153234)
@@ -2353,3 +2353,125 @@ class NumputilsTests(TestCase):
             fixed_inverse_atoms=[18, 19, 20, 21, 26, 27, 28, 29, 30, 31],
             return_inverse=True
         )
+
+    @validationTest
+    def test_EigenvectroDerivs(self):
+
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+        masses = 1 + 2 * np.random.rand(15)
+        # huh = nput.transrot_deriv(coords, *(0, 1, 4, 2))
+
+        inertia_base = nput.inertia_tensors(coords, masses=masses)
+        inertia_higher = nput.inertial_frame_derivatives(coords, masses=masses, mass_weighted=False)
+        inertia_expansion = [inertia_base] + inertia_higher
+        def inert_t(coords):
+            return nput.inertia_tensors(coords, masses=masses)
+
+        dt = FiniteDifferenceDerivative(inert_t,
+                                        ((15, 3), (3, 3)),
+                                        mesh_spacing=.001
+                                        ).derivatives(coords)
+        # print(np.round(dt.derivative_tensor(1)[0], 8))
+        # print(inertia_expansion[1][0])
+        # return
+
+        val_exp, vec_exp = nput.mateigh_deriv(inertia_expansion, 1)
+        nput.frac_powh([[1],[0], [0]], -1, nonzero_cutoff=.01)
+
+        def mom_i(coords):
+            return moments_of_inertia(coords, masses=masses)[0]
+        dt = FiniteDifferenceDerivative(mom_i,
+                                        ((15, 3), (3,)),
+                                        mesh_spacing=.0001
+                                        ).derivatives(coords)
+        # print(dt.derivative_tensor(1)[:, 0])
+        # print(val_exp[1][:, 0, 0])
+
+        def mom_ax(coords):
+            return moments_of_inertia(coords, masses=masses)[1]
+        dt = FiniteDifferenceDerivative(mom_ax,
+                                        ((15, 3), (3, 3)),
+                                        mesh_spacing=.0001
+                                        ).derivatives(coords)
+        print(dt.derivative_tensor(1)[..., 0])
+        print(vec_exp[1][..., 0])
+
+        return
+
+        # print(val_exp[0])
+        # print(vec_exp[0])
+        # print(vec_exp[1])
+
+        a_exp, b_exp, c_exp = nput.orientation_angle_deriv(coords,
+                                                           (0, 1, 2, 3),
+                                                           (4, 5, 6),
+                                                           masses=masses,
+                                                           order=1)
+
+        _ = nput.com_dist_deriv(coords,
+                                (0, 1, 2, 3),
+                                (4, 5, 6),
+                                masses=masses,
+                                order=1)
+
+    @debugTest
+    def test_DerivPerf(self):
+        from Psience.Molecools import Molecule
+        import McUtils.Coordinerds as coordops
+
+        test3 = Molecule.from_string('CC1(C)C(/C=C/C2=C(O)C=CC3=C2C=CC=C3)=[N+](CCCS(=O)([O-])=O)C4=CC=CC=C41')
+        internal_set = coordops.extract_zmatrix_internals(test3.get_bond_zmatrix())
+        # with BlockProfiler():
+        #     woof2 = nput.internal_coordinate_tensors(
+        #         test3.coords,
+        #         internal_set + internal_set,
+        #         masses=test3.masses,
+        #         return_inverse=True,
+        #         use_cache=False,
+        #         # method='old',
+        #         # angle_ordering='ijk',
+        #         order=1
+        #     )
+        # with BlockProfiler():
+        # internal_set = [internal_set[i] for i in (0, -2, -1)]
+        # internal_set = internal_set[-12:]
+        internal_set = internal_set+internal_set+internal_set+internal_set
+        with BlockProfiler():
+            woof2 = nput.internal_coordinate_tensors(
+                test3.coords,
+                internal_set,
+                masses=test3.masses,
+                # return_inverse=True,
+                use_cache=False,
+                reproject=True,
+                # method='old',
+                # angle_ordering='ijk',
+                order=1
+            )
+        with BlockProfiler():
+            woof2 = nput.internal_coordinate_tensors(
+                test3.coords,
+                internal_set,
+                masses=test3.masses,
+                # return_inverse=True,
+                use_cache=False,
+                reproject=False,
+                # method='old',
+                # angle_ordering='ijk',
+                order=1
+            )
+        with BlockProfiler():
+            woof3 = nput.internal_coordinate_tensors(
+                test3.coords,
+                internal_set,
+                masses=test3.masses,
+                # return_inverse=True,
+                # use_cache=True,
+                # reproject=False,
+                # method='old',
+                # angle_ordering='ijk',
+                order=1
+            )
+        # print(np.concatenate([woof2[1], woof3[1]], axis=1))
+        print(woof2[1] - woof3[1])
