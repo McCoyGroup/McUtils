@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordinateFrames.moments_of_inertia">moments_of_inertia</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L149)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L149?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L152?message=Update%20Docs)]
 </div>
 
 ```python
-moments_of_inertia(coords, masses=None, force_rotation=True): 
+moments_of_inertia(coords, masses=None, force_rotation=True, return_com=False): 
 ```
 Computes the moment of inertia tensor for the walkers with coordinates coords (assumes all have the same masses)
   - `coords`: `CoordinateSet`
@@ -64,7 +64,7 @@ Computes the moment of inertia tensor for the walkers with coordinates coords (a
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/moments_of_inertia.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/moments_of_inertia.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L149?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L152?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

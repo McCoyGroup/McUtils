@@ -5,7 +5,7 @@
 </div>
 
 ```python
-transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, fixed_atoms=None): 
+transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, return_frame=False, fixed_atoms=None): 
 ```
 
 
