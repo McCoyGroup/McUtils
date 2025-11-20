@@ -22,6 +22,7 @@ class JSMol:
         }};
         """
         unsynced_properties = ['width', 'height']
+        # can_by_dynamic = False
         @classmethod
         def load_applet_script(cls, id, loader,
                                include_script_interface=False,
@@ -97,19 +98,36 @@ class JSMol:
                      animate=False, vibrate=False,
                      load_script=None,
                      suffix=None,
+                     id=None,
                      dynamic_loading=None,
-                     include_script_interface=True,
+                     include_script_interface=False,
+                     create_applet_loader=None,
+                     style=None,
                      **attrs):
             if suffix is None:
                 suffix = str(uuid.uuid4())[:6].replace("-", "")
             self.suffix = suffix
-            self.id = "jsmol-applet-" + self.suffix
-            if len(model_etc) > 0 and isinstance(model_etc[0], str):
-                model_file = model_etc[0]
-                rest = model_etc[1:]
+            if id is None:
+                id =  "jsmol-applet-" + self.suffix
+            self.id = id
+            if len(model_etc) > 0:
+                if isinstance(model_etc[0], str):
+                    model_file = model_etc[0]
+                    rest = model_etc[1:]
+                    if create_applet_loader is None:
+                        create_applet_loader = True
+                else:
+                    model_file = None
+                    if create_applet_loader is None:
+                        create_applet_loader = False
+                    rest = model_etc
             else:
                 model_file = None
+                if create_applet_loader is None:
+                    create_applet_loader = False
                 rest = model_etc
+            if len(rest) == 1 and isinstance(rest[0], (list, tuple)):
+                rest = rest[0]
 
             if load_script is None:
                 load_script = []
@@ -129,10 +147,21 @@ class JSMol:
 
             self.load_script = load_script
             self.width, self.height = width, height
-            elems = self.create_applet(model_file, include_script_interface=include_script_interface) + list(rest)
+            if create_applet_loader:
+                elems = self.create_applet(model_file, include_script_interface=include_script_interface) + list(rest)
+            else:
+                elems = rest
             if include_script_interface:
                 height = height + 200
-            super().__init__(*elems, id=self.id, width=f'{width}px', height=f'{height}px', **attrs)
+            if style is not None:
+                if 'width' not in style:
+                    style['width'] =  f'{width}px'
+                if 'height' not in style:
+                    style['height'] =  f'{height}px'
+            else:
+                attrs['width'] =  f'{width}px'
+                attrs['height'] = f'{height}px'
+            super().__init__(*elems, id=self.id, style=style, **attrs)
 
         @property
         def applet_target(self):
