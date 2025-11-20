@@ -1,4 +1,5 @@
 import itertools
+import numbers
 from xml.etree import ElementTree
 import weakref, numpy as np, copy, textwrap, inspect
 import contextlib
@@ -858,7 +859,12 @@ class HTML(XMLBase):
         @property
         def elems(self):
             if self._elem_view is None:
-                self._elem_view = tuple(str(x) if isinstance(x, (int, float, bool)) else x for x in self._elems)
+                self._elem_view = tuple(
+                        str(x)
+                            if isinstance(x, (int, float, bool, numbers.Number)) else
+                        x
+                        for x in self._elems
+                )
             return self._elem_view
         @elems.setter
         def elems(self, elems):
@@ -981,10 +987,11 @@ class HTML(XMLBase):
                     root.text = elem
             elif hasattr(elem, 'to_widget'):
                 raise ValueError(
-                    "can't convert {} to pure HTML. It looks like a Jupyter widget so look for the appropriate `JHTML` subclass.".format(
-                        elem))
+                    f"can't convert {elem} to pure HTML. "
+                    "It looks like a Jupyter widget so look for the appropriate `JHTML` subclass."
+                )
             else:
-                raise ValueError("don't know what to do with {}".format(elem))
+                raise ValueError(f"don't know what to do with {elem} in converting {parent}")
 
         attr_converter = None
         @classmethod
@@ -1038,11 +1045,20 @@ class HTML(XMLBase):
                 if self._tree_cache not in root:
                     root.append(self._tree_cache)
             return self._tree_cache
+        def modify(self, elems=None, **attrs):
+            attrs = self.context.manage_attrs(attrs)
+            extra_styles, attrs = self.context.extract_styles(attrs, style_props=self.style_props, ignored_styles=self.ignored_styles)
+            base_attrs = dict(self.attrs, **attrs)
+            return type(self)(
+                self.elems if elems is None else elems,
+                style=dict(base_attrs.pop('style', {}), **extra_styles),
+                **base_attrs
+            )
         def clean_props(self, attr_converter=None):
             if attr_converter is None:
                 attr_converter = self.attr_converter
-            return type(self)(
-                [e.clean_props() if hasattr(e, 'clean_props') else e for e in self.elems],
+            return self.modify(
+                elems=[e.clean_props() if hasattr(e, 'clean_props') else e for e in self.elems],
                 **(attr_converter(self.attrs) if attr_converter is not None else self.attrs)
             )
         def to_json(self, root=None, parent=None, attr_converter=None):
