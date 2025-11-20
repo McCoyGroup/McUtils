@@ -43,7 +43,7 @@ def center_of_mass(coords, masses=None):
 
     return np.tensordot(masses / np.sum(masses), coords, axes=[0, -2])
 
-def inertia_tensors(coords, masses=None, mass_weighted=False):
+def inertia_tensors(coords, masses=None, mass_weighted=False, return_com=False):
     """
     Computes the moment of intertia tensors for the walkers with coordinates coords (assumes all have the same masses)
 
@@ -74,7 +74,10 @@ def inertia_tensors(coords, masses=None, mass_weighted=False):
     o = vec_ops.vec_outer(coords, coords, axes=[-1, -1])
     tens = np.tensordot(masses, d - o, axes=[0, -3])
 
-    return tens
+    if return_com:
+        return tens, com
+    else:
+        return tens
 
 def inertial_frame_derivatives(coords, masses=None, sel=None, mass_weighted=True):
     if masses is None:
@@ -146,7 +149,7 @@ def inertial_frame_derivatives(coords, masses=None, sel=None, mass_weighted=True
 
     return [I0Y, I0YY]
 
-def moments_of_inertia(coords, masses=None, force_rotation=True):
+def moments_of_inertia(coords, masses=None, force_rotation=True, return_com=False):
     """
     Computes the moment of inertia tensor for the walkers with coordinates coords (assumes all have the same masses)
 
@@ -173,7 +176,7 @@ def moments_of_inertia(coords, masses=None, force_rotation=True):
     if masses is None:
         masses = np.ones(coords.shape[-2])
 
-    massy_doop = inertia_tensors(coords, masses)
+    massy_doop, com = inertia_tensors(coords, masses, return_com=True)
     moms, axes = np.linalg.eigh(massy_doop)
     # a = axes[..., :, 0]
     # c = axes[..., :, 2]
@@ -193,7 +196,11 @@ def moments_of_inertia(coords, masses=None, force_rotation=True):
     else:
         moms = moms[0]
         axes = axes[0]
-    return moms, axes
+
+    if return_com:
+        return (moms, axes), com
+    else:
+        return moms, axes
 
 def moments_of_inertia_expansion(coords, masses=None, order=1, force_rotation=True, mass_weighted=True):
     inertia_base = inertia_tensors(coords, masses=masses, mass_weighted=mass_weighted)
@@ -211,7 +218,8 @@ def moments_of_inertia_expansion(coords, masses=None, order=1, force_rotation=Tr
 def translation_rotation_eigenvectors(coords, masses=None,
                                       mass_weighted=True,
                                       return_com=False,
-                                      return_rot=True
+                                      return_rot=True,
+                                      return_principle_axes=False
                                       ):
     """
     Returns the eigenvectors corresponding to translations and rotations
@@ -249,8 +257,10 @@ def translation_rotation_eigenvectors(coords, masses=None,
     coords = coords.reshape((-1,) + coords.shape[-2:])
 
     M = np.kron(mvec / mT, np.eye(3)).T  # translation eigenvectors
+    principle_axes = None
     if return_rot:
         mom_rot, ax_rot = moments_of_inertia(coords, masses)
+        principle_axes = ax_rot
         # if order > 0:
         #     base_tensor = StructuralProperties.get_prop_inertia_tensors(coords, masses)
         #     mom_expansion = StructuralProperties.get_prop_inertial_frame_derivatives(coords, masses)
@@ -365,11 +375,16 @@ def translation_rotation_eigenvectors(coords, masses=None,
     if smol:
         eigs = eigs[0]
         freqs = freqs[0]
+        principle_axes = principle_axes[0]
     else:
         eigs = eigs.reshape(base_shape + eigs.shape[1:])
         freqs = freqs.reshape(base_shape + freqs.shape[1:])
+        principle_axes = principle_axes.reshape(base_shape + principle_axes.shape[1:])
 
-    return freqs, eigs
+    if return_principle_axes:
+        return (freqs, eigs), principle_axes
+    else:
+        return freqs, eigs
 
 def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False,
                                    orthonormal=True

@@ -31,8 +31,8 @@ __all__ = [
     'wag_deriv',
     'transrot_deriv',
     'com_dist_deriv',
-    "com_pos_diff_deriv",
-    'orientation_angle_deriv',
+    # "com_pos_diff_deriv",
+    'orientation_deriv',
     'vec_norm_derivs',
     'vec_sin_cos_derivs',
     'vec_angle_derivs',
@@ -1556,7 +1556,7 @@ def wag_deriv(coords, i, j, k, l=None, m=None, n=None, /, order=1, method='expan
     else:
         raise NotImplementedError("too annoying")
 
-def transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, fixed_atoms=None):
+def transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, return_frame=False, fixed_atoms=None):
     coords = np.asanyarray(coords)
     if len(pos) > 0:
         if masses is not None:
@@ -1564,12 +1564,13 @@ def transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, fixed_at
         subcoords = coords[..., pos, :]
     else:
         subcoords = coords
-    com, eigs = frames.translation_rotation_eigenvectors(
+    (com, eigs), axes = frames.translation_rotation_eigenvectors(
         subcoords,
         masses,
         mass_weighted=False,
         return_com=True,
-        return_rot=return_rot
+        return_rot=return_rot,
+        return_principle_axes=True
     )
 
     nc = com.shape[-1]
@@ -1591,8 +1592,11 @@ def transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, fixed_at
             expansion.append(
                 np.zeros(coords.shape[:-2] + (n,) * (o+1) + (nc,))
             )
-    
-    return expansion
+
+    if return_frame:
+        return expansion, axes
+    else:
+        return expansion
 
 def com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None):
     #TODO: could also include the com vec if that was useful...
@@ -1609,17 +1613,6 @@ def com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fi
 
     norm_deriv, _ = td.vec_norm_unit_deriv(disp_exp, order=order)
     return norm_deriv
-
-def com_pos_diff_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None):
-    #TODO: could also include the com vec if that was useful...
-    coords = np.asanyarray(coords)
-    com_deriv1 = transrot_deriv(coords, *frame_pos_1, masses=masses, order=order,
-                             return_rot=False,
-                             fixed_atoms=fixed_atoms)
-    com_deriv2 = transrot_deriv(coords, *frame_pos_2, masses=masses, order=order,
-                             return_rot=False,
-                             fixed_atoms=fixed_atoms)
-    return [cd1 - cd2 for cd1, cd2 in zip(com_deriv1, com_deriv2)]
 
 def moment_of_inertia_expansion_deriv(coords, *pos, order=1, masses=None, fixed_atoms=None):
     coords = np.asanyarray(coords)
@@ -1661,31 +1654,78 @@ def moment_of_inertia_expansion_deriv(coords, *pos, order=1, masses=None, fixed_
 
     return vals, vecs
 
-def orientation_angle_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None,
-                            fixed_atoms=None,
-                            return_axes=False
-                            ):
+def _frame_data(coords, *pos, masses=None):
+    coords = np.asanyarray(coords)
+    if len(pos) > 0:
+        if masses is not None:
+            masses = np.asanyarray(masses)[pos,]
+        subcoords = coords[..., pos, :]
+    else:
+        subcoords = coords
+    return frames.moments_of_inertia(subcoords, masses=masses, return_com=True)
+
+def orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None,
+                      fixed_atoms=None,
+                      return_frame=False
+                      ):
     #TODO: could also include the com vec if that was useful...
     coords = np.asanyarray(coords)
-    _, vecs1 = moment_of_inertia_expansion_deriv(coords, *frame_pos_1, order=order, masses=masses,
-                                                 fixed_atoms=fixed_atoms)
+    disps1, axes1 = transrot_deriv(coords, *frame_pos_1,
+                                   order=order,
+                                   masses=masses,
+                                   fixed_atoms=fixed_atoms,
+                                   return_frame=True
+                                   )
+    disps2, axes2 = transrot_deriv(coords, *frame_pos_2,
+                                   order=order,
+                                   masses=masses,
+                                   fixed_atoms=fixed_atoms,
+                                   return_frame=True
+                                   )
 
-    _, vecs2 = moment_of_inertia_expansion_deriv(coords, *frame_pos_2, order=order, masses=masses,
-                                                 fixed_atoms=fixed_atoms)
+    angle_expansion = []
+    for i in range(3):
+        vecs1 = [axes1[..., i]]
+        for d in disps1[1:]:
+            base_vec = d[..., 3+i]
+            new_tensor = np.zeros(base_vec.shape + (3,))
+            new_tensor[..., ::3, 0] = base_vec[..., ::3]
+            new_tensor[..., 1::3, 1] = base_vec[..., 1::3]
+            new_tensor[..., 2::3, 2] = base_vec[..., 2::3]
+            vecs1.append(new_tensor)
 
-    angle_expansion = [
-        td.vec_angle_deriv(
-            [v[..., i] for v in vecs1],
-            [v[..., i] for v in vecs2],
-            up_vector=vecs1[0][..., 2],
-            order=order
+        vecs2 = [axes2[..., i]]
+        for d in disps2[1:]:
+            base_vec = d[:, 3+i]
+            new_tensor = np.zeros(base_vec.shape + (3,))
+            new_tensor[..., ::3, 0] = base_vec[..., ::3]
+            new_tensor[..., 1::3, 1] = base_vec[..., 1::3]
+            new_tensor[..., 2::3, 2] = base_vec[..., 2::3]
+            vecs2.append(new_tensor)
+
+        angle_expansion.append(
+            td.vec_angle_deriv(
+                vecs1,
+                vecs2,
+                up_vector=axes1[..., (i+2)%3],
+                order=order
+            )
         )
-        for i in range(3)
+
+    xyz_expansion = [
+        (cd1[..., :3] - cd2[..., :3])
+        for cd1, cd2 in zip(disps1, disps2)
     ]
-    if return_axes:
-        return angle_expansion, (vecs1, vecs2)
+
+    total_expansion = [
+        np.concatenate([xyz, a[..., np.newaxis], b[..., np.newaxis], c[..., np.newaxis]], axis=-1)
+        for a,b,c,xyz in zip(*angle_expansion, xyz_expansion)
+    ]
+
+    if return_frame:
+        return total_expansion, ((disps1[0], axes1), (disps2[0], axes2))
     else:
-        return angle_expansion
+        return total_expansion
 
 
 def _pop_bond_vecs(bond_tf, i, j, coords):

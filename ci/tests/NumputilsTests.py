@@ -804,7 +804,7 @@ class NumputilsTests(TestCase):
         self.assertEquals(td.shape, (4, 3, 4, 3))
         self.assertEquals(array.tensordot(array, axes=[[1, 2], [1, 2]]).shape, (4, 4))
 
-    @debugTest
+    @validationTest
     def test_Sparse(self):
 
         shape = (1000, 100, 50)
@@ -2412,10 +2412,10 @@ class NumputilsTests(TestCase):
                                         ((15, 3), (3, 3)),
                                         mesh_spacing=.0001
                                         ).derivatives(coords)
-        print(dt.derivative_tensor(1)[..., 0])
-        print(vec_exp[1][..., 0])
-
-        return
+        # print(dt.derivative_tensor(1)[..., 0])
+        # print(vec_exp[1][..., 0])
+        #
+        # return
 
         # print(val_exp[0])
         # print(vec_exp[0])
@@ -2493,3 +2493,15 @@ class NumputilsTests(TestCase):
             )
         # print(np.concatenate([woof2[1], woof3[1]], axis=1))
         print(woof2[1] - woof3[1])
+
+    @debugTest
+    def test_FrameDerivs(self):
+
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+        masses = 1 + 2 * np.random.rand(15)
+        a_exp, b_exp, c_exp = nput.orientation_angle_deriv(coords,
+                                                           (0, 1, 2, 3),
+                                                           (4, 5, 6),
+                                                           masses=masses,
+                                                           order=1)

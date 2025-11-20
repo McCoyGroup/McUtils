@@ -97,13 +97,17 @@ class JSMol:
                      animate=False, vibrate=False,
                      load_script=None,
                      suffix=None,
+                     id=None,
                      dynamic_loading=None,
                      include_script_interface=True,
+                     style=None,
                      **attrs):
             if suffix is None:
                 suffix = str(uuid.uuid4())[:6].replace("-", "")
             self.suffix = suffix
-            self.id = "jsmol-applet-" + self.suffix
+            if id is None:
+                id =  "jsmol-applet-" + self.suffix
+            self.id = id
             if len(model_etc) > 0 and isinstance(model_etc[0], str):
                 model_file = model_etc[0]
                 rest = model_etc[1:]
@@ -132,7 +136,15 @@ class JSMol:
             elems = self.create_applet(model_file, include_script_interface=include_script_interface) + list(rest)
             if include_script_interface:
                 height = height + 200
-            super().__init__(*elems, id=self.id, width=f'{width}px', height=f'{height}px', **attrs)
+            if style is not None:
+                if 'width' not in style:
+                    style['width'] =  f'{width}px'
+                if 'height' not in style:
+                    style['height'] =  f'{height}px'
+            else:
+                attrs['width'] =  f'{width}px'
+                attrs['height'] = f'{height}px'
+            super().__init__(*elems, id=self.id, **attrs)
 
         @property
         def applet_target(self):
