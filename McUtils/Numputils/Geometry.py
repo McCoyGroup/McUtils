@@ -20,16 +20,20 @@ __all__ = [
     "triangle_converter",
     "triangle_area",
     "make_triangle",
+    "make_symbolic_triangle",
     "triangle_property_specifiers",
     "triangle_completions",
     "triangle_completion_paths",
+    "enumerate_triangle_completions",
     "triangle_is_complete",
     "triangle_property_function",
     "make_dihedron",
+    "make_symbolic_dihedron",
     "dihedron_property_specifiers",
     "dihedral_completions",
     "dihedral_completion_paths",
     "dihedron_is_complete",
+    "enumerate_dihedron_completions",
     "dihedron_property_function",
 ]
 
@@ -1374,6 +1378,31 @@ def _expand_trie(t):
             for k, v in new.items()
         )
     return comps
+def _expand_trie_iter(t, sorting=None):
+    queue = collections.deque()
+    for k,v in t.items():
+        queue.append([[k], v, -1])
+    sort_map = {}
+    while queue:
+        prev, new, sort_max = queue.pop()
+        if not isinstance(new, dict):
+            if new is True:
+                yield tuple(prev), None
+            else:
+                completion,function = new
+                yield tuple(completion), function
+            continue
+        if sorting is None:
+            queue.extend(
+                [prev + [k], v, -1]
+                for k, v in new.items()
+            )
+        else:
+            for k, v in new.items():
+                if k not in sort_map:
+                    sort_map[k] = sorting.index(k)
+                if sort_max < sort_map[k]:
+                    queue.append([prev + [k], v, sort_map[k]])
 def _completion_paths(dd, completions_trie, prop_func, return_trie=False):
     queue = collections.deque([[[], completions_trie]])
     fall_throughs = []
@@ -1442,23 +1471,42 @@ def _dist_completions_trie(b, c, A, B, C):
         C: {b: True, A: True, B: True},
         A: {B: True, C: True}
     }
-def _angle_completions_trie(a, b, c, B, C):
+def _angle_completions_trie(a, b, c, B, C, angle_only=True):
     return {
         a: {B: True, C: True},
         b: {c: True, B:True, C: True},
         c: {b: True, B:True, C: True},
-        B: {a:True, b:True, c: True, C: True},
-        C: {a:True, c:True, b: True, B: True}
+        B: (
+            {a:True, b:True, c: True, C: True}
+                if angle_only else
+            {a:True, b:True, c: True}
+        ),
+        C: (
+            {a:True, c:True, b: True, B: True}
+                if angle_only else
+            {a:True, c:True, b: True}
+        )
     }
-def _triangle_completable_trie(a, b, c, A, B, C):
+def _triangle_completable_trie(a, b, c, A, B, C, require_all=True):
     return {
-        a: _dist_completions_trie(b, c, A, B, C),
-        b: _dist_completions_trie(a, c, B, A, C),
-        c: _dist_completions_trie(a, b, C, A, B),
-        A: _angle_completions_trie(a, b, c, B, C),
-        B: _angle_completions_trie(b, a, c, A, C),
-        C: _angle_completions_trie(c, a, b, A, B)
-    }
+            a: _dist_completions_trie(b, c, A, B, C),
+            b: _dist_completions_trie(a, c, B, A, C),
+            c: _dist_completions_trie(a, b, C, A, B),
+            A: _angle_completions_trie(a, b, c, B, C, angle_only=not require_all),
+            B: _angle_completions_trie(b, a, c, A, C, angle_only=not require_all),
+            C: _angle_completions_trie(c, a, b, A, B, angle_only=not require_all)
+        }
+def enumerate_triangle_completions(tdata:TriangleData):
+    if _check_bond_valid_triangle(tdata):
+        yield ()
+    else:
+        order = ["a", "b", "c", "A", "B", "C"]
+        base_trie = _triangle_completable_trie(*order)
+        for var in order:
+            if _tri_prop(tdata, var) is not None:
+                base_trie = base_trie[var]
+        for l, _ in _expand_trie_iter(base_trie, sorting=order):
+            yield l
 
 def _triangle_data_permute(tdata:TriangleData, perm):
     a,b,c,A,B,C = tdata
@@ -3633,6 +3681,38 @@ def dihedron_is_complete(dd: DihedralTetrahedronData):
                 if dihedron_property(dd, x, allow_completion=False) is not None:
                     return True
     return False
+def enumerate_dihedron_completions(dd):
+    if dihedron_is_complete(dd):
+        yield ()
+    else:
+        # checks are getting duplicated, but they're cheap
+        tris = [
+            dihedron_triangle_1(dd),
+            dihedron_triangle_2(dd),
+            dihedron_triangle_3(dd),
+            dihedron_triangle_4(dd)
+        ]
+        comps = [triangle_is_complete(t) for t in tris]
+        pair_scoring = {
+            (i,j): (1 if comps[i] else 0) + (1 if comps[j] else 0)
+            for i,j in itertools.combinations(range(4), 2)
+        }
+        max_score = max(pair_scoring.values())
+        pair_scoring = [k for k,v in pair_scoring.items() if v == max_score]
+        for i,j in pair_scoring:
+            subenums = [
+                enumerate_triangle_completions(tris[i])
+                    if not comps[i] else
+                [[]],
+                enumerate_triangle_completions(tris[j])
+                    if not comps[j] else
+                [[]],
+                dihedron_triangle_pair_dihedrals[(i, j)]
+            ]
+            tri_map_1 = dict(zip(tris[i]._asdict().keys(), dihedron_triangle_fields[i]))
+            tri_map_2 = dict(zip(tris[j]._asdict().keys(), dihedron_triangle_fields[j]))
+            for c_i, c_j, p in itertools.product(*subenums):
+                yield tuple(tri_map_1[x] for x in c_i) + tuple(tri_map_2[y] for y in c_j) + (p,)
 
 def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name,
                                disallowed_conversions=None,

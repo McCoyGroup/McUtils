@@ -8,6 +8,7 @@ from .. import Numputils as nput
 
 __all__ = [
     "canonicalize_internal",
+    "get_canonical_internal_list",
     "is_coordinate_list_like",
     "is_valid_coordinate",
     "permute_internals",
@@ -212,6 +213,13 @@ class InternalCoordinateSet:
         if self._triangulation is None:
             self._triangulation = self.get_triangulation()
         return self._triangulation
+
+
+def get_canonical_internal_list(coords):
+    if isinstance(coords, InternalCoordinateSet):
+        return coords.specs
+    else:
+        return [canonicalize_internal(c) for c in coords]
 
 def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False):
     if canonicalize:

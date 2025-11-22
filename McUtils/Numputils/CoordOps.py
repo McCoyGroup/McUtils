@@ -1739,7 +1739,7 @@ def _pop_bond_vecs(bond_tf, i, j, coords):
 def _fill_derivs(coords, idx, derivs, method='old'):
     vals = []
     # nx = np.prod(coords.shape, dtype=int)
-    nats = len(coords)
+    nats = coords.shape[-2]
     subpos = (np.array(idx)[:, np.newaxis] * 3 + np.arange(3)[np.newaxis, :]).flatten()
     base_shape = coords.shape[:-2]
     for n, d in enumerate(derivs):
@@ -1758,7 +1758,7 @@ def _fill_derivs(coords, idx, derivs, method='old'):
             block = np.ix_(*[subpos] * n)
             idx = (...,) + block #+ (slice(None),)*core_dim
             tensor[idx] = d
-        vals.append(tensor.reshape((nats * 3,) * n))
+        vals.append(tensor.reshape(base_shape + (nats * 3,) * n))
     return vals
 def dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None):
     """
