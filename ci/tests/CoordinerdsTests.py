@@ -729,7 +729,7 @@ class ConverterTest(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_SimpleZMatrices(self):
 
         pprint.pprint(
@@ -750,6 +750,16 @@ class ConverterTest(TestCase):
                 ethyl_positions=[0]
             )
         )
+
+    @debugTest
+    def test_CoordinateNumeration(self):
+        for c in enumerate_coordinate_sets([
+            [0, 1, 2],
+            [2, 3, 4, 5]
+            ],
+                [(0, 1), (1, 2)]
+        ):
+            print(c)
 
     @validationTest
     def test_DistsFromInternals(self):

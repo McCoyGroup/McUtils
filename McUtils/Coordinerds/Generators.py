@@ -3,6 +3,7 @@ import itertools
 import collections
 from .. import Numputils as nput
 from ..Graphs import EdgeGraph
+from . import Internals as ints
 
 __all__ = [
     "get_stretch_angles",
@@ -11,7 +12,8 @@ __all__ = [
     "get_dihedral_stretches",
     "get_stretch_angle_dihedrals",
     "get_stretch_coordinate_system",
-    "PrimitiveCoordinatePicker"
+    "PrimitiveCoordinatePicker",
+    "enumerate_coordinate_sets"
 ]
 
 
@@ -507,3 +509,55 @@ class PrimitiveCoordinatePicker:
         #     coords = self.chain_coords(R, atom)
 
         return coords
+
+def enumerate_coordinate_completions_line(indices, coords, canonicalize=False):
+    num_atoms = len(indices)
+    if canonicalize:
+        coords = ints.get_canonical_internal_list(coords)
+    if num_atoms == 1:
+        yield ()
+    elif num_atoms == 2:
+        i,j = num_atoms
+        crd = ints.canonicalize_internal(i,j)
+        if crd in coords:
+            yield ()
+        else:
+            yield (crd,)
+    elif num_atoms == 3:
+        template = nput.make_symbolic_triangle(indices=indices)
+        res_map = template._asdict()
+        test_tri = nput.make_triangle(**{
+            key:(True if val in coords else None)
+            for key, val in res_map.items()
+        })
+        for comp in nput.enumerate_triangle_completions(test_tri):
+            # map backwards
+            yield tuple(res_map[name] for name in comp)
+    else:
+        template = nput.make_symbolic_dihedron(indices=indices)
+        res_map = template._asdict()
+        test_tri = nput.make_dihedron(**{
+            key: (True if val in coords else None)
+            for key, val in res_map.items()
+        })
+        for comp in nput.enumerate_dihedron_completions(test_tri):
+            # map backwards
+            yield tuple(res_map[name] for name in comp)
+
+def enumerate_coordinate_sets(groups, coords, canonicalize=True):
+    #TODO: add in BFS enumeration
+    if canonicalize:
+        coords = set(ints.get_canonical_internal_list(coords))
+    for n,subinds in enumerate(groups):
+        subsubinds = [g for g in subinds if g >= 0]
+        for comp in enumerate_coordinate_completions_line(subsubinds, coords, canonicalize=False):
+            merge_coords = coords|set(comp)
+            if len(groups) == 1:
+                yield merge_coords
+            else:
+                for subcomp in enumerate_coordinate_sets(
+                        groups[n + 1:],
+                        merge_coords,
+                        canonicalize=False
+                ):
+                    yield subcomp

@@ -2494,7 +2494,7 @@ class NumputilsTests(TestCase):
         # print(np.concatenate([woof2[1], woof3[1]], axis=1))
         print(woof2[1] - woof3[1])
 
-    @debugTest
+    @validationTest
     def test_FrameDerivs(self):
 
         np.random.seed(2123)
@@ -2505,3 +2505,10 @@ class NumputilsTests(TestCase):
                                                            (4, 5, 6),
                                                            masses=masses,
                                                            order=1)
+    @debugTest
+    def test_FailingCarts(self):
+        from Psience.Molecools import Molecule
+        test = Molecule.from_string("OC(C=CC=C1)=C1/C=C/C2=[N+](CCCS(=O)([O-])=O)C3=CC=CC=C3C2(C)C")
+        tint = test.modify(internals='auto')
+        print(len(tint.internals['specs']))
+        print(tint.get_cartesians_by_internals(1)[0].shape)
