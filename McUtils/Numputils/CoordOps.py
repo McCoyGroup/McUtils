@@ -13,6 +13,7 @@ from . import TensorDerivatives as td
 from . import Misc as misc
 from . import SetOps as setops
 from . import PermutationOps as pops
+from . import Geometry as geom
 from .Options import Options
 
 __all__ = [
@@ -33,6 +34,10 @@ __all__ = [
     'com_dist_deriv',
     # "com_pos_diff_deriv",
     'orientation_deriv',
+    "rotation_expansion_from_axis_angle",
+    "dist_expansion",
+    "dihed_expansion",
+    "angle_expansion",
     'vec_norm_derivs',
     'vec_sin_cos_derivs',
     'vec_angle_derivs',
@@ -781,8 +786,9 @@ def disp_deriv_mat(coords, i, j, at_list, axes=None):
     else:
         proj = np.zeros(coords.shape + (3 * len(at_list),))
         mats = np.zeros(coords[..., at_list, :].shape + (3,))
-        _, (a, b), _ = np.intersect1d(at_list, [i, j], return_indices=True)
-        # a, b = np.sort([a,b]) #TODO: check on this...I think I want this to be flipped?
+        _, (a, b), ord = np.intersect1d(at_list, [i, j], return_indices=True)
+        inv = np.argsort(ord)
+        a, b = np.array([a, b])[inv,]
         mats = fill_disp_jacob_atom(
             mats,
             [[a, 1], [b, -1]],
@@ -814,7 +820,9 @@ def prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
         return [a]
 
 def prep_expanded_mats_from_cache(expansion, i, j, at_list, root_dim=1, core_dim=0):
-    _, (a, b), _ = np.intersect1d(at_list, [i, j], return_indices=True)
+    _, (a, b), ord = np.intersect1d(at_list, [i, j], return_indices=True)
+    inv = np.argsort(ord)
+    a, b = np.array([a, b])[inv,]
     # a, b = np.sort([a,b])
     # print(at_list, (i, j), a, b)
     natl = len(at_list) * 3
@@ -850,11 +858,12 @@ def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, expan
                                                 fixed_atoms=None,
                                                 expand=True)
 
-        if i > j:
-            j, i = i, j
-            sign = -1
-        else:
-            sign = 1
+        # if i > j:
+        #     j, i = i, j
+        #     sign = -1
+        # else:
+        #     sign = 1
+        sign = 1
 
         key = ((i, j), expand, fixed_atoms)
         if key in cache:
@@ -1303,7 +1312,7 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            coords, j, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
         base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion,
@@ -1727,7 +1736,6 @@ def orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None,
     else:
         return total_expansion
 
-
 def _pop_bond_vecs(bond_tf, i, j, coords):
     bond_vectors = np.zeros(coords.shape)
     bond_vectors[..., i, :] = bond_tf[0]
@@ -2125,7 +2133,8 @@ def prep_inverse_derivatives(expansion, fixed_atoms=None, fixed_coords=None, fix
 
     return expansion
 
-
+_transrot_projection_method = 'addition'
+_pre_mass_weight = False
 def inverse_internal_coordinate_tensors(expansion,
                                         coords=None, masses=None, order=None,
                                         mass_weighted=True,
@@ -2134,7 +2143,7 @@ def inverse_internal_coordinate_tensors(expansion,
                                         fixed_coords=None,
                                         fixed_cartesians=None,
                                         ):
-    from .CoordinateFrames import translation_rotation_invariant_transformation
+    from .CoordinateFrames import translation_rotation_invariant_transformation, translation_rotation_eigenvectors
 
     if order is None:
         order = len(expansion)
@@ -2148,17 +2157,44 @@ def inverse_internal_coordinate_tensors(expansion,
 
     if coords is not None and remove_translation_rotation:
         # expansion = remove_translation_rotations(expansion, coords[opt_inds], masses)
-        #TODO: is this the correct definition? Do we want to project out before or after the inverse?
-        L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
-                                                                    mass_weighted=False, strip_embedding=True)
-        new_tf = td.tensor_reexpand([L_inv], expansion, order)
-        inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
-        inverse_expansion = [
-            vec_tensordot(j, np.moveaxis(L_inv, -1, -2), axes=[-1, -1], shared=L_base.ndim - 2)
-                if not misc.is_numeric(j) else
-            j
-            for j in inverse_tf
-        ]
+        if _pre_mass_weight:
+            g12 = np.expand_dims(
+                np.repeat(
+                    np.diag(np.repeat(1 / np.sqrt(masses), 3)),
+                    coords.shape[0],
+                    axis=0
+                ),
+                list(range(expansion[0].ndim - 2))
+            )
+            expansion = td.tensor_reexpand([g12], expansion, len(expansion))
+        if _transrot_projection_method == 'projector':
+            #TODO: is this the correct definition? Do we want to project out before or after the inverse?
+            L_base, L_inv = translation_rotation_invariant_transformation(coords, masses,
+                                                                        mass_weighted=True, strip_embedding=True)
+            new_tf = td.tensor_reexpand([L_inv], expansion, order)
+            inverse_tf = td.inverse_transformation(new_tf, order, allow_pseudoinverse=True)
+            inverse_expansion = [
+                vec_tensordot(j, np.moveaxis(L_inv, -1, -2), axes=[-1, -1], shared=L_base.ndim - 2)
+                    if not misc.is_numeric(j) else
+                j
+                for j in inverse_tf
+            ]
+        else:
+            _, tr = translation_rotation_eigenvectors(coords, masses, mass_weighted=_pre_mass_weight)
+            tr_expansion = [tr]
+            n = tr.shape[-1]
+            for e in expansion[1:]:
+                base_shape = e.shape[:-1]
+                final_shape = base_shape + (n,)
+                tr_expansion.append(np.zeros(final_shape))
+            total_exp = [np.concatenate([t, e], axis=-1) for t,e in zip(tr_expansion, expansion)]
+            inverse_tf = td.inverse_transformation(total_exp, order, allow_pseudoinverse=True)
+            inverse_expansion = []
+            for i,t in enumerate(inverse_tf):
+                idx = (...,) + (slice(n, None),)*(i+1) + (slice(None),)
+                inverse_expansion.append(t[idx])
+        if _pre_mass_weight:
+            inverse_expansion = td.tensor_reexpand(inverse_expansion, [g12], order)
     elif mass_weighted and masses is not None:
         sqrt_mass = np.expand_dims(
             np.repeat(
@@ -2180,6 +2216,106 @@ def inverse_internal_coordinate_tensors(expansion,
                                                  fixed_cartesians=fixed_cartesians)
 
     return inverse_expansion
+
+def rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0, axis_order=0):
+    axis = vec_normalize(axis)
+    if axis.ndim > 1:
+        raise NotImplementedError("multi-axis broadcasting is tedious")
+    R_expansion = geom.axis_rot_gen_deriv(angle, axis, angle_order=order, axis_order=axis_order)
+    if axis_order == 0:
+        return [
+            (coords[..., np.newaxis, :] @ np.moveaxis(R, -1, -2)).reshape(
+                coords.shape
+                    if i == 0 else
+                (coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],))
+            )
+            for i,R in enumerate(R_expansion)
+        ]
+    else:
+        extra = coords.ndim - 2
+        base_expansion = [
+            np.moveaxis(np.tensordot(coords, R, axes=[-1, -1]), extra, -2)
+            for R in R_expansion
+        ]
+        return [
+            np.reshape(
+                e,
+                e.shape[:-2] + (e.shape[-2] * e.shape[-1],)
+            ) if i > 0 else e
+            for i,e in enumerate(base_expansion)
+        ]
+
+def _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms):
+    rem_atoms = np.setdiff1d(np.arange(len(coords)), np.concatenate([left_atoms, right_atoms]))
+    left_pos = block_broadcast_indices(left_atoms, 3)
+    # right_pos = block_broadcast_indices(right_atoms, 3)
+    rem_pos = block_broadcast_indices(rem_atoms, 3)
+    for e,l in zip(right_expansion[1:], left_expansion[1:]):
+        if len(left_pos) > 0:
+            e[..., left_pos] = l[..., left_pos]
+        if len(rem_pos) > 0:
+            e[..., rem_pos] = 0
+    return right_expansion
+
+def dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None):
+    coords = np.asanyarray(coords)
+    vec = vec_normalize(coords[..., j, :] - coords[..., i, :]) / 2
+    base_shape = coords.shape[:-2]
+    targ_shape = base_shape + (coords.shape[-2] * coords.shape[-1],)
+    right_expansion = [coords]
+    for o in range(order):
+        term = np.zeros(coords.shape)
+        if o == 0:
+            term[..., :] = vec
+        right_expansion.append(term.reshape(targ_shape))
+    left_expansion = [coords]
+    for o in range(order):
+        term = np.zeros(coords.shape)
+        if o == 0:
+            term[..., :] = -vec
+        left_expansion.append(term.reshape(targ_shape))
+
+    if left_atoms is None:
+        left_atoms = [i]
+    if right_atoms is None:
+        right_atoms = [j]
+    _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
+    return right_expansion
+
+def angle_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, angle=0, axis_order=0):
+    coords = np.asanyarray(coords)
+    shift_coords = coords - coords[..., (j,), :]
+    axis = vec_crosses(coords[..., i, :] - coords[..., j, :],
+                       coords[..., k, :] - coords[..., j, :],
+                       normalize=True)
+    right_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle, axis_order=axis_order)
+    left_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle, axis_order=axis_order)
+    #TODO: fix this
+    right_expansion[0] += coords[..., (j,), :] # shift back from origin
+    if left_atoms is None:
+        left_atoms = [i]
+    if right_atoms is None:
+        right_atoms = [k]
+    _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
+    right_expansion = right_expansion[:1] + [e/2 for e in right_expansion[1:]]
+    return right_expansion
+
+def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=None, *, angle=0, axis_order=0):
+    coords = np.asanyarray(coords)
+    shift_coords = coords - coords[..., (k,), :]
+    axis = shift_coords[..., j, :]
+    right_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle, axis_order=axis_order)
+    left_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle, axis_order=axis_order)
+    # left might not always be the negation...I think
+    right_expansion[0] += coords[..., (k,), :] # shift back from origin
+
+    if left_atoms is None:
+        left_atoms = [i]
+    if right_atoms is None:
+        right_atoms = [l]
+    _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
+    right_expansion = right_expansion[:1] + [e/2 for e in right_expansion[1:]]
+    return right_expansion
 
 class _inverse_coordinate_conversion_caller:
     def __init__(self, conversion, target_internals,

@@ -14,6 +14,7 @@ __all__ = [
     'find',
     "fast_first_nonzero",
     "fast_first_zero",
+    "partial_sort",
     'argsort',
     'group_by',
     'grouping_info',
@@ -773,3 +774,19 @@ def fast_first_zero(arr, axis=-1):
     mask = vector_take(arr, r) == 0
     r[mask] = -1
     return r
+
+def partial_sort(array, k, return_order=False):
+    part = np.argpartition(array, k)
+    if k > 0:
+        subord = part[:k]
+        suba = array[subord,]
+        subsort = np.argsort(suba)
+    else:
+        subord = part[k:]
+        suba = array[subord,]
+        subsort = np.argsort(suba)
+        subsort = np.flip(subsort)
+    if return_order:
+        return suba[subsort,], subord[subsort,]
+    else:
+        return suba[subsort,]

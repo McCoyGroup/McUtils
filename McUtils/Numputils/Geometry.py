@@ -35,6 +35,14 @@ __all__ = [
     "dihedron_is_complete",
     "enumerate_dihedron_completions",
     "dihedron_property_function",
+    "arcsin_deriv",
+    "arccos_deriv",
+    "arctan_deriv",
+    "sin_deriv",
+    "cos_deriv",
+    "tan_deriv",
+    "cot_deriv",
+    "axis_rot_gen_deriv"
 ]
 
 
@@ -169,7 +177,7 @@ def sqrt_deriv(term, order):
 def cos_deriv(term, order):
     return np.cos(order*np.pi/2 + term)
 def sin_deriv(term, order):
-    return np.cos(order*np.pi/2 + term)
+    return np.sin(order*np.pi/2 + term)
 def legendre_scaling(n):
     if n > 1:
         rems, _ = integer_exponent(np.arange(1, n+1), 2)
@@ -3828,3 +3836,98 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
             else:
                 return None
             # try to find conversions for subterms
+
+def _rot_gen2(axis):
+    axis = np.asanyarray(axis)
+
+    # could be computed via Levi-Cevita connections, but why bother
+    K = np.zeros(axis.shape[:-1] + (3, 3))
+    for sign, (i,j,k) in [
+        [-1, (0, 1, 2)],
+        [1, (0, 2, 1)],
+        [-1, (1, 2, 0)],
+    ]:
+        K[..., i, j] = sign*axis[..., k]
+        K[..., j, i] = (-sign)*axis[..., k]
+
+    # could be computed via Levi-Cevita connections, but why bother
+    K2 = np.zeros(axis.shape[:-1] + (3, 3))
+    for (i,j,k) in [(0, 1, 2), (0, 2, 1), (1, 2, 0)]:
+        K2[..., k, k] = -(axis[..., i]**2 + axis[..., j]**2)
+        K2[..., i, j] = axis[..., i] * axis[..., j]
+        K2[..., j, i] = K2[..., i, j]
+
+    return K, K2
+
+def _rot_gen2_deriv(axis, order):
+    axis = np.asanyarray(axis)
+
+    # could be computed via Levi-Cevita connections, but why bother
+    K0, K20 = _rot_gen2(axis)
+
+    K_expansion = [K0]
+    for o in range(order):
+        K = np.zeros(axis.shape[:-1] + (3,) * (o+1) + (3, 3))
+        if o == 0:
+            for a in range(3):
+                for sign, (i,j,k) in [
+                    [-1, (0, 1, 2)],
+                    [1, (0, 2, 1)],
+                    [-1, (1, 2, 0)],
+                ]:
+                    if k == a:
+                        K[..., a, i, j] = sign
+                        K[..., a, j, i] = -sign
+        K_expansion.append(K)
+
+    # could be computed via Levi-Cevita connections, but why bother
+    K2_expansion = [K20]
+    for o in range(order):
+        K2 = np.zeros(axis.shape[:-1] + (3,) * (o+1) + (3, 3))
+        if o == 0:
+            for a in range(3):
+                for (i,j,k) in [(0, 1, 2), (0, 2, 1), (1, 2, 0)]:
+                    if a == i:
+                        K2[..., a, k, k] = -2*axis[..., i]
+                        K2[..., a, i, j] = axis[..., j]
+                    if a == j:
+                        K2[..., a, k, k] = -2*axis[..., j]
+                        K2[..., a, i, j] = axis[..., i]
+                    K2[..., a, j, i] = K2[..., a, i, j]
+        elif o == 1:
+            for a in range(3):
+                for (i, j, k) in [(0, 1, 2), (0, 2, 1), (1, 2, 0)]:
+                    if a == i or a == j:
+                        K2[..., a, k, k] = -2
+            for a,b in itertools.combinations(range(3), 2):
+                for (i, j, k) in [(0, 1, 2), (0, 2, 1), (1, 2, 0)]:
+                    if (a == i and b == j) or (a == j and b == i):
+                        K2[..., a, b, i, j] = 1
+                        K2[..., a, b, j, i] = 1
+        K2_expansion.append(K2)
+
+    return K_expansion, K2_expansion
+
+
+def axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, normalized=False):
+    # if not normalized:
+    #     axis = vec_normalize(axis)
+    axis = np.asanyarray(axis)
+    if axis_order == 0:
+        sd = [sin_deriv(angle, n) for n in range(angle_order+1)]
+        cd = [cos_deriv(angle, n) for n in range(angle_order+1)]
+        K, K2 = _rot_gen2(axis)
+        mom = vec_outer(axis, axis)
+        return [
+            (mom if i == 0 else 0) + s * K - c * K2
+            for i,(s,c) in enumerate(zip(sd, cd))
+        ]
+    elif angle_order == 0:
+        s = np.sin(angle)
+        c = np.cos(angle)
+        eye = identity_tensors(axis.shape[:-1], 3)
+        mom_expansion = td.tensorprod_deriv([axis, eye], [axis, eye], axis_order)
+        K_expansion, K2_expansion = _rot_gen2_deriv(axis, axis_order)
+        return [m + s * K - c * K2 for m,K,K2 in zip(mom_expansion, K_expansion, K2_expansion)]
+    else:
+        raise NotImplementedError("cross terms are tedious")

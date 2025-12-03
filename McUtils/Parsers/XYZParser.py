@@ -13,8 +13,10 @@ class XYZParser(FileStreamReader):
         self.has_comments = has_comments
         super().__init__(file, **kw)
     def find_block(self):
-        int_tag = self.get_tagged_block(None, '\n')
-        if int_tag is None: return None
+        int_tag = "\n"
+        while int_tag == "\n":
+            int_tag = self.get_tagged_block(None, '\n')
+            if int_tag is None: return None
         num_follows = int(int_tag)
         if not self.has_comments:
             num_follows = num_follows - 1

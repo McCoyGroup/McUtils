@@ -2500,15 +2500,116 @@ class NumputilsTests(TestCase):
         np.random.seed(2123)
         coords = np.random.rand(15, 3)
         masses = 1 + 2 * np.random.rand(15)
-        a_exp, b_exp, c_exp = nput.orientation_angle_deriv(coords,
-                                                           (0, 1, 2, 3),
-                                                           (4, 5, 6),
-                                                           masses=masses,
-                                                           order=1)
-    @debugTest
+        _ = nput.orientation_deriv(coords,
+                                   (0, 1, 2, 3),
+                                   (4, 5, 6),
+                                   masses=masses,
+                                   order=1)
+    @validationTest
     def test_FailingCarts(self):
         from Psience.Molecools import Molecule
         test = Molecule.from_string("OC(C=CC=C1)=C1/C=C/C2=[N+](CCCS(=O)([O-])=O)C3=CC=CC=C3C2(C)C")
         tint = test.modify(internals='auto')
         print(len(tint.internals['specs']))
         print(tint.get_cartesians_by_internals(1)[0].shape)
+
+    @debugTest
+    def test_RotDerivs(self):
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+        axis = nput.vec_normalize(np.random.rand(3))
+        rot_gen = nput.axis_rot_gen_deriv(0, axis, 1)
+        # for d in rot_gen:
+        #     print(d)
+        rot_exp = nput.rotation_expansion_from_axis_angle(coords, axis)
+
+        coords = np.array([[0.03741612, -0.01751408, 0.48282824],
+                           [1.871758, -0.33360481, -0.16993489],
+                           [-1.25575486, -1.37259928, -0.15862522],
+                           [-0.65341925, 1.72371818, -0.15426813]])
+
+#         coords = np.array([[-0.0098587, 0.71712296, -0.],
+#                            [-1.52597184, -0.3620726, -0.],
+#                            [1.53583054, -0.35505036, 0.]])
+#         rot_der2, _ = nput.internal_coordinate_tensors(coords.copy(),
+#                                                        [(1, 0, 2)],
+#                                                        order=1,
+#                                                        angle_ordering='ijk',
+#                                                        return_inverse=True
+#                                                        )
+#         print()
+#         print(rot_der2[1][:, 0].reshape(-1, 3))
+#         """
+# [[-3.12361505e-01  7.64373549e-01  0.00000000e+00]
+#  [ 3.11612441e-01 -4.37770256e-01  0.00000000e+00]
+#  [ 7.49064252e-04 -3.26603293e-01  0.00000000e+00]]
+#  """
+#         return
+
+        import McUtils.Zachary as zach
+
+        # why = zach.FiniteDifferenceDerivative(
+        #     lambda c:nput.pts_dihedrals(c[..., i, :], c[..., j, :], c[..., k, :], c[..., l, :]),
+        #     function_shape=((0, 0), ())
+        # ).derivatives(coords).derivative_tensor(1)
+        # print(why)
+
+        # old = nput.internal_coordinate_tensors(coords,
+        #                                        [(i, j), (j, k), (k, l), (i, j, k), (i, j, k, l)],
+        #                                        order=1,
+        #                                        angle_ordering='ijk',
+        #                                        method='old')
+        # new = nput.internal_coordinate_tensors(coords,
+        #                                        [(i, j), (j, k), (k, l), (i, j, k), (i, j, k, l)],
+        #                                        order=1,
+        #                                        use_cache=True,
+        #                                        reproject=False,
+        #                                        angle_ordering='ijk')
+        #
+        # with np.printoptions(linewidth=1e8):
+        #     print(old[1].T)
+        #     print(new[1].T)
+        # return
+
+
+        i, j, k, l = (0, 1, 3, 2)
+        coords = coords[(i, j, k, l), :]
+        rot_exp2 = np.array([
+            nput.dist_expansion(coords, j, k, left_atoms=[i, j], right_atoms=[k, l])[1],
+            nput.angle_expansion(coords, i, j, k, left_atoms=[i, j], right_atoms=[k, l])[1],
+            nput.dihed_expansion(coords, i, j, k, l, left_atoms=[i, j], right_atoms=[k, l])[1]
+        ])
+        rot_der2, _ = nput.internal_coordinate_tensors(coords,
+                                                       [(i, j), (j, k), (k, l), (i, j, k), (j, k, l), (i, j, k, l)],
+                                                       order=1,
+                                                       angle_ordering='ijk',
+                                                       return_inverse=True)
+        # print()
+        # print(rot_der2[1][:, 0])
+        # with np.printoptions(linewidth=1e8):
+        #     print()
+        #     t1 = rot_exp2[2]
+        #     t2 = rot_der2[1][:, -1].copy()
+        #     t2[t1 == 0] = 0
+        #     print(np.array([t1, t2]))
+        # return
+
+        print()
+        print(np.round(rot_exp2 @ rot_der2[1], 8))
+
+        # rot_vec = nput.angle_expansion(
+        #     coords.copy(),
+        #     0, 1, 2
+        # )[1]
+        #
+        # huh, inv = nput.internal_coordinate_tensors(
+        #     coords.copy(),
+        #     [(0, 1, 2)],
+        #     order=1,
+        #     return_inverse=True,
+        #     angle_ordering='ijk',
+        #     # use_cache=False,
+        #     # reproject=True
+        # )
+        #
+        # print(rot_vec[np.newaxis] @ huh[1])

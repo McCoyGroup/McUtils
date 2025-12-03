@@ -740,6 +740,13 @@ def functionalized_zmatrix(
     for attachment_points, fragment in attachments:
         if nput.is_numeric(fragment):
             fragment = chain_zmatrix(fragment)
+        prev_atoms = [z[0] for z in zm]
+        bad_attach = [
+            b for b in attachment_points
+            if b not in prev_atoms and b > 0 and b < len(prev_atoms)
+        ]
+        if len(bad_attach) > 0:
+            raise ValueError(f"error attaching at {attachment_points} with previous atoms {prev_atoms}")
         zm = zm + attached_zmatrix_fragment(
             len(zm),
             fragment,
@@ -1005,10 +1012,12 @@ def add_missing_zmatrix_bonds(
     else:
         mods = {}
         for i,v in new_bonds.items():
-            i_pos = np.where(atoms == i)[0][0]
-            reindexing.extend(v)
-            ix = _attachment_point(i_pos)
-            mods[ix] = center_bound_zmatrix(len(v))
+            v = [vv for vv in v if vv not in reindexing]
+            if len(v) > 0:
+                i_pos = np.where(atoms == i)[0][0]
+                reindexing.extend(v)
+                ix = _attachment_point(i_pos)
+                mods[ix] = center_bound_zmatrix(len(v))
 
         new_zm = functionalized_zmatrix(
                 zm,
@@ -1017,8 +1026,10 @@ def add_missing_zmatrix_bonds(
         if validate_additions and not validate_zmatrix(new_zm):
             raise ValueError(f"invalid zmatrix after functionalization, {new_zm}")
         new_zm = reindex_zmatrix(new_zm, reindexing)
-        if validate_additions and not validate_zmatrix(new_zm):
-            raise ValueError(f"invalid zmatrix after reindexing ({reindexing}), {new_zm}")
+        if validate_additions:
+            is_valid, reason = validate_zmatrix(new_zm, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"invalid zmatrix after reindexing ({reason}) in {reindexing} to {new_zm}")
 
         if max_iterations is None or max_iterations > 0:
             new_zm, new_new_bonds = add_missing_zmatrix_bonds(
@@ -1224,8 +1235,9 @@ def complex_zmatrix(
                 dm = distance_matrix[np.ix_(inds, inds_2)]
                 min_cols = np.argmin(dm, axis=1)
                 min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
-                root = inds[min_row]
+                # root = inds[min_row]
                 # root = np.where(inds == min_row)[0][0]
+                root = zm[min_row][0]
         else:
             if nput.is_int(root):
                 root = np.where(inds == root)[0][0]
@@ -1236,13 +1248,13 @@ def complex_zmatrix(
         zm = functionalized_zmatrix(
             zm,
             {
-                _attachment_point(root): zm_2
+                _attachment_point(root): set_zmatrix_embedding(zm_2)
             }
         )
         if validate_additions:
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
             if not is_valid:
-                raise ValueError(f"new zmatrix after attachment invalid ({reason}) in {zm}")
+                raise ValueError(f"new zmatrix after attachment invalid ({reason}) at {_attachment_point(root)} in {zm}")
 
     if reindex:
         zm = reindex_zmatrix(zm, inds)
