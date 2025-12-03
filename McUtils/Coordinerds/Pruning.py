@@ -91,7 +91,10 @@ class GeometricInternalCoordinatePruner(InternalCoordinatePruner):
             b_matrix_generator = lambda pos, coords: b_matrix[:, pos]
 
         if max_coords is None:
-            max_coords = b_matrix_generator([0], [coords[0]]).shape[0] - 1
+            max_coords = min([
+                b_matrix_generator([0], [coords[0]]).shape[0] - 1,
+                len(coords)
+            ])
         subspace = max_coords
 
         sub_b = b_matrix_generator(np.arange(subspace), coords[:subspace])

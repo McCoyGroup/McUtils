@@ -60,6 +60,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
 
     def convert(self, coords, *, ordering, use_rad=True, return_derivs=None, order=None,
                 strip_embedding=False,
+                derivative_method='old',
                 **kw):
         """The ordering should be specified like:
 
@@ -106,7 +107,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         # we define an order map that we'll index into to get the new indices for a
         # given coordinate
         om = 1 + np.argsort(ol[:, 0])
-        if return_derivs:
+        if return_derivs and derivative_method != "old":
             og_ord = None
             if order is None:
                 order = 1

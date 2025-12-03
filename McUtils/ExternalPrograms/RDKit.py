@@ -6,6 +6,7 @@ __all__ = [
 
 import numpy as np, io, os
 from .. import Numputils as nput
+from .. import Devutils as dev
 from ..Devutils import OutputRedirect
 
 from .ChemToolkits import RDKitInterface
@@ -74,14 +75,19 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True,
                    add_implicit_hydrogens=False,
-                   sanitize_ops=None):
+                   sanitize_ops=None,
+                   allow_generate_conformers=False,
+                   num_confs=1,
+                   optimize=False,
+                   take_min=True,
+                   force_field_type='mmff'):
         Chem = cls.chem_api() # to get nice errors
         rdmol = Chem.AddHs(rdmol, explicitOnly=not add_implicit_hydrogens)
+        if charge is None:
+            charge = Chem.GetFormalCharge(rdmol)
         if guess_bonds:
             rdDetermineBonds = RDKitInterface.submodule("Chem.rdDetermineBonds")
             rdmol = Chem.Mol(rdmol)
-            if charge is None:
-                charge = 0
             rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
             # return cls.from_rdmol(rdmol, conf_id=conf_id, guess_bonds=False, charge=charge)
         if sanitize:
@@ -96,6 +102,23 @@ class RDMolecule(ExternalMolecule):
                 )
             rdmol = Chem.Mol(rdmol)
             Chem.SanitizeMol(rdmol, sanitize_ops)
+
+        no_confs = False
+        try:
+            conf_0 = rdmol.GetConformer(0)
+        except ValueError:
+            no_confs = True
+
+        if no_confs:
+            if allow_generate_conformers:
+                conf_id = cls.generate_conformers_for_mol(rdmol,
+                                                          num_confs=num_confs,
+                                                          optimize=optimize,
+                                                          take_min=take_min,
+                                                          force_field_type=force_field_type)
+            else:
+                raise ValueError(f"{rdmol} has no conformers")
+
         conf = rdmol.GetConformer(conf_id)
         return cls(conf, charge=charge)
 
@@ -215,14 +238,14 @@ class RDMolecule(ExternalMolecule):
         rdkit_mol = Chem.MolFromSmiles(smiles, params)
         if not sanitize:
             rdkit_mol.UpdatePropertyCache()
-        if call_add_hydrogens:
+        if call_add_hydrogens: # RDKit is super borked for most molecules
             mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
         else:
             mol = rdkit_mol
 
         return cls.from_base_mol(mol,
-                                 num_confs=1, optimize=False, take_min=True,
-                                 force_field_type='mmff'
+                                 num_confs=num_confs, optimize=optimize, take_min=take_min,
+                                 force_field_type=force_field_type
                                  )
 
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
@@ -254,15 +277,15 @@ class RDMolecule(ExternalMolecule):
                                                   )
 
     @classmethod
-    def from_no_conformer_molecule(cls,
-                                   mol,
-                                   num_confs=1,
-                                   optimize=False,
-                                   take_min=True,
-                                   force_field_type='mmff',
-                                   add_implicit_hydrogens=False,
-                                   **etc
-                                   ):
+    def generate_conformers_for_mol(cls, mol,
+                                    *,
+                                    num_confs=1,
+                                    optimize=False,
+                                    take_min=True,
+                                    force_field_type='mmff',
+                                    add_implicit_hydrogens=False,
+                                    ):
+
         AllChem = cls.allchem_api()
 
         AllChem.AddHs(mol, explicitOnly=not add_implicit_hydrogens)
@@ -300,23 +323,323 @@ class RDMolecule(ExternalMolecule):
         else:
             conf_id = 0
 
+        return conf_id
+
+    @classmethod
+    def from_no_conformer_molecule(cls,
+                                   mol,
+                                   *,
+                                   num_confs=1,
+                                   optimize=False,
+                                   take_min=True,
+                                   force_field_type='mmff',
+                                   add_implicit_hydrogens=False,
+                                   **etc
+                                   ):
+
+        conf_id = cls.generate_conformers_for_mol(mol,
+                                                  num_confs=num_confs,
+                                                  optimize=optimize,
+                                                  take_min=take_min,
+                                                  force_field_type=force_field_type)
+
         return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
 
     def to_smiles(self):
         return self.chem_api().MolToSmiles(self.rdmol)
 
     @classmethod
+    def _from_file_reader(cls,
+                          file_reader,
+                          block_reader,
+                          block,
+                          binary=False,
+                          add_implicit_hydrogens=False,
+                          guess_bonds=False,
+                          conf_id=0,
+                          charge=None,
+                          sanitize_ops=None,
+                          post_sanitize=True,
+                          allow_generate_conformers=False,
+                          num_confs=1,
+                          optimize=False,
+                          take_min=True,
+                          force_field_type='mmff',
+                          **kwargs
+                          ):
+        if os.path.isfile(block):
+            if file_reader is None:
+                return cls._from_file_reader(
+                    file_reader,
+                    block_reader,
+                    dev.read_file(block, mode='rb' if binary else 'r'),
+                    add_implicit_hydrogens=add_implicit_hydrogens,
+                    **kwargs
+                )
+            else:
+                if binary and isinstance(block, str):
+                    block = block.encode('utf-8')
+                mol = file_reader(block, **kwargs)
+        else:
+            if binary and isinstance(block, str):
+                block = block.encode('utf-8')
+            mol = block_reader(block, **kwargs)
+        return cls.from_rdmol(mol,
+                              charge=charge,
+                              conf_id=conf_id,
+                              sanitize_ops=sanitize_ops,
+                              sanitize=post_sanitize,
+                              add_implicit_hydrogens=add_implicit_hydrogens,
+                              guess_bonds=guess_bonds,
+                              allow_generate_conformers=allow_generate_conformers,
+                              num_confs=num_confs,
+                              optimize=optimize,
+                              take_min=take_min,
+                              force_field_type=force_field_type)
+
+    @classmethod
     def from_molblock(cls,
                       molblock,
                       add_implicit_hydrogens=False,
-                      call_add_hydrogens=True,
+                      sanitize=False, remove_hydrogens=False,
+                      **mol_opts
                       ):
         Chem = cls.chem_api()
-        if os.path.isfile(molblock):
-            mol = Chem.MolFromMolFile(molblock, sanitize=False, removeHs=False)
+        return cls._from_file_reader(
+            Chem.MolFromMolFile,
+            Chem.MolFromMolBlock,
+            molblock,
+            sanitize=sanitize, removeHs=remove_hydrogens,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_mrv(cls,
+                 molblock,
+                 add_implicit_hydrogens=False,
+                 sanitize=False, remove_hydrogens=False,
+                 **mol_opts
+                 ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            Chem.MolFromMrvFile,
+            Chem.MolFromMrvBlock,
+            molblock,
+            sanitize=sanitize, removeHs=remove_hydrogens,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_xyz(cls,
+                 molblock,
+                 add_implicit_hydrogens=False,
+                 guess_bonds=True,
+                 **mol_opts
+                 ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            Chem.MolFromXYZFile,
+            Chem.MolFromXYZBlock,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            guess_bonds=guess_bonds,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_mol2(cls,
+                  molblock,
+                  add_implicit_hydrogens=False,
+                  sanitize=False, remove_hydrogens=False,
+                  **mol_opts
+                  ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            Chem.MolFromMol2File,
+            Chem.MolFromMol2Block,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            sanitize=sanitize, removeHs=remove_hydrogens,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_cdxml(cls,
+                   molblock,
+                   add_implicit_hydrogens=True,
+                   **mol_opts
+                   ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            Chem.MolsFromCDXMLFile,
+            Chem.MolsFromCDXML,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_pdb(cls,
+                 molblock,
+                 add_implicit_hydrogens=True,
+                 **mol_opts
+                 ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            Chem.MolFromPDBFile,
+            Chem.MolFromPDBString,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_png(cls,
+                 molblock,
+                 add_implicit_hydrogens=False,
+                 **mol_opts
+                 ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            Chem.MolFromPNGFile,
+            Chem.MolFromPNGString,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_fasta(cls,
+                   molblock,
+                   add_implicit_hydrogens=True,
+                   allow_generate_conformers=True,
+                   **mol_opts
+                   ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            None,
+            Chem.MolFromFASTA,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            allow_generate_conformers=allow_generate_conformers,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_inchi(cls,
+                   molblock,
+                   add_implicit_hydrogens=True,
+                   allow_generate_conformers=True,
+                   **mol_opts
+                   ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            None,
+            Chem.MolFromInChi,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            allow_generate_conformers=allow_generate_conformers,
+            **mol_opts
+        )
+
+    @classmethod
+    def from_helm(cls,
+                   molblock,
+                   add_implicit_hydrogens=True,
+                   allow_generate_conformers=True,
+                   **mol_opts
+                   ):
+        Chem = cls.chem_api()
+        return cls._from_file_reader(
+            None,
+            Chem.MolFromHELM,
+            molblock,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            allow_generate_conformers=allow_generate_conformers,
+            **mol_opts
+        )
+
+    def _to_file_or_string(self,
+                           file_writer,
+                           string_writer,
+                           filename=None,
+                           mode='w+',
+                           binary=False,
+                           **converter_opts):
+        if filename is None:
+            return string_writer(self.rdmol, **converter_opts)
         else:
-            mol = Chem.MolFromMolBlock(molblock, sanitize=False, removeHs=False)
-        return cls.from_rdmol(mol, add_implicit_hydrogens=add_implicit_hydrogens)
+            if file_writer is None:
+                string = string_writer(self.rdmol, **converter_opts)
+                if binary:
+                    string = string.encode('utf-8')
+                    mode = mode.replace('b', '')+"b"
+
+                return dev.write_file(filename,
+                               string,
+                               mode=mode)
+            else:
+                return file_writer(self.rdmol, filename, **converter_opts)
+
+    def to_xyz(self, filename=None, conf_id=None, **opts):
+        Chem = self.chem_api()
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        return self._to_file_or_string(
+            Chem.MolToXYZFile,
+            Chem.MolToXYZBlock,
+            filename=filename,
+            confId=conf_id,
+            **opts
+        )
+
+    def to_molblock(self, filename=None, conf_id=None, **opts):
+        Chem = self.chem_api()
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        return self._to_file_or_string(
+            Chem.MolToMolFile,
+            Chem.MolToMolBlock,
+            filename=filename,
+            confId=conf_id,
+            **opts
+        )
+
+    def to_mrv(self, filename=None, conf_id=None, **opts):
+        Chem = self.chem_api()
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        return self._to_file_or_string(
+            Chem.MolToMrvFile,
+            Chem.MolToMrvBlock,
+            filename=filename,
+            confId=conf_id,
+            **opts
+        )
+
+    def to_pdb(self, filename=None, conf_id=None, **opts):
+        Chem = self.chem_api()
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        return self._to_file_or_string(
+            Chem.MolToPDBFile,
+            Chem.MolToPDBBlock,
+            filename=filename,
+            confId=conf_id,
+            **opts
+        )
+
+    def to_cml(self, filename=None, **opts):
+        Chem = self.chem_api()
+        return self._to_file_or_string(
+            Chem.MolToCMLFile,
+            Chem.MolToCMLBlock,
+            filename=filename,
+            **opts
+        )
+
 
     @classmethod
     def allchem_api(cls):

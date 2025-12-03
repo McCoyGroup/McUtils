@@ -752,6 +752,51 @@ class ConverterTest(TestCase):
         )
 
     @debugTest
+    def test_NewZMatConversions(self):
+        # from McUtils.Parsers import XYZParser
+        from McUtils.ExternalPrograms import RDMolecule
+
+        rdmol = RDMolecule.from_xyz(TestManager.test_data('bzpo.xyz'))
+        zmat = [[11, -1, -2, -3],
+                [10, 11, -1, -2],
+                [9, 10, 11, -1],
+                [8, 9, 10, 11],
+                [7, 8, 9, 10],
+                [6, 7, 8, 9],
+                [4, 6, 7, 8],
+                [3, 4, 6, 7],
+                [2, 3, 4, 6],
+                [1, 2, 3, 4],
+                [12, 1, 2, 3],
+                [17, 12, 1, 2],
+                [16, 17, 12, 1],
+                [15, 16, 17, 12],
+                [14, 15, 16, 17],
+                [13, 14, 15, 16],
+                [0, 1, 2, 3],
+                [5, 4, 6, 7],
+                [18, 7, 8, 9],
+                [19, 8, 9, 10],
+                [20, 9, 10, 11],
+                [21, 10, 11, 9],
+                [22, 11, 10, 9],
+                [23, 13, 14, 15],
+                [24, 14, 15, 16],
+                [25, 15, 16, 17],
+                [26, 16, 17, 12],
+                [27, 17, 12, 1]]
+
+        zm, opts = coordops.convert_cartesian_to_zmatrix(rdmol.coords,
+                                                   ordering=zmat,
+                                                   order=1)
+        subopts = opts.copy()
+        del subopts['derivs']
+        _, opts2 = coordops.convert_zmatrix_to_cartesians(zm,
+                                                         order=2,
+                                                         **subopts)
+        print(subopts['derivs'][0])
+
+    @validationTest
     def test_CoordinateNumeration(self):
         for c in enumerate_coordinate_sets([
             [0, 1, 2],

@@ -312,7 +312,7 @@ def translation_rotation_eigenvectors(coords, masses=None,
 
         com = center_of_mass(coords, masses)
         # com = np.expand_dims(com, 1) # ???
-        shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[: np.newaxis, :])
+        shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[:, np.newaxis, :])
         cos_rot = perm_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
         R = vec_ops.vec_tensordot(
             shift_crds, cos_rot,

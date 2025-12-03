@@ -26,6 +26,7 @@ __all__ = [
     "distance_matrix",
     "points_from_distance_matrix",
     "identity_tensors",
+    "block_broadcast_indices",
     "semisparse_tensordot",
     "frac_powh",
     "vec_crosses",
@@ -620,6 +621,21 @@ def identity_tensors(base_shape, ndim):
         np.expand_dims(eye, list(range(len(base_shape)))),
         base_shape + (ndim, ndim)
     )
+
+def block_broadcast_indices(base_pos, block_inds, block_size=None):
+    if util.is_int(block_inds):
+        if block_size is None:
+            block_size = block_inds
+        block_inds = np.arange(block_inds)
+    else:
+        if block_size is None:
+            raise ValueError("block size required")
+        block_inds = np.asanyarray(block_inds)
+    base_pos = np.asanyarray(base_pos)
+    return (
+        base_pos[..., :, np.newaxis] * block_size
+        + block_inds[..., np.newaxis, :]
+    ).flatten()
 
 #################################################################################
 #
