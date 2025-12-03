@@ -44,8 +44,8 @@ find_block(self):
 parse_xyz_block(self, block, include_comment=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L26?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ parse_xyz_block(self, block, include_comment=True):
 parse(self, max_blocks=None, include_comment=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L39?message=Update%20Docs)]
 </div>
  </div>
 </div>

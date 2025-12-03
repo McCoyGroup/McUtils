@@ -313,6 +313,17 @@ Chained conversions are not _currently_ supported, but might well become support
 [RedundantCoordinateGenerator](Coordinerds/Redundant/RedundantCoordinateGenerator.md)   
 </div>
    <div class="col" markdown="1">
+[convert_cartesian_to_zmatrix](Coordinerds/Conversions/convert_cartesian_to_zmatrix.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[convert_zmatrix_to_cartesians](Coordinerds/Conversions/convert_zmatrix_to_cartesians.md)   
+</div>
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
    
 </div>
 </div>
@@ -338,9 +349,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-500421" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-500421"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-50697b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-50697b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-500421" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-50697b" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -375,6 +386,7 @@ Chained conversions are not _currently_ supported, but might well become support
 - [GenericInternals](#GenericInternals)
 - [Permutations](#Permutations)
 - [SimpleZMatrices](#SimpleZMatrices)
+- [NewZMatConversions](#NewZMatConversions)
 - [CoordinateNumeration](#CoordinateNumeration)
 - [DistsFromInternals](#DistsFromInternals)
 - [InternalInterConversion](#InternalInterConversion)
@@ -382,9 +394,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-23803b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-23803b"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-49ad11" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-49ad11"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-23803b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-49ad11" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1184,6 +1196,53 @@ class ConverterTest(TestCase):
                 ethyl_positions=[0]
             )
         )
+```
+
+#### <a name="NewZMatConversions">NewZMatConversions</a>
+```python
+    def test_NewZMatConversions(self):
+        # from McUtils.Parsers import XYZParser
+        from McUtils.ExternalPrograms import RDMolecule
+
+        rdmol = RDMolecule.from_xyz(TestManager.test_data('bzpo.xyz'))
+        zmat = [[11, -1, -2, -3],
+                [10, 11, -1, -2],
+                [9, 10, 11, -1],
+                [8, 9, 10, 11],
+                [7, 8, 9, 10],
+                [6, 7, 8, 9],
+                [4, 6, 7, 8],
+                [3, 4, 6, 7],
+                [2, 3, 4, 6],
+                [1, 2, 3, 4],
+                [12, 1, 2, 3],
+                [17, 12, 1, 2],
+                [16, 17, 12, 1],
+                [15, 16, 17, 12],
+                [14, 15, 16, 17],
+                [13, 14, 15, 16],
+                [0, 1, 2, 3],
+                [5, 4, 6, 7],
+                [18, 7, 8, 9],
+                [19, 8, 9, 10],
+                [20, 9, 10, 11],
+                [21, 10, 11, 9],
+                [22, 11, 10, 9],
+                [23, 13, 14, 15],
+                [24, 14, 15, 16],
+                [25, 15, 16, 17],
+                [26, 16, 17, 12],
+                [27, 17, 12, 1]]
+
+        zm, opts = coordops.convert_cartesian_to_zmatrix(rdmol.coords,
+                                                   ordering=zmat,
+                                                   order=1)
+        subopts = opts.copy()
+        del subopts['derivs']
+        _, opts2 = coordops.convert_zmatrix_to_cartesians(zm,
+                                                         order=2,
+                                                         **subopts)
+        print(subopts['derivs'][0])
 ```
 
 #### <a name="CoordinateNumeration">CoordinateNumeration</a>

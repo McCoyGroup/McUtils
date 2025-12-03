@@ -1,7 +1,7 @@
 # <a id="McUtils.Coordinerds.Pruning.prune_internal_coordinates">prune_internal_coordinates</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Pruning.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Pruning.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Pruning.py#L137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Pruning.py#L137?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ prune_internal_coordinates(coords, *args, method='equivalent', **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Pruning/prune_internal_coordinates.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Pruning/prune_internal_coordinates.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Pruning.py#L134?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Pruning.py#L137?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
