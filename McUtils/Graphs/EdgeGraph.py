@@ -438,15 +438,18 @@ class EdgeGraph:
                           use_highest_valencies=True,
                           validate=True
                           ):
-        return self.segment_graph_by_chains(
-            self.map,
-            root=root,
-            graph=self.graph,
-            rings=self.rings,
-            use_highest_valencies=use_highest_valencies,
-            shortest_path_data=self.shortest_path_data,
-            validate=validate
-        )
+        if len(self.map) < 2:
+            return ((0,),)
+        else:
+            return self.segment_graph_by_chains(
+                self.map,
+                root=root,
+                graph=self.graph,
+                rings=self.rings,
+                use_highest_valencies=use_highest_valencies,
+                shortest_path_data=self.shortest_path_data,
+                validate=validate
+            )
 
     @classmethod
     def find_graph_centroid(cls, graph, shortest_path_data=None):

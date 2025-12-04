@@ -60,7 +60,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
 
     def convert(self, coords, *, ordering, use_rad=True, return_derivs=None, order=None,
                 strip_embedding=False,
-                derivative_method='old',
+                derivative_method='new',
                 **kw):
         """The ordering should be specified like:
 

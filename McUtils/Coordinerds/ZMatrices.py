@@ -926,10 +926,11 @@ def canonicalize_zmatrix(zm):
     perm = {z:i for i,z in enumerate(z_vec)}
     return z_vec, reindex_zmatrix(zm, perm)
 
-def _attachment_point(i_pos):
+def _attachment_point(i_pos, graph=None, ind_mapping=None):
     r = None
     a = None
     d = None
+    graph_mapped = [False, False, False]
     if nput.is_int(i_pos):
         i_pos = [i_pos]
 
@@ -943,49 +944,97 @@ def _attachment_point(i_pos):
     if r is None:
         if a is not None:
             if d is not None:
-                if a > 0:
-                    r = a - 1
-                    if r == d: r = a + 1
-                else:
-                    r = a + 1
-                    if r == d: r = a + 2
+                if graph is not None:
+                    neighbors = np.setdiff1d(list(graph.map.get(a, [])), [d])
+                    if len(neighbors) > 0:
+                        r = neighbors[0]
+                        graph_mapped[0] = True
+                if r is None:
+                    if a > 0:
+                        r = a - 1
+                        if r == d: r = a + 1
+                    else:
+                        r = a + 1
+                        if r == d: r = a + 2
             else:
-                r = (a - 1) if a > 0 else (a + 1)
+                if graph is not None:
+                    neighbors = list(graph.map.get(a, []))
+                    if len(neighbors) > 0:
+                        r = neighbors[0]
+                        graph_mapped[0] = True
+                if r is None:
+                   r = (a - 1) if a > 0 else (a + 1)
         elif d is not None:
-            if d > 1:
-                r = d - 2
-            elif d > 0:
-                r = d - 1
-            else:
-                r = d + 1
+            if graph is not None:
+                neighbors = list(graph.map.get(d, []))
+                if len(neighbors) > 0:
+                    r = neighbors[0]
+                    graph_mapped[0] = True
+            if r is None:
+                if d > 1:
+                    r = d - 2
+                elif d > 0:
+                    r = d - 1
+                else:
+                    r = d + 1
         else:
             r = 0
     if a is None:
-        if r > 0:
-            a = r - 1
-            if d is not None and a == d:
-                if r > 1:
-                    a = r - 2
-                else:
-                    a = r + 1
-        else:
-            a = r + 1
-            if d is not None and a == d:
-                a = r + 2
+        if graph is not None:
+            neighbors = list(graph.map.get(r, []))
+            if d is not None:
+                neighbors = np.setdiff1d(neighbors, [d])
+                if len(neighbors) == 0:
+                    neighbors = list(graph.map.get(d, []))
+                    if r is not None:
+                        neighbors = np.setdiff1d(neighbors, [r])
+            if len(neighbors) > 0:
+                a = neighbors[0]
+                graph_mapped[1] = True
+        if a is None:
+            if r > 0:
+                a = r - 1
+                if d is not None and a == d:
+                    if r > 1:
+                        a = r - 2
+                    else:
+                        a = r + 1
+            else:
+                a = r + 1
+                if d is not None and a == d:
+                    a = r + 2
     if d is None:
-        if r > 1:
-            d = r - 2
-            if a is not None and a == d:
+        if graph is not None:
+            neighbors = list(graph.map.get(r, []))
+            if a is not None:
+                neighbors = np.setdiff1d(neighbors, [a])
+                if len(neighbors) == 0:
+                    neighbors = list(graph.map.get(a, []))
+                    if r is not None:
+                        neighbors = np.setdiff1d(neighbors, [r])
+            if len(neighbors) > 0:
+                d = neighbors[0]
+                graph_mapped[2] = True
+        if d is None:
+            if r > 1:
+                d = r - 2
+                if a is not None and a == d:
+                    d = r - 1
+            elif r > 0:
                 d = r - 1
-        elif r > 0:
-            d = r - 1
-            if a is not None and a == d:
+                if a is not None and a == d:
+                    d = r + 1
+            else:
                 d = r + 1
-        else:
-            d = r + 1
-            if a is not None and a == d:
-                d = r + 2
-
+                if a is not None and a == d:
+                    d = r + 2
+    if ind_mapping is not None:
+        if graph_mapped[0]:
+            r = ind_mapping[r]
+        if graph_mapped[1]:
+            a = ind_mapping[a]
+        if graph_mapped[2]:
+            d = ind_mapping[d]
     return (r, a, d)
 def add_missing_zmatrix_bonds(
         base_zmat,
@@ -1229,32 +1278,34 @@ def complex_zmatrix(
         if root is None:
             if distance_matrix is None:
                 subgraph = graph.take(inds)
-                root = subgraph.get_centroid(check_fragments=False)
+                min_row = subgraph.get_centroid(check_fragments=False) #TODO: see if I need to add a row check to this...
             else:
                 distance_matrix = np.asanyarray(distance_matrix)
                 dm = distance_matrix[np.ix_(inds, inds_2)]
                 min_cols = np.argmin(dm, axis=1)
                 min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
-                # root = inds[min_row]
-                # root = np.where(inds == min_row)[0][0]
-                root = zm[min_row][0]
+                # min_row = np.where(inds == min_row)[0][0]
+                # root = zm[min_row][0]
         else:
             if nput.is_int(root):
-                root = np.where(inds == root)[0][0]
+                min_row = np.where(inds == root)[0][0]
             else:
-                root = [np.where(inds == r)[0][0] for r in root]
+                min_row = [np.where(inds == r)[0][0] for r in root]
+            # root = zm[min_row][0]
 
+        ind_mapping = {k:i for i,k in enumerate(inds)}
+        ap = tuple(ind_mapping[x] for x in _attachment_point(inds[min_row], graph))
         inds = np.concatenate([inds, inds_2])
         zm = functionalized_zmatrix(
             zm,
             {
-                _attachment_point(root): set_zmatrix_embedding(zm_2)
+                ap : set_zmatrix_embedding(zm_2)
             }
         )
         if validate_additions:
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
             if not is_valid:
-                raise ValueError(f"new zmatrix after attachment invalid ({reason}) at {_attachment_point(root)} in {zm}")
+                raise ValueError(f"new zmatrix after attachment invalid ({reason}) at {ap} in {zm}")
 
     if reindex:
         zm = reindex_zmatrix(zm, inds)
