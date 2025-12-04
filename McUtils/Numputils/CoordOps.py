@@ -2217,7 +2217,7 @@ def inverse_internal_coordinate_tensors(expansion,
 
     return inverse_expansion
 
-def rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0, axis_order=0):
+def rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0., axis_order=0):
     axis = vec_normalize(axis)
     if axis.ndim > 1:
         raise NotImplementedError("multi-axis broadcasting is tedious")
@@ -2250,6 +2250,10 @@ def _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, l
     left_pos = block_broadcast_indices(left_atoms, 3)
     # right_pos = block_broadcast_indices(right_atoms, 3)
     rem_pos = block_broadcast_indices(rem_atoms, 3)
+    if len(left_pos) > 0:
+        right_expansion[0][..., left_atoms, :] = left_expansion[0][..., left_atoms, :]
+    if len(rem_atoms) > 0:
+        right_expansion[0][..., rem_atoms, :] = coords[..., rem_atoms, :]
     for e,l in zip(right_expansion[1:], left_expansion[1:]):
         if len(left_pos) > 0:
             e[..., left_pos] = l[..., left_pos]
@@ -2257,18 +2261,18 @@ def _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, l
             e[..., rem_pos] = 0
     return right_expansion
 
-def dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None):
+def dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, amount=0):
     coords = np.asanyarray(coords)
     vec = vec_normalize(coords[..., j, :] - coords[..., i, :]) / 2
     base_shape = coords.shape[:-2]
     targ_shape = base_shape + (coords.shape[-2] * coords.shape[-1],)
-    right_expansion = [coords]
+    right_expansion = [coords + (amount/2)*vec[..., np.newaxis, :]]
     for o in range(order):
         term = np.zeros(coords.shape)
         if o == 0:
             term[..., :] = vec
         right_expansion.append(term.reshape(targ_shape))
-    left_expansion = [coords]
+    left_expansion = [coords - (amount/2)*vec[..., np.newaxis, :]]
     for o in range(order):
         term = np.zeros(coords.shape)
         if o == 0:
@@ -2288,9 +2292,10 @@ def angle_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None,
     axis = vec_crosses(coords[..., i, :] - coords[..., j, :],
                        coords[..., k, :] - coords[..., j, :],
                        normalize=True)
-    right_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle, axis_order=axis_order)
-    left_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle, axis_order=axis_order)
+    right_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle/2, axis_order=axis_order)
+    left_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle/2, axis_order=axis_order)
     #TODO: fix this
+    left_expansion[0] += coords[..., (j,), :] # shift back from origin
     right_expansion[0] += coords[..., (j,), :] # shift back from origin
     if left_atoms is None:
         left_atoms = [i]
@@ -2304,9 +2309,10 @@ def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=No
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (k,), :]
     axis = shift_coords[..., j, :]
-    right_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle, axis_order=axis_order)
-    left_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle, axis_order=axis_order)
+    right_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle/2, axis_order=axis_order)
+    left_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle/2, axis_order=axis_order)
     # left might not always be the negation...I think
+    left_expansion[0] += coords[..., (k,), :] # shift back from origin
     right_expansion[0] += coords[..., (k,), :] # shift back from origin
 
     if left_atoms is None:
