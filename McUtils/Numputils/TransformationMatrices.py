@@ -204,7 +204,7 @@ def rotation_matrix(axis, theta=None):
 
         if axis.shape == theta.shape:
             return rotation_matrix_align_vectors(axis, theta)
-        elif (axis.ndim == theta.ndim + 1) or theta.ndim == 0 and axis.shape[-1] == 3:
+        elif (axis.ndim == theta.ndim + 1) or (theta.ndim == 0 and axis.shape[-1] == 3):
             return rotation_matrix_ER_vec(axis, theta)
         else:
             # we have the vectors that get mixed and their mixing angles, we assume any fixed axis is the 0 element

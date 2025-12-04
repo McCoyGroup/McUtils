@@ -2518,7 +2518,11 @@ class NumputilsTests(TestCase):
         np.random.seed(2123)
         coords = np.random.rand(15, 3)
         axis = nput.vec_normalize(np.random.rand(3))
-        rot_gen = nput.axis_rot_gen_deriv(0, axis, 1)
+        rot_gen = nput.axis_rot_gen_deriv(np.deg2rad(15), axis, 1)
+        print(rot_gen[0])
+        print(np.deg2rad(15), axis)
+        print(rotation_matrix(axis, np.deg2rad(15)))
+        # return
         # for d in rot_gen:
         #     print(d)
         rot_exp = nput.rotation_expansion_from_axis_angle(coords, axis)
