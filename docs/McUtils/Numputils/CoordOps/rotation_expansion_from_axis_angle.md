@@ -5,7 +5,7 @@
 </div>
 
 ```python
-rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0, axis_order=0): 
+rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0.0, axis_order=0): 
 ```
 
 
