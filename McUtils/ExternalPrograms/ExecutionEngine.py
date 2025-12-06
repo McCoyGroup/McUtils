@@ -12,7 +12,6 @@ __all__ = [
     "ExecutionStatus",
     "ExecutionQueue",
     "ExecutionEngine",
-    # "QueuedSubmissionEngine",
     # "PoolSubmissionEngine",
     "ManagedJobQueueExecutionEngine",
     "SLURMExecutionEngine"
@@ -27,7 +26,7 @@ class ExecutionStatus(enum.Enum):
 
 class ExecutionFuture(metaclass=abc.ABCMeta):
     poll_time = 1
-    def __init__(self, initial_status=None, poll_time=None):
+    def __init__(self, poll_time=None):
         self.status = ExecutionStatus.UNKNOWN
         self._is_complete = False
         self._result = None
@@ -106,11 +105,16 @@ class ExecutionEngine(metaclass=abc.ABCMeta):
     def __enter__(self):
         # here to be extended
         self._call_depth += 1
+        if self._call_depth == 1:
+            self.startup()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._call_depth -= 1
         if self._call_depth < 1:
             self.shutdown()
+
+    def startup(self):
+        ...
 
     def shutdown(self):
         ...
@@ -255,3 +259,46 @@ class SLURMExecutionEngine(ManagedJobQueueExecutionEngine):
             self.queue_manager,
             **fut_opts
         )
+
+class ProcessExecutionFuture(JoinableExecutionFuture)
+    def __init__(self, base_obj, **ignored):
+        super().__init__(**ignored)
+        self.obj = base_obj
+        self._get_result = dev.default
+    def await_result(self, timeout=None):
+        if dev.is_default(self._get_result, allow_None=False):
+            self._get_result = self.obj.get(timeout=timeout)
+    def get_result(self):
+        if dev.is_default(self._get_result):
+            return None
+        else:
+            return self._get_result
+    def get_status(self) -> ExecutionStatus:
+        try:
+            res = self.obj.successful()
+        except (ValueError, AssertionError):
+            return ExecutionStatus.RUNNING
+        else:
+            if res:
+                return ExecutionStatus.COMPLETED
+            else:
+                return ExecutionStatus.ERROR
+
+class ProcessGeneratorExecutionEngine(ExecutionEngine):
+    future_type = ProcessExecutionFuture
+    def __init__(self, proc_gen, **opts):
+        super().__init__(**opts)
+        self.proc_gen = proc_gen
+
+    def submit_job(self, method, **kwargs):
+        # TODO: track output files
+        proc = self.proc_gen.apply_async(method, **kwargs)
+        return self.future_type(
+            proc
+        )
+
+    def startup(self):
+        self.proc_gen.__enter__()
+
+    def shutdown(self):
+        self.proc_gen.__exit__()
