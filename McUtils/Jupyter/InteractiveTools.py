@@ -1,8 +1,10 @@
 """
 Miscellaneous tools for interactive messing around in Jupyter environments
 """
+from .. import Devutils as dev
+
 import sys, os, types, importlib, inspect, io, tempfile as tf
-import subprocess, threading
+import subprocess, threading, platform
 
 __all__ = [
     "ModuleReloader",
@@ -12,10 +14,168 @@ __all__ = [
     "NoLineWrapFormatter",
     "OutputCapture",
     # "SlurmTools",
-    "patch_pinfo"
+    "patch_pinfo",
+    "JupyterSessionManager"
 ]
 
 __reload_hook__ = ['.NBExporter']
+
+class JupyterSessionManager:
+    @classmethod
+    def _get_exec_prefix(cls):
+        import subprocess
+        ext_call = subprocess.run(["jupyter", "labextension", "list"], capture_output=True)
+        path_list = ext_call.stdout.decode() + "\n" + ext_call.stderr.decode()
+        end_path = ("share", "jupyter", "labextensions")
+        for p in path_list.split():
+            if os.path.isdir(p):
+                p, p3 = os.path.split(p)
+                p, p2 = os.path.split(p)
+                root, p1 = os.path.split(p)
+                if (p1, p2, p3) == end_path:  # TODO: be a bit more careful?
+                    return root
+        else:
+            return sys.exec_prefix
+
+    _jupyter_dir = None
+    @classmethod
+    def jupyter_env(cls):
+        if cls._jupyter_dir is None:
+            cls._jupyter_dir = cls._get_exec_prefix()
+        return cls._jupyter_dir
+
+    _jupyter_dirs = None
+    @classmethod
+    def _get_jupyter_dirs(cls):
+        res = subprocess.run(['jupyter', '--paths'], text=True, capture_output=True)
+        dirs = {}
+        active_dir = None
+        for line in res.stdout.splitlines():
+            subline = line.strip()
+            if len(subline) == 0: continue
+            if line[0] != subline[0]:
+                dirs[active_dir].append(subline)
+            else:
+                active_dir = subline.strip(":")
+                dirs[active_dir] = []
+        return dirs
+    @classmethod
+    def jupyter_dirs(cls):
+        if cls._jupyter_dirs is None:
+            cls._jupyter_dirs = cls._get_jupyter_dirs()
+        return cls._jupyter_dirs
+
+    @classmethod
+    def install_extension(cls,
+                          extension_package, exec_prefix=None,
+                          extension_types=('nbextension', 'labextension'), overwrite=False):
+        """
+        Attempts to do a basic installation for JupterLab
+        :return:
+        :rtype:
+        """
+        import sys, shutil, os, tempfile as tf
+
+        prefix = cls.jupyter_env() if exec_prefix is None else exec_prefix
+        pkg_root = extension_package
+        pkg_name = os.path.basename(pkg_root)
+        for ext in extension_types:
+            src = os.path.join(pkg_root, ext)
+            if os.path.isdir(src):
+                target = os.path.join(prefix, "share", "jupyter", ext+"s", pkg_name)
+                copied = False
+                if overwrite or not os.path.isdir(target):
+                    copied = True
+                    if os.path.exists(target):
+                        with tf.TemporaryDirectory() as new_loc:
+                            try:
+                                os.remove(new_loc)
+                            except:
+                                pass
+                        os.rename(target, new_loc)
+                    else:
+                        new_loc = None
+                    try:
+                        shutil.copytree(src, target)
+                    except:
+                        if new_loc is not None:
+                            os.rename(new_loc, target)
+
+                from IPython.core.display import HTML
+                if copied:
+                    return HTML(
+                        f"<h4>Extension installed to {target}. "
+                        "You will need to reload the page to apply changes.</h4>"
+                    )
+
+    @classmethod
+    def get_kernel_specs(cls, root_dirs=None):
+        kernels = {}
+        if root_dirs is None:
+            root_dirs = cls.jupyter_dirs()['data']
+        for root_dir in root_dirs:
+            if not os.path.isdir(root_dir): continue
+            kernel_dir = os.path.join(root_dir, 'share', 'jupyter', 'kernels')
+            if not os.path.isdir(kernel_dir):
+                kernel_dir = os.path.join(root_dir, 'kernels')
+                if not os.path.isdir(kernel_dir): continue
+            for dir in os.listdir(kernel_dir):
+                kernel_file = os.path.join(kernel_dir, dir, 'kernel.json')
+                if os.path.exists(kernel_file):
+                    kernels[dir] = dev.read_json(kernel_file)
+                    kernels[dir]['root'] = root_dir
+        return kernels
+
+    @classmethod
+    def prep_kernel_args(cls, name, base_opts, new_opts):
+        new_args = dev.merge_dicts(base_opts, new_opts)
+        if 'argv' not in new_args:
+            exec = new_args.pop('exec', None)
+            if exec is None:
+                exec = sys.exec_prefix
+            new_args['argv'] = [
+                exec,
+                'ipykernel_launcher',
+                '-f',
+                '{connection_file}'
+            ]
+        if 'display_name' not in new_args:
+            new_args['display_name'] = name
+        if 'language' not in new_args:
+            new_args['language'] = 'python'
+        return new_args
+
+    @classmethod
+    def modify_kernel_spec(cls, name, root_dirs=None, **opts):
+        base_kernels = cls.get_kernel_specs(root_dirs=root_dirs)
+        if name not in base_kernels:
+            base_opts = {}
+            root_dir = cls.jupyter_env()
+        else:
+            base_opts = base_kernels[name]
+            root_dir = base_kernels[name]['root']
+        kernel_dir = os.path.join(root_dir, 'share', 'jupyter', 'kernels')
+        if not os.path.isdir(kernel_dir):
+            kernel_dir = os.path.join(root_dir, 'kernels')
+            if not os.path.isdir(kernel_dir):
+                raise ValueError(f"root dir {root_dir} has no kernel subdir")
+
+        kernel_arg = cls.prep_kernel_args(
+            name,
+            base_opts,
+            opts
+        )
+        os.makedirs(os.path.join(kernel_dir, name), exist_ok=True)
+        kernel_file = os.path.join(kernel_dir, name, 'kernel.json')
+        dev.write_json(
+            kernel_file,
+            kernel_arg
+        )
+        return kernel_file
+    
+    @classmethod
+    def install_ipykernel(cls, prefix):
+        return subprocess.run([prefix, '-m', 'pip', 'install', 'ipykernel'], capture_output=True, text=True)
 
 class ModuleReloader:
     """

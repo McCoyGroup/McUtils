@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import itertools
 import numpy as np
+from .. import Devutils as dev
 
 __all__ = [
     "TableFormatter"
@@ -326,7 +327,22 @@ class TableFormatter:
         data_columns = self.format_tablular_data_columns(table_data, column_formats, row_padding)
 
         if column_join is None: column_join = self.column_join
-        if column_join is None: column_join = self.default_column_join
+        if column_join is None:
+            if headers is not None:
+                if header_column_join is None: header_column_join = self.header_column_join
+                if header_column_join is not None:
+                    if isinstance(header_column_join, str):
+                        n = len(header_column_join)
+                        column_join = (self.default_column_join * n)[:n]
+                    else:
+                        column_join = [
+                            (self.default_column_join * len(h))[:len(h)]
+                            for h in header_column_join
+                        ]
+                else:
+                    column_join = self.default_column_join
+            else:
+                column_join = self.default_column_join
 
         if headers is None:
             col_ = []
@@ -353,11 +369,11 @@ class TableFormatter:
             col_ = []
 
             join_width = (
-               [len(column_join)]
-                    if isinstance(column_join, str) else
-                [len(j) for j in column_join]
-                    if hasattr(column_join, "__getitem__") else
-                [0]
+                    [len(column_join)]
+                        if isinstance(column_join, str) else
+                    [len(j) for j in column_join]
+                        if hasattr(column_join, "__getitem__") else
+                    [0]
             )
 
             join_width = [0] + (join_width * len(data_columns))
@@ -502,7 +518,141 @@ class TableFormatter:
 
         return body
 
+    @classmethod
+    def _join_across(cls, iterable):
+        return [
+            sum((list(k) for k in l), [])
+            for l in zip(*iterable)
+        ]
 
+    @classmethod
+    def _join_data(cls, data_lists):
+        if dev.is_atomic(data_lists[0][0]):
+            return np.concatenate(data_lists, axis=0)
+        else:
+            return np.concatenate(data_lists, axis=1)
 
+    @classmethod
+    def _is_terminal(cls, value, depth):
+        return dev.is_atomic(value) or (
+            isinstance(value, (tuple, list, np.ndarray))
+            and dev.is_atomic(value[0])
+        )
 
+    @classmethod
+    def extract_tree_headers(cls, tree, key_normalizer=None, depth=0,
+                             default_key=None,
+                             terminal_data_function=None):
+        if terminal_data_function is None:
+            terminal_data_function = cls._is_terminal
+        if hasattr(tree, 'keys'):
+            headers = [
+                (
+                    [key_normalizer(key, depth) for key in tree.keys()]
+                        if key_normalizer is not None else
+                    list(tree.keys())
+                )
+            ]
 
+            terminal_tree = terminal_data_function(next(iter(tree.values())), depth)
+            if terminal_tree:
+                subheader_data = None
+                tree_data = np.array(list(tree.values()))
+                if tree_data.ndim == 1:
+                    tree_data = tree_data[np.newaxis]
+                else:
+                    tree_data = tree_data.T
+            else:
+                subheader_data = [
+                    cls.extract_tree_headers(v, key_normalizer=key_normalizer, depth=depth+1,
+                                             default_key=default_key,
+                                             terminal_data_function=terminal_data_function)
+                    for v in tree.values()
+                ]
+                tree_data = None
+        else:
+            headers = [
+                [key_normalizer(default_key, depth) for _ in tree]
+                    if key_normalizer is not None else
+                [default_key] * len(tree)
+            ]
+
+            terminal_tree = terminal_data_function(next(iter(tree)), depth)
+            if terminal_tree:
+                subheader_data = None
+                tree_data = np.array(list(tree))
+                if tree_data.ndim == 1:
+                    tree_data = tree_data[np.newaxis]
+                else:
+                    tree_data = tree_data.T
+            else:
+                subheader_data = [
+                    cls.extract_tree_headers(v, key_normalizer=key_normalizer, depth=depth+1,
+                                             default_key=default_key,
+                                             terminal_data_function=terminal_data_function)
+                    for v in tree
+                ]
+                tree_data = None
+
+        if subheader_data is None:
+            header_spans = [[1] * len(headers[0])]
+        else:
+            subheaders = cls._join_across(
+                s[0] for s in subheader_data
+            )
+            sublens = cls._join_across(
+                s[1] for s in subheader_data
+            )
+            tree_data = cls._join_data([s[2] for s in subheader_data])
+
+            headers = headers + subheaders
+            header_spans = [[sum(s[1][0]) for s in subheader_data]] + sublens
+
+        return headers, header_spans, tree_data
+
+    @classmethod
+    def from_tree(cls,
+                  tree_data,
+                  header_spans=None,
+                  key_normalizer=None,
+                  depth=0,
+                  default_key=None,
+                  column_formats=None,
+                  header_normalization_function=None,
+                  header_function=None,
+                  terminal_data_function=None,
+                  **opts
+                  ):
+        headers, hspans, data = cls.extract_tree_headers(tree_data,
+                                                         key_normalizer=key_normalizer, depth=depth + 1,
+                                                         default_key=default_key,
+                                                         terminal_data_function=terminal_data_function)
+        if header_normalization_function is not None:
+            headers, hspans = header_normalization_function(headers, hspans)
+        if header_function is not None:
+            headers = [
+                [
+                    header_function(h, w)
+                    for h, w in zip(hline, sline)
+                ]
+                for hline, sline in zip(headers, hspans)
+            ]
+        if header_spans is None:
+            header_spans = hspans
+        if column_formats is None:
+            column_formats = {}
+        if isinstance(column_formats, dict):
+            column_formats = {column_formats.get(k, "") for k in headers[-1]}
+        return cls(
+            column_formats,
+            headers=headers,
+            header_spans=header_spans,
+            **opts
+        ), data
+
+    @classmethod
+    def format_tree(cls, tree_data, data_normalization_function=None, **opts):
+        formatter, data = cls.from_tree(tree_data, **opts)
+        if data_normalization_function is not None:
+            data = data_normalization_function(data)
+        return formatter.format(data)

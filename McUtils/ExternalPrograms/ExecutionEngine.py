@@ -260,7 +260,7 @@ class SLURMExecutionEngine(ManagedJobQueueExecutionEngine):
             **fut_opts
         )
 
-class ProcessExecutionFuture(JoinableExecutionFuture)
+class ProcessExecutionFuture(JoinableExecutionFuture):
     def __init__(self, base_obj, **ignored):
         super().__init__(**ignored)
         self.obj = base_obj
