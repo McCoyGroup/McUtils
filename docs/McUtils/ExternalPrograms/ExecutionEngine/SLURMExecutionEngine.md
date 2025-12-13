@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ExecutionEngine.SLURMExecutionEngine">SLURMExecutionEngine</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L221)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L221?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L225)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L225?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ future_type: SLURMExecutionFuture
 __init__(self, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L223)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L223?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L227)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L227?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, **opts):
 prep_future_opts(self, *, sbatch_file, watch_dir=None, chdir=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L230)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L230?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ prep_future_opts(self, *, sbatch_file, watch_dir=None, chdir=None, **kwargs):
 submit_job(self, sbatch_file, *, watch_dir=None, poll_time=None, results_file=None, status_file=None, **kwargs) -> 'ManagedJobQueueExecutionFuture': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L243)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L243?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L247)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.py#L247?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -102,7 +102,7 @@ submit_job(self, sbatch_file, *, watch_dir=None, poll_time=None, results_file=No
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L221?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L225?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

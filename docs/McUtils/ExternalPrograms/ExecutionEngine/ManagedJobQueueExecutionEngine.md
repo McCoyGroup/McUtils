@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ExecutionEngine.ManagedJobQueueExecutionEngine">ManagedJobQueueExecutionEngine</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L182?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ future_type: ManagedJobQueueExecutionFuture
 __init__(self, queue_manager: 'queues.ManagedJobQueueHandler', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L180)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L180?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L184?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, queue_manager: 'queues.ManagedJobQueueHandler', **opts):
 prep_future_opts(self, watch_dir=None, results_file=None, status_file=None, poll_time=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L188?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ prep_future_opts(self, watch_dir=None, results_file=None, status_file=None, poll
 submit_job(self, *, watch_dir=None, poll_time=None, results_file=None, status_file=None, **kwargs) -> 'ManagedJobQueueExecutionFuture': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.py#L201?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -102,7 +102,7 @@ submit_job(self, *, watch_dir=None, poll_time=None, results_file=None, status_fi
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L178?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L182?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

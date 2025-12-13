@@ -1,7 +1,7 @@
 # <a id="McUtils.Jupyter.InteractiveTools.patch_pinfo">patch_pinfo</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L594)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L594?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L754)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L754?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ patch_pinfo():
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/patch_pinfo.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/patch_pinfo.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L594?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L754?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

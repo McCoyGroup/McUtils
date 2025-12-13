@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ExecutionEngine.ExecutionEngine">ExecutionEngine</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L70)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L70?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ engine_types: dict
 register(cls, name, engine=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L74?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ register(cls, name, engine=None):
 resolve(cls, name, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L88)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L88?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L87)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L87?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ resolve(cls, name, **opts):
 __init__(self, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L92)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L92?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L91?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ __init__(self, **opts):
 submit_job(self, **kwargs) -> 'ExecutionFuture': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L95)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L95?message=Update%20Docs)]
 </div>
 
 
@@ -68,8 +68,8 @@ submit_job(self, **kwargs) -> 'ExecutionFuture':
 submit_jobs(self, jobs: 'list[dict]', **kwargs) -> 'ExecutionQueue': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L99?message=Update%20Docs)]
 </div>
 
 
@@ -78,8 +78,8 @@ submit_jobs(self, jobs: 'list[dict]', **kwargs) -> 'ExecutionQueue':
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L105)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L105?message=Update%20Docs)]
 </div>
 
 
@@ -88,8 +88,18 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L111?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.ExecutionEngine.ExecutionEngine.startup" class="docs-object-method">&nbsp;</a> 
+```python
+startup(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L116?message=Update%20Docs)]
 </div>
 
 
@@ -98,8 +108,8 @@ __exit__(self, exc_type, exc_val, exc_tb):
 shutdown(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.py#L119?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -154,7 +164,7 @@ shutdown(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ExecutionEngine/ExecutionEngine.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L71?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ExecutionEngine.py#L70?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
