@@ -952,6 +952,8 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         vec_cross = None
 
     if np.all(planar):
+        if component_vectors is None:
+            raise ValueError("parallel vector angle derivative only supported for dihedrals")
         expansion = vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order,
                                                   component_vectors=component_vectors,
                                                   unit_expansions=unit_expansions

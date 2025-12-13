@@ -1167,7 +1167,9 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion',
 
         # A_expansion = [A_expansion[0], np.concatenate([np.eye(3), np.zeros((3, 3))], axis=0)]
         # B_expansion = [B_expansion[0], np.concatenate([np.zeros((3, 3)), np.eye(3)], axis=0)]
-        base_deriv = td.vec_angle_deriv(A_expansion, B_expansion, order=order, unitized=True)
+        base_deriv = td.vec_angle_deriv(A_expansion, B_expansion,
+                                        order=order, unitized=True
+                                        )
         if proj is None: return base_deriv
         if reproject:
             base_deriv = [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
