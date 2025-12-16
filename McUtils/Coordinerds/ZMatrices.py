@@ -1102,7 +1102,6 @@ def bond_graph_zmatrix(
 ):
     submats = []
     backbone = fragments[0]
-    primary = chain_zmatrix(len(backbone))
     if edge_map is None:
         edge_map = EdgeGraph.get_edge_map(bonds)
     for frag in fragments[1:]:
@@ -1120,50 +1119,71 @@ def bond_graph_zmatrix(
                 )
             )
 
+    fragments = fragments[1:]
+    fused = chain_zmatrix(len(backbone))
+    backbone = list(backbone)
+    while len(fragments) > 0:
+        attachment_points = {}
+        missing_frags = []
+        missing_mats = []
+        added_frags = []
+        for frag,mat in zip(fragments, submats):
+            base_frag = frag
+            if not nput.is_int(frag[0]):
+                frag = frag[0]
 
-    attachment_points = []
-    for frag in fragments[1:]:
-        if not nput.is_int(frag[0]):
-            frag = frag[0]
+            for f in frag:
+                attach = None
+                submap = edge_map.get(f)
 
-        for f in frag:
-            attach = None
-            submap = edge_map.get(f)
-            if nput.is_int(submap):
-                if submap in backbone:
-                    attach = submap
+                if nput.is_int(submap):
+                    if submap in backbone:
+                        attach = submap
+                else:
+                    for s in submap:
+                        if s in backbone:
+                            attach = s
+                            break
+
+                if attach is not None:
+                    added_frags.append(base_frag)
+                    attachment_points[backbone.index(attach)] = mat
+                    break
             else:
-                for s in submap:
-                    if s in backbone:
-                        attach = s
-                        break
+                missing_frags.append(frag)
+                missing_mats.append(mat)
 
-            if attach is not None:
-                attachment_points.append(backbone.index(attach))
-                break
+        if len(missing_frags) == len(fragments):
+            raise ValueError(
+                f"can't attach fragments {fragments} to backbone {backbone}, no connections"
+            )
 
-        else:
-            raise ValueError("can't attach fragment to backbone, no connections")
+        fused = functionalized_zmatrix(
+            fused,
+            {
+                _attachment_point(ap):zmat
+                for ap,zmat in attachment_points.items()
+            }
+        )
+        if validate_additions:
+            is_valid, reason = validate_zmatrix(fused, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"base graph zmatrix invalid ({reason}) in {fused}")
 
-    fused = functionalized_zmatrix(
-        len(primary),
-        {
-            _attachment_point(ap):zmat
-            for ap,zmat in zip(attachment_points, submats)
-        }
-    )
-    if validate_additions:
-        is_valid, reason = validate_zmatrix(fused, return_reason=True)
-        if not is_valid:
-            raise ValueError(f"base graph zmatrix invalid ({reason}) in {fused}")
+        backbone = backbone + list(itut.flatten(added_frags))
+        fragments = missing_frags
+        submats = missing_mats
+
+    # if len(fragments) == 1:
+    #     raise ValueError(f"can't attach fragment {fragments[0]} to backbone {backbone}, no connections")
 
     if reindex:
-        flat_frags = list(itut.flatten(fragments))
+        flat_frags = backbone
         if validate_additions:
             frag_counts = itut.counts(flat_frags)
             bad_frags = {k:v for k,v in frag_counts.items() if v > 1}
             if len(bad_frags) > 0:
-                raise ValueError(f"diplicate atoms {list(bad_frags.keys())} encountered in {fragments}")
+                raise ValueError(f"duplicate atoms {list(bad_frags.keys())} encountered in {fragments}")
         fused = reindex_zmatrix(fused, flat_frags)
         if validate_additions:
             is_valid, reason = validate_zmatrix(fused, return_reason=True)

@@ -191,6 +191,12 @@ class CoordinateSystem:
     def register_converter(self, system, conversion):
         converters.register_converter(self, system, conversion)
 
+    def get_direct_converter(self, target):
+        # useful for overrides when it's harder to add them to the overall registry
+        ...
+    def get_inverse_converter(self, target):
+        # useful for overrides when it's harder to add them to the overall registry
+        ...
     def converter(self, system):
         """
         Gets the converter from the current system to a new system
