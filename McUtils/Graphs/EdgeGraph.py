@@ -49,7 +49,10 @@ class EdgeGraph:
                 for j in spec[i]
             ])
             if num_nodes is None:
-                num_nodes = len(np.unique(edge_list.flatten()))
+                num_nodes = len(np.unique(
+                    list(spec.keys())
+                    + list(vv for v in spec.values() for vv in v)
+                ))
             return cls.adj_mat(num_nodes, edge_list)
         elif isinstance(spec, (sparse.csr_matrix, sparse.coo_matrix, sparse.csc_matrix)): #TODO: better checks
             return spec
@@ -265,18 +268,48 @@ class EdgeGraph:
                 )
             )
 
-        filt_rings = [t for t in test_rings if t is not None]
+        filt_rings = itut.delete_duplicates(
+            (t for t in test_rings if t is not None),
+            key=lambda r:tuple(sorted(r))
+        )
+
+        # print(filt_rings, test_rings)
 
         rings = []
+        set_rings = []
         keys = set()
+        subrings = set()
         for i, r1 in enumerate(filt_rings):
-            for r2 in filt_rings[i:]:
-                int_ring = r1 & r2
-                key = tuple(sorted(int_ring))
-                if key in keys: continue
-                keys.add(key)
-                r = cls.check_ring_in_graph(int_ring, edge_map)
-                if r: rings.append(r)
+            found_minimal_ring = False
+            edge_valencies = [len(edge_map[x] & r1) for x in r1]
+            lr = [x for x,v in zip(r1, edge_valencies) if v > 1]
+            has_subrings = any(v > 2 for v in edge_valencies)
+            # TODO: need a more direct enumeration scheme
+            if has_subrings:
+                min_ring_size = 3
+            else:
+                min_ring_size = len(lr)
+            for n in range(min_ring_size, len(lr)+1):
+                for int_ring in itertools.combinations(r1, n):
+                    set_r = set(int_ring)
+                    if any(
+                            len(edge_map[x] & set_r) < 2
+                            for x in set_r
+                    ): continue
+                    if any(len(set_r & rr) == len(rr) for rr in set_rings): continue
+                    key = tuple(sorted(int_ring))
+                    if key in keys: continue
+                    keys.add(key)
+                    r = cls.check_ring_in_graph(int_ring, edge_map)
+                    if r:
+                        key = tuple(sorted(r))
+                        if key in subrings: continue
+                        subrings.add(key)
+                        rings.append(r)
+                        set_rings.append(set(r))
+                        found_minimal_ring=True
+                        break
+                if found_minimal_ring: break
         return rings
 
     @classmethod
@@ -348,13 +381,26 @@ class EdgeGraph:
             return np.array([len(map[i]) for i in indices])
 
     @classmethod
+    def compute_ring_centralities(cls, indices, rings):
+        smol = nput.is_int(indices)
+        if smol: indices = [indices]
+        count_map = {}
+        for r in rings:
+            for i in r:
+                count_map[i] = count_map.get(i, 0) + 1
+        counts = np.array([count_map.get(i) for i in indices])
+        if smol: counts = counts[0]
+        return counts
+
+    @classmethod
     def find_longest_chain_from_breakpoints(cls,
                                             map,
                                             graph=None,
                                             rings=None,
                                             root=None,
                                             use_highest_valencies=True,
-                                            shortest_path_data=None
+                                            shortest_path_data=None,
+                                            raise_on_failure=True
                                             ):
         if rings is None:
             rings = cls.find_rings_in_graph(len(map), map)
@@ -372,14 +418,22 @@ class EdgeGraph:
             # atom in non-fused rings
             # each potential high-valency bond can be broken
             if use_highest_valencies:
-                ring_valencies = [cls.compute_edge_centralities(r, map) for r in rings]
+                ring_valencies = [
+                    cls.compute_ring_centralities(r, rings)
+                    for r in rings
+                ]
+                ring_valencies = [
+                    cls.compute_edge_centralities(r, map)
+                        if len(np.unique(v)) == 1 else
+                    v
+                    for r,v in zip(rings, ring_valencies)
+                ]
                 break_pos = [
                     np.array(r)[np.where(v == np.max(v))]
                     for r,v in zip(rings, ring_valencies)
                 ]
             else:
                 break_pos = rings
-
             break_bonds = [
                 [
                     (p, j)  # enumerate all ring bonds starting at the breakpos, could be more efficient
@@ -400,6 +454,7 @@ class EdgeGraph:
             n_inds = len(map)
             for p_list in itertools.product(*break_bonds):
                 if len({tuple(sorted(p)) for p in p_list}) < len(p_list): continue # dupe bond in fused ring
+                # print(p_list)
                 new_map: dict[int, set[int]] = {k: v.copy() for k, v in map.items()}
                 for center, bond in p_list:
                     new_map[center].remove(bond)
@@ -409,11 +464,16 @@ class EdgeGraph:
                 if len(new_rings) == 0:
                     chain = cls.find_longest_chain_from_breakpoints(
                         new_map,
-                        root=root
+                        root=root,
+                        rings=new_rings
                     )
-                    break
+                    if chain is not None:
+                        break
             else:
-                raise ValueError("couldn't find a way to break rings?")
+                if raise_on_failure:
+                    raise ValueError("couldn't find a way to break rings?")
+                else:
+                    return None
 
             return chain
 

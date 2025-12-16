@@ -168,6 +168,13 @@ class CoordinateSystemConverters:
         :return:
         :rtype:
         """
+        conv = system1.get_direct_converter(system2)
+        if conv is not None:
+            return conv
+
+        conv = system2.get_inverse_converter(system1)
+        if conv is not None:
+            return conv
 
         cls._preload_converters()
         if (system1, system2) in cls.converters:
