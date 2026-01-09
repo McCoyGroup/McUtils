@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.Generators.PrimitiveCoordinatePicker">PrimitiveCoordinatePicker</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L157)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L157?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,8 @@ symmetry_type_dispatch: dict
 __init__(self, atoms, bonds, base_coords=None, rings=None, fragments=None, light_atoms=None, backbone=None, neighbor_count=3): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L160)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L160?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ __init__(self, atoms, bonds, base_coords=None, rings=None, fragments=None, light
 coords(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L181?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ coords(self):
 generate_coords(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -60,8 +60,8 @@ generate_coords(self):
 canonicalize_coord(cls, coord): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L203?message=Update%20Docs)]
 </div>
 
 
@@ -71,8 +71,8 @@ canonicalize_coord(cls, coord):
 prep_unique_coords(cls, coords): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L170)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L170?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L223)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L223?message=Update%20Docs)]
 </div>
 
 
@@ -82,8 +82,8 @@ prep_unique_coords(cls, coords):
 prune_excess_coords(cls, coord_set, canonicalized=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L181)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L181?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L234)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L234?message=Update%20Docs)]
 </div>
 
 
@@ -93,8 +93,8 @@ prune_excess_coords(cls, coord_set, canonicalized=False):
 ring_coordinates(cls, ring_atoms): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L209)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L209?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L262)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L262?message=Update%20Docs)]
 </div>
 
 
@@ -104,8 +104,8 @@ ring_coordinates(cls, ring_atoms):
 unfused_ring_coordinates(cls, ring_atoms1, ring_atoms2, shared_atoms, shared_indices1, shared_indices2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L237)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L237?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L290)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L290?message=Update%20Docs)]
 </div>
 
 
@@ -115,8 +115,8 @@ unfused_ring_coordinates(cls, ring_atoms1, ring_atoms2, shared_atoms, shared_ind
 pivot_fused_ring_coordinates(cls, ring_atoms1, ring_atoms2, shared_atoms, shared_indices1, shared_indices2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L240)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L240?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L293?message=Update%20Docs)]
 </div>
 
 
@@ -126,8 +126,8 @@ pivot_fused_ring_coordinates(cls, ring_atoms1, ring_atoms2, shared_atoms, shared
 simple_fused_ring_coordinates(cls, ring_atoms1, ring_atoms2, shared_atoms, shared_indices1, shared_indices2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L258)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L258?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L311)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L311?message=Update%20Docs)]
 </div>
 
 
@@ -137,8 +137,8 @@ simple_fused_ring_coordinates(cls, ring_atoms1, ring_atoms2, shared_atoms, share
 fused_ring_coordinates(cls, ring_atoms1, ring_atoms2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L277)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L277?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L330)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L330?message=Update%20Docs)]
 </div>
 
 
@@ -147,8 +147,8 @@ fused_ring_coordinates(cls, ring_atoms1, ring_atoms2):
 fragment_connection_coords(self, frag_1, frag_2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L289)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L289?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L342)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L342?message=Update%20Docs)]
 </div>
 
 
@@ -157,8 +157,8 @@ fragment_connection_coords(self, frag_1, frag_2):
 get_neighborhood_symmetries(self, atoms, ignored=None, neighborhood=3): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L312)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L312?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L365?message=Update%20Docs)]
 </div>
 
 
@@ -167,8 +167,8 @@ get_neighborhood_symmetries(self, atoms, ignored=None, neighborhood=3):
 chain_coords(self, R, y): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L320)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L320?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L373)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L373?message=Update%20Docs)]
 </div>
 
 
@@ -177,8 +177,8 @@ chain_coords(self, R, y):
 RYX2_coords(self, R, y, X): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L330)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L330?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L383?message=Update%20Docs)]
 </div>
 
 
@@ -187,8 +187,8 @@ RYX2_coords(self, R, y, X):
 RYX3_coords(self, R, y, X): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L410)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L410?message=Update%20Docs)]
 </div>
 
 
@@ -197,8 +197,8 @@ RYX3_coords(self, R, y, X):
 get_precedent_chains(self, atom, num_precs=2, ring_atoms=None, light_atoms=None, ignored=None, backbone=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L383)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L383?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L436)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L436?message=Update%20Docs)]
 </div>
 
 
@@ -208,8 +208,8 @@ get_precedent_chains(self, atom, num_precs=2, ring_atoms=None, light_atoms=None,
 get_symmetry_groups(cls, neighbors, matches): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L469)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L469?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L522?message=Update%20Docs)]
 </div>
 
 
@@ -218,8 +218,8 @@ get_symmetry_groups(cls, neighbors, matches):
 symmetry_coords(self, atom, neighborhood=3, backbone=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L490)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L490?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L543)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.py#L543?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -274,7 +274,7 @@ symmetry_coords(self, atom, neighborhood=3, backbone=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Generators/PrimitiveCoordinatePicker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L104?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L157?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

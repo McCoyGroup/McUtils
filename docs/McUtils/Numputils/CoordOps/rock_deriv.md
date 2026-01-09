@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.rock_deriv">rock_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1219)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1219?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1227)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1227?message=Update%20Docs)]
 </div>
 
 ```python
-rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='ijk', zero_thresh=None, fixed_atoms=None, expanded_vectors=None): 
+rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='ijk', cache=None, reproject=True, zero_thresh=None, fixed_atoms=None, expanded_vectors=None): 
 ```
 Gives the derivative of the rocking motion (symmetric bend basically)
   - `coords`: `np.ndarray`
@@ -125,7 +125,7 @@ k
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/rock_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/rock_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1219?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1227?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

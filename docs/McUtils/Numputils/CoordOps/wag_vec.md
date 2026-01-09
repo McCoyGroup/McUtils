@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.wag_vec">wag_vec</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1926)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1926?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2120?message=Update%20Docs)]
 </div>
 
 ```python
-wag_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None): 
+wag_vec(coords, i, j, k, l=None, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None): 
 ```
 Returns the full vectors that define the linearized version of an oop displacement
   - `coords`: `Any`
@@ -66,7 +66,7 @@ Returns the full vectors that define the linearized version of an oop displaceme
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/wag_vec.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/wag_vec.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1926?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2120?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.rock_vec">rock_vec</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1826)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1826?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1991)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1991?message=Update%20Docs)]
 </div>
 
 ```python
-rock_vec(coords, i, j, k, order=None, method='expansion', fixed_atoms=None): 
+rock_vec(coords, i, j, k, order=None, method='expansion', cache=None, reproject=True, angle_ordering='ijk', fixed_atoms=None): 
 ```
 Returns the full vectors that define the linearized version of an angle displacement
   - `coords`: `Any`
@@ -66,7 +66,7 @@ Returns the full vectors that define the linearized version of an angle displace
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/rock_vec.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/rock_vec.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1826?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1991?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

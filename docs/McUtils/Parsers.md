@@ -342,9 +342,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-383df7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-383df7"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-b32d61" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b32d61"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-383df7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b32d61" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
@@ -352,9 +352,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-fcf765" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fcf765"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-fe99ec" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fe99ec"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fcf765" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fe99ec" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

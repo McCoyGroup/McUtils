@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.wag_deriv">wag_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1546)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1546?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1541)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1541?message=Update%20Docs)]
 </div>
 
 ```python
-wag_deriv(coords, i, j, k, l=None, m=None, n=None, /, order=1, method='expansion', fixed_atoms=None, expanded_vectors=None): 
+wag_deriv(coords, i, j, k, l=None, *, order=1, method='expansion', cache=None, reproject=True, fixed_atoms=None, expanded_vectors=None): 
 ```
 
 
@@ -59,7 +59,7 @@ wag_deriv(coords, i, j, k, l=None, m=None, n=None, /, order=1, method='expansion
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/wag_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/wag_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1546?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1541?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

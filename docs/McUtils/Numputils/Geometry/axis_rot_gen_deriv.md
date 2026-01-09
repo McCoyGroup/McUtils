@@ -5,7 +5,7 @@
 </div>
 
 ```python
-axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, normalized=False): 
+axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, moments_of_inertia=None, normalized=False): 
 ```
 
 

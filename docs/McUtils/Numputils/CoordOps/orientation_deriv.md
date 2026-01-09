@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.orientation_deriv">orientation_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1678)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1678?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1791)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1791?message=Update%20Docs)]
 </div>
 
 ```python
-orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None, return_frame=False): 
+orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None, cache=None, reproject=True, return_frame=False, return_rot=True): 
 ```
 
 
@@ -59,7 +59,7 @@ orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fix
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/orientation_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/orientation_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1678?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1791?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

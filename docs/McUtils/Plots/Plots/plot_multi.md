@@ -1,11 +1,11 @@
 # <a id="McUtils.Plots.Plots.plot_multi">plot_multi</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1299)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1299?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1300)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1300?message=Update%20Docs)]
 </div>
 
 ```python
-plot_multi(*plot_specs: dict, figure=None, plot_type_styles=None, default_type='plot', **global_settings): 
+plot_multi(*plot_specs: dict, figure=None, plot_type_styles=None, default_type='plot', x=None, y=None, z=None, func=None, common_settings=None, **global_settings): 
 ```
 
 
@@ -59,7 +59,7 @@ plot_multi(*plot_specs: dict, figure=None, plot_type_styles=None, default_type='
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/plot_multi.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/plot_multi.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1299?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1300?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

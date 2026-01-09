@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.com_dist_deriv">com_dist_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1612)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1612?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1686)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1686?message=Update%20Docs)]
 </div>
 
 ```python
-com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None): 
+com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, cache=None, reproject=True, fixed_atoms=None): 
 ```
 
 
@@ -59,7 +59,7 @@ com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/com_dist_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/com_dist_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1612?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1686?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

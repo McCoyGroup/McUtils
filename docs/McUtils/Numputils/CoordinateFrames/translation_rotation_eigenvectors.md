@@ -5,7 +5,7 @@
 </div>
 
 ```python
-translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True, return_com=False, return_rot=True, return_principle_axes=False): 
+translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True, ref=None, ref_masses=None, axes=None, align_with_frame=True, return_values=False, return_com=False, return_rot=True, return_principle_axes=False): 
 ```
 Returns the eigenvectors corresponding to translations and rotations
 in the system

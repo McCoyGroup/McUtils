@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DPrimitive">X3DPrimitive</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L459)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L459?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L526)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L526?message=Update%20Docs)]
 </div>
 
 
@@ -22,23 +22,45 @@
 wrapper_class: NoneType
 tag_class: NoneType
 ```
-<a id="McUtils.Plots.X3DInterface.X3DPrimitive.__init__" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.X3DInterface.X3DPrimitive.get_new_id" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, *children, **opts): 
+@classmethod
+get_new_id(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L462)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L462?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L529)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L529?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3DPrimitive.__init__" class="docs-object-method">&nbsp;</a> 
+```python
+__init__(self, *children, id=None, **opts): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L532)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L532?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3DPrimitive.id" class="docs-object-method">&nbsp;</a> 
+```python
+@property
+id(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L540)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L540?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.split_opts" class="docs-object-method">&nbsp;</a> 
 ```python
-split_opts(self, opts: dict): 
+split_opts(self, opts: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L467)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L467?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L546)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L546?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +69,8 @@ split_opts(self, opts: dict):
 get_appearance(self, appearance_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L476)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L476?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L555)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L555?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +79,39 @@ get_appearance(self, appearance_options):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L481)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L481?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L560)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L560?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3DPrimitive.resolve_prop_attr" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+resolve_prop_attr(self, prop_name): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L579)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L579?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3DPrimitive.get_prop_node_id" class="docs-object-method">&nbsp;</a> 
+```python
+get_prop_node_id(self, prop_name): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L592)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L592?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.X3DInterface.X3DPrimitive.get_children" class="docs-object-method">&nbsp;</a> 
+```python
+get_children(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L603)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L603?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -113,7 +166,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DPrimitive.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DPrimitive.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L459?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L526?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

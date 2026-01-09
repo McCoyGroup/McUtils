@@ -407,6 +407,28 @@ Any lowish-level numerical operations that need to be shared go here.
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[oop_expansion](Numputils/CoordOps/oop_expansion.md)   
+</div>
+   <div class="col" markdown="1">
+[wag_expansion](Numputils/CoordOps/wag_expansion.md)   
+</div>
+   <div class="col" markdown="1">
+[transrot_vecs](Numputils/CoordOps/transrot_vecs.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[transrot_expansion](Numputils/CoordOps/transrot_expansion.md)   
+</div>
+   <div class="col" markdown="1">
+[orientation_vecs](Numputils/CoordOps/orientation_vecs.md)   
+</div>
+   <div class="col" markdown="1">
+[orientation_expansion](Numputils/CoordOps/orientation_expansion.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [internal_conversion_function](Numputils/CoordOps/internal_conversion_function.md)   
 </div>
    <div class="col" markdown="1">
@@ -765,147 +787,147 @@ Any lowish-level numerical operations that need to be shared go here.
 [subtract_expansions](Numputils/TensorDerivatives/subtract_expansions.md)   
 </div>
    <div class="col" markdown="1">
-[center_of_mass](Numputils/CoordinateFrames/center_of_mass.md)   
+[renormalize_transformation](Numputils/TensorDerivatives/renormalize_transformation.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[center_of_mass](Numputils/CoordinateFrames/center_of_mass.md)   
+</div>
    <div class="col" markdown="1">
 [inertia_tensors](Numputils/CoordinateFrames/inertia_tensors.md)   
 </div>
    <div class="col" markdown="1">
 [moments_of_inertia](Numputils/CoordinateFrames/moments_of_inertia.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [moments_of_inertia_expansion](Numputils/CoordinateFrames/moments_of_inertia_expansion.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [inertial_frame_derivatives](Numputils/CoordinateFrames/inertial_frame_derivatives.md)   
 </div>
    <div class="col" markdown="1">
 [translation_rotation_eigenvectors](Numputils/CoordinateFrames/translation_rotation_eigenvectors.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [translation_rotation_projector](Numputils/CoordinateFrames/translation_rotation_projector.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [remove_translation_rotations](Numputils/CoordinateFrames/remove_translation_rotations.md)   
 </div>
    <div class="col" markdown="1">
 [translation_rotation_invariant_transformation](Numputils/CoordinateFrames/translation_rotation_invariant_transformation.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [eckart_embedding](Numputils/CoordinateFrames/eckart_embedding.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [eckart_permutation](Numputils/CoordinateFrames/eckart_permutation.md)   
 </div>
    <div class="col" markdown="1">
 [iterative_step_minimize](Numputils/Optimization/iterative_step_minimize.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [iterative_chain_minimize](Numputils/Optimization/iterative_chain_minimize.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GradientDescentStepFinder](Numputils/Optimization/GradientDescentStepFinder.md)   
 </div>
    <div class="col" markdown="1">
 [NewtonStepFinder](Numputils/Optimization/NewtonStepFinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [QuasiNewtonStepFinder](Numputils/Optimization/QuasiNewtonStepFinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ConjugateGradientStepFinder](Numputils/Optimization/ConjugateGradientStepFinder.md)   
 </div>
    <div class="col" markdown="1">
 [EigenvalueFollowingStepFinder](Numputils/Optimization/EigenvalueFollowingStepFinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NudgedElasticBandStepFinder](Numputils/Optimization/NudgedElasticBandStepFinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [jacobi_maximize](Numputils/Optimization/jacobi_maximize.md)   
 </div>
    <div class="col" markdown="1">
 [LineSearchRotationGenerator](Numputils/Optimization/LineSearchRotationGenerator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GradientDescentRotationGenerator](Numputils/Optimization/GradientDescentRotationGenerator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OperatorMatrixRotationGenerator](Numputils/Optimization/OperatorMatrixRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
 [displacement_localizing_rotation_generator](Numputils/Optimization/displacement_localizing_rotation_generator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GeometricTransformation](Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [TransformationFunction](Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.md)   
 </div>
    <div class="col" markdown="1">
 [AffineTransform](Numputils/GeometricTransformations/AffineTransform/AffineTransform.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TranslationTransform](Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RotationTransform](Numputils/GeometricTransformations/RotationTransform/RotationTransform.md)   
 </div>
    <div class="col" markdown="1">
 [permutation_sign](Numputils/PermutationOps/permutation_sign.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [levi_cevita_maps](Numputils/PermutationOps/levi_cevita_maps.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [levi_cevita_tensor](Numputils/PermutationOps/levi_cevita_tensor.md)   
 </div>
    <div class="col" markdown="1">
 [levi_cevita_dot](Numputils/PermutationOps/levi_cevita_dot.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [normalize_commutators](Numputils/PermutationOps/normalize_commutators.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [commutator_terms](Numputils/PermutationOps/commutator_terms.md)   
 </div>
    <div class="col" markdown="1">
 [commutator_evaluate](Numputils/PermutationOps/commutator_evaluate.md)   
 </div>
-   <div class="col" markdown="1">
-[permutation_cycles](Numputils/PermutationOps/permutation_cycles.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[enumerate_permutations](Numputils/PermutationOps/enumerate_permutations.md)   
+[permutation_cycles](Numputils/PermutationOps/permutation_cycles.md)   
 </div>
    <div class="col" markdown="1">
-   
+[enumerate_permutations](Numputils/PermutationOps/enumerate_permutations.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -933,9 +955,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-f611f6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f611f6"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-61b9bc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-61b9bc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f611f6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-61b9bc" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -976,12 +998,14 @@ Any lowish-level numerical operations that need to be shared go here.
 - [FrameDerivs](#FrameDerivs)
 - [FailingCarts](#FailingCarts)
 - [RotDerivs](#RotDerivs)
+- [AltCoords](#AltCoords)
+- [TransrotExpansion](#TransrotExpansion)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-0a66c0" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-0a66c0"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-69e002" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-69e002"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-0a66c0" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-69e002" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -998,6 +1022,8 @@ class NumputilsTests(TestCase):
                                   [-1.97215226e-31,  1.43714410e+00, -9.00306410e-01],
                                   [-1.75999392e-16, -1.43714410e+00, -9.00306410e-01]
     ])
+    def setUp(self):
+        np.set_printoptions(linewidth=1e8)
 ```
 
  </div>
@@ -3617,6 +3643,77 @@ class NumputilsTests(TestCase):
 
         print()
         print(np.round(rot_exp2 @ rot_der2[1], 8))
+```
+
+#### <a name="AltCoords">AltCoords</a>
+```python
+    def test_AltCoords(self):
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+
+        nput.internal_coordinate_tensors(
+            coords,
+            [
+                # {'oop':(0, 1, 2)},
+                {'wag':(0, 1, 2)}
+            ]
+        )
+```
+
+#### <a name="TransrotExpansion">TransrotExpansion</a>
+```python
+    def test_TransrotExpansion(self):
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+        masses = 1 + 2*np.random.rand(15)
+
+        _, exp = nput.internal_coordinate_tensors(
+            coords,
+            [
+                {
+                    'orientation': ((0, 1, 2, 3), (5, 6, 7)),
+                    'masses': masses
+                }
+            ],
+            return_inverse=True,
+            masses=masses,
+            remove_inverse_translation_rotation=True
+        )
+
+        rot_exp = nput.transrot_expansion(coords, 0, 1, 2, 3, extra_atoms=[5, 6, 7], masses=masses)
+        rot_der = nput.transrot_deriv(coords, 0, 1, 2, 3, masses=masses)
+
+        print()
+        print(np.round(nput.tensor_reexpand(rot_exp[1:], rot_der[1:])[0], 8))
+        # return
+
+        rot_exp = nput.orientation_expansion(coords, (0, 1, 2, 3), (5, 6, 7),
+                                             masses=masses
+                                             )
+        rot_der = nput.orientation_deriv(coords, (0, 1, 2, 3), (5, 6, 7),
+                                         masses=masses
+                                         )
+        print(np.round(nput.tensor_reexpand(rot_exp[1:], rot_der[1:])[0], 8))
+
+        # return
+
+        i, j, k, l = (0, 1, 3, 2)
+        rot_exp2 = [None, np.array([
+            nput.dist_expansion(coords, j, k, left_atoms=[i, j], right_atoms=[k, l])[1],
+            nput.angle_expansion(coords, i, j, k, left_atoms=[i, j], right_atoms=[k, l])[1],
+            nput.dihed_expansion(coords, i, j, k, l, left_atoms=[i, j], right_atoms=[k, l])[1]
+        ])]
+        rot_der2, _ = nput.internal_coordinate_tensors(coords,
+                                                       [(i, j), (j, k), (k, l), (i, j, k), (j, k, l), (i, j, k, l)],
+                                                       order=1,
+                                                       angle_ordering='ijk',
+                                                       return_inverse=True
+                                                       )
+
+        concat_exp = [np.concatenate(p, axis=0) for p in zip(rot_exp[1:], rot_exp2[1:])]
+        concat_der = [np.concatenate(p, axis=-1) for p in zip(rot_der[1:], rot_der2[1:])]
+        print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8).shape)
+        print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8))
 ```
 
  </div>
