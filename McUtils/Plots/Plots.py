@@ -1,6 +1,7 @@
 """
 Provides various types of plots and plotting utilities
 """
+import collections
 
 from .Graphics import Graphics, Graphics3D, GraphicsGrid
 from .Backends import GraphicsAxes, GraphicsFigure
@@ -1301,31 +1302,47 @@ def plot_multi(
         figure=None,
         plot_type_styles=None,
         default_type='plot',
+        x=None,
+        y=None,
+        z=None,
+        func=None,
+        common_settings=None,
         **global_settings
 ):
     if plot_type_styles is None:
         plot_type_styles = {}
+    if common_settings is None:
+        common_settings = {}
+    for key, val in [
+        ['x', x],
+        ['y', y],
+        ['z', z],
+        ['func', func]
+    ]:
+        if not dev.is_default(val):
+            common_settings[key] = val
     for i,f in enumerate(plot_specs):
-        f = dict(
+        f = collections.ChainMap(
+            f,
             plot_type_styles.get(f.get('type', default_type), {}),
-            **f
+            common_settings
         )
         f['type'] = f.get('type', default_type)
         f['figure'] = f.get('figure', figure)
         func = f.get('func')
         if not dev.is_list_like(func):
             if i == 0:
-                figure = plot_generic(**f, **global_settings)
+                figure = plot_generic(**collections.ChainMap(f, global_settings))
             else:
                 _ = plot_generic(**f)  # TDB if I prefer to update the object each iteration or not
         else:
             for j, c in enumerate(func):
                 if i == 0 and j == 0:
-                    figure = plot_generic(**dict(f, func=c), **global_settings)
+                    figure = plot_generic(**collections.ChainMap(dict(func=c), f, global_settings))
                     if f['figure'] is None:
                         f['figure'] = figure
                 else:
-                    _ = plot_generic(**dict(f, func=c))  # TDB if I prefer to update the object each iteration or not
+                    _ = plot_generic(**collections.ChainMap(dict(func=c), f))
     return figure
 
 # add classes to __all__

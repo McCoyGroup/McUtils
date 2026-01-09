@@ -3837,7 +3837,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                 return None
             # try to find conversions for subterms
 
-def _rot_gen2(axis):
+def _rot_gen2(axis, moments_of_inertia=None):
     axis = np.asanyarray(axis)
 
     # could be computed via Levi-Cevita connections, but why bother
@@ -3909,14 +3909,14 @@ def _rot_gen2_deriv(axis, order):
     return K_expansion, K2_expansion
 
 
-def axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, normalized=False):
+def axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, moments_of_inertia=None, normalized=False):
     # if not normalized:
     #     axis = vec_normalize(axis)
     axis = np.asanyarray(axis)
     if axis_order == 0:
         sd = [sin_deriv(angle, n) for n in range(angle_order+1)]
         cd = [cos_deriv(angle, n) for n in range(angle_order+1)]
-        K, K2 = _rot_gen2(axis)
+        K, K2 = _rot_gen2(axis, moments_of_inertia=moments_of_inertia)
         mom = vec_outer(axis, axis)
         return [
             (mom if i == 0 else 0) + s * K - c * K2

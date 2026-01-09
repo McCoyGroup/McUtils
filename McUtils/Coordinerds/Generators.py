@@ -12,6 +12,7 @@ __all__ = [
     "get_dihedral_stretches",
     "get_stretch_angle_dihedrals",
     "get_stretch_coordinate_system",
+    "get_fragment_coordinate_system",
     "PrimitiveCoordinatePicker",
     "enumerate_coordinate_sets"
 ]
@@ -95,10 +96,62 @@ def get_angle_dihedrals(angles):
                     dihedrals.append((ad, aa, ab, ac))
     return dihedrals
 
-def get_stretch_coordinate_system(stretches):
-    angles = get_stretch_angles(stretches)
-    dihedrals = get_angle_dihedrals(angles)
+def get_stretch_coordinate_system(stretches,
+                                  include_bends=True,
+                                  include_dihedrals=True):
+    if include_bends or include_dihedrals:
+        angles = get_stretch_angles(stretches)
+    else:
+        angles = None
+    if include_dihedrals:
+        dihedrals = get_angle_dihedrals(angles)
+    else:
+        dihedrals = None
     return stretches,angles,dihedrals
+
+def get_fragment_coordinate_system(bond_graph:EdgeGraph,
+                                   fragments=None,
+                                   masses=None,
+                                   distance_matrix=None):
+    if fragments is None:
+        fragments = bond_graph.get_fragments()
+    if len(fragments) == 1: return []
+    if len(fragments) > 2 and distance_matrix is None:
+        distance_matrix = np.array(distance_matrix)
+        max_dist = np.max(distance_matrix)+1
+        np.fill_diagonal(distance_matrix, max_dist)
+        intra_frag_dists = {
+            (i,j):np.min(distance_matrix[np.ix_(fragments[i], fragments[j])])
+            for i,j in itertools.combinations(range(len(fragments)), 2)
+        }
+        neighbors = [
+            min(
+                range(len(fragments)),
+                key=lambda j:(
+                    max_dist
+                        if i == j else
+                    intra_frag_dists.get((i,j), intra_frag_dists.get((j,i)))
+                )
+            )
+            for i in range(len(intra_frag_dists))
+        ]
+        added = set()
+        for i,j in enumerate(neighbors):
+            if (j,i) in added: continue
+            added.add((i,j))
+        fragment_pairs = list(added)
+    else:
+        fragment_pairs = [
+            (i,i+1)
+            for i in range(len(fragments)-1)
+        ]
+
+    return [
+        {'orientation':(fragments[i], fragments[j]), 'masses':masses}
+            if masses is not None else
+        {'orientation':(fragments[i], fragments[j])}
+        for i,j in fragment_pairs
+    ]
 
 
 class PrimitiveCoordinatePicker:

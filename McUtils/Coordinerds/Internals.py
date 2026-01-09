@@ -1,4 +1,9 @@
+from __future__ import annotations
+from typing import *
+
+import abc
 import collections
+import enum
 import functools
 import itertools
 
@@ -23,6 +28,135 @@ __all__ = [
     "validate_internals",
     # "InternalCoordinateSet"
 ]
+
+class InternalCoordinateType(metaclass=abc.ABCMeta):
+    registry = {}
+    @classmethod
+    def register(cls, type, typename=None):
+        if typename is None and isinstance(type, str):
+            typename = type
+            def register(type, typename=typename):
+                cls.register(typename, type)
+            return register
+        else:
+            if typename is None:
+                typename = type.name
+            cls._dispatch = dev.uninitialized
+            cls.registry[typename] = type
+            return type
+
+    _dispatch = dev.uninitialized
+    @classmethod
+    def get_dispatch(cls) -> dev.OptionsMethodDispatch:
+        cls._dispatch = dev.handle_uninitialized(
+            cls._dispatch,
+            dev.OptionsMethodDispatch,
+            args=(cls.registry,),
+            kwargs=dict(
+                method_key='type',
+                attributes_map=cls.registry,
+                allow_custom_methods=False
+            )
+        )
+        return cls._dispatch
+
+    @classmethod
+    def resolve(cls, input):
+        if isinstance(input, dict):
+            type, opts = cls.get_dispatch().resolve(input)
+            inds = opts.pop(type.name, None)
+            if inds is not None:
+                opts['indices'] = inds
+        else:
+            for v in cls.registry.values():
+                if v.could_be(input):
+                    opts = {}
+                    type = v
+                    break
+            else:
+                raise ValueError(f"couldn't match input {input} to an internal coordinate type")
+        return type(**opts)
+
+    @classmethod
+    def could_be(cls, input):
+        return False
+
+    @abc.abstractmethod
+    def canonicalize(self):
+        ...
+
+    @abc.abstractmethod
+    def get_indices(self) -> Tuple[int]:
+        ...
+
+    @abc.abstractmethod
+    def get_expansion(self, coords, order=None, **opts) -> List[np.ndarray]:
+        ...
+
+    @abc.abstractmethod
+    def get_inverse_expansion(self, coords, order=None, moved_indices=None, **opts) -> List[np.ndarray]:
+        ...
+
+    @classmethod
+    def _prep_left_right_atoms(cls, moved_indices, left_atoms, right_atoms):
+        if moved_indices is not None:
+            left_ats, right_ats = moved_indices
+        else:
+            left_ats = right_ats = None
+        if left_atoms is None:
+            left_atoms = left_ats
+        if right_ats is None:
+            right_atoms = right_ats
+        return left_atoms, right_atoms
+
+class BasicInternalType(InternalCoordinateType):
+    forward_conversion: Callable[[np.ndarray, ParamSpec("P")], List[np.ndarray]]
+    inverse_conversion: Callable[[np.ndarray, ParamSpec("P")], List[np.ndarray]]
+    def __init__(self, indices: Sequence[int]):
+        self.inds = tuple(indices)
+    def get_indices(self):
+        return self.inds
+    def get_expansion(self, coords, *, order=None, **opts):
+        return self.forward_conversion(coords, *self.inds, order=order, **opts)
+    def get_inverse_expansion(self, coords, *, order=None, moved_indices=None,
+                              left_atoms=None, right_atoms=None, **opts):
+        left_atoms, right_atoms = self._prep_left_right_atoms(moved_indices, left_atoms, right_atoms)
+        return self.inverse_conversion(coords, *self.inds,
+                                   order=order, left_atoms=left_atoms, right_atoms=right_atoms,
+                                   **opts)
+
+
+InternalCoordinateType.register("dist")
+class Distance(BasicInternalType):
+    forward_conversion = nput.dist_vec
+    inverse_conversion = nput.dist_expansion
+
+InternalCoordinateType.register("bend")
+class Angle(BasicInternalType):
+    forward_conversion = nput.angle_vec
+    inverse_conversion = nput.angle_expansion
+
+InternalCoordinateType.register("dihedral")
+class Dihedral(BasicInternalType):
+    forward_conversion = nput.dihed_vec
+    inverse_conversion = nput.dihed_expansion
+
+InternalCoordinateType.register("transrot")
+class TranslatonRotation(BasicInternalType):
+    forward_conversion = nput.transrot_vecs
+    inverse_conversion = nput.transrot_expansion
+
+
+class InternalTypes(enum.Enum):
+    Distance = 'dist'
+    Bend = 'bend'
+    Rock = 'rock'
+    Dihedral = 'dihed'
+    Book = 'book'
+    OutOfPlane = 'oop'
+    Wag = 'wag'
+    TranslationRotation = 'transrot'
+    Orientation = 'orientation'
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
@@ -1082,7 +1216,7 @@ def _triangle_conversion_function(inds, tri, coord):
     b = canonicalize_internal(idx)
     target = nput.triangle_property_specifiers(b)
     return nput.triangle_property_function(tri, target['name'], raise_on_missing=False)
-def _dihedral_conversion_function(inds, dihed, coord):
+def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True):
     idx = []
     for i in coord:
         try:
@@ -1092,7 +1226,7 @@ def _dihedral_conversion_function(inds, dihed, coord):
         else:
             idx.append(ix)
     b = canonicalize_internal(idx)
-    return nput.dihedron_property_function(dihed, b, raise_on_missing=False)
+    return nput.dihedron_property_function(dihed, b, allow_completion=allow_completion, raise_on_missing=False)
 
 int_conv_data = collections.namedtuple("int_conv_data",
                                       ['input_indices', 'pregen_indices', 'conversion'])
@@ -1100,6 +1234,8 @@ def find_internal_conversion(internals, targets,
                              triangles_and_dihedrons=None,
                              # prior_coords=None,
                              canonicalize=True,
+                             allow_completion=True,
+                             return_conversions=False,
                              missing_val='raise'):
     smol = nput.is_int(targets[0])
     if smol: targets = [targets]
@@ -1142,7 +1278,7 @@ def find_internal_conversion(internals, targets,
         if conv is None and len(target_coord) in {2, 3, 4}:
             for a, v in dihedrals.items():
                 dihed = v
-                conv = _dihedral_conversion_function(a, v, target_coord)
+                conv = _dihedral_conversion_function(a, v, target_coord, allow_completion=allow_completion)
                 if conv is not None:
                     break
                 else:
@@ -1181,20 +1317,23 @@ def find_internal_conversion(internals, targets,
     if smol:
         convert = conversions[0]
     else:
-        def convert(internal_spec, order=None, conversions=conversions, **kwargs):
-            convs = [
-                c(internal_spec)
-                for c in conversions
-            ]
-            if order is None:
-                return np.moveaxis(np.array(convs), 0, -1)
-            else:
-                return [
-                    np.moveaxis(np.array([c[i] for c in convs]), 0, -1)
-                    for i in range(order + 1)
+        if return_conversions:
+            return conversions
+        else:
+            def convert(internal_spec, order=None, conversions=conversions, **kwargs):
+                convs = [
+                    c(internal_spec)
+                    for c in conversions
                 ]
+                if order is None:
+                    return np.moveaxis(np.array(convs), 0, -1)
+                else:
+                    return [
+                        np.moveaxis(np.array([c[i] for c in convs]), 0, -1)
+                        for i in range(order + 1)
+                    ]
     return convert
-def enumerate_dists(internals):
+def _enumerate_dists(internals):
     for coord in internals:
         for c in itertools.combinations(coord, 2):
             yield canonicalize_internal(c)
@@ -1203,14 +1342,18 @@ def get_internal_distance_conversion(
         triangles_and_dihedrons=None,
         # prior_coords=None,
         canonicalize=True,
-        missing_val='raise'
+        allow_completion=True,
+        missing_val='raise',
+        return_conversions=False
 ):
-    dist_set = list(sorted(set(enumerate_dists(internals)))) # remove dupes, sort
+    dist_set = list(sorted(set(_enumerate_dists(internals)))) # remove dupes, sort
     return dist_set, find_internal_conversion(internals, dist_set,
-                                    canonicalize=canonicalize,
-                                    triangles_and_dihedrons=triangles_and_dihedrons,
-                                    missing_val=missing_val
-                                    )
+                                              canonicalize=canonicalize,
+                                              triangles_and_dihedrons=triangles_and_dihedrons,
+                                              missing_val=missing_val,
+                                              allow_completion=allow_completion,
+                                              return_conversions=return_conversions
+                                              )
 
 def get_internal_cartesian_conversion(
         internals,
@@ -1265,4 +1408,14 @@ def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure
             else:
                 return False, (k,t)
     return True, None
+
+def get_internal_bond_graph(internals, natoms=None):
+    from ..Graphs import EdgeGraph
+
+    dists, funs = get_internal_distance_conversion(internals, allow_completion=False, missing_val=None,
+                                                   return_conversions=True)
+    edges = [d for d, f in zip(dists, funs) if f is not None]
+    if natoms is None:
+        natoms = len(np.concatenate(internals))
+    return EdgeGraph(np.arange(len(natoms)), edges)
 

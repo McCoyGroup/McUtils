@@ -3,9 +3,9 @@ import itertools
 
 import scipy.linalg
 
-from .VectorOps import vec_normalize, vec_angles
+from .VectorOps import vec_normalize#, vec_angles
 from . import VectorOps as vec_ops
-from . import Misc as misc
+# from . import Misc as misc
 from . import PermutationOps as perm_ops
 import math, numpy as np, scipy as sp
 
