@@ -2513,15 +2513,37 @@ class X3DFigure(GraphicsFigure):
     def to_widget(self, **opts):
         return self.to_x3d(**opts).to_widget()
 
-    def animate_frames(self, frames: list['X3DAxes'], **animation_opts):
-        animator = X3DAxes(
-            x3d.X3DListAnimator(
-                [
+    def animate_frames(self, frames: list['X3DAxes'], mode=None, **animation_opts):
+        frame_data = [
                     x3d.X3DGroup(f.children if hasattr(f, 'children') else f)
                     for f in frames
-                ],
+                ]
+        if mode is None:
+            try:
+                animation = x3d.X3DInterpolatingAnimator.from_frames(
+                    frame_data,
+                    **animation_opts
+                )
+            except ValueError:
+                animation = x3d.X3DListAnimator(
+                    frame_data,
+                    **animation_opts
+                )
+        elif mode == 'interpolated':
+            animation = x3d.X3DInterpolatingAnimator.from_frames(
+                frame_data,
                 **animation_opts
-            ),
+            )
+        elif mode == 'list':
+            animation = x3d.X3DListAnimator(
+                frame_data,
+                **animation_opts
+            )
+        else:
+            raise ValueError(f"bad mode {mode}")
+
+        animator = X3DAxes(
+            animation,
             **self.axes[0].opts
         )
         opts = dict(

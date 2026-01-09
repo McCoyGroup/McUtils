@@ -81,7 +81,7 @@ class GeometricInternalCoordinatePruner(InternalCoordinatePruner):
     def prune_coordinates(cls,
                           coords, b_matrix,
                           max_coords=None,
-                          small_value_cutoff=1e-8,
+                          small_value_cutoff=1e-4,
                           max_contrib_cutoff=5e-2,
                           return_positions=False
                           ):

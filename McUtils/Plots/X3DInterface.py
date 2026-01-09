@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import abc
+import collections
 import uuid
 import numpy as np
 import os
@@ -30,29 +33,48 @@ __all__ = [
     "X3DIndexedTriangleSet",
     "X3DIndexedLineSet",
     "X3DSwitch",
-    "X3DListAnimator"
+    "X3DListAnimator",
+    "X3DInterpolatingAnimator"
 ]
 
 #TODO: cache these resources or put them on a path that is accessible by Jupyter
 #      might be pretty simple depending on what resource paths Jupyter naturally exposes
 
 class X3DObject(metaclass=abc.ABCMeta):
+    id: str
     @abc.abstractmethod
-    def to_x3d(self):
+    def to_x3d(self) -> X3DHTML.X3DElement:
         ...
+
+    def get_interpolated_attributes(self):
+        return self.to_x3d().attrs
+    def get_children(self):
+        return []
+
+    @classmethod
+    def get_new_id(cls):
+        return str(uuid.uuid4())[:6]
+
+    def resolve_prop_attr(self, prop_name):
+        return prop_name
+    def get_prop_node_id(self, prop_name):
+        return self.id
 
 class X3D(X3DObject):
     defaults = dict(
         width=500,
         height=500
     )
+    @classmethod
+    def get_new_id(cls):
+        return "x3d-" + str(uuid.uuid4())[:6]
     def __init__(self, *children, id=None, dynamic_loading=True, x3dom_path=None, x3dom_css_path=None, **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
         self.opts = opts
         if id is None:
-            id = "x3d-" + str(uuid.uuid4())[:6]
+            id = self.get_new_id()
         self.id = id
         self.dynamic_loading = dynamic_loading
         if x3dom_path is not None:
@@ -305,10 +327,19 @@ class X3D(X3DObject):
             html = self.to_x3d()
         return html.write(file, **opts)
 
+    def get_children(self):
+        return self.children
+
 class X3DOptionsSet(X3DObject):
     __props__ = {}
 
-    def __init__(self, **attrs):
+    @classmethod
+    def get_new_id(cls):
+        return "x3d-opts-" + str(uuid.uuid4())[:6]
+    def __init__(self, id=None, **attrs):
+        if id is None:
+            id = self.get_new_id()
+        self.id = id
         self.attrs = attrs
 
     conversion_map = {}
@@ -324,7 +355,15 @@ class X3DOptionsSet(X3DObject):
         if len(excess_keys) > 0:
             cls = type(self).__name__
             raise ValueError(f"keys {excess_keys} are invalid keys for {cls}")
+        attrs['id'] = self.id
         return attrs
+
+    @classmethod
+    def resolve_prop_attr(self, prop_name):
+        return self.conversion_map.get(prop_name, prop_name)
+
+    def get_prop_node_id(self, prop_name):
+        return self.id
 
 class X3DMaterial(X3DOptionsSet):
     __props__ = {
@@ -361,6 +400,9 @@ class X3DAppearance(X3DOptionsSet):
         "texture",
         "textureTransform"
     }
+    @classmethod
+    def get_new_id(cls):
+        return "x3d-appearance-" + str(uuid.uuid4())[:6]
     def prep_attrs(self, attrs:dict):
         material_keys = attrs.keys() & X3DMaterial.prop_keys()
         line_keys = attrs.keys() & X3DLineProperties.prop_keys()
@@ -390,7 +432,7 @@ class X3DAppearance(X3DOptionsSet):
         line_props = base_attrs.pop('lineProperties', None)
         if line_props is not None:
             if isinstance(line_props, dict):
-                line_props = X3DLineProperties(**line_props)
+                line_props = X3DLineProperties(id=self.id+'-lineprops', **line_props)
             if isinstance(line_props, X3DLineProperties):
                 line_props = line_props.to_x3d()
             comps.append(line_props)
@@ -398,7 +440,7 @@ class X3DAppearance(X3DOptionsSet):
         point_props = base_attrs.pop('pointProperties', None)
         if point_props is not None:
             if isinstance(point_props, dict):
-                point_props = X3DPointProperties(**point_props)
+                point_props = X3DPointProperties(id=self.id+'-pointprops', **point_props)
             if isinstance(point_props, X3DPointProperties):
                 point_props = point_props.to_x3d()
             comps.append(point_props)
@@ -406,12 +448,37 @@ class X3DAppearance(X3DOptionsSet):
         material_props = base_attrs.pop('material', None)
         if material_props is not None:
             if isinstance(material_props, dict):
-                material_props = X3DMaterial(**material_props)
+                material_props = X3DMaterial(id=self.id+'-material', **material_props)
             if isinstance(material_props, X3DMaterial):
                 material_props = material_props.to_x3d()
             comps.append(material_props)
 
         return X3DHTML.Appearance(*comps, **base_attrs)
+
+    @classmethod
+    def resolve_prop_attr(self, prop_name):
+        if prop_name in X3DAppearance.prop_keys():
+            return self.conversion_map.get(prop_name, prop_name)
+        elif prop_name in X3DLineProperties.prop_keys():
+            return X3DLineProperties.conversion_map.get(prop_name, prop_name)
+        elif prop_name in X3DLineProperties.prop_keys():
+            return X3DLineProperties.conversion_map.get(prop_name, prop_name)
+        elif prop_name in X3DMaterial.prop_keys():
+            return X3DMaterial.conversion_map.get(prop_name, prop_name)
+        else:
+            raise ValueError(f"property {prop_name} not known")
+
+    def get_prop_node_id(self, prop_name):
+        if prop_name in X3DAppearance.prop_keys():
+            return self.id
+        elif prop_name in X3DLineProperties.prop_keys():
+            return self.id+'-lineprops'
+        elif prop_name in X3DLineProperties.prop_keys():
+            return self.id+'-pointprops'
+        elif prop_name in X3DMaterial.prop_keys():
+            return self.id+'-material'
+        else:
+            raise ValueError(f"property {prop_name} not known")
 
 class X3DLineProperties(X3DOptionsSet):
     __props__ = {
@@ -459,11 +526,23 @@ class X3DPointProperties(X3DOptionsSet):
 class X3DPrimitive(X3DObject):
     wrapper_class = None
     tag_class = None
-    def __init__(self, *children, **opts):
+    @classmethod
+    def get_new_id(cls):
+        return "x3d-obj-" + str(uuid.uuid4())[:6]
+    def __init__(self, *children, id=None, **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
+        if id is None:
+            id = self.get_new_id()
+        opts['id'] = id
         self.opts = opts
+    @property
+    def id(self):
+        return self.opts['id']
+    @id.setter
+    def id(self, new_id):
+        self.opts['id'] = new_id
     def split_opts(self, opts:dict):
         material_keys = opts.keys() & (
             X3DMaterial.prop_keys()
@@ -475,7 +554,7 @@ class X3DPrimitive(X3DObject):
         return {k:opts[k] for k in rem_keys}, {k:opts[k] for k in material_keys}
     def get_appearance(self, appearance_options):
         if len(appearance_options) > 0:
-            return X3DAppearance(**appearance_options).to_x3d()
+            return X3DAppearance(id=self.id+"-appearance", **appearance_options).to_x3d()
         else:
             return None
     def to_x3d(self):
@@ -496,6 +575,33 @@ class X3DPrimitive(X3DObject):
                 return self.wrapper_class(appearance, core)
             else:
                 return core
+
+    @classmethod
+    def resolve_prop_attr(self, prop_name):
+        if prop_name in (
+                X3DMaterial.prop_keys()
+                | X3DAppearance.prop_keys()
+                | X3DLineProperties.prop_keys()
+                | X3DPointProperties.prop_keys()
+        ):
+            return X3DAppearance.resolve_prop_attr(prop_name)
+        #TODO: handle mapping of transform props
+        else:
+            return prop_name
+
+    def get_prop_node_id(self, prop_name):
+        if prop_name in (
+            X3DMaterial.prop_keys()
+            | X3DAppearance.prop_keys()
+            | X3DLineProperties.prop_keys()
+            | X3DPointProperties.prop_keys()
+        ):
+            return X3DAppearance(id=self.id + "-appearance").get_prop_node_id(prop_name)
+        else:
+            return self.id
+
+    def get_children(self):
+        return self.children
 
 class X3DScene(X3DPrimitive):
     wrapper_class = X3DHTML.Scene
@@ -659,6 +765,8 @@ class X3DGeometryObject(X3DPrimitive):
         geom_opts, self.material_opts = self.split_opts(opts)
         self.geometry_opts = self.prep_geometry_opts(*args, **geom_opts)
         super().__init__()
+    def get_interpolated_attributes(self):
+        return dict(self.geometry_opts, **self.material_opts)
     @abc.abstractmethod
     def prep_geometry_opts(self, *args, **opts) -> dict:
         ...
@@ -672,6 +780,7 @@ class X3DGeometryObject(X3DPrimitive):
                       up_vector=None,
                       bbox_center=None,
                       **core_opts):
+        core_opts['id'] = core_opts.get('id', self.id)
         base_obj = self.create_tag_object(**core_opts)
         tf = {}
         if normal is not None:
@@ -701,6 +810,13 @@ class X3DGeometryObject(X3DPrimitive):
             return np.concatenate([crosses, [angs]]), norms[1]
         else:
             return np.concatenate([crosses, angs[..., np.newaxis]], axis=-1), norms[1]
+
+    transform_props = ("translation", "rotation", "scale", "bboxcenter")
+    def get_prop_node_id(self, prop_name):
+        if prop_name in self.transform_props:
+            return self.id + "-transform"
+        else:
+            return self.id
     def to_x3d(self):
         # obj_opts, material_opts = self.split_opts(self.opts)
         # kids = [k.to_x3d() for k in self.children]
@@ -709,13 +825,15 @@ class X3DGeometryObject(X3DPrimitive):
         if appearance is not None:
             core = self.wrapper_class(appearance, core)
         if tf is not None:
-            core = X3DHTML.Transform(core, **tf)
+            core = X3DHTML.Transform(core, id=core.id+"-transform", **tf)
         return core
 
 class X3DGeometryGroup(X3DGeometryObject):
     @abc.abstractmethod
     def prep_geometry_opts(self, *args, **opts) -> list[dict]:
         ...
+    def get_interpolated_attributes(self):
+        return dict(self.geometry_opts[0], **self.material_opts)
     def prep_vecs(self, vecs, nstruct=None):
         if vecs is None:
             return [None] * nstruct
@@ -749,11 +867,18 @@ class X3DGeometryGroup(X3DGeometryObject):
         kids = [self.create_object(**g) for g in self.geometry_opts]
         appearance = self.get_appearance(self.material_opts)
         objs = []
-        for o,tf in kids:
+        for i,(o,tf) in enumerate(kids):
+            if hasattr(o, 'id'):
+                id = o.id
+            else:
+                try:
+                    id = o['id']
+                except KeyError:
+                    id = None
             if appearance is not None:
                 o = self.wrapper_class(appearance, o)
             if tf is not None:
-                o = X3DHTML.Transform(o, **tf)
+                o = X3DHTML.Transform(o, id=id+"-transform", **tf)
             objs.append(o)
         if len(objs) == 1:
             return objs[0]
@@ -1070,44 +1195,275 @@ class X3DIndexedQuadSet(X3DIndexedCoordinatesWrapper):
 class X3DIndexedFaceSet(X3DIndexedCoordinatesWrapper):
     tag_class = X3DHTML.IndexedFaceSet
 
-class X3DListAnimator(X3DGroup):
-    def __init__(self, *frames, id=None, animation_duration=2, running=True, slider=False,
-                 # allow_interpolation=True,
+class X3DGenericAnimator(X3DGroup):
+    def __init__(self, *animation_data, id=None, animation_duration=2, running=True, slider=False,
                  **opts):
         self.uuid = str(uuid.uuid4())
         if id is None:
             id = f"animation-{self.uuid}"
-        self.id = id
-        anim_frames = X3DSwitch(
-                *frames,
-                id=id,
-                whichChoice="0"
-            )
-        nframes = len(anim_frames.children) - 1
-        key_frames = np.linspace(0, 1, nframes)
+
+        animated_objects, attributes, nframes = self.get_animation_objects(animation_data, id)
         elements = []
         if slider:
             elements.append(
                 JHTML.Input(type="range", value="0", min="0", max=f"{nframes}", step="1", cls="slider",
                             oninput=f"""document.getElementById("{id}").setAttribute("whichChoice", this.value)""")
             )
-        elements.append(anim_frames)
-        if running:
-            elements.extend([
-                X3DHTML.TimeSensor(id=f'animation-clock-{self.uuid}', cycleInterval=animation_duration, loop=True,
-                                   enabled=running
-                                   ),
-                X3DHTML.IntegerSequencer(id=f'animation-indexer-{self.uuid}', key=key_frames,
-                                         keyValue=np.arange(nframes)),
+        elements.extend(animated_objects)
+        # if running:
+        elements.extend(
+            self.build_animator_group(attributes,
+                                      nframes=nframes,
+                                      animation_duration=animation_duration,
+                                      running=running,
+                                      uuid=self.uuid
+                                      )
+        )
+
+        super().__init__(elements, id=id, **opts)
+
+    @classmethod
+    @abc.abstractmethod
+    def get_animation_objects(cls, animation_data, id) -> tuple[list[X3DObject], dict, int]:
+        ...
+
+    @classmethod
+    def build_animator_group(cls, attribute_sets, nframes, *, uuid, running=True, animation_duration=2):
+        key_frames = np.linspace(0, 1, nframes+1)[:-1]
+        return [
+            X3DHTML.TimeSensor(id=f'animation-clock-{uuid}', cycleInterval=animation_duration, loop=True,
+                               enabled=running),
+            X3DHTML.IntegerSequencer(id=f'animation-indexer-{uuid}',
+                                     key=key_frames,
+                                     keyValue=np.arange(nframes)),
+            X3DHTML.Route(
+                fromField='fraction_changed', fromNode=f'animation-clock-{uuid}',
+                toField='set_fraction', toNode=f'animation-indexer-{uuid}'
+            )
+        ] + sum((
+            cls.create_animation_control(name, uuid=uuid, **opts)
+            for attributes in attribute_sets
+            for name,opts in attributes.items()),
+            []
+        )
+
+    @classmethod
+    def resolve_control_type(cls, name, values):
+        if np.all(values == np.arange(1, len(values)+1)):
+            return 'indexed'
+        else:
+            return 'interpolated'
+
+    interpolator_map = {
+        ('color', 'glow'): X3DHTML.ColorInterpolator,
+        ('position', 'translation'): X3DHTML.PositionInterpolator,
+        ('point', 'coordinate'): X3DHTML.CoordinateInterpolator,
+        ('rotation',): X3DHTML.OrientationInterpolator
+    }
+    @classmethod
+    def resolve_interpolator_type(cls, name, values):
+        nl = name.lower()
+        for k,t in cls.interpolator_map.items():
+            if any(kl in nl for kl in k):
+                interp_type = t
+                if issubclass(interp_type, X3DHTML.PositionInterpolator):
+                    values = np.asanyarray(values)
+                    if values.ndim == 1:
+                        nframes = len(values) // 3
+                    else:
+                        nframes = len(values)
+                elif issubclass(interp_type, X3DHTML.OrientationInterpolator):
+                    values = np.asanyarray(values)
+                    if values.ndim == 1:
+                        nframes = len(values) // 4
+                    else:
+                        nframes = len(values)
+                else:
+                    nframes = len(values)
+                break
+        else:
+            values = np.asanyarray(values)
+            nframes = len(values)
+            if np.issubdtype(values.dtype, np.dtype(str)):
+                interp_type = X3DHTML.ColorInterpolator
+            elif values.ndim == 1:
+                interp_type = X3DHTML.ScalarInterpolator
+            elif values.ndim == 2 and values.shape[-1] == 3:
+                interp_type = X3DHTML.PositionInterpolator
+            elif values.ndim == 3 and values.shape[-1] == 3:
+                interp_type = X3DHTML.CoordinateInterpolator
+            elif values.ndim == 2 and values.shape[-1] == 4:
+                interp_type = X3DHTML.OrientationInterpolator
+            else:
+                raise ValueError(f"interpolator can't be determined for property {name} with shape {values.shape}")
+
+        return interp_type, nframes
+
+    @classmethod
+    def create_animation_control(cls, name, *, id, uuid, type=None, values=None, interpolator_type=None):
+        if values is None:
+            if type is None:
+                raise ValueError("`values` or `type` must be passed")
+            return [
                 X3DHTML.Route(
-                    fromField='fraction_changed', fromNode=f'animation-clock-{self.uuid}',
-                    toField='set_fraction', toNode=f'animation-indexer-{self.uuid}'
+                    fromField='value_changed' if type == 'indexed' else 'fraction_changed',
+                    fromNode=f'animation-indexer-{uuid}' if type == 'indexed' else f'animation-clock-{uuid}',
+                    toField=name, toNode=id
+                )
+            ]
+        else:
+            # if type is None:
+            #     type = self.resolve_control_type(name, values)
+            interpolator_type, nframes = cls.resolve_interpolator_type(name, values)
+            if nput.is_numeric_array_like(values):
+                values = " ".join(np.round(values, 4).flatten().astype(str))
+            key_frames = np.linspace(0, 1, nframes)
+            interp_obj = (
+                interpolator_type(key=key_frames, keyValue=values, id=id+"-interpolator-"+cls.get_new_id())
+                    if issubclass(interpolator_type, X3DHTML.X3DElement) else
+                interpolator_type
+            )
+            if hasattr(interp_obj, 'id'):
+                interp_id = interp_obj.id
+            else:
+                interp_id = interp_obj['id']
+            return [
+                interp_obj,
+                X3DHTML.Route(
+                    fromField='fraction_changed',
+                    fromNode=f'animation-clock-{uuid}',
+                    toField='set_fraction', toNode=interp_id
                 ),
                 X3DHTML.Route(
-                    fromField='value_changed', fromNode=f'animation-indexer-{self.uuid}',
-                    toField='whichChoice', toNode=self.id
+                    fromField='value_changed',
+                    fromNode=interp_id,
+                    toField='set_'+name, toNode=id
                 )
-            ])
+            ]
 
-        super().__init__(elements, **opts)
+class X3DListAnimator(X3DGenericAnimator):
+    @classmethod
+    def get_animation_objects(self, frames, id):
+        anim_frames = X3DSwitch(
+                *frames,
+                id=id+"-switch",
+                whichChoice="0"
+            )
+        nframes = len(anim_frames.children)
+        attributes = [
+            {
+                'whichChoice':{'type':'indexed', 'id':id+"-switch"}
+            }
+        ]
+        return [anim_frames], attributes, nframes
+
+class X3DInterpolatingAnimator(X3DGenericAnimator):
+    @classmethod
+    def get_animation_objects(cls, object_attr_sets:dict[X3DObject, dict], id):
+        if isinstance(object_attr_sets, tuple) and len(object_attr_sets) == 1:
+            object_attr_sets = object_attr_sets[0]
+        objects = []
+        att_set = []
+        nframes = None
+        for i,(obj,attrs) in enumerate(object_attr_sets.items()):
+            objects.append(obj)
+            at_list = {}
+            for a,v in attrs.items():
+                if nframes is None:
+                    nframes = len(v)
+                else:
+                    nf = len(v)
+                    if nframes != nf:
+                        raise ValueError(f"attribute {a} has different number of frames {nf} than other attributes {nframes}")
+                prop = obj.resolve_prop_attr(a)
+                node = obj.get_prop_node_id(a)
+                at_list[prop] = {
+                    'id':node,
+                    'values':v
+                }
+            att_set.append(at_list)
+
+        return objects, att_set, nframes
+
+    @classmethod
+    def frame_diffs(cls, ref:X3DObject|X3DHTML.X3DElement, test:X3DObject|X3DHTML.X3DElement, *rest:X3DObject|X3DHTML.X3DElement):
+        statics = []
+        changes = {}
+        queue = collections.deque([(ref, test) + rest])
+        # avoid bugs
+        del ref
+        del test
+        while queue:
+            trees = queue.pop()
+            left = trees[0]
+            rights = trees[1:]
+            if isinstance(left, X3DObject):
+                left_kids = left.get_children()
+                right_kids = [right.get_children() for right in rights]
+            else:
+                left_kids = left.elems
+                right_kids = [right.elems for right in rights]
+
+            l = len(left_kids)
+            for right,rk in zip(rights, right_kids):
+                if l != len(rk):
+                    raise ValueError(f"tree nodes have different numbers of children {l} vs {len(rk)} for  {left} and {right}")
+
+            if l > 0:
+                all_kids = [left_kids] + right_kids
+                queue.extend(zip(*all_kids))
+
+            if isinstance(left, X3DObject):
+                left_attrs = left.get_interpolated_attributes()
+                right_attrs = [right.get_interpolated_attributes() for right in rights]
+            else:
+                left_attrs = left.attrs
+                right_attrs = [right.attrs for right in rights]
+
+            attr_diffs = {}
+            all_keys = {
+                k
+                for a in [left_attrs] + right_attrs
+                for k in a.keys()
+            } - {'id'}
+            for k in all_keys:
+                v = left_attrs.get(k)
+                vals = [v]
+                diffed = False
+                for a in right_attrs:
+                    v2 = a.get(k)
+                    vals.append(v2)
+                    if not diffed:
+                        diffed = (
+                                v is None and v2 is not None
+                                or v2 is None and v is None
+                        )
+                        if not diffed:
+                            if nput.is_numeric_array_like(v):
+                                if not nput.is_numeric_array_like(v2):
+                                    diffed = True
+                                else:
+                                    diffed = not np.allclose(v, v2)
+                            elif nput.is_numeric_array_like(2):
+                                diffed = True
+                            else:
+                                diffed = v2 != v
+                if diffed:
+                    attr_diffs[k] = vals
+            if len(attr_diffs) > 0:
+                changes[left] = attr_diffs
+            elif l == 0:
+                statics.append(left)
+        return statics, changes
+
+    @classmethod
+    def from_frames(cls, frames:list[X3DObject|X3DHTML.X3DElement], **opts):
+        static_objects, interpolated_objects = cls.frame_diffs(*frames)
+        if len(interpolated_objects) == 0:
+            return frames[0]
+        else:
+            anim = X3DInterpolatingAnimator(interpolated_objects, **opts)
+            if len(static_objects) > 0:
+                anim = X3DGroup(static_objects + [anim])
+            return anim
 

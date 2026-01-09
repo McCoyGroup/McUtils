@@ -22,6 +22,10 @@ class NumputilsTests(TestCase):
                                   [-1.75999392e-16, -1.43714410e+00, -9.00306410e-01]
     ])
 
+    @classmethod
+    def setUp(self):
+        np.set_printoptions(linewidth=1e8)
+
     @validationTest
     def test_VecOps(self):
         v = np.random.rand(16, 3, 5)
@@ -2513,7 +2517,7 @@ class NumputilsTests(TestCase):
         print(len(tint.internals['specs']))
         print(tint.get_cartesians_by_internals(1)[0].shape)
 
-    @debugTest
+    @validationTest
     def test_RotDerivs(self):
         np.random.seed(2123)
         coords = np.random.rand(15, 3)
@@ -2617,3 +2621,71 @@ class NumputilsTests(TestCase):
         # )
         #
         # print(rot_vec[np.newaxis] @ huh[1])
+
+    @validationTest
+    def test_AltCoords(self):
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+
+        nput.internal_coordinate_tensors(
+            coords,
+            [
+                # {'oop':(0, 1, 2)},
+                {'wag':(0, 1, 2)}
+            ]
+        )
+
+
+    @debugTest
+    def test_TransrotExpansion(self):
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+        masses = 1 + 2*np.random.rand(15)
+
+        _, exp = nput.internal_coordinate_tensors(
+            coords,
+            [
+                {
+                    'orientation': ((0, 1, 2, 3), (5, 6, 7)),
+                    'masses': masses
+                }
+            ],
+            return_inverse=True,
+            masses=masses,
+            remove_inverse_translation_rotation=True
+        )
+
+        rot_exp = nput.transrot_expansion(coords, 0, 1, 2, 3, extra_atoms=[5, 6, 7], masses=masses)
+        rot_der = nput.transrot_deriv(coords, 0, 1, 2, 3, masses=masses)
+
+        print()
+        print(np.round(nput.tensor_reexpand(rot_exp[1:], rot_der[1:])[0], 8))
+        # return
+
+        rot_exp = nput.orientation_expansion(coords, (0, 1, 2, 3), (5, 6, 7),
+                                             masses=masses
+                                             )
+        rot_der = nput.orientation_deriv(coords, (0, 1, 2, 3), (5, 6, 7),
+                                         masses=masses
+                                         )
+        print(np.round(nput.tensor_reexpand(rot_exp[1:], rot_der[1:])[0], 8))
+
+        # return
+
+        i, j, k, l = (0, 1, 3, 2)
+        rot_exp2 = [None, np.array([
+            nput.dist_expansion(coords, j, k, left_atoms=[i, j], right_atoms=[k, l])[1],
+            nput.angle_expansion(coords, i, j, k, left_atoms=[i, j], right_atoms=[k, l])[1],
+            nput.dihed_expansion(coords, i, j, k, l, left_atoms=[i, j], right_atoms=[k, l])[1]
+        ])]
+        rot_der2, _ = nput.internal_coordinate_tensors(coords,
+                                                       [(i, j), (j, k), (k, l), (i, j, k), (j, k, l), (i, j, k, l)],
+                                                       order=1,
+                                                       angle_ordering='ijk',
+                                                       return_inverse=True
+                                                       )
+
+        concat_exp = [np.concatenate(p, axis=0) for p in zip(rot_exp[1:], rot_exp2[1:])]
+        concat_der = [np.concatenate(p, axis=-1) for p in zip(rot_der[1:], rot_der2[1:])]
+        print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8).shape)
+        print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8))

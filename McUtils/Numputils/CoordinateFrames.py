@@ -215,8 +215,14 @@ def moments_of_inertia_expansion(coords, masses=None, order=1, force_rotation=Tr
     r, c = np.diag_indices(3)
     return [v[..., r, c] for v in val_exp], vec_exp
 
-def translation_rotation_eigenvectors(coords, masses=None,
+def translation_rotation_eigenvectors(coords,
+                                      masses=None,
                                       mass_weighted=True,
+                                      ref=None,
+                                      ref_masses=None,
+                                      axes=None,
+                                      align_with_frame=True,
+                                      return_values=False,
                                       return_com=False,
                                       return_rot=True,
                                       return_principle_axes=False
@@ -232,16 +238,22 @@ def translation_rotation_eigenvectors(coords, masses=None,
     :return:
     :rtype:
     """
+    coords = np.asanyarray(coords)
 
 
     if masses is None:
         masses = np.ones(coords.shape[-2])
     masses = np.asanyarray(masses)
 
+    if ref is None:
+        ref = coords
+    if ref_masses is None:
+        ref_masses = masses
+
     n = len(masses)
     # explicitly put masses in m_e from AMU
     # masses = UnitsData.convert("AtomicMassUnits", "AtomicUnitOfMass") * masses
-    mT = np.sqrt(np.sum(masses))
+    mT = np.sqrt(np.sum(ref_masses))
     mvec = np.sqrt(masses)
 
     # no_derivs = order is None
@@ -251,16 +263,45 @@ def translation_rotation_eigenvectors(coords, masses=None,
     smol = coords.ndim == 2
     if smol:
         coords = coords[np.newaxis]
+
     # base_shape = None
     # if coords.ndim > 3:
     base_shape = coords.shape[:-2]
     coords = coords.reshape((-1,) + coords.shape[-2:])
 
+    values = []
+
     M = np.kron(mvec / mT, np.eye(3)).T  # translation eigenvectors
     principle_axes = None
-    if return_rot:
-        mom_rot, ax_rot = moments_of_inertia(coords, masses)
+    if axes is not None:
+        axes = np.broadcast_to(
+            np.asanyarray(axes).reshape(-1, 3, 3),
+            (coords.shape[0], 3, 3)
+        )
+        M = np.broadcast_to(M.reshape((-1,) + M.shape), (coords.shape[0],) + M.shape)
+        M = vec_ops.vec_tensordot(
+            M,
+            axes,
+            axes=[-1, -1],
+            shared=1
+        )
+    elif align_with_frame:
+        ref = np.broadcast_to(ref.reshape((-1,) + ref.shape[-2:]), coords.shape[:1] + ref.shape[-2:])
+        mom_rot, ax_rot = moments_of_inertia(ref, ref_masses)
         principle_axes = ax_rot
+        M = np.broadcast_to(M.reshape((-1,) + M.shape), (coords.shape[0],) + M.shape)
+        M = vec_ops.vec_tensordot(
+            M,
+            principle_axes,
+            axes=[-1, -1],
+            shared=1
+        )
+
+    if return_rot:
+        if principle_axes is None:
+            ref = np.broadcast_to(ref.reshape((-1,) + ref.shape[-2:]), coords.shape[:1] + ref.shape[-2:])
+            mom_rot, ax_rot = moments_of_inertia(ref, ref_masses)
+            principle_axes = ax_rot
         # if order > 0:
         #     base_tensor = StructuralProperties.get_prop_inertia_tensors(coords, masses)
         #     mom_expansion = StructuralProperties.get_prop_inertial_frame_derivatives(coords, masses)
@@ -310,16 +351,40 @@ def translation_rotation_eigenvectors(coords, masses=None,
                     inv_rot_2.append(subinv)
                 inv_rot_2 = np.array(inv_rot_2)
 
-        com = center_of_mass(coords, masses)
+        com = center_of_mass(ref, ref_masses)
         # com = np.expand_dims(com, 1) # ???
         shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[:, np.newaxis, :])
+        if return_values:
+            values.append(np.sum(shift_crds/mT, axis=-2))
         cos_rot = perm_ops.levi_cevita_dot(3, inv_rot_2, axes=[0, -1], shared=1) # kx3bx3cx3j
-        R = vec_ops.vec_tensordot(
+        R = -vec_ops.vec_tensordot(
             shift_crds, cos_rot,
             shared=1,
             axes=[-1, 1]
         ).reshape((coords.shape[0], 3 * n, 3))  # rotations
 
+        if return_values:
+            # mT = np.sqrt(np.sum(masses))
+            mvec_ref = np.sqrt(ref_masses)
+            shift_ref = mvec_ref[np.newaxis, :, np.newaxis] * (ref - com[:, np.newaxis, :])
+            shift_ref = shift_ref.reshape(shift_ref.shape[0], -1)
+            values.append(
+                -vec_ops.vec_tensordot(
+                    R[:, :shift_ref.shape[-1], :],
+                    shift_ref,
+                    shared=1,
+                    axes=[-2, -1]
+                )
+            )
+
+        if axes is not None:
+            axes = np.broadcast_to(
+                np.asanyarray(axes).reshape(-1, 3, 3),
+                (coords.shape[0], 3, 3)
+            )
+            R = vec_ops.vec_tensordot(R, np.moveaxis(axes, -2, -1), shared=1, axes=[-1, -1])
+        elif align_with_frame:
+            R = vec_ops.vec_tensordot(R, np.moveaxis(principle_axes, -2, -1), shared=1, axes=[-1, -1])
 
         if nonlinear:
             if return_com:
@@ -332,7 +397,8 @@ def translation_rotation_eigenvectors(coords, masses=None,
                 # this isn't right, I'm totally aware, but I think the frequency is supposed to be zero anyway and this
                 # will be tiny
             ], axis=-1)
-            M = np.broadcast_to(M[np.newaxis], R.shape)
+            if M.ndim < R.ndim:
+                M = np.broadcast_to(M[np.newaxis], R.shape)
             eigs = np.concatenate([M, R], axis=2)
         elif all_linear:
             mom_rot = mom_rot[:, good_ax]
@@ -347,7 +413,8 @@ def translation_rotation_eigenvectors(coords, masses=None,
                 # will be tiny
             ], axis=-1)
             R = R[:, :, good_ax]
-            M = np.broadcast_to(M[np.newaxis], R.shape[:1] + M.shape)
+            if M.ndim < R.ndim:
+                M = np.broadcast_to(M[np.newaxis], R.shape[:1] + M.shape)
             eigs = np.concatenate([M, R], axis=2)
         else:
             freqs = []
@@ -362,29 +429,49 @@ def translation_rotation_eigenvectors(coords, masses=None,
                 freqs.append(f)
                 eigs.append(np.concatenate([M, r], axis=1))
     else:
-        eigs = np.broadcast_to(M[np.newaxis], coords.shape[:-2] + M.shape)
+        if M.ndim == 2:
+            eigs = np.broadcast_to(M[np.newaxis], coords.shape[:-2] + M.shape)
+        else:
+            eigs = M
         if return_com:
-            freqs = center_of_mass(coords, masses)
+            com = freqs = center_of_mass(ref, ref_masses)
+            if return_values:
+                shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[:, np.newaxis, :])
+                values.append(np.sum(shift_crds / mT, axis=-2))
         else:
             freqs = np.full(M.shape[:-2] + (3,), 1e-14)
+            if return_values:
+                com  = center_of_mass(ref, ref_masses)
+                shift_crds = mvec[np.newaxis, :, np.newaxis] * (coords - com[:, np.newaxis, :])
+                values.append(np.sum(shift_crds / mT, axis=-2))
 
     if not mass_weighted:
-        W = np.diag(np.repeat(1/np.sqrt(masses), 3))
+        W = np.diag(np.repeat(np.sqrt(masses), 3))
         eigs = np.moveaxis(np.tensordot(eigs, W, axes=[-2, 0]), -1, -2)
 
+    if return_values:
+        values = np.concatenate(values, axis=-1)
     if smol:
         eigs = eigs[0]
         freqs = freqs[0]
         principle_axes = principle_axes[0]
+        if return_values:
+            values = values[0]
     else:
         eigs = eigs.reshape(base_shape + eigs.shape[1:])
         freqs = freqs.reshape(base_shape + freqs.shape[1:])
         principle_axes = principle_axes.reshape(base_shape + principle_axes.shape[1:])
+        if return_values:
+            values = values.reshape(base_shape + values.shape[1:])
 
+    res = (freqs, eigs)
+    if return_values or return_principle_axes:
+        res = (res,)
+    if return_values:
+        res = res + (values,)
     if return_principle_axes:
-        return (freqs, eigs), principle_axes
-    else:
-        return freqs, eigs
+        res = res + (principle_axes,)
+    return res
 
 def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False,
                                    orthonormal=True
@@ -392,14 +479,17 @@ def translation_rotation_projector(coords, masses=None, mass_weighted=False, ret
     if masses is None:
         masses = np.ones(coords.shape[-2])
     _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
+    if not mass_weighted:
+        g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
+        inv = np.tensordot(tr_modes, g12)
+    else:
+        inv = np.moveaxis(tr_modes, -2, -1)
     if orthonormal:
-        if not mass_weighted:
-            tr_modes = vec_ops.vec_normalize(tr_modes, axis=0)
-        projector = vec_ops.orthogonal_projection_matrix(tr_modes, orthonormal=True)
+        projector = vec_ops.orthogonal_projection_matrix(tr_modes, inverse=inv, orthonormal=True)
     else:
         shared = tr_modes.ndim - 2
         eye = vec_ops.identity_tensors(tr_modes.shape[:-2], tr_modes.shape[-2])
-        projector = eye - vec_ops.vec_tensordot(tr_modes, tr_modes, axes=[-1, -1], shared=shared)
+        projector = eye - vec_ops.vec_tensordot(tr_modes, inv, axes=[-1, -2], shared=shared)
 
     if return_modes:
         return projector, tr_modes

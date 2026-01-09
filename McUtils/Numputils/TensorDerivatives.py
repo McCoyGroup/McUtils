@@ -4,7 +4,7 @@ import itertools, numpy as np, math
 
 from .. import Devutils as dev
 
-from . import PermutationOps as perms
+from . import PermutationOps as perms, vec_tensordiag
 from . import VectorOps as vec_ops
 from . import SetOps as set_ops
 from .Misc import is_numeric, is_zero
@@ -34,7 +34,8 @@ __all__ = [
     "shift_expansion",
     "scale_expansion",
     "add_expansions",
-    "subtract_expansions"
+    "subtract_expansions",
+    "renormalize_transformation"
 ]
 
 # levi_cevita3.__name__ = "levi_cevita3"
@@ -442,6 +443,32 @@ def inverse_transformation(forward_expansion, order, reverse_expansion=None,
             #     new_B = np.tensordot(B, new_B, axes=[1, -2])
         reverse_expansion = reverse_expansion + [new_B]
     return reverse_expansion
+
+
+def renormalize_transformation(forward_transformation, reverse_transformation, nonzero_cutoff=None):
+    evals, vecs = np.linalg.eigh(forward_transformation[0] @ reverse_transformation[0])
+    abs_eval = np.abs(evals)
+    signs = np.sign(evals)
+    sq_eval = np.sqrt(abs_eval)
+    if nonzero_cutoff is not None:
+        mask = np.abs(evals) < nonzero_cutoff
+        sq_eval[mask] = 1
+        vals_left = signs/sq_eval
+        vals_left[mask] = 0
+        vals_right = 1/sq_eval
+        vals_right[mask] = 0
+    else:
+        vals_left = signs/sq_eval
+        vals_right = 1/sq_eval
+    scaling_left = vec_tensordiag(vals_left)
+    scaling_right = vec_tensordiag(vals_right)
+    tf_left = scaling_left @ np.moveaxis(vecs, -1, -2)
+    tf_right = vecs @ scaling_right
+
+    forward_transformation = tensor_reexpand([tf_left], forward_transformation)
+    reverse_transformation = tensor_reexpand(reverse_transformation, [tf_right])
+
+    return forward_transformation, reverse_transformation
 
 def kron_prod_derivs(A_expansion, B_expansion, order):
     # s = A_expansion[0].ndim - 2
