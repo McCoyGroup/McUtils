@@ -446,24 +446,18 @@ def inverse_transformation(forward_expansion, order, reverse_expansion=None,
 
 
 def renormalize_transformation(forward_transformation, reverse_transformation, nonzero_cutoff=None):
-    evals, vecs = np.linalg.eigh(forward_transformation[0] @ reverse_transformation[0])
-    abs_eval = np.abs(evals)
-    signs = np.sign(evals)
-    sq_eval = np.sqrt(abs_eval)
+    u, s, v = np.linalg.svd(forward_transformation[0] @ reverse_transformation[0])
+    sq_eval = np.sqrt(s)
     if nonzero_cutoff is not None:
-        mask = np.abs(evals) < nonzero_cutoff
+        mask = np.abs(s) < nonzero_cutoff
         sq_eval[mask] = 1
-        vals_left = signs/sq_eval
-        vals_left[mask] = 0
-        vals_right = 1/sq_eval
-        vals_right[mask] = 0
+        vals = s/sq_eval
+        vals[mask] = 0
     else:
-        vals_left = signs/sq_eval
-        vals_right = 1/sq_eval
-    scaling_left = vec_tensordiag(vals_left)
-    scaling_right = vec_tensordiag(vals_right)
-    tf_left = scaling_left @ np.moveaxis(vecs, -1, -2)
-    tf_right = vecs @ scaling_right
+        vals = 1/sq_eval
+    scaling = vec_tensordiag(vals)
+    tf_left = scaling @ np.moveaxis(u, -2, -1)
+    tf_right = np.moveaxis(v, -2, -1) @ scaling
 
     forward_transformation = tensor_reexpand([tf_left], forward_transformation)
     reverse_transformation = tensor_reexpand(reverse_transformation, [tf_right])
