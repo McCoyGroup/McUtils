@@ -5,7 +5,7 @@
 </div>
 
 ```python
-dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, amount=0): 
+dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, include_core=True, amount=0): 
 ```
 
 
