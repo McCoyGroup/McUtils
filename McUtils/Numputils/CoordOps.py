@@ -2521,7 +2521,7 @@ def _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, l
             e[..., rem_pos] = 0
     return right_expansion
 
-def dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, amount=0):
+def dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, include_core=True, amount=0):
     coords = np.asanyarray(coords)
     vec = vec_normalize(coords[..., j, :] - coords[..., i, :]) / 2
     base_shape = coords.shape[:-2]
@@ -2541,12 +2541,18 @@ def dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, 
 
     if left_atoms is None:
         left_atoms = [i]
+    elif include_core and i not in left_atoms:
+        left_atoms = [i] + list(left_atoms)
     if right_atoms is None:
         right_atoms = [j]
+    elif include_core and j not in right_atoms:
+        right_atoms = [j] + list(right_atoms)
     _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
     return right_expansion
 
-def angle_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, angle=0, axis_order=0):
+def angle_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *,
+                    include_core=True,
+                    angle=0, axis_order=0):
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (j,), :]
     axis = vec_crosses(coords[..., i, :] - coords[..., j, :],
@@ -2559,13 +2565,19 @@ def angle_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None,
     right_expansion[0] += coords[..., (j,), :] # shift back from origin
     if left_atoms is None:
         left_atoms = [i]
+    elif include_core and i not in left_atoms:
+        left_atoms = [i] + list(left_atoms)
     if right_atoms is None:
         right_atoms = [k]
+    elif include_core and k not in right_atoms:
+        right_atoms = [k] + list(right_atoms)
     _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
     right_expansion = right_expansion[:1] + [e/2 for e in right_expansion[1:]]
     return right_expansion
 
-def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=None, *, angle=0, axis_order=0):
+def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=None, *,
+                    include_core=True,
+                    angle=0, axis_order=0):
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (k,), :]
     axis = shift_coords[..., j, :]
@@ -2577,13 +2589,19 @@ def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=No
 
     if left_atoms is None:
         left_atoms = [i]
+    elif include_core and i not in left_atoms:
+        left_atoms = [i] + list(left_atoms)
     if right_atoms is None:
         right_atoms = [l]
+    elif include_core and l not in right_atoms:
+        right_atoms = [l] + list(right_atoms)
     _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
     right_expansion = right_expansion[:1] + [e/2 for e in right_expansion[1:]]
     return right_expansion
 
-def oop_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, angle=0, axis_order=0):
+def oop_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *,
+                  include_core=True,
+                  angle=0, axis_order=0):
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (j,), :]
     axis = (shift_coords[..., i, :] + shift_coords[..., k, :]) / 2
@@ -2595,13 +2613,19 @@ def oop_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *
 
     if left_atoms is None:
         left_atoms = [i]
+    elif include_core and i not in left_atoms:
+        left_atoms = [i] + list(left_atoms)
     if right_atoms is None:
         right_atoms = [k]
+    elif include_core and k not in right_atoms:
+        right_atoms = [k] + list(right_atoms)
     _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
     right_expansion = right_expansion[:1] + [e/2 for e in right_expansion[1:]]
     return right_expansion
 
-def wag_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, angle=0, axis_order=0):
+def wag_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *,
+                  include_core=True,
+                  angle=0, axis_order=0):
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (j,), :]
     axis = (shift_coords[..., i, :] + shift_coords[..., k, :]) / 2
@@ -2613,8 +2637,12 @@ def wag_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *
 
     if left_atoms is None:
         left_atoms = [i]
+    elif include_core and i not in left_atoms:
+        left_atoms = [i] + list(left_atoms)
     if right_atoms is None:
         right_atoms = [k]
+    elif include_core and k not in right_atoms:
+        right_atoms = [k] + list(right_atoms)
     _handle_expansion_atom_exclusions(coords, left_expansion, right_expansion, left_atoms, right_atoms)
     right_expansion = right_expansion[:1] + [e/2 for e in right_expansion[1:]]
     return right_expansion

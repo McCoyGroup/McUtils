@@ -751,7 +751,7 @@ class ConverterTest(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_NewZMatConversions(self):
         # from McUtils.Parsers import XYZParser
         from McUtils.ExternalPrograms import RDMolecule
@@ -1116,3 +1116,16 @@ class ConverterTest(TestCase):
 # geoms2 = np.array({geoms2.tolist()})
 # geoms = np.array({geoms12.tolist()})
 # """)
+
+    @debugTest
+    def test_NewInternalCoordinateSet(self):
+        internals = InternalSpec([
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 0, 2),
+            (1, 0, 3),
+            (2, 0, 3)
+        ])
+
+        print(internals.get_bond_graph())

@@ -8,6 +8,7 @@ import functools
 import itertools
 
 import numpy as np
+
 from .. import Devutils as dev
 from .. import Numputils as nput
 
@@ -26,7 +27,8 @@ __all__ = [
     "find_internal_conversion",
     "get_internal_cartesian_conversion",
     "validate_internals",
-    # "InternalCoordinateSet"
+    # "RADInternalCoordinateSet"
+    'InternalSpec'
 ]
 
 class InternalCoordinateType(metaclass=abc.ABCMeta):
@@ -36,7 +38,8 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
         if typename is None and isinstance(type, str):
             typename = type
             def register(type, typename=typename):
-                cls.register(typename, type)
+                type.name = typename
+                return cls.register(type, typename)
             return register
         else:
             if typename is None:
@@ -70,11 +73,11 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
         else:
             for v in cls.registry.values():
                 if v.could_be(input):
-                    opts = {}
+                    opts = {'indices':input}
                     type = v
                     break
             else:
-                raise ValueError(f"couldn't match input {input} to an internal coordinate type")
+                raise ValueError(f"couldn't match input {input} to internal coordinate types {cls.registry}")
         return type(**opts)
 
     @classmethod
@@ -114,6 +117,11 @@ class BasicInternalType(InternalCoordinateType):
     inverse_conversion: Callable[[np.ndarray, ParamSpec("P")], List[np.ndarray]]
     def __init__(self, indices: Sequence[int]):
         self.inds = tuple(indices)
+    def canonicalize(self):
+        if self.inds[0] < self.inds[-1]:
+            return type(self)(tuple(self.inds[::-1]))
+        else:
+            return self
     def get_indices(self):
         return self.inds
     def get_expansion(self, coords, *, order=None, **opts):
@@ -126,37 +134,171 @@ class BasicInternalType(InternalCoordinateType):
                                    **opts)
 
 
-InternalCoordinateType.register("dist")
+@InternalCoordinateType.register("dist")
 class Distance(BasicInternalType):
     forward_conversion = nput.dist_vec
     inverse_conversion = nput.dist_expansion
+    @classmethod
+    def could_be(cls, input):
+        return (
+            dev.is_list_like(input)
+            and len(input) == 2
+            and nput.is_int(input[0])
+            and nput.is_int(input[1])
+        )
 
-InternalCoordinateType.register("bend")
+@InternalCoordinateType.register("bend")
 class Angle(BasicInternalType):
     forward_conversion = nput.angle_vec
     inverse_conversion = nput.angle_expansion
+    @classmethod
+    def could_be(cls, input):
+        return (
+            dev.is_list_like(input)
+            and len(input) == 3
+            and nput.is_int(input[0])
+            and nput.is_int(input[1])
+        )
 
-InternalCoordinateType.register("dihedral")
+@InternalCoordinateType.register("dihedral")
 class Dihedral(BasicInternalType):
     forward_conversion = nput.dihed_vec
     inverse_conversion = nput.dihed_expansion
+    @classmethod
+    def could_be(cls, input):
+        return (
+            dev.is_list_like(input)
+            and len(input) == 4
+            and nput.is_int(input[0])
+            and nput.is_int(input[1])
+        )
 
-InternalCoordinateType.register("transrot")
+@InternalCoordinateType.register("wag")
+class Wag(BasicInternalType):
+    forward_conversion = nput.wag_vec
+    inverse_conversion = nput.wag_expansion
+
+@InternalCoordinateType.register("oop")
+class OutOfPlane(BasicInternalType):
+    forward_conversion = nput.oop_vec
+    inverse_conversion = nput.oop_expansion
+
+@InternalCoordinateType.register("transrot")
 class TranslatonRotation(BasicInternalType):
     forward_conversion = nput.transrot_vecs
     inverse_conversion = nput.transrot_expansion
+    def canonicalize(self):
+        return type(self)(np.sort(self.inds))
+    def get_inverse_expansion(self, coords, *, order=None, moved_indices=None, extra_atoms=None, **opts):
+        if extra_atoms is None:
+            extra_atoms = moved_indices
+        return self.inverse_conversion(coords, *self.inds,
+                                       order=order,
+                                       extra_atoms=extra_atoms,
+                                       **opts)
 
+InternalCoordinateType.register("orientation")
+class Orientation(BasicInternalType):
+    forward_conversion = nput.orientation_vecs
+    inverse_conversion = nput.orientation_expansion
+    def canonicalize(self):
+        return type(self)((np.sort(self.inds[0]), np.sort(self.inds[1])))
+    def get_indices(self):
+        return tuple(self.inds[0]) + tuple(self.inds[1])
+    def get_inverse_expansion(self, coords, *, order=None, moved_indices=None,
+                              left_extra_atoms=None, right_extra_atoms=None, **opts):
+        left_extra_atoms, right_extra_atoms = self._prep_left_right_atoms(moved_indices, left_extra_atoms, right_extra_atoms)
+        return self.inverse_conversion(coords, *self.inds,
+                                       order=order,
+                                       left_extra_atoms=left_extra_atoms, right_extra_atoms=right_extra_atoms,
+                                       **opts)
 
-class InternalTypes(enum.Enum):
-    Distance = 'dist'
-    Bend = 'bend'
-    Rock = 'rock'
-    Dihedral = 'dihed'
-    Book = 'book'
-    OutOfPlane = 'oop'
-    Wag = 'wag'
-    TranslationRotation = 'transrot'
-    Orientation = 'orientation'
+class InternalSpec:
+    def __init__(self, coords, canonicalize=False, bond_graph=None, masses=None):
+        self.coords:tuple[InternalCoordinateType] = tuple(
+            InternalCoordinateType.resolve(c)
+                if not isinstance(c, InternalCoordinateType) else
+            c
+            for c in coords
+        )
+
+        if canonicalize:
+            self.coords = tuple(c.canonicalize() for c in self.coords)
+
+        self.rad_set = [
+            c.inds for c in self.coords
+            if isinstance(c, (Distance, Angle, Dihedral))
+        ]
+
+        self.masses = masses
+        self._atom_lists = None
+        self._atoms = None
+        self._bond_graph = bond_graph
+
+    @property
+    def atom_sets(self) -> Tuple[Tuple[int]]:
+        if self._atom_lists is None:
+            self._atom_lists = tuple(a.get_indices() for a in self.coords)
+        return self._atom_lists
+    @property
+    def atoms(self) -> Tuple[int]:
+        if self._atoms is None:
+            self._atoms =tuple(c for a in self.atom_sets for c in a)
+        return self._atoms
+
+    def get_bond_graph(self):
+        if self._bond_graph is None:
+            self._bond_graph = get_internal_bond_graph(self.rad_set, len(self.atoms))
+        return self._bond_graph
+
+    def get_direct_derivatives(self, coords, order=1, **opts):
+        coords = np.asanyarray(coords)
+        base_shape = coords.shape[:-2]
+        coords = coords.reshape((-1,) + coords.shape[-2:])
+        subexpansions = [
+            c.get_expansion(coords, order=order, **opts)
+            for c in self.coords
+        ]
+        subexpansions = [
+            e
+            if e[0].ndim > 1 else
+            [ee[..., np.newaxis] for ee in ...]
+            for e in subexpansions
+        ]
+
+        expansions = [
+            np.concatenate(e, axis=-1)
+            for e in zip(*subexpansions)
+        ]
+
+        return [e.reshape(base_shape + e.shape[1:]) for e in expansions]
+
+    def get_expansion(self, coords, order=1, return_inverse=False, **opts) -> List[np.ndarray]:
+        expansion = self.get_direct_derivatives(coords, order=order, **opts)
+        if return_inverse:
+            raise NotImplementedError(...)
+        return expansion
+
+    def get_direct_inverses(self, coords, order=1, **opts) -> List[np.ndarray]:
+        coords = np.asanyarray(coords)
+        base_shape = coords.shape[:-2]
+        coords = coords.reshape((-1,) + coords.shape[-2:])
+        subexpansions = [
+            c.get_inverse_expansion(coords, order=order, **opts)
+            for c in self.coords
+        ]
+        subexpansions = [
+            e
+            if e[0].ndim > 1 else
+            [ee[..., np.newaxis] for ee in ...]
+            for e in subexpansions
+        ]
+
+        expansions = [
+            np.concatenate(e, axis=-1)
+            for e in zip(*subexpansions)
+        ]
+        return [e.reshape(base_shape + e.shape[1:]) for e in expansions]
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
@@ -207,7 +349,7 @@ def is_coordinate_list_like(clist):
         is_valid_coordinate(c) for c in clist
     )
 
-class InternalCoordinateSet:
+class RADInternalCoordinateSet:
     def __init__(self, coord_specs:'list[tuple[int]]', prepped_data=None, triangulation=None):
         self._specs = tuple(coord_specs) if coord_specs is not None else coord_specs
         if prepped_data is not None:
@@ -350,7 +492,7 @@ class InternalCoordinateSet:
 
 
 def get_canonical_internal_list(coords):
-    if isinstance(coords, InternalCoordinateSet):
+    if isinstance(coords, RADInternalCoordinateSet):
         return coords.specs
     else:
         return [canonicalize_internal(c) for c in coords]
@@ -358,7 +500,7 @@ def get_canonical_internal_list(coords):
 def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False):
     if canonicalize:
         coord = canonicalize_internal(coord)
-    if isinstance(coords, InternalCoordinateSet):
+    if isinstance(coords, RADInternalCoordinateSet):
         return coords.find(coord, allow_negation=allow_negation)
     else:
         try:
@@ -384,7 +526,7 @@ def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, a
             return idx
 
 def permute_internals(coords, perm, canonicalize=True):
-    if isinstance(coords, InternalCoordinateSet):
+    if isinstance(coords, RADInternalCoordinateSet):
         return coords.permute(perm, canonicalize=canonicalize)
     else:
         return [
@@ -437,7 +579,7 @@ def coordinate_sign(old, new, canonicalize=True):
         raise ValueError(f"can't compare coordinates {old} and {new}")
 
 def coordinate_indices(coords):
-    if isinstance(coords, InternalCoordinateSet):
+    if isinstance(coords, RADInternalCoordinateSet):
         return coords.coordinate_indices
     else:
         return tuple(sorted(
@@ -461,7 +603,7 @@ def _get_pregen_ind(dm_data):
         dm_data.mapped_pos
     )
 def get_internal_distance_conversion_spec(internals, canonicalize=True):
-    if isinstance(internals, InternalCoordinateSet):
+    if isinstance(internals, RADInternalCoordinateSet):
         internals = internals.specs
     dists:dict[tuple[int,int], dm_conv_data] = {}
     # we do an initial pass to separate out dists, angles, and dihedrals
@@ -1240,7 +1382,7 @@ def find_internal_conversion(internals, targets,
     smol = nput.is_int(targets[0])
     if smol: targets = [targets]
     if triangles_and_dihedrons is None:
-        if isinstance(internals, InternalCoordinateSet):
+        if isinstance(internals, RADInternalCoordinateSet):
             triangles_and_dihedrons = internals.triangulation
             internals = internals.specs
         else:
@@ -1389,7 +1531,7 @@ def get_internal_cartesian_conversion(
 def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure=True):
     # detect whether or not they may be interconverted freely
     if triangles_and_dihedrons is None:
-        if isinstance(internals, InternalCoordinateSet):
+        if isinstance(internals, RADInternalCoordinateSet):
             triangles_and_dihedrons = internals.triangulation
             internals = internals.specs
         else:
@@ -1417,5 +1559,5 @@ def get_internal_bond_graph(internals, natoms=None):
     edges = [d for d, f in zip(dists, funs) if f is not None]
     if natoms is None:
         natoms = len(np.concatenate(internals))
-    return EdgeGraph(np.arange(len(natoms)), edges)
+    return EdgeGraph(np.arange(natoms), edges)
 
