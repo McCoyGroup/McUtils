@@ -293,6 +293,7 @@ class WrapperComponent(Component):
         else:
             attrs = self.theme[wrappers[0][0]]
             self.wrapper = wrappers[0][1]
+        # print(attrs)
         super().__init__(**attrs) # need to delegate attr updates to the theme...
 
         # self.item_attrs = theme.get(item[0], {})
