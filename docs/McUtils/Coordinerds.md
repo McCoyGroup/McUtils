@@ -360,9 +360,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-22e5e1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-22e5e1"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-599bd1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-599bd1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-22e5e1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-599bd1" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -406,9 +406,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-b7cf1b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b7cf1b"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-166e6f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-166e6f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b7cf1b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-166e6f" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1591,7 +1591,39 @@ class ConverterTest(TestCase):
             (2, 0, 3)
         ])
 
+        from Psience.Molecools import Molecule
+
+        nh3 = Molecule.construct('N', 'smi')
+
         print(internals.get_bond_graph())
+        uuh1 = (nput.internal_coordinate_tensors(nh3.coords, internals.rad_set))
+
+        # with Timer("old"):
+        #     uuh1 = (nput.internal_coordinate_tensors(nh3.coords, internals.rad_set, order=2))
+        #
+        # with Timer("nocache"):
+        #     uuh2 = (nput.internal_coordinate_tensors(nh3.coords, internals.rad_set,
+        #                                              order=2,
+        #                                              reproject=True,
+        #                                              use_cache=False))
+        #
+        # with Timer("new"):
+        #     uuh3 = (internals.get_expansion(nh3.coords, order=2))
+        #
+        # # print(uuh1)
+        # # print(uuh2)
+        # # print(uuh3[1])
+        #
+        # with Timer("inverse"):
+        #     uuh4 = internals.get_direct_inverses(nh3.coords, order=2)
+        # # print(uuh4[1].shape)
+
+
+        with Timer("clean-inverse"):
+            d5, e5 = internals.get_expansion(nh3.coords, order=2, return_inverse=True)
+        print([np.asanyarray(d).shape for d in d5], [np.asanyarray(e).shape for e in e5])
+        for e in nput.tensor_reexpand(e5, d5[1:]):
+            print(np.round(e, 8))
 ```
 
  </div>

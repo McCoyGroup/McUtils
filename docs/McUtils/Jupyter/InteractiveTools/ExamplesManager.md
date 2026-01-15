@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.InteractiveTools.ExamplesManager">ExamplesManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L493)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L493?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L494)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L494?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ examples_path: tuple
 __init__(self, root, data_path=None, examples_path=None, globs=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L496)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L496?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L497)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L497?message=Update%20Docs)]
 </div>
 
 
@@ -37,8 +37,8 @@ __init__(self, root, data_path=None, examples_path=None, globs=None):
 test_data(cls, *path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L519)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L519?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L520)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L520?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ test_data(cls, *path):
 examples_data(cls, *path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L521)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L521?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L522?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ examples_data(cls, *path):
 load_module(self, module, modify_relative_imports=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L524)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L524?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L525)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L525?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ load_module(self, module, modify_relative_imports=True):
 import_from(self, module, names, modify_relative_imports=True, globs=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L533)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L533?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L534)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/ExamplesManager.py#L534?message=Update%20Docs)]
 </div>
 
 
@@ -78,8 +78,8 @@ import_from(self, module, names, modify_relative_imports=True, globs=None):
 parse_x3d_view_matrix(cls, vs, view_all=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L545)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L545?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L546)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L546?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -134,7 +134,7 @@ parse_x3d_view_matrix(cls, vs, view_all=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/ExamplesManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/ExamplesManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L493?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L494?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

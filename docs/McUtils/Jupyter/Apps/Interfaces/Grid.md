@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Grid">Grid</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1652)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1652?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1653)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1653?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ Item: GridItem
 __init__(self, elements, rows=None, cols=None, alignment=None, justification=None, row_spacing=None, col_spacing=None, item_attrs=None, row_height='auto', column_width='1fr', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1654)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1654?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1655?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, elements, rows=None, cols=None, alignment=None, justification=Non
 setup_layout(self, grid, attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1676)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1676?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1677)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1677?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ setup_layout(self, grid, attrs):
 wrap_item(self, e, attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1697)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1697?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1698)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1698?message=Update%20Docs)]
 </div>
 
 
@@ -57,8 +57,8 @@ wrap_item(self, e, attrs):
 get_grid_styles(cls, rows=None, cols=None, alignment=None, justification=None, row_gap=None, col_gap=None, row_height='1fr', col_width='1fr'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1711)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1711?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1712)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1712?message=Update%20Docs)]
 </div>
 
 
@@ -67,8 +67,8 @@ get_grid_styles(cls, rows=None, cols=None, alignment=None, justification=None, r
 get_layout_styles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1743)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1743?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1744)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Grid.py#L1744?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -123,7 +123,7 @@ get_layout_styles(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Grid.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Grid.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1652?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1653?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

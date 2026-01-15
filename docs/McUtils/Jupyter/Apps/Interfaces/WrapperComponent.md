@@ -42,8 +42,8 @@ __init__(self, items: Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableTyp
 handle_variants(self, theme): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L300)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L300?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L301)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L301?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +52,8 @@ handle_variants(self, theme):
 manage_theme(self, theme, extend_base_theme=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L316)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L316?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L317)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L317?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ manage_theme(self, theme, extend_base_theme=True):
 merge_themes(cls, theme: 'None|dict', attrs: dict, merge_keys=('cls',)): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L327)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L327?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L328)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L328?message=Update%20Docs)]
 </div>
 Needs to handle cases where a `theme` is provided
 which includes things like `cls` declarations and then the
@@ -78,8 +78,8 @@ declarations get appended to the theme
 manage_items(cls, items, attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L361)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L361?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L362)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L362?message=Update%20Docs)]
 </div>
 
 
@@ -88,8 +88,8 @@ manage_items(cls, items, attrs):
 get_child(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L385)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L385?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L386)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L386?message=Update%20Docs)]
 </div>
 
 
@@ -98,8 +98,8 @@ get_child(self, key):
 set_child(self, which, new): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L387)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L387?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L388)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L388?message=Update%20Docs)]
 </div>
 
 
@@ -108,8 +108,8 @@ set_child(self, which, new):
 insert_child(self, where, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L389)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L389?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L390)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L390?message=Update%20Docs)]
 </div>
 
 
@@ -118,8 +118,8 @@ insert_child(self, where, child):
 wrap_items(self, items): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L414)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L414?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L415)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L415?message=Update%20Docs)]
 </div>
 
 
@@ -128,8 +128,8 @@ wrap_items(self, items):
 to_jhtml(self, parent=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L424)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L424?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L425?message=Update%20Docs)]
 </div>
  </div>
 </div>

@@ -83,8 +83,8 @@ prep_kernel_args(cls, name, base_opts, new_opts):
 modify_kernel_spec(cls, name, root_dirs=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L149)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L149?message=Update%20Docs)]
 </div>
 
 
@@ -94,8 +94,8 @@ modify_kernel_spec(cls, name, root_dirs=None, **opts):
 install_ipykernel(cls, prefix): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L177?message=Update%20Docs)]
 </div>
  </div>
 </div>

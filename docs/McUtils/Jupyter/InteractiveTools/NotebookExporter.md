@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.InteractiveTools.NotebookExporter">NotebookExporter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L387)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L387?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L388)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L388?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ tag_filters: dict
 __init__(self, name, src_dir=None, img_prefix=None, img_dir=None, output_dir=None, tag_filters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L393)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L393?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L394)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L394?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ __init__(self, name, src_dir=None, img_prefix=None, img_dir=None, output_dir=Non
 load_preprocessor(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L407)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L407?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L408)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L408?message=Update%20Docs)]
 </div>
 
 
@@ -46,8 +46,8 @@ load_preprocessor(self):
 load_filters(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L413)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L413?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L414)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L414?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +56,8 @@ load_filters(self):
 load_nb(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L439)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L439?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L440)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L440?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ load_nb(self):
 save_output_file(self, filename, body): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L449)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L449?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L450)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L450?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +76,8 @@ save_output_file(self, filename, body):
 export(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L457)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L457?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L458)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools/NotebookExporter.py#L458?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -132,7 +132,7 @@ export(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/NotebookExporter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/NotebookExporter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L387?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L388?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

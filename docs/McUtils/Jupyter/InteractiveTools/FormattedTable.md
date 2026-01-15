@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.InteractiveTools.FormattedTable">FormattedTable</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L599)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L599?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L600)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L600?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, table_data, column_formats='8.3f', **format_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L600)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L600?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/InteractiveTools.py#L601)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L601?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -80,7 +80,7 @@ __init__(self, table_data, column_formats='8.3f', **format_opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/InteractiveTools/FormattedTable.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/InteractiveTools/FormattedTable.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L599?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/InteractiveTools.py#L600?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
