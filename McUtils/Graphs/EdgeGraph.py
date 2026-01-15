@@ -143,17 +143,38 @@ class EdgeGraph:
     def take(self, pos):
         return self._take(pos, self.labels, self.graph)
 
-    def split(self, backbone_pos):
+    def split(self, backbone_pos, return_subgraphs=True):
         new_adj = self.graph.copy()
         for n in backbone_pos:
-            for i,j in self.map[n]:
-                new_adj[i,j] = 0
+            for j in self.map[n]:
+                if j not in backbone_pos:
+                    new_adj[n,j] = 0
+                    new_adj[j,n] = 0
         ncomp, labels = sparse.csgraph.connected_components(new_adj, directed=False, return_labels=True)
-        groups, _ = nput.group_by(np.arange(len(labels)), labels)
-        return [
-            self._take(pos, self.labels, new_adj)
-            for _, pos in groups
-        ]
+        _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
+        if return_subgraphs:
+            return [
+                self._take(pos, self.labels, new_adj)
+                for pos in groups
+            ]
+        else:
+            return groups
+
+    def break_bonds(self, bonds, return_subgraphs=True):
+        new_adj = self.graph.copy()
+        for i,j in bonds:
+            new_adj[i, j] = 0
+            new_adj[j, i] = 0
+        print(new_adj.toarray())
+        ncomp, labels = sparse.csgraph.connected_components(new_adj, directed=False, return_labels=True)
+        _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
+        if return_subgraphs:
+            return [
+                self._take(pos, self.labels, new_adj)
+                for pos in groups
+            ]
+        else:
+            return groups
 
     @classmethod
     def _subgraph_match(cls,

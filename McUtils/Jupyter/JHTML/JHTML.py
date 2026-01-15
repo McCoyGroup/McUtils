@@ -240,12 +240,24 @@ class JHTML:
         Widget = JupyterAPIs.get_widgets_api().Widget
         if isinstance(elems, (list, tuple)) and len(elems) == 0:
             return False
-        elif isinstance(elems, (ActiveHTMLWrapper, Widget)) or hasattr(elems, 'to_widget'):
+        elif isinstance(elems, HTML.XMLElement):
+            return False
+        elif (
+                isinstance(elems, (ActiveHTMLWrapper, Widget))
+                or (hasattr(elems, 'to_widget') and not isinstance(elems.to_widget(), HTML.XMLElement))
+        ):
             return True
         else:
             return any(
-                cls._check_widg(e) if isinstance(e, (list, tuple)) else
-                 (isinstance(e, (ActiveHTMLWrapper, Widget)) or hasattr(e, 'to_widget'))
+                cls._check_widg(e)
+                    if isinstance(e, (list, tuple)) else
+                (
+                    (not isinstance(e, HTML.XMLElement))
+                    and (
+                            isinstance(e, (ActiveHTMLWrapper, Widget))
+                            or (hasattr(e, 'to_widget') and not isinstance(e.to_widget(), HTML.XMLElement))
+                    )
+                )
                 for e in elems
             )
 

@@ -129,12 +129,13 @@ class JupyterSessionManager:
     @classmethod
     def prep_kernel_args(cls, name, base_opts, new_opts):
         new_args = dev.merge_dicts(base_opts, new_opts)
-        if 'argv' not in new_args:
+        if 'argv' not in new_opts:
             exec = new_args.pop('exec', None)
             if exec is None:
                 exec = sys.exec_prefix
             new_args['argv'] = [
                 exec,
+                "-m",
                 'ipykernel_launcher',
                 '-f',
                 '{connection_file}'

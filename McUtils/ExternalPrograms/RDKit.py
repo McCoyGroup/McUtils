@@ -70,6 +70,11 @@ class RDMolecule(ExternalMolecule):
         ]
 
     @classmethod
+    def quiet_errors(cls):
+        from rdkit.rdBase import BlockLogs
+        return BlockLogs()
+
+    @classmethod
     def chem_api(cls):
         return RDKitInterface.submodule("Chem")
     @classmethod
@@ -237,7 +242,12 @@ class RDMolecule(ExternalMolecule):
 
         rdkit_mol = Chem.MolFromSmiles(smiles, params)
         if not sanitize:
-            rdkit_mol.UpdatePropertyCache()
+            try:
+                rdkit_mol.UpdatePropertyCache()
+            except Chem.rdchem.MolSanitizeException:
+                rdkit_mol.UpdatePropertyCache(strict=False)
+                _ = Chem.GetSymmSSSR(rdkit_mol)
+                Chem.SetHybridization(rdkit_mol)
         if call_add_hydrogens: # RDKit is super borked for most molecules
             mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
         else:
@@ -290,8 +300,18 @@ class RDMolecule(ExternalMolecule):
 
         AllChem.AddHs(mol, explicitOnly=not add_implicit_hydrogens)
 
-        with OutputRedirect():
-            conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=cls.get_confgen_opts())
+        params = cls.get_confgen_opts()
+        try:
+            # with OutputRedirect():
+            with cls.quiet_errors():
+                conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=params)
+        except AllChem.rdchem.MolSanitizeException:
+            conformer_set = None
+        if conformer_set is None:
+            params.embedFragmentsSeparately = False
+            # with OutputRedirect():
+            with cls.quiet_errors():
+                conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=params)
         if optimize:
             rdForceFieldHelpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
             if force_field_type == 'mmff':
@@ -713,23 +733,25 @@ class RDMolecule(ExternalMolecule):
 
         if force_field_generator is None:
             force_field_generator = self.get_force_field
-        if geoms is not None:
-            cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
-            geoms = np.asanyarray(geoms)
-            base_shape = geoms.shape[:-2]
-            geoms = geoms.reshape((-1,) + cur_geom.shape)
-            vals = np.empty(len(geoms), dtype=float)
-            try:
-                for i,g in enumerate(geoms):
-                    conf.SetPositions(g.copy())
-                    ff = force_field_generator(force_field_type, conf=conf, mol=mol)
-                    vals[i] = ff.CalcEnergy()
-            finally:
-                conf.SetPositions(cur_geom)
-            return vals.reshape(base_shape)
-        else:
-            ff = force_field_generator(force_field_type, conf_id=conf_id)
-            return ff.CalcEnergy()
+
+        with self.quiet_errors():
+            if geoms is not None:
+                cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
+                geoms = np.asanyarray(geoms)
+                base_shape = geoms.shape[:-2]
+                geoms = geoms.reshape((-1,) + cur_geom.shape)
+                vals = np.empty(len(geoms), dtype=float)
+                try:
+                    for i,g in enumerate(geoms):
+                        conf.SetPositions(g.copy())
+                        ff = force_field_generator(force_field_type, conf=conf, mol=mol)
+                        vals[i] = ff.CalcEnergy()
+                finally:
+                    conf.SetPositions(cur_geom)
+                return vals.reshape(base_shape)
+            else:
+                ff = force_field_generator(force_field_type, conf_id=conf_id)
+                return ff.CalcEnergy()
 
     def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
         if force_field_generator is None:
@@ -741,24 +763,25 @@ class RDMolecule(ExternalMolecule):
         mol = Chem.Mol(self.rdmol, confId=conf_id)
         conf = mol.GetConformer(0)
 
-        cur_geom = np.array(conf.GetPositions()).reshape(-1, 3)
-        if geoms is not None:
-            geoms = np.asanyarray(geoms)
-            base_shape = geoms.shape[:-2]
-            geoms = geoms.reshape((-1,) + cur_geom.shape)
-            vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
-            try:
-                for i, g in enumerate(geoms):
-                    new_geom = g.copy().view(np.ndarray)
-                    conf.SetPositions(new_geom)
-                    ff = force_field_generator(force_field_type, conf=conf, mol=mol)
-                    vals[i] = ff.CalcGrad()
-            finally:
-                conf.SetPositions(cur_geom)
-            return vals.reshape(base_shape + (-1,))
-        else:
-            ff = force_field_generator(force_field_type, conf_id=conf_id, conf=conf, mol=mol)
-            return np.array(ff.CalcGrad()).reshape(-1)
+        with self.quiet_errors():
+            cur_geom = np.array(conf.GetPositions()).reshape(-1, 3)
+            if geoms is not None:
+                geoms = np.asanyarray(geoms)
+                base_shape = geoms.shape[:-2]
+                geoms = geoms.reshape((-1,) + cur_geom.shape)
+                vals = np.empty((len(geoms), np.prod(cur_geom.shape, dtype=int)), dtype=float)
+                try:
+                    for i, g in enumerate(geoms):
+                        new_geom = g.copy().view(np.ndarray)
+                        conf.SetPositions(new_geom)
+                        ff = force_field_generator(force_field_type, conf=conf, mol=mol)
+                        vals[i] = ff.CalcGrad()
+                finally:
+                    conf.SetPositions(cur_geom)
+                return vals.reshape(base_shape + (-1,))
+            else:
+                ff = force_field_generator(force_field_type, conf_id=conf_id, conf=conf, mol=mol)
+                return np.array(ff.CalcGrad()).reshape(-1)
 
     def calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=.01, **fd_opts):
         from ..Zachary import FiniteDifferenceDerivative

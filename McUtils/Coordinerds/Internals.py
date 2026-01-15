@@ -3,14 +3,14 @@ from typing import *
 
 import abc
 import collections
-import enum
-import functools
 import itertools
 
 import numpy as np
 
 from .. import Devutils as dev
 from .. import Numputils as nput
+from .. import Iterators as itut
+from ..Graphs import EdgeGraph
 
 __all__ = [
     "canonicalize_internal",
@@ -84,12 +84,22 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
     def could_be(cls, input):
         return False
 
+    def equivalent_to(self, other):
+        return (
+                type(self) is type(other)
+                and self.canonicalize().get_indices() == other.canonicalize().get_indices()
+        )
+
     @abc.abstractmethod
     def canonicalize(self):
         ...
 
     @abc.abstractmethod
     def get_indices(self) -> Tuple[int]:
+        ...
+
+    @abc.abstractmethod
+    def get_carried_atoms(self, context:InternalSpec):
         ...
 
     @abc.abstractmethod
@@ -100,15 +110,17 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
     def get_inverse_expansion(self, coords, order=None, moved_indices=None, **opts) -> List[np.ndarray]:
         ...
 
-    @classmethod
-    def _prep_left_right_atoms(cls, moved_indices, left_atoms, right_atoms):
+    def _prep_left_right_atoms(self, context, moved_indices, left_atoms, right_atoms):
         if moved_indices is not None:
             left_ats, right_ats = moved_indices
         else:
-            left_ats = right_ats = None
+            if context is not None and (left_atoms is None or right_atoms is None):
+                left_ats, right_ats = self.get_carried_atoms(context)
+            else:
+                left_ats = right_ats = None
         if left_atoms is None:
             left_atoms = left_ats
-        if right_ats is None:
+        if right_atoms is None:
             right_atoms = right_ats
         return left_atoms, right_atoms
 
@@ -117,6 +129,9 @@ class BasicInternalType(InternalCoordinateType):
     inverse_conversion: Callable[[np.ndarray, ParamSpec("P")], List[np.ndarray]]
     def __init__(self, indices: Sequence[int]):
         self.inds = tuple(indices)
+        # a hack to make these classes easier to work with
+        self.forward_conversion = type(self).forward_conversion
+        self.inverse_conversion = type(self).inverse_conversion
     def canonicalize(self):
         if self.inds[0] < self.inds[-1]:
             return type(self)(tuple(self.inds[::-1]))
@@ -124,11 +139,27 @@ class BasicInternalType(InternalCoordinateType):
             return self
     def get_indices(self):
         return self.inds
+    def get_dropped_internals(self):
+        return [self]
+    def get_carried_atoms(self, context:InternalSpec):
+        groups = context.get_dropped_internal_bond_graph(self.get_dropped_internals()).get_fragments()
+        left_atoms = None
+        for g in groups:
+            if self.inds[0] in g:
+                left_atoms = g
+                break
+        right_atoms = None
+        for g in groups:
+            if self.inds[-1] in g:
+                right_atoms = g
+                break
+        return left_atoms, right_atoms
     def get_expansion(self, coords, *, order=None, **opts):
         return self.forward_conversion(coords, *self.inds, order=order, **opts)
     def get_inverse_expansion(self, coords, *, order=None, moved_indices=None,
+                              context=None,
                               left_atoms=None, right_atoms=None, **opts):
-        left_atoms, right_atoms = self._prep_left_right_atoms(moved_indices, left_atoms, right_atoms)
+        left_atoms, right_atoms = self._prep_left_right_atoms(context, moved_indices, left_atoms, right_atoms)
         return self.inverse_conversion(coords, *self.inds,
                                    order=order, left_atoms=left_atoms, right_atoms=right_atoms,
                                    **opts)
@@ -159,6 +190,9 @@ class Angle(BasicInternalType):
             and nput.is_int(input[0])
             and nput.is_int(input[1])
         )
+    def get_dropped_internals(self):
+        i,j,k = self.get_indices()
+        return [self, Distance((i, j)), Distance((j, k))]
 
 @InternalCoordinateType.register("dihedral")
 class Dihedral(BasicInternalType):
@@ -172,6 +206,9 @@ class Dihedral(BasicInternalType):
             and nput.is_int(input[0])
             and nput.is_int(input[1])
         )
+    def get_dropped_internals(self):
+        i,j,k,l = self.get_indices()
+        return [self, Distance((i, j)), Distance((j, k)), Distance((k, l))]
 
 @InternalCoordinateType.register("wag")
 class Wag(BasicInternalType):
@@ -189,9 +226,21 @@ class TranslatonRotation(BasicInternalType):
     inverse_conversion = nput.transrot_expansion
     def canonicalize(self):
         return type(self)(np.sort(self.inds))
-    def get_inverse_expansion(self, coords, *, order=None, moved_indices=None, extra_atoms=None, **opts):
+    def get_carried_atoms(self, context:InternalSpec):
+        moved_indices = None
+        groups = context.get_bond_graph().get_fragments()
+        for g in groups:
+            if len(np.intersect1d(g, self.inds)) > 0:
+                moved_indices = g
+                break
+        return moved_indices
+    def get_inverse_expansion(self, coords, *, order=None,
+                              context=None, moved_indices=None, extra_atoms=None, **opts):
         if extra_atoms is None:
-            extra_atoms = moved_indices
+            if moved_indices is None and context is not None:
+                moved_indices = self.get_carried_atoms(context)
+            if moved_indices is not None:
+                extra_atoms = np.setdiff1d(moved_indices, self.inds)
         return self.inverse_conversion(coords, *self.inds,
                                        order=order,
                                        extra_atoms=extra_atoms,
@@ -205,16 +254,33 @@ class Orientation(BasicInternalType):
         return type(self)((np.sort(self.inds[0]), np.sort(self.inds[1])))
     def get_indices(self):
         return tuple(self.inds[0]) + tuple(self.inds[1])
-    def get_inverse_expansion(self, coords, *, order=None, moved_indices=None,
+    def get_carried_atoms(self, context:InternalSpec):
+        moved_indices_left = None
+        moved_indices_right = None
+        groups = context.get_bond_graph().get_fragments()
+        for g in groups:
+            if len(np.intersect1d(g, self.inds[0])) > 0:
+                moved_indices_left = g
+                break
+        for g in groups:
+            if len(np.intersect1d(g, self.inds[1])) > 0:
+                moved_indices_right = g
+                break
+        return moved_indices_left, moved_indices_right
+    def get_inverse_expansion(self, coords, *, order=None, moved_indices=None, context=None,
                               left_extra_atoms=None, right_extra_atoms=None, **opts):
-        left_extra_atoms, right_extra_atoms = self._prep_left_right_atoms(moved_indices, left_extra_atoms, right_extra_atoms)
+        left_extra_atoms, right_extra_atoms = self._prep_left_right_atoms(context, moved_indices, left_extra_atoms, right_extra_atoms)
+        if left_extra_atoms is not None:
+            left_extra_atoms = np.setdiff1d(left_extra_atoms, self.inds[0])
+        if right_extra_atoms is not None:
+            right_extra_atoms = np.setdiff1d(right_extra_atoms, self.inds[1])
         return self.inverse_conversion(coords, *self.inds,
                                        order=order,
                                        left_extra_atoms=left_extra_atoms, right_extra_atoms=right_extra_atoms,
                                        **opts)
 
 class InternalSpec:
-    def __init__(self, coords, canonicalize=False, bond_graph=None, masses=None):
+    def __init__(self, coords, canonicalize=False, bond_graph=None, triangulation=None, masses=None):
         self.coords:tuple[InternalCoordinateType] = tuple(
             InternalCoordinateType.resolve(c)
                 if not isinstance(c, InternalCoordinateType) else
@@ -234,6 +300,7 @@ class InternalSpec:
         self._atom_lists = None
         self._atoms = None
         self._bond_graph = bond_graph
+        self._tri_di = triangulation
 
     @property
     def atom_sets(self) -> Tuple[Tuple[int]]:
@@ -243,63 +310,166 @@ class InternalSpec:
     @property
     def atoms(self) -> Tuple[int]:
         if self._atoms is None:
-            self._atoms =tuple(c for a in self.atom_sets for c in a)
+            self._atoms = tuple(itut.delete_duplicates(c for a in self.atom_sets for c in a))
         return self._atoms
 
-    def get_bond_graph(self):
+    def get_triangulation(self):
+        if self._tri_di is None:
+            self._tri_di = get_internal_triangles_and_dihedrons(self.rad_set)
+        return self._tri_di
+    def get_bond_graph(self) -> EdgeGraph:
         if self._bond_graph is None:
-            self._bond_graph = get_internal_bond_graph(self.rad_set, len(self.atoms))
+            self._bond_graph = get_internal_bond_graph(self.rad_set, len(self.atoms),
+                                                       triangles_and_dihedrons=self.get_triangulation())
         return self._bond_graph
+    def get_dropped_internal_bond_graph(self, internals):
+        bg = self.get_bond_graph()
+        cur_bonds = bg.edges
+        core_atoms, sub_triangulation, _ = update_triangulation(
+            self.get_triangulation(),
+            [],
+            [
+                i.get_indices() for i in internals
+                if isinstance(i, (Distance, Angle, Dihedral))
+            ],
+            triangulation_internals=[canonicalize_internal(i) for i in self.rad_set],
+            return_split=True
+        )
 
-    def get_direct_derivatives(self, coords, order=1, **opts):
+        target_bonds = [b for b in cur_bonds if all(i in core_atoms for i in b)]
+        kept_bonds = [b for b in cur_bonds if any(i not in core_atoms for i in b)]
+
+        _, funs = get_internal_distance_conversion(internals,
+                                                   allow_completion=False,
+                                                   missing_val=None,
+                                                   triangles_and_dihedrons=sub_triangulation,
+                                                   return_conversions=True,
+                                                   dist_set=target_bonds)
+        target_bonds = [d for d, f in zip(target_bonds, funs) if f is not None]
+        return EdgeGraph(
+            bg.labels,
+            target_bonds + kept_bonds
+        )
+
+
+    def get_direct_derivatives(self, coords, order=1,
+                               cache=True,
+                               reproject=False, # used to accelerate base derivs
+                               base_transformation=None,
+                               reference_internals=None,
+                               combine_expansions=True,
+                               **opts):
         coords = np.asanyarray(coords)
-        base_shape = coords.shape[:-2]
-        coords = coords.reshape((-1,) + coords.shape[-2:])
+        if cache is False:
+            cache = None
+        elif cache is True:
+            cache = {}
         subexpansions = [
-            c.get_expansion(coords, order=order, **opts)
+            c.get_expansion(coords, order=order, cache=cache, reproject=reproject, **opts)
             for c in self.coords
         ]
-        subexpansions = [
-            e
-            if e[0].ndim > 1 else
-            [ee[..., np.newaxis] for ee in ...]
-            for e in subexpansions
-        ]
 
-        expansions = [
-            np.concatenate(e, axis=-1)
-            for e in zip(*subexpansions)
-        ]
+        if combine_expansions:
+            base_dim = coords.ndim - 2
+            return nput.combine_coordinate_deriv_expansions(
+                subexpansions,
+                order=order,
+                base_dim=base_dim,
+                base_transformation=base_transformation,
+                reference_internals=reference_internals
+            )
+        else:
+            return subexpansions
 
-        return [e.reshape(base_shape + e.shape[1:]) for e in expansions]
-
-    def get_expansion(self, coords, order=1, return_inverse=False, **opts) -> List[np.ndarray]:
-        expansion = self.get_direct_derivatives(coords, order=order, **opts)
+    def get_expansion(self, coords, order=1,
+                      return_inverse=False,
+                      remove_translation_rotations=True,
+                      **opts) -> List[np.ndarray]:
+        coords = np.asanyarray(coords)
+        base_dim = coords.ndim - 2
+        expansion = self.get_direct_derivatives(coords, order=order,
+                                                combine_expansions=not return_inverse,
+                                                **opts)
         if return_inverse:
-            raise NotImplementedError(...)
+            if order == 0:
+                raise ValueError("order > 0 required for inverses")
+            base_inverses = self.get_direct_inverses(coords,
+                                                     order=1,
+                                                     combine_expansions=False,
+                                                     **opts)
+            expansion = [
+                [
+                    np.expand_dims(t, -1)
+                        if t.ndim - i == base_dim else
+                    t
+                    for i, t in enumerate(subt)
+                ]
+                for subt in expansion
+            ]
+            vals = [e[0] for e in expansion]
+            expansion = [e[1:] for e in expansion]
+
+            inverses = [i[1:] for i in base_inverses]
+            inverses = [
+                [
+                    np.expand_dims(t, list(range(base_dim, base_dim+i+1)))
+                        if t.ndim - 1 == base_dim else
+                    t
+                    for i, t in enumerate(subt)
+                ]
+                for subt in inverses
+            ]
+
+            if remove_translation_rotations:
+                transrot_deriv = nput.transrot_deriv(
+                    coords,
+                    masses=self.masses,
+                    order=order
+                )
+                transrot_inv = nput.transrot_expansion(
+                    coords,
+                    masses=self.masses,
+                    order=1
+                )
+                expansion = [transrot_deriv[1:]] + expansion
+                inverses = [transrot_inv[1:]] + inverses
+                # print([e.shape for e in nput.concatenate_expansions(expansion, concatenate_values=True)],
+                #       [i.shape for i in nput.concatenate_expansions(inverses, concatenate_values=False)])
+                # for f,r in zip(inverses, expansion):
+                #     print([ff.shape for ff in f], [rr.shape for rr in r])
+                inverses, expansion = nput.orthogonalize_transformations(zip(inverses, expansion), concatenate=False)
+                expansion = nput.concatenate_expansions(expansion, concatenate_values=True)
+                inverses = nput.concatenate_expansions(inverses, concatenate_values=False)
+                full_inverses = nput.inverse_transformation(expansion, order,
+                                                            reverse_expansion=inverses[:1],
+                                                            allow_pseudoinverse=True
+                                                            )
+                expansion = [e[..., 6:] for e in expansion]
+                _ = []
+                for i,e in enumerate(full_inverses):
+                    sel = (...,) + (slice(6,None),)*(i+1) + (slice(None),)
+                    _.append(e[sel])
+                full_inverses = _
+
+            else:
+                inverses, expansion = nput.orthogonalize_transformations(zip(inverses, expansion))
+                full_inverses = nput.inverse_transformation(expansion, order,
+                                                            reverse_expansion=inverses[:1],
+                                                            allow_pseudoinverse=True
+                                                            )
+            expansion = [np.concatenate(vals, axis=-1)] + expansion
+            expansion = expansion, full_inverses
         return expansion
 
-    def get_direct_inverses(self, coords, order=1, **opts) -> List[np.ndarray]:
+    def get_direct_inverses(self, coords, order=1, combine_expansions=True, **opts) -> List[np.ndarray]:
         coords = np.asanyarray(coords)
-        base_shape = coords.shape[:-2]
-        coords = coords.reshape((-1,) + coords.shape[-2:])
-        subexpansions = [
-            c.get_inverse_expansion(coords, order=order, **opts)
+        expansions = [
+            c.get_inverse_expansion(coords, order=order, context=self, **opts)
             for c in self.coords
         ]
-        subexpansions = [
-            e
-            if e[0].ndim > 1 else
-            [ee[..., np.newaxis] for ee in ...]
-            for e in subexpansions
-        ]
-
-        expansions = [
-            np.concatenate(e, axis=-1)
-            for e in zip(*subexpansions)
-        ]
-        return [e.reshape(base_shape + e.shape[1:]) for e in expansions]
-
+        if combine_expansions:
+            expansions = nput.combine_coordinate_inverse_expansions(expansions, order=order)
+        return expansions
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
     if len(coord) == 2:
@@ -1345,6 +1515,244 @@ def get_internal_triangles_and_dihedrons(internals,
                 _[k] = nput.make_dihedron(**vals)
             dihed_sets = _
     return tri_sets, dihed_sets
+def get_triangulation_internals(
+    triangulation:tuple[dict[Tuple[int],collections.namedtuple], dict[Tuple[int],collections.namedtuple]]
+):
+    tri_sets, dihed_sets = triangulation
+    return list(
+        itut.delete_duplicates(
+            v
+            for tv in [tri_sets, dihed_sets]
+            for t in tv.values()
+            for v in t if v is not None
+        )
+    )
+def update_triangulation(
+        triangulation: tuple[dict[Tuple[int], collections.namedtuple], dict[Tuple[int], collections.namedtuple]],
+        added_internals,
+        removed_internals,
+        triangulation_internals=None,
+        return_split=False
+):
+    if triangulation_internals is None:
+        triangulation_internals = [canonicalize_internal(c) for c in get_triangulation_internals(triangulation)]
+    added_internals = [canonicalize_internal(a) for a in added_internals]
+    added_internals = [a for a in added_internals if a not in triangulation_internals and a not in removed_internals]
+    removed_internals = [canonicalize_internal(r) for r in removed_internals]
+    removed_internals = [r for r in removed_internals if r in triangulation_internals and r not in added_internals]
+
+    mod_internals = added_internals + removed_internals
+
+    test_internals = [
+        i for i in triangulation_internals
+        if i not in removed_internals
+    ] + added_internals
+
+    test_dists = [i for i in test_internals if len(i) == 2]
+    test_angles = [i for i in test_internals if len(i) == 3]
+    test_dihedrals = [i for i in test_internals if len(i) == 4]
+
+    core_internals = []
+    core_atoms = set()
+    for d in test_dihedrals:
+        # test intersection with any modified coordinates, has to intersect fully
+        # to me included
+        for n,t in enumerate(mod_internals):
+            if all(i in d for i in t):
+                core_internals.append(d)
+                core_atoms.update(d)
+                break
+
+    for d in test_angles:
+        # test intersection with any modified coordinates, has to intersect with
+        # n-1 atoms to be included
+        for n,t in enumerate(mod_internals):
+            if len([i in d for i in t]) == len(t) - 1:
+                core_internals.append(d)
+                core_atoms.update(d)
+                core_atoms.update(t)
+                break
+
+    for d in test_dists:
+        # test intersection with any modified coordinates, has to intersect with
+        # any atom to be included
+        for n,t in enumerate(mod_internals):
+            if any(i in t for i in d):
+                core_internals.append(d)
+                core_atoms.update(d)
+                core_atoms.update(t)
+                break
+
+    for d in test_internals:
+        # a special case for 5 distances in a dihedron where 2 bonds
+        # can be related without an intersection via triangle properties
+        if all(i in core_atoms for i in d) and d not in core_internals:
+            core_internals.append(d)
+
+    tri_set, dihed_set = triangulation
+    sub_tris, sub_diheds = get_internal_triangles_and_dihedrons(core_internals)
+    unmodified_tris = {k:v for k,v in tri_set.items() if any(i not in core_atoms for i in k)}
+    unmodified_diheds = {k:v for k,v in dihed_set.items() if any(i not in core_atoms for i in k)}
+
+    if return_split:
+        return core_atoms, (sub_tris, sub_diheds), (unmodified_tris, unmodified_diheds)
+    else:
+        tri_set = {
+            k:v
+            for ts in [sub_tris, unmodified_tris]
+            for k, v in ts.items()
+        }
+        dihed_set = {
+            k:v
+            for ts in [sub_diheds, unmodified_diheds]
+            for k, v in ts.items()
+        }
+
+        return tri_set, dihed_set
+
+
+# def extend_triangles_and_dihedrons(triangulation:tuple[dict[Tuple[int],collections.namedtuple], dict[Tuple[int],collections.namedtuple]],
+#                                    new_internals,
+#                                    prune_incomplete=True
+#                                    ):
+#     tri_sets, dihed_sets = triangulation
+#     new_dists = [i for i in new_internals if len(i) == 2]
+#     new_angles = [i for i in new_internals if len(i) == 3]
+#     new_diheds = [i for i in new_internals if len(i) == 4]
+#
+#     updated_triangles = {}
+#     updated_dihedrons = {}
+#
+#     use_angles = set()
+#     for t,tri in tri_sets:
+#         t0 = tri
+#         updated = False
+#         for i,j in new_dists:
+#             try:
+#                 x = t.index(i)
+#             except IndexError:
+#                 continue
+#             try:
+#                 y = t.index(j)
+#             except IndexError:
+#                 continue
+#             if y < x:
+#                 x,y = y,x
+#                 i,j = j,i
+#             if (x,y) == (0, 1):
+#                 if tri.a is None:
+#                     updated = True
+#                     tri = tri._replace(a=(i,j))
+#             elif (x,y) == (0,2):
+#                 if tri.c is None:
+#                     updated = True
+#                     tri = tri._replace(c=(i,j))
+#             else:
+#                 if tri.b is None:
+#                     updated = True
+#                     tri = tri._replace(b=(i,j))
+#
+#         for a in new_angles:
+#             if a in use_angles: continue
+#             i,j,k = a
+#             try:
+#                 x = t.index(i)
+#             except IndexError:
+#                 continue
+#             try:
+#                 y = t.index(j)
+#             except IndexError:
+#                 continue
+#             try:
+#                 z = t.index(k)
+#             except IndexError:
+#                 continue
+#             use_angles.add(a)
+#             if z < x:
+#                 x,y,z = z,y,x
+#                 i,j,k = k,j,i
+#             if (x,y,z) == (0, 1, 2):
+#                 if tri.C is None:
+#                     updated = True
+#                     tri = tri._replace(C=(i,j,k))
+#             elif (x,y,z) == (0, 2, 1):
+#                 if tri.A is None:
+#                     updated = True
+#                     tri = tri._replace(A=(i,j,k))
+#             else:
+#                 if tri.B is None:
+#                     updated = True
+#                     tri = tri._replace(B=(i,j,k))
+#
+#         if updated:
+#             tri_sets[t] = tri
+#             updated_triangles[t] = (t0, tri)
+#
+#     for d, dihed in dihed_sets:
+#         d0 = dihed
+#         updated = False
+#         for i, j in new_dists:
+#             try:
+#                 x = d.index(i)
+#             except IndexError:
+#                 continue
+#             try:
+#                 y = d.index(j)
+#             except IndexError:
+#                 continue
+#             if y < x:
+#                 x, y = y, x
+#                 i, j = j, i
+#             mod_pos = ...
+#             if (x, y) == (0, 1):
+#                 if tri.a is None:
+#                     updated = True
+#                     tri = tri._replace(a=(i, j))
+#             elif (x, y) == (0, 2):
+#                 if tri.c is None:
+#                     updated = True
+#                     tri = tri._replace(c=(i, j))
+#             else:
+#                 if tri.b is None:
+#                     updated = True
+#                     tri = tri._replace(b=(i, j))
+#
+#         for a in new_angles:
+#             if a in use_angles: continue
+#             i, j, k = a
+#             try:
+#                 x = t.index(i)
+#             except IndexError:
+#                 continue
+#             try:
+#                 y = t.index(j)
+#             except IndexError:
+#                 continue
+#             try:
+#                 z = t.index(k)
+#             except IndexError:
+#                 continue
+#             use_angles.add(a)
+#             if z < x:
+#                 x, y, z = z, y, x
+#                 i, j, k = k, j, i
+#             if (x, y, z) == (0, 1, 2):
+#                 if tri.C is None:
+#                     updated = True
+#                     tri = tri._replace(C=(i, j, k))
+#             elif (x, y, z) == (0, 2, 1):
+#                 if tri.A is None:
+#                     updated = True
+#                     tri = tri._replace(A=(i, j, k))
+#             else:
+#                 if tri.B is None:
+#                     updated = True
+#                     tri = tri._replace(B=(i, j, k))
+#
+#         if updated:
+#             tri_sets[t] = tri
+#             updated_triangles[t] = (t0, tri)
+#     return (tri_sets, dihed_sets), (updated_triangles, updated_dihedrons)
 
 def _triangle_conversion_function(inds, tri, coord):
     idx = []
@@ -1434,7 +1842,7 @@ def find_internal_conversion(internals, targets,
 
             # prep conversion based on internal indices
             if tri is not None:
-                args = {k:find_internal(internals, v) for k,v in tri._asdict().items() if v is not None}
+                args = {k:find_internal(internals, v, missing_val=missing_val) for k,v in tri._asdict().items() if v is not None}
                 def convert(internal_list, args=args, conv=conv,  **kwargs):
                     internal_list = np.asanyarray(internal_list)
                     subtri = nput.make_triangle(
@@ -1444,7 +1852,7 @@ def find_internal_conversion(internals, targets,
                 convert.__name__ = 'convert_' + conv.__name__
             else:
                 args = {
-                    k:find_internal(internals, v, allow_negation=True)
+                    k:find_internal(internals, v, allow_negation=True, missing_val=missing_val)
                         for k,v in dihed._asdict().items()
                     if v is not None
                 }
@@ -1482,13 +1890,15 @@ def _enumerate_dists(internals):
 def get_internal_distance_conversion(
         internals,
         triangles_and_dihedrons=None,
+        dist_set=None,
         # prior_coords=None,
         canonicalize=True,
         allow_completion=True,
         missing_val='raise',
         return_conversions=False
 ):
-    dist_set = list(sorted(set(_enumerate_dists(internals)))) # remove dupes, sort
+    if dist_set is None:
+        dist_set = list(sorted(set(_enumerate_dists(internals)))) # remove dupes, sort
     return dist_set, find_internal_conversion(internals, dist_set,
                                               canonicalize=canonicalize,
                                               triangles_and_dihedrons=triangles_and_dihedrons,
@@ -1551,13 +1961,15 @@ def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure
                 return False, (k,t)
     return True, None
 
-def get_internal_bond_graph(internals, natoms=None):
-    from ..Graphs import EdgeGraph
-
-    dists, funs = get_internal_distance_conversion(internals, allow_completion=False, missing_val=None,
-                                                   return_conversions=True)
-    edges = [d for d, f in zip(dists, funs) if f is not None]
+def get_internal_bond_graph(internals, natoms=None, triangles_and_dihedrons=None, dist_set=None):
+    dist_set, funs = get_internal_distance_conversion(internals,
+                                                   allow_completion=False,
+                                                   missing_val=None,
+                                                   triangles_and_dihedrons=triangles_and_dihedrons,
+                                                   return_conversions=True,
+                                                   dist_set=dist_set)
+    edges = [d for d, f in zip(dist_set, funs) if f is not None]
     if natoms is None:
-        natoms = len(np.concatenate(internals))
+        natoms = len(np.unique(np.concatenate(internals)))
     return EdgeGraph(np.arange(natoms), edges)
 

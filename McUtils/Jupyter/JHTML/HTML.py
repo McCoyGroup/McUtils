@@ -986,10 +986,14 @@ class HTML(XMLBase):
                 else:
                     root.text = elem
             elif hasattr(elem, 'to_widget'):
-                raise ValueError(
-                    f"can't convert {elem} to pure HTML. "
-                    "It looks like a Jupyter widget so look for the appropriate `JHTML` subclass."
-                )
+                elem = elem.to_widget()
+                if not isinstance(elem, HTML.XMLElement):
+                    raise ValueError(
+                        f"can't convert {elem} to pure HTML. "
+                        "It looks like a Jupyter widget so look for the appropriate `JHTML` subclass."
+                    )
+                else:
+                    cls.construct_etree_element(elem, root, parent=parent, attr_converter=attr_converter)
             else:
                 raise ValueError(f"don't know what to do with {elem} in converting {parent}")
 

@@ -58,9 +58,11 @@ __all__ = [
     'orientation_vecs',
     'orientation_expansion',
     "internal_conversion_function",
+    "combine_coordinate_deriv_expansions",
     "internal_coordinate_tensors",
     "inverse_internal_coordinate_tensors",
     "inverse_coordinate_solve",
+    "combine_coordinate_inverse_expansions",
     "metric_tensor",
     "delocalized_internal_coordinate_transformation",
     "relocalize_coordinate_transformation",
@@ -854,13 +856,13 @@ def prep_expanded_mats_from_cache(expansion, i, j, at_list, root_dim=1, core_dim
         new.append(new_sub)
     return new
 
-def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, expand, fixed_atoms):
+def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order, expand, fixed_atoms):
 
     if cache is None or fixed_atoms is not None or not expand:
         proj, A_expansion = prep_disp_expansion(coords, i, j, at_list,
                                                 fixed_atoms=fixed_atoms,
                                                 expand=expand)
-        A_norms, A_expansion = td.vec_norm_unit_deriv(A_expansion, len(A_expansion))
+        A_norms, A_expansion = td.vec_norm_unit_deriv(A_expansion, order)
     else:
         proj, A_base = prep_disp_expansion(coords, i, j, at_list,
                                                 fixed_atoms=None,
@@ -874,14 +876,18 @@ def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, expan
         sign = 1
 
         key = ((i, j), expand, fixed_atoms)
+        A_norms = []
         if key in cache:
             (A_raw, A_norms, A_expansion) = cache[key]
-        else:
+        if len(A_norms) < (order + 1):
             _, A_raw = prep_disp_expansion(coords, i, j, [i, j],
                                                     fixed_atoms=None,
                                                     expand=True)
-            A_norms, A_expansion = td.vec_norm_unit_deriv(A_raw, len(A_raw))
+            A_norms, A_expansion = td.vec_norm_unit_deriv(A_raw, order)
             cache[key] = (A_raw, A_norms, A_expansion)
+
+        A_norms = A_norms[:order+1]
+        A_expansion = A_expansion[:order+1]
 
         # print(sign, i, j, at_list)
         # print(sign*A_norms[1])
@@ -1093,7 +1099,9 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None,
     if method == 'expansion':
         proj, (base_deriv, _) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True
+            coords, j, i, [i, j],
+            order=order,
+            fixed_atoms=fixed_atoms, expand=True
         )
         # proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True)
         # base_deriv = td.vec_norm_unit_deriv(A_expansion, order=order)[0]
@@ -1157,20 +1165,24 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion',
         if angle_ordering == 'ijk':
             proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, i, j, [j, i, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+                coords, i, j, [j, i, k],
+                order=order, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
             )
             _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, k, j, [j, i, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+                coords, k, j, [j, i, k],
+                order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
             )
         else:
             proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+                coords, j, i, [i, j, k],
+                order=order, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
             )
             _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+                coords, k, i, [i, j, k],
+                order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
             )
 
         # A_expansion = [A_expansion[0], np.concatenate([np.eye(3), np.zeros((3, 3))], axis=0)]
@@ -1251,20 +1263,24 @@ def rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='
         if angle_ordering == 'ijk':
             proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, i, j, [j, i, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+                coords, i, j, [j, i, k],
+                order=order, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
             )
             _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, k, j, [j, i, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+                coords, k, j, [j, i, k],
+                order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
             )
         else:
             proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, j, i, [i, j, k], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+                coords, j, i, [i, j, k],
+                order=order, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
             )
             _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
                 cache,
-                coords, k, i, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+                coords, k, i, [i, j, k],
+                order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
             )
 
         A_deriv = td.vec_angle_deriv(A_expansion, B_expansion[:1], order=order, unitized=True)
@@ -1339,7 +1355,8 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, j, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            coords, j, k, [i, j, k, l],
+            order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
         base_deriv = td.vec_dihed_deriv(A_expansion, B_expansion, C_expansion,
@@ -1526,7 +1543,8 @@ def book_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansi
         proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, k, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            coords, k, j, [i, j, k, l],
+            order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         _, C_expansion = prep_disp_expansion(coords,  l, j, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
 
@@ -1560,7 +1578,8 @@ def wag_deriv(coords, i, j, k, l=None, *, order=1, method='expansion',
                                                 expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, k, j, [i, j, k], fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            coords, k, j, [i, j, k],
+            order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         if l is None:
             l = i
@@ -1616,7 +1635,8 @@ def oop_deriv(coords, i, j, k, l=None, *, order=1, method='expansion',
         proj, A_expansion = prep_disp_expansion(coords, j, i, at_list, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, k, j, at_list, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            coords, k, j, at_list,
+            order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         if l is None:
             l = i
@@ -1900,13 +1920,14 @@ def orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None,
         return total_expansion
 
 def _pop_bond_vecs(bond_tf, i, j, coords):
-    bond_vectors = np.zeros(coords.shape)
-    bond_vectors[..., i, :] = bond_tf[0]
-    bond_vectors[..., j, :] = bond_tf[1]
-
-    return bond_vectors.reshape(
-        coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
-    )
+    # bond_vectors = np.zeros(coords.shape)
+    # bond_vectors[..., i, :] = bond_tf[0]
+    # bond_vectors[..., j, :] = bond_tf[1]
+    #
+    # return bond_vectors.reshape(
+    #     coords.shape[:-2] + (coords.shape[-2] * coords.shape[-1],)
+    # )
+    return _fill_derivs(coords, (i, j), [0, bond_tf], method='expansion')[1]
 def _fill_derivs(coords, idx, derivs, method='old'):
     vals = []
     # nx = np.prod(coords.shape, dtype=int)
@@ -2222,6 +2243,60 @@ def internal_conversion_specs(specs, angle_ordering='ijk', coord_type_dispatch=N
 
     return targets
 
+def combine_coordinate_deriv_expansions(expansions,
+                                        order=None,
+                                        base_dim=0,
+                                        base_transformation=None,
+                                        reference_internals=None):
+    if order is None:
+        targets = [
+            np.expand_dims(t, -1)
+                if t.ndim - 1 == base_dim else
+            t
+            for t in expansions
+        ]
+        base = np.concatenate(targets, axis=-1)
+        if base_transformation is not None:
+            base = td.tensor_reexpand(base, base_transformation)  # del_XR * del_RQ
+    else:
+        targets = [
+            [
+                np.expand_dims(t, -1)
+                    if t.ndim - i == base_dim else
+                t
+                for i, t in enumerate(subt)
+            ]
+            for subt in expansions
+        ]
+        base = [
+            np.concatenate(t, axis=-1)
+            for t in zip(*targets)
+        ]
+        internals, expansion = base[0], base[1:]
+        if reference_internals is not None:
+            if reference_internals.ndim == 1 and internals.ndim > 1:
+                reference_internals = np.expand_dims(reference_internals, list(range(internals.ndim - 1)))
+            internals = internals - reference_internals
+        if base_transformation is not None:
+            if base_transformation[0].ndim == 2 and len(expansion) > 0 and expansion[0].ndim > 2:
+                base_transformation = [
+                    np.broadcast_to(
+                        np.expand_dims(b, list(range(expansion[0].ndim - 2))),
+                        expansion[0].shape[:-2] + b.shape
+                    ) for b in base_transformation
+                ]
+            internals = (internals[..., np.newaxis, :] @ base_transformation[0]).reshape(
+                internals.shape[:-1] + base_transformation[0].shape[-1:]
+            )
+            expansion = (
+                td.tensor_reexpand(expansion, base_transformation, order=len(expansion))
+                    if len(expansion) > 0 else
+                expansion
+            )
+        base = [internals] + expansion
+
+    return base
+
 def internal_conversion_function(specs,
                                  base_transformation=None,
                                  reference_internals=None,
@@ -2231,7 +2306,8 @@ def internal_conversion_function(specs,
     base_specs = internal_conversion_specs(specs, **opts)
     def convert(coords, order=None,
                 use_cache=use_cache,
-                reference_internals=reference_internals, base_transformation=base_transformation):
+                reference_internals=reference_internals,
+                base_transformation=base_transformation):
         targets = []
         #
         if use_cache:
@@ -2243,55 +2319,14 @@ def internal_conversion_function(specs,
             targets.append(res)
 
         base_dim = coords.ndim - 2
-        if order is None:
-            targets = [
-                np.expand_dims(t, -1)
-                    if t.ndim - 1 == base_dim else
-                t
-                for t in targets
-            ]
-            base = np.concatenate(targets, axis=-1)
-            if base_transformation is not None:
-                base = td.tensor_reexpand(base, base_transformation) # del_XR * del_RQ
-        else:
-            targets = [
-                [
-                    np.expand_dims(t, -1)
-                        if t.ndim - i == base_dim else
-                    t
-                    for i,t in enumerate(subt)
-                ]
-                for subt in targets
-            ]
-            base = [
-                np.concatenate(t, axis=-1)
-                for t in zip(*targets)
-            ]
-            internals, expansion = base[0], base[1:]
-            if reference_internals is not None:
-                if reference_internals.ndim == 1 and internals.ndim > 1:
-                    reference_internals = np.expand_dims(reference_internals, list(range(internals.ndim - 1)))
-                internals = internals - reference_internals
-            if base_transformation is not None:
-                if base_transformation[0].ndim == 2 and len(expansion) > 0 and expansion[0].ndim > 2:
-                    base_transformation = [
-                        np.broadcast_to(
-                            np.expand_dims(b, list(range(expansion[0].ndim - 2))),
-                            expansion[0].shape[:-2] + b.shape
-                        ) for b in base_transformation
-                    ]
-                internals = (internals[..., np.newaxis, :] @ base_transformation[0]).reshape(
-                    internals.shape[:-1] + base_transformation[0].shape[-1:]
-                )
-                expansion = (
-                    td.tensor_reexpand(expansion, base_transformation, order=len(expansion))
-                        if len(expansion) > 0 else
-                    expansion
-                )
-            base = [internals] + expansion
-        return base
+        return combine_coordinate_deriv_expansions(
+            targets,
+            order=order,
+            base_dim=base_dim,
+            base_transformation=base_transformation,
+            reference_internals=reference_internals
+        )
     return convert
-
 
 def internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None,
                                 fixed_atoms=None,
@@ -2904,6 +2939,45 @@ def orientation_expansion(coords, frame_pos_1, frame_pos_2, *, order=1, masses=N
     #
     #     expansion = expansion + full_exp
     return expansion
+
+def combine_coordinate_inverse_expansions(expansions,
+                                          order=None,
+                                          base_dim=None,
+                                          base_transformation=None):
+    coords = [e[0] for e in expansions]
+    if base_dim is None:
+        base_dim = coords[0].ndim - 2
+    expansions = [e[1:] for e in expansions]
+    # if order is None:
+    #     targets = [
+    #         np.expand_dims(t, -1)
+    #             if t.ndim - 1 == base_dim else
+    #         t
+    #         for t in expansions
+    #     ]
+    #     base = np.concatenate(targets, axis=-1)
+    #     if base_transformation is not None:
+    #         base = td.tensor_reexpand(base, base_transformation)  # del_XR * del_RQ
+    # else:
+    targets = [
+        [
+            np.expand_dims(t, list(range(base_dim, base_dim+i+1)))
+                if t.ndim - 1 == base_dim else
+            t
+            for i, t in enumerate(subt)
+        ]
+        for subt in expansions
+    ]
+    base = td.concatenate_expansions(targets, concatenate_values=False)
+    if base_transformation is not None:
+        base = td.tensor_reexpand(base_transformation, base, axes=[-1, -2])
+
+    if order is None:
+        base = base[0]
+    else:
+        base = [coords] + base
+
+    return base
 
 class _inverse_coordinate_conversion_caller:
     def __init__(self, conversion, target_internals,

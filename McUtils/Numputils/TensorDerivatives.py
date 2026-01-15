@@ -4,7 +4,7 @@ import itertools, numpy as np, math
 
 from .. import Devutils as dev
 
-from . import PermutationOps as perms, vec_tensordiag
+from . import PermutationOps as perms, vec_tensordiag, identity_tensors
 from . import VectorOps as vec_ops
 from . import SetOps as set_ops
 from .Misc import is_numeric, is_zero
@@ -35,7 +35,9 @@ __all__ = [
     "scale_expansion",
     "add_expansions",
     "subtract_expansions",
-    "renormalize_transformation"
+    "concatenate_expansions",
+    "renormalize_transformation",
+    "orthogonalize_transformations"
 ]
 
 # levi_cevita3.__name__ = "levi_cevita3"
@@ -409,6 +411,79 @@ def subtract_expansions(a_expansion, b_expansion, order=None):
         for a,b in zip(a_expansion, b_expansion)
     ]
 
+def concatenate_expansions(a_expansion_or_expansion_list, b_expansion=None, concatenate_values=True):
+    if b_expansion is None:
+        expansion_list = a_expansion_or_expansion_list
+        _ = expansion_list[0]
+        for e in expansion_list[1:]:
+            _ = concatenate_expansions(_, e, concatenate_values=concatenate_values)
+        return _
+    else:
+        a_expansion = a_expansion_or_expansion_list
+        a_expansion = [np.asanyarray(a) if not is_zero(a) else 0 for a in a_expansion]
+        b_expansion = [np.asanyarray(b) if not is_zero(b) else 0 for b in b_expansion]
+        if len(a_expansion) < len(b_expansion):
+            a_expansion = a_expansion + [0] * (len(b_expansion) - len(a_expansion))
+        elif len(b_expansion) < len(a_expansion):
+            b_expansion = b_expansion + [0] * (len(a_expansion) - len(b_expansion))
+
+        base_shape = None
+        for n,a in enumerate(a_expansion):
+            if not is_zero(a):
+                base_shape = a.shape[:-(2+n)]
+                break
+        else:
+            for n,b in enumerate(b_expansion):
+                if not is_zero(b):
+                    base_shape = b.shape[:-(2 + n)]
+                    break
+            else:
+                raise ValueError("can't concatenate two entirely zero expansions")
+
+        a_nder = None
+        a_nvals = None
+        for n,a in enumerate(a_expansion):
+            if not is_zero(a):
+                a_nder, a_nvals = a.shape[-2:]
+                break
+
+        b_nder = None
+        b_nvals = None
+        for n,b in enumerate(b_expansion):
+            if not is_zero(b):
+                b_nder, b_nvals = b.shape[-2:]
+                break
+
+        if b_nder is None:
+            b_nder, b_nvals = a_nder, a_nvals
+        elif a_nder is None:
+            a_nder, a_nvals = b_nder, b_nvals
+
+        expansion = []
+        for n,(a,b) in enumerate(zip(a_expansion, b_expansion)):
+            if is_zero(a):
+                if is_zero(b):
+                    expansion.append(0)
+                    continue
+                a = np.zeros(base_shape + (a_nder,)*(n+1) + (a_nvals,))
+            elif is_zero(b):
+                b = np.zeros(base_shape + (b_nder,)*(n+1) + (b_nvals,))
+
+            if concatenate_values:
+                c = np.concatenate([a, b], axis=-1)
+            else:
+                if a_nvals != b_nvals:
+                    raise ValueError(f"can't concatenate expansions along the derivative axes with different value shapes "
+                                     f"(ncoord: {a_nder},{b_nder}, nvals:{a_nvals},{b_nvals})")
+                c = np.zeros(base_shape + (a_nder + b_nder,)*(n+1) + (a_nvals,))
+                # TODO: add small optimization for zero cases
+                sel_a = (...,) + (slice(0, a_nder),) * (n+1) + (slice(None),)
+                sel_b = (...,) + (slice(a_nder, None),) * (n+1) + (slice(None),)
+                c[sel_a] = a
+                c[sel_b] = b
+            expansion.append(c)
+    return expansion
+
 #TODO: add a DifferentiableExpansion class so I can have nicer overloads on all of this...
 
 def inverse_transformation(forward_expansion, order, reverse_expansion=None,
@@ -463,6 +538,57 @@ def renormalize_transformation(forward_transformation, reverse_transformation, n
     reverse_transformation = tensor_reexpand(reverse_transformation, [tf_right])
 
     return forward_transformation, reverse_transformation
+
+def orthogonalize_transformations(transformation_pairs,
+                                  order=None,
+                                  orthonormalize=True,
+                                  assume_prenormalized=True,
+                                  first_order_projector=True,
+                                  nonzero_cutoff=None,
+                                  concatenate=True):
+    projector = None
+    forward_transformations = []
+    reverse_transformations = []
+    if order is None:
+        transformation_pairs = list(transformation_pairs)
+        order = max(max([len(f), len(r)]) for f,r in transformation_pairs)
+    for forward, reverse in transformation_pairs:
+        if not assume_prenormalized:
+            forward, reverse = renormalize_transformation(forward, reverse, nonzero_cutoff=nonzero_cutoff)
+        if projector is None:
+            forward_transformations.append(forward)
+            reverse_transformations.append(reverse)
+            if first_order_projector:
+                projector = [identity_tensors(reverse[0].shape[:-2], reverse[0].shape[-2]) - reverse[0]@forward[0]]
+            else:
+                I_expansion = [identity_tensors(reverse[0].shape[:-2], reverse[0].shape[-2])]
+                projector = subtract_expansions(I_expansion, tensor_reexpand(reverse, forward))
+        else:
+            forward = tensor_reexpand(forward, projector, order=order)
+            reverse = tensor_reexpand(projector, reverse, order=order)
+            if orthonormalize:
+                forward, reverse = renormalize_transformation(forward, reverse, nonzero_cutoff=nonzero_cutoff)
+
+            forward_transformations.append(forward)
+            reverse_transformations.append(reverse)
+            if first_order_projector:
+                subprojector = identity_tensors(reverse[0].shape[:-2], reverse[0].shape[-2]) - reverse[0]@forward[0]
+                projector = [projector[0] @ subprojector]
+            else:
+                I_expansion = [identity_tensors(reverse[0].shape[:-2], reverse[0].shape[-2])]
+                subprojector = subtract_expansions(I_expansion, tensor_reexpand(reverse, forward))
+                projector = tensor_reexpand(projector, subprojector)
+
+    if concatenate:
+        _ = forward_transformations[0]
+        for f in forward_transformations[1:]:
+            _ = concatenate_expansions(_, f, concatenate_values=True)
+        forward_transformations = _
+        _ = reverse_transformations[0]
+        for f in reverse_transformations[1:]:
+            _ = concatenate_expansions(_, f, concatenate_values=False)
+        reverse_transformations = _
+    return forward_transformations, reverse_transformations
 
 def kron_prod_derivs(A_expansion, B_expansion, order):
     # s = A_expansion[0].ndim - 2
