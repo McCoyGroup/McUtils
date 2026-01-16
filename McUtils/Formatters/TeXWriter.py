@@ -1,12 +1,23 @@
+from __future__ import annotations
 
 import abc, numpy as np, io, weakref
+import collections
+import os
+import functools
+import re
+import shutil
+import tempfile as tf
+import itertools
+
 from .. import Devutils as dev
 from .. import Numputils as nput
+from .. import Parsers
 from .TableFormatters import TableFormatter
 from ..Misc.Symbolics import Abstract
 
 __all__ = [
-    "TeX"
+    "TeX",
+    "TeXTranspiler"
 ]
 
 class TeXWriter(metaclass=abc.ABCMeta):
@@ -757,3 +768,391 @@ class TeX:
     @classmethod
     def Matrix(cls, mat, **kwargs):
         return cls.wrap_parens(cls.Array(mat, **kwargs))
+
+class TeXImportGraph:
+    import_heads = ("input", "import", "loadmodule", "loadsec", "loadfig", "loadtab")
+    def __init__(self, tex_root, root_dir=None, head_parser=None, import_heads=None, strip_comments=True):
+        if root_dir is None:
+            root_dir = os.path.dirname(tex_root)
+        self.root = tex_root
+        self.root_dir = root_dir
+        self.graph = {}
+        self._initialized = False
+        if import_heads is None:
+            import_heads = self.import_heads
+        self.import_heads = import_heads
+        if head_parser is None:
+            head_parser = self.head_resolver
+        self.head_parser = head_parser
+        self.strip_comments = strip_comments
+
+    @classmethod
+    def import_parser(cls, head:str, tag:str):
+        return tag.partition(head)[2].strip("{}").strip()+".tex", {}
+    @classmethod
+    def head_resolver(cls, tag:str):
+        return tag.strip()[1:].partition("{")[0].partition("[")[0]
+    @classmethod
+    def load_module_parser(cls, tag:str):
+        root = tag.partition('module')[2].strip("{}").strip()
+        file = os.path.join(root, "main.tex")
+        return file, {'root':root}
+    @classmethod
+    def load_block_parser(cls, head:str, root, tag:str):
+        filename = tag.partition(head)[2].strip("{}").strip()
+        file = os.path.join(root, filename + ".tex")
+        ref = head[4:]
+        if ref not in {'fig', 'tab', 'eq'}:
+            opts = {'header': f'\\label{{{ref}:{filename}}}\n'}
+        else:
+            opts = {}
+        return file, opts
+    @classmethod
+    def resolve_parser(cls, head:str):
+        if head == 'module':
+            return cls.load_module_parser
+        elif head.startswith("load"):
+            subhead = head[4:]
+            if subhead == 'sec':
+                root = 'sections'
+            elif subhead == 'fig':
+                root = 'figures'
+            elif subhead == 'tab':
+                root = 'tables'
+            else:
+                root = subhead
+            return functools.partial(cls.load_block_parser, head, root)
+        else:
+            return functools.partial(cls.import_parser, head)
+
+    ImportNode = collections.namedtuple("ImportNode", ["root_dir", "end_points", "head", "block", "opts"])
+    root_dir_var = r"\RootDirectory"
+    def _handle_parse_block(self, parser, head_map, import_heads, root_dir):
+        imports = {}
+        ep, block = parser.parse_tex_call(import_heads, return_end_points=True)
+        while block is not None:
+            head = self.head_parser(block)
+            filename, opts = head_map[head](block)
+            filename = filename.replace(self.root_dir_var, root_dir)
+            if not filename.startswith("/"):
+                file = os.path.join(root_dir, filename)
+            else:
+                file = filename
+            imports[file] = self.ImportNode(root_dir, ep, head, block, opts)
+            ep, block = parser.parse_tex_call(import_heads, return_end_points=True)
+        return imports
+    def find_imports(self, root=None, import_heads=None, root_dir=None) -> dict[str, ImportNode]:
+        if root is None:
+            root = self.root
+        if import_heads is None:
+            import_heads = self.import_heads
+        if root_dir is None:
+            root_dir = self.root_dir
+
+        if isinstance(import_heads, dict):
+            head_map = import_heads
+        else:
+            head_map = {
+                k:self.resolve_parser(k)
+                for k in import_heads
+            }
+        if self.strip_comments:
+            with tf.TemporaryFile(mode='w+') as new_root:
+                new_body = dev.read_file(root)
+                new_body = re.sub("%.*\n", "", new_body)
+                new_root.write(new_body)
+                new_root.seek(0)
+                with Parsers.TeXParser(new_root) as parser:
+                    imports = self._handle_parse_block(parser, head_map, import_heads, root_dir)
+        else:
+            with Parsers.TeXParser(root) as parser:
+                imports = self._handle_parse_block(parser, head_map, import_heads, root_dir)
+        return imports
+
+    def populate_graph(self, import_heads=None, root_dir=None):
+        if root_dir is None:
+            root_dir = self.root_dir
+        if not self._initialized:
+            queue = collections.deque([(self.root, root_dir)])
+            while queue:
+                root, root_dir = queue.pop()
+                new_imports = self.find_imports(root, import_heads=import_heads, root_dir=root_dir)
+                new_imports = {
+                    file: node
+                    for file, node in new_imports.items()
+                    if file not in self.graph
+                }
+                self.graph[root] = new_imports
+                for file, node in new_imports.items():
+                    subroot = node.opts.get('root')
+                    if subroot is not None:
+                        subdir = os.path.join(root_dir, subroot)
+                    else:
+                        subdir = root_dir
+                    queue.append((file, subdir))
+
+        return self.graph
+
+class TeXTranspiler:
+    def __init__(self,
+                 tex_root,
+                 root_dir=None,
+                 figure_renaming_function=None,
+                 bib_renaming_function=None,
+                 strip_comments=True,
+                 figures_path=None,
+                 figure_merge_function=None,
+                 bib_path=None,
+                 bib_merge_function=None):
+        self.graph = TeXImportGraph(tex_root, root_dir=root_dir, strip_comments=strip_comments)
+        self.figure_renaming_function = figure_renaming_function
+        self.figures_path = figures_path
+        self.figure_merge_function = figure_merge_function
+        self.bib_renaming_function = bib_renaming_function
+        self.bib_path = bib_path
+        self.bib_merge_function = bib_merge_function
+
+    @classmethod
+    def figure_counter(cls, name_root="Figure", start_at=1):
+        counter = itertools.count()
+        for _ in range(start_at):
+            next(counter)
+        return lambda fig: f"{name_root}{next(counter)}" + os.path.splitext(fig)[1]
+
+    @classmethod
+    def add_bibs(cls, bib_list):
+        body = "\n\n".join(dev.read_file(b) for b in bib_list)
+        with tf.NamedTemporaryFile('w+', delete=False) as temp:
+            temp.write(body)
+        return temp.name, True
+
+    @classmethod
+    def get_injection_body(cls, root_dir, node_data:TeXImportGraph.ImportNode, body:str):
+        # here to be overridden
+        if root_dir is not None:
+            root = dev.drop_directory_prefix(root_dir, node_data.root_dir)
+        else:
+            root = node_data.root_dir
+        body = (
+            node_data.opts.get('header', "")
+            + body.replace("\\RootDirectory/", root)
+            + node_data.opts.get('footer', "")
+        )
+        return node_data.end_points, body
+
+    @classmethod
+    def apply_body_edit(cls, cur_text, edits, normalization_function=None):
+        chunks = []
+        split_point = 0
+        if hasattr(edits, 'items'):
+            edits = edits.items()
+        for node_data, body in edits:
+            if normalization_function is not None:
+                (s, e), body = normalization_function(node_data, body)
+            else:
+                (s, e) = node_data
+            s = s - split_point
+            e = e - split_point
+            start_chunk = cur_text[:s]
+            chunks.append(start_chunk)
+            chunks.append(body)
+            cur_text = cur_text[e:]
+            split_point = split_point + e
+        chunks.append(cur_text)
+
+        return "".join(chunks)
+
+    @classmethod
+    def flatten_import_graph(cls,
+                             graph:dict[str, dict[str, TeXImportGraph.ImportNode]],
+                             root,
+                             cache=None,
+                             root_dir=None,
+                             strip_comments=False
+                             ):
+        if cache is None:
+            cache = {}
+        if root in cache:
+            return cache[root]
+
+        cache[root] = None # to break cycles
+
+        edits = []
+        for file,node_data in graph[root].items():
+            if file not in cache:
+                cache[file] = cls.flatten_import_graph(graph, file, cache=cache, root_dir=root_dir, strip_comments=strip_comments)
+            edits.append([node_data, cache[file]])
+
+        cur_text = dev.read_file(root)
+        if strip_comments:
+            cur_text = re.sub("%.*\n", "", cur_text)
+        edit_block = cls.apply_body_edit(
+            cur_text, edits,
+            normalization_function=lambda node_data, body:cls.get_injection_body(root_dir, node_data, body)
+        )
+
+        cache[root] = edit_block
+
+        return cache[root]
+
+    def remap_block(self, flat_tex, call_head, file_parser, replacement_path=None, renaming_function=None):
+        blocks = None
+        if os.path.isfile(flat_tex):
+            temp_tex = flat_tex
+            flat_tex = dev.read_file(flat_tex)
+            if self.graph.strip_comments:
+                flat_tex = re.sub("%.*\n", "", flat_tex)
+            else:
+                with Parsers.TeXParser(temp_tex) as parser:
+                    blocks = dict(
+                        iter(
+                            lambda: parser.parse_tex_call(call_head, return_end_points=True),
+                            ((-1, -1), None)
+                        )
+                    )
+
+        if blocks is None:
+            with tf.TemporaryFile(mode="w+") as temp_tex:
+                temp_tex.write(flat_tex)
+                temp_tex.seek(0)
+                with Parsers.TeXParser(temp_tex) as parser:
+                    blocks = dict(
+                        iter(
+                            lambda: parser.parse_tex_call(call_head, return_end_points=True),
+                            ((-1, -1), None)
+                        )
+                    )
+
+        filenames = [ file_parser(v) for v in blocks.values() ]
+
+        if replacement_path is not None:
+            repathing = functools.partial(self._repath_resource, replacement_path)
+            if renaming_function is None:
+                renaming_function = repathing
+            else:
+                renaming_function = lambda figure, _renaming=renaming_function : repathing(figure, _renaming)
+
+        if renaming_function is not None:
+            filenames = {
+                k: renaming_function(k)
+                for k in filenames
+            }
+            flat_tex = self.apply_body_edit(
+                flat_tex, blocks,
+                normalization_function=lambda edit_pos, body: (
+                    edit_pos,
+                    self.__modify_resource_path(body, filenames)
+                )
+            )
+
+        return flat_tex, filenames
+
+    @classmethod
+    def _repath_resource(cls, new_root, figure_path, renaming_function=None):
+        if isinstance(figure_path, str):
+            if renaming_function is not None:
+                basename = renaming_function(figure_path)
+            else:
+                basename = os.path.basename(figure_path)
+            return os.path.join(new_root, basename)
+        else:
+            if renaming_function is not None:
+                figure_path = renaming_function(figure_path)
+                if isinstance(figure_path, str):
+                    return os.path.join(new_root, figure_path)
+            return ",".join(cls._repath_resource(new_root, fp) for fp in figure_path)
+    @classmethod
+    def _parse_graphics_file(cls, tag:str):
+        files = tuple(s.strip() for s in tag.partition("{")[-1].partition("}")[0].split(","))
+        if len(files) == 1:
+            files = files[0]
+        return files
+    @classmethod
+    def __modify_resource_path(cls, tag:str, file_map):
+        head, _, path = tag.partition("{")
+        name, _, rest = path.partition("}")
+        names = tuple(s.strip() for s in name.split(","))
+        if len(names) == 1:
+            names = names[0]
+        return head + "{" + file_map[names] + "}" + rest
+    def remap_figures(self, flat_tex, figures_path=None):
+        if figures_path is None:
+            figures_path = self.figures_path
+        return self.remap_block(flat_tex, "includegraphics", self._parse_graphics_file,
+                                replacement_path=figures_path,
+                                renaming_function=self.figure_renaming_function)
+
+    def remap_bibliography(self, flat_tex, bib_path=None):
+        if bib_path is None:
+            bib_path = self.bib_path
+        return self.remap_block(flat_tex, "bibliography",
+                                self._parse_graphics_file,
+                                replacement_path=bib_path,
+                                renaming_function=self.bib_renaming_function)
+
+    def create_flat_tex(self, include_aux=True):
+        flat_tex = self.flatten_import_graph(
+            self.graph.populate_graph(),
+            self.graph.root,
+            root_dir=self.graph.root_dir,
+            strip_comments=self.graph.strip_comments
+        )
+
+        if include_aux:
+            flat_tex, figure_files = self.remap_figures(flat_tex)
+            flat_tex, bib_files = self.remap_bibliography(flat_tex)
+
+            aux = {
+                'figures':figure_files,
+                'bibliography':bib_files
+            }
+
+            return flat_tex, aux
+        else:
+            return flat_tex
+
+
+    @classmethod
+    def _copy_inputs(cls, root_dir, target_dir, resource_path, inputs, merge_function):
+        if resource_path is not None:
+            fig_dir = os.path.join(target_dir, resource_path)
+            os.makedirs(fig_dir, exist_ok=True)
+        else:
+            fig_dir = target_dir
+        for src, target in inputs.items():
+            requires_delete = False
+            if not isinstance(target, str):
+                if isinstance(src, str):
+                    raise ValueError(f"can't map single source file ({src}) to multiple outputs ({target})")
+                elif len(src) != len(target):
+                    raise ValueError(f"can't map {len(src)} source files to {len(target)} outputs ({src} to {target})")
+            elif not isinstance(src, str):
+                src, requires_delete = merge_function([os.path.join(root_dir, s) for s in src])
+                if not isinstance(src, str):
+                    if requires_delete:
+                        os.remove(src)
+                    raise ValueError(f"can't map non string source ({src}) to {target}")
+            else:
+                src = os.path.join(root_dir, src)
+
+            if isinstance(src, str):
+                src = [src]
+                target = [target]
+            try:
+                for s, d in zip(src, target):
+                    shutil.copy(s, os.path.join(fig_dir, d))
+            finally:
+                if requires_delete:
+                    for s in src: os.remove(s)
+
+    def transpile(self, target_dir, file_name='main.tex', include_aux=True):
+        flat_file = self.create_flat_tex(include_aux=include_aux)
+        os.makedirs(target_dir, exist_ok=True)
+        if include_aux:
+            flat_file, aux = flat_file
+            self._copy_inputs(self.graph.root_dir, target_dir, self.figures_path, aux['figures'], self.figure_merge_function)
+            self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'], self.bib_merge_function)
+        os.path.join(target_dir, file_name)
+        dev.write_file(os.path.join(target_dir, file_name), flat_file)
+        return target_dir
+

@@ -137,3 +137,29 @@ class ParserTests(TestCase):
         #     sep="\n",
         #     end="\n"
         # )
+
+
+
+    @validationTest
+    def test_ParseTex(self):
+        import McUtils.Devutils as dev
+        root_text = dev.read_file(TestManager.test_data('samp.tex'))
+        with TeXParser(TestManager.test_data('samp.tex')) as parser:
+            print()
+            for i in range(6):
+                (s, e), text = parser.parse_tex_call(return_end_points=True)
+                print((s, e), text)
+                if e > 0:
+                    print(root_text[s:e])
+                else:
+                    print(root_text[s:])
+
+        with TeXParser(TestManager.test_data('samp.tex')) as parser:
+            print()
+            # print(parser.parse_tex_call("func"))
+            (s, e), text = parser.parse_tex_environment(return_end_points=True)
+            print((s, e), text)
+            if e > 0:
+                print(root_text[s:e])
+            else:
+                print(root_text[s:])
