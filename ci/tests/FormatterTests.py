@@ -1,11 +1,16 @@
+import collections
+import itertools
+import re
+
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Formatters import *
 import os, inspect
+import pprint
 
 class FormatterTests(TestCase):
 
-    @debugTest
+    @validationTest
     def test_TreeToTable(self):
         print()
         print(
@@ -29,3 +34,28 @@ class FormatterTests(TestCase):
                 )
             )
         )
+
+    @debugTest
+    def test_TeXTranspile(self):
+        print()
+
+        # import McUtils.Devutils as dev
+        # print(dev.split_path('/ASDa/b/d/c/d/d', 3))
+        # print(
+        #     dev.drop_directory_prefix('', '/ASDa/b/d/c/d/d')
+        # )
+        # return
+
+
+        transpiler = TeXTranspiler(
+            TestManager.test_data('TeXPaper/main.tex'),
+            figure_renaming_function=TeXTranspiler.figure_counter(),
+            bib_renaming_function=lambda _:"bibliography.bib",
+            bib_merge_function=TeXTranspiler.add_bibs
+        )
+        # print(transpiler.create_flat_tex(include_aux=False))
+        # body, aux = transpiler.create_flat_tex(include_aux=True)
+        # print(body)
+        # pprint.pprint(aux)
+
+        transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'))

@@ -27,3 +27,5 @@ from .Parsers import *; from .Parsers import __all__ as exposed
 __all__ += exposed
 from .XYZParser import *; from .XYZParser import __all__ as exposed
 __all__ += exposed
+from .TeXParser import *; from .TeXParser import __all__ as exposed
+__all__ += exposed

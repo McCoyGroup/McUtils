@@ -1,4 +1,4 @@
-
+import os
 import pathlib
 import json
 import tempfile as tf
@@ -11,7 +11,9 @@ __all__ = [
     "write_file",
     "read_file",
     "read_json",
-    "write_json"
+    "write_json",
+    "split_path",
+    "drop_directory_prefix"
 ]
 
 bad_file_chars = {" ", "\t", "\n"}
@@ -65,3 +67,48 @@ def write_json(file, data, mode="w+", **opts):
     opts, js_opts = opts_handler.OptionsSet(opts).split(open_opts)
     with safe_open(file, mode=mode, **opts) as fs:
         return json.dump(data, fs)
+
+def split_path(path, nsteps=-1):
+    if len(path) == 0:
+        return []
+
+    if isinstance(path, pathlib.Path):
+        splitter = lambda p:(p.parent,p.name)
+    else:
+        splitter = lambda p:(("","") if p == os.path.sep else os.path.split(p))
+    if nsteps < 0:
+        subpath = []
+        root = path
+        while len(root) > 0:
+            root, end = splitter(root)
+            subpath.append(end)
+        return subpath[::-1]
+    else:
+        subpath = []
+        root = path
+        for i in range(nsteps):
+            root, end = splitter(root)
+            subpath.append(end)
+            if len(root) == 0:
+                break
+        return [root] + subpath[::-1]
+
+def drop_directory_prefix(prefix, path):
+    split1 = split_path(prefix)
+    split2 = split_path(path)
+    i = -1
+    for i,(s1,s2) in enumerate(zip(split1, split2)):
+        if s1 != s2:
+            break
+
+    if i+1 < len(split2):
+        subsplit = split2[i+1:]
+        if subsplit[0] == "":
+            subsplit[0] = os.path.sep
+        subpath = os.path.join(*subsplit)
+    else:
+        subpath = ""
+
+    if isinstance(path, pathlib.Path):
+        subpath = pathlib.Path(subpath)
+    return subpath
