@@ -26,8 +26,8 @@ class TeXParser(Parsers.FileStreamReader):
         def matches(tag:str):
             if not cls.is_valid_stream_start(tag):
                 return Parsers.FileStreamReader.TagSentinels.Continue
-            base = tag[1:].partition("[")[0]
-            if re.match(options, base):
+            base = tag[1:].strip("{").partition("[")[0]
+            if re.fullmatch(options, base):
                 return True
             else:
                 return Parsers.FileStreamReader.TagSentinels.NextMatch
@@ -92,7 +92,7 @@ class TeXParser(Parsers.FileStreamReader):
             init_test = base_test(tag)
             if init_test is True:
                 base = tag.partition("{")[2][:-1]
-                if re.match(options, base):
+                if re.fullmatch(options, base):
                     return True
                 else:
                     return Parsers.FileStreamReader.TagSentinels.NextMatch
