@@ -93,37 +93,48 @@ Defines a set of formatting utilities
 [TeX](Formatters/TeXWriter/TeX.md)   
 </div>
    <div class="col" markdown="1">
-[StringMatcher](Formatters/FileMatcher/StringMatcher.md)   
+[TeXTranspiler](Formatters/TeXWriter/TeXTranspiler.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[StringMatcher](Formatters/FileMatcher/StringMatcher.md)   
+</div>
    <div class="col" markdown="1">
 [MatchList](Formatters/FileMatcher/MatchList.md)   
 </div>
    <div class="col" markdown="1">
 [FileMatcher](Formatters/FileMatcher/FileMatcher.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [TableFormatter](Formatters/TableFormatters/TableFormatter.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [format_tensor_element_table](Formatters/Conveniences/format_tensor_element_table.md)   
 </div>
    <div class="col" markdown="1">
 [format_symmetric_tensor_elements](Formatters/Conveniences/format_symmetric_tensor_elements.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [format_mode_labels](Formatters/Conveniences/format_mode_labels.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [format_zmatrix](Formatters/Conveniences/format_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
 [format_state_vector_frequency_table](Formatters/Conveniences/format_state_vector_frequency_table.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    

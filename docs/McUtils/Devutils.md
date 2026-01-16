@@ -126,48 +126,48 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 [write_json](Devutils/FileHelpers/write_json.md)   
 </div>
    <div class="col" markdown="1">
-[Logger](Devutils/Loggers/Logger.md)   
+[split_path](Devutils/FileHelpers/split_path.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[drop_directory_prefix](Devutils/FileHelpers/drop_directory_prefix.md)   
+</div>
+   <div class="col" markdown="1">
+[Logger](Devutils/Loggers/Logger.md)   
+</div>
+   <div class="col" markdown="1">
 [NullLogger](Devutils/Loggers/NullLogger.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [LogLevel](Devutils/Loggers/LogLevel.md)   
 </div>
    <div class="col" markdown="1">
 [LoggingBlock](Devutils/Loggers/LoggingBlock.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OptionsSet](Devutils/Options/OptionsSet.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OptionsMethodDispatch](Devutils/Options/OptionsMethodDispatch.md)   
 </div>
    <div class="col" markdown="1">
 [StreamRedirect](Devutils/Redirects/StreamRedirect.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OutputRedirect](Devutils/Redirects/OutputRedirect.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DefaultDirectory](Devutils/Redirects/DefaultDirectory.md)   
 </div>
    <div class="col" markdown="1">
 [Schema](Devutils/Schema/Schema.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-   
-</div>
-   <div class="col" markdown="1">
-   
 </div>
    <div class="col" markdown="1">
    

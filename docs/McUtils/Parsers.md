@@ -179,7 +179,7 @@ using a streamer to match chunks and a parser to extract data from the matched c
 [XYZParser](Parsers/XYZParser/XYZParser.md)   
 </div>
    <div class="col" markdown="1">
-   
+[TeXParser](Parsers/TeXParser/TeXParser.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -342,19 +342,20 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-286c06" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-286c06"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-4a645a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-4a645a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-286c06" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-4a645a" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
 - [BasicParse](#BasicParse)
+- [ParseTex](#ParseTex)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ffbc34" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ffbc34"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-91a1bc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-91a1bc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ffbc34" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-91a1bc" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -491,6 +492,32 @@ class ParserTests(TestCase):
         comment_string = res["Comment"].array[0]
         self.assertTrue('comment' in comment_string)
         self.assertEquals(res['Atoms'].array.shape, (4, 3))
+```
+
+#### <a name="ParseTex">ParseTex</a>
+```python
+    def test_ParseTex(self):
+        import McUtils.Devutils as dev
+        root_text = dev.read_file(TestManager.test_data('samp.tex'))
+        with TeXParser(TestManager.test_data('samp.tex')) as parser:
+            print()
+            for i in range(6):
+                (s, e), text = parser.parse_tex_call(return_end_points=True)
+                print((s, e), text)
+                if e > 0:
+                    print(root_text[s:e])
+                else:
+                    print(root_text[s:])
+
+        with TeXParser(TestManager.test_data('samp.tex')) as parser:
+            print()
+            # print(parser.parse_tex_call("func"))
+            (s, e), text = parser.parse_tex_environment(return_end_points=True)
+            print((s, e), text)
+            if e > 0:
+                print(root_text[s:e])
+            else:
+                print(root_text[s:])
 ```
 
  </div>

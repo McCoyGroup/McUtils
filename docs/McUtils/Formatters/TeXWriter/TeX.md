@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TeXWriter.TeX">TeX</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L735)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L735?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L746)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L746?message=Update%20Docs)]
 </div>
 
 Namespace for TeX-related utilities, someday might help with document prep from templates
@@ -34,8 +34,8 @@ bold: TeXBold
 Symbol(s): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L506)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L506?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L517)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L517?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ Symbol(s):
 Function(s): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L511)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L511?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXExpr.py#L522?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ Function(s):
 Matrix(cls, mat, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L757)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L757?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L768)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L768?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -111,7 +111,7 @@ Matrix(cls, mat, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TeXWriter/TeX.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TeXWriter/TeX.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L735?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L746?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
