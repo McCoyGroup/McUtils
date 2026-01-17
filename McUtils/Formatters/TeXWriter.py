@@ -995,13 +995,15 @@ class TeXTranspiler:
             else:
                 (s, e) = node_data
             s = s - split_point
-            if e > 0:
-                e = e - split_point
             start_chunk = cur_text[:s]
             chunks.append(start_chunk)
             chunks.append(body)
-            cur_text = cur_text[e:]
-            split_point = split_point + e
+            if e > 0:
+                e = e - split_point
+                cur_text = cur_text[e:]
+                split_point = split_point + e
+            else:
+                cur_text = ""
         chunks.append(cur_text)
 
         return "".join(chunks)
