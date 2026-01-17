@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.StringLineByLineReader">StringLineByLineReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L891)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L891?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L893)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L893?message=Update%20Docs)]
 </div>
 
 Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
@@ -24,8 +24,8 @@ Represents a string from which we'll stream blocks of data by finding tags and p
 __init__(self, string, ignore_comments=False, max_nesting_depth=-1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L895)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L895?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L897)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L897?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -80,7 +80,7 @@ __init__(self, string, ignore_comments=False, max_nesting_depth=-1):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L891?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L893?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
