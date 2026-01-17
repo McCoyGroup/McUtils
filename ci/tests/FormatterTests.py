@@ -54,8 +54,8 @@ class FormatterTests(TestCase):
             bib_merge_function=TeXTranspiler.add_bibs
         )
         # print(transpiler.create_flat_tex(include_aux=False))
-        # body, aux = transpiler.create_flat_tex(include_aux=True)
-        # print(body)
+        body, aux = transpiler.create_flat_tex(include_aux=True)
+        print(body)
         # pprint.pprint(aux)
 
-        transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'))
+        # transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'))

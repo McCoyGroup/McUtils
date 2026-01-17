@@ -465,6 +465,8 @@ class SearchStreamReader:
                             break
         elif allow_terminal and end < 0:
             block = self.stream.read()
+            if not validator(block):
+                block = None
         else:
             block = self.TagSentinels.EOF
 
