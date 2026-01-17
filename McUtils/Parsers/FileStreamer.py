@@ -271,6 +271,7 @@ class SearchStreamReader:
         """
         self.stream = stream
         self._exhausted_tag_pos = {} # an optimization for tag alternative searching
+        self._next_tag_pos = {} # an optimization for tag alternative searching
     def __enter__(self):
         self.stream.__enter__()
         return self
@@ -351,16 +352,28 @@ class SearchStreamReader:
         cur = self.tell()
         tag = None
         for t in tags.tags:
-            if (
-                    t not in self._exhausted_tag_pos
-                    or cur < self._exhausted_tag_pos[t]
-            ):
-                self.seek(cur)
-                pos = self._find_tag(t, skip_tag=skip_tag, seek=seek)
-                if pos < 0:
-                    self._exhausted_tag_pos[t] = cur
-                else:
-                    tag_positions[pos] = t
+            # if (
+            #         t not in self._exhausted_tag_pos
+            #         or cur < self._exhausted_tag_pos[t]
+            # ):
+            #     self.seek(cur)
+            #     pos = self._find_tag(t, skip_tag=skip_tag, seek=seek)
+            #     if pos < 0:
+            #         self._exhausted_tag_pos[t] = cur
+            #     else:
+            #         tag_positions[pos] = t
+
+            (cur_test, p_test) = self._next_tag_pos.get(t, (cur+1, -1))
+            if cur_test <= cur and p_test >= cur:
+                if p_test > 0:
+                    tag_positions[p_test] = t
+                continue
+
+            self.seek(cur)
+            pos = self._find_tag(t, skip_tag=skip_tag, seek=seek)
+            self._next_tag_pos[t] = (cur, pos)
+            if pos > 0:
+                tag_positions[pos] = t
 
         for pos in sorted(tag_positions.keys()):
             og_pos = pos
@@ -678,8 +691,8 @@ class FileStreamReader(SearchStreamReader):
     """
     Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
     """
-    def __init__(self, file, mode="r", encoding="utf-8", **kw):
-        stream = FileSearchStream(file, mode=mode, encoding=encoding, **kw)
+    def __init__(self, file, mode="r", encoding="utf-8",  allow_tempfile=False, **kw):
+        stream = FileSearchStream(file, mode=mode, encoding=encoding, allow_tempfile=allow_tempfile, **kw)
         super().__init__(stream)
 class StringStreamReader(SearchStreamReader):
     """
