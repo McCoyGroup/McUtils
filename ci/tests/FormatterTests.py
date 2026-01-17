@@ -56,6 +56,14 @@ class FormatterTests(TestCase):
         # print(transpiler.create_flat_tex(include_aux=False))
         body, aux = transpiler.create_flat_tex(include_aux=True)
         print(body)
-        # pprint.pprint(aux)
+        pprint.pprint(aux)
+
+        # pprint.pprint(
+        #     transpiler.create_label_map(body)
+        # )
+        #
+        # pprint.pprint(
+        #     transpiler.create_ref_map(body)
+        # )
 
         # transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'))

@@ -865,6 +865,11 @@ class TeXImportGraph:
             imports[file] = self.ImportNode(root_dir, ep, head, block, opts)
             ep, block = parser.parse_tex_call(import_heads, return_end_points=True)
         return imports
+    @classmethod
+    def strip_tex_comments(cls, body):
+        body = re.sub(r"($|^)%.*\n", "", body)
+        body = re.sub(r"(?<!\\)%.*\n", "", body)
+        return body
     def find_imports(self, root=None, import_heads=None, root_dir=None) -> dict[str, ImportNode]:
         if root is None:
             root = self.root
@@ -882,8 +887,7 @@ class TeXImportGraph:
             }
         if self.strip_comments:
             with tf.TemporaryFile(mode='w+') as new_root:
-                new_body = dev.read_file(root)
-                new_body = re.sub("%.*\n", "", new_body)
+                new_body = self.strip_tex_comments(dev.read_file(root))
                 new_root.write(new_body)
                 new_root.seek(0)
                 with Parsers.TeXParser(new_root) as parser:
@@ -989,11 +993,13 @@ class TeXTranspiler:
         split_point = 0
         if hasattr(edits, 'items'):
             edits = edits.items()
-        for node_data, body in edits:
-            if normalization_function is not None:
-                (s, e), body = normalization_function(node_data, body)
-            else:
-                (s, e) = node_data
+        clean_edits = [
+            normalization_function(node_data, body)
+                if normalization_function is not None else
+            (node_data, body)
+            for node_data, body in edits
+        ]
+        for (s,e), body in sorted(clean_edits, key=lambda se: se[0][0]):
             s = s - split_point
             start_chunk = cur_text[:s]
             chunks.append(start_chunk)
@@ -1031,7 +1037,7 @@ class TeXTranspiler:
 
         cur_text = dev.read_file(root)
         if strip_comments:
-            cur_text = re.sub("%.*\n", "", cur_text)
+            cur_text = TeXImportGraph.strip_tex_comments(cur_text)
         edit_block = cls.apply_body_edit(
             cur_text, edits,
             normalization_function=lambda node_data, body:cls.get_injection_body(root_dir, node_data, body)
@@ -1047,7 +1053,7 @@ class TeXTranspiler:
             temp_tex = flat_tex
             flat_tex = dev.read_file(flat_tex)
             if self.graph.strip_comments:
-                flat_tex = re.sub("%.*\n", "", flat_tex)
+                flat_tex = TeXImportGraph.strip_tex_comments(flat_tex)
             else:
                 with Parsers.TeXParser(temp_tex) as parser:
                     ep, block = parser.parse_tex_call(call_head, return_end_points=True)
@@ -1149,6 +1155,162 @@ class TeXTranspiler:
         bib_styles = [os.path.splitext(c)[0]+".bst" for c in bib_styles]
         return flat_tex, (classes + bib_styles)
 
+
+    @classmethod
+    def get_call_list(self, tex_stream, tags) -> dict[tuple[int, int], str]:
+        blocks = {}
+        with dev.StreamInterface(tex_stream, file_backed=True) as stream:
+            with Parsers.TeXParser(stream) as parser:
+                ep, block = parser.parse_tex_call(tags, return_end_points=True)
+                while block is not None:
+                    blocks[ep] = block
+                    ep, block = parser.parse_tex_call(tags, return_end_points=True)
+
+        return blocks
+    @classmethod
+    def _parse_label_ref(cls, l:str):
+        head, _, tag = l.partition('{')
+        tag_type, _, tag_ref = tag.partition('}')[0].partition(":")
+        head = head.strip("\\").partition("[")[0]
+        return head, tag_type.strip(), tag_ref.strip()
+    LabelBlock = collections.namedtuple("LabelBlock", ["tag", "ref", "end_points", "head", "block"])
+    @classmethod
+    def create_label_block_map(cls, tex_stream, call_tags, block_parser):
+        maps = {}
+        for ep, l in cls.get_call_list(tex_stream, call_tags).items():
+            head, tag_type, tag_ref = block_parser(l)
+            if len(tag_ref) == 0:
+                tag_type, tag_ref = None, tag_type
+            if tag_type not in maps:
+                maps[tag_type] = {}
+            maps[tag_type][ep] = cls.LabelBlock(tag_type, tag_ref, ep, head, l)
+        return maps
+    @classmethod
+    def create_label_map(cls, tex_stream):
+        return cls.create_label_block_map(tex_stream, 'label', cls._parse_label_ref)
+
+    @classmethod
+    def _parse_ref_ref(cls, l):
+        refs = l.split('{')
+        head, refs = refs[0], refs[1:]
+        head = head.strip("\\").partition("[")[0]
+        refs = [r.partition("}")[0] for r in refs]
+        if ":" in refs[0]:
+            tag_type, _, tag_ref = [r.strip() for r in refs[0].partition(":")]
+        else:
+            tag_type = head[3:]
+            if head.endswith("s"):
+                tag_type = tag_type[:-1]
+                tag_ref = {'refs':refs, 'type':'pair'}
+            elif head.endswith('rng'):
+                tag_type = tag_type[:-3]
+                tag_ref = {'refs':refs, 'type':'range'}
+            else:
+                tag_ref = refs[0]
+        return head, tag_type, tag_ref
+    @classmethod
+    def create_ref_map(cls, tex_stream):
+        return cls.create_label_block_map(tex_stream,
+                                          ('ref',
+                                           'reffig', 'reftab', 'refeq', 'refsec',
+                                           'reffigs', 'reftabs', 'refeqs', 'refsecs',
+                                           'reffigrng', 'reftabrng', 'refeqrng', 'refsecrng',
+                                           ),
+                                          cls._parse_ref_ref)
+
+    ref_tag_map = {
+        'sec': ("Sec.", "Secs."),
+        'fig': ("Fig.", "Figs."),
+        'tab': ("Table", "Tables"),
+        'eq': ("Eq.", "Eqs.")
+    }
+    ref_label_formats = {
+        'single': "{tag} {index}",
+        'pair': "{tag} {index[0]} and {index[1]}",
+        'range': "{tag} {index[0]}-{index[1]}",
+    }
+    si_ref_format = "S{i}"
+    main_ref_format = "ref{{{ref}}}"
+    @classmethod
+    def ref_remapping_label(cls, head, label, si_index_map):
+        if isinstance(label.ref, str):
+            if (head, label.ref) in si_index_map:
+                return cls.ref_label_formats['single'].format(
+                    tag=cls.ref_tag_map[head][0],
+                    index=cls.si_ref_format.format(i=si_index_map[(head, label.ref)] + 1)
+                )
+            else:
+                return None
+        else:
+            if any((head, r) in si_index_map for r in label.ref['refs']):
+                fmt = cls.ref_label_formats[label.ref['type']]
+                tag = cls.ref_tag_map[head][1]
+                index = [
+                    cls.si_ref_format.format(i=si_index_map[(head, r)] + 1)
+                        if (head, r) in si_index_map else
+                    cls.main_ref_format.format(r)
+                    for r in label.ref['refs']
+                ]
+                return fmt.format(tag=tag, index=index)
+            else:
+                return None
+
+    @classmethod
+    def figure_table_remapping(cls, si_labels:dict[str, dict[tuple[int, int], LabelBlock]], label_function=None):
+        si_ref_map = {}
+        for head, labels in si_labels.items():
+            for index,(_, label) in enumerate(labels.items()):
+                si_ref_map[(head, label.ref)] = index
+
+        if label_function is None:
+            label_function = cls.ref_remapping_label
+
+        def handle_refs(ref_map:dict[str, dict[tuple[int, int], cls.LabelBlock]]):
+            edits = {}
+            for head, labels in ref_map.items():
+                for eps, label in labels.items():
+                    label = label_function(head, label, si_ref_map)
+                    if label is not None:
+                        edits[eps] = label
+            return edits
+        return handle_refs
+    @classmethod
+    def remap_refs(cls, tex_stream, ref_handler, ref_map=None):
+        if ref_map is None:
+            ref_map = cls.create_ref_map(tex_stream)
+        edits = ref_handler(ref_map)
+        return cls.apply_body_edit(tex_stream, edits)
+
+    si_doc_labels = ('referenceExternalDocument',)
+    @classmethod
+    def find_si_documents(cls, flat_tex):
+        si_docs = {}
+        for ep, l in cls.get_call_list(flat_tex, cls.si_doc_labels).items():
+            doc_name = l.partition("{")[-1].partition("}")[0].strip()
+            si_docs[doc_name] = ep
+        return si_docs
+
+    def remap_si(self, flat_tex):
+        docs = self.find_si_documents(flat_tex)
+        flat_docs = {
+            t:type(self)(
+                os.path.join(self.graph.root_dir, os.path.splitext(t)[0] + ".tex"),
+                root_dir=self.graph.root_dir
+            ).create_flat_tex(include_aux=False)
+            for t in docs.keys()
+        }
+
+        #TODO: infer label style
+        si_labels = {}
+        for doc in flat_docs.values():
+            si_labels = dev.merge_dicts(si_labels, self.create_label_map(doc))
+
+        if len(si_labels) > 0:
+            flat_tex = self.apply_body_edit(flat_tex, {e:"" for e in docs.values()})
+            flat_tex = self.remap_refs(flat_tex, self.figure_table_remapping(si_labels))
+
+        return flat_tex, flat_docs
+
     def create_flat_tex(self, include_aux=True):
         flat_tex = self.flatten_import_graph(
             self.graph.populate_graph(),
@@ -1161,17 +1323,19 @@ class TeXTranspiler:
             flat_tex, style_files = self.remap_style_files(flat_tex)
             flat_tex, figure_files = self.remap_figures(flat_tex)
             flat_tex, bib_files = self.remap_bibliography(flat_tex)
+            flat_tex, si_tex = self.remap_si(flat_tex)
+            # flat_tex = self.remap_si
 
             aux = {
                 'styles':style_files,
                 'figures':figure_files,
-                'bibliography':bib_files
+                'bibliography':bib_files,
+                'si':si_tex
             }
 
             return flat_tex, aux
         else:
             return flat_tex
-
 
     @classmethod
     def _copy_inputs(cls, root_dir, target_dir, resource_path, inputs, merge_function,
@@ -1222,6 +1386,7 @@ class TeXTranspiler:
                 if requires_delete:
                     for s in src: os.remove(s)
 
+
     style_search_paths = ["styles"]
     def transpile(self, target_dir, file_name='main.tex', include_aux=True):
         flat_file = self.create_flat_tex(include_aux=include_aux)
@@ -1240,4 +1405,3 @@ class TeXTranspiler:
         os.path.join(target_dir, file_name)
         dev.write_file(os.path.join(target_dir, file_name), flat_file)
         return target_dir
-
