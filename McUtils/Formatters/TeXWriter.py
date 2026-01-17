@@ -770,8 +770,15 @@ class TeX:
         return cls.wrap_parens(cls.Array(mat, **kwargs))
 
 class TeXImportGraph:
-    import_heads = ("input", "import", "loadmodule", "loadsec", "loadfig", "loadtab")
-    def __init__(self, tex_root, root_dir=None, head_parser=None, import_heads=None, strip_comments=True):
+    import_heads = ("input", "import", "module", "loadsec", "loadfig", "loadtab")
+    def __init__(self, tex_root,
+                 root_dir=None,
+                 head_parser=None,
+                 import_heads=None,
+                 strip_comments=True,
+                 aliases=None,
+                 ignored_files=None
+                 ):
         if root_dir is None:
             root_dir = os.path.dirname(tex_root)
         self.root = tex_root
@@ -785,6 +792,7 @@ class TeXImportGraph:
             head_parser = self.head_resolver
         self.head_parser = head_parser
         self.strip_comments = strip_comments
+        self.aliases = aliases
 
     @classmethod
     def import_parser(cls, head:str, tag:str):
@@ -792,11 +800,12 @@ class TeXImportGraph:
     @classmethod
     def head_resolver(cls, tag:str):
         return tag.strip()[1:].partition("{")[0].partition("[")[0]
+    module_root = "sections"
     @classmethod
     def load_module_parser(cls, tag:str):
         root = tag.partition('module')[2].strip("{}").strip()
-        file = os.path.join(root, "main.tex")
-        return file, {'root':root}
+        file = os.path.join(cls.module_root, root, "main.tex")
+        return file, {'root':os.path.join(cls.module_root, root)}
     @classmethod
     def load_block_parser(cls, head:str, root, tag:str):
         filename = tag.partition(head)[2].strip("{}").strip()
@@ -827,13 +836,28 @@ class TeXImportGraph:
 
     ImportNode = collections.namedtuple("ImportNode", ["root_dir", "end_points", "head", "block", "opts"])
     root_dir_var = r"\RootDirectory"
+    def _resolve_aliases(self, root_dir):
+        base_aliases = {
+            self.root_dir_var:root_dir
+        }
+        if self.aliases is not None:
+            for a,v in self.aliases.items():
+                if not isinstance(v, str):
+                    v = v(base_aliases)
+                else:
+                    for rep_from,rep_to in base_aliases.items():
+                        v = v.replace(rep_from, rep_to)
+                base_aliases[a] = v
+        return base_aliases
     def _handle_parse_block(self, parser, head_map, import_heads, root_dir):
         imports = {}
         ep, block = parser.parse_tex_call(import_heads, return_end_points=True)
+        aliases = self._resolve_aliases(root_dir)
         while block is not None:
             head = self.head_parser(block)
             filename, opts = head_map[head](block)
-            filename = filename.replace(self.root_dir_var, root_dir)
+            for rep_from,rep_to in aliases.items():
+                filename = filename.replace(rep_from, rep_to)
             if not filename.startswith("/"):
                 file = os.path.join(root_dir, filename)
             else:
@@ -869,6 +893,7 @@ class TeXImportGraph:
                 imports = self._handle_parse_block(parser, head_map, import_heads, root_dir)
         return imports
 
+    verbose = False
     def populate_graph(self, import_heads=None, root_dir=None):
         if root_dir is None:
             root_dir = self.root_dir
@@ -882,6 +907,14 @@ class TeXImportGraph:
                     for file, node in new_imports.items()
                     if file not in self.graph
                 }
+                clean_imports = {}
+                for file,node in new_imports.items():
+                    if not os.path.isfile(file):
+                        if self.verbose:
+                            print(f"IGNORING MISSING FILE: {file}")
+                    else:
+                        clean_imports[file] = node
+                new_imports = clean_imports
                 self.graph[root] = new_imports
                 for file, node in new_imports.items():
                     subroot = node.opts.get('root')
@@ -903,14 +936,22 @@ class TeXTranspiler:
                  figures_path=None,
                  figure_merge_function=None,
                  bib_path=None,
-                 bib_merge_function=None):
-        self.graph = TeXImportGraph(tex_root, root_dir=root_dir, strip_comments=strip_comments)
+                 bib_merge_function=None,
+                 aliases=None,
+                 styles_path=None
+                 ):
+        self.graph = TeXImportGraph(tex_root,
+                                    root_dir=root_dir,
+                                    strip_comments=strip_comments,
+                                    aliases=aliases
+                                    )
         self.figure_renaming_function = figure_renaming_function
         self.figures_path = figures_path
         self.figure_merge_function = figure_merge_function
         self.bib_renaming_function = bib_renaming_function
         self.bib_path = bib_path
         self.bib_merge_function = bib_merge_function
+        self.styles_path = styles_path
 
     @classmethod
     def figure_counter(cls, name_root="Figure", start_at=1):
@@ -933,6 +974,8 @@ class TeXTranspiler:
             root = dev.drop_directory_prefix(root_dir, node_data.root_dir)
         else:
             root = node_data.root_dir
+        if len(root) > 0 and not root.endswith("/"):
+            root = root + "/"
         body = (
             node_data.opts.get('header', "")
             + body.replace("\\RootDirectory/", root)
@@ -952,7 +995,8 @@ class TeXTranspiler:
             else:
                 (s, e) = node_data
             s = s - split_point
-            e = e - split_point
+            if e > 0:
+                e = e - split_point
             start_chunk = cur_text[:s]
             chunks.append(start_chunk)
             chunks.append(body)
@@ -1004,24 +1048,21 @@ class TeXTranspiler:
                 flat_tex = re.sub("%.*\n", "", flat_tex)
             else:
                 with Parsers.TeXParser(temp_tex) as parser:
-                    blocks = dict(
-                        iter(
-                            lambda: parser.parse_tex_call(call_head, return_end_points=True),
-                            ((-1, -1), None)
-                        )
-                    )
+                    ep, block = parser.parse_tex_call(call_head, return_end_points=True)
+                    while block is not None:
+                        blocks[ep] = block
+                        ep, block = parser.parse_tex_call(call_head, return_end_points=True)
 
         if blocks is None:
             with tf.TemporaryFile(mode="w+") as temp_tex:
                 temp_tex.write(flat_tex)
                 temp_tex.seek(0)
                 with Parsers.TeXParser(temp_tex) as parser:
-                    blocks = dict(
-                        iter(
-                            lambda: parser.parse_tex_call(call_head, return_end_points=True),
-                            ((-1, -1), None)
-                        )
-                    )
+                    blocks = {}
+                    ep, block = parser.parse_tex_call(call_head, return_end_points=True)
+                    while block is not None:
+                        blocks[ep] = block
+                        ep, block = parser.parse_tex_call(call_head, return_end_points=True)
 
         filenames = [ file_parser(v) for v in blocks.values() ]
 
@@ -1041,7 +1082,7 @@ class TeXTranspiler:
                 flat_tex, blocks,
                 normalization_function=lambda edit_pos, body: (
                     edit_pos,
-                    self.__modify_resource_path(body, filenames)
+                    self._modify_resource_path(body, filenames)
                 )
             )
 
@@ -1068,7 +1109,7 @@ class TeXTranspiler:
             files = files[0]
         return files
     @classmethod
-    def __modify_resource_path(cls, tag:str, file_map):
+    def _modify_resource_path(cls, tag:str, file_map):
         head, _, path = tag.partition("{")
         name, _, rest = path.partition("}")
         names = tuple(s.strip() for s in name.split(","))
@@ -1090,6 +1131,22 @@ class TeXTranspiler:
                                 replacement_path=bib_path,
                                 renaming_function=self.bib_renaming_function)
 
+    def remap_style_files(self, flat_tex, styles_path=None):
+        if styles_path is None:
+            styles_path = self.styles_path
+        flat_tex, classes = self.remap_block(flat_tex,
+                                "documentclass",
+                                self._parse_graphics_file,
+                                replacement_path=styles_path)
+        classes = [os.path.splitext(c)[0]+".cls" for c in classes]
+
+        flat_tex, bib_styles = self.remap_block(flat_tex,
+                                "bibliographystyle",
+                                self._parse_graphics_file,
+                                replacement_path=styles_path)
+        bib_styles = [os.path.splitext(c)[0]+".bst" for c in bib_styles]
+        return flat_tex, (classes + bib_styles)
+
     def create_flat_tex(self, include_aux=True):
         flat_tex = self.flatten_import_graph(
             self.graph.populate_graph(),
@@ -1099,10 +1156,12 @@ class TeXTranspiler:
         )
 
         if include_aux:
+            flat_tex, style_files = self.remap_style_files(flat_tex)
             flat_tex, figure_files = self.remap_figures(flat_tex)
             flat_tex, bib_files = self.remap_bibliography(flat_tex)
 
             aux = {
+                'styles':style_files,
                 'figures':figure_files,
                 'bibliography':bib_files
             }
@@ -1113,12 +1172,18 @@ class TeXTranspiler:
 
 
     @classmethod
-    def _copy_inputs(cls, root_dir, target_dir, resource_path, inputs, merge_function):
+    def _copy_inputs(cls, root_dir, target_dir, resource_path, inputs, merge_function,
+                     search_paths=None,
+                     allow_missing=False
+                     ):
         if resource_path is not None:
             fig_dir = os.path.join(target_dir, resource_path)
             os.makedirs(fig_dir, exist_ok=True)
         else:
             fig_dir = target_dir
+
+        if not hasattr(inputs, 'items'):
+            inputs = {k:os.path.basename(k) for k in inputs}
         for src, target in inputs.items():
             requires_delete = False
             if not isinstance(target, str):
@@ -1140,16 +1205,34 @@ class TeXTranspiler:
                 target = [target]
             try:
                 for s, d in zip(src, target):
+                    if not os.path.isfile(s):
+                        if search_paths is not None:
+                            s_dir, s_base = os.path.split(s)
+                            for p in search_paths:
+                                test = os.path.join(s_dir, p, s_base)
+                                if os.path.isfile(test):
+                                    s = test
+                                    break
+                    if allow_missing and not os.path.isfile(s):
+                        continue
                     shutil.copy(s, os.path.join(fig_dir, d))
             finally:
                 if requires_delete:
                     for s in src: os.remove(s)
 
+    style_search_paths = ["styles"]
     def transpile(self, target_dir, file_name='main.tex', include_aux=True):
         flat_file = self.create_flat_tex(include_aux=include_aux)
         os.makedirs(target_dir, exist_ok=True)
         if include_aux:
             flat_file, aux = flat_file
+            self._copy_inputs(self.graph.root_dir, target_dir,
+                              self.styles_path,
+                              aux['styles'],
+                              self.figure_merge_function,
+                              search_paths=self.style_search_paths,
+                              allow_missing=False
+                              )
             self._copy_inputs(self.graph.root_dir, target_dir, self.figures_path, aux['figures'], self.figure_merge_function)
             self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'], self.bib_merge_function)
         os.path.join(target_dir, file_name)
