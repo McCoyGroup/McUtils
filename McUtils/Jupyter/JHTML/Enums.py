@@ -75,6 +75,7 @@ class Options(enum.Enum):
     GridTemplateRows = "grid-template-rows"
     Height = "height"
     Left = "left"
+    JustifyContent = "justify-content"
     LetterSpacing = "letter-spacing"
     LineHeight = "line-height"
     ListStyle = "list-style"

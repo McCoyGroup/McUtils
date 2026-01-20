@@ -10,6 +10,8 @@ __all__ = [
     "ContentXML"
 ]
 
+from ase.io.x3d import element
+
 from ...Misc import mixedmethod
 from .Enums import Options
 from .WidgetTools import frozendict
@@ -1034,6 +1036,7 @@ class HTML(XMLBase):
         def to_tree(self, root=None, parent=None, attr_converter=None):
             if parent is not None:
                 self._parents.add(parent)
+            attr_converter = self.__dict__.get('attr_converter') # don't want to resolve to class-level converter
             if self._tree_cache is None:
                 if root is None:
                     root = ElementTree.Element('root')
@@ -1062,7 +1065,11 @@ class HTML(XMLBase):
             if attr_converter is None:
                 attr_converter = self.attr_converter
             return self.modify(
-                elems=[e.clean_props() if hasattr(e, 'clean_props') else e for e in self.elems],
+                elems=[
+                    e.clean_props(attr_converter=attr_converter)
+                        if hasattr(e, 'clean_props') else e
+                    for e in self.elems
+                ],
                 **(attr_converter(self.attrs) if attr_converter is not None else self.attrs)
             )
         def to_json(self, root=None, parent=None, attr_converter=None):
@@ -1224,16 +1231,25 @@ class HTML(XMLBase):
         def dump(self, prefix="", linewidth=80):
             print(self.format(prefix=prefix, linewidth=linewidth))
         def write(self, file, **opts):
-            def write_str(tree, **base_opts):
-                if isinstance(tree, str):
-                    if hasattr(file, 'write'):
-                        file.write(tree)
-                    else:
-                        with open(file, 'w+') as f:
-                            f.write(tree)
-                else:
-                    tree.write(file, **base_opts)
-            return self.tostring(write_string=write_str, **opts)
+            ## Stream version is faster but more fragile
+            # def write_str(tree, **base_opts):
+            #     if isinstance(tree, str):
+            #         if hasattr(file, 'write'):
+            #             file.write(tree)
+            #         else:
+            #             with open(file, 'w+') as f:
+            #                 f.write(tree)
+            #     elif hasattr(tree, 'write'):
+            #         tree.write(file, **base_opts)
+            #     else:
+            #         write_str(ElementTree.tostring(tree), **base_opts)
+            base_str = self.tostring(**opts)
+            if hasattr(file, 'write'):
+                file.write(base_str)
+            else:
+                with open(file, 'w+') as dump:
+                    dump.write(base_str)
+
         MAX_REPR_LENGTH = 1000
         def __repr__(self):
             base_repr = "{}({}, {})".format(type(self).__name__, self.elems, self.attrs)

@@ -107,12 +107,19 @@ class JupyterAPIs:
 
 class DefaultOutputWidget:
     _output_area_stack = []
+    @classmethod
+    def _get_output_pane(cls):
+        api = JupyterAPIs.get_widgets_api()
+        if api is not None:
+            return api.Output()
+        else:
+            return None
     def __init__(self, obj=None):
-        self.obj = JupyterAPIs.get_widgets_api().Output() if obj is None else obj
+        self.obj = self._get_output_pane() if obj is None else obj
     @classmethod
     def get_default(cls):
         if len(cls._output_area_stack) == 0:
-            return JupyterAPIs.get_widgets_api().Output()
+            return cls._get_output_pane()
         else:
             return cls._output_area_stack[-1]
     def __enter__(self):

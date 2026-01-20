@@ -571,7 +571,24 @@ def view_matrix(
         right_vector[..., np.newaxis]
     ], axis=-1).reshape(base_shape + (d, d))
 
+
     if output_order is not None:
+        if isinstance(output_order[0], str):
+            output_order = [
+                (
+                    0
+                        if o == "z" else
+                    1
+                        if o == "y" else
+                    2
+                        if o == "x" else
+                    o
+                )
+                    if isinstance(o, str) else
+                o
+                for o in output_order
+
+            ]
         from .PermutationOps import permutation_sign
         sign = permutation_sign(output_order)
         axes = axes[..., :, output_order]
