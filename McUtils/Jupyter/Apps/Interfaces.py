@@ -97,6 +97,44 @@ class WidgetInterface(metaclass=abc.ABCMeta):
         JupyterAPIs.get_display_api().display(self.to_widget())
         self.initialize()
 
+    bootstrap_js_bundle_opts = dict(
+        src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js",
+        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct",
+        crossorigin="anonymous"
+    )
+    bootstrap_jquery_bundle_opts = dict(
+        src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js",
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj",
+        crossorigin="anonymous"
+    )
+    bootstrap_css_opts = dict(
+        rel="stylesheet",
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css",
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N",
+        crossorigin="anonymous"
+    )
+    @classmethod
+    def _get_boostrap_links(cls):
+        return [
+            JHTML.Link(**cls.bootstrap_css_opts),
+            JHTML.Script(**cls.bootstrap_jquery_bundle_opts),
+            JHTML.Script(**cls.bootstrap_js_bundle_opts)
+        ]
+    def to_static_html(self, include_bootstrap=True, create_body=True):
+        w = self.to_widget()
+        if not isinstance(w, JHTML.HTML.XMLElement):
+            raise ValueError("widget {} can't reduce to static HTML")
+        if include_bootstrap:
+            if create_body:
+                w = JHTML.HTML.Html(
+                    JHTML.Head(*self._get_boostrap_links()),
+                    JHTML.Body(w)
+                )
+            else:
+                w = JHTML.HTML.Div(*self._get_boostrap_links())
+            w = w.clean_props(attr_converter=lambda attrs:{k.replace("data-bs-", "data-"):v for k,v in attrs.items()})
+        return w
+
     _display_locks = set()
     def display(self):
         if self not in self._display_locks: # don't want to call this over and over...
@@ -281,6 +319,7 @@ class WrapperComponent(Component):
 
         wrappers = list(wrappers.items())
 
+        is_dynamic = attrs.get('dynamic')
         self.theme = self.manage_theme(theme, extend_base_theme=extend_base_theme)
         self.theme[wrappers[0][0]] = self.merge_themes(self.theme.get(wrappers[0][0], {}), attrs)
         if len(wrappers) > 1:
@@ -293,7 +332,8 @@ class WrapperComponent(Component):
         else:
             attrs = self.theme[wrappers[0][0]]
             self.wrapper = wrappers[0][1]
-        # print(attrs)
+        if is_dynamic is not None:
+            attrs['dynamic'] = is_dynamic
         super().__init__(**attrs) # need to delegate attr updates to the theme...
 
         # self.item_attrs = theme.get(item[0], {})
@@ -360,6 +400,11 @@ class WrapperComponent(Component):
         return theme
 
     @classmethod
+    def _check_is_widget_class(cls, el):
+        widg_api = JupyterAPIs.get_widgets_api()
+        return (widg_api is not None and isinstance(el, widg_api.Widget))
+
+    @classmethod
     def manage_items(cls, items, attrs):
         if isinstance(items, dict):
             attrs = dict(attrs, **items)
@@ -373,7 +418,8 @@ class WrapperComponent(Component):
             attrs = dict(attrs, **items[1])
             items = items[0]
         if (
-                isinstance(items, (str, int, float, JupyterAPIs.get_widgets_api().Widget))
+                isinstance(items, (str, int, float))
+                or cls._check_is_widget_class(items)
                 or hasattr(items, 'to_tree')
                 or hasattr(items, 'to_widget')
         ):
@@ -782,14 +828,26 @@ class Carousel(MenuComponent):
     theme = {
         'wrapper': {'cls': ['carousel']},
         'inner': {'cls': ['carousel-inner']},
-        'item': {'cls': ['carousel-item']}
+        'item': {'cls': ['carousel-item']},
+        'control':{"cls": ['bg-secondary']}
     }
-    def __init__(self, items, include_controls=True, data_bs_ride='carousel', interval=None, **attrs):
+    def __init__(self, items, include_controls=True, data_bs_ride='carousel',
+                 include_indicators=False,
+                 overlap_controls=False,
+                 interval=None, **attrs):
         self.include_controls = include_controls
+        self.include_indicators = include_indicators
         self._active_made = False
         self.base_name = 'carousel-' + short_uuid()
         self.interval = interval
         super().__init__(items, id=self.base_name, data_bs_ride=data_bs_ride, **attrs)
+        if not overlap_controls:
+            control_theme = self.theme['control']
+            control_theme['width'] = control_theme.get('width', '2rem')
+            inner_theme = self.theme['inner']
+            inner_theme['margin_left'] = control_theme['width']
+            inner_theme['margin_right'] = control_theme['width']
+
     def create_item(self, item, cls=None, data_bs_interval=None, **kw):
         cls = JHTML.manage_class(cls)
         if not self._active_made:
@@ -798,24 +856,45 @@ class Carousel(MenuComponent):
         if data_bs_interval is None:
             data_bs_interval = str(self.interval) if self.interval is not None else "10000000000"
         return super().create_item(item, cls=cls, data_bs_interval=data_bs_interval, **kw)
-    def next_button(self, body=None, cls='carousel-control-next', **kwargs):
+    def _control_button(self, dir, body=None, cls='carousel-control-{dir}', **kwargs):
+        kwargs = dict(self.theme['control'], **kwargs)
+        if isinstance(body, dict):
+            opts = body.copy()
+            body = opts.pop('body', None)
+            kwargs = dict(kwargs, **opts)
         return JHTML.Button(
-                    JHTML.Span(cls='carousel-control-next-icon') if body is None else body,
-                    **self.merge_themes(dict(cls=cls, data_bs_target='#'+self.base_name, data_bs_slide='next'), kwargs)
-                )
-    def prev_button(self, body=None, cls='carousel-control-prev', **kwargs):
-        return JHTML.Button(
-            JHTML.Span(cls='carousel-control-prev-icon') if body is None else body,
+            JHTML.Span(cls=f'carousel-control-{dir}-icon') if body is None else body,
             **self.merge_themes(
-                dict(cls=cls, data_bs_target='#' + self.base_name, data_bs_slide='prev'),
-                kwargs
-            )
+                dict(cls=cls.format(dir=dir), data_bs_target='#' + self.base_name, data_bs_slide=dir), kwargs)
+        )
+    def next_button(self, body=None, **kwargs):
+        return self._control_button("next", body=body, **kwargs)
+    def prev_button(self, body=None, **kwargs):
+        return self._control_button("prev", body=body, **kwargs)
+    def indicators(self, **kwargs):
+        ttt = self.theme['control'].copy()
+        ttt.pop('width')
+        kwargs = dict(ttt, **kwargs)
+        return JHTML.Ol(
+            [
+                JHTML.Li(cls="active" if i ==0 else "", data_bs_target='#' + self.base_name, data_bs_slide_to=str(i))
+                for i in range(len(self.items))
+            ],
+            **self.merge_themes(dict(cls='carousel-indicators'), kwargs)
         )
     def wrap_items(self, items):
         base = super().wrap_items(items)
-        if self.include_controls:
-            base.append(self.prev_button())
-            base.append(self.next_button())
+        controls = self.include_controls
+        if controls:
+            if controls is True:
+                controls = [self.prev_button(), self.next_button()]
+            else:
+                left, right = controls
+                controls = [self.prev_button(left), self.next_button(right)]
+            base.append(controls[0])
+            base.append(controls[1])
+        if self.include_indicators:
+            base.append(self.indicators())
         return base
 
 
@@ -1981,7 +2060,7 @@ class DelayedResult(WidgetInterface):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.output.__exit__()
+        self.output.__exit__(exc_type, exc_val, exc_tb)
 
     def _run(self):
         # with self.output:

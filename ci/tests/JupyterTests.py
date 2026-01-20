@@ -24,9 +24,30 @@ a {
 }
         """)[0].tostring()
 
-    @debugTest
+    @validationTest
     def test_WidgetConstruction(self):
         from Psience.Molecools import Molecule
         water = Molecule.from_string('O', 'smi')
         widg = interactive.JHTML.Div(water.plot(backend='x3d').figure.to_x3d(), dynamic=True)
         print(widg.elem.children[0].children)
+
+    @debugTest
+    def test_WidgetInteractivity(self):
+        import McUtils.Jupyter as interactive
+        from Psience.Molecools import Molecule
+
+        reactant = Molecule.from_string("CCO", "smi")
+
+        p = reactant.plot(backend='x3d')
+
+        print(type(
+            interactive.Grid([[
+                p, p
+            ]], dynamic=False).to_jhtml()
+        ))
+
+        print(type(
+            interactive.Carousel([
+                p, p
+            ], dynamic=False).to_jhtml()
+        ))
