@@ -92,6 +92,44 @@ FormattedCheckpointComponents["Dipole Moment num derivs"] = FchkDipoleNumDerivat
 
 FormattedCheckpointComponents["Dipole Derivatives num derivs"] = FchkDipoleHigherDerivatives
 
+def parse_pol(pol_array, tril=np.tril_indices(3), reader=None):
+    full_array = np.zeros((3, 3), dtype=float)
+    full_array[tril] = pol_array
+    r,c = tril
+    full_array[c,r] = pol_array
+    return full_array
+FormattedCheckpointComponents["Polarizability"] = parse_pol
+def parse_hyper_pol(pol_array, tril=np.tril_indices(3), reader=None):
+    import itertools
+    full_array = np.zeros((3, 3, 3), dtype=float)
+    i,j,k = list(itertools.combinations_with_replacement(range(3), 3))
+    full_array[i,j,k] = pol_array
+    full_array[i,k,j] = pol_array
+    full_array[k,i,j] = pol_array
+    return full_array
+FormattedCheckpointComponents["HyperPolarizability"] = parse_pol
+def parse_pol_derivs(pol_array, tril=np.tril_indices(3), reader=None):
+    n_modes = len(pol_array) // 6
+    full_array = np.zeros((n_modes, 3, 3))
+    r, c = tril
+    for i, block in enumerate(np.array_split(pol_array, n_modes)):
+        full_array[i, r, c] = block
+        full_array[i, c, r] = block
+    return full_array
+FormattedCheckpointComponents["Polarizability Derivatives"] = parse_pol_derivs
+def parse_pol_num_derivs(pol_array, tril=np.tril_indices(3), reader=None):
+    n_modes = len(pol_array) // 12
+    firsts = np.zeros((n_modes, 3, 3))
+    second_diag = np.zeros((n_modes, n_modes, 3, 3))
+    r, c = tril
+    for i,block in enumerate(np.array_split(pol_array, n_modes)):
+        firsts[i, r,c] = block[:6]
+        firsts[i, c, r] = block[:6]
+        second_diag[i, i, r,c] = block[6:]
+        second_diag[i, i, c, r] = block[6:]
+    return firsts, second_diag
+FormattedCheckpointComponents["Polarizability num derivs"] = parse_pol_num_derivs
+
 #endregion
 
 ########################################################################################################################

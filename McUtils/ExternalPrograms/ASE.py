@@ -142,7 +142,7 @@ class ASEMolecule(ExternalMolecule):
                 for k,r in prop_arrays.items()
             }
 
-    def calculate_energy(self, geoms=None, order=None, calc=None):
+    def calculate_energy(self, geoms=None, order=None, calc=None, hessian_func_attr='get_hessian'):
         if calc is None:
             calc = self.mol.calc
         just_eng = order is None
@@ -152,7 +152,8 @@ class ASEMolecule(ExternalMolecule):
             props.append('forces')
         extra_calcs = None
         if order > 1:
-            if hasattr(calc, 'get_hessian'):
+            if hasattr(calc, hessian_func_attr):
+                hessian_func = getattr(calc, hessian_func_attr)
                 extra_calcs = lambda m:{'hessian':calc.get_hessian(m)}
             else:
                 raise ValueError("ASE calculators only need to implement forces")
