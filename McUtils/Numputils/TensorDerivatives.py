@@ -95,8 +95,9 @@ def apply_nca_op(op, order, k,
     # so we can symmetrize
     d = deriv_axis + s
     sa = (A.ndim - len(axes[0]) if contract else A.ndim)
+    #TODO: figure out why this wasn't _shared_ since the idea is the same?
     for i in range(k):
-        base = np.moveaxis(base, d+i, sa)
+        base = np.moveaxis(base, d+i, shared)
     part = [x for x in [s, k] if x > 0]
     if len(part) > 1:
         base = nca_symmetrize(base, part, contract=contract, shared=shared, identical=identical)
@@ -674,9 +675,9 @@ def matinv_deriv(A_expansion, order, base_expansion=None):
     for o in range(len(inverse_expansion), order+1):
         expansion = tensorops_deriv(
             A_expansion[1:],
-                [s, s + 1],
+                [s+1, s + 1],
             inverse_expansion,
-                [s, s + 0],
+                [s+2, s + 0],
             inverse_expansion,
             order=[o - 1],
             shared=shared

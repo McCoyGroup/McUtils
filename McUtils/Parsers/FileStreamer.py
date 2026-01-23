@@ -691,8 +691,8 @@ class FileStreamReader(SearchStreamReader):
     """
     Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
     """
-    def __init__(self, file, mode="r", encoding="utf-8",  allow_tempfile=False, **kw):
-        stream = FileSearchStream(file, mode=mode, encoding=encoding, allow_tempfile=allow_tempfile, **kw)
+    def __init__(self, file, mode="r", encoding="utf-8", **kw):
+        stream = FileSearchStream(file, mode=mode, encoding=encoding, **kw)
         super().__init__(stream)
 class StringStreamReader(SearchStreamReader):
     """

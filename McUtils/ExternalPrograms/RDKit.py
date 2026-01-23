@@ -222,6 +222,7 @@ class RDMolecule(ExternalMolecule):
                     call_add_hydrogens=True,
                     num_confs=1, optimize=False, take_min=True,
                     force_field_type='mmff',
+                    reorder_from_atom_map=True,
                     **opts):
 
         if os.path.isfile(smiles):
@@ -248,6 +249,12 @@ class RDMolecule(ExternalMolecule):
                 rdkit_mol.UpdatePropertyCache(strict=False)
                 _ = Chem.GetSymmSSSR(rdkit_mol)
                 Chem.SetHybridization(rdkit_mol)
+
+        if reorder_from_atom_map:
+            base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
+            base_map = [len(base_map)+1 if a == 0 else a for a in base_map]
+            rdkit_mol = Chem.RenumberAtoms(rdkit_mol, np.argsort(base_map).tolist())
+
         if call_add_hydrogens: # RDKit is super borked for most molecules
             mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
         else:
