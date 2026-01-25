@@ -352,7 +352,7 @@ class CoordinateSystem:
         if self.matrix is not None:
             self.matrix = np.dot(self.matrix, rot)
             if self._inv is not None:
-                self._inv = np.dot(rot, self._inv)
+                self._inv = np.dot(rot.T, self._inv)
         else:
             self.matrix = rot
         return self

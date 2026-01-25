@@ -44,6 +44,8 @@ def format_symmetric_tensor_elements(
         symmetries=None,
         cutoff=1e-6,
         headers=("Indices", "Value"),
+        allowed_indices=None,
+        filter=None,
         format="{:12.3f}",
         **etc
 ):
@@ -61,6 +63,17 @@ def format_symmetric_tensor_elements(
         ]
         inds_mask = np.all(inds_tests, axis=0)
         inds = tuple(x[inds_mask] for x in inds)
+
+    if allowed_indices is not None:
+        mask = np.full(len(inds[0]), True)
+        for a,x in zip(allowed_indices, inds):
+            if a is None: continue
+            mask = mask & np.in1d(x, a)
+        inds = tuple(x[mask] for x in inds)
+
+    if filter is not None:
+        mask = filter(inds)
+        inds = tuple(x[mask] for x in inds)
 
     vals = tensor[inds]
 

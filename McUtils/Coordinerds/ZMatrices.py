@@ -307,6 +307,8 @@ def _prep_var_spec(v):
     else:
         raise ValueError(f"can't parse var spec {v}")
 def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,
+                         has_values=True,
+                         atoms_are_order=False,
                          keep_variables=False,
                          variables=None,
                          dialect='gaussian'):
@@ -338,21 +340,37 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,
     last_idx = len(bits) - 1
     for i, b in enumerate(bits):
         d = (i - last_complete) - 1
-        m = d % 2
-        if d == 0:
-            atoms.append(b)
-        elif m == 1:
-            b = int(b)
-            if b > 0: b = b - 1
-            ord.append(b)
-        elif m == 0:
-            coord.append(b)
+        if has_values:
+            m = d % 2
+            if d == 0:
+                atoms.append(b)
+            elif m == 1:
+                b = int(b)
+                if b > 0: b = b - 1
+                ord.append(b)
+            elif m == 0:
+                coord.append(b)
 
-        terminal = (
-                i == last_idx
-                or i in {0, 3, 8}
-                or (i > 8 and (i - 9) % 7 == 6)
-        )
+            terminal = (
+                    i == last_idx
+                    or i in {0, 3, 8}
+                    or (i > 8 and (i - 9) % 7 == 6)
+            )
+        else:
+            if d == 0:
+                atoms.append(b)
+            else:
+                b = int(b)
+                if b > 0: b = b - 1
+                ord.append(b)
+
+            terminal = (
+                    i == last_idx
+                    or i in {0, 2, 5}
+                    or (i > 5 and d == 3)
+            )
+
+
         # atom_q = bits[i + 1][:2] in possible_atoms
         if terminal:
             last_complete = i
@@ -362,6 +380,13 @@ def parse_zmatrix_string(zmat, units="Angstroms", in_radians=False,
             coords.append(coord)
             ord = []
             coord = []
+
+    if atoms_are_order:
+        atom_ord = np.array(atoms).astype(int) - 1
+        ordering = np.asanyarray(ordering)
+        ordering[:, 0] = atom_ord
+        atoms = None
+
 
     split_vars = [
         vb.strip().replace("=", " ").split()
