@@ -14,7 +14,8 @@ __all__ = [
     "Inset",
     "Point",
     "Triangle",
-    "Polygon"
+    "Polygon",
+    "Rectangle"
 ]
 
 import abc, numpy as np
@@ -180,6 +181,18 @@ class Polygon(GraphicsPrimitive):
             axes = axes.axes
         return axes.draw_poly(self.pos, **self.opts)
 
+class Rectangle(GraphicsPrimitive):
+    def __init__(self, pts, **opts):
+        self.pos = pts
+        self.opts = dict(opts)
+
+    def get_bbox(self):
+        raise NotImplementedError("...")
+
+    def plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs):
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_rect(self.pos, **self.opts)
 
 class Inset(GraphicsPrimitive):
     def __init__(self, prims, position, offset=(.5, .5), dimensions=None, plot_range=None, **opts):

@@ -2387,12 +2387,120 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(text)
         return text
 
-    def draw_rect(self, points, **styles):
-        points = np.asanyarray(points)
-        rects = x3d.X3DRectangle2D(points[..., 0, :], points[..., 1, :], **styles)
-        self.children.append(rects)
+    @classmethod
+    def prep_uv(cls, uv_axes, normal=None, uv_sign=None, rotation=None, angle=None):
+        u, v = uv_axes
+        base_ang, base_norm = nput.vec_angles(u, v, return_crosses=True)
+        base_norm = nput.vec_normalize(base_norm)
+        if normal is None:
+            normal = base_norm
+        angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
+        embedding_axes = nput.rotation_matrix(crosses, angs).T
+        local_x, local_y, local_z = embedding_axes
+        emb_angle, ax2 = nput.vec_angles(local_x, v)
+        if uv_sign is None:
+            # print(np.dot(local_x, v))
+            # print(np.dot(local_y, v))
+            # print(np.dot(local_x, u))
+            # print(np.dot(local_y, u))
+            uv_sign = np.sign(np.dot(local_y, v))
+        emb_angle = uv_sign * emb_angle
+        if rotation is None:
+            rotation = [0, 0, 1, emb_angle]
+        if angle is None:
+            angle = base_ang
 
-        return rects
+        return normal, rotation, angle, embedding_axes
+
+    def draw_rect(self,
+                  points,
+                  color=None,
+                  line_color=None,
+                  edgecolors=None,
+                  normal=None,
+                  line_thickness=None,
+                  innerRadius=None,
+                  outerRadius=None,
+                  uv_axes=None,
+                  uv_sign=None,
+                  angle=None,
+                  rotation=None,
+                  solid=None,
+                  cap_style='round',
+                  **styles):
+
+        if line_color is None:
+            line_color = edgecolors
+
+        if uv_axes is not None:
+            normal, rotation, angle, embedding_axes = self.prep_uv(
+                uv_axes, normal=normal, uv_sign=uv_sign, rotation=rotation, angle=angle
+            )
+        elif normal is not None:
+            embedding_axes = nput.rotation_matrix(normal, [0, 0, 1])
+            if rotation is not None:
+                rotation = np.asanyarray(rotation)
+                embedding_axes = embedding_axes @ nput.rotation_matrix(rotation[..., :3], rotation[..., 3])
+        else:
+            embedding_axes = None
+
+        objects = []
+        if line_color is not None:
+            line_points = np.asanyarray(points)
+            if embedding_axes is not None:
+                center = (line_points[..., (0,), :] + line_points[..., (1,), :]) / 2
+                line_points = line_points - center
+                line_points = line_points @ embedding_axes
+            left = line_points[..., 0, :]
+            right = line_points[..., 1, :]
+            second = np.concatenate([left[..., (0,)], right[..., (1,)], left[..., (2,)]], axis=-1)
+            fourth = np.concatenate([right[..., (0,)], left[..., (1,)], right[..., (2,)]], axis=-1)
+            if line_thickness is None:
+                line_points = np.moveaxis(np.array([left, second, second, right, right, fourth, fourth, left]), 0, -2)
+                if embedding_axes is not None:
+                    line_points = line_points @ embedding_axes.T + center
+                line_set = x3d.X3DLine(line_points,
+                                           glow=line_color,
+                                           **styles
+                                           )
+            else:
+                starts = np.moveaxis(np.array([left, second, right, fourth]), 0, -2)
+                ends = np.moveaxis(np.array([second, right, fourth, left]), 0, -2)
+                if embedding_axes is not None:
+                    starts = starts @ embedding_axes.T + center
+                    ends = ends @ embedding_axes.T + center
+                if cap_style == 'butt':
+                    line_set = x3d.X3DCylinder(starts, ends,
+                                               radius=line_thickness,
+                                               color=line_color,
+                                               solid=solid,
+                                               **styles
+                                               )
+                else:
+                    line_set = x3d.X3DCappedCylinder(starts, ends,
+                                                     radius=line_thickness,
+                                                     color=line_color,
+                                                     solid=solid,
+                                                     **styles
+                                                     )
+            objects.append(line_set)
+
+        if color is None and line_color is None:
+            color = 'black'
+        if color is not None:
+            points = np.asanyarray(points)
+            rect_set = x3d.X3DRectangle2D(points[..., 0, :], points[..., 1, :],
+                                     normal=normal,
+                                     color=color,
+                                     rotation=rotation,
+                                     solid=False if solid is None else solid,
+                                     **styles
+                                     )
+            objects.append(rect_set)
+
+        self.children.extend(objects)
+
+        return objects
     def draw_point(self, points, color=None, glow=None, **styles):
         points = np.asanyarray(points)
         if glow is None: glow = color

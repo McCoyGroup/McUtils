@@ -553,7 +553,7 @@ def translation_rotation_invariant_transformation(
 
 EmbeddingData = collections.namedtuple("PrincipleAxisData", ['coords', 'com', 'axes'])
 EckartData = collections.namedtuple('EckartData', ['rotations', 'coordinates', 'reference_data', 'coord_data'])
-def principle_axis_embedded_coords(coords, masses=None):
+def principle_axis_embedded_coords(coords, masses=None, sel=None):
     """
     Returns coordinate embedded in the principle axis frame
 
@@ -564,12 +564,25 @@ def principle_axis_embedded_coords(coords, masses=None):
     :return:
     :rtype:
     """
+
+    og_coords = coords
+    if sel is not None:
+        coords = coords[..., sel, :]
+        masses = masses[sel]
+
+    real_pos = masses > 0
+    # print(real_pos)
+    # og_coords = coords
+    coords = coords[..., real_pos, :]
+    masses = masses[real_pos,]
+
     com = center_of_mass(coords, masses)
     # crds_ = coords
     coords = coords - com[..., np.newaxis, :]
     moms, pax_axes = moments_of_inertia(coords, masses)
     # pax_axes = np.swapaxes(pax_axes, -2, -1)
-    coords = np.matmul(coords, pax_axes)
+    coords = np.matmul(og_coords - com[..., np.newaxis, :], pax_axes)
+    # coords = np.matmul(coords, pax_axes)
 
     return EmbeddingData(coords, com, pax_axes)
 
@@ -582,8 +595,8 @@ def _prep_eckart_data(ref, coords, masses, in_paf=False, sel=None):
         coords = np.broadcast_to(coords, (1,) + coords.shape)
 
     if not in_paf:
-        coords, com, pax_axes = principle_axis_embedded_coords(coords, masses)
-        ref, ref_com, ref_axes = principle_axis_embedded_coords(ref, masses)
+        coords, com, pax_axes = principle_axis_embedded_coords(coords, masses, sel=sel)
+        ref, ref_com, ref_axes = principle_axis_embedded_coords(ref, masses, sel=sel)
         # raise ValueError(ref)
     else:
         com = pax_axes = None
