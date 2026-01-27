@@ -5,6 +5,9 @@ import collections
 import uuid
 import numpy as np
 import os
+
+from rdkit.sping.colors import transparent
+
 from .. import Devutils as dev
 from ..Jupyter import JHTML, X3DHTML
 from .. import Numputils as nput
@@ -334,6 +337,38 @@ class X3DOptionsSet(X3DObject):
     __props__ = {}
 
     @classmethod
+    def parse_color(cls, color):
+        if isinstance(color, (list, tuple, np.ndarray)) and all(isinstance(c, str) for c in color):
+            color = " ".join(color)
+        if isinstance(color, str):
+            try:
+                _ = [float(s) for s in color.split()]
+            except ValueError:
+                from .Colors import ColorPalette
+
+                bits = []
+                for c in color.split():
+                    if c.startswith('#'):
+                        c = ColorPalette.parse_rgb_code(c)
+                    else:
+                        c = np.array(ColorPalette.parse_color_string(c))
+                    bit_bits = np.array(c) / 255
+                    bits.extend(bit_bits)
+
+            else:
+                bits = _
+        else:
+            bits = color
+        if len(bits) > 3:
+            color = bits[:-1]
+            transparency = bits[-1]
+        else:
+            color = bits
+            transparency = None
+
+        return color, transparency
+
+    @classmethod
     def get_new_id(cls):
         return "x3d-opts-" + str(uuid.uuid4())[:6]
     def __init__(self, id=None, **attrs):
@@ -381,6 +416,16 @@ class X3DMaterial(X3DOptionsSet):
         "color": "diffuseColor",
         "specularity": "specularColor"
     }
+    def prep_attrs(self, attrs:dict):
+        if 'color' in attrs:
+            new_attrs = attrs.copy()
+            color, transparency = self.parse_color(attrs['color'])
+            new_attrs['color'] = color
+            if transparency is not None:
+                new_attrs['transparency'] = transparency
+        else:
+            new_attrs = attrs
+        return super().prep_attrs(new_attrs)
     def to_x3d(self):
         return X3DHTML.Material(**self.prep_attrs(self.attrs))
 
@@ -712,32 +757,10 @@ class X3DBackground(X3DOptionsSet):
         attrs = super().prep_attrs(attrs)
         color = attrs.get('skyColor', None)
         if color is not None:
-            if isinstance(color, (list, tuple, np.ndarray)) and all(isinstance(c, str) for c in color):
-                color = " ".join(color)
-            if isinstance(color, str):
-                try:
-                    _ = [float(s) for s in color.split()]
-                except ValueError:
-                    from .Colors import ColorPalette
-
-                    bits = []
-                    for c in color.split():
-                        if c.startswith('#'):
-                            c = ColorPalette.parse_rgb_code(c)
-                        else:
-                            c = np.array(ColorPalette.parse_color_string(c))
-                        bit_bits = np.array(c) / 255
-                        bits.extend(bit_bits)
-
-                else:
-                    bits = _
-            else:
-                bits = color
-            if len(bits) > 3:
-                attrs['skyColor'] = bits[:-1]
-                attrs['transparency'] = bits[-1]
-            else:
-                attrs['skyColor'] = bits
+            color, transparency = self.parse_color(color)
+            attrs['skyColor'] = color
+            if transparency is not None:
+                attrs['transparency'] = transparency
         return attrs
 
     def to_x3d(self):
