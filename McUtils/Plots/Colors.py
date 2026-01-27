@@ -395,7 +395,7 @@ class ColorPalette:
         rgb = np.round(np.clip(rgb, 0, 255)).astype(int)
         return f"#{rgb[0]:0>{padding}x}{rgb[1]:0>{padding}x}{rgb[2]:0>{padding}x}"
     @classmethod
-    def parse_rgb_code(cls, code, padding=None, return_padding=False):
+    def parse_rgb_code(cls, code, padding=None, return_padding=False, num_channels=None):
         if not isinstance(code, str):
             if not return_padding:
                 return [
@@ -410,11 +410,21 @@ class ColorPalette:
                 ], padding
         if code[0] == "#":
             code = code[1:]
+        if num_channels is None:
+            lc = len(code)
+            if lc % 3 == 0:
+                num_channels = 3
+            elif lc % 4 == 0:
+                num_channels = 4
+            elif lc == 1 or lc == 2:
+                num_channels = 1
+            else:
+                num_channels = 3
         if padding is None:
-            padding = len(code) // 3
+            padding = len(code) // num_channels
         color_list = [
             int(code[(padding*i):(padding*(i+1))], 16)
-            for i in range(3)
+            for i in range(num_channels)
         ]
         if return_padding:
             return color_list, padding

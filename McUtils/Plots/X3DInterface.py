@@ -722,12 +722,22 @@ class X3DBackground(X3DOptionsSet):
 
                     bits = []
                     for c in color.split():
-                        if color.startswith('#'):
+                        if c.startswith('#'):
                             c = ColorPalette.parse_rgb_code(c)
                         else:
                             c = np.array(ColorPalette.parse_color_string(c))
-                        bits.extend(np.array(c) / 255)
-                    attrs['skyColor'] = bits
+                        bit_bits = np.array(c) / 255
+                        bits.extend(bit_bits)
+
+                else:
+                    bits = _
+            else:
+                bits = color
+            if len(bits) > 3:
+                attrs['skyColor'] = bits[:-1]
+                attrs['transparency'] = bits[-1]
+            else:
+                attrs['skyColor'] = bits
         return attrs
 
     def to_x3d(self):
@@ -1093,19 +1103,51 @@ class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
         return [base_dict]
 
 class X3DGeometry2DGroup(X3DGeometryGroup):
+    @classmethod
+    def prep_2d_coords(cls, coords):
+        coords = np.asanyarray(coords)
+        coords = coords.reshape(-1, coords.shape[-1])
+        if coords.shape[-1] == 2:
+            coords = np.pad(coords, [[0, 0], [0, 1]])
+        return coords
     def prep_geometry_opts(self, center, **etc):
-        # raise Exception(crosses)
-        # a = np.concatenate([crosses, [angs]])
-        # a, _ = self.get_rotation(crosses, up_vector=up_vector)
+        center = self.prep_2d_coords(center)
         return [
             {
-                "translation":center,
+                "translation":c,
                  **etc
             }
+            for c in center
         ]
 
 class X3DRectangle2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Rectangle2D
+    def prep_geometry_opts(self, left_endpoints, right_endpoints, normal=None, rotation=None, **etc):
+        left_endpoints = self.prep_2d_coords(left_endpoints)
+        right_endpoints = self.prep_2d_coords(right_endpoints)
+        center = (left_endpoints + right_endpoints ) / 2
+        base_opts = super().prep_geometry_opts(center, **etc)
+
+        if normal is None and rotation is not None:
+            normal = np.array([0, 0, 1])
+            rotation = np.asanyarray(rotation)
+            if np.asanyarray(rotation).ndim > 1:
+                normal = np.repeat(normal[np.newaxis], len(rotation), axis=0)
+        if normal is not None:
+            embedding_axes = nput.rotation_matrix(normal, [0, 0, 1])
+            if rotation is not None:
+                rotation = np.asanyarray(rotation)
+                embedding_axes = embedding_axes @ nput.rotation_matrix(rotation[..., :3], rotation[..., 3])
+            right_endpoints = (right_endpoints - center) @ embedding_axes
+            left_endpoints = (left_endpoints - center) @ embedding_axes
+        normal = self.prep_vecs(normal, right_endpoints.shape[0])
+        rotation = self.prep_vecs(rotation, right_endpoints.shape[0])
+        size_x = np.abs(right_endpoints[..., 0] - left_endpoints[..., 0])
+        size_y = np.abs(right_endpoints[..., 1] - left_endpoints[..., 1])
+        return [
+            dict(b, size=[x, y], normal=n, rotation=r)
+            for b,x,y,n,r in zip(base_opts, size_x, size_y, normal, rotation)
+        ]
 class X3DCircle2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Circle2D
     def prep_geometry_opts(self, centers, radius=1,
