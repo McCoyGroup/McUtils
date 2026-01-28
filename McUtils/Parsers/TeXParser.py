@@ -158,7 +158,7 @@ class BibItemParser(Parsers.FileStreamReader):
     def parse_header(self, return_end_points=False):
         header_block = self.parse_key_block(
             tag_start=Parsers.FileStreamerTag("@", skip_tag=True),
-            tag_end=",",
+            tag_end=Parsers.FileStreamerTag(",", skip_tag=False),
             tag_validator=BibTeXParser.is_valid_stream_start,
             preserve_tag=True,
             allow_terminal=True,
@@ -276,7 +276,7 @@ class BibTeXParser(Parsers.FileStreamReader):
         return block
 
     @classmethod
-    def parse_bib_body(self, text, allowed_fields=None):
+    def parse_bib_body(self, text, allowed_fields=None, parse_lines=True):
         bits = {
             "fields": {
 
@@ -289,10 +289,13 @@ class BibTeXParser(Parsers.FileStreamReader):
                 bits['key'] = cite_key
                 bits['tag_key_endpoints'] = eps
 
-                eps, block = parser.parse_bib_line(allowed_fields=allowed_fields, return_end_points=True)
-                while block is not None:
-                    key, _, body = block.partition("=")
-                    bits['fields'][key.strip()] = (eps, block)
+                if parse_lines:
                     eps, block = parser.parse_bib_line(allowed_fields=allowed_fields, return_end_points=True)
+                    while block is not None:
+                        key, _, body = block.partition("=")
+                        bits['fields'][key.strip()] = (eps, block)
+                        eps, block = parser.parse_bib_line(allowed_fields=allowed_fields, return_end_points=True)
+                else:
+                    bits['fields'] = None
 
         return bits

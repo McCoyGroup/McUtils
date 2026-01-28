@@ -8,6 +8,7 @@ import re
 import shutil
 import tempfile as tf
 import itertools
+from cProfile import label
 
 from .. import Devutils as dev
 from .. import Numputils as nput
@@ -941,6 +942,8 @@ class TeXTranspiler:
                  figure_merge_function=None,
                  bib_path=None,
                  bib_merge_function=None,
+                 bib_cleanup_function=None,
+                 citation_renaming_function=None,
                  aliases=None,
                  styles_path=None
                  ):
@@ -955,6 +958,8 @@ class TeXTranspiler:
         self.bib_renaming_function = bib_renaming_function
         self.bib_path = bib_path
         self.bib_merge_function = bib_merge_function
+        self.bib_cleanup_function = bib_cleanup_function
+        self.citation_renaming_function = citation_renaming_function
         self.styles_path = styles_path
 
     @classmethod
@@ -970,6 +975,39 @@ class TeXTranspiler:
         with tf.NamedTemporaryFile('w+', delete=False) as temp:
             temp.write(body)
         return temp.name, True
+
+    @classmethod
+    def pruned_bib(cls, bib_file_or_filter, cites=None, filter=None):
+        if filter is None and cites is None:
+            def prune_bib(bib_file, cites):
+                return cls.pruned_bib(bib_file, cites, filter=bib_file_or_filter)
+            return prune_bib
+        else:
+            bib_file = bib_file_or_filter
+
+            if filter is not None:
+                cites = filter(cites)
+
+            allowed_cites = {
+                r
+                for label in cites.values()
+                for r in label.ref
+            }
+
+            print(allowed_cites)
+
+            blocks = []
+            with Parsers.BibTeXParser(bib_file) as parser:
+                (s, e), text = parser.parse_bib_item(return_end_points=True)
+                while text is not None:
+                    keys = parser.parse_bib_body(text, parse_lines=False)
+                    print(keys)
+                    if keys['key'] in allowed_cites:
+                        blocks.append(text)
+                    (s, e), text = parser.parse_bib_item(return_end_points=True)
+
+
+            dev.write_file(bib_file, "\n\n".join(blocks))
 
     @classmethod
     def get_injection_body(cls, root_dir, node_data:TeXImportGraph.ImportNode, body:str):
@@ -1218,6 +1256,42 @@ class TeXTranspiler:
                                            ),
                                           cls._parse_ref_ref)
 
+    @classmethod
+    def _parse_cite_ref(cls, l):
+        head, _, body = l.partition('{')
+        head = head.strip("\\").partition("[")[0]
+        cites = [s.strip() for s in body.partition("}")[0].split()]
+        return head, "cite", cites
+    @classmethod
+    def create_cite_map(cls, tex_stream):
+        return cls.create_label_block_map(tex_stream,
+                                          'cite',
+                                          cls._parse_cite_ref)
+    @classmethod
+    def remap_citation_set(cls, tex_stream, ref_handler, cite_map=None):
+        if cite_map is None:
+            cite_map = cls.create_cite_map(tex_stream)
+        edits = ref_handler(cite_map)
+        return cls.apply_body_edit(tex_stream, edits)
+
+    @classmethod
+    def _rename_cites(cls, citations, renaming):
+        return {
+            eps:f"\\{label.head}" + "{" + ",".join(renaming(l) for l in label.refs) + "}"
+            for eps,label in citations.items()
+        }
+    def remap_citations(self, flat_tex, citation_renaming_function=None):
+        citations = self.create_cite_map(flat_tex)
+        if len(citations) > 0:
+            citations = citations['cite']
+            if citation_renaming_function is not None:
+                citation_renaming_function = self.citation_renaming_function
+            if citation_renaming_function is not None:
+                flat_tex = self.remap_citation_set(flat_tex,
+                                                   lambda cites:self._rename_cites(cites, citation_renaming_function),
+                                                   citations)
+        return flat_tex, citations
+
     ref_tag_map = {
         'sec': ("Sec.", "Secs."),
         'fig': ("Fig.", "Figs."),
@@ -1324,13 +1398,15 @@ class TeXTranspiler:
             flat_tex, figure_files = self.remap_figures(flat_tex)
             flat_tex, bib_files = self.remap_bibliography(flat_tex)
             flat_tex, si_tex = self.remap_si(flat_tex)
+            flat_tex, cites = self.remap_citations(flat_tex)
             # flat_tex = self.remap_si
 
             aux = {
                 'styles':style_files,
                 'figures':figure_files,
                 'bibliography':bib_files,
-                'si':si_tex
+                'si':si_tex,
+                'citations': cites
             }
 
             return flat_tex, aux
@@ -1340,7 +1416,8 @@ class TeXTranspiler:
     @classmethod
     def _copy_inputs(cls, root_dir, target_dir, resource_path, inputs, merge_function,
                      search_paths=None,
-                     allow_missing=False
+                     allow_missing=False,
+                     post_processor=None
                      ):
         if resource_path is not None:
             fig_dir = os.path.join(target_dir, resource_path)
@@ -1381,14 +1458,17 @@ class TeXTranspiler:
                                     break
                     if allow_missing and not os.path.isfile(s):
                         continue
-                    shutil.copy(s, os.path.join(fig_dir, d))
+                    targ = os.path.join(fig_dir, d)
+                    shutil.copy(s, targ)
+                    if post_processor is not None:
+                        post_processor(targ)
             finally:
                 if requires_delete:
                     for s in src: os.remove(s)
 
 
     style_search_paths = ["styles"]
-    def transpile(self, target_dir, file_name='main.tex', include_aux=True):
+    def transpile(self, target_dir, file_name='main.tex', include_aux=True, allow_missing_styles=False):
         flat_file = self.create_flat_tex(include_aux=include_aux)
         os.makedirs(target_dir, exist_ok=True)
         if include_aux:
@@ -1398,10 +1478,17 @@ class TeXTranspiler:
                               aux['styles'],
                               self.figure_merge_function,
                               search_paths=self.style_search_paths,
-                              allow_missing=False
+                              allow_missing=allow_missing_styles
                               )
             self._copy_inputs(self.graph.root_dir, target_dir, self.figures_path, aux['figures'], self.figure_merge_function)
-            self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'], self.bib_merge_function)
+            self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'],
+                              self.bib_merge_function,
+                              post_processor=lambda file:self.bib_cleanup_function(file, aux['citations'])
+                              )
         os.path.join(target_dir, file_name)
         dev.write_file(os.path.join(target_dir, file_name), flat_file)
         return target_dir
+
+    # @classmethod
+    # def condense_bibtex(cls, source_tex):
+    #     ...
