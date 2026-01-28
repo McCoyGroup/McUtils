@@ -35,7 +35,7 @@ class FormatterTests(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_TeXTranspile(self):
         print()
 
@@ -67,3 +67,7 @@ class FormatterTests(TestCase):
         # )
 
         # transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'))
+
+    @debugTest
+    def test_BibTeXReduce(self):
+        ...

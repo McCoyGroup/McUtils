@@ -1,4 +1,4 @@
-
+from McUtils.McUtils.Parsers.TeXParser import BibItemParser
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Parsers import *
@@ -163,3 +163,40 @@ class ParserTests(TestCase):
                 print(root_text[s:e])
             else:
                 print(root_text[s:])
+
+    @debugTest
+    def test_ParseBib(self):
+        import McUtils.Devutils as dev
+
+        bib_file = TestManager.test_data('TeXPaper/bibliography/library.bib')
+        root_text = dev.read_file(bib_file)
+
+        samp_bib = """
+@misc{MAB-pres-APS-2024,
+   author = {Mark A Boyer and Sibert III, Edwin L}
+   month = {3},
+   note = {American Physical Society March Meeting},
+   title = {EXPLORING HYDROGEN BONDING THROUGH REDUCED DIMENSIONAL TREATMENTS IN OBLIQUE COORDINATES},
+   year = {2024}
+}
+"""
+        # with dev.StreamInterface(samp_bib, file_backed=True) as stream:
+        #     with BibItemParser(stream) as item_parser:
+        #         print(":::", item_parser.parse_bib_line())
+
+        # return
+        import pprint
+
+        with BibTeXParser(bib_file) as parser:
+            print()
+            for i in range(2):
+                (s, e), text = parser.parse_bib_item(return_end_points=True)
+                if text is not None:
+                    print("="*100)
+                    print((s, e), text)
+                    # if e > 0:
+                    #     print(root_text[s:e])
+                    # else:
+                    #     print(root_text[s:])
+
+                    pprint.pprint(parser.parse_bib_body(text))
