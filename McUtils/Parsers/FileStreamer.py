@@ -48,6 +48,22 @@ class SearchStream(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def read(self, n=-1):
         raise NotImplementedError("SearchStream is a base class")
+    def rread(self, n=-1):
+        cur = self.tell()
+        if n > 0:
+            if n > cur:
+                targ = 0
+                block = cur
+            else:
+                targ = cur - n
+                block = n
+        else:
+            targ = 0
+            block = cur
+        self.seek(targ)
+        res = self.read(block)
+        self.seek(targ)
+        return res
     @abc.abstractmethod
     def readline(self):
         raise NotImplementedError("SearchStream is a base class")
@@ -271,7 +287,7 @@ class SearchStreamReader:
         """
         self.stream = stream
         self._exhausted_tag_pos = {} # an optimization for tag alternative searching
-        self._next_tag_pos = {} # an optimization for tag alternative searching
+        self._next_tag_pos = [{}, {}] # an optimization for tag alternative searching
     def __enter__(self):
         self.stream.__enter__()
         return self
@@ -280,6 +296,21 @@ class SearchStreamReader:
     def __repr__(self):
         cls = type(self)
         return f"{cls.__name__}({self.stream})"
+
+    class StreamSearchDirection(enum.Enum):
+        Forward = "forward"
+        Reverse = "reverse"
+        ForwardReverse = "forward-reverse"
+        ReverseForward = "reverse-forward"
+
+    @classmethod
+    def _is_forward(self, direction):
+        #TODO: optimize this away
+        return self.StreamSearchDirection(direction) is self.StreamSearchDirection.Forward
+    @classmethod
+    def _is_reverse(self, direction):
+        #TODO: optimize this away
+        return self.StreamSearchDirection(direction) is self.StreamSearchDirection.Reverse
 
     def _find_tag(self, tag,
                   skip_tag=True,
@@ -294,24 +325,23 @@ class SearchStreamReader:
         :return: position of tag
         :rtype: int
         """
+        direction = self.StreamSearchDirection(direction)
+        forward = self._is_forward(direction)
         with FileStreamCheckPoint(self, revert=False) as chk:
-            if direction == 'forward':
+            if forward:
                 pos = self.stream.find(tag)
             else:
                 pos = self.stream.rfind(tag)
+
             if pos >= 0:
                 if skip_tag:
                     tag_size = self.stream.tag_size(tag)
                 else:
                     tag_size = 0
-
-                if direction == 'forward':
-                    pos += tag_size
-                else:
-                    pos -= tag_size
+                pos += tag_size
                 if seek:
                     self.stream.seek(pos)
-            elif pos == -1:
+            elif pos < 0:
                 chk.revert()
         return pos
 
@@ -321,7 +351,8 @@ class SearchStreamReader:
                  seek=None,
                  allow_terminal=False,
                  validator=None,
-                 return_body=False
+                 return_body=False,
+                 direction='forward'
                  ):
         """
         Finds a tag in a file
@@ -351,6 +382,9 @@ class SearchStreamReader:
         tag_positions = {}
         cur = self.tell()
         tag = None
+        direction = self.StreamSearchDirection(direction)
+        forward = self._is_forward(direction)
+        reverse = not forward
         for t in tags.tags:
             # if (
             #         t not in self._exhausted_tag_pos
@@ -363,19 +397,38 @@ class SearchStreamReader:
             #     else:
             #         tag_positions[pos] = t
 
-            (cur_test, p_test) = self._next_tag_pos.get(t, (cur+1, -1))
-            if cur_test <= cur and p_test >= cur:
-                if p_test > 0:
-                    tag_positions[p_test] = t
-                continue
+            if forward:
+                (cur_test, p_test) = self._next_tag_pos[0].get(t, (cur + 1, -1))
+                if (
+                        (p_test < 0 or p_test >= cur_test)
+                        and cur_test <= cur and p_test >= cur
+                ):
+                    if p_test > 0:
+                        tag_positions[p_test] = t
+                    continue
+            else:
+                (cur_test, p_test) = self._next_tag_pos[1].get(t, (cur-1, -1))
+                if (
+                        (p_test < 0 or p_test <= cur_test)
+                        and cur_test >= cur and p_test <= cur
+                ):
+                    if p_test >= 0:
+                        tag_positions[p_test] = t
+                    continue
 
             self.seek(cur)
-            pos = self._find_tag(t, skip_tag=skip_tag, seek=seek)
-            self._next_tag_pos[t] = (cur, pos)
+            pos = self._find_tag(t, skip_tag=skip_tag, seek=seek, direction=direction)
+            if forward:
+                self._next_tag_pos[0][t] = (cur, pos)
+            else:
+                self._next_tag_pos[1][t] = (cur, pos)
             if pos > 0:
                 tag_positions[pos] = t
 
-        for pos in sorted(tag_positions.keys()):
+        tag_keys = sorted(tag_positions.keys())
+        if reverse:
+            tag_keys = reversed(tag_keys)
+        for pos in tag_keys:
             og_pos = pos
             tag = tag_positions[pos]
             if skip_tag and (return_body or validator is not None):
@@ -387,15 +440,25 @@ class SearchStreamReader:
             if follow_ups is not None:
                 for tag in follow_ups:
                     if not skip_tag:
-                        self.stream.seek(pos+1)
+                        if forward:
+                            self.stream.seek(pos+1)
+                        else:
+                            self.stream.seek(pos-1)
                     else:
                         self.stream.seek(pos)
-                    p = self.find_tag(tag)
+                    p = self.find_tag(tag, seek=False, direction=direction)
                     if allow_terminal or p > -1:
                         pos = p
+                if not seek:
+                    self.seek()
                 if validator is not None:
-                    self.stream.seek(og_pos - ts)
-                    res = self.stream.read(pos - og_pos + ts)
+                    block_size = abs(pos - og_pos + ts)
+                    if forward:
+                        self.stream.seek(og_pos - ts)
+                        res = self.stream.read(block_size)
+                    else:
+                        self.stream.seek(pos + ts)
+                        res = self.stream.rread(block_size)
                     test = validator(res)
                     if test == self.TagSentinels.NextMatch:
                         return self.find_tag(tags,
@@ -406,14 +469,22 @@ class SearchStreamReader:
                                              return_body=return_body
                                              )
                     while test == self.TagSentinels.Continue or not test:
-                        self.stream.seek(pos + 1)
-                        p = self.find_tag(tag)
+                        if forward:
+                            self.stream.seek(pos + 1)
+                        else:
+                            self.stream.seek(pos - 1)
+                        p = self.find_tag(tag, direction=direction)
                         pos = p
                         if p == -1:
                             break
                         else:
-                            self.stream.seek(og_pos - ts)
-                            res = self.stream.read(pos - og_pos + ts)
+                            block_size = abs(pos - og_pos + ts)
+                            if forward:
+                                self.stream.seek(og_pos - ts)
+                                res = self.stream.read(block_size)
+                            else:
+                                self.stream.seek(pos + ts)
+                                res = self.stream.rread(block_size)
                             test = validator(res)
                             if test == self.TagSentinels.NextMatch:
                                 return self.find_tag(tags,
@@ -421,25 +492,56 @@ class SearchStreamReader:
                                                      seek=seek,
                                                      allow_terminal=allow_terminal,
                                                      validator=validator,
-                                                     return_body=return_body
+                                                     return_body=return_body,
+                                                     direction=direction
                                                      )
-                    if pos == -1:
+                    if pos < 0:
                         res = None
                         continue
+                else:
+                    block_size = abs(pos - og_pos + ts)
+                    if forward:
+                        self.stream.seek(og_pos - ts)
+                        res = self.stream.read(block_size)
+                    else:
+                        self.stream.seek(pos + ts)
+                        res = self.stream.rread(block_size)
+
+            else:
+                block_size = abs(pos - og_pos + ts)
+                if forward:
+                    self.stream.seek(og_pos - ts)
+                    res = self.stream.read(block_size)
+                else:
+                    self.stream.seek(pos + ts)
+                    res = self.stream.rread(block_size)
 
             offset = tags.offset
             if offset is not None:
                 # why are we using self._stream.tell here...?
                 # I won't touch it for now but I feel like it should be pos
-                pos = self.stream.tell() + offset
+                if forward:
+                    pos = self.stream.tell() + offset
+                else:
+                    pos = self.stream.tell() - offset
 
             if return_body and res is None:
-                self.stream.seek(og_pos - ts)
-                res = self.stream.read(pos - og_pos + ts)
+                if forward:
+                    self.stream.seek(og_pos - ts)
+                    res = self.stream.read(pos - og_pos + ts)
+                else:
+                    self.stream.seek(pos)
+                    res = self.stream.rread(abs(pos - og_pos - ts))
             if not skip_tag:
-                self.stream.seek(og_pos)
+                if forward:
+                    self.stream.seek(og_pos)
+                else:
+                    self.stream.seek(pos + ts)
                 pos = og_pos
             break # first match in alternatives
+
+        if seek is False:
+            self.seek(cur)
 
         if return_body:
             return res, pos
@@ -452,44 +554,91 @@ class SearchStreamReader:
         NextMatch = "next_match"
     def _parse_end_block(self,
                          start, tag_end, allow_terminal,
-                         expand_until_valid, validator
+                         expand_until_valid, validator,
+                         direction="forward"
                          ):
         with FileStreamCheckPoint(self):
-            end = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False)
-        if end >= start:
-            block = self.stream.read(end - start)
+            end = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False, direction=direction)
+        reverse = self._is_reverse(direction)
+        forward = not reverse
+        if reverse:
+            start, end = end, start
+        if (start < 0 or end < 0):
+            if allow_terminal:
+                block = self.stream.read()
+                if not validator(block):
+                    block = None
+            else:
+                block = self.TagSentinels.EOF
+        else:
+            if forward:
+                block = self.stream.read(end - start)
+            else:
+                block = self.stream.rread(end - start)
+
             if expand_until_valid:
                 with FileStreamCheckPoint(self):
-                    while not validator(block):
-                        self.stream.seek(end + 1)
-                        extra = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False)
-                        if extra > 0:
-                            block = block + self.stream.read(extra - end)
-                            end = extra
+                    if not validator(block):
+                        if forward:
+                            block = block + self.stream.read(1)
                         else:
-                            if allow_terminal:
-                                self.stream.seek(start)
-                                block = self.stream.read()
-                                if not validator(block):
-                                    block = None
-                                end = -1
+                            block = self.stream.rread(1) + block
+                    while not validator(block):
+                        if forward:
+                            self.stream.seek(end + 1)
+                            extra = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False, direction=direction)
+                            if extra > 0:
+                                block = block + self.stream.read(extra - end)
+                                end = extra
                             else:
-                                block = None
-                            break
-        elif allow_terminal and end < 0:
-            block = self.stream.read()
-            if not validator(block):
-                block = None
-        else:
-            block = self.TagSentinels.EOF
-
+                                if allow_terminal:
+                                    self.stream.seek(start)
+                                    block = self.stream.read()
+                                    if not validator(block):
+                                        block = None
+                                    end = -1
+                                else:
+                                    block = None
+                                break
+                        else:
+                            self.stream.seek(max(start - 1, 0))
+                            extra = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False, direction=direction)
+                            if extra > 0:
+                                block = self.stream.rread(start - extra) + block
+                                start = extra
+                            else:
+                                if allow_terminal:
+                                    self.stream.seek(end)
+                                    block = self.stream.rread()
+                                    if not validator(block):
+                                        block = None
+                                    start = -1
+                                else:
+                                    block = None
+                                break
+            # else:
+            #     validator(block)
         return (start, end), block
+
+    @classmethod
+    def _get_search_directions(cls, direction):
+        direction = cls.StreamSearchDirection(direction)
+        if direction is cls.StreamSearchDirection.Forward:
+            start_direction = end_direction = cls.StreamSearchDirection.Forward
+        elif direction is cls.StreamSearchDirection.Reverse:
+            start_direction = end_direction = cls.StreamSearchDirection.Reverse
+        elif direction is cls.StreamSearchDirection.ForwardReverse:
+            start_direction, end_direction = cls.StreamSearchDirection.Forward, cls.StreamSearchDirection.Reverse
+        else:
+            start_direction, end_direction = cls.StreamSearchDirection.Reverse, cls.StreamSearchDirection.Forward
+        return start_direction, end_direction
     def get_tagged_block(self, tag_start, tag_end,
                          validator=None, tag_validator=None,
                          allow_terminal=False,
                          expand_until_valid=False,
                          return_tag=False,
                          return_end_points=False,
+                         direction='forward',
                          block_size=500):
         """
         Pulls the string between tag_start and tag_end
@@ -505,14 +654,23 @@ class SearchStreamReader:
         block = None
         tag_body = None
         end_points = None
+
+        start_direction, end_direction = self._get_search_directions(direction)
+        _eps = end_points
         while block is None:
             if tag_start is not None:
                 tag_str, start = self.find_tag(tag_start,
                                                allow_terminal=False,
                                                return_body=True,
-                                               validator=tag_validator)
+                                               validator=tag_validator,
+                                               direction=start_direction)
+
                 if start >= 0:
-                    end_points, block = self._parse_end_block(start, tag_end, allow_terminal, expand_until_valid, validator)
+                    end_points, block = self._parse_end_block(start, tag_end, allow_terminal, expand_until_valid,
+                                                              validator, end_direction)
+                    if end_points is not None and _eps is not None and end_points == _eps:
+                        raise ValueError(f"stuck in a loop while searching for {tag_end} starting from {start} in dir {end_direction}")
+                    _eps = end_points
                     if block is not None:
                         tag_body = tag_str
                 else:
@@ -520,16 +678,20 @@ class SearchStreamReader:
                     end_points = (start,-1)
             else:
                 start = self.tell()
-                end_points, block = self._parse_end_block(start, tag_end, allow_terminal, expand_until_valid, validator)
+                end_points, block = self._parse_end_block(start, tag_end, allow_terminal, expand_until_valid,
+                                                          validator, end_direction)
 
             if (
                     not expand_until_valid
                     and block is not None
                     and block is not self.TagSentinels.EOF
-                    and validator is not None
-                    and not validator(block)
+                    and (validator is not None and not validator(block))
             ):
                 block = None
+                if self._is_forward(start_direction):
+                    self.seek(end_points[-1]+1)
+                else:
+                    self.seek(end_points[0]-1)
                 end_points = None
 
         if block is self.TagSentinels.EOF:
@@ -546,7 +708,7 @@ class SearchStreamReader:
             return block
 
     def _parse_block(self, tag_start, tag_end, validator, tag_validator,
-                     allow_terminal, expand_until_valid, preserve_tag, return_end_points):
+                     allow_terminal, expand_until_valid, preserve_tag, return_end_points, direction):
         ret_tag = preserve_tag
         if ret_tag and isinstance(tag_start, FileStreamerTag):
             ret_tag = tag_start.skip_tag
@@ -556,20 +718,26 @@ class SearchStreamReader:
                                       return_tag=ret_tag,
                                       return_end_points=return_end_points,
                                       allow_terminal=allow_terminal,
-                                      expand_until_valid=expand_until_valid
+                                      expand_until_valid=expand_until_valid,
+                                      direction=direction
                                       )
+
         end_points = None
         if ret_tag:
+            start_direction, end_direction = self._get_search_directions(direction)
             if return_end_points:
                 (tag_body, end_points), block = block
             else:
                 (tag_body,), block = block
-            if block is not None and tag_body is not None:
+            if self._is_forward(end_direction) and block is not None and tag_body is not None:
                 block = tag_body + block
                 if end_points is not None:
                     start, end = end_points
-                    start = start - len(tag_body)
+                    if self._is_forward(start_direction):
+                        start = start - len(tag_body)
                     end_points = (start, end)
+        elif return_end_points:
+            (end_points,), block = block
 
         if end_points is not None:
             return end_points, block
@@ -589,6 +757,7 @@ class SearchStreamReader:
                         num=None,
                         pass_context=False,
                         allow_terminal=False,
+                        direction="forward",
                         **ignore
                         ):
         """Parses a block by starting at tag_start and looking for tag_end and parsing what's in between them
@@ -628,7 +797,8 @@ class SearchStreamReader:
                     i = 0 # protective
                     for i in range(num):
                         block = self._parse_block(tag_start, tag_end, validator, tag_validator,
-                                                  allow_terminal, expand_until_valid, preserve_tag, return_end_points)
+                                                  allow_terminal, expand_until_valid, preserve_tag, return_end_points,
+                                                  direction)
                         if block is None:
                             break
                         if parse_mode != "List":
@@ -643,7 +813,8 @@ class SearchStreamReader:
                 else:
                     blocks = []
                     block = self._parse_block(tag_start, tag_end, validator, tag_validator,
-                                              allow_terminal, expand_until_valid, preserve_tag, return_end_points)
+                                              allow_terminal, expand_until_valid, preserve_tag, return_end_points,
+                                              direction)
                     if parser is None:
                         parser = lambda a, reader=None:a
                     while block is not None:
@@ -655,7 +826,8 @@ class SearchStreamReader:
 
                         blocks.append(block)
                         block = self._parse_block(tag_start, tag_end, validator, tag_validator,
-                                                  allow_terminal, expand_until_valid, preserve_tag, return_end_points)
+                                                  allow_terminal, expand_until_valid, preserve_tag, return_end_points,
+                                                  direction)
 
                     if parse_mode == "List":
                         if pass_context:
@@ -665,7 +837,8 @@ class SearchStreamReader:
                 return blocks
         else:
             block = self._parse_block(tag_start, tag_end, validator, tag_validator,
-                                      allow_terminal, expand_until_valid, preserve_tag, return_end_points)
+                                      allow_terminal, expand_until_valid, preserve_tag, return_end_points,
+                                      direction)
             if parser is not None:
                 block = parser(block)
             return block
@@ -680,8 +853,21 @@ class SearchStreamReader:
         return self.stream.tell()
     def find(self, tag):
         return self.stream.find(tag)
-    def rfind(self, tag):
-        return self.stream.rfind(tag)
+    def rfind(self, tag, search_window=None):
+        if hasattr(self.stream, 'rfind'):
+            return self.stream.rfind(tag)
+        else:
+            cur = self.stream.tell()
+            if search_window is None:
+                start = 0
+            else:
+                start = cur - search_window
+            self.seek(start)
+            body = self.read(cur)
+            pos = body.rfind(tag)
+            if pos > 0:
+                pos = start + pos
+            return pos
     def skip_tag(self, tag):
         return self.stream.skip_tag(tag)
     def rskip_tag(self, tag):
@@ -728,6 +914,10 @@ class FileStreamerTag:
         self.direction = direction
         self.skip_tag = skip_tag
         self.seek = seek
+
+    def __repr__(self):
+        cls = type(self)
+        return f"{cls.__name__}({self.tags=}, {self.skip_tag=}, {self.seek=})"
 
 class LineByLineParser(metaclass=abc.ABCMeta):
     def __init__(self, stream, binary=True, encoding='utf-8', max_nesting_depth=-1, ignore_comments=False):

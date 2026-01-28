@@ -51,12 +51,13 @@ class FormatterTests(TestCase):
             TestManager.test_data('TeXPaper/main.tex'),
             figure_renaming_function=TeXTranspiler.figure_counter(),
             bib_renaming_function=lambda _:"bibliography.bib",
-            bib_merge_function=TeXTranspiler.add_bibs
+            bib_merge_function=TeXTranspiler.add_bibs,
+            bib_cleanup_function=TeXTranspiler.pruned_bib
         )
         # print(transpiler.create_flat_tex(include_aux=False))
-        body, aux = transpiler.create_flat_tex(include_aux=True)
-        print(body)
-        pprint.pprint(aux)
+        # body, aux = transpiler.create_flat_tex(include_aux=True)
+        # print(body)
+        # pprint.pprint(aux)
 
         # pprint.pprint(
         #     transpiler.create_label_map(body)
@@ -66,4 +67,4 @@ class FormatterTests(TestCase):
         #     transpiler.create_ref_map(body)
         # )
 
-        # transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'))
+        transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'), allow_missing_styles=True)

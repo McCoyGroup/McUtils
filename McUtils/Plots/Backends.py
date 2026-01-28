@@ -2232,8 +2232,38 @@ class X3DAxes(GraphicsAxes3D):
         else:
             self.opts['viewpoint'] = new_opts
 
+    @classmethod
+    def _apply_dashing(cls, dashing, starts, ends, scaled=None):
+        if dashing is True:
+            return cls._apply_dashing([.2, .1], starts, ends, scaled=True)
+        elif isinstance(dashing, dict):
+            return cls._apply_dashing(dashing['dashing'], starts, ends, scaled=dashing.get('scaled', False))
+        else:
+            seg_w, space_w = dashing
+            new_starts = []
+            new_ends = []
+            for s,e in zip(starts, ends):
+                l,n = nput.vec_normalize(e-s, return_norms=True)
+                if scaled:
+                    dx = n * seg_w
+                    ds = n * space_w
+                else:
+                    dx, ds = seg_w, space_w
+                w = dx+ds
+                if w <= 0: raise ValueError(f'invalid dashing spec, {dashing} (scaled={scaled})')
+                nseg = int(n // w)
+                for i in range(nseg):
+                    new_starts.append(s + l*(i*w))
+                    new_ends.append(s + l*(i*w+dx))
+
+            return np.array(new_starts), np.array(new_ends)
+
     def draw_line(self, points, indices=None, s=None, riffle=True, line_thickness=None,
-                  edgecolors=None, color=None, glow=None, **styles):
+                  edgecolors=None, color=None, glow=None,
+                  line_style=None,
+                  dashing=None,
+                  connected=True,
+                  **styles):
         if color is None: color = edgecolors
         if color is None: color = 'black'
         # if line_thickness is None and s is not None:
@@ -2259,15 +2289,38 @@ class X3DAxes(GraphicsAxes3D):
                     points[..., riff_end, np.newaxis, :]
                 ], axis=-2).reshape((-1, 2, 3))
 
+        if dashing is None and dev.str_is(line_style, 'dashed'):
+            dashing = True
+
+        if dashing is not None:
+            if indices is not None:
+                raise NotImplementedError("dashing + indices")
+            else:
+                if riffle:
+                    starts, ends  = self._apply_dashing(dashing, points[:-1], points[1:])
+                else:
+                    starts, ends  = self._apply_dashing(dashing, points[::2], points[1::2])
+                points = np.zeros((starts.shape[0]*2,) + starts.shape[1:], dtype=starts.dtype)
+                points[::2] = starts
+                points[1::2] = ends
+            riffle = False
+
         if line_thickness is not None:
             if indices is not None:
-                raise NotImplementedError(indices)
+                raise NotImplementedError("line thickness + indices")
             else:
                 # line_set = x3d.X3DGroup([
                 #     x3d.X3DCylinder(p1, p2, line_thickness=line_thickness, color=glow, **styles)
                 #     for p1, p2 in zip(points[:-1], points[1:])
                 # ])
-                line_set = x3d.X3DCylinder(points[:-1], points[1:], radius=line_thickness,
+                if glow is None:
+                    glow = color
+                    color = 'black'
+                if riffle:
+                    starts, ends = points[:-1], points[1:]
+                else:
+                    starts, ends = points[::2], points[1::2]
+                line_set = x3d.X3DCylinder(starts, ends, radius=line_thickness,
                                            glow=glow,
                                            color=color,
                                            **styles)
@@ -2536,16 +2589,16 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(cyls)
 
         return cyls
-
-    def to_x3d(self):
-        opts = dict(
+    def prep_opts(self):
+        return dict(
             self.opts,
             background=self.background,
             title=self.title
         )
+    def to_x3d(self):
         return x3d.X3DScene(
             self.children,
-            **opts
+            **self.prep_opts()
         )
 
 class X3DFigure(GraphicsFigure):
@@ -2553,6 +2606,11 @@ class X3DFigure(GraphicsFigure):
 
     def __init__(self, width=640, height=500,
                  background='white', figsize=None, profile='Immersive', version='3.3',
+                 dynamic_loading=None,
+                 include_export_button=None,
+                 include_record_button=None,
+                 include_view_settings_button=None,
+                 recording_options=None,
                  id=None,
                  **opts):
         if id is None:
@@ -2567,6 +2625,11 @@ class X3DFigure(GraphicsFigure):
             self.set_size_inches(*figsize)
         self.background = background
         self.shown = False
+        self.recording_options = recording_options
+        self.dynamic_loading = dynamic_loading
+        self.include_export_button = include_export_button
+        self.include_record_button = include_record_button
+        self.include_view_settings_button = include_view_settings_button
         super().__init__()
 
     def __setitem__(self, key, value):
@@ -2604,16 +2667,23 @@ class X3DFigure(GraphicsFigure):
         self.background = fg
     def savefig(self, file, format=None, **opts):
         return self.to_x3d(**opts).dump(file)
-    def to_x3d(self, **opts):
-        opts = dict(
+    def prep_opts(self):
+        return dict(
             self.opts,
             profile=self.profile,
             version=self.version,
             width=self.width,
             height=self.height,
             id=self.id,
-            **opts
+            background=self.background,
+            recording_options=self.recording_options,
+            dynamic_loading=self.dynamic_loading,
+            include_export_button=self.include_export_button,
+            include_record_button=self.include_record_button,
+            include_view_settings_button=self.include_view_settings_button
         )
+    def to_x3d(self, **opts):
+        opts = dict(self.prep_opts(), **opts)
         return x3d.X3D(
             *[a.to_x3d() for a in self.axes],
             **opts
@@ -2652,16 +2722,9 @@ class X3DFigure(GraphicsFigure):
 
         animator = X3DAxes(
             animation,
-            **self.axes[0].opts
+            **self.axes[0].prep_opts()
         )
-        opts = dict(
-            self.opts,
-            profile=self.profile,
-            version=self.version,
-            width=self.width,
-            height=self.height
-        )
-        return x3d.X3D(animator.to_x3d(), **opts)
+        return x3d.X3D(animator.to_x3d(), **self.prep_opts())
 
 class X3DBackend(GraphicsBackend):
     Figure = X3DFigure

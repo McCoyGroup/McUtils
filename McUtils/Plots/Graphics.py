@@ -448,6 +448,7 @@ class GraphicsBase(metaclass=ABCMeta):
             self.animator = Animator(self, *args, **opts)
 
     def animate_frames(self, frames, **opts):
+        self.prep_show()
         return self.figure.animate_frames(frames, **opts)
 
     known_keys = layout_keys

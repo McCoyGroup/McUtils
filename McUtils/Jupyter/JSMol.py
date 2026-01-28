@@ -27,9 +27,12 @@ class JSMol:
         def load_applet_script(cls, id, loader,
                                include_script_interface=False,
                                interface_target="",
+                               recording_options=None,
                                target=None):
             if target is None:
                 target = id
+            if recording_options is None:
+                recording_options = {}
 
             injection = "''"
             if include_script_interface:
@@ -56,7 +59,7 @@ class JSMol:
                 elems.append(
                     HTML.Div([
                         HTML.Button("Save Figure", onclick=X3D.get_export_script(new_id + '_appletdiv')),
-                        HTML.Button("Record Animation", onclick=X3D.get_record_screen_script(new_id+ '_appletdiv')),
+                        HTML.Button("Record Animation", onclick=X3D.get_record_screen_script(new_id+ '_appletdiv', **recording_options)),
                         HTML.Input(value="2", id=id + '-duration-input',
                                    oninput=X3D.set_animation_duration_script(id))
                     ], style='display:flex')
@@ -101,6 +104,7 @@ class JSMol:
                      id=None,
                      dynamic_loading=None,
                      include_script_interface=False,
+                     recording_options=None,
                      create_applet_loader=None,
                      style=None,
                      **attrs):
@@ -110,6 +114,9 @@ class JSMol:
             if id is None:
                 id =  "jsmol-applet-" + self.suffix
             self.id = id
+            if recording_options is None:
+                recording_options = {}
+            self.recording_options = recording_options
             if len(model_etc) > 0:
                 if isinstance(model_etc[0], str):
                     model_file = model_etc[0]
@@ -194,6 +201,7 @@ class JSMol:
                                                   loader,
                                                   target=targ,
                                                   interface_target=interface_target,
+                                                  recording_options=self.recording_options,
                                                   include_script_interface=include_script_interface)
 
             if self.dynamic_loading:

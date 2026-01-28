@@ -71,7 +71,14 @@ class X3D(X3DObject):
     @classmethod
     def get_new_id(cls):
         return "x3d-" + str(uuid.uuid4())[:6]
-    def __init__(self, *children, id=None, dynamic_loading=True, x3dom_path=None, x3dom_css_path=None, **opts):
+    def __init__(self, *children, id=None, dynamic_loading=True,
+                 x3dom_path=None,
+                 x3dom_css_path=None,
+                 recording_options=None,
+                 include_export_button=False,
+                 include_record_button=False,
+                 include_view_settings_button=False,
+                 **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
@@ -80,6 +87,12 @@ class X3D(X3DObject):
             id = self.get_new_id()
         self.id = id
         self.dynamic_loading = dynamic_loading
+        if recording_options is None:
+            recording_options = {}
+        self.recording_options = recording_options
+        self.include_export_button =include_export_button
+        self.include_record_button = include_record_button
+        self.include_view_settings_button =include_view_settings_button
         if x3dom_path is not None:
             if dev.str_is(x3dom_path, 'local') and not os.path.isfile('local'):
                 # get the relative path
@@ -140,7 +153,7 @@ class X3D(X3DObject):
 
     @classmethod
     def get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'):
-            return f"""
+        return f"""
     (function(){{
         let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
         
@@ -187,10 +200,8 @@ class X3D(X3DObject):
     }})()
            """
 
-    include_export_button = False
-    include_record_button = False
-    include_view_settings_button = False
-    def to_widget(self, dynamic_loading=None,
+    def to_widget(self,
+                  dynamic_loading=None,
                   include_export_button=None,
                   include_record_button=None,
                   include_view_settings_button=None
@@ -199,6 +210,7 @@ class X3D(X3DObject):
             return self._widg
         id = self.id
         x3d_embed = self.to_x3d()#.tostring()
+
 
         if dynamic_loading is None:
             dynamic_loading = self.dynamic_loading
@@ -250,8 +262,9 @@ class X3D(X3DObject):
             elems.append(JHTML.Button("Save Figure", onclick=self.get_export_script(self.id)))
         if include_record_button:
             elems.extend([
-                JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id)),
-                JHTML.Input(value="2", id=self.id+'-duration-input', width="50px", oninput=self.set_animation_duration_script(self.id))
+                JHTML.Button("Record Animation", onclick=self.get_record_screen_script(self.id, **self.recording_options)),
+                JHTML.Input(value=str(self.recording_options.get('recording_duration', 2)),
+                            id=self.id+'-duration-input', width="50px", oninput=self.set_animation_duration_script(self.id))
             ])
         if include_view_settings_button:
             elems.append(
