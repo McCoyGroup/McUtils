@@ -28,6 +28,10 @@ class FileStreamCheckPoint:
         self.parent = parent
         self.chk = parent.tell()
         self._revert = revert
+    def disable(self):
+        self._revert = False
+    def enable(self):
+        self._revert = True
     def revert(self):
         self.parent.seek(self.chk)
     def __enter__(self, ):
@@ -160,14 +164,22 @@ class FileSearchStream(SearchStream):
     """
     A stream that is implemented for searching in mmap-ed files
     """
-    def __init__(self, file, mode="r", binary=True, encoding="utf-8", **kw):
+    default_binary = True
+    def __init__(self, file, mode="r", binary=None, encoding="utf-8",
+                 check_decoding=False,
+                 decoding_mode="strict",
+                 **kw):
         self._file = file
+        if binary is None:
+            binary = self.default_binary
         if binary:
             mode = mode.strip("+b") + "+b"
         else:
             mode = mode.strip('+') + '+'
         self._mode = mode
         self._encoding = encoding
+        self.check_decoding = check_decoding,
+        self.decoding_mode = decoding_mode
         self._kw = kw
         self._stream = None
         self._wasopen = None
@@ -197,10 +209,20 @@ class FileSearchStream(SearchStream):
             not_exhausted = new_pos > old_pos
             if not_exhausted:
                 yield line
+    def handle_chunk(self, chunk):
+        if isinstance(chunk, bytes):
+            if self.check_decoding:
+                try:
+                    chunk = chunk.decode(self._encoding, self.decoding_mode)
+                except UnicodeDecodeError:
+                    raise ValueError(f"error decoding: {chunk}")
+            else:
+                chunk = chunk.decode(self._encoding, self.decoding_mode)
+        return chunk
     def read(self, n=-1):
-        return self._stream.read(n).decode(self._encoding)
+        return self.handle_chunk(self._stream.read(n))
     def readline(self):
-        return self._stream.readline().decode(self._encoding)
+        return self.handle_chunk(self._stream.readline())
     def seek(self, *args, **kwargs):
         return self._stream.seek(*args, **kwargs)
     def tell(self):
@@ -577,7 +599,7 @@ class SearchStreamReader:
                 block = self.stream.rread(end - start)
 
             if expand_until_valid:
-                with FileStreamCheckPoint(self):
+                with FileStreamCheckPoint(self) as chk:
                     if not validator(block):
                         if forward:
                             block = block + self.stream.read(1)
@@ -616,8 +638,8 @@ class SearchStreamReader:
                                 else:
                                     block = None
                                 break
-            # else:
-            #     validator(block)
+                    if block is not None:
+                        chk.disable()
         return (start, end), block
 
     @classmethod
