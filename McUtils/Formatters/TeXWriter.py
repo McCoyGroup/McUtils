@@ -778,7 +778,8 @@ class TeXImportGraph:
                  import_heads=None,
                  strip_comments=True,
                  aliases=None,
-                 ignored_files=None
+                 ignored_files=None,
+                 **parser_options
                  ):
         if root_dir is None:
             root_dir = os.path.dirname(tex_root)
@@ -794,6 +795,7 @@ class TeXImportGraph:
         self.head_parser = head_parser
         self.strip_comments = strip_comments
         self.aliases = aliases
+        self.parser_options = parser_options
 
     @classmethod
     def import_parser(cls, head:str, tag:str):
@@ -891,10 +893,10 @@ class TeXImportGraph:
                 new_body = self.strip_tex_comments(dev.read_file(root))
                 new_root.write(new_body)
                 new_root.seek(0)
-                with Parsers.TeXParser(new_root) as parser:
+                with Parsers.TeXParser(new_root, **self.parser_options) as parser:
                     imports = self._handle_parse_block(parser, head_map, import_heads, root_dir)
         else:
-            with Parsers.TeXParser(root) as parser:
+            with Parsers.TeXParser(root, **self.parser_options) as parser:
                 imports = self._handle_parse_block(parser, head_map, import_heads, root_dir)
         return imports
 
@@ -903,6 +905,7 @@ class TeXImportGraph:
         if root_dir is None:
             root_dir = self.root_dir
         if not self._initialized:
+            self._initialized = True
             queue = collections.deque([(self.root, root_dir)])
             while queue:
                 root, root_dir = queue.pop()
@@ -945,12 +948,16 @@ class TeXTranspiler:
                  bib_cleanup_function=None,
                  citation_renaming_function=None,
                  aliases=None,
-                 styles_path=None
+                 styles_path=None,
+                 parser_options=None
                  ):
+        if parser_options is None:
+            parser_options = {}
         self.graph = TeXImportGraph(tex_root,
                                     root_dir=root_dir,
                                     strip_comments=strip_comments,
-                                    aliases=aliases
+                                    aliases=aliases,
+                                    **parser_options
                                     )
         self.figure_renaming_function = figure_renaming_function
         self.figures_path = figures_path
@@ -961,6 +968,7 @@ class TeXTranspiler:
         self.bib_cleanup_function = bib_cleanup_function
         self.citation_renaming_function = citation_renaming_function
         self.styles_path = styles_path
+        self.parser_options = parser_options
 
     @classmethod
     def figure_counter(cls, name_root="Figure", start_at=1):
@@ -971,16 +979,21 @@ class TeXTranspiler:
 
     @classmethod
     def add_bibs(cls, bib_list):
-        body = "\n\n".join(dev.read_file(b) for b in bib_list)
+        bib_bodies = []
+        for b in bib_list:
+            if not os.path.isfile(b) and os.path.splitext(b)[-1] == "":
+                b = b + ".bib"
+            bib_bodies.append(dev.read_file(b))
+        body = "\n\n".join(bib_bodies)
         with tf.NamedTemporaryFile('w+', delete=False) as temp:
             temp.write(body)
         return temp.name, True
 
     @classmethod
-    def pruned_bib(cls, bib_file_or_filter, cites=None, filter=None):
+    def pruned_bib(cls, bib_file_or_filter,  cites=None, *, filter=None, **parser_options):
         if filter is None and cites is None:
             def prune_bib(bib_file, cites):
-                return cls.pruned_bib(bib_file, cites, filter=bib_file_or_filter)
+                return cls.pruned_bib(bib_file, cites=cites, filter=bib_file_or_filter, **parser_options)
             return prune_bib
         else:
             bib_file = bib_file_or_filter
@@ -994,14 +1007,11 @@ class TeXTranspiler:
                 for r in label.ref
             }
 
-            print(allowed_cites)
-
             blocks = []
-            with Parsers.BibTeXParser(bib_file) as parser:
+            with Parsers.BibTeXParser(bib_file, **parser_options) as parser:
                 (s, e), text = parser.parse_bib_item(return_end_points=True)
                 while text is not None:
                     keys = parser.parse_bib_body(text, parse_lines=False)
-                    print(keys)
                     if keys['key'] in allowed_cites:
                         blocks.append(text)
                     (s, e), text = parser.parse_bib_item(return_end_points=True)
@@ -1260,7 +1270,7 @@ class TeXTranspiler:
     def _parse_cite_ref(cls, l):
         head, _, body = l.partition('{')
         head = head.strip("\\").partition("[")[0]
-        cites = [s.strip() for s in body.partition("}")[0].split()]
+        cites = [s.strip() for s in body.partition("}")[0].split(",")]
         return head, "cite", cites
     @classmethod
     def create_cite_map(cls, tex_stream):
@@ -1280,8 +1290,11 @@ class TeXTranspiler:
             eps:f"\\{label.head}" + "{" + ",".join(renaming(l) for l in label.refs) + "}"
             for eps,label in citations.items()
         }
-    def remap_citations(self, flat_tex, citation_renaming_function=None):
+    def remap_citations(self, flat_tex, si_tex:dict[str,str]=None, citation_renaming_function=None):
         citations = self.create_cite_map(flat_tex)
+        if si_tex is not None:
+            for name,tex in si_tex.items():
+                citations = dev.merge_dicts(citations, self.create_cite_map(tex))
         if len(citations) > 0:
             citations = citations['cite']
             if citation_renaming_function is not None:
@@ -1398,7 +1411,7 @@ class TeXTranspiler:
             flat_tex, figure_files = self.remap_figures(flat_tex)
             flat_tex, bib_files = self.remap_bibliography(flat_tex)
             flat_tex, si_tex = self.remap_si(flat_tex)
-            flat_tex, cites = self.remap_citations(flat_tex)
+            flat_tex, cites = self.remap_citations(flat_tex, si_tex)
             # flat_tex = self.remap_si
 
             aux = {
@@ -1483,7 +1496,7 @@ class TeXTranspiler:
             self._copy_inputs(self.graph.root_dir, target_dir, self.figures_path, aux['figures'], self.figure_merge_function)
             self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'],
                               self.bib_merge_function,
-                              post_processor=lambda file:self.bib_cleanup_function(file, aux['citations'])
+                              post_processor=lambda file:self.bib_cleanup_function(file, aux['citations'], **self.parser_options)
                               )
         os.path.join(target_dir, file_name)
         dev.write_file(os.path.join(target_dir, file_name), flat_file)

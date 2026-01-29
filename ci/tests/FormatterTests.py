@@ -67,4 +67,4 @@ class FormatterTests(TestCase):
         #     transpiler.create_ref_map(body)
         # )
 
-        transpiler.transpile(os.path.expanduser('~/Desktop/flat_tex'), allow_missing_styles=True)
+        transpiler.transpile(os.path.expanduser('~/Desktop/wat'), allow_missing_styles=True)

@@ -9,6 +9,7 @@ __all__ = [
 ]
 
 class TeXParser(Parsers.FileStreamReader):
+    default_binary = False
     @classmethod
     def is_valid_tex_block(cls, block:str):
         block = block.replace("\\{", "|").replace("\\}", "|")
@@ -147,6 +148,7 @@ class TeXParser(Parsers.FileStreamReader):
         return block
 
 class BibItemParser(Parsers.FileStreamReader):
+    default_binary = False
     @classmethod
     def is_valid_tex_block(cls, block:str):
         block = block.replace("\\{", "|").replace("\\}", "|")
@@ -228,6 +230,7 @@ class BibItemParser(Parsers.FileStreamReader):
             return block
 
 class BibTeXParser(Parsers.FileStreamReader):
+    default_binary = False
     @classmethod
     def is_valid_tex_block(cls, block:str):
         block = block.replace("\\{", "|").replace("\\}", "|")

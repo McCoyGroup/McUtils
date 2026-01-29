@@ -168,28 +168,29 @@ class ParserTests(TestCase):
     def test_ParseBib(self):
         import McUtils.Devutils as dev
 
-        bib_file = TestManager.test_data('TeXPaper/bibliography/library.bib')
+        bib_file = TestManager.test_data('TeXPaper/bibliography/alt.bib')
         root_text = dev.read_file(bib_file)
 
         samp_bib = """
-@misc{MAB-pres-APS-2024,
-   author = {Mark A Boyer and Sibert III, Edwin L}
-   month = {3},
-   note = {American Physical Society March Meeting},
-   title = {EXPLORING HYDROGEN BONDING THROUGH REDUCED DIMENSIONAL TREATMENTS IN OBLIQUE COORDINATES},
-   year = {2024}
+@article{Goodfellow2014,
+   author = {Ian J. Goodfellow and Jean Pouget-Abadie and Mehdi Mirza and Bing Xu and David Warde-Farley and Sherjil Ozair and Aaron Courville and Yoshua Bengio},
+   journal = {arXiv e-prints},
+   month = {6},
+   title = {Generative Adversarial Networks},
+   url = {http://arxiv.org/abs/1406.2661},
+   year = {2014},
 }
 """
         # with dev.StreamInterface(samp_bib, file_backed=True) as stream:
         #     with BibItemParser(stream) as item_parser:
         #         print(":::", item_parser.parse_bib_line())
-
+        #
         # return
         import pprint
 
         with BibTeXParser(bib_file) as parser:
             print()
-            for i in range(2):
+            for i in range(6):
                 (s, e), text = parser.parse_bib_item(return_end_points=True)
                 if text is not None:
                     print("="*100)
