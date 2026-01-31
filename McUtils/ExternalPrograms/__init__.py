@@ -36,3 +36,5 @@ from .ExecutionEngine import *; from .ExecutionEngine import __all__ as exposed
 __all__ += exposed
 from .ManagedJobQueues import *; from .ManagedJobQueues import __all__ as exposed
 __all__ += exposed
+from .SMILES import *; from .SMILES import __all__ as exposed
+__all__ += exposed
