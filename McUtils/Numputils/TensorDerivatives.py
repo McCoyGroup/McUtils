@@ -1148,7 +1148,7 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
             )
             signs = signs.reshape(signs.shape[:-2])
             norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
-            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(norms)]
+            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
 
         final_tensors = [
             np.zeros(base_shape + e.shape[1:])
@@ -1187,7 +1187,7 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
             )
             signs = signs.reshape(signs.shape[:-2])
             norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
-            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(norms)]
+            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
 
     if return_unit_vectors:
         return norms, units

@@ -10,6 +10,8 @@ import tempfile as tf
 import itertools
 from cProfile import label
 
+from setuptools.command.easy_install import auto_chmod
+
 from .. import Devutils as dev
 from .. import Numputils as nput
 from .. import Parsers
@@ -844,7 +846,7 @@ class TeXImportGraph:
             self.root_dir_var:root_dir
         }
         if self.aliases is not None:
-            for a,v in self.aliases.items():
+            for a,v in self.aliases.items()  :
                 if not isinstance(v, str):
                     v = v(base_aliases)
                 else:
@@ -1481,23 +1483,35 @@ class TeXTranspiler:
 
 
     style_search_paths = ["styles"]
-    def transpile(self, target_dir, file_name='main.tex', include_aux=True, allow_missing_styles=False):
+    def transpile(self, target_dir, file_name='main.tex', include_si=True, include_aux=True, allow_missing_styles=False):
         flat_file = self.create_flat_tex(include_aux=include_aux)
         os.makedirs(target_dir, exist_ok=True)
         if include_aux:
             flat_file, aux = flat_file
-            self._copy_inputs(self.graph.root_dir, target_dir,
-                              self.styles_path,
-                              aux['styles'],
-                              self.figure_merge_function,
-                              search_paths=self.style_search_paths,
-                              allow_missing=allow_missing_styles
-                              )
-            self._copy_inputs(self.graph.root_dir, target_dir, self.figures_path, aux['figures'], self.figure_merge_function)
-            self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'],
-                              self.bib_merge_function,
-                              post_processor=lambda file:self.bib_cleanup_function(file, aux['citations'], **self.parser_options)
-                              )
+            if 'styles' in aux:
+                self._copy_inputs(self.graph.root_dir, target_dir,
+                                  self.styles_path,
+                                  aux['styles'],
+                                  self.figure_merge_function,
+                                  search_paths=self.style_search_paths,
+                                  allow_missing=allow_missing_styles
+                                  )
+            if 'figures' in aux:
+                self._copy_inputs(self.graph.root_dir, target_dir, self.figures_path, aux['figures'], self.figure_merge_function)
+
+            if 'citations' in aux:
+                if self.bib_cleanup_function is not None:
+                    bib_post_processor = lambda file:self.bib_cleanup_function(file, aux['citations'], **self.parser_options)
+                else:
+                    bib_post_processor = None
+                self._copy_inputs(self.graph.root_dir, target_dir, self.bib_path, aux['bibliography'],
+                                  self.bib_merge_function,
+                                  post_processor=bib_post_processor
+                                  )
+            if include_si and 'si' in aux:
+                for name,flat in aux['si'].items():
+                    dev.write_file(os.path.join(target_dir, name+'.tex'), flat)
+
         os.path.join(target_dir, file_name)
         dev.write_file(os.path.join(target_dir, file_name), flat_file)
         return target_dir
