@@ -1,7 +1,9 @@
+
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.ExternalPrograms import *
 from McUtils.Data import UnitsData
+from McUtils.Profilers import Timer
 import sys, os, numpy as np, pprint
 
 class ExternalProgramsTest(TestCase):
@@ -132,3 +134,35 @@ class ExternalProgramsTest(TestCase):
                client.print_response(res)
             else:
                 pprint.pprint(res)
+
+    @staticmethod
+    def _echo(arg): return arg
+    @debugTest
+    def test_SMIVendor(self):
+        samp = TestManager.test_data('a2bbb-substances.smi')
+        vendor = SMILESSupplier(samp)
+
+        # print(vendor.find_smi(5))
+        # with open(samp) as smi:
+        #     for i in range(6):
+        #         test = smi.readline()
+        #     print(test)
+        #
+        # print(vendor.line_indices[:5])
+
+
+        with Timer():
+            print(vendor.find_smi(90))
+
+        with Timer():
+            print(vendor.find_smi(90))
+
+        vendor = SMILESSupplier(samp)
+        vendor.create_line_index()
+
+        with Timer():
+            print(vendor.find_smi(90))
+
+        smi_list = consume_smiles(vendor, self._echo, upto=83)
+        smi_list2 = consume_smiles(vendor, self._echo, 3, upto=83)
+        self.assertListEqual(smi_list, smi_list2)
