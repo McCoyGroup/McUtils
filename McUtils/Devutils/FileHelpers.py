@@ -163,6 +163,18 @@ class StreamInterface:
         self.file_opts = file_opts
         self._was_open = None
 
+    def is_binary(self):
+        if isinstance(self._input, (str, bytes)):
+            return "b" in self.file_opts.get('mode', '')
+        else:
+            return "b" in self._input.mode
+
+    def get_encoding(self):
+        if isinstance(self._input, (str, bytes)):
+            return self.file_opts.get('encoding', 'utf-8')
+        else:
+            return self._input.encoding
+
     @classmethod
     def is_path_like(cls, input):
         return (len(input) > 0 and all(k not in input for k in ["\n", ",", "(", ")"]))

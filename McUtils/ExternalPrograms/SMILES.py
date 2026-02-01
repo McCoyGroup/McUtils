@@ -3,7 +3,7 @@ import multiprocessing
 
 from .. import Devutils as dev
 import numpy as np
-import multiprocessing as mp
+import hashlib
 
 __all__ = [
     "SMILESSupplier",
@@ -12,8 +12,13 @@ __all__ = [
 ]
 
 class SMILESSupplier:
-    def __init__(self, smiles_file, line_indices=None, size=int(1e3), split_idx=0):
-        self.smi = dev.StreamInterface(smiles_file)
+    def __init__(self, smiles_file, line_indices=None, name=None,
+                 size=int(1e3),
+                 split_idx=0,
+                 split_char=None,
+                 line_parser=None):
+        self.name = name
+        self.smi = dev.StreamInterface(smiles_file, mode='rb')
         self.line_indices = line_indices
         self._size = size
         self._call_depth = 0
@@ -23,7 +28,36 @@ class SMILESSupplier:
         self._offsets:np.ndarray[(None,), int] = None
         self._flexible_offsets = None
         self._assignable_offsets = None
+        self._encoding = self.smi.get_encoding()
+        self._binary = self.smi.is_binary()
+        if isinstance(split_char, str) and self._binary:
+            split_char = split_char.encode(self._encoding)
+        self.split_char = split_char
         self.split_idx = split_idx
+        if line_parser is None:
+            line_parser = self._default_parser
+        self.line_parser = line_parser
+
+    known_suppliers = {
+        "zinc20": {
+            'smiles_file': 'ZINC20.smi',
+            'line_indices': 'ZINC20_idx.npy',
+            'split_idx': 0
+        },
+        "emols": {
+            'smiles_file': 'emolecule_sc_2026_01_01.smi',
+            'line_indices': 'molecule_sc_2026_01_01_idx.npy',
+            'split_idx': 0
+        },
+        "pubchem":{
+            'smiles_file':'pubchem_cid_smi_2026_01.smi',
+            'line_indices':'pubchem_cid_smi_2026_01_idx.npy',
+            'split_idx':1
+        }
+    }
+    @classmethod
+    def from_name(cls, name):
+        return cls(**cls.known_suppliers[name], name=name)
 
     def __enter__(self):
         self._call_depth += 1
@@ -44,7 +78,7 @@ class SMILESSupplier:
                 self._flexible_offsets = False
                 self._assignable_offsets = False
             if self._max_offset is None:
-                self._max_offset = len(self._offsets)
+                self._max_offset = len(self._offsets) - 1
         return self._stream
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._call_depth -= 1
@@ -64,12 +98,21 @@ class SMILESSupplier:
             else:
                 return self._max_offset
     @classmethod
-    def _consume_next(self, db, split_idx=0):
+    def _split_smi(cls, line:bytes, encoding='utf-8', split_idx=0, split_char=None, maxsplit=-1):
+        if split_char is None:
+            return line.split(maxsplit=maxsplit)[split_idx].strip().decode(encoding)
+        else:
+            return line.split(sep=split_char, maxsplit=maxsplit)[split_idx].strip().decode(encoding)
+    def _default_parser(self, line):
+        return self._split_smi(line, split_idx=self.split_idx, split_char=self.split_char, encoding=self._encoding)
+
+    @classmethod
+    def _consume_next(self, db, parser):
         line = db.readline()
         if len(line) == 0:
             return line
         else:
-            return line.split(maxsplit=1)[split_idx].strip()
+            return parser(line)
     def find_smi(self, n, block_size=None):
         with self as db:
             #TODO: add ability to stream line indices to avoid reading them into memory
@@ -78,7 +121,7 @@ class SMILESSupplier:
             db.seek(self._offsets[n])
             if block_size is None:
                 self._cur = n
-                return self._consume_next(db, split_idx=self.split_idx)
+                return self._consume_next(db, self.line_parser)
             else:
                 self._cur = n + block_size
                 if n + block_size >= self._max_offset:
@@ -87,39 +130,41 @@ class SMILESSupplier:
                         if self._assignable_offsets:
                             self._expand_offset_if_needed(n+m)
                             self._offsets[n+m] = db.tell()
-                        blocks.append(self._consume_next(db, split_idx=self.split_idx))
+                        blocks.append(self._consume_next(db, self.line_parser))
                     return blocks
                 else:
                     return [
-                        self._consume_next(db, split_idx=self.split_idx)
+                        self._consume_next(db, self.line_parser)
                         for _ in range(block_size)
                     ]
     def consume_iter(self, start_at=None, upto=None):
         with self as db:
             if start_at is None:
                 start_at = self._cur
+            else:
+                self.create_line_index(upto=start_at, return_index=False)
             ninds = start_at
             try:
                 db.seek(self._offsets[ninds])
                 if upto is None:
-                    smi = self._consume_next(db, split_idx=self.split_idx)
+                    smi = self._consume_next(db, self.line_parser)
                     while len(smi) > 0:
                         ninds += 1
                         if self._assignable_offsets:
                             self._expand_offset_if_needed(ninds)
                             self._offsets[ninds] = db.tell()
                         yield smi
-                        smi = self._consume_next(db, split_idx=self.split_idx)
+                        smi = self._consume_next(db, self.line_parser)
                 else:
                     if ninds >= upto: return
-                    smi = self._consume_next(db, split_idx=self.split_idx)
+                    smi = self._consume_next(db, self.line_parser)
                     while ninds < upto and len(smi) > 0:
                         ninds += 1
                         if self._assignable_offsets:
                             self._expand_offset_if_needed(ninds)
                             self._offsets[ninds] = db.tell()
                         yield smi
-                        smi = self._consume_next(db, split_idx=self.split_idx)
+                        smi = self._consume_next(db, self.line_parser)
             finally:
                 self._cur = ninds
                 self._max_offset = max(self._max_offset, ninds)
@@ -130,7 +175,7 @@ class SMILESSupplier:
             raise ValueError(f"{cls.__name__} must be opened via `with` before it can be iterated over")
         with self as db:
             db.seek(self._offsets[self._cur])
-            return self._consume_next(db)
+            return self._consume_next(db, self.line_parser)
 
     def __iter__(self):
         return self.consume_iter()
@@ -159,6 +204,8 @@ class SMILESSupplier:
                         ninds += 1
                         self._expand_offset_if_needed(ninds)
                         self._offsets[ninds] = self._offsets[ninds-1] + l
+                        if not self._binary:
+                            if db.peek(1) == "\r": self._offsets[ninds] += 1
                         l = len(db.readline())
                 else:
                     if ninds < upto:
@@ -167,6 +214,8 @@ class SMILESSupplier:
                             ninds += 1
                             self._expand_offset_if_needed(ninds)
                             self._offsets[ninds] = self._offsets[ninds-1] + l
+                            if not self._binary:
+                                if db.peek(1) == "\r": self._offsets[ninds] += 1
                             # self._offsets[ninds] = db.tell()
                             l = len(db.readline())
             finally:
@@ -184,9 +233,9 @@ class SMILESSupplier:
                 break
         return np.save(file, line_index)
 
-def _consume_supplier_mp(smiles_file, consumer, line_offset, block_size):
+def _consume_supplier_mp(smiles_file, split_idx, consumer, line_offset, block_size):
     offsets = np.full(block_size, line_offset)
-    supplier = SMILESSupplier(smiles_file, line_indices=offsets)
+    supplier = SMILESSupplier(smiles_file, line_indices=offsets, split_idx=split_idx)
     res = []
     with supplier:
         for smi in supplier.consume_iter(start_at=0, upto=block_size):
@@ -195,7 +244,9 @@ def _consume_supplier_mp(smiles_file, consumer, line_offset, block_size):
     return res
 
 def consume_smiles_supplier(supplier:SMILESSupplier, consumer, pool=None, start_at=None, upto=None, initializer=None):
-    if dev.is_int(pool):
+    if pool is True:
+        pool = multiprocessing.Pool(initializer=initializer)
+    elif dev.is_int(pool):
         pool = multiprocessing.Pool(pool, initializer=initializer)
 
     if pool is None:
@@ -218,7 +269,7 @@ def consume_smiles_supplier(supplier:SMILESSupplier, consumer, pool=None, start_
                 for i in range(num_blocks)
             ]
             #TODO: don't access the `_input` argument directly...
-            args = [(supplier.smi._input, consumer) + bs for bs in block_starts_sizes]
+            args = [(supplier.smi._input, supplier.split_idx, consumer) + bs for bs in block_starts_sizes]
         res = pool.starmap(_consume_supplier_mp, args)
 
         return sum(res, [])
@@ -234,9 +285,12 @@ def _disable_rdkit_log(blockage=[]):
     bl = BlockLogs()
     blockage.append([bl,  bl.__enter__()])
 
-def match_smiles_supplier(supplier:SMILESSupplier, matcher, pool=None, start_at=None, upto=None, quiet=True,
+def match_smiles_supplier(supplier:SMILESSupplier, matcher, pool=None,
+                          start_at=None, upto=None, quiet=True,
+                          out_file=None,
                           initializer=None):
     from rdkit.rdBase import BlockLogs
+    smarts_tag = str(matcher)
     if isinstance(matcher, str):
         from .RDKit import RDKitInterface
         AllChem = RDKitInterface.submodule("Chem.AllChem")
@@ -244,8 +298,37 @@ def match_smiles_supplier(supplier:SMILESSupplier, matcher, pool=None, start_at=
         matcher = functools.partial(_match_rdkit, smarts_candidate)
         if quiet and initializer is None:
             initializer = _disable_rdkit_log
+
+    if out_file is True:
+        out_file_bits = [
+            "match",
+            "{name}" if supplier.name is not None else None,
+            "s{start}" if start_at is not None else None,
+            "t{to}" if upto is not None else None,
+            "{smarts_key}.smi"
+        ]
+        out_file = "_".join(b for b in out_file_bits if b is not None)
+
+    hash_obj = hashlib.md5(smarts_tag.encode('utf-8'))
+    smarts_key = hash_obj.hexdigest()
+    if isinstance(out_file, str):
+        out_file = out_file.format(
+            name=supplier.name,
+            start=start_at,
+            to=upto,
+            smarts_key=smarts_key,
+            smarts_tag=smarts_tag)
+
     if quiet:
         with BlockLogs():
-            return consume_smiles_supplier(supplier, matcher, pool=pool, start_at=start_at, upto=upto, initializer=initializer)
+            matches = consume_smiles_supplier(supplier, matcher, pool=pool, start_at=start_at, upto=upto, initializer=initializer)
     else:
-        return consume_smiles_supplier(supplier, matcher, pool=pool, start_at=start_at, upto=upto, initializer=initializer)
+        matches = consume_smiles_supplier(supplier, matcher, pool=pool, start_at=start_at, upto=upto, initializer=initializer)
+
+    if out_file is not None:
+        with dev.StreamInterface(out_file, mode='w+') as match_output:
+            match_output.write(f"SMARTS: {smarts_tag} ({smarts_key})\n")
+            for match in matches:
+                match_output.write(match + "\n")
+
+    return matches
