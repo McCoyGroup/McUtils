@@ -173,6 +173,11 @@ class ExternalProgramsTest(TestCase):
         # dev.write_file("/Users/Mark/Desktop/pubchem_partial_50000.smi", "\n".join(subsmi))
         # return
 
+        print()
+        vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'))
+        print(vendor.find_smi(0))
+        print(vendor.find_smi(1))
+
         vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'))
         lix = vendor.create_line_index()
         vendor.save_line_index(TestManager.test_data('pubchem_partial_50000_idx.npy'), lix)
@@ -186,4 +191,5 @@ class ExternalProgramsTest(TestCase):
         with Timer("parale"):
             sm2 = match_smiles_supplier(vendor, "C=C", pool=4)
 
+        print(sm1[:5])
         self.assertListEqual(sm1, sm2)

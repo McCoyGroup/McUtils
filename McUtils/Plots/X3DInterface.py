@@ -354,6 +354,8 @@ class X3DOptionsSet(X3DObject):
         if isinstance(color, (list, tuple, np.ndarray)) and all(isinstance(c, str) for c in color):
             color = " ".join(color)
         if isinstance(color, str):
+            if color == 'transparent':
+                color = '#' + 'F'*8
             try:
                 _ = [float(s) for s in color.split()]
             except ValueError:
