@@ -174,9 +174,16 @@ class ExternalProgramsTest(TestCase):
         # return
 
         vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'))
+        lix = vendor.create_line_index()
+        vendor.save_line_index(TestManager.test_data('pubchem_partial_50000_idx.npy'), lix)
+
         print()
+        vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'),
+                                line_indices=TestManager.test_data('pubchem_partial_50000_idx.npy'))
         with Timer("serial"):
             sm1 = match_smiles_supplier(vendor, "C=C")
 
         with Timer("parale"):
             sm2 = match_smiles_supplier(vendor, "C=C", pool=4)
+
+        self.assertListEqual(sm1, sm2)
