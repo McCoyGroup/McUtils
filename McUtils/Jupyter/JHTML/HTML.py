@@ -10,8 +10,6 @@ __all__ = [
     "ContentXML"
 ]
 
-from ase.io.x3d import element
-
 from ...Misc import mixedmethod
 from .Enums import Options
 from .WidgetTools import frozendict
