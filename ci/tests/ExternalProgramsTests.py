@@ -151,18 +151,32 @@ class ExternalProgramsTest(TestCase):
         # print(vendor.line_indices[:5])
 
 
-        with Timer():
-            print(vendor.find_smi(90))
+        # with Timer():
+        #     print(vendor.find_smi(90))
+        #
+        # with Timer():
+        #     print(vendor.find_smi(90))
+        #
+        # vendor = SMILESSupplier(samp)
+        # vendor.create_line_index()
+        #
+        # with Timer():
+        #     print(vendor.find_smi(90))
+        #
+        # smi_list = consume_smiles_supplier(vendor, self._echo, upto=83)
+        # smi_list2 = consume_smiles_supplier(vendor, self._echo, 3, upto=83)
+        # self.assertListEqual(smi_list, smi_list2)
 
-        with Timer():
-            print(vendor.find_smi(90))
+        # pubhchem = SMILESSupplier("/Users/Mark/Downloads/pubchem_cid_smi_2026_01.smi", split_idx=1)
+        # subsmi = consume_smiles_supplier(pubhchem, self._echo, upto=int(5e4))
+        # import McUtils.Devutils as dev
+        # dev.write_file("/Users/Mark/Desktop/pubchem_partial_50000.smi", "\n".join(subsmi))
+        # return
 
-        vendor = SMILESSupplier(samp)
-        vendor.create_line_index()
+        vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'))
+        print()
+        with Timer("serial"):
+            sm1 = match_smiles_supplier(vendor, "C=C")
 
-        with Timer():
-            print(vendor.find_smi(90))
-
-        smi_list = consume_smiles(vendor, self._echo, upto=83)
-        smi_list2 = consume_smiles(vendor, self._echo, 3, upto=83)
-        self.assertListEqual(smi_list, smi_list2)
+        with Timer("parale"):
+            sm2 = match_smiles_supplier(vendor, "C=C", pool=4)
