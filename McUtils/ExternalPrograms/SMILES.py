@@ -154,15 +154,21 @@ class SMILESSupplier:
             db.seek(self._offsets[ninds])
             try:
                 if upto is None:
-                    while len(db.readline()) > 0:
+                    l = len(db.readline())
+                    while l > 0:
                         ninds += 1
                         self._expand_offset_if_needed(ninds)
-                        self._offsets[ninds] = db.tell()
+                        self._offsets[ninds] = self._offsets[ninds-1] + l
+                        l = len(db.readline())
                 else:
-                    while ninds < upto and len(db.readline()) > 0:
-                        ninds += 1
-                        self._expand_offset_if_needed(ninds)
-                        self._offsets[ninds] = db.tell()
+                    if ninds < upto:
+                        l = len(db.readline())
+                        while ninds < upto and l > 0:
+                            ninds += 1
+                            self._expand_offset_if_needed(ninds)
+                            self._offsets[ninds] = self._offsets[ninds-1] + l
+                            # self._offsets[ninds] = db.tell()
+                            l = len(db.readline())
             finally:
                 self._max_offset = ninds
             if return_index:
