@@ -22,6 +22,7 @@ class SMILESSupplier:
         self._max_offset = None
         self._offsets:np.ndarray[(None,), int] = None
         self._flexible_offsets = None
+        self._assignable_offsets = None
         self.split_idx = split_idx
 
     def __enter__(self):
@@ -37,11 +38,13 @@ class SMILESSupplier:
             if isinstance(self.line_indices, np.ndarray):
                 self._offsets = self.line_indices
                 self._flexible_offsets = True
+                self._assignable_offsets = True
             else:
                 self._offsets = np.load(self.line_indices, mmap_mode='r')
                 self._flexible_offsets = False
+                self._assignable_offsets = False
             if self._max_offset is None:
-                self._max_offset = len(self.line_indices)
+                self._max_offset = len(self._offsets)
         return self._stream
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._call_depth -= 1
@@ -56,7 +59,7 @@ class SMILESSupplier:
     def __len__(self):
         with self:
             if self._flexible_offsets:
-                self.create_line_index()
+                self.create_line_index(return_index=False)
                 return self._max_offset
             else:
                 return self._max_offset
@@ -71,7 +74,7 @@ class SMILESSupplier:
         with self as db:
             #TODO: add ability to stream line indices to avoid reading them into memory
             if n >= self._max_offset:
-                self.create_line_index(n)
+                self.create_line_index(n, return_index=False)
             db.seek(self._offsets[n])
             if block_size is None:
                 self._cur = n
@@ -81,8 +84,9 @@ class SMILESSupplier:
                 if n + block_size >= self._max_offset:
                     blocks = []
                     for m in range(block_size):
-                        self._expand_offset_if_needed(n+m)
-                        self._offsets[n+m] = db.tell()
+                        if self._assignable_offsets:
+                            self._expand_offset_if_needed(n+m)
+                            self._offsets[n+m] = db.tell()
                         blocks.append(self._consume_next(db, split_idx=self.split_idx))
                     return blocks
                 else:
@@ -101,8 +105,9 @@ class SMILESSupplier:
                     smi = self._consume_next(db, split_idx=self.split_idx)
                     while len(smi) > 0:
                         ninds += 1
-                        self._expand_offset_if_needed(ninds)
-                        self._offsets[ninds] = db.tell()
+                        if self._assignable_offsets:
+                            self._expand_offset_if_needed(ninds)
+                            self._offsets[ninds] = db.tell()
                         yield smi
                         smi = self._consume_next(db, split_idx=self.split_idx)
                 else:
@@ -110,8 +115,9 @@ class SMILESSupplier:
                     smi = self._consume_next(db, split_idx=self.split_idx)
                     while ninds < upto and len(smi) > 0:
                         ninds += 1
-                        self._expand_offset_if_needed(ninds)
-                        self._offsets[ninds] = db.tell()
+                        if self._assignable_offsets:
+                            self._expand_offset_if_needed(ninds)
+                            self._offsets[ninds] = db.tell()
                         yield smi
                         smi = self._consume_next(db, split_idx=self.split_idx)
             finally:
@@ -137,22 +143,32 @@ class SMILESSupplier:
                 new_offsets = np.zeros(2 * len(self._offsets), dtype='uint64')
                 new_offsets[:len(self._offsets)] = self._offsets
                 self._offsets = new_offsets
-    def create_line_index(self, upto=None):
+    def create_line_index(self, upto=None, return_index=True):
         with self as db:
+            if not self._assignable_offsets:
+                if return_index:
+                    return self._offsets[:self._max_offset]
+                else:
+                    return None
             ninds = self._max_offset
             db.seek(self._offsets[ninds])
-            if upto is None:
-                while len(db.readline()) > 0:
-                    ninds += 1
-                    self._expand_offset_if_needed(ninds)
-                    self._offsets[ninds] = db.tell()
+            try:
+                if upto is None:
+                    while len(db.readline()) > 0:
+                        ninds += 1
+                        self._expand_offset_if_needed(ninds)
+                        self._offsets[ninds] = db.tell()
+                else:
+                    while ninds < upto and len(db.readline()) > 0:
+                        ninds += 1
+                        self._expand_offset_if_needed(ninds)
+                        self._offsets[ninds] = db.tell()
+            finally:
+                self._max_offset = ninds
+            if return_index:
+                return self._offsets[:self._max_offset]
             else:
-                while ninds < upto and len(db.readline()) > 0:
-                    ninds += 1
-                    self._expand_offset_if_needed(ninds)
-                    self._offsets[ninds] = db.tell()
-            self._max_offset = ninds
-            return self._offsets[:self._max_offset]
+                return None
     @classmethod
     def save_line_index(cls, file, line_index):
         max_offset = line_index[-1]
@@ -185,17 +201,18 @@ def consume_smiles_supplier(supplier:SMILESSupplier, consumer, pool=None, start_
 
         return res
     else:
-        max_size = len(supplier) if upto is None else upto
-        offsets = supplier.create_line_index(upto=upto)
-        nproc = pool._processes
-        block_size = max_size // nproc
-        num_blocks = int(np.ceil(max_size / block_size))
-        block_starts_sizes = [
-            (offsets[block_size*i], min([block_size, max_size - (block_size*i+1) + 1]))
-            for i in range(num_blocks)
-        ]
-        #TODO: don't access the `_input` argument directly...
-        args = [(supplier.smi._input, consumer) + bs for bs in block_starts_sizes]
+        with supplier:
+            max_size = len(supplier) if upto is None else upto
+            offsets = supplier._offsets # TODO: gross
+            nproc = pool._processes
+            block_size = max_size // nproc
+            num_blocks = int(np.ceil(max_size / block_size))
+            block_starts_sizes = [
+                (offsets[block_size*i], min([block_size, max_size - (block_size*i+1) + 1]))
+                for i in range(num_blocks)
+            ]
+            #TODO: don't access the `_input` argument directly...
+            args = [(supplier.smi._input, consumer) + bs for bs in block_starts_sizes]
         res = pool.starmap(_consume_supplier_mp, args)
 
         return sum(res, [])
