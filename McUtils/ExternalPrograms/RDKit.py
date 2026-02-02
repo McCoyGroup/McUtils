@@ -204,11 +204,27 @@ class RDMolecule(ExternalMolecule):
         return cls.from_rdmol(mol)
 
     @classmethod
-    def get_confgen_opts(cls):
+    def get_confgen_opts(cls,
+                         version='v3',
+                         use_experimental_torsion_angle_prefs=True,
+                         use_basic_knowledge=True,
+                         **opts
+                         ):
         AllChem = cls.allchem_api()
-        params = AllChem.ETKDGv3()
-        params.useExpTorsionAnglePrefs = True
-        params.useBasicKnowledge = True
+        version = version.lower()
+        if version == 'v3':
+            params = AllChem.ETKDGv3()
+        elif version == 'v2':
+            params = AllChem.ETKDGv3()
+        elif version == 'v1':
+            params = AllChem.ETKDGv3()
+        else:
+            raise ValueError(f"unknown ETKDG version {version}")
+        params.useExpTorsionAnglePrefs = use_experimental_torsion_angle_prefs
+        params.useBasicKnowledge = use_basic_knowledge
+        for o,v in opts.items():
+            o = "".join(b.capitalize() if i > 0 else b for i,b in enumerate(o.split("_")))
+            setattr(params, o, v)
         return params
     @classmethod
     def from_smiles(cls, smiles,
@@ -223,6 +239,7 @@ class RDMolecule(ExternalMolecule):
                     num_confs=1, optimize=False, take_min=True,
                     force_field_type='mmff',
                     reorder_from_atom_map=True,
+                    confgen_opts=None,
                     **opts):
 
         if os.path.isfile(smiles):
@@ -262,20 +279,23 @@ class RDMolecule(ExternalMolecule):
 
         return cls.from_base_mol(mol,
                                  num_confs=num_confs, optimize=optimize, take_min=take_min,
-                                 force_field_type=force_field_type
+                                 force_field_type=force_field_type,
+                                 confgen_opts=confgen_opts
                                  )
 
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
         # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
 
     @classmethod
-    def from_base_mol(cls, mol,
-                           conf_id=-1,
-                           num_confs=1,
-                           optimize=False,
-                           take_min=None,
-                           force_field_type='mmff',
-                           **mol_opts):
+    def from_base_mol(cls,
+                      mol,
+                      conf_id=-1,
+                      num_confs=1,
+                      optimize=False,
+                      take_min=None,
+                      force_field_type='mmff',
+                      confgen_opts=None,
+                      **mol_opts):
         try:
             conf = mol.GetConformer(conf_id)
         except ValueError:
@@ -290,6 +310,7 @@ class RDMolecule(ExternalMolecule):
                                                   optimize=optimize,
                                                   take_min=conf_id < 0 if take_min is None else take_min,
                                                   force_field_type=force_field_type,
+                                                  confgen_opts=confgen_opts,
                                                   **mol_opts
                                                   )
 
@@ -301,13 +322,31 @@ class RDMolecule(ExternalMolecule):
                                     take_min=True,
                                     force_field_type='mmff',
                                     add_implicit_hydrogens=False,
+                                    distance_constraints=None,
+                                    **opts
                                     ):
 
         AllChem = cls.allchem_api()
 
         AllChem.AddHs(mol, explicitOnly=not add_implicit_hydrogens)
 
-        params = cls.get_confgen_opts()
+        params = cls.get_confgen_opts(**opts)
+        if distance_constraints is not None:
+            if hasattr(distance_constraints, 'items'):
+                distance_constraints = distance_constraints.items()
+            if nput.is_numeric_array_like(distance_constraints):
+                bmat = np.array(distance_constraints)
+            else:
+                mol.UpdatePropertyCache(strict=False)
+                _ = AllChem.GetSymmSSSR(mol)
+                AllChem.SetHybridization(mol)
+                bmat = AllChem.GetMoleculeBoundsMatrix(mol)
+                for (i, j), (min_dist, max_dist) in distance_constraints:
+                    if j > i: i,j = j,i
+                    if max_dist < min_dist: min_dist, max_dist = max_dist, min_dist
+                    bmat[i, j] = min_dist
+                    bmat[j, i] = max_dist
+            params.SetBoundsMat(bmat)
         try:
             # with OutputRedirect():
             with cls.quiet_errors():
@@ -361,14 +400,17 @@ class RDMolecule(ExternalMolecule):
                                    take_min=True,
                                    force_field_type='mmff',
                                    add_implicit_hydrogens=False,
+                                   confgen_opts=None,
                                    **etc
                                    ):
-
+        if confgen_opts is None:
+            confgen_opts = {}
         conf_id = cls.generate_conformers_for_mol(mol,
                                                   num_confs=num_confs,
                                                   optimize=optimize,
                                                   take_min=take_min,
-                                                  force_field_type=force_field_type)
+                                                  force_field_type=force_field_type,
+                                                  **confgen_opts)
 
         return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
 
