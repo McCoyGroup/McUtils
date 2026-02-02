@@ -6,8 +6,6 @@ import uuid
 import numpy as np
 import os
 
-from rdkit.sping.colors import transparent
-
 from .. import Devutils as dev
 from ..Jupyter import JHTML, X3DHTML
 from .. import Numputils as nput
