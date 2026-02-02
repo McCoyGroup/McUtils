@@ -8,9 +8,6 @@ import re
 import shutil
 import tempfile as tf
 import itertools
-from cProfile import label
-
-from setuptools.command.easy_install import auto_chmod
 
 from .. import Devutils as dev
 from .. import Numputils as nput

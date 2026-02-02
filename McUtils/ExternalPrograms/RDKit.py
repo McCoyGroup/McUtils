@@ -7,7 +7,6 @@ __all__ = [
 import numpy as np, io, os
 from .. import Numputils as nput
 from .. import Devutils as dev
-from ..Devutils import OutputRedirect
 
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule
@@ -106,7 +105,12 @@ class RDMolecule(ExternalMolecule):
                         ^rdmolops.SANITIZE_CLEANUP_ORGANOMETALLICS
                 )
             rdmol = Chem.Mol(rdmol)
-            Chem.SanitizeMol(rdmol, sanitize_ops)
+            try:
+                Chem.SanitizeMol(rdmol, sanitize_ops)
+            except Chem.rdchem.MolSanitizeException:
+                rdmol.UpdatePropertyCache(strict=False)
+                _ = Chem.GetSymmSSSR(rdmol)
+                Chem.SetHybridization(rdmol)
 
         no_confs = False
         try:
@@ -353,6 +357,9 @@ class RDMolecule(ExternalMolecule):
                 conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=params)
         except AllChem.rdchem.MolSanitizeException:
             conformer_set = None
+            mol.UpdatePropertyCache(strict=False)
+            _ = AllChem.GetSymmSSSR(mol)
+            AllChem.SetHybridization(mol)
         if conformer_set is None:
             params.embedFragmentsSeparately = False
             # with OutputRedirect():
