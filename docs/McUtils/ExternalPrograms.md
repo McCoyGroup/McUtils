@@ -259,6 +259,17 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [SLURMHandler](ExternalPrograms/ManagedJobQueues/SLURMHandler.md)   
 </div>
    <div class="col" markdown="1">
+[SMILESSupplier](ExternalPrograms/SMILES/SMILESSupplier.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[consume_smiles_supplier](ExternalPrograms/SMILES/consume_smiles_supplier.md)   
+</div>
+   <div class="col" markdown="1">
+[match_smiles_supplier](ExternalPrograms/SMILES/match_smiles_supplier.md)   
+</div>
+   <div class="col" markdown="1">
    
 </div>
 </div>
@@ -284,21 +295,22 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-98190a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-98190a"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-0f9014" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0f9014"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-98190a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0f9014" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
 - [CRESTParse](#CRESTParse)
 - [CRESTJob](#CRESTJob)
 - [EvaluationServer](#EvaluationServer)
+- [SMIVendor](#SMIVendor)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-18fa81" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-18fa81"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a09e45" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a09e45"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-18fa81" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a09e45" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -314,6 +326,7 @@ class ExternalProgramsTest(TestCase):
             return {
                 "add":self.add_vals
             }
+    def _echo(arg): return arg
 ```
 
  </div>
@@ -430,6 +443,65 @@ class ExternalProgramsTest(TestCase):
                client.print_response(res)
             else:
                 pprint.pprint(res)
+```
+
+#### <a name="SMIVendor">SMIVendor</a>
+```python
+    def test_SMIVendor(self):
+        samp = TestManager.test_data('a2bbb-substances.smi')
+        vendor = SMILESSupplier(samp)
+
+        # print(vendor.find_smi(5))
+        # with open(samp) as smi:
+        #     for i in range(6):
+        #         test = smi.readline()
+        #     print(test)
+        #
+        # print(vendor.line_indices[:5])
+
+
+        # with Timer():
+        #     print(vendor.find_smi(90))
+        #
+        # with Timer():
+        #     print(vendor.find_smi(90))
+        #
+        # vendor = SMILESSupplier(samp)
+        # vendor.create_line_index()
+        #
+        # with Timer():
+        #     print(vendor.find_smi(90))
+        #
+        # smi_list = consume_smiles_supplier(vendor, self._echo, upto=83)
+        # smi_list2 = consume_smiles_supplier(vendor, self._echo, 3, upto=83)
+        # self.assertListEqual(smi_list, smi_list2)
+
+        # pubhchem = SMILESSupplier("/Users/Mark/Downloads/pubchem_cid_smi_2026_01.smi", split_idx=1)
+        # subsmi = consume_smiles_supplier(pubhchem, self._echo, upto=int(5e4))
+        # import McUtils.Devutils as dev
+        # dev.write_file("/Users/Mark/Desktop/pubchem_partial_50000.smi", "\n".join(subsmi))
+        # return
+
+        print()
+        vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'))
+        print(vendor.find_smi(0))
+        print(vendor.find_smi(1))
+
+        vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'))
+        lix = vendor.create_line_index()
+        vendor.save_line_index(TestManager.test_data('pubchem_partial_50000_idx.npy'), lix)
+
+        print()
+        vendor = SMILESSupplier(TestManager.test_data('pubchem_partial_50000.smi'),
+                                line_indices=TestManager.test_data('pubchem_partial_50000_idx.npy'))
+        with Timer("serial"):
+            sm1 = match_smiles_supplier(vendor, "C=C")
+
+        with Timer("parale"):
+            sm2 = match_smiles_supplier(vendor, "C=C", pool=4)
+
+        print(sm1[:5])
+        self.assertListEqual(sm1, sm2)
 ```
 
  </div>

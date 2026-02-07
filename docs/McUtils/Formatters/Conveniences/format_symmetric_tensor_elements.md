@@ -5,7 +5,7 @@
 </div>
 
 ```python
-format_symmetric_tensor_elements(tensor, symmetries=None, cutoff=1e-06, headers=('Indices', 'Value'), format='{:12.3f}', **etc): 
+format_symmetric_tensor_elements(tensor, symmetries=None, cutoff=1e-06, headers=('Indices', 'Value'), allowed_indices=None, filter=None, format='{:12.3f}', **etc): 
 ```
 
 

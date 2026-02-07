@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DListAnimator">X3DListAnimator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1344)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1344?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1422)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1422?message=Update%20Docs)]
 </div>
 
 
@@ -25,8 +25,8 @@
 get_animation_objects(self, frames, id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1345)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1345?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1423)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1423?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -81,7 +81,7 @@ get_animation_objects(self, frames, id):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DListAnimator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DListAnimator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1344?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1422?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

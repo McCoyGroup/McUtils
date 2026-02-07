@@ -20,7 +20,11 @@ Jupyter display runtime
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
- 
+ ```python
+bootstrap_js_bundle_opts: dict
+bootstrap_jquery_bundle_opts: dict
+bootstrap_css_opts: dict
+```
 <a id="McUtils.Jupyter.Apps.Interfaces.WidgetInterface.to_widget" class="docs-object-method">&nbsp;</a> 
 ```python
 to_widget(self): 
@@ -41,13 +45,23 @@ initialize(self):
 </div>
 
 
+<a id="McUtils.Jupyter.Apps.Interfaces.WidgetInterface.to_static_html" class="docs-object-method">&nbsp;</a> 
+```python
+to_static_html(self, include_bootstrap=True, create_body=True): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L123?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Jupyter.Apps.Interfaces.WidgetInterface.display" class="docs-object-method">&nbsp;</a> 
 ```python
 display(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L139?message=Update%20Docs)]
 </div>
 
 
@@ -56,8 +70,8 @@ display(self):
 get_mime_bundle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L146)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WidgetInterface.py#L146?message=Update%20Docs)]
 </div>
  </div>
 </div>

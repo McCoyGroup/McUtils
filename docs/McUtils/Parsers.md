@@ -182,6 +182,17 @@ using a streamer to match chunks and a parser to extract data from the matched c
 [TeXParser](Parsers/TeXParser/TeXParser.md)   
 </div>
    <div class="col" markdown="1">
+[BibTeXParser](Parsers/TeXParser/BibTeXParser.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
    
 </div>
 </div>
@@ -342,20 +353,21 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-2ad318" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2ad318"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-b68138" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b68138"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2ad318" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b68138" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
 - [BasicParse](#BasicParse)
 - [ParseTex](#ParseTex)
+- [ParseBib](#ParseBib)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ae1123" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ae1123"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-3d5f21" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3d5f21"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ae1123" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3d5f21" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -518,6 +530,46 @@ class ParserTests(TestCase):
                 print(root_text[s:e])
             else:
                 print(root_text[s:])
+```
+
+#### <a name="ParseBib">ParseBib</a>
+```python
+    def test_ParseBib(self):
+        import McUtils.Devutils as dev
+
+        bib_file = TestManager.test_data('TeXPaper/bibliography/alt.bib')
+        root_text = dev.read_file(bib_file)
+
+        samp_bib = """
+@article{Goodfellow2014,
+   author = {Ian J. Goodfellow and Jean Pouget-Abadie and Mehdi Mirza and Bing Xu and David Warde-Farley and Sherjil Ozair and Aaron Courville and Yoshua Bengio},
+   journal = {arXiv e-prints},
+   month = {6},
+   title = {Generative Adversarial Networks},
+   url = {http://arxiv.org/abs/1406.2661},
+   year = {2014},
+}
+"""
+        # with dev.StreamInterface(samp_bib, file_backed=True) as stream:
+        #     with BibItemParser(stream) as item_parser:
+        #         print(":::", item_parser.parse_bib_line())
+        #
+        # return
+        import pprint
+
+        with BibTeXParser(bib_file) as parser:
+            print()
+            for i in range(6):
+                (s, e), text = parser.parse_bib_item(return_end_points=True)
+                if text is not None:
+                    print("="*100)
+                    print((s, e), text)
+                    # if e > 0:
+                    #     print(root_text[s:e])
+                    # else:
+                    #     print(root_text[s:])
+
+                    pprint.pprint(parser.parse_bib_body(text))
 ```
 
  </div>

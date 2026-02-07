@@ -5,7 +5,7 @@
 </div>
 
 ```python
-parse_zmatrix_string(zmat, units='Angstroms', in_radians=False, keep_variables=False, variables=None, dialect='gaussian'): 
+parse_zmatrix_string(zmat, units='Angstroms', in_radians=False, has_values=True, atoms_are_order=False, keep_variables=False, variables=None, dialect='gaussian'): 
 ```
 
 

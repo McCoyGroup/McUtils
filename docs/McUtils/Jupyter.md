@@ -383,18 +383,19 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-cb0e21" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cb0e21"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-a7d7b9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a7d7b9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cb0e21" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a7d7b9" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
+- [WidgetInteractivity](#WidgetInteractivity)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-72b0c2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-72b0c2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-110e8e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-110e8e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-72b0c2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-110e8e" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -436,6 +437,29 @@ a {
         water = Molecule.from_string('O', 'smi')
         widg = interactive.JHTML.Div(water.plot(backend='x3d').figure.to_x3d(), dynamic=True)
         print(widg.elem.children[0].children)
+```
+
+#### <a name="WidgetInteractivity">WidgetInteractivity</a>
+```python
+    def test_WidgetInteractivity(self):
+        import McUtils.Jupyter as interactive
+        from Psience.Molecools import Molecule
+
+        reactant = Molecule.from_string("CCO", "smi")
+
+        p = reactant.plot(backend='x3d')
+
+        print(type(
+            interactive.Grid([[
+                p, p
+            ]], dynamic=False).to_jhtml()
+        ))
+
+        print(type(
+            interactive.Carousel([
+                p, p
+            ], dynamic=False).to_jhtml()
+        ))
 ```
 
  </div>

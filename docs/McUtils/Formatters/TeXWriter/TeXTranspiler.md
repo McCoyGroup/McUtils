@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TeXWriter.TeXTranspiler">TeXTranspiler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L933)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L933?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L936)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L936?message=Update%20Docs)]
 </div>
 
 
@@ -29,11 +29,11 @@ style_search_paths: list
 ```
 <a id="McUtils.Formatters.TeXWriter.TeXTranspiler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, tex_root, root_dir=None, figure_renaming_function=None, bib_renaming_function=None, strip_comments=True, figures_path=None, figure_merge_function=None, bib_path=None, bib_merge_function=None, aliases=None, styles_path=None): 
+__init__(self, tex_root, root_dir=None, figure_renaming_function=None, bib_renaming_function=None, strip_comments=True, figures_path=None, figure_merge_function=None, bib_path=None, bib_merge_function=None, bib_cleanup_function=None, citation_renaming_function=None, aliases=None, styles_path=None, parser_options=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L934)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L934?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter.py#L937)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L937?message=Update%20Docs)]
 </div>
 
 
@@ -43,8 +43,8 @@ __init__(self, tex_root, root_dir=None, figure_renaming_function=None, bib_renam
 figure_counter(cls, name_root='Figure', start_at=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L960)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L960?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L972)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L972?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,19 @@ figure_counter(cls, name_root='Figure', start_at=1):
 add_bibs(cls, bib_list): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L967)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L967?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L979)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L979?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Formatters.TeXWriter.TeXTranspiler.pruned_bib" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+pruned_bib(cls, bib_file_or_filter, cites=None, *, filter=None, **parser_options): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L991)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L991?message=Update%20Docs)]
 </div>
 
 
@@ -65,8 +76,8 @@ add_bibs(cls, bib_list):
 get_injection_body(cls, root_dir, node_data: 'TeXImportGraph.ImportNode', body: 'str'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L974)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L974?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1021)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1021?message=Update%20Docs)]
 </div>
 
 
@@ -76,8 +87,8 @@ get_injection_body(cls, root_dir, node_data: 'TeXImportGraph.ImportNode', body: 
 apply_body_edit(cls, cur_text, edits, normalization_function=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L990)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L990?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1037)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1037?message=Update%20Docs)]
 </div>
 
 
@@ -87,8 +98,8 @@ apply_body_edit(cls, cur_text, edits, normalization_function=None):
 flatten_import_graph(cls, graph: 'dict[str, dict[str, TeXImportGraph.ImportNode]]', root, cache=None, root_dir=None, strip_comments=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1017)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1017?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1064)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1064?message=Update%20Docs)]
 </div>
 
 
@@ -97,8 +108,8 @@ flatten_import_graph(cls, graph: 'dict[str, dict[str, TeXImportGraph.ImportNode]
 remap_block(self, flat_tex, call_head, file_parser, replacement_path=None, renaming_function=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1050)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1050?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1097)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1097?message=Update%20Docs)]
 </div>
 
 
@@ -107,8 +118,8 @@ remap_block(self, flat_tex, call_head, file_parser, replacement_path=None, renam
 remap_figures(self, flat_tex, figures_path=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1174)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1174?message=Update%20Docs)]
 </div>
 
 
@@ -117,8 +128,8 @@ remap_figures(self, flat_tex, figures_path=None):
 remap_bibliography(self, flat_tex, bib_path=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1181?message=Update%20Docs)]
 </div>
 
 
@@ -127,8 +138,8 @@ remap_bibliography(self, flat_tex, bib_path=None):
 remap_style_files(self, flat_tex, styles_path=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1142)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1142?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1189)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1189?message=Update%20Docs)]
 </div>
 
 
@@ -138,8 +149,8 @@ remap_style_files(self, flat_tex, styles_path=None):
 get_call_list(self, tex_stream, tags) -> 'dict[tuple[int, int], str]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1159)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1159?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1206)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1206?message=Update%20Docs)]
 </div>
 
 
@@ -149,8 +160,8 @@ get_call_list(self, tex_stream, tags) -> 'dict[tuple[int, int], str]':
 create_label_block_map(cls, tex_stream, call_tags, block_parser): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1224?message=Update%20Docs)]
 </div>
 
 
@@ -160,8 +171,8 @@ create_label_block_map(cls, tex_stream, call_tags, block_parser):
 create_label_map(cls, tex_stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1235)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1235?message=Update%20Docs)]
 </div>
 
 
@@ -171,8 +182,40 @@ create_label_map(cls, tex_stream):
 create_ref_map(cls, tex_stream): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1211)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1211?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1258)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1258?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Formatters.TeXWriter.TeXTranspiler.create_cite_map" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+create_cite_map(cls, tex_stream): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1274)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1274?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Formatters.TeXWriter.TeXTranspiler.remap_citation_set" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+remap_citation_set(cls, tex_stream, ref_handler, cite_map=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1279)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1279?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Formatters.TeXWriter.TeXTranspiler.remap_citations" class="docs-object-method">&nbsp;</a> 
+```python
+remap_citations(self, flat_tex, si_tex: 'dict[str, str]' = None, citation_renaming_function=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1292?message=Update%20Docs)]
 </div>
 
 
@@ -182,8 +225,8 @@ create_ref_map(cls, tex_stream):
 ref_remapping_label(cls, head, label, si_index_map): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1320)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1320?message=Update%20Docs)]
 </div>
 
 
@@ -193,8 +236,8 @@ ref_remapping_label(cls, head, label, si_index_map):
 figure_table_remapping(cls, si_labels: 'dict[str, dict[tuple[int, int], LabelBlock]]', label_function=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1258)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1258?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1344)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1344?message=Update%20Docs)]
 </div>
 
 
@@ -204,8 +247,8 @@ figure_table_remapping(cls, si_labels: 'dict[str, dict[tuple[int, int], LabelBlo
 remap_refs(cls, tex_stream, ref_handler, ref_map=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1277)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1277?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1363)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1363?message=Update%20Docs)]
 </div>
 
 
@@ -215,8 +258,8 @@ remap_refs(cls, tex_stream, ref_handler, ref_map=None):
 find_si_documents(cls, flat_tex): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1285)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1285?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1371)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1371?message=Update%20Docs)]
 </div>
 
 
@@ -225,8 +268,8 @@ find_si_documents(cls, flat_tex):
 remap_si(self, flat_tex): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1293)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1293?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1379)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1379?message=Update%20Docs)]
 </div>
 
 
@@ -235,18 +278,18 @@ remap_si(self, flat_tex):
 create_flat_tex(self, include_aux=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1314)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1314?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1400)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1400?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Formatters.TeXWriter.TeXTranspiler.transpile" class="docs-object-method">&nbsp;</a> 
 ```python
-transpile(self, target_dir, file_name='main.tex', include_aux=True): 
+transpile(self, target_dir, file_name='main.tex', include_si=True, include_aux=True, allow_missing_styles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1391)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1391?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1483)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter/TeXTranspiler.py#L1483?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -301,7 +344,7 @@ transpile(self, target_dir, file_name='main.tex', include_aux=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TeXWriter/TeXTranspiler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TeXWriter/TeXTranspiler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L933?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TeXWriter.py#L936?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

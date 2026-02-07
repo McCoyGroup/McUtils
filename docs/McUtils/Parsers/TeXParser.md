@@ -13,7 +13,7 @@
 [TeXParser](TeXParser/TeXParser.md)   
 </div>
    <div class="col" markdown="1">
-   
+[BibTeXParser](TeXParser/BibTeXParser.md)   
 </div>
    <div class="col" markdown="1">
    

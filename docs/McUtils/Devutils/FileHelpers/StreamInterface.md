@@ -29,14 +29,34 @@ __init__(self, stream, file_backed=False, **file_opts):
 </div>
 
 
+<a id="McUtils.Devutils.FileHelpers.StreamInterface.is_binary" class="docs-object-method">&nbsp;</a> 
+```python
+is_binary(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L166?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Devutils.FileHelpers.StreamInterface.get_encoding" class="docs-object-method">&nbsp;</a> 
+```python
+get_encoding(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L172?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Devutils.FileHelpers.StreamInterface.is_path_like" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 is_path_like(cls, input): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L178)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L178?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +65,8 @@ is_path_like(cls, input):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L170)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L170?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L182?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +75,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L189)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L189?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L201?message=Update%20Docs)]
 </div>
  </div>
 </div>

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DMaterial">X3DMaterial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L368)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L368?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L416)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L416?message=Update%20Docs)]
 </div>
 
 
@@ -21,13 +21,23 @@
  ```python
 conversion_map: dict
 ```
+<a id="McUtils.Plots.X3DInterface.X3DMaterial.prep_attrs" class="docs-object-method">&nbsp;</a> 
+```python
+prep_attrs(self, attrs: 'dict'): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L432)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L432?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Plots.X3DInterface.X3DMaterial.to_x3d" class="docs-object-method">&nbsp;</a> 
 ```python
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L384)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L384?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L442)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L442?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -82,7 +92,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DMaterial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DMaterial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L368?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L416?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

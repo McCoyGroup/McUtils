@@ -1,7 +1,7 @@
 # <a id="McUtils.Plots.Colors.prep_color">prep_color</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors.py#L755)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors.py#L755?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors.py#L765)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors.py#L765?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ prep_color(base=None, palette=None, blending=None, index=None, lighten=None, mod
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Colors/prep_color.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Colors/prep_color.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors.py#L755?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors.py#L765?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
