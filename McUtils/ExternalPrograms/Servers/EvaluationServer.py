@@ -31,9 +31,9 @@ class EvaluationHandler(NodeCommHandler):
                 id = str(uuid.uuid4())
                 output = f'{name}-{id}'
                 if isinstance(res, np.ndarray):
-                    res = {'outfile':np.save(output+'.npy')}
+                    res = {'outfile':np.save(output+'.npy', res)}
                 else:
-                    res = {'outfile':np.save(output+'.npz')}
+                    res = {'outfile':np.save(output+'.npz', **res)}
             else:
                 if isinstance(res, np.ndarray):
                     res = {'result_array':res.tolist()}
