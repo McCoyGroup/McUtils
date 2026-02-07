@@ -168,6 +168,7 @@ class RDMolecule(ExternalMolecule):
         mol.CommitBatchEdit()
 
         mol = mol.GetMol()
+        mol.UpdatePropertyCache()
         mol = Chem.AddHs(mol, explicitOnly=True)
         conf = Chem.Conformer(len(atoms))
         conf.SetPositions(np.asanyarray(coords))
