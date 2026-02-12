@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.NumPySerializer">NumPySerializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L915)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L915?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L914)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L914?message=Update%20Docs)]
 </div>
 
 A serializer that implements NPZ dumps
@@ -30,8 +30,8 @@ dict_key_sep: str
 get_default_converters(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L925)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L925?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L924)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L924?message=Update%20Docs)]
 </div>
 
 
@@ -41,8 +41,8 @@ get_default_converters(self):
 get_converters(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L935)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L935?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L934)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L934?message=Update%20Docs)]
 </div>
 
 
@@ -51,8 +51,8 @@ get_converters(self):
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1010)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1010?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1009)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1009?message=Update%20Docs)]
 </div>
 
 
@@ -61,8 +61,8 @@ convert(self, data):
 deconvert(self, data, sep=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1034)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1034?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1033)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1033?message=Update%20Docs)]
 </div>
 Unflattens nested dictionary structures so that the original data
 can be recovered
@@ -79,8 +79,8 @@ can be recovered
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1066)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1066?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1065)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1065?message=Update%20Docs)]
 </div>
 
 
@@ -89,8 +89,8 @@ serialize(self, file, data, **kwargs):
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1074)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1074?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1073)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumPySerializer.py#L1073?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -145,7 +145,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/NumPySerializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/NumPySerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L915?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L914?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
