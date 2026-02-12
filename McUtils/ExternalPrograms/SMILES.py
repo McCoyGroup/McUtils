@@ -34,8 +34,7 @@ class SMILESSupplier:
             split_char = split_char.encode(self._encoding)
         self.split_char = split_char
         self.split_idx = split_idx
-        if line_parser is None:
-            line_parser = self._default_parser
+        self._line_parser = line_parser
         self.line_parser = line_parser
 
     known_suppliers = {
@@ -59,9 +58,35 @@ class SMILESSupplier:
     def from_name(cls, name):
         return cls(**cls.known_suppliers[name], name=name)
 
+    def to_mp_state(self):
+        return (
+            self.smi._input,
+            self.name,
+            self.split_idx,
+            self.split_char,
+            self._line_parser
+        )
+    @classmethod
+    def from_mp_state(cls, state, line_indices=None, **extra):
+        smi, name, split_idx, split_char, line_parser = state
+        kwargs = {}
+        kwargs['line_indices'] = line_indices
+        kwargs['name'] = name
+        kwargs['split_idx'] = split_idx
+        kwargs['split_char'] = split_char
+        kwargs['line_parser'] = line_parser
+        kwargs.update(extra)
+
+        return cls(
+            smi,
+            **kwargs
+        )
+
     def __enter__(self):
         self._call_depth += 1
         if self._call_depth == 1:
+            if self.line_parser is None:
+                self.line_parser = self._default_parser
             self._stream = self.smi.__enter__()
             self._cur = 0
             if self.line_indices is None:
@@ -83,6 +108,7 @@ class SMILESSupplier:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._call_depth -= 1
         if self._call_depth == 0:
+            self.line_parser = self._line_parser
             self._cur = None
             self._stream.__exit__(exc_type, exc_val, exc_tb)
             self._stream = None
@@ -233,9 +259,9 @@ class SMILESSupplier:
                 break
         return np.save(file, line_index)
 
-def _consume_supplier_mp(smiles_file, split_idx, consumer, line_offset, block_size):
+def _consume_supplier_mp(state, consumer, line_offset, block_size):
     offsets = np.full(block_size, line_offset)
-    supplier = SMILESSupplier(smiles_file, line_indices=offsets, split_idx=split_idx)
+    supplier = SMILESSupplier.from_mp_state(state, line_indices=offsets)
     res = []
     with supplier:
         for smi in supplier.consume_iter(start_at=0, upto=block_size):
@@ -269,7 +295,8 @@ def consume_smiles_supplier(supplier:SMILESSupplier, consumer, pool=None, start_
                 for i in range(num_blocks)
             ]
             #TODO: don't access the `_input` argument directly...
-            args = [(supplier.smi._input, supplier.split_idx, consumer) + bs for bs in block_starts_sizes]
+            state = supplier.to_mp_state()
+            args = [(state, consumer) + bs for bs in block_starts_sizes]
         res = pool.starmap(_consume_supplier_mp, args)
 
         return sum(res, [])

@@ -17,8 +17,6 @@ __all__= [
     "ModuleSerializer"
 ]
 
-import h5py
-
 
 class PseudoPickler:
     """
@@ -761,6 +759,7 @@ class HDF5Serializer(BaseSerializer):
         :return:
         :rtype:
         """
+        h5py = self.api
         if not self._validate_datatype(data):
             raise TypeError('trying to write non-numpy data {} to key "{}"'.format(data, key))
 
