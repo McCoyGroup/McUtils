@@ -491,16 +491,19 @@ def format_zmatrix_string(atoms, zmat, ordering=None, units="Angstroms",
         _ = []
         for i,(r,a,d) in enumerate(zmat):
             s = []
-            vr = distance_variable_format.format(i=i)
-            variables[vr] = r
-            s.append(vr)
             if i > 0:
+                vr = distance_variable_format.format(i=i)
+                variables[vr] = r
+                s.append(vr)
+            else:
+                s.append("")
+            if i > 1:
                 va = angle_variable_format.format(i=i)
                 variables[va] = a
                 s.append(va)
             else:
                 s.append("")
-            if i > 1:
+            if i > 2:
                 vd = dihedral_variable_format.format(i=i)
                 variables[vd] = d
                 s.append(vd)

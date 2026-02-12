@@ -21,7 +21,7 @@ class UnitGraph:
         if node in self._graph:
             self._graph[node].add(connection)
         else:
-            self._graph[node]={connection}
+            self._graph[node] = {connection}
         if not connection in self._graph:
             self._graph[connection] = set()
     def update(self, iterable):
@@ -44,23 +44,32 @@ class UnitGraph:
         while len(q)>0:
             cur = q.pop()
             steps += 1
+            done = False
             for k in self._graph[cur]:
                 if k is end:
                     parents[k] = cur
+                    done = True
                     break
                 elif k not in parents:
                     q.append(k)
                     parents[k] = cur
+            if done:
+                break
         if end not in parents:
             return None
         else:
-            path = []*steps
+            path = [None]*(steps+1)
             cur = end
-            while cur != start:
-                path.append(cur)
+            m = -1
+            for m in range(steps):
+                if cur == start:
+                    m = m - 1
+                    break
+                path[m] = cur
                 cur = parents[cur]
-            path.append(start)
-            return list(reversed(path))
+            m = m + 1
+            path[m] = start
+            return list(reversed(path[:m+1]))
 
 class UnitsDataHandler(DataHandler):
     """
