@@ -241,7 +241,10 @@ class RDMolecule(ExternalMolecule):
                     replacements=None,
                     add_implicit_hydrogens=False,
                     call_add_hydrogens=True,
-                    num_confs=1, optimize=False, take_min=True,
+                    conf_id=None,
+                    num_confs=None,
+                    optimize=False,
+                    take_min=True,
                     force_field_type='mmff',
                     reorder_from_atom_map=True,
                     confgen_opts=None,
@@ -283,6 +286,7 @@ class RDMolecule(ExternalMolecule):
             mol = rdkit_mol
 
         return cls.from_base_mol(mol,
+                                 conf_id=conf_id,
                                  num_confs=num_confs, optimize=optimize, take_min=take_min,
                                  force_field_type=force_field_type,
                                  confgen_opts=confgen_opts
@@ -294,26 +298,37 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def from_base_mol(cls,
                       mol,
-                      conf_id=-1,
-                      num_confs=1,
+                      conf_id=None,
+                      num_confs=None,
                       optimize=False,
                       take_min=None,
                       force_field_type='mmff',
                       confgen_opts=None,
                       **mol_opts):
-        try:
-            conf = mol.GetConformer(conf_id)
-        except ValueError:
-            conf = None
+        conf = None
+        if conf_id is not None:
+            try:
+                conf = mol.GetConformer(conf_id)
+            except ValueError:
+                ...
         if conf:
             return cls.from_rdmol(mol, conf_id, **mol_opts)
         else:
-            if conf_id > num_confs + 1:
+            if (
+                    conf_id is not None
+                    and num_confs is not None
+                    and conf_id > num_confs + 1
+            ):
                 num_confs = conf_id
+            if take_min is None:
+                take_min = num_confs is None or conf_id is not None
+            if num_confs is None:
+                num_confs = 1
             return cls.from_no_conformer_molecule(mol,
+                                                  conf_id=conf_id,
                                                   num_confs=num_confs,
                                                   optimize=optimize,
-                                                  take_min=conf_id < 0 if take_min is None else take_min,
+                                                  take_min=take_min,
                                                   force_field_type=force_field_type,
                                                   confgen_opts=confgen_opts,
                                                   **mol_opts
@@ -375,27 +390,30 @@ class RDMolecule(ExternalMolecule):
             else:
                 raise NotImplementedError(f"no basic preoptimization support for {force_field_type}")
 
-        if take_min and num_confs > 1:
-            conf_ids = list(conformer_set)
-            force_field_type = cls.get_force_field_type(force_field_type)
-            if isinstance(force_field_type, (list, tuple)):
-                force_field_type, prop_gen = force_field_type
+        if take_min:
+            if num_confs > 1:
+                conf_ids = list(conformer_set)
+                force_field_type = cls.get_force_field_type(force_field_type)
+                if isinstance(force_field_type, (list, tuple)):
+                    force_field_type, prop_gen = force_field_type
+                else:
+                    prop_gen = None
+
+                if prop_gen is not None:
+                    props = prop_gen(mol)
+                else:
+                    props = None
+
+                engs = [
+                    force_field_type(mol, props, confId=conf_id).CalcEnergy()
+                    for conf_id in conf_ids
+                ]
+
+                conf_id = conf_ids[np.argmin(engs)]
             else:
-                prop_gen = None
-
-            if prop_gen is not None:
-                props = prop_gen(mol)
-            else:
-                props = None
-
-            engs = [
-                force_field_type(mol, props, confId=conf_id).CalcEnergy()
-                for conf_id in conf_ids
-            ]
-
-            conf_id = conf_ids[np.argmin(engs)]
+                conf_id = 0
         else:
-            conf_id = 0
+            conf_id = list(conformer_set)
 
         return conf_id
 
@@ -403,6 +421,7 @@ class RDMolecule(ExternalMolecule):
     def from_no_conformer_molecule(cls,
                                    mol,
                                    *,
+                                   conf_id=None,
                                    num_confs=1,
                                    optimize=False,
                                    take_min=True,
@@ -413,14 +432,25 @@ class RDMolecule(ExternalMolecule):
                                    ):
         if confgen_opts is None:
             confgen_opts = {}
-        conf_id = cls.generate_conformers_for_mol(mol,
-                                                  num_confs=num_confs,
-                                                  optimize=optimize,
-                                                  take_min=take_min,
-                                                  force_field_type=force_field_type,
-                                                  **confgen_opts)
-
-        return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
+        if conf_id is not None and conf_id >= 0:
+            optimize = False
+        else:
+            conf_id = None
+        ci = cls.generate_conformers_for_mol(mol,
+                                             num_confs=num_confs,
+                                             optimize=optimize,
+                                             take_min=take_min,
+                                             force_field_type=force_field_type,
+                                             **confgen_opts)
+        if conf_id is None:
+            conf_id = ci
+        if isinstance(conf_id, list):
+            return [
+                cls.from_rdmol(mol, conf_id=c, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
+                for c in conf_id
+            ]
+        else:
+            return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
 
     def to_smiles(self):
         return self.chem_api().MolToSmiles(self.rdmol)
