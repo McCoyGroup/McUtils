@@ -59,21 +59,27 @@ def infer_mode(connection):
 class NodeCommTCPServer(socketserver.TCPServer):
     allow_reuse_address = True
 
+try:
+    import socketserver.UnixStreamServer
+except ImportError:
+    class NodeCommUnixServer:
+        def __init__(self, *args, **kwargs):
+            raise NotImplementedError("`socketserver.UnixStreamServer` not available")
+else:
+    class NodeCommUnixServer(socketserver.UnixStreamServer):
+        allow_reuse_address = True
 
-class NodeCommUnixServer(socketserver.UnixStreamServer):
-    allow_reuse_address = True
+        def server_bind(self):
+            """Called by constructor to bind the socket.
 
-    def server_bind(self):
-        """Called by constructor to bind the socket.
+            May be overridden.
 
-        May be overridden.
+            """
 
-        """
-
-        if self.allow_reuse_address:
-            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.bind(self.server_address)
-        self.server_address = self.socket.getsockname()
+            if self.allow_reuse_address:
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.socket.bind(self.server_address)
+            self.server_address = self.socket.getsockname()
 
 
 class NodeCommClient:
