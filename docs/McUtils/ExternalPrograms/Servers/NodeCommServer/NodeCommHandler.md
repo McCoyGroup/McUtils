@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Servers.NodeCommServer.NodeCommHandler">NodeCommHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L141)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L141?message=Update%20Docs)]
 </div>
 
 
@@ -32,8 +32,8 @@ client_class: NodeCommClient
 handle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L143?message=Update%20Docs)]
 </div>
 
 
@@ -42,8 +42,8 @@ handle(self):
 handle_json_request(self, message: bytes): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L155)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L155?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L161)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L161?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +52,8 @@ handle_json_request(self, message: bytes):
 setup_env(self, env): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L179)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L179?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ setup_env(self, env):
 method_dispatch(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L182?message=Update%20Docs)]
 </div>
 
 
@@ -73,8 +73,8 @@ method_dispatch(self):
 dispatch_request(self, request: dict, env: dict): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L180)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L180?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -83,8 +83,8 @@ dispatch_request(self, request: dict, env: dict):
 get_methods(self) -> 'dict[str,method]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L215)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L215?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L221)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.py#L221?message=Update%20Docs)]
 </div>
 
 
@@ -94,8 +94,8 @@ get_methods(self) -> 'dict[str,method]':
 get_valid_port(git_port, min_port=4000, max_port=65535): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L219)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L219?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L225)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L225?message=Update%20Docs)]
 </div>
 
 
@@ -105,8 +105,8 @@ get_valid_port(git_port, min_port=4000, max_port=65535):
 get_default_connection(cls, port=None, hostname='localhost', session_var='SESSION_ID'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L228)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L228?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L234)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L234?message=Update%20Docs)]
 </div>
 
 
@@ -116,8 +116,8 @@ get_default_connection(cls, port=None, hostname='localhost', session_var='SESSIO
 start_server(cls, connection=None, port=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L244)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L244?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L250)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L250?message=Update%20Docs)]
 </div>
 
 
@@ -127,8 +127,8 @@ start_server(cls, connection=None, port=None):
 start_multiprocessing_server(cls, connection=None, port=None, timeout=3): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L286)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L286?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L292?message=Update%20Docs)]
 </div>
 
 
@@ -138,8 +138,8 @@ start_multiprocessing_server(cls, connection=None, port=None, timeout=3):
 client_request(cls, *args, client_class=None, connection=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L292)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L292?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L298)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L298?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -194,7 +194,7 @@ client_request(cls, *args, client_class=None, connection=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L135?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L141?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

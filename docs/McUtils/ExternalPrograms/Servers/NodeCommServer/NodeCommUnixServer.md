@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Servers.NodeCommServer.NodeCommUnixServer">NodeCommUnixServer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L65?message=Update%20Docs)]
 </div>
 
 
@@ -18,20 +18,15 @@
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
- ```python
-allow_reuse_address: bool
-```
-<a id="McUtils.ExternalPrograms.Servers.NodeCommServer.NodeCommUnixServer.server_bind" class="docs-object-method">&nbsp;</a> 
+ 
+<a id="McUtils.ExternalPrograms.Servers.NodeCommServer.NodeCommUnixServer.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-server_bind(self): 
+__init__(self, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommUnixServer.py#L66)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommUnixServer.py#L66?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L66)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L66?message=Update%20Docs)]
 </div>
-Called by constructor to bind the socket.
-
-May be overridden.
  </div>
 </div>
 
@@ -85,7 +80,7 @@ May be overridden.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommUnixServer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Servers/NodeCommServer/NodeCommUnixServer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L63?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L65?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
