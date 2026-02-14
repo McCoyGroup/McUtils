@@ -251,12 +251,14 @@ class RDMolecule(ExternalMolecule):
 
         return coords3
 
+    implicit_hydrogen_to_conformer_method = 'builtin'
     @classmethod
     def from_coords(cls, atoms, coords, bonds=None,
                     charge=None,
                     formal_charges=None,
                     guess_bonds=None,
                     add_implicit_hydrogens=False,
+                    implicit_hydrogen_method=None,
                     distance_matrix_tol=0.05,
                     num_confs=None,
                     optimize=False,
@@ -296,7 +298,9 @@ class RDMolecule(ExternalMolecule):
 
         mol = mol.GetMol()
         cls._prep_mol(mol)
-        if add_implicit_hydrogens:
+        if implicit_hydrogen_method is None:
+            implicit_hydrogen_method = 'align' if num_confs is not None else 'builtin'
+        if add_implicit_hydrogens and implicit_hydrogen_method == 'align':
             mol = Chem.AddHs(mol, explicitOnly=False)
             dm = nput.distance_matrix(coords)
             if confgen_opts is None:
@@ -381,6 +385,8 @@ class RDMolecule(ExternalMolecule):
             conf.SetPositions(np.asanyarray(coords))
             conf.SetId(0)
             mol.AddConformer(conf)
+            if add_implicit_hydrogens:
+                mol = Chem.AddHs(mol, explicitOnly=False, addCoords=True)
 
             if guess_bonds is None:
                 guess_bonds = bonds is None
