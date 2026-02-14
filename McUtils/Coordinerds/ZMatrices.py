@@ -17,6 +17,7 @@ __all__ = [
     "enumerate_zmatrices",
     "extract_zmatrix_internals",
     "extract_zmatrix_values",
+    "zmatrix_from_values",
     "parse_zmatrix_string",
     "format_zmatrix_string",
     "validate_zmatrix",
@@ -29,6 +30,7 @@ __all__ = [
     "functionalized_zmatrix",
     "add_missing_zmatrix_bonds",
     "bond_graph_zmatrix",
+    "canonical_fragment_zmatrix",
     "reindex_zmatrix",
     "sort_complex_attachment_points",
     "complex_zmatrix"
@@ -71,7 +73,7 @@ emb_pos_map = [
     None,
     (2,3)
 ]
-def zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False):
+def zmatrix_embedding_coords(zmat_or_num_atoms, partial_embedding=False, array_inds=False):
     if array_inds:
         base_inds = zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False)
         return [emb_pos_map[i] for i in base_inds]
@@ -80,14 +82,22 @@ def zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False):
             zmat_or_num_atoms = len(zmat_or_num_atoms) + (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
         n: int = zmat_or_num_atoms
 
-        if n < 1:
-            return []
-        elif n == 1:
-            return [0, 1, 2]
-        elif n == 2:
-            return [0, 1, 2, 4, 5]
+        if partial_embedding:
+            if n < 1:
+                return []
+            elif n == 1:
+                return [1, 2]
+            else:
+                return [1, 2, 5]
         else:
-            return [0, 1, 2, 4, 5, 8]
+            if n < 1:
+                return []
+            elif n == 1:
+                return [0, 1, 2]
+            elif n == 2:
+                return [0, 1, 2, 4, 5]
+            else:
+                return [0, 1, 2, 4, 5, 8]
 
 def num_zmatrix_coords(zmat_or_num_atoms, strip_embedding=True):
     if not nput.is_int(zmat_or_num_atoms):
@@ -277,7 +287,7 @@ def extract_zmatrix_internals(zmat, strip_embedding=True, canonicalize=True):
             specs.append(coord)
     return specs
 
-def extract_zmatrix_values(zmat, inds=None, strip_embedding=True):
+def extract_zmatrix_values(zmat, inds=None, partial_embedding=False, strip_embedding=True):
     zmat = np.asanyarray(zmat)
     if zmat.shape[-1] == 4:
         zmat = zmat[1:, 1:]
@@ -285,7 +295,7 @@ def extract_zmatrix_values(zmat, inds=None, strip_embedding=True):
         n = zmat.shape[-1]*zmat.shape[-2]
         inds = np.arange(n)
         if strip_embedding:
-            inds = np.delete(inds, zmatrix_embedding_coords(zmat))
+            inds = np.delete(inds, zmatrix_embedding_coords(zmat, partial_embedding=partial_embedding))
     elif strip_embedding:
         real_coords = np.delete(
             np.arange(zmat.shape[-1]*zmat.shape[-2]),
@@ -294,7 +304,23 @@ def extract_zmatrix_values(zmat, inds=None, strip_embedding=True):
         inds = real_coords[inds,]
     flat_mat = np.reshape(zmat, zmat.shape[:-2] + (zmat.shape[-1]*zmat.shape[-2],))
     return flat_mat[..., inds]
-
+def zmatrix_from_values(flat_z, strip_embedding=True, partial_embedding=False):
+    if not strip_embedding:
+        return np.asanyarray(flat_z).reshape(-1, 3)
+    elif partial_embedding:
+        nats = (len(flat_z) + 3) // 3
+        zcoords = np.zeros((nats, 3))
+        zcoords[0, 0] = flat_z[0]
+        zcoords[1, :2] = flat_z[1:3]
+        zcoords[2:] = flat_z[3:].reshape(-1, 3)
+        return zcoords
+    else:
+        nats = (len(flat_z) + 6) // 3
+        zcoords = np.zeros((nats, 3))
+        zcoords[1, 0] = flat_z[0]
+        zcoords[2, :2] = flat_z[1:3]
+        zcoords[3:] = flat_z[3:].reshape(-1, 3)
+        return zcoords
 
 scan_spec = collections.namedtuple('scan_spec', ['value', 'steps', 'amount'])
 def _prep_var_spec(v):
@@ -693,10 +719,16 @@ def validate_zmatrix(ordering,
         return True
 
 def chain_zmatrix(n):
-    return [
-        list(range(i, i-4, -1))
-        for i in range(n)
-    ]
+    if isinstance(n, int):
+        return [
+            list(range(i, i-4, -1))
+            for i in range(n)
+        ]
+    else:
+        return [
+            [n[i], n[i-1] if i > 0 else i - 1, n[i-2] if i > 1 else i - 2, n[i-3] if i > 2 else i - 3]
+            for i in range(len(n))
+        ]
 
 def center_bound_zmatrix(n, center=-1):
     return [
@@ -1219,6 +1251,53 @@ def bond_graph_zmatrix(
                 raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
 
     return fused
+
+def canonical_fragment_zmatrix(canonical_framents, validate_additions=False):
+    atom_ordering = []
+    for _, f in canonical_framents:
+        atom_ordering.extend(f)
+    atom_ordering = np.argsort(atom_ordering)
+    inv_order = np.argsort(atom_ordering)
+    backbone = chain_zmatrix(len(canonical_framents[0][1]))
+    attachment_points = []
+    for bb,frag in canonical_framents[1:]:
+        submat = chain_zmatrix(len(frag))
+        if bb is None:
+            if len(attachment_points) > 0:
+                backbone = functionalized_zmatrix(
+                    backbone,
+                    attachment_points
+                )
+                attachment_points = []
+            n = len(backbone)
+            backbone = backbone + [
+                [i + n for i in z]
+                for z in submat
+            ]
+        else:
+            bb = [inv_order[i] if i >= 0 else i for i in bb]
+            attachment_points.append(
+                (bb, submat)
+            )
+    if len(attachment_points) > 0:
+        backbone = functionalized_zmatrix(
+            backbone,
+            attachment_points
+        )
+
+    if validate_additions:
+        is_valid, reason = validate_zmatrix(backbone, return_reason=True)
+        if not is_valid:
+            raise ValueError(f"base canonical zmatrix invalid ({reason}) in {backbone}")
+
+    # print(np.array(backbone))
+    # print(atom_ordering)
+    backbone = reindex_zmatrix(backbone, atom_ordering)
+    if validate_additions:
+        is_valid, reason = validate_zmatrix(backbone, return_reason=True)
+        if not is_valid:
+            raise ValueError(f"post reindexing zmatrix invalid ({reason}) in {backbone}")
+    return backbone
 
 def sort_complex_attachment_points(
         fragment_inds,

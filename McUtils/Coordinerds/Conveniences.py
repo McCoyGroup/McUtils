@@ -12,7 +12,7 @@ __all__ = [
     "zmatrix_to_cartesian"
 ]
 
-zm_type = namedtuple("zms", ["coords", "ordering"])
+zm_type = namedtuple("zms", ["coords", "ordering", "origins", "axes"])
 def cartesian_to_zmatrix(coords, ordering=None, use_rad=True):
     """
     Converts Cartesians to Z-Matrix coords and returns the underlying arrays
@@ -26,7 +26,7 @@ def cartesian_to_zmatrix(coords, ordering=None, use_rad=True):
     """
 
     zms = CoordinateSet(coords, system=CartesianCoordinates3D).convert(ZMatrixCoordinates, ordering=ordering, use_rad=use_rad)
-    return zm_type(np.asarray(zms), zms.converter_options['ordering'])
+    return zm_type(np.asarray(zms), zms.converter_options['ordering'], zms.converter_options['origins'], zms.converter_options['axes'])
 
 def zmatrix_to_cartesian(coords, ordering=None, origins=None, axes=None, use_rad=True):
     """
@@ -45,6 +45,8 @@ def zmatrix_to_cartesian(coords, ordering=None, origins=None, axes=None, use_rad
     :return:
     :rtype:
     """
-    carts = CoordinateSet(coords, ZMatrixCoordinates).convert(CartesianCoordinates3D,
-                                                            ordering=ordering, origins=origins, axes=axes, use_rad=use_rad)
+    carts = CoordinateSet(coords, ZMatrixCoordinates).convert(
+        CartesianCoordinates3D,
+        ordering=ordering, origins=origins, axes=axes, use_rad=use_rad
+    )
     return np.asarray(carts)
