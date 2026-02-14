@@ -147,6 +147,109 @@ class RDMolecule(ExternalMolecule):
             t = Chem.BondType.values[int(t)]
 
         return t
+
+    default_new_coord_alignment_method = 'rigid'
+    @classmethod
+    def _set_new_conformer_from_coords(cls, mol, coords, method=None):
+        dm = nput.distance_matrix(coords)
+        _ = cls.generate_conformers_for_mol(
+            mol,
+            distance_constraints={
+                (i, j): (dm[i, j], dm[i, j])
+                for i in range(len(coords))
+                for j in range(i + 1, len(coords))
+            }
+        )
+        conf = mol.GetConformer(0)
+        coords2 = conf.GetPositions()
+
+        if method is None:
+            method = cls.default_new_coord_alignment_method
+
+        if method == 'rigid':
+            new_pos = len(coords2) - len(coords)
+            if new_pos == 0:
+                coords3 = coords
+            else:
+                new_coords = []
+                bond_map = {}
+                for b in mol.GetBonds():
+                    i = b.GetBeginAtomIdx()
+                    j = b.GetEndAtomIdx()
+                    if i not in bond_map: bond_map[i] = set()
+                    if j not in bond_map: bond_map[j] = set()
+                    bond_map[i].add(j)
+                    bond_map[j].add(i)
+                nog = len(coords)
+                atoms = [a.GetSymbol() for a in mol.GetAtoms()]
+                for i in range(new_pos):
+                    i += nog
+                    if len(bond_map[i]) == 0:
+                        new_coords.append(coords2[i])
+                    else:
+                        j = list(bond_map[i])[0]
+                        partners = [f for f in bond_map[j] if f < nog]
+                        if len(partners) == 0:
+                            z = coords[i] - coords2[j]
+                            new_coords.append(z + coords[j])
+                        else:
+                            k = partners[0]
+                            l = None
+                            m = None
+                            if len(partners) == 1:
+                                partners2 = [f for f in bond_map[k] if f < nog and f != j]
+                                if len(partners2) > 0:
+                                    l = partners2[0]
+                                if len(partners2) > 1:
+                                    m = partners2[1]
+                            else:
+                                l = partners[1]
+                                if len(partners) > 2:
+                                    m = partners[2]
+
+                            if m is None:
+                                r = nput.rotation_matrix(coords2[k] - coords2[j], coords[k] - coords[j])
+                                if l is not None:
+                                    x = nput.vec_normalize(coords[k] - coords[j])
+                                    v2 = (coords2[l] - coords2[j]) @ r
+                                    v2 = v2 - (np.dot(v2, x)) * x
+                                    y = coords[l] - coords[j]
+                                    y =  y - (np.dot(y, x)) * x
+                                    r2 = nput.rotation_matrix(v2, y)
+                                    r = r @ r2
+                                z = (coords2[i] - coords2[j]) @ r
+                                new_coords.append(z + coords[j])
+                            else:
+                                alignment = nput.eckart_embedding(
+                                    coords[(j, k, l, m),], coords2[(j, k, l, m),]
+                                )
+                                new_pos = (
+                                    # embed new coords in the original frame
+                                        (coords2[[i],] - alignment.coord_data.com[np.newaxis])
+                                        @ alignment.coord_data.axes
+                                        @ alignment.rotations
+                                        @ alignment.reference_data.axes.T
+                                        + alignment.reference_data.com[np.newaxis]
+                                )
+                                new_coords.append(new_pos[0])
+                coords3 = np.concatenate([coords, new_coords], axis=0)
+        elif method == 'eckart':
+            alignment = nput.eckart_embedding(
+                coords, coords2[:len(coords)]
+            )
+            coords3 = (
+                # embed new coords in the original frame
+                    (coords2 - alignment.coord_data.com[np.newaxis])
+                    @ alignment.coord_data.axes
+                    @ alignment.rotations
+                    @ alignment.reference_data.axes.T
+                    + alignment.reference_data.com[np.newaxis]
+            )
+        else:
+            coords3 = coords2
+
+        conf.SetPositions(coords3)
+
     @classmethod
     def from_coords(cls, atoms, coords, bonds=None,
                     charge=None,
@@ -174,13 +277,15 @@ class RDMolecule(ExternalMolecule):
 
         mol = mol.GetMol()
         mol.UpdatePropertyCache(strict=False)
-        mol = Chem.AddHs(mol, explicitOnly=True)
-        conf = Chem.Conformer(len(atoms))
-        conf.SetPositions(np.asanyarray(coords))
-        conf.SetId(0)
-        mol.AddConformer(conf)
         if add_implicit_hydrogens:
-            mol = Chem.AddHs(mol, explicitOnly=False, addCoords=True)
+            mol = Chem.AddHs(mol, explicitOnly=False)
+            cls._set_new_conformer_from_coords(mol, coords)
+        else:
+            mol = Chem.AddHs(mol, explicitOnly=True)
+            conf = Chem.Conformer(len(atoms))
+            conf.SetPositions(np.asanyarray(coords))
+            conf.SetId(0)
+            mol.AddConformer(conf)
 
         if guess_bonds is None:
             guess_bonds = bonds is None
@@ -514,19 +619,25 @@ class RDMolecule(ExternalMolecule):
                   remove_hydrogens=None,
                   remove_implicit_hydrogens=None,
                   include_tag=False, canonical=False,
+                  preserve_atom_order=False,
                   binary=False,
                   **opts):
         Chem = self.chem_api()
         mol = self.rdmol
-        og_atom_map = [
-            atom.GetAtomMapNum() for atom in mol.GetAtoms()
-        ]
+        if preserve_atom_order:
+            og_atom_map = list(range(len(self.atoms)))
+            for atom in mol.GetAtoms():
+                atom.SetAtomMapNum(atom.GetIdx() + 1)
+        else:
+            og_atom_map = [
+                atom.GetAtomMapNum() for atom in mol.GetAtoms()
+            ]
         if remove_hydrogens is None:
             remove_hydrogens = remove_implicit_hydrogens
         if remove_hydrogens:
             if remove_implicit_hydrogens is None: remove_implicit_hydrogens = False
             mol = Chem.Mol(mol)
-            if include_tag:
+            if include_tag and not preserve_atom_order:
                 for atom in mol.GetAtoms():
                     atom.SetAtomMapNum(atom.GetIdx()+1)
             mol = Chem.RemoveHs(mol, implicitOnly=remove_implicit_hydrogens, sanitize=False, updateExplicitCount=False)
@@ -536,22 +647,42 @@ class RDMolecule(ExternalMolecule):
         if include_tag:
             coords = self.coords
             if remove_hydrogens:
-                coords = [
-                    coords[atom.GetAtomMapNum()-1] for atom in mol.GetAtoms()
-                ]
-                for atom in mol.GetAtoms():
-                    atom.SetAtomMapNum(og_atom_map[atom.GetAtomMapNum() - 1])
+                if not preserve_atom_order:
+                    coords = [
+                        coords[atom.GetAtomMapNum() - 1] for atom in mol.GetAtoms()
+                    ]
+                    for atom in mol.GetAtoms():
+                        atom.SetAtomMapNum(og_atom_map[atom.GetAtomMapNum() - 1])
+                else:
+                    remapping = np.array([
+                        atom.GetAtomMapNum() - 1
+                        for atom in mol.GetAtoms()
+                    ])
+                    suborder = np.argsort(remapping, kind='merge')
+                    coords = [
+                        coords[o]
+                        for o in remapping[suborder]
+                    ]
+                    for atom,o in zip(mol.GetAtoms(), suborder):
+                        atom.SetAtomMapNum(int(o+1))
             smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
             # track coordinates into new Mol
-            mol = Chem.Mol(mol)
-            for atom in mol.GetAtoms():
-                atom.SetAtomMapNum(atom.GetIdx()+1)
-            ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-            ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=remove_hydrogens)
-            coords = [
-                coords[atom.GetAtomMapNum()-1]
-                for atom in ord_mol.GetAtoms()
-            ]
+            if not preserve_atom_order:
+                mol = Chem.Mol(mol)
+                for atom in mol.GetAtoms():
+                    atom.SetAtomMapNum(atom.GetIdx()+1)
+                ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
+                ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=remove_hydrogens)
+                coords = [
+                    coords[atom.GetAtomMapNum()-1]
+                    for atom in ord_mol.GetAtoms()
+                ]
+            else:
+                ord_mol = self.parse_smiles(smi, remove_hydrogens=remove_hydrogens)
+                base_map = [a.GetAtomMapNum() for a in ord_mol.GetAtoms()]
+                base_map = [len(base_map) + 1 if a == 0 else a for a in base_map]
+                # need to use a stable sort
+                ord_mol = Chem.RenumberAtoms(ord_mol, np.argsort(base_map, kind='merge').tolist())
             graph = self.get_edge_graph(ord_mol)
             tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary)
             if binary:
@@ -870,7 +1001,7 @@ class RDMolecule(ExternalMolecule):
 
     defaul_conformer_compression = 'compressed'
     default_tag_byte_size = 16
-    default_tag_byte_encoding = 85
+    default_tag_byte_encoding = 64
     def conformer_smiles_tag(self,
                              coords=None, graph=None, zmatrix=None,
                              encoder=None, byte_size=None, byte_encoding=None,
