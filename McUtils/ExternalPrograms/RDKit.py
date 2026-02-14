@@ -70,6 +70,13 @@ class RDMolecule(ExternalMolecule):
             for at in self.rdmol.GetAtoms()
         ]
 
+    @property
+    def formal_charges(self):
+        return [
+            at.GetFormalCharge()
+            for at in self.rdmol.GetAtoms()
+        ]
+
     @classmethod
     def quiet_errors(cls):
         from rdkit.rdBase import BlockLogs
@@ -78,6 +85,13 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def chem_api(cls):
         return RDKitInterface.submodule("Chem")
+
+    @classmethod
+    def _prep_mol(cls, rdkit_mol):
+        Chem = cls.allchem_api()
+        rdkit_mol.UpdatePropertyCache(strict=False)
+        _ = Chem.GetSymmSSSR(rdkit_mol)
+        Chem.SetHybridization(rdkit_mol)
     @classmethod
     def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True,
                    add_implicit_hydrogens=False,
@@ -110,9 +124,7 @@ class RDMolecule(ExternalMolecule):
             try:
                 Chem.SanitizeMol(rdmol, sanitize_ops)
             except Chem.rdchem.MolSanitizeException:
-                rdmol.UpdatePropertyCache(strict=False)
-                _ = Chem.GetSymmSSSR(rdmol)
-                Chem.SetHybridization(rdmol)
+                cls._prep_mol(rdmol)
 
         no_confs = False
         try:
@@ -242,20 +254,31 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def from_coords(cls, atoms, coords, bonds=None,
                     charge=None,
+                    formal_charges=None,
                     guess_bonds=None,
                     add_implicit_hydrogens=False,
+                    distance_matrix_tol=0.05,
                     num_confs=None,
                     optimize=False,
                     take_min=None,
                     force_field_type='mmff',
                     confgen_opts=None,
+                    sanitize=False,
                     **opts
                     ):
-        Chem = cls.chem_api()
+        Chem = cls.allchem_api()
         mol = Chem.EditableMol(Chem.Mol())
         mol.BeginBatchEdit()
-        for a in atoms:
+        if formal_charges is None:
+            formal_charges = [None] * len(atoms)
+        for a,fc in zip(atoms, formal_charges):
             a = Chem.Atom(a)
+            if fc is not None:
+                if nput.is_int(fc):
+                    fc = int(fc)
+                else:
+                    fc = float(fc)
+                a.SetFormalCharge(fc)
             mol.AddAtom(a)
         if bonds is not None:
             for b in bonds:
@@ -272,7 +295,7 @@ class RDMolecule(ExternalMolecule):
         mol.CommitBatchEdit()
 
         mol = mol.GetMol()
-        mol.UpdatePropertyCache(strict=False)
+        cls._prep_mol(mol)
         if add_implicit_hydrogens:
             mol = Chem.AddHs(mol, explicitOnly=False)
             dm = nput.distance_matrix(coords)
@@ -282,10 +305,11 @@ class RDMolecule(ExternalMolecule):
                 take_min = num_confs is None
             if num_confs is None:
                 num_confs = 1
+
             conf_ids = cls.generate_conformers_for_mol(
                 mol,
                 distance_constraints={
-                    (i, j): (dm[i, j], dm[i, j])
+                    (i, j): (dm[i, j]-distance_matrix_tol, dm[i, j]+distance_matrix_tol)
                     for i in range(len(coords))
                     for j in range(i + 1, len(coords))
                 },
@@ -296,17 +320,60 @@ class RDMolecule(ExternalMolecule):
                 **dict(opts, **confgen_opts)
             )
             if nput.is_int(conf_ids):
-                conf = mol.GetConformer(conf_ids)
+                try:
+                    conf = mol.GetConformer(conf_ids)
+                except ValueError:
+                    import pprint
+                    settings = pprint.pformat(dict(
+                        distance_constraints={
+                            (i, j): round(float(dm[i, j]), 3)
+                            for i in range(len(coords))
+                            for j in range(i + 1, len(coords))
+                        },
+                        num_confs=num_confs,
+                        optimize=optimize,
+                        take_min=take_min,
+                        force_field_type=force_field_type,
+                        **dict(opts, **confgen_opts)
+                    ))
+                    smi = Chem.MolToSmiles(mol, canonical=False)
+                    raise ValueError(f"failed to build conformer {conf_ids} for {smi} with settings {settings}")
                 coords2 = conf.GetPositions()
-                conf.SetPositions(cls._align_new_conf_coords(mol, coords, coords2))
-                return cls.from_rdmol(mol, conf_id=conf_ids, charge=charge, guess_bonds=guess_bonds)
+                coords3 = cls._align_new_conf_coords(mol, coords, coords2)
+                print(coords[:5])
+                print(coords3[:5])
+                conf.SetPositions(coords3)
+                return cls.from_rdmol(mol, conf_id=conf_ids, charge=charge, guess_bonds=guess_bonds,
+                                      sanitize=sanitize)
             else:
                 mols = []
                 for i in conf_ids:
-                    conf = mol.GetConformer(i)
+                    try:
+                        conf = mol.GetConformer(i)
+                    except ValueError:
+                        continue
                     coords2 = conf.GetPositions()
                     conf.SetPositions(cls._align_new_conf_coords(mol, coords, coords2))
-                    mols.append(cls.from_rdmol(mol, conf_id=i, charge=charge, guess_bonds=guess_bonds))
+                    mols.append(
+                        cls.from_rdmol(mol, conf_id=i, charge=charge, guess_bonds=guess_bonds,
+                                       sanitize=sanitize)
+                    )
+                if len(mols) == 0:
+                    import pprint
+                    settings = pprint.pformat(dict(
+                        distance_constraints={
+                            (i, j): round(float(dm[i, j]), 3)
+                            for i in range(len(coords))
+                            for j in range(i + 1, len(coords))
+                        },
+                        num_confs=num_confs,
+                        optimize=optimize,
+                        take_min=take_min,
+                        force_field_type=force_field_type,
+                        **dict(opts, **confgen_opts)
+                    ))
+                    smi = Chem.MolToSmiles(mol, canonical=False)
+                    raise ValueError(f"failed to build conformers {conf_ids} for {smi} with settings {settings}")
                 return mols
         else:
             mol = Chem.AddHs(mol, explicitOnly=True)
@@ -318,7 +385,7 @@ class RDMolecule(ExternalMolecule):
             if guess_bonds is None:
                 guess_bonds = bonds is None
 
-            return cls.from_rdmol(mol, conf_id=0, charge=charge, guess_bonds=guess_bonds)
+            return cls.from_rdmol(mol, conf_id=0, charge=charge, guess_bonds=guess_bonds, sanitize=sanitize)
 
     @classmethod
     def from_mol(cls, mol, coord_unit="Angstroms", guess_bonds=None):
@@ -329,6 +396,7 @@ class RDMolecule(ExternalMolecule):
             mol.coords * UnitsData.convert(coord_unit, "Angstroms"),
             bonds=mol.bonds,
             charge=mol.charge,
+            formal_charges=mol.formal_charges,
             guess_bonds=guess_bonds
         )
 
@@ -548,9 +616,7 @@ class RDMolecule(ExternalMolecule):
             if nput.is_numeric_array_like(distance_constraints):
                 bmat = np.array(distance_constraints)
             else:
-                mol.UpdatePropertyCache(strict=False)
-                _ = AllChem.GetSymmSSSR(mol)
-                AllChem.SetHybridization(mol)
+                cls._prep_mol(mol)
                 bmat = AllChem.GetMoleculeBoundsMatrix(mol)
                 for (i, j), (min_dist, max_dist) in distance_constraints:
                     if j > i: i,j = j,i
@@ -564,9 +630,7 @@ class RDMolecule(ExternalMolecule):
                 conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=params)
         except AllChem.rdchem.MolSanitizeException:
             conformer_set = None
-            mol.UpdatePropertyCache(strict=False)
-            _ = AllChem.GetSymmSSSR(mol)
-            AllChem.SetHybridization(mol)
+            cls._prep_mol(mol)
         if conformer_set is None:
             params.embedFragmentsSeparately = False
             # with OutputRedirect():
@@ -650,18 +714,32 @@ class RDMolecule(ExternalMolecule):
                   remove_hydrogens=None,
                   remove_implicit_hydrogens=None,
                   include_tag=False, canonical=False,
+                  compute_stereo=False,
+                  remove_stereo=False,
                   preserve_atom_order=False,
                   binary=False,
                   **opts):
-        Chem = self.chem_api()
+        Chem = self.allchem_api()
         mol = self.rdmol
+        if compute_stereo:
+            mol = Chem.Mol(mol)
+            coords = self.coords
+            conf = Chem.Conformer(len(coords))
+            conf.SetPositions(np.asanyarray(coords))
+            conf.SetId(0)
+            mol.AddConformer(conf)
+            Chem.AssignStereochemistryFrom3D(mol, confId=0)
+        elif remove_stereo:
+            mol = Chem.Mol(mol)
+            Chem.RemoveStereochemistry(mol)
         if preserve_atom_order:
             og_atom_map = list(range(len(self.atoms)))
             for atom in mol.GetAtoms():
                 atom.SetAtomMapNum(atom.GetIdx() + 1)
         else:
             og_atom_map = [
-                atom.GetAtomMapNum() for atom in mol.GetAtoms()
+                atom.GetAtomMapNum()
+                for atom in mol.GetAtoms()
             ]
         if remove_hydrogens is None:
             remove_hydrogens = remove_implicit_hydrogens
@@ -703,7 +781,7 @@ class RDMolecule(ExternalMolecule):
                 for atom in mol.GetAtoms():
                     atom.SetAtomMapNum(atom.GetIdx()+1)
                 ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-                ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=remove_hydrogens)
+                ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=False)
                 coords = [
                     coords[atom.GetAtomMapNum()-1]
                     for atom in ord_mol.GetAtoms()
