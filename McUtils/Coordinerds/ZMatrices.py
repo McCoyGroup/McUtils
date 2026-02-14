@@ -73,10 +73,26 @@ emb_pos_map = [
     None,
     (2,3)
 ]
+emb_partial_pos_map = [
+    None,
+    (0,2),
+    (0,3),
+    None,
+    None,
+    (1,3)
+]
 def zmatrix_embedding_coords(zmat_or_num_atoms, partial_embedding=False, array_inds=False):
     if array_inds:
-        base_inds = zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False)
-        return [emb_pos_map[i] for i in base_inds]
+        if not nput.is_int(zmat_or_num_atoms):
+            dim_shift = (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
+        else:
+            dim_shift = 0
+        base_inds = zmatrix_embedding_coords(zmat_or_num_atoms, array_inds=False, partial_embedding=partial_embedding)
+        if partial_embedding:
+            map = emb_partial_pos_map
+        else:
+            map = emb_pos_map
+        return [(map[n][0], map[n][1]-dim_shift) for n in base_inds]
     else:
         if not nput.is_int(zmat_or_num_atoms):
             zmat_or_num_atoms = len(zmat_or_num_atoms) + (1 if len(zmat_or_num_atoms[0]) == 3 else 0)
@@ -757,11 +773,14 @@ def attached_zmatrix_fragment(n, fragment, attachment_points):
         for row in fragment
     ]
 
-def set_zmatrix_embedding(zmat, embedding=None):
+def set_zmatrix_embedding(zmat, embedding=None, partial_embedding=False):
     zmat = np.array(zmat)
     if embedding is None:
-        embedding = [-1, -2, -3, -1, -2, -1]
-    emb_pos = zmatrix_embedding_coords(zmat, array_inds=True)
+        if partial_embedding:
+            embedding = [-1, -2, -1]
+        else:
+            embedding = [-1, -2, -3, -1, -2, -1]
+    emb_pos = zmatrix_embedding_coords(zmat, array_inds=True, partial_embedding=partial_embedding)
     for (i,j),v in zip(emb_pos, embedding):
         zmat[..., i,j] = v
     return zmat
