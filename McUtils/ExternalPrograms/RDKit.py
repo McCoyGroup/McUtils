@@ -150,18 +150,7 @@ class RDMolecule(ExternalMolecule):
 
     default_new_coord_alignment_method = 'rigid'
     @classmethod
-    def _set_new_conformer_from_coords(cls, mol, coords, method=None):
-        dm = nput.distance_matrix(coords)
-        _ = cls.generate_conformers_for_mol(
-            mol,
-            distance_constraints={
-                (i, j): (dm[i, j], dm[i, j])
-                for i in range(len(coords))
-                for j in range(i + 1, len(coords))
-            }
-        )
-        conf = mol.GetConformer(0)
-        coords2 = conf.GetPositions()
+    def _align_new_conf_coords(cls, mol, coords, coords2, method=None):
 
         if method is None:
             method = cls.default_new_coord_alignment_method
@@ -248,13 +237,20 @@ class RDMolecule(ExternalMolecule):
         else:
             coords3 = coords2
 
-        conf.SetPositions(coords3)
+        return coords3
 
     @classmethod
     def from_coords(cls, atoms, coords, bonds=None,
                     charge=None,
                     guess_bonds=None,
-                    add_implicit_hydrogens=False):
+                    add_implicit_hydrogens=False,
+                    num_confs=None,
+                    optimize=False,
+                    take_min=None,
+                    force_field_type='mmff',
+                    confgen_opts=None,
+                    **opts
+                    ):
         Chem = cls.chem_api()
         mol = Chem.EditableMol(Chem.Mol())
         mol.BeginBatchEdit()
@@ -279,7 +275,39 @@ class RDMolecule(ExternalMolecule):
         mol.UpdatePropertyCache(strict=False)
         if add_implicit_hydrogens:
             mol = Chem.AddHs(mol, explicitOnly=False)
-            cls._set_new_conformer_from_coords(mol, coords)
+            dm = nput.distance_matrix(coords)
+            if confgen_opts is None:
+                confgen_opts = {}
+            if take_min is None:
+                take_min = num_confs is None
+            if num_confs is None:
+                num_confs = 1
+            conf_ids = cls.generate_conformers_for_mol(
+                mol,
+                distance_constraints={
+                    (i, j): (dm[i, j], dm[i, j])
+                    for i in range(len(coords))
+                    for j in range(i + 1, len(coords))
+                },
+                num_confs=num_confs,
+                optimize=optimize,
+                take_min=take_min,
+                force_field_type=force_field_type,
+                **dict(opts, **confgen_opts)
+            )
+            if nput.is_int(conf_ids):
+                conf = mol.GetConformer(conf_ids)
+                coords2 = conf.GetPositions()
+                conf.SetPositions(cls._align_new_conf_coords(mol, coords, coords2))
+                return cls.from_rdmol(mol, conf_id=conf_ids, charge=charge, guess_bonds=guess_bonds)
+            else:
+                mols = []
+                for i in conf_ids:
+                    conf = mol.GetConformer(i)
+                    coords2 = conf.GetPositions()
+                    conf.SetPositions(cls._align_new_conf_coords(mol, coords, coords2))
+                    mols.append(cls.from_rdmol(mol, conf_id=i, charge=charge, guess_bonds=guess_bonds))
+                return mols
         else:
             mol = Chem.AddHs(mol, explicitOnly=True)
             conf = Chem.Conformer(len(atoms))
@@ -287,10 +315,10 @@ class RDMolecule(ExternalMolecule):
             conf.SetId(0)
             mol.AddConformer(conf)
 
-        if guess_bonds is None:
-            guess_bonds = bonds is None
+            if guess_bonds is None:
+                guess_bonds = bonds is None
 
-        return cls.from_rdmol(mol, conf_id=0, charge=charge, guess_bonds=guess_bonds)
+            return cls.from_rdmol(mol, conf_id=0, charge=charge, guess_bonds=guess_bonds)
 
     @classmethod
     def from_mol(cls, mol, coord_unit="Angstroms", guess_bonds=None):
@@ -449,7 +477,10 @@ class RDMolecule(ExternalMolecule):
                     [b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble()]
                     for b in rdkit_mol.GetBonds()
                 ],
-                add_implicit_hydrogens=add_implicit_hydrogens
+                add_implicit_hydrogens=add_implicit_hydrogens,
+                num_confs=num_confs, optimize=optimize, take_min=take_min,
+                force_field_type=force_field_type,
+                confgen_opts=confgen_opts
             )
 
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
