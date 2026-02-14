@@ -165,7 +165,6 @@ class EdgeGraph:
         for i,j in bonds:
             new_adj[i, j] = 0
             new_adj[j, i] = 0
-        print(new_adj.toarray())
         ncomp, labels = sparse.csgraph.connected_components(new_adj, directed=False, return_labels=True)
         _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
         if return_subgraphs:
@@ -531,6 +530,60 @@ class EdgeGraph:
                 shortest_path_data=self.shortest_path_data,
                 validate=validate
             )
+
+    def get_canonical_fragments(self, ordering=None):
+        if ordering is None:
+            ordering = np.arange(len(self.labels))
+        fragment_map = {}
+        branches = []
+        branch_point = None
+        cur_frag = [ordering[0]]
+        for n,o in enumerate(ordering[1:]):
+            attached_points = self.map[o]
+            if cur_frag[-1] in attached_points:
+                cur_frag.append(o)
+            else: # time to branch
+                for f in cur_frag:
+                    fragment_map[f] = (branch_point, cur_frag)
+                branches.append(
+                    (branch_point, cur_frag)
+                )
+                cur_frag = [o]
+                for i in ordering[:n+1]:
+                    if i in attached_points:
+                        branch_i, fragment_i = fragment_map[i]
+                        pos_i = fragment_i.index(i)
+                        if pos_i > 1:
+                            branch_point = (i, fragment_i[pos_i - 1], fragment_i[pos_i - 2])
+                        elif pos_i > 0:
+                            if branch_i is None:
+                                if len(fragment_i) > pos_i + 1:
+                                    branch_point = (i, fragment_i[pos_i - 1], fragment_i[pos_i + 1])
+                                else:
+                                    branch_point = (i, fragment_i[pos_i - 1], -1)
+                            else:
+                                branch_point = (i, fragment_i[pos_i - 1], branch_i[0])
+                        else:
+                            if branch_i is None:
+                                branch_point = (i, fragment_i[pos_i - 1], fragment_i[pos_i - 2])
+                            else:
+                                j = branch_i[0]
+                                branch_j, fragment_j = fragment_map[j]
+                                if branch_j is None:
+                                    pos_j = fragment_j.index(j)
+                                    if pos_j > 0:
+                                        branch_point = (i, j, fragment_j[pos_j - 1])
+                                    elif len(fragment_j) > 1:
+                                        branch_point = (i, j, fragment_j[pos_j + 1])
+                                    else:
+                                        branch_point = (i, j, -1)
+                                else:
+                                    branch_point = (i, j, branch_j[0])
+                        break
+                else:
+                    branch_point = None
+        branches.append((branch_point, cur_frag))
+        return branches
 
     @classmethod
     def find_graph_centroid(cls, graph, shortest_path_data=None):

@@ -28,6 +28,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                      coordlist, *,
                      ordering, origins=None, axes=None, use_rad=True,
                      return_derivs=False,
+                     check_overlapping=False,
                      **kw
                      ):
         """Expects to get a list of configurations
@@ -183,6 +184,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                     psi_flag = False
 
             if return_derivs:
+                raise NotImplementedError("dead code path")
                 if ordering.shape[-1] == 4:
                     raise NotImplementedError("don't have derivatives for case with psi angles")
                 der_stuff = cartesian_from_rad_derivatives(
@@ -203,6 +205,14 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                 if return_deriv_order > 1:
                     derivs[2][np.arange(sysnum), :i+1, :, :i+1, :, i+1, :] = der_stuff[2]
             else:
+                #TODO: add coplanar check
+                if check_overlapping:
+                    bad_vs = np.linalg.norm(refs2 - refs1, axis=-1) < 1e-8
+                    if np.any(bad_vs):
+                        refs2[..., bad_vs, :] = refs1[..., bad_vs, :] + x_pts[0][np.newaxis, np.newaxis, :] # eh
+                    bad_us = np.linalg.norm(refs3 - refs2, axis=-1) < 1e-8
+                    if np.any(bad_us):
+                        refs3[..., bad_us, :] = refs2[..., bad_us, :] + y_pts[0][np.newaxis, np.newaxis, :] # eh
                 ref_points_1, _ = cartesian_from_rad(refs1, refs2, refs3, dists, angle, dihed, psi=psi_flag)
                 total_points[:, i+1] = ref_points_1
 

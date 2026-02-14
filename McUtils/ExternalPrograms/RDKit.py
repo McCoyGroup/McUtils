@@ -4,12 +4,14 @@ __all__ = [
     "RDMolecule"
 ]
 
+import base64
 import numpy as np, io, os
 from .. import Numputils as nput
 from .. import Devutils as dev
 
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule
+from .. import Coordinerds as coordops
 
 class RDMolecule(ExternalMolecule):
     """
@@ -146,7 +148,10 @@ class RDMolecule(ExternalMolecule):
 
         return t
     @classmethod
-    def from_coords(cls, atoms, coords, bonds=None, charge=None, guess_bonds=None):
+    def from_coords(cls, atoms, coords, bonds=None,
+                    charge=None,
+                    guess_bonds=None,
+                    add_implicit_hydrogens=False):
         Chem = cls.chem_api()
         mol = Chem.EditableMol(Chem.Mol())
         mol.BeginBatchEdit()
@@ -174,11 +179,13 @@ class RDMolecule(ExternalMolecule):
         conf.SetPositions(np.asanyarray(coords))
         conf.SetId(0)
         mol.AddConformer(conf)
+        if add_implicit_hydrogens:
+            mol = Chem.AddHs(mol, explicitOnly=False, addCoords=True)
 
         if guess_bonds is None:
             guess_bonds = bonds is None
 
-        return cls.from_rdmol(mol, charge=charge, guess_bonds=guess_bonds)
+        return cls.from_rdmol(mol, conf_id=0, charge=charge, guess_bonds=guess_bonds)
 
     @classmethod
     def from_mol(cls, mol, coord_unit="Angstroms", guess_bonds=None):
@@ -232,6 +239,39 @@ class RDMolecule(ExternalMolecule):
             setattr(params, o, v)
         return params
     @classmethod
+    def parse_smiles(cls,
+                  smiles,
+                  sanitize=False,
+                  parse_name=True,
+                  allow_cxsmiles=True,
+                  strict_cxsmiles=True,
+                  remove_hydrogens=False,
+                  replacements=None,
+                  **opts
+                  ):
+        Chem = cls.chem_api()
+        params = Chem.SmilesParserParams()
+        params.removeHs = remove_hydrogens
+        params.sanitize = sanitize
+        if replacements is not None:
+            params.replacements = replacements
+        params.parseName = parse_name
+        params.allowCXSMILES = allow_cxsmiles
+        params.strictCXSMILES = strict_cxsmiles
+        for k, v in opts.items():
+            setattr(params, k, v)
+
+        rdkit_mol = Chem.MolFromSmiles(smiles, params)
+        if not sanitize:
+            try:
+                rdkit_mol.UpdatePropertyCache()
+            except Chem.rdchem.MolSanitizeException:
+                rdkit_mol.UpdatePropertyCache(strict=False)
+                _ = Chem.GetSymmSSSR(rdkit_mol)
+                Chem.SetHybridization(rdkit_mol)
+
+        return rdkit_mol
+    @classmethod
     def from_smiles(cls, smiles,
                     sanitize=False,
                     parse_name=True,
@@ -248,6 +288,9 @@ class RDMolecule(ExternalMolecule):
                     force_field_type='mmff',
                     reorder_from_atom_map=True,
                     confgen_opts=None,
+                    check_tag=True,
+                    coords=None,
+                    conf_tag=None,
                     **opts):
 
         if os.path.isfile(smiles):
@@ -255,42 +298,54 @@ class RDMolecule(ExternalMolecule):
                 smiles = f.read()
         Chem = cls.chem_api()
 
-        params = Chem.SmilesParserParams()
-        params.removeHs = remove_hydrogens
-        params.sanitize = sanitize
-        if replacements is not None:
-            params.replacements = replacements
-        params.parseName = parse_name
-        params.allowCXSMILES = allow_cxsmiles
-        params.strictCXSMILES = strict_cxsmiles
-        for k,v in opts.items():
-            setattr(params, k, v)
+        if check_tag and conf_tag is None:
+            smiles, _, conf_tag = smiles.partition("_")
+            if len(conf_tag) == 0: conf_tag = None
 
-        rdkit_mol = Chem.MolFromSmiles(smiles, params)
-        if not sanitize:
-            try:
-                rdkit_mol.UpdatePropertyCache()
-            except Chem.rdchem.MolSanitizeException:
-                rdkit_mol.UpdatePropertyCache(strict=False)
-                _ = Chem.GetSymmSSSR(rdkit_mol)
-                Chem.SetHybridization(rdkit_mol)
+        rdkit_mol = cls.parse_smiles(
+            smiles,
+            sanitize=sanitize,
+            parse_name=parse_name,
+            allow_cxsmiles=allow_cxsmiles,
+            strict_cxsmiles=strict_cxsmiles,
+            remove_hydrogens=remove_hydrogens,
+            replacements=replacements,
+            **opts
+        )
 
         if reorder_from_atom_map:
             base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
             base_map = [len(base_map)+1 if a == 0 else a for a in base_map]
-            rdkit_mol = Chem.RenumberAtoms(rdkit_mol, np.argsort(base_map).tolist())
+            # need to use a stable sort
+            rdkit_mol = Chem.RenumberAtoms(rdkit_mol, np.argsort(base_map, kind='merge').tolist())
 
-        if call_add_hydrogens: # RDKit is super borked for most molecules
-            mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
+        if coords is None and conf_tag is not None:
+            #TODO: add precision support
+            graph = cls.get_mol_edge_graph(rdkit_mol)
+            coords = cls.conformer_from_smiles_tag(conf_tag, graph)
+
+        if coords is None:
+            if call_add_hydrogens: # RDKit is super borked for most molecules
+                mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
+            else:
+                mol = rdkit_mol
+
+            return cls.from_base_mol(mol,
+                                     conf_id=conf_id,
+                                     num_confs=num_confs, optimize=optimize, take_min=take_min,
+                                     force_field_type=force_field_type,
+                                     confgen_opts=confgen_opts
+                                     )
         else:
-            mol = rdkit_mol
-
-        return cls.from_base_mol(mol,
-                                 conf_id=conf_id,
-                                 num_confs=num_confs, optimize=optimize, take_min=take_min,
-                                 force_field_type=force_field_type,
-                                 confgen_opts=confgen_opts
-                                 )
+            return cls.from_coords(
+                [a.GetSymbol() for a in rdkit_mol.GetAtoms()],
+                coords,
+                bonds=[
+                    [b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble()]
+                    for b in rdkit_mol.GetBonds()
+                ],
+                add_implicit_hydrogens=add_implicit_hydrogens
+            )
 
         # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
         # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
@@ -452,8 +507,513 @@ class RDMolecule(ExternalMolecule):
         else:
             return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
 
-    def to_smiles(self):
-        return self.chem_api().MolToSmiles(self.rdmol)
+    @staticmethod
+    def _camel_case(o):
+        return "".join(b.capitalize() if i > 0 else b for i,b in enumerate(o.split("_")))
+    def to_smiles(self,
+                  remove_hydrogens=None,
+                  remove_implicit_hydrogens=None,
+                  include_tag=False, canonical=False,
+                  binary=False,
+                  **opts):
+        Chem = self.chem_api()
+        mol = self.rdmol
+        og_atom_map = [
+            atom.GetAtomMapNum() for atom in mol.GetAtoms()
+        ]
+        if remove_hydrogens is None:
+            remove_hydrogens = remove_implicit_hydrogens
+        if remove_hydrogens:
+            if remove_implicit_hydrogens is None: remove_implicit_hydrogens = False
+            mol = Chem.Mol(mol)
+            if include_tag:
+                for atom in mol.GetAtoms():
+                    atom.SetAtomMapNum(atom.GetIdx()+1)
+            mol = Chem.RemoveHs(mol, implicitOnly=remove_implicit_hydrogens, sanitize=False, updateExplicitCount=False)
+        new_opts = {
+            self._camel_case(k):v for k,v in opts.items()
+        }
+        if include_tag:
+            coords = self.coords
+            if remove_hydrogens:
+                coords = [
+                    coords[atom.GetAtomMapNum()-1] for atom in mol.GetAtoms()
+                ]
+                for atom in mol.GetAtoms():
+                    atom.SetAtomMapNum(og_atom_map[atom.GetAtomMapNum() - 1])
+            smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
+            # track coordinates into new Mol
+            mol = Chem.Mol(mol)
+            for atom in mol.GetAtoms():
+                atom.SetAtomMapNum(atom.GetIdx()+1)
+            ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
+            ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=remove_hydrogens)
+            coords = [
+                coords[atom.GetAtomMapNum()-1]
+                for atom in ord_mol.GetAtoms()
+            ]
+            graph = self.get_edge_graph(ord_mol)
+            tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary)
+            if binary:
+                smi = smi.encode()
+                smi = smi + b"_" + tag
+            else:
+                smi = smi+"_"+tag
+        else:
+            smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
+        return smi
+
+    draw_options_mapping = {
+
+    }
+    drawing_defaults = {
+        # dispatched by format
+        None: {'image_size':[500, 200]}
+    }
+    @classmethod
+    def _draw_ipython(cls, mol, format='svg', **opts):
+        from rdkit.Chem.Draw import IPythonConsole
+        from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
+        if format == 'svg':
+            IPythonConsole.ipython_useSVG = True
+        elif format == 'png':
+            IPythonConsole.ipython_useSVG = False
+
+        draw_opts = IPythonConsole.drawOptions
+        for  k, v in opts.items():
+            setattr(draw_opts, cls._camel_case(k), v)
+        return JupyterAPIs.get_display_api().display(mol)
+
+    @classmethod
+    def _drawer_png(cls, *, image_size, **opts):
+        Chem = cls.chem_api()
+        rdMolDraw2D = Chem.Draw.rdMolDraw2D
+        # from rdkit.Chem.Draw import rdMolDraw2D
+        drawer = rdMolDraw2D.MolDraw2DCairo(*image_size)
+        return drawer, opts
+    @classmethod
+    def _drawer_svg(cls, *, image_size, **opts):
+        Chem = cls.chem_api()
+        rdMolDraw2D = Chem.Draw.rdMolDraw2D
+        # from rdkit.Chem.Draw import rdMolDraw2D
+        drawer = rdMolDraw2D.MolDraw2DSVG(*image_size)
+        return drawer, opts
+
+    @classmethod
+    def _prep_draw_opts(cls, format, opts):
+        return dict(
+            dict(
+                cls.drawing_defaults.get(None, {}),
+                **cls.drawing_defaults.get(format, {})
+            ),
+            **opts
+        )
+
+    @classmethod
+    def _draw_non_interactive(cls,
+                              mol,
+                              format='svg',
+                              drawer=None,
+                              drawer_options=None,
+                              **opts
+                              ):
+        Chem = cls.chem_api()
+        rdMolDraw2D = Chem.Draw.rdMolDraw2D
+
+        if drawer is None:
+            if drawer_options is None:
+                drawer_options = {}
+            draw_opts = cls._prep_draw_opts(format, dict(opts, **drawer_options))
+            if format == 'svg':
+                drawer, opts = cls._drawer_svg(**draw_opts)
+            else:
+                drawer, opts = cls._drawer_png(**draw_opts)
+
+        opts = {
+            cls._camel_case(k): v for k, v in opts.items()
+        }
+        rdMolDraw2D.PrepareAndDrawMolecule(drawer, mol, **opts)
+        drawer.FinishDrawing()
+        return drawer.GetDrawingText()
+
+    def draw(self,
+             display_atom_numbers=False,
+             format='svg',
+             drawer=None,
+             use_coords=False,
+             atom_labels=None,
+             highlight_atoms=None,
+             highlight_bonds=None,
+             **draw_opts):
+        if drawer is None:
+            drawer = self._draw_non_interactive
+
+        Chem = self.allchem_api()
+        mol = self.rdmol
+        modified = False
+        if not use_coords:
+            if not modified:
+                mol = Chem.Mol(mol)
+                modified = True
+            Chem.Compute2DCoords(mol)
+        if display_atom_numbers:
+            if not modified:
+                mol = Chem.Mol(mol)
+                modified = True
+            for atom in mol.GetAtoms():
+                atom.SetAtomMapNum(atom.GetIdx())
+        if atom_labels is not None:
+            if not modified:
+                mol = Chem.Mol(mol)
+                modified = True
+            for atom,label in zip(mol.GetAtoms(), atom_labels):
+                atom.SetProp("atomNote", label)
+
+        if highlight_bonds is None and highlight_atoms is not None:
+            bond_set = {}
+            for i,b in enumerate(self.bonds):
+                if b[0] not in bond_set:
+                    bond_set[b[0]] = {}
+                bond_set[b[0]][b[1]] = i
+
+            highlight_bonds = []
+            hats = set(highlight_atoms)
+            for a in hats:
+                for b,i in bond_set.get(a, {}).items():
+                    if b in hats:
+                        highlight_bonds.append(i)
+
+        text = drawer(mol, format=format, highlight_atoms=highlight_atoms, highlight_bonds=highlight_bonds, **draw_opts)
+        return self.DisplayImage(text, format)
+
+    @classmethod
+    def _plain_encode(cls, flat_z, byte_size):
+        if byte_size == 16:
+            dtype = np.float16
+        elif byte_size == 32:
+            dtype = np.float32
+        elif byte_size == 64:
+            dtype = np.float64
+        elif byte_size == 128:
+            dtype = np.float128
+        else:
+            raise ValueError(f"unhandled byte size {byte_size}")
+        return np.array(flat_z).astype(dtype)
+
+    @classmethod
+    def _plain_decode(cls, buffer, byte_size):
+        if byte_size == 16:
+            dtype = np.float16
+        elif byte_size == 32:
+            dtype = np.float32
+        elif byte_size == 64:
+            dtype = np.float64
+        elif byte_size == 128:
+            dtype = np.float128
+        else:
+            raise ValueError(f"unhandled byte size {byte_size}")
+        return np.frombuffer(buffer, dtype)
+
+    @classmethod
+    def _compressed_encode(cls, flat_z, byte_size, primary_bond_range=(.5, 2.5), pack_angles=True):
+        """
+        Compress distances such that if they are between 1 and 2 angstroms, we get
+        an extra digit of precision
+        :param flat_z:
+        :param dtype:
+        :return:
+        """
+        if byte_size == 16:
+            base_type = np.uint16
+            # float_type = np.float16
+            if pack_angles:
+                pack_type = np.uint8
+            else:
+                pack_type = np.uint16
+        elif byte_size == 32:
+            base_type = np.uint32
+            # float_type = np.float32
+            if pack_angles:
+                pack_type = np.uint16
+            else:
+                pack_type = np.uint32
+        elif byte_size == 64:
+            base_type = np.uint64
+            # float_type = np.float64
+            if pack_angles:
+                pack_type = np.uint32
+            else:
+                pack_type = np.uint64
+        else:
+            raise ValueError(f"can't pack into byte size {byte_size}")
+
+        flat_z = np.asanyarray(flat_z)
+        dists = np.concatenate([flat_z[:2], flat_z[3::3]])
+        compressed = (dists >= primary_bond_range[0]) & (dists < primary_bond_range[1])
+        comp_vals = dists[compressed]
+
+        step_max = 2**(byte_size-1) - 1
+        total_bond_range =  primary_bond_range[1] -  primary_bond_range[0]
+        comp_vals = np.round(step_max * (comp_vals - primary_bond_range[0]) / total_bond_range).astype(base_type)
+        packaged_dists = np.zeros(len(dists), dtype=base_type)
+        packaged_dists[compressed] = comp_vals
+        # takes advantage of the fact that we are never negative to use that
+        # bit for this encoding
+        packaged_dists[~compressed] = dists[~compressed].view(base_type) + step_max
+
+        full_max = 2 ** byte_size - 1
+        if pack_angles:
+            pack_max = 2 ** (byte_size//2) - 1
+        else:
+            pack_max = full_max
+        angles = np.concatenate([flat_z[[2],], flat_z[4::3]])
+        first_angle = np.round(full_max * angles[0] / np.pi).astype(base_type)
+        scaled_angles = np.round(pack_max * angles[1:] / np.pi).astype(base_type)
+        dihedrals = flat_z[5::3].copy()
+        mask = dihedrals < 0
+        dihedrals[mask] = 2*np.pi + dihedrals[mask]
+        scaled_dihedrals = np.round(pack_max * dihedrals / (2*np.pi)).astype(base_type)
+
+        if pack_angles:
+            full_pack = np.zeros(len(dists) + len(angles), dtype=base_type)
+        else:
+            full_pack = np.zeros(len(flat_z), dtype=base_type)
+
+        full_pack[:2] = packaged_dists[:2]
+        full_pack[2] = first_angle
+
+        packaged_angles = np.zeros(len(angles), dtype=base_type)
+        if pack_angles:
+            full_pack[3::2] = packaged_dists[2:]
+            packaged_angles[1:] = (scaled_angles << (byte_size // 2) | scaled_dihedrals)
+            full_pack[4::2] = packaged_angles[1:]
+        else:
+            full_pack[3::3] = packaged_dists[2:]
+            full_pack[4::3] = scaled_angles
+            full_pack[5::3] = scaled_dihedrals
+
+        return full_pack
+
+    @classmethod
+    def _compressed_decode(cls, buffer, byte_size, primary_bond_range=(.5, 2.5), pack_angles=True):
+        """
+        Compress distances such that if they are between 1 and 2 angstroms, we get
+        an extra digit of precision
+        :param flat_z:
+        :param dtype:
+        :return:
+        """
+        if byte_size == 16:
+            base_type = np.uint16
+            float_type = np.float16
+            if pack_angles:
+                pack_type = np.uint8
+            else:
+                pack_type = np.uint16
+        elif byte_size == 32:
+            base_type = np.uint32
+            float_type = np.float32
+            if pack_angles:
+                pack_type = np.uint16
+            else:
+                pack_type = np.uint32
+        elif byte_size == 64:
+            base_type = np.uint64
+            float_type = np.float64
+            if pack_angles:
+                pack_type = np.uint32
+            else:
+                pack_type = np.uint64
+        else:
+            raise ValueError(f"can't pack into byte size {byte_size}")
+
+        uint_stream = np.frombuffer(buffer, base_type)
+        if pack_angles:
+            dists = np.concatenate([uint_stream[:2], uint_stream[3::2]])
+        else:
+            dists = np.concatenate([uint_stream[:2], uint_stream[3::3]])
+
+        step_max = 2 ** (byte_size - 1) - 1
+        compressed = dists < step_max
+        decompressed_dists = np.zeros(len(dists), dtype=float)
+
+        total_bond_range = primary_bond_range[1] - primary_bond_range[0]
+        decompressed_dists[compressed] = (total_bond_range *  dists[compressed] / step_max) + primary_bond_range[0]
+        decompressed_dists[~compressed] = (dists[~compressed] - step_max).view(float_type)
+
+        full_max = 2 ** byte_size - 1
+        if pack_angles:
+            pack_max = 2 ** (byte_size // 2) - 1
+        else:
+            pack_max = full_max
+
+        if pack_angles:
+            full_pack = np.zeros(3*(len(dists) - 1) , dtype=float)
+            packed_angles = np.concatenate([uint_stream[[2],], uint_stream[4::2]])
+            angles = np.concatenate([packed_angles[[0],], packed_angles[1:] >> (byte_size // 2)])
+            dihedrals = packed_angles[1:] & (2**(byte_size // 2) - 1)
+        else:
+            full_pack = np.zeros(len(uint_stream) , dtype=float)
+            angles = np.concatenate([uint_stream[[2],], uint_stream[4::3]])
+            dihedrals = uint_stream[5::3]
+
+        full_angles = np.pi*np.concatenate([angles[:1] / full_max, angles[1:] / pack_max])
+        full_dihedrals = (2*np.pi * dihedrals / pack_max)
+
+        full_pack[:2] = decompressed_dists[:2]
+        full_pack[2] = full_angles[0]
+        full_pack[3::3] = decompressed_dists[2:]
+        full_pack[4::3] = full_angles[1:]
+        full_pack[5::3] = full_dihedrals
+
+        return full_pack
+
+    defaul_conformer_compression = 'compressed'
+    default_tag_byte_size = 16
+    default_tag_byte_encoding = 85
+    def conformer_smiles_tag(self,
+                             coords=None, graph=None, zmatrix=None,
+                             encoder=None, byte_size=None, byte_encoding=None,
+                             binary=False, include_zmatrix=False):
+        if zmatrix is None:
+            if graph is None:
+                graph = self.get_edge_graph()
+            frags = graph.get_canonical_fragments()
+            zmatrix = coordops.canonical_fragment_zmatrix(frags, validate_additions=True)
+        if coords is None:
+            coords = self.coords
+
+        if byte_size is None:
+            byte_size = self.default_tag_byte_size
+        if byte_encoding is None:
+            byte_encoding = self.default_tag_byte_encoding
+
+        zdata = coordops.cartesian_to_zmatrix(coords, zmatrix)
+        flat_z = coordops.extract_zmatrix_values(zdata.coords, partial_embedding=True)
+        if encoder is None:
+            encoder = self.defaul_conformer_compression
+        if dev.str_is(encoder, 'plain'):
+            zmat_coords = self._plain_encode(flat_z, byte_size)
+        elif encoder == 'compressed':
+            zmat_coords = self._compressed_encode(flat_z, byte_size)
+        elif encoder == 'precision':
+            zmat_coords = self._compressed_encode(flat_z, byte_size, pack_angles=False)
+        else:
+            zmat_coords = encoder(flat_z, byte_size)
+
+        if nput.is_int(byte_encoding):
+            if byte_encoding == 16:
+                byte_encoding = base64.b16encode
+            elif byte_encoding == 32:
+                byte_encoding = base64.b32encode
+            elif byte_encoding == 64:
+                byte_encoding = base64.b64encode
+            elif byte_encoding == 85:
+                byte_encoding = base64.b85encode
+            else:
+                raise ValueError(f"don't know byte encoding {byte_encoding}")
+
+        if binary:
+            tag = zmat_coords.data
+        else:
+            tag = byte_encoding(zmat_coords.data)
+            if isinstance(tag, bytes):
+                tag = tag.decode()
+        if include_zmatrix:
+            zz = np.array([z[1:] for z in zmatrix])
+            zinds = np.array(coordops.extract_zmatrix_values(zz))
+            zinds = zinds.astype(nput.infer_inds_dtype(np.max(zinds)))
+            if binary:
+                ztag = zinds.data
+            else:
+
+                ztag = byte_encoding(zinds.data)
+                if isinstance(ztag, bytes):
+                    ztag = ztag.decode()
+            return ztag, zinds
+        else:
+            return tag
+
+    @classmethod
+    def conformer_from_smiles_tag(cls, tag, graph, decoder=None, byte_size=None, byte_encoding=None, zmatrix=None):
+        if zmatrix is None:
+            frags = graph.get_canonical_fragments()
+            zmatrix = coordops.canonical_fragment_zmatrix(frags, validate_additions=True)
+
+        if byte_size is None:
+            byte_size = cls.default_tag_byte_size
+        if byte_encoding is None:
+            byte_encoding = cls.default_tag_byte_encoding
+        if nput.is_int(byte_encoding):
+            if byte_encoding == 16:
+                byte_encoding = base64.b16decode
+            elif byte_encoding == 32:
+                byte_encoding = base64.b32decode
+            elif byte_encoding == 64:
+                byte_encoding = base64.b64decode
+            elif byte_encoding == 85:
+                byte_encoding = base64.b85decode
+            else:
+                raise ValueError(f"don't know byte encoding {byte_encoding}")
+
+        buffer = byte_encoding(tag.encode())
+        if decoder is None:
+            decoder = cls.defaul_conformer_compression
+        if dev.str_is(decoder, 'plain'):
+            flat_z = cls._plain_decode(buffer, byte_size)
+        elif decoder == 'compressed':
+            flat_z = cls._compressed_decode(buffer, byte_size)
+        elif decoder == 'precision':
+            flat_z = cls._compressed_decode(buffer, byte_size, pack_angles=False)
+        else:
+            flat_z = decoder(buffer, byte_size)
+        zcoords = coordops.zmatrix_from_values(flat_z, partial_embedding=True)
+        coords = coordops.zmatrix_to_cartesian(zcoords, np.array(zmatrix)) # very borked
+        return coords
+
+    @classmethod
+    def get_mol_edge_graph(cls, mol):
+        from .. import Graphs
+        atoms = [a.GetSymbol() for a in mol.GetAtoms()]
+        bonds = [
+            [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
+            for b in mol.GetBonds()
+        ]
+        return Graphs.EdgeGraph(atoms, bonds)
+    def get_edge_graph(self, mol=None):
+        from .. import Graphs
+        if mol is None:
+            atoms, bonds = self.atoms, [b[:2] for b in self.bonds]
+            return Graphs.EdgeGraph(atoms, bonds)
+        else:
+            return self.get_mol_edge_graph(mol)
+
+    class DisplayImage:
+        def __init__(self, text, format):
+            self.text = text
+            self.fmt = format
+
+        def _ipython_display_(self):
+            from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
+            display = JupyterAPIs.get_display_api()
+            if self.fmt == 'svg':
+                obj = display.SVG(self.text)
+            else:
+                from PIL import Image
+                obj = Image.open(io.BytesIO(self.text))
+            display.display(obj)
+
+        def save(self, file):
+            if self.fmt == 'svg':
+                with open(file, 'w+') as out:
+                    out.write(self.text)
+            else:
+                from PIL import Image
+                obj = Image.open(io.BytesIO(self.text))
+                obj.save(file, format=self.fmt)
+
+    def _ipython_display_(self):
+        self.draw()._ipython_display_()
 
     @classmethod
     def _from_file_reader(cls,
