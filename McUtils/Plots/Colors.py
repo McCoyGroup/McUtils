@@ -84,6 +84,7 @@ class ColorPalette:
                    clip=True,
                    color_space='rgb',
                    modification_space='lab',
+                   return_color_code=True,
                    cycle=None
                    ):
         if base is None:
@@ -99,11 +100,14 @@ class ColorPalette:
                 if hasattr(base, 'color_strings'):
                     base = base.color_strings
             elif blending is not None:
-                base = palette(blending, return_color_code=True)
+                base = palette(blending, return_color_code=return_color_code)
             else:
-                base = palette.color_strings
+                if return_color_code:
+                    base = palette.color_strings
+                else:
+                    base = palette.color_convert(palette.lab_colors, 'lab', color_space)
 
-        smol = isinstance(base, str) or not isinstance(base[0], str)
+        smol = isinstance(base, str) or not dev.is_atomic(base[0])
         if smol: base = [base]
         final = []
         for b in base:
@@ -774,6 +778,7 @@ def prep_color(
         clip=True,
         color_space='rgb',
         modification_space='lab',
+        return_color_code=True,
         cycle=None
 ):
     return ColorPalette.prep_color(
@@ -788,5 +793,6 @@ def prep_color(
         clip=clip,
         color_space=color_space,
         modification_space=modification_space,
+        return_color_code=return_color_code,
         cycle=cycle
     )
