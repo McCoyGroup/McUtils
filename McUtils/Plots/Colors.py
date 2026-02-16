@@ -174,7 +174,7 @@ class ColorPalette:
             urllib.parse.quote(c[:7] if c.startswith("#") else c[:6]) for c in self.color_strings
         )
 
-    def blend(self, amount, modification_space='lab', rescale=False, return_color_code=True):
+    def blend(self, amount, modification_space='lab', rescale=False, clip=True, return_color_code=True):
         amount = np.asanyarray(amount)
         smol = amount.ndim == 0
         if smol: amount = np.array([amount])
@@ -211,6 +211,9 @@ class ColorPalette:
                 colors = self.color_convert(colors, 'lab', modification_space).T
             new_lab = colors[rem_inds - 1,] * (1 - d) + colors[rem_inds,] * d
             rgb = self.color_convert(new_lab.T, modification_space, 'rgb').T
+
+            if clip:
+                rgb = self.color_normalize(rgb, "rgb")
 
             if return_color_code:
                 rgb = self.rgb_code(rgb.T)
