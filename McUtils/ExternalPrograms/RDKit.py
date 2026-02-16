@@ -5,6 +5,8 @@ __all__ = [
 ]
 
 import base64
+import uuid
+
 import numpy as np, io, os
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -12,6 +14,8 @@ from .. import Devutils as dev
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule
 from .. import Coordinerds as coordops
+from ..Jupyter import JHTML
+
 
 class RDMolecule(ExternalMolecule):
     """
@@ -858,31 +862,50 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def _draw_non_interactive(cls,
                               mol,
+                              figure=None,
+                              background=None,
                               format='svg',
                               drawer=None,
                               drawer_options=None,
                               **opts
                               ):
-        Chem = cls.chem_api()
-        rdMolDraw2D = Chem.Draw.rdMolDraw2D
+        Draw = RDKitInterface.submodule("Chem.Draw")
+        rdMolDraw2D = Draw.rdMolDraw2D
 
         if drawer is None:
-            if drawer_options is None:
-                drawer_options = {}
-            draw_opts = cls._prep_draw_opts(format, dict(opts, **drawer_options))
-            if format == 'svg':
-                drawer, opts = cls._drawer_svg(**draw_opts)
+            if figure is not None:
+                if hasattr(figure, 'figure'):
+                    drawer = figure.figure
+                else:
+                    drawer = figure
             else:
-                drawer, opts = cls._drawer_png(**draw_opts)
-
+                if drawer_options is None:
+                    drawer_options = {}
+                draw_opts = cls._prep_draw_opts(format, dict(opts, **drawer_options))
+                if format == 'svg':
+                    drawer, opts = cls._drawer_svg(**draw_opts)
+                else:
+                    drawer, opts = cls._drawer_png(**draw_opts)
+        if background is not None:
+            dops = drawer.drawOptions()
+            dops.setBackgroundColour(background)
         opts = {
             cls._camel_case(k): v for k, v in opts.items()
+            if v is not None
         }
         rdMolDraw2D.PrepareAndDrawMolecule(drawer, mol, **opts)
-        drawer.FinishDrawing()
-        return drawer.GetDrawingText()
+        return drawer
+
+    def find_substructure(self, query):
+        Chem = self.chem_api()
+        query = Chem.MolFromSmarts(query)
+        return self.rdmol.GetSubstructMatches(query)
 
     def draw(self,
+             figure=None,
+             background=None,
+             remove_atom_numbers=False,
+             remove_hydrogens=True,
              display_atom_numbers=False,
              format='svg',
              drawer=None,
@@ -890,13 +913,22 @@ class RDMolecule(ExternalMolecule):
              atom_labels=None,
              highlight_atoms=None,
              highlight_bonds=None,
+             highlight_atom_colors=None,
+             highlight_bond_colors=None,
+             conf_id=None,
+             include_save_buttons=False,
              **draw_opts):
+        from ..Plots import ColorPalette
+
         if drawer is None:
             drawer = self._draw_non_interactive
 
         Chem = self.allchem_api()
         mol = self.rdmol
         modified = False
+        if remove_hydrogens:
+            modified = True
+            mol = Chem.RemoveHs(mol)
         if not use_coords:
             if not modified:
                 mol = Chem.Mol(mol)
@@ -907,7 +939,13 @@ class RDMolecule(ExternalMolecule):
                 mol = Chem.Mol(mol)
                 modified = True
             for atom in mol.GetAtoms():
-                atom.SetAtomMapNum(atom.GetIdx())
+                atom.SetAtomMapNum(atom.GetIdx()+1)
+        elif remove_atom_numbers:
+            if not modified:
+                mol = Chem.Mol(mol)
+                modified = True
+            for atom in mol.GetAtoms():
+                atom.SetAtomMapNum(0)
         if atom_labels is not None:
             if not modified:
                 mol = Chem.Mol(mol)
@@ -915,22 +953,129 @@ class RDMolecule(ExternalMolecule):
             for atom,label in zip(mol.GetAtoms(), atom_labels):
                 atom.SetProp("atomNote", label)
 
-        if highlight_bonds is None and highlight_atoms is not None:
+        if highlight_atoms is not None:
             bond_set = {}
             for i,b in enumerate(self.bonds):
                 if b[0] not in bond_set:
                     bond_set[b[0]] = {}
                 bond_set[b[0]][b[1]] = i
 
-            highlight_bonds = []
+            if highlight_bonds is None:
+                highlight_bonds = []
+            else:
+                highlight_bonds = list(highlight_bonds)
             hats = set(highlight_atoms)
             for a in hats:
                 for b,i in bond_set.get(a, {}).items():
                     if b in hats:
                         highlight_bonds.append(i)
+        if highlight_bonds is not None:
+            _ = []
+            for b in highlight_bonds:
+                if not nput.is_int(b):
+                    i,j = b
+                    _.append(mol.GetBondBetweenAtoms(int(i),int(j)).GetIdx())
+                else:
+                    _.append(b)
+            highlight_bonds = _
 
-        text = drawer(mol, format=format, highlight_atoms=highlight_atoms, highlight_bonds=highlight_bonds, **draw_opts)
-        return self.DisplayImage(text, format)
+        if highlight_bond_colors is not None:
+            _ = {}
+            if highlight_atom_colors is not None:
+                atom_colors = highlight_atom_colors
+            else:
+                atom_colors = {}
+            for b in highlight_bonds:
+                if b not in highlight_bond_colors:
+                    if not nput.is_int(b):
+                        i, j = b
+                    else:
+                        bb = mol.GetBondWithIdx(b)
+                        i = bb.GetBeginAtomIdx()
+                        j = bb.GetEndAtomIdx()
+                    if (i,j) not in highlight_bond_colors and (j,i) not in highlight_bond_colors:
+                        c1 = atom_colors.get(i)
+                        c2 = atom_colors.get(j)
+                        if c1 is None:
+                            if c2 is None:
+                                highlight_bond_colors[(i,j)] = (.5, .7, .5)
+                            else:
+                                highlight_bond_colors[(i,j)] = c2
+                        elif c2 is None:
+                            highlight_bond_colors[(i,j)] = c1
+                        else:
+                            if isinstance(c1, str):
+                                if not isinstance(c2, str):
+                                    c1 = ColorPalette.parse_color_string(c1)
+                            elif isinstance(c2, str):
+                                c2 = ColorPalette.parse_color_string(c2)
+                            if  (
+                                    (isinstance(c1, str) and isinstance(c2, str) and c1 == c2)
+                                    or np.allclose(c1, c2)
+                            ):
+                                highlight_bond_colors[(i, j)] = c1
+                            else:
+                                highlight_bond_colors[(i,j)] = ColorPalette.prep_color(
+                                    palette=[c1, c2],
+                                    blending=.5,
+                                    return_color_code=False
+                                )
+
+            for b,v in highlight_bond_colors.items():
+                if not nput.is_int(b):
+                    i,j = b
+                    x = mol.GetBondBetweenAtoms(int(i),int(j)).GetIdx()
+                    _[x] = v
+                else:
+                    _[b] = v
+            highlight_bond_colors = _
+
+            _ = {}
+            for b,c in highlight_bond_colors.items():
+                if isinstance(c, str):
+                    c = np.array(ColorPalette.parse_color_string(c)) / 255
+                _[b] = tuple(c)
+            highlight_bond_colors = _
+        if highlight_atom_colors is not None:
+            _ = {}
+            for b, c in highlight_atom_colors.items():
+                if isinstance(c, str):
+                    c = np.array(ColorPalette.parse_color_string(c)) / 255
+                _[b] = tuple(c)
+            highlight_atom_colors = _
+
+        if background is not None:
+            if isinstance(background, str):
+                background = np.array(ColorPalette.parse_color_string(background))
+                background = tuple(background[:3]/255) + tuple(background[3:])
+
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+        figure = drawer(mol,
+                        figure=figure,
+                        background=background,
+                        format=format,
+                        highlight_atoms=highlight_atoms,
+                        highlight_bonds=highlight_bonds,
+                        highlight_atom_colors=highlight_atom_colors,
+                        highlight_bond_colors=highlight_bond_colors,
+                        conf_id=conf_id,
+                        **draw_opts)
+        return self.DisplayImage(figure, format, include_save_buttons=include_save_buttons)
+
+    def plot(self,
+             conf_id=None,
+             image_size=(450, 450),
+             **opts):
+        # import py3Dmol
+        from rdkit.Chem.Draw import IPythonConsole
+
+        if conf_id is None:
+            conf_id = self.mol.GetId()
+
+        opts = dict(dict(confId=conf_id, size=image_size),
+                    **{self._camel_case(k): v for k, v in opts.items()})
+        return IPythonConsole.drawMol3D(self.rdmol, confId=self.mol, **opts)
 
     @classmethod
     def _plain_encode(cls, flat_z, byte_size):
@@ -1235,19 +1380,117 @@ class RDMolecule(ExternalMolecule):
             return self.get_mol_edge_graph(mol)
 
     class DisplayImage:
-        def __init__(self, text, format):
-            self.text = text
+        def __init__(self, figure, format, include_save_buttons=False, id=None):
+            self.figure = figure
             self.fmt = format
+            if id is None:
+                id = "rdkit-" + str(uuid.uuid4())[:6]
+            self.id = id
+            self._text = None
+            self.include_save_buttons = include_save_buttons
+
+        @property
+        def text(self):
+            if self._text is None:
+                self.figure.FinishDrawing()
+                self._text = self.figure.GetDrawingText()
+            return self._text
+
+        @classmethod
+        def get_svg_script(self, id):
+            return f"""
+        (function(){{
+          let link = document.createElement('a');
+          let base_name = '{id}';
+          link.download = base_name + '.svg';
+          let serializer = new XMLSerializer();
+          let svg = document.getElementById('{id}').getElementsByTagName('svg')[0]
+          let source = serializer.serializeToString(svg);
+          link.href = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+          link.click();
+        }})()"""
+
+        @classmethod
+        def get_png_from_svg_script(self, id):
+            return f"""
+                (function(){{
+                  let base_name = '{id}';
+                  let serializer = new XMLSerializer();
+                  let svg = document.getElementById('{id}').getElementsByTagName('svg')[0]
+                  let source = serializer.serializeToString(svg);
+                    
+                  // https://stackoverflow.com/a/28226736  
+                  const svgBlob = new Blob([source], {{type: 'image/svg+xml;charset=utf-8'}});
+                  const url = window.URL.createObjectURL(svgBlob);
+
+                  const image = new Image();
+                  image.width = svg.width.baseVal.value;
+                  image.height = svg.height.baseVal.value;
+                  image.src = url;
+                  image.onload = function () {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(image, 0, 0);
+                    window.URL.revokeObjectURL(url);
+                
+                    const imgURI = canvas
+                      .toDataURL('image/png')
+                      .replace('image/png', 'image/octet-stream');
+                    
+                    let link = document.createElement('a');
+                    link.download = base_name + '.png';
+                    link.target = '_blank';
+                    link.href = imgURI;
+                
+                    link.click()    
+                  }};
+                }})()"""
+
+        @classmethod
+        def get_png_script(self, id):
+            return f"""
+        (function(){{
+          let link = document.createElement('a');
+          let base_name = '{id}';
+          link.download = base_name + '.png';
+          link.href = document.getElementById('{id}').getElementsByTagName('img')[0].src
+          link.click();
+        }})()"""
+
+        def to_widget(self):
+            from ..Jupyter.JHTML import HTML
+            if self.fmt == 'svg':
+                obj = HTML.parse(self.text, namespace='http://www.w3.org/2000/svg')
+                if self.include_save_buttons:
+                    obj = JHTML.Div(
+                        obj,
+                        JHTML.Div(
+                            JHTML.Button("Download SVG", onclick=self.get_svg_script(self.id)),
+                            JHTML.Button("Download PNG", onclick=self.get_png_from_svg_script(self.id)),
+                            display='flex'
+                        ),
+                        id=self.id,
+                        display='block'
+                    )
+            else:
+                b64_url = base64.b64encode(self.text.encode())
+                data_url = "data:image/png;base64," + b64_url.decode('utf-8')
+                obj = HTML.Image(src=data_url)
+                if self.include_save_buttons:
+                    obj = JHTML.Div(
+                        obj,
+                        JHTML.Button("Download", onclick=self.get_png_script(self.id)),
+                        id=self.id,
+                        display='block'
+                    )
+            return obj
 
         def _ipython_display_(self):
-            from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
-            display = JupyterAPIs.get_display_api()
-            if self.fmt == 'svg':
-                obj = display.SVG(self.text)
-            else:
-                from PIL import Image
-                obj = Image.open(io.BytesIO(self.text))
-            display.display(obj)
+            self.to_widget()._ipython_display_()
 
         def save(self, file):
             if self.fmt == 'svg':

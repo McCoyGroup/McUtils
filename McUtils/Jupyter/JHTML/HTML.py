@@ -666,7 +666,9 @@ class XMLBase:
         return tag_class(*elems, **dict(extra_attrs, **attrs))
 
     @classmethod
-    def parse(cls, str, strict=True, strip=True, fallback=None, converter=None):
+    def parse(cls, str, strict=True, strip=True, fallback=None, converter=None, namespace=None):
+        if namespace is not None:
+            ElementTree.register_namespace("", namespace)
         if strict:
             etree = ElementTree.fromstring(str)
         else:
