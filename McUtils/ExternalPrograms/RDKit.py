@@ -867,6 +867,14 @@ class RDMolecule(ExternalMolecule):
                               format='svg',
                               drawer=None,
                               drawer_options=None,
+                              legend=None,
+                              highlight_atoms=None,
+                              highlight_bonds=None,
+                              highlight_atom_colors=None,
+                              highlight_bond_colors=None,
+                              highlight_atom_radii=None,
+                              highlight_bond_radii=None,
+                              conf_id=None,
                               **opts
                               ):
         Draw = RDKitInterface.submodule("Chem.Draw")
@@ -889,11 +897,34 @@ class RDMolecule(ExternalMolecule):
         if background is not None:
             dops = drawer.drawOptions()
             dops.setBackgroundColour(background)
+        if len(opts) > 0:
+            dops = drawer.drawOptions()
+            for k,v in opts.items():
+                setattr(dops,  cls._camel_case(k), v)
         opts = {
-            cls._camel_case(k): v for k, v in opts.items()
+            cls._camel_case(k): v for k, v in dict(
+                legend=legend,
+                conf_id=conf_id,
+                highlight_atoms=highlight_atoms,
+                highlight_bonds=highlight_bonds,
+                highlight_atom_colors=highlight_atom_colors,
+                highlight_bond_colors=highlight_bond_colors,
+                highlight_atom_radii=highlight_atom_radii,
+                highlight_bond_radii=highlight_bond_radii
+                ).items()
             if v is not None
         }
-        rdMolDraw2D.PrepareAndDrawMolecule(drawer, mol, **opts)
+        if highlight_bond_radii is not None:
+            mol = rdMolDraw2D.PrepareMolForDrawing(mol)
+            drawer.DrawMoleculeWithHighlights(mol,
+                                              opts.get("legend", ""),
+                                              {k:[tuple(float(cc) for cc in c)] for k,c in opts.get("highlightAtomColors", {}).items()},
+                                              {k:[tuple(float(cc) for cc in c)] for k,c in opts.get("highlightBondColors", {}).items()},
+                                              opts.get("highlightAtomRadii", {}),
+                                              opts.get("highlightBondRadii", {}),
+                                              )
+        else:
+            rdMolDraw2D.PrepareAndDrawMolecule(drawer, mol, **opts)
         return drawer
 
     def find_substructure(self, query):
@@ -904,17 +935,21 @@ class RDMolecule(ExternalMolecule):
     def draw(self,
              figure=None,
              background=None,
-             remove_atom_numbers=False,
+             remove_atom_numbers=None,
              remove_hydrogens=True,
              display_atom_numbers=False,
              format='svg',
              drawer=None,
              use_coords=False,
              atom_labels=None,
+             blend_mixed_bonds=True,
              highlight_atoms=None,
              highlight_bonds=None,
              highlight_atom_colors=None,
              highlight_bond_colors=None,
+             highlight_bond_radii=None,
+             bond_radius=None,
+             highlight_rings=None,
              conf_id=None,
              include_save_buttons=False,
              **draw_opts):
@@ -938,8 +973,15 @@ class RDMolecule(ExternalMolecule):
             if not modified:
                 mol = Chem.Mol(mol)
                 modified = True
-            for atom in mol.GetAtoms():
-                atom.SetAtomMapNum(atom.GetIdx()+1)
+            if dev.str_is(display_atom_numbers, 'inline'):
+                for atom in mol.GetAtoms():
+                    atom.SetAtomMapNum(atom.GetIdx()+1)
+            else:
+                if remove_atom_numbers or remove_atom_numbers is None:
+                    for atom in mol.GetAtoms():
+                        atom.SetAtomMapNum(0)
+                    # atom.SetProp("atomNote", str(atom.GetIdx()))
+                draw_opts['add_atom_indices'] = True
         elif remove_atom_numbers:
             if not modified:
                 mol = Chem.Mol(mol)
@@ -968,7 +1010,25 @@ class RDMolecule(ExternalMolecule):
             for a in hats:
                 for b,i in bond_set.get(a, {}).items():
                     if b in hats:
-                        highlight_bonds.append(i)
+                        if blend_mixed_bonds or highlight_atom_colors is None:
+                            highlight_bonds.append(i)
+                        else:
+                            c1 = highlight_atom_colors.get(a)
+                            c2 = highlight_atom_colors.get(b)
+                            if c1 is None or c2 is None:
+                                highlight_bonds.append(i)
+                            else:
+                                if isinstance(c1, str):
+                                    if not isinstance(c2, str):
+                                        c1 = ColorPalette.parse_color_string(c1)
+                                elif isinstance(c2, str):
+                                    c2 = ColorPalette.parse_color_string(c2)
+                                if (
+                                        (isinstance(c1, str) and isinstance(c2, str) and c1 == c2)
+                                        or (not isinstance(c1, str) and np.allclose(c1, c2))
+                                ):
+                                    highlight_bonds.append(i)
+
         if highlight_bonds is not None:
             _ = []
             for b in highlight_bonds:
@@ -979,12 +1039,14 @@ class RDMolecule(ExternalMolecule):
                     _.append(b)
             highlight_bonds = _
 
-        if highlight_bond_colors is not None:
+        if highlight_bonds is not None:
             _ = {}
             if highlight_atom_colors is not None:
                 atom_colors = highlight_atom_colors
             else:
                 atom_colors = {}
+            if highlight_bond_colors is None:
+                highlight_bond_colors = {}
             for b in highlight_bonds:
                 if b not in highlight_bond_colors:
                     if not nput.is_int(b):
@@ -993,34 +1055,35 @@ class RDMolecule(ExternalMolecule):
                         bb = mol.GetBondWithIdx(b)
                         i = bb.GetBeginAtomIdx()
                         j = bb.GetEndAtomIdx()
-                    if (i,j) not in highlight_bond_colors and (j,i) not in highlight_bond_colors:
+                    if (i, j) not in highlight_bond_colors and (j, i) not in highlight_bond_colors:
                         c1 = atom_colors.get(i)
                         c2 = atom_colors.get(j)
                         if c1 is None:
                             if c2 is None:
-                                highlight_bond_colors[(i,j)] = (.5, .7, .5)
+                                highlight_bond_colors[(i, j)] = (.5, .7, .5)
                             else:
-                                highlight_bond_colors[(i,j)] = c2
+                                highlight_bond_colors[(i, j)] = c2
                         elif c2 is None:
-                            highlight_bond_colors[(i,j)] = c1
+                            highlight_bond_colors[(i, j)] = c1
                         else:
                             if isinstance(c1, str):
                                 if not isinstance(c2, str):
                                     c1 = ColorPalette.parse_color_string(c1)
                             elif isinstance(c2, str):
                                 c2 = ColorPalette.parse_color_string(c2)
-                            if  (
+                            if (
                                     (isinstance(c1, str) and isinstance(c2, str) and c1 == c2)
-                                    or np.allclose(c1, c2)
+                                    or (not isinstance(c1, str) and np.allclose(c1, c2))
                             ):
                                 highlight_bond_colors[(i, j)] = c1
-                            else:
-                                highlight_bond_colors[(i,j)] = ColorPalette.prep_color(
+                            elif blend_mixed_bonds:
+                                highlight_bond_colors[(i, j)] = ColorPalette.prep_color(
                                     palette=[c1, c2],
                                     blending=.5,
                                     return_color_code=False
                                 )
-
+        if highlight_bond_colors is not None:
+            _ = {}
             for b,v in highlight_bond_colors.items():
                 if not nput.is_int(b):
                     i,j = b
@@ -1044,6 +1107,26 @@ class RDMolecule(ExternalMolecule):
                 _[b] = tuple(c)
             highlight_atom_colors = _
 
+        if highlight_bond_radii is not None:
+            _ = {}
+            for b,v in highlight_bond_radii.items():
+                if not nput.is_int(b):
+                    i, j = b
+                    _[mol.GetBondBetweenAtoms(int(i), int(j)).GetIdx()] = v
+                else:
+                    _[b] = v
+            highlight_bond_radii = _
+
+        if bond_radius is not None and highlight_bonds is not None:
+            if highlight_bond_radii is None:
+                highlight_bond_radii = {}
+            for b in highlight_bonds:
+                if b not in highlight_bond_radii:
+                    highlight_bond_radii[b] = bond_radius
+
+        if highlight_bond_radii is not None:
+            draw_opts['fill_highlights'] = draw_opts.get('fill_highlights', False)
+
         if background is not None:
             if isinstance(background, str):
                 background = np.array(ColorPalette.parse_color_string(background))
@@ -1059,6 +1142,7 @@ class RDMolecule(ExternalMolecule):
                         highlight_bonds=highlight_bonds,
                         highlight_atom_colors=highlight_atom_colors,
                         highlight_bond_colors=highlight_bond_colors,
+                        highlight_bond_radii=highlight_bond_radii,
                         conf_id=conf_id,
                         **draw_opts)
         return self.DisplayImage(figure, format, include_save_buttons=include_save_buttons)
