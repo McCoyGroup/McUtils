@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.RDKit.RDMolecule">RDMolecule</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit.py#L20?message=Update%20Docs)]
 </div>
 
 A simple interchange format for RDKit molecules
@@ -33,8 +33,8 @@ DisplayImage: DisplayImage
 __init__(self, rdconf, charge=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit.py#L25?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ __init__(self, rdconf, charge=None):
 rdmol(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L31?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +55,8 @@ rdmol(self):
 atoms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L36)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L36?message=Update%20Docs)]
 </div>
 
 
@@ -66,8 +66,8 @@ atoms(self):
 bonds(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L40?message=Update%20Docs)]
 </div>
 
 
@@ -77,8 +77,8 @@ bonds(self):
 coords(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L47?message=Update%20Docs)]
 </div>
 
 
@@ -88,8 +88,8 @@ coords(self):
 rings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L50?message=Update%20Docs)]
 </div>
 
 
@@ -99,8 +99,8 @@ rings(self):
 meta(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L49)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L49?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L53)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L53?message=Update%20Docs)]
 </div>
 
 
@@ -109,8 +109,8 @@ meta(self):
 copy(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L53)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L53?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L57)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L57?message=Update%20Docs)]
 </div>
 
 
@@ -120,8 +120,8 @@ copy(self):
 charges(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L68)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L68?message=Update%20Docs)]
 </div>
 
 
@@ -131,8 +131,8 @@ charges(self):
 formal_charges(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L77)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L77?message=Update%20Docs)]
 </div>
 
 
@@ -142,8 +142,8 @@ formal_charges(self):
 quiet_errors(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L84?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ quiet_errors(cls):
 chem_api(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L89)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L89?message=Update%20Docs)]
 </div>
 
 
@@ -164,8 +164,8 @@ chem_api(cls):
 from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True, add_implicit_hydrogens=False, sanitize_ops=None, allow_generate_conformers=False, num_confs=1, optimize=False, take_min=True, force_field_type='mmff'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L95)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L95?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L99?message=Update%20Docs)]
 </div>
 
 
@@ -175,8 +175,8 @@ from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True,
 resolve_bond_type(cls, t): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L152?message=Update%20Docs)]
 </div>
 
 
@@ -186,8 +186,8 @@ resolve_bond_type(cls, t):
 from_coords(cls, atoms, coords, bonds=None, charge=None, formal_charges=None, guess_bonds=None, add_implicit_hydrogens=False, implicit_hydrogen_method=None, distance_matrix_tol=0.05, num_confs=None, optimize=False, take_min=None, force_field_type='mmff', confgen_opts=None, sanitize=False, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L255)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L255?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L259)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L259?message=Update%20Docs)]
 </div>
 
 
@@ -197,8 +197,8 @@ from_coords(cls, atoms, coords, bonds=None, charge=None, formal_charges=None, gu
 from_mol(cls, mol, coord_unit='Angstroms', guess_bonds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L400)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L400?message=Update%20Docs)]
 </div>
 
 
@@ -208,8 +208,8 @@ from_mol(cls, mol, coord_unit='Angstroms', guess_bonds=None):
 from_sdf(cls, sdf_string, which=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L416)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L416?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L420)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L420?message=Update%20Docs)]
 </div>
 
 
@@ -219,8 +219,8 @@ from_sdf(cls, sdf_string, which=0):
 get_confgen_opts(cls, version='v3', use_experimental_torsion_angle_prefs=True, use_basic_knowledge=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L429)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L429?message=Update%20Docs)]
 </div>
 
 
@@ -230,8 +230,8 @@ get_confgen_opts(cls, version='v3', use_experimental_torsion_angle_prefs=True, u
 parse_smiles(cls, smiles, sanitize=False, parse_name=True, allow_cxsmiles=True, strict_cxsmiles=True, remove_hydrogens=False, replacements=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L448)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L448?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L452)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L452?message=Update%20Docs)]
 </div>
 
 
@@ -241,8 +241,8 @@ parse_smiles(cls, smiles, sanitize=False, parse_name=True, allow_cxsmiles=True, 
 from_smiles(cls, smiles, sanitize=False, parse_name=True, allow_cxsmiles=True, strict_cxsmiles=True, remove_hydrogens=False, replacements=None, add_implicit_hydrogens=False, call_add_hydrogens=True, conf_id=None, num_confs=None, optimize=False, take_min=True, force_field_type='mmff', reorder_from_atom_map=True, confgen_opts=None, check_tag=True, coords=None, conf_tag=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L481)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L481?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L485)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L485?message=Update%20Docs)]
 </div>
 
 
@@ -252,8 +252,8 @@ from_smiles(cls, smiles, sanitize=False, parse_name=True, allow_cxsmiles=True, s
 from_base_mol(cls, mol, conf_id=None, num_confs=None, optimize=False, take_min=None, force_field_type='mmff', confgen_opts=None, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L563)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L563?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L567)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L567?message=Update%20Docs)]
 </div>
 
 
@@ -263,8 +263,8 @@ from_base_mol(cls, mol, conf_id=None, num_confs=None, optimize=False, take_min=N
 generate_conformers_for_mol(cls, mol, *, num_confs=1, optimize=False, take_min=True, force_field_type='mmff', add_implicit_hydrogens=False, distance_constraints=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L602)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L602?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L606)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L606?message=Update%20Docs)]
 </div>
 
 
@@ -274,8 +274,8 @@ generate_conformers_for_mol(cls, mol, *, num_confs=1, optimize=False, take_min=T
 from_no_conformer_molecule(cls, mol, *, conf_id=None, num_confs=1, optimize=False, take_min=True, force_field_type='mmff', add_implicit_hydrogens=False, confgen_opts=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L681)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L681?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L685)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L685?message=Update%20Docs)]
 </div>
 
 
@@ -284,18 +284,38 @@ from_no_conformer_molecule(cls, mol, *, conf_id=None, num_confs=1, optimize=Fals
 to_smiles(self, remove_hydrogens=None, remove_implicit_hydrogens=None, include_tag=False, canonical=False, compute_stereo=False, remove_stereo=False, preserve_atom_order=False, binary=False, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L719)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L719?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L723)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L723?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.RDKit.RDMolecule.find_substructure" class="docs-object-method">&nbsp;</a> 
+```python
+find_substructure(self, query): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L899)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L899?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.ExternalPrograms.RDKit.RDMolecule.draw" class="docs-object-method">&nbsp;</a> 
 ```python
-draw(self, display_atom_numbers=False, format='svg', drawer=None, use_coords=False, atom_labels=None, highlight_atoms=None, highlight_bonds=None, **draw_opts): 
+draw(self, figure=None, background=None, remove_atom_numbers=False, remove_hydrogens=True, display_atom_numbers=False, format='svg', drawer=None, use_coords=False, atom_labels=None, highlight_atoms=None, highlight_bonds=None, highlight_atom_colors=None, highlight_bond_colors=None, conf_id=None, include_save_buttons=False, **draw_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L885)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L885?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L904)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L904?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.RDKit.RDMolecule.plot" class="docs-object-method">&nbsp;</a> 
+```python
+plot(self, conf_id=None, image_size=(450, 450), **opts): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1066)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1066?message=Update%20Docs)]
 </div>
 
 
@@ -304,8 +324,8 @@ draw(self, display_atom_numbers=False, format='svg', drawer=None, use_coords=Fal
 conformer_smiles_tag(self, coords=None, graph=None, zmatrix=None, encoder=None, byte_size=None, byte_encoding=None, binary=False, include_zmatrix=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1265?message=Update%20Docs)]
 </div>
 
 
@@ -315,8 +335,8 @@ conformer_smiles_tag(self, coords=None, graph=None, zmatrix=None, encoder=None, 
 conformer_from_smiles_tag(cls, tag, graph, decoder=None, byte_size=None, byte_encoding=None, zmatrix=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1183)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1183?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1328)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1328?message=Update%20Docs)]
 </div>
 
 
@@ -326,8 +346,8 @@ conformer_from_smiles_tag(cls, tag, graph, decoder=None, byte_size=None, byte_en
 get_mol_edge_graph(cls, mol): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1220)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1220?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1365?message=Update%20Docs)]
 </div>
 
 
@@ -336,8 +356,8 @@ get_mol_edge_graph(cls, mol):
 get_edge_graph(self, mol=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1229)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1229?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1374)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1374?message=Update%20Docs)]
 </div>
 
 
@@ -347,8 +367,8 @@ get_edge_graph(self, mol=None):
 from_molblock(cls, molblock, add_implicit_hydrogens=False, sanitize=False, remove_hydrogens=False, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1556)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1556?message=Update%20Docs)]
 </div>
 
 
@@ -358,8 +378,8 @@ from_molblock(cls, molblock, add_implicit_hydrogens=False, sanitize=False, remov
 from_mrv(cls, molblock, add_implicit_hydrogens=False, sanitize=False, remove_hydrogens=False, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1330)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1330?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1573)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1573?message=Update%20Docs)]
 </div>
 
 
@@ -369,8 +389,8 @@ from_mrv(cls, molblock, add_implicit_hydrogens=False, sanitize=False, remove_hyd
 from_xyz(cls, molblock, add_implicit_hydrogens=False, guess_bonds=True, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1347)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1347?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1590)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1590?message=Update%20Docs)]
 </div>
 
 
@@ -380,8 +400,8 @@ from_xyz(cls, molblock, add_implicit_hydrogens=False, guess_bonds=True, **mol_op
 from_mol2(cls, molblock, add_implicit_hydrogens=False, sanitize=False, remove_hydrogens=False, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1364)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1364?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1607)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1607?message=Update%20Docs)]
 </div>
 
 
@@ -391,8 +411,8 @@ from_mol2(cls, molblock, add_implicit_hydrogens=False, sanitize=False, remove_hy
 from_cdxml(cls, molblock, add_implicit_hydrogens=True, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1381)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1381?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1624)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1624?message=Update%20Docs)]
 </div>
 
 
@@ -402,8 +422,8 @@ from_cdxml(cls, molblock, add_implicit_hydrogens=True, **mol_opts):
 from_pdb(cls, molblock, add_implicit_hydrogens=True, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1639)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1639?message=Update%20Docs)]
 </div>
 
 
@@ -413,8 +433,8 @@ from_pdb(cls, molblock, add_implicit_hydrogens=True, **mol_opts):
 from_png(cls, molblock, add_implicit_hydrogens=False, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1654)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1654?message=Update%20Docs)]
 </div>
 
 
@@ -424,8 +444,8 @@ from_png(cls, molblock, add_implicit_hydrogens=False, **mol_opts):
 from_fasta(cls, molblock, add_implicit_hydrogens=True, allow_generate_conformers=True, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1426)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1426?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1669)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1669?message=Update%20Docs)]
 </div>
 
 
@@ -435,8 +455,8 @@ from_fasta(cls, molblock, add_implicit_hydrogens=True, allow_generate_conformers
 from_inchi(cls, molblock, add_implicit_hydrogens=True, allow_generate_conformers=True, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1443)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1443?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1686)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1686?message=Update%20Docs)]
 </div>
 
 
@@ -446,8 +466,8 @@ from_inchi(cls, molblock, add_implicit_hydrogens=True, allow_generate_conformers
 from_helm(cls, molblock, add_implicit_hydrogens=True, allow_generate_conformers=True, **mol_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1460)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1460?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1703)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1703?message=Update%20Docs)]
 </div>
 
 
@@ -456,8 +476,8 @@ from_helm(cls, molblock, add_implicit_hydrogens=True, allow_generate_conformers=
 to_xyz(self, filename=None, conf_id=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1499)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1499?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1742)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1742?message=Update%20Docs)]
 </div>
 
 
@@ -466,8 +486,8 @@ to_xyz(self, filename=None, conf_id=None, **opts):
 to_molblock(self, filename=None, conf_id=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1511)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1511?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1754)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1754?message=Update%20Docs)]
 </div>
 
 
@@ -476,8 +496,8 @@ to_molblock(self, filename=None, conf_id=None, **opts):
 to_mrv(self, filename=None, conf_id=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1523)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1523?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1766)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1766?message=Update%20Docs)]
 </div>
 
 
@@ -486,8 +506,8 @@ to_mrv(self, filename=None, conf_id=None, **opts):
 to_pdb(self, filename=None, conf_id=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1535)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1535?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1778)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1778?message=Update%20Docs)]
 </div>
 
 
@@ -496,8 +516,8 @@ to_pdb(self, filename=None, conf_id=None, **opts):
 to_cml(self, filename=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1547)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1547?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1790)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1790?message=Update%20Docs)]
 </div>
 
 
@@ -507,8 +527,8 @@ to_cml(self, filename=None, **opts):
 allchem_api(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1557)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1557?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1800)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1800?message=Update%20Docs)]
 </div>
 
 
@@ -518,8 +538,8 @@ allchem_api(cls):
 get_force_field_type(cls, ff_type): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1560)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1560?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1803)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1803?message=Update%20Docs)]
 </div>
 
 
@@ -528,8 +548,8 @@ get_force_field_type(cls, ff_type):
 get_force_field(self, force_field_type='mmff', conf=None, mol=None, conf_id=None, **extra_props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1574)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1574?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1817)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1817?message=Update%20Docs)]
 </div>
 
 
@@ -538,8 +558,8 @@ get_force_field(self, force_field_type='mmff', conf=None, mol=None, conf_id=None
 evaluate_charges(self, coords, model='gasteiger'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1609)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1609?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1852)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1852?message=Update%20Docs)]
 </div>
 
 
@@ -548,8 +568,8 @@ evaluate_charges(self, coords, model='gasteiger'):
 calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1620)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1620?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1863)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1863?message=Update%20Docs)]
 </div>
 
 
@@ -558,8 +578,8 @@ calculate_energy(self, geoms=None, force_field_generator=None, force_field_type=
 calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1649)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1649?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1892)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1892?message=Update%20Docs)]
 </div>
 
 
@@ -568,8 +588,8 @@ calculate_gradient(self, geoms=None, force_field_generator=None, force_field_typ
 calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=0.01, **fd_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1679)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1679?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1922)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1922?message=Update%20Docs)]
 </div>
 
 
@@ -578,8 +598,8 @@ calculate_hessian(self, force_field_generator=None, force_field_type='mmff', ste
 get_optimizer_params(self, maxAttempts=1000, useExpTorsionAnglePrefs=True, useBasicKnowledge=True, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1704)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1704?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1947)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1947?message=Update%20Docs)]
 </div>
 
 
@@ -588,8 +608,8 @@ get_optimizer_params(self, maxAttempts=1000, useExpTorsionAnglePrefs=True, useBa
 optimize_structure(self, geoms=None, force_field_type='mmff', optimizer=None, maxIters=1000, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1716)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1716?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1959)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1959?message=Update%20Docs)]
 </div>
 
 
@@ -598,8 +618,8 @@ optimize_structure(self, geoms=None, force_field_type='mmff', optimizer=None, ma
 show(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1744)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1744?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1987)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit/RDMolecule.py#L1987?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -654,7 +674,7 @@ show(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/RDKit/RDMolecule.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/RDKit/RDMolecule.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/RDKit.py#L20?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
