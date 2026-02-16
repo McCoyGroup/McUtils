@@ -33,12 +33,15 @@ class ColorPalette:
 
     named_colors = {}
     @classmethod
-    def parse_color_string(cls, name:str):
+    def parse_color_string(cls, name:str, include_named_alpha=False):
         if not name.startswith('#'):
             c = cls.named_colors.get(name)
             if c is None:
                 from matplotlib.colors import to_rgba
-                c = [255*x for x in to_rgba(name)[:3]]
+                vals = to_rgba(name)
+                c = [255 * x for x in vals[:3]]
+                if include_named_alpha:
+                    c = c + list(vals[3:])
         else:
             c = name
         if isinstance(c, str):

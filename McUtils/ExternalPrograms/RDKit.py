@@ -348,8 +348,6 @@ class RDMolecule(ExternalMolecule):
                     raise ValueError(f"failed to build conformer {conf_ids} for {smi} with settings {settings}")
                 coords2 = conf.GetPositions()
                 coords3 = cls._align_new_conf_coords(mol, coords, coords2)
-                print(coords[:5])
-                print(coords3[:5])
                 conf.SetPositions(coords3)
                 return cls.from_rdmol(mol, conf_id=conf_ids, charge=charge, guess_bonds=guess_bonds,
                                       sanitize=sanitize)
@@ -718,8 +716,11 @@ class RDMolecule(ExternalMolecule):
             return cls.from_rdmol(mol, conf_id=conf_id, add_implicit_hydrogens=add_implicit_hydrogens, **etc)
 
     @staticmethod
-    def _camel_case(o):
-        return "".join(b.capitalize() if i > 0 else b for i,b in enumerate(o.split("_")))
+    def _camel_case(o, caps_all=False):
+        if caps_all:
+            return "".join(b.capitalize() for b in o.split("_"))
+        else:
+            return "".join(b.capitalize() if i > 0 else b for i,b in enumerate(o.split("_")))
     def to_smiles(self,
                   remove_hydrogens=None,
                   remove_implicit_hydrogens=None,
@@ -859,6 +860,83 @@ class RDMolecule(ExternalMolecule):
             **opts
         )
 
+    _drawer_opts = {
+        'fill_polys':'fill_polys',
+        'color':(None, 'set_colour', 'black')
+    }
+    _getter_draw_opts = {
+        'annotation_color':'annotation_colour',
+        'query_color':'query_colour'
+    }
+    @classmethod
+    def _handle_color(cls, v):
+        from ..Plots import ColorPalette
+        if v is None: return None
+        if isinstance(v, str):
+            v = np.array(ColorPalette.parse_color_string(v))
+            v = tuple(v/255)
+        return tuple(float(vv) for vv in v)
+    @classmethod
+    def _get_draw_opt(cls, drawer, draw_options, k):
+        if k in cls._drawer_opts:
+            k = cls._drawer_opts[k]
+            if isinstance(k, str):
+                return getattr(drawer, cls._camel_case(k, caps_all=True))()
+            else:
+                if k[0] is not None:
+                    return getattr(drawer, cls._camel_case(k[0], caps_all=True))()
+                elif hasattr(drawer, '_'+k[1]):
+                    return getattr(drawer, "_"+k[1])
+                elif len(k) > 2:
+                    return k[2]
+        elif k in cls._getter_draw_opts:
+            k = cls._getter_draw_opts[k]
+            if isinstance(k, str):
+                return getattr(draw_options, cls._camel_case("get_"+k))()
+            else:
+                return getattr(draw_options, cls._camel_case(k[0]))()
+        else:
+            return getattr(draw_options, cls._camel_case(k))
+    @classmethod
+    def _set_draw_opt(cls, drawer, draw_options, k, v):
+        if v is not None:
+            if k in cls._drawer_opts:
+                k = cls._drawer_opts[k]
+                if isinstance(k, str):
+                    if k.endswith('colour'):
+                        v = cls._handle_color(v)
+                    return getattr(drawer, cls._camel_case('set_'+k, caps_all=True))(v)
+                else:
+                    if k[1] is not None:
+                        if k[0] is None:
+                            setattr(drawer, "_"+k[1], v)
+                        if k[1].endswith('colour'):
+                            v = cls._handle_color(v)
+                        return getattr(drawer, cls._camel_case(k[1], caps_all=True))(v)
+            elif k in cls._getter_draw_opts:
+                k = cls._getter_draw_opts[k]
+                if isinstance(k, str):
+                    if k.endswith('colour'):
+                        v = cls._handle_color(v)
+                    return getattr(draw_options, cls._camel_case("set_"+k))(v)
+                else:
+                    if k[1].endswith('colour'):
+                        v = cls._handle_color(v)
+                    return getattr(draw_options, cls._camel_case(k[1]))(v)
+            else:
+                return setattr(draw_options, cls._camel_case(k), v)
+    @classmethod
+    def _handle_annotation_draw(cls, caller, drawer, draw_options, *args, styles:dict, **kwargs):
+        cur_draw_options = {
+            k: cls._get_draw_opt(drawer, draw_options, k)
+            for k in styles
+        }
+        for k, v in styles.items():
+            cls._set_draw_opt(drawer, draw_options, k, v)
+        caller(*args, **kwargs)
+        for k, v in cur_draw_options.items():
+            cls._set_draw_opt(drawer, draw_options, k, v)
+
     @classmethod
     def _draw_non_interactive(cls,
                               mol,
@@ -874,6 +952,7 @@ class RDMolecule(ExternalMolecule):
                               highlight_bond_colors=None,
                               highlight_atom_radii=None,
                               highlight_bond_radii=None,
+                              draw_coords=None,
                               conf_id=None,
                               **opts
                               ):
@@ -900,7 +979,11 @@ class RDMolecule(ExternalMolecule):
         if len(opts) > 0:
             dops = drawer.drawOptions()
             for k,v in opts.items():
-                setattr(dops,  cls._camel_case(k), v)
+                if v is not None:
+                    try:
+                        setattr(dops,  cls._camel_case(k), v)
+                    except:
+                        raise ValueError(f"error setting draw option {k} to {v}")
         opts = {
             cls._camel_case(k): v for k, v in dict(
                 legend=legend,
@@ -924,7 +1007,209 @@ class RDMolecule(ExternalMolecule):
                                               opts.get("highlightBondRadii", {}),
                                               )
         else:
-            rdMolDraw2D.PrepareAndDrawMolecule(drawer, mol, **opts)
+            mol = rdMolDraw2D.PrepareMolForDrawing(mol)
+            drawer.DrawMolecule(mol, **opts)
+        if draw_coords is not None:
+            import rdkit.Chem.Draw as Draw
+            import rdkit.Geometry as Geom
+            drawer: Draw.MolDraw2D
+            draw_options = drawer.drawOptions()
+            if isinstance(draw_coords, dict):
+                _ = []
+                for k,v in draw_coords.items():
+                    v = v.copy()
+                    v['key'] = k
+                    _.append(v)
+                draw_coords = _
+            draw_coords = [
+                {'key': d}
+                    if not isinstance(d, dict) else
+                d
+                for d in draw_coords
+            ]
+            all_coords = mol.GetConformer(conf_id).GetPositions()
+            for v in draw_coords:
+                v = v.copy()
+                k = v.pop('key', None)
+                type = v.get("type")
+                if type is None:
+                    if isinstance(k, str):
+                        type = k
+                    elif len(k) == 2:
+                        type = 'line'
+                    elif len(k) == 3:
+                        type = 'arc'
+                    else:
+                        type = 'polygon'
+
+                label_style = None
+                label_position = None
+                label_text = None
+                if type in {'line', 'arrow'}:
+                    coords = v.get('coords')
+                    if coords is None:
+                        coords = all_coords[k, :2]
+                    scaling = v.get('scaling', .9)
+                    if scaling is not None:
+                        u = (coords[1] - coords[0])
+                        coords = [
+                            coords[0] + (1 - scaling) * u,
+                            coords[0] + scaling * u
+                        ]
+                    offset = v.get('offset')
+                    if offset is not None:
+                        u = nput.rotation_matrix('2d', np.pi/2) @ nput.vec_normalize(coords[1] - coords[0])
+                        coords = [
+                            coords[0] + offset * u,
+                            coords[1] + offset * u
+                        ]
+
+                    label = v.get('label')
+                    if label is not None:
+                        if isinstance(label, str):
+                            label = {'text': label}
+                        label_text = label['text']
+                        pos = label.get('position')
+                        if pos is None:
+                            offset = label.get('offset', 2)
+                            if nput.is_numeric(offset):
+                                offset = [offset, 0]
+                            y = nput.vec_normalize(coords[0] - coords[1])
+                            x = nput.rotation_matrix('2d', np.pi / 2) @ y
+                            pos = (coords[0] + coords[1])/2 + np.dot(offset, [x, y])
+                        label_position = pos
+                        label_style = label.copy()
+                        for k in (
+                                'text', 'offset', 'position'
+                        ): label_style.pop(k, None)
+
+                    styles = v.get('styles')
+                    if styles is None:
+                        styles = v.copy()
+                        for k in ('type', 'coords', 'scaling', 'offset', 'label', 'label_style'): styles.pop(k, None)
+                    if (
+                            label_style is not None
+                            and 'color' not in label_style
+                    ):
+                        test_color = styles.get('color')
+                        if test_color is not None:
+                            label_style['color'] = test_color
+                    test_color = styles.get('color', True)
+                    if test_color is not None:
+                        cls._handle_annotation_draw(
+                            drawer.DrawLine
+                                if type == 'line' else
+                            drawer.DrawArrow,
+                            drawer,
+                            draw_options,
+                            Geom.Point2D(*coords[0]), Geom.Point2D(*coords[1]),
+                            styles=styles
+                        )
+                elif type == 'arc':
+                    center = v.get('center')
+                    angle = v.get('angle')
+                    radius = v.get('radius')
+                    start_angle = v.get('start_angle')
+                    coords = v.get('coords')
+                    if coords is None:
+                        coords = all_coords[k, :2]
+                    if center is None:
+                        center = coords[1]
+                    offset = v.get('offset')
+                    if offset is not None:
+                        x = (
+                                nput.vec_normalize(coords[0] - coords[1])
+                                + nput.vec_normalize(coords[2] - coords[1])
+                        ) / 2
+                        coords = [
+                            coords[0] + offset * x,
+                            coords[1] + offset * x
+                        ]
+                    if angle is None:
+                        u = nput.vec_normalize(coords[0] - coords[1])
+                        x = nput.vec_normalize(coords[2] - coords[1])
+                        angle = np.arccos(np.dot(u, x))
+                    if start_angle is None:
+                        u = nput.vec_normalize(coords[0] - coords[1])
+                        start_angle = np.arccos(u[0])
+                        yy = nput.vec_normalize(coords[2] - coords[1])
+                        det = u[0] * yy[1] - u[1] * yy[0]
+                        if det < 0:
+                            start_angle = 2*np.pi - (start_angle + angle)
+                    scaling = v.get('scaling', .85)
+                    if scaling is not None:
+                        start_angle = start_angle + (1-scaling) * angle/2
+                        angle = (scaling) * angle
+                    if radius is None:
+                        radius = .8 * np.min([
+                            nput.vec_norms(coords[0] - coords[1]),
+                            nput.vec_norms(coords[2] - coords[1]),
+                        ])
+
+                    label = v.get('label')
+                    if label is not None:
+                        if isinstance(label, str):
+                            label = {'text':label}
+                        label_text = label['text']
+                        pos = label.get('position')
+                        if pos is None:
+                            offset = label.get('offset', 2)
+                            if nput.is_numeric(offset):
+                                offset = [offset, 0]
+                            x = (
+                                        nput.vec_normalize(coords[0] - coords[1])
+                                        + nput.vec_normalize(coords[2] - coords[1])
+                                ) / 2
+                            y = nput.rotation_matrix('2d', -np.pi/2) @ x
+                            pos = center + np.dot(offset, [x, y])
+                        label_position = pos
+                        label_style = label.copy()
+                        for k in (
+                                'text', 'offset', 'position'
+                        ): label_style.pop(k, None)
+
+                    styles = v.get('styles')
+                    if styles is None:
+                        styles = v.copy()
+                        for k in (
+                                'type', 'coords', 'scaling', 'offset',
+                                'label', 'center',
+                                'angle', 'radius', 'start_angle'
+                        ): styles.pop(k, None)
+                    if (
+                            label_style is not None
+                            and 'color' not in label_style
+                    ):
+                        test_color = styles.get('color')
+                        if test_color is not None:
+                            label_style['color'] = test_color
+                    if 'fill_polys' not in styles:
+                        styles['fill_polys'] = False
+
+                    test_color = styles.get('color', True)
+                    if test_color is not None:
+                        cls._handle_annotation_draw(
+                            drawer.DrawArc,
+                            drawer,
+                            draw_options,
+                            Geom.Point2D(*center), radius, np.rad2deg(start_angle), np.rad2deg(start_angle + angle),
+                            styles=styles
+                        )
+                else:
+                    raise NotImplementedError(f"drawing coordinate type {type} not supported")
+
+                if label_text is not None:
+                    if label_style is None:
+                        label_style = {}
+                    cls._handle_annotation_draw(
+                        drawer.DrawString,
+                        drawer,
+                        draw_options,
+                        label_text,
+                        Geom.Point2D(*label_position),
+                        styles=label_style
+                    )
+
         return drawer
 
     def find_substructure(self, query):
@@ -942,6 +1227,7 @@ class RDMolecule(ExternalMolecule):
              drawer=None,
              use_coords=False,
              atom_labels=None,
+             bond_labels=None,
              blend_mixed_bonds=True,
              highlight_atoms=None,
              highlight_bonds=None,
@@ -949,6 +1235,7 @@ class RDMolecule(ExternalMolecule):
              highlight_bond_colors=None,
              highlight_bond_radii=None,
              bond_radius=None,
+             draw_coords=None,
              highlight_rings=None,
              conf_id=None,
              include_save_buttons=False,
@@ -977,11 +1264,14 @@ class RDMolecule(ExternalMolecule):
                 for atom in mol.GetAtoms():
                     atom.SetAtomMapNum(atom.GetIdx()+1)
             else:
+                if display_atom_numbers is True:
+                    draw_opts['add_atom_indices'] = True
+                    display_atom_numbers = []
                 if remove_atom_numbers or remove_atom_numbers is None:
                     for atom in mol.GetAtoms():
                         atom.SetAtomMapNum(0)
-                    # atom.SetProp("atomNote", str(atom.GetIdx()))
-                draw_opts['add_atom_indices'] = True
+                        if atom.GetIdx() in display_atom_numbers:
+                            atom.SetProp("atomNote", str(atom.GetIdx()))
         elif remove_atom_numbers:
             if not modified:
                 mol = Chem.Mol(mol)
@@ -992,8 +1282,34 @@ class RDMolecule(ExternalMolecule):
             if not modified:
                 mol = Chem.Mol(mol)
                 modified = True
-            for atom,label in zip(mol.GetAtoms(), atom_labels):
-                atom.SetProp("atomNote", label)
+            if isinstance(atom_labels, dict):
+                for atom in mol.GetAtoms():
+                    label = atom_labels.get(atom.GetIdx())
+                    if label is not None:
+                        atom.SetProp("atomNote", label)
+            else:
+                for atom,label in zip(mol.GetAtoms(), atom_labels):
+                    if label is not None:
+                        atom.SetProp("atomNote", label)
+
+        if bond_labels is not None:
+            if not modified:
+                mol = Chem.Mol(mol)
+                modified = True
+            if isinstance(bond_labels, dict):
+                for bond in mol.GetBonds():
+                    i,j = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+                    label = bond_labels.get(bond.GetIdx(),
+                                            bond_labels.get((i,j),
+                                                            bond_labels.get((j, i))
+                                                            )
+                                            )
+                    if label is not None:
+                        bond.SetProp("bondNote", label)
+            else:
+                for bond,label in zip(mol.GetBonds(), bond_labels):
+                    if label is not None:
+                        bond.SetProp("bondNote", label)
 
         if highlight_atoms is not None:
             bond_set = {}
@@ -1068,9 +1384,9 @@ class RDMolecule(ExternalMolecule):
                         else:
                             if isinstance(c1, str):
                                 if not isinstance(c2, str):
-                                    c1 = ColorPalette.parse_color_string(c1)
+                                    c1 = self._handle_color(c1)
                             elif isinstance(c2, str):
-                                c2 = ColorPalette.parse_color_string(c2)
+                                c2 = self._handle_color(c2)
                             if (
                                     (isinstance(c1, str) and isinstance(c2, str) and c1 == c2)
                                     or (not isinstance(c1, str) and np.allclose(c1, c2))
@@ -1095,16 +1411,12 @@ class RDMolecule(ExternalMolecule):
 
             _ = {}
             for b,c in highlight_bond_colors.items():
-                if isinstance(c, str):
-                    c = np.array(ColorPalette.parse_color_string(c)) / 255
-                _[b] = tuple(c)
+                _[b] = self._handle_color(c)
             highlight_bond_colors = _
         if highlight_atom_colors is not None:
             _ = {}
             for b, c in highlight_atom_colors.items():
-                if isinstance(c, str):
-                    c = np.array(ColorPalette.parse_color_string(c)) / 255
-                _[b] = tuple(c)
+                _[b] = self._handle_color(c)
             highlight_atom_colors = _
 
         if highlight_bond_radii is not None:
@@ -1128,9 +1440,7 @@ class RDMolecule(ExternalMolecule):
             draw_opts['fill_highlights'] = draw_opts.get('fill_highlights', False)
 
         if background is not None:
-            if isinstance(background, str):
-                background = np.array(ColorPalette.parse_color_string(background))
-                background = tuple(background[:3]/255) + tuple(background[3:])
+            background = self._handle_color(background)
 
         if conf_id is None:
             conf_id = self.mol.GetId()
@@ -1143,6 +1453,7 @@ class RDMolecule(ExternalMolecule):
                         highlight_atom_colors=highlight_atom_colors,
                         highlight_bond_colors=highlight_bond_colors,
                         highlight_bond_radii=highlight_bond_radii,
+                        draw_coords=draw_coords,
                         conf_id=conf_id,
                         **draw_opts)
         return self.DisplayImage(figure, format, include_save_buttons=include_save_buttons)
@@ -1911,8 +2222,6 @@ class RDMolecule(ExternalMolecule):
             if conf_id is None:
                 conf_id = conf.GetId()
             if np.sum(np.abs(conf.GetPositions() - mol.GetConformer(conf_id).GetPositions())) > 1e-6:
-                print(mol)
-                print(self.rdmol)
                 raise ValueError(
                     conf, mol.GetConformer(conf_id)
                 )
