@@ -860,12 +860,37 @@ class RDMolecule(ExternalMolecule):
             **opts
         )
 
+    @classmethod
+    def _manage_draw_opts(cls,
+                          label_style=None,
+                          **etc
+                          ):
+        deferred = {}
+        if label_style is not None:
+            font_size = label_style.get('font_size')
+            if font_size is not None:
+                etc['annotation_font_scale'] = 1.0/28 * font_size
+                deferred['font_size'] = font_size
+            color = label_style.get('color')
+            if color is not None:
+                etc['atom_note_color'] = color
+                etc['bond_note_color'] = color
+                etc['annotation_color'] = color
+                # etc['color'] = color
+                deferred['color'] = color
+
+        return etc, deferred
+
     _drawer_opts = {
         'fill_polys':'fill_polys',
-        'color':(None, 'set_colour', 'black')
+        'color':(None, 'set_colour', 'black'),
+        'font_size':'font_size'
     }
     _getter_draw_opts = {
+        'background':'background_colour',
         'annotation_color':'annotation_colour',
+        'atom_note_color':'atom_note_colour',
+        'bond_note_color':'atom_note_colour',
         'query_color':'query_colour'
     }
     @classmethod
@@ -876,6 +901,25 @@ class RDMolecule(ExternalMolecule):
             v = np.array(ColorPalette.parse_color_string(v))
             v = tuple(v/255)
         return tuple(float(vv) for vv in v)
+    @classmethod
+    def _handle_draw_elements(cls, elements):
+        import rdkit.Chem.Draw.rdMolDraw2D as Draw
+        if isinstance(elements, (list, tuple)):
+            elements = [
+                getattr(Draw.DrawElement, cls._camel_case(k).upper())
+                    if isinstance(k, str) else
+                k
+                for k in elements
+            ]
+            if len(elements) == 1:
+                element_mask = elements[0]
+            else:
+                element_mask = Draw.DrawElement.ALL
+                for k in elements:
+                    element_mask = element_mask ^ k
+        else:
+            element_mask = elements
+        return element_mask
     @classmethod
     def _get_draw_opt(cls, drawer, draw_options, k):
         if k in cls._drawer_opts:
@@ -924,6 +968,11 @@ class RDMolecule(ExternalMolecule):
                         v = cls._handle_color(v)
                     return getattr(draw_options, cls._camel_case(k[1]))(v)
             else:
+                if k in {
+                    'enabled_elements',
+                    'drawing_extents_include'
+                }:
+                    v = cls._handle_draw_elements(v)
                 return setattr(draw_options, cls._camel_case(k), v)
     @classmethod
     def _handle_annotation_draw(cls, caller, drawer, draw_options, *args, styles:dict, **kwargs):
@@ -938,10 +987,33 @@ class RDMolecule(ExternalMolecule):
             cls._set_draw_opt(drawer, draw_options, k, v)
 
     @classmethod
+    def _prep_draw_coords(cls, draw_coords):
+        if draw_coords is None:
+            return []
+        if isinstance(draw_coords, dict):
+            _ = []
+            for k, v in draw_coords.items():
+                v = v.copy()
+                v['key'] = k
+                _.append(v)
+            draw_coords = _
+        draw_coords = [
+            {'key': d}
+            if not isinstance(d, dict) else
+            d
+            for d in draw_coords
+        ]
+
+        return draw_coords
+
+
+    default_draw_options = {
+        'annotation_font_scale':1
+    }
+    @classmethod
     def _draw_non_interactive(cls,
                               mol,
                               figure=None,
-                              background=None,
                               format='svg',
                               drawer=None,
                               drawer_options=None,
@@ -954,6 +1026,7 @@ class RDMolecule(ExternalMolecule):
                               highlight_bond_radii=None,
                               draw_coords=None,
                               conf_id=None,
+                              predraw=None,
                               **opts
                               ):
         Draw = RDKitInterface.submodule("Chem.Draw")
@@ -973,17 +1046,11 @@ class RDMolecule(ExternalMolecule):
                     drawer, opts = cls._drawer_svg(**draw_opts)
                 else:
                     drawer, opts = cls._drawer_png(**draw_opts)
-        if background is not None:
-            dops = drawer.drawOptions()
-            dops.setBackgroundColour(background)
+        opts, deferred = cls._manage_draw_opts(**dict(cls.default_draw_options, **opts))
         if len(opts) > 0:
             dops = drawer.drawOptions()
             for k,v in opts.items():
-                if v is not None:
-                    try:
-                        setattr(dops,  cls._camel_case(k), v)
-                    except:
-                        raise ValueError(f"error setting draw option {k} to {v}")
+                cls._set_draw_opt(drawer, dops, k, v)
         opts = {
             cls._camel_case(k): v for k, v in dict(
                 legend=legend,
@@ -997,6 +1064,8 @@ class RDMolecule(ExternalMolecule):
                 ).items()
             if v is not None
         }
+        if predraw is not None:
+            drawer = predraw(drawer)
         if highlight_bond_radii is not None:
             mol = rdMolDraw2D.PrepareMolForDrawing(mol)
             drawer.DrawMoleculeWithHighlights(mol,
@@ -1009,24 +1078,16 @@ class RDMolecule(ExternalMolecule):
         else:
             mol = rdMolDraw2D.PrepareMolForDrawing(mol)
             drawer.DrawMolecule(mol, **opts)
+        if len(deferred) > 0:
+            dops = drawer.drawOptions()
+            for k,v in deferred.items():
+                cls._set_draw_opt(drawer, dops, k, v)
         if draw_coords is not None:
             import rdkit.Chem.Draw as Draw
             import rdkit.Geometry as Geom
             drawer: Draw.MolDraw2D
             draw_options = drawer.drawOptions()
-            if isinstance(draw_coords, dict):
-                _ = []
-                for k,v in draw_coords.items():
-                    v = v.copy()
-                    v['key'] = k
-                    _.append(v)
-                draw_coords = _
-            draw_coords = [
-                {'key': d}
-                    if not isinstance(d, dict) else
-                d
-                for d in draw_coords
-            ]
+            draw_coords = cls._prep_draw_coords(draw_coords)
             all_coords = mol.GetConformer(conf_id).GetPositions()
             for v in draw_coords:
                 v = v.copy()
@@ -1035,6 +1096,8 @@ class RDMolecule(ExternalMolecule):
                 if type is None:
                     if isinstance(k, str):
                         type = k
+                    elif len(k) == 1:
+                        type = 'label'
                     elif len(k) == 2:
                         type = 'line'
                     elif len(k) == 3:
@@ -1072,15 +1135,19 @@ class RDMolecule(ExternalMolecule):
                         pos = label.get('position')
                         if pos is None:
                             offset = label.get('offset', 2)
+                            scaled_offset = label.get('offset_scaled', True)
                             if nput.is_numeric(offset):
                                 offset = [offset, 0]
-                            y = nput.vec_normalize(coords[0] - coords[1])
+                            if scaled_offset:
+                                y = (coords[0] - coords[1])
+                            else:
+                                y = nput.vec_normalize(coords[0] - coords[1])
                             x = nput.rotation_matrix('2d', np.pi / 2) @ y
                             pos = (coords[0] + coords[1])/2 + np.dot(offset, [x, y])
                         label_position = pos
                         label_style = label.copy()
                         for k in (
-                                'text', 'offset', 'position'
+                                'text', 'offset', 'position', 'offset_scaled'
                         ): label_style.pop(k, None)
 
                     styles = v.get('styles')
@@ -1115,6 +1182,14 @@ class RDMolecule(ExternalMolecule):
                         coords = all_coords[k, :2]
                     if center is None:
                         center = coords[1]
+                    refs = v.get('refs', [])
+                    if len(refs) > 0:
+                        x = (
+                                    nput.vec_normalize(coords[0] - coords[1])
+                                    + nput.vec_normalize(coords[2] - coords[1])
+                            ) / 2
+                        if np.linalg.norm(x) < .05:
+                            coords = [coords[0], coords[1], all_coords[refs[0], :2]]
                     offset = v.get('offset')
                     if offset is not None:
                         x = (
@@ -1154,18 +1229,27 @@ class RDMolecule(ExternalMolecule):
                         pos = label.get('position')
                         if pos is None:
                             offset = label.get('offset', 2)
+                            scaled_offset = label.get('offset_scaled', True)
                             if nput.is_numeric(offset):
                                 offset = [offset, 0]
                             x = (
                                         nput.vec_normalize(coords[0] - coords[1])
                                         + nput.vec_normalize(coords[2] - coords[1])
                                 ) / 2
+                            if scaled_offset:
+                                x = radius * x
                             y = nput.rotation_matrix('2d', -np.pi/2) @ x
-                            pos = center + np.dot(offset, [x, y])
+                            ov = np.dot(offset, [x, y])
+                            nn = nput.vec_normalize(ov)
+                            for r in refs:
+                                if np.dot(nn, nput.vec_normalize(all_coords[r, :2] - coords[1])) > .9:
+                                    ov = -ov
+                                    break
+                            pos = center + ov
                         label_position = pos
                         label_style = label.copy()
                         for k in (
-                                'text', 'offset', 'position'
+                                'text', 'offset', 'position', 'offset_scaled'
                         ): label_style.pop(k, None)
 
                     styles = v.get('styles')
@@ -1173,7 +1257,7 @@ class RDMolecule(ExternalMolecule):
                         styles = v.copy()
                         for k in (
                                 'type', 'coords', 'scaling', 'offset',
-                                'label', 'center',
+                                'label', 'center', 'refs',
                                 'angle', 'radius', 'start_angle'
                         ): styles.pop(k, None)
                     if (
@@ -1195,12 +1279,28 @@ class RDMolecule(ExternalMolecule):
                             Geom.Point2D(*center), radius, np.rad2deg(start_angle), np.rad2deg(start_angle + angle),
                             styles=styles
                         )
+                elif type == 'label':
+                    center = v.get('center')
+                    if center is None:
+                        center = all_coords[k[0], :2]
+                    offset = v.get('offset', np.array([.5, .3]))
+                    label_position = center + offset
+                    label_text = v.get('text')
+                    if label_text is None:
+                        label_text = str(k[0])
+                    label_style = v.copy()
+                    for k in (
+                            'text', 'offset', 'center'
+                    ): label_style.pop(k, None)
+
                 else:
                     raise NotImplementedError(f"drawing coordinate type {type} not supported")
 
                 if label_text is not None:
                     if label_style is None:
                         label_style = {}
+                    if 'font_size' in label_style:
+                        label_style['fixed_font_size'] = label_style['font_size']
                     cls._handle_annotation_draw(
                         drawer.DrawString,
                         drawer,
@@ -1216,6 +1316,12 @@ class RDMolecule(ExternalMolecule):
         Chem = self.chem_api()
         query = Chem.MolFromSmarts(query)
         return self.rdmol.GetSubstructMatches(query)
+
+    def get_atom_neighbors(self, i, n=1, mol=None, graph=None):
+        if graph is None:
+            graph = self.get_edge_graph(mol=mol)
+        neighbor_graph = graph.neighbor_graph(i, num=n)
+        return neighbor_graph.labels
 
     def draw(self,
              figure=None,
@@ -1237,6 +1343,7 @@ class RDMolecule(ExternalMolecule):
              bond_radius=None,
              draw_coords=None,
              highlight_rings=None,
+             label_offset=1,
              conf_id=None,
              include_save_buttons=False,
              **draw_opts):
@@ -1283,14 +1390,44 @@ class RDMolecule(ExternalMolecule):
                 mol = Chem.Mol(mol)
                 modified = True
             if isinstance(atom_labels, dict):
-                for atom in mol.GetAtoms():
-                    label = atom_labels.get(atom.GetIdx())
-                    if label is not None:
+                atom_labels = [atom_labels.get(atom.GetIdx()) for atom in mol.GetAtoms()]
+            graph = self.get_edge_graph(mol)
+            for atom,label in zip(mol.GetAtoms(), atom_labels):
+                if label is not None:
+                    if isinstance(label, str):
                         atom.SetProp("atomNote", label)
-            else:
-                for atom,label in zip(mol.GetAtoms(), atom_labels):
-                    if label is not None:
-                        atom.SetProp("atomNote", label)
+                    else:
+                        draw_coords = self._prep_draw_coords(draw_coords)
+                        label = label.copy()
+                        key = label.pop('key', None)
+                        if key is None:
+                            i = atom.GetIdx()
+                            neighbors = self.get_atom_neighbors(i, 2, graph=graph)
+                            neighbors = sorted(set(neighbors) - {i})
+                            if len(neighbors) == 0:
+                                key = (i,)
+                            elif len(neighbors) == 1:
+                                key = (i, neighbors[0])
+                            else:
+                                key = (neighbors[0], i, neighbors[1])
+                                label['refs'] = neighbors[2:]
+                        if 'offset' not in label:
+                            if len(key) == 2:
+                                label['offset'] = [0, 1.2 * label_offset]
+                            elif len(key) == 3:
+                                label['offset'] = [-label_offset, 0]
+                        if 'text' not in label:
+                            i = atom.GetIdx()
+                            label['text'] = str(i)
+                        spec = {
+                            'key':key,
+                            'color':None,
+                            'label':label
+                        }
+                        refs = label.pop('refs', None)
+                        if refs is not None:
+                            spec['refs'] = refs
+                        draw_coords.append(spec)
 
         if bond_labels is not None:
             if not modified:
@@ -1760,7 +1897,7 @@ class RDMolecule(ExternalMolecule):
     @classmethod
     def get_mol_edge_graph(cls, mol):
         from .. import Graphs
-        atoms = [a.GetSymbol() for a in mol.GetAtoms()]
+        atoms = np.arange(len(mol.GetAtoms()))
         bonds = [
             [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
             for b in mol.GetBonds()
@@ -1769,7 +1906,7 @@ class RDMolecule(ExternalMolecule):
     def get_edge_graph(self, mol=None):
         from .. import Graphs
         if mol is None:
-            atoms, bonds = self.atoms, [b[:2] for b in self.bonds]
+            atoms, bonds = np.arange(len(self.atoms)), [b[:2] for b in self.bonds]
             return Graphs.EdgeGraph(atoms, bonds)
         else:
             return self.get_mol_edge_graph(mol)
