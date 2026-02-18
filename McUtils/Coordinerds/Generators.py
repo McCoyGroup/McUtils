@@ -116,7 +116,7 @@ def get_fragment_coordinate_system(bond_graph:EdgeGraph,
     if fragments is None:
         fragments = bond_graph.get_fragments()
     if len(fragments) == 1: return []
-    if len(fragments) > 2 and distance_matrix is None:
+    if len(fragments) > 2 and distance_matrix is not None:
         distance_matrix = np.array(distance_matrix)
         max_dist = np.max(distance_matrix)+1
         np.fill_diagonal(distance_matrix, max_dist)

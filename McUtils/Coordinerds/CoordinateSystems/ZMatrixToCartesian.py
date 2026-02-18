@@ -28,7 +28,11 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                      coordlist, *,
                      ordering, origins=None, axes=None, use_rad=True,
                      return_derivs=False,
+                     order=None,
                      check_overlapping=False,
+                     use_direct_expansions=False,
+                     orthogonalize_derivatives=True,
+                     spec=None,
                      **kw
                      ):
         """Expects to get a list of configurations
@@ -63,7 +67,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         """
         #TODO: introduce fast derivs back into this coordinate system by extracting "specs" from the ordering
         #      and then partially inverting
-        if return_derivs: raise NotImplementedError("analytic derivatives need maintenance")
+        # if return_derivs: raise NotImplementedError("analytic derivatives need maintenance")
 
         # make sure we have the ordering stuff in hand
         if ordering is None:
@@ -91,11 +95,19 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
             atom_ordering = None
 
         total_points = np.empty((sysnum, coordnum+1, 3))
-        if return_derivs is not True and return_derivs is not False and isinstance(return_derivs, int):
-            return_derivs = True
-            return_deriv_order = return_derivs
-        elif return_derivs:
-            return_deriv_order = 2
+        if return_derivs:
+            if order is not None:
+                return_deriv_order = order
+                if not is_int(return_deriv_order): return_deriv_order = return_deriv_order[-1] # order can be a list
+            elif (
+                    return_derivs is not True
+                    and return_derivs is not False
+                    and is_int(return_derivs)
+            ):
+                return_derivs = True
+                return_deriv_order = return_derivs
+            else:
+                return_deriv_order = 1
         if return_derivs:
             derivs = [
                 None, # no need to stoare a copy of total_points here...
@@ -127,7 +139,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         y_pts = origins + vec_normalize(axes[:, 1])
 
         dists = coordlist[:, 0, 0]
-        if return_derivs:
+        if return_derivs and not use_direct_expansions:
             raise NotImplementedError('old Z-matrix derivatives disabled for instabilities')
             der_stuff = cartesian_from_rad_derivatives(origins,
                                                        x_pts, y_pts, dists,
@@ -183,7 +195,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                 else:
                     psi_flag = False
 
-            if return_derivs:
+            if return_derivs and not use_direct_expansions:
                 raise NotImplementedError("dead code path")
                 if ordering.shape[-1] == 4:
                     raise NotImplementedError("don't have derivatives for case with psi angles")
@@ -222,7 +234,16 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
 
         converter_opts = dict(use_rad=use_rad, ordering=ordering)
         if return_derivs:
-            if return_deriv_order > 0:
+            if use_direct_expansions:
+                if spec is None:
+                    raise ValueError("`spec` is required to handle re-expansion")
+                #TODO: handle multiple different orderings...
+                _, inv = spec.get_expansion(total_points,
+                                            order=return_deriv_order,
+                                            orthogonalize=orthogonalize_derivatives,
+                                            return_inverse=use_direct_expansions)
+                converter_opts['derivs'] = inv
+            elif return_deriv_order > 0:
                 converter_opts['derivs'] = derivs[1:][:return_deriv_order]
 
         return total_points, converter_opts
@@ -230,6 +251,8 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
     def convert(self, coords, **kw):
         """dipatches to convert_many but only pulls the first"""
         total_points, opts = self.convert_many(coords[np.newaxis], **kw)
+        if 'derivs' in opts:
+            opts['derivs'] = [o[0] for o in opts['derivs']]
         return total_points[0], opts
 
 __converters__ = [ ZMatrixToCartesianConverter() ]
