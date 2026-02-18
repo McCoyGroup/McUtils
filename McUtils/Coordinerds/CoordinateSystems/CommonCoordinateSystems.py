@@ -170,6 +170,7 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
                  converter_options=None,
                  dimension=(None, None),
                  coordinate_shape=(None, 3),
+                 spec=None,
                  **opts):
         """
         :param converter_options: options to be passed through to a `CoordinateSystemConverter`
@@ -184,6 +185,7 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
         if converter_options is None or len(converter_options) == 0:
             converter_options = opts
         super().__init__(dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
+        self._spec = spec
         self.jacobian_prep = self.jacobian_prep_coordinates
     @staticmethod
     def jacobian_prep_coordinates(
@@ -340,6 +342,35 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
             flags_tiled = np.broadcast_to(ol[:, 4:], (steps, nol, ncol-4))
             ol_tiled = np.concatenate([ol_tiled, flags_tiled], axis=-1)
         return np.reshape(ol_tiled, (ncoords, ncol))
+
+    @property
+    def ordering(self):
+        # from ..ZMatrices import chain_zmatrix, reindex_zmatrix
+        # if 'ordering' not in self.converter_options:
+        #     return reindex_zmatrix(
+        #         chain_zmatrix(len(self.co)),
+        #         ...
+        #     )
+        #     ...
+        return self.converter_options.get('ordering')
+    def _prep_spec(self, ordering=None):
+        from ..Internals import InternalSpec
+        from ..ZMatrices import extract_zmatrix_internals
+        if ordering is None:
+            ordering = self.ordering
+        if ordering is not None:
+            return InternalSpec(extract_zmatrix_internals(ordering))
+        else:
+            return None
+    @property
+    def spec(self):
+        # if self._spec is None:
+        #     self._spec = self._prep_spec()
+        return self._prep_spec()
+    def pre_convert_to(self, system, opts=None):
+        if opts is not None and 'spec' not in opts:
+            opts = opts | {'spec':self._prep_spec(opts.get('ordering'))}
+        return opts
 ZMatrixCoordinates = ZMatrixCoordinateSystem()
 ZMatrixCoordinates.__name__ = "ZMatrixCoordinates"
 ZMatrixCoordinates.__doc__ = """

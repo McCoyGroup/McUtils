@@ -32,6 +32,14 @@ class FiniteDifferenceFunction:
     Used in a large number of other places, but relatively rarely on its own.
     A convenient application is the `FiniteDifferenceDerivative` class in the `Derivatives` module.
     """
+    __props__ = (
+        "mesh_spacing",
+        "accuracy",
+        "stencil",
+        "end_point_accuracy",
+        "axes",
+        "contract"
+    )
     def __init__(self, *diffs, axes=0, contract = False):
         """Constructs an object to take finite differences derivatives of grids of data
 

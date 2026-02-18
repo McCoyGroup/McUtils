@@ -1,4 +1,6 @@
 import numpy as np
+from ... import Devutils as dev
+from ... import Numputils as nput
 from .CoordinateSystemConverter import CoordinateSystemConverters as converters, CoordinateSystemConverter
 from .CoordinateUtils import is_multiconfig, mc_safe_apply
 
@@ -112,13 +114,18 @@ class CoordinateSystem:
                              )
     def pre_convert(self, system):
         """
+        [DEPRECATED, see `pre_convert_to` and `pre_convert_from`]
         A hook to allow for handlign details before converting
         :param system:
         :type system:
         :return:
         :rtype:
         """
-        pass
+        self.pre_convert_to(system)
+    def pre_convert_to(self, system, opts=None):
+        return opts
+    def pre_convert_from(self, system, opts=None):
+        return opts
 
     def _validate(self):
         if self._matrix is None:
@@ -278,8 +285,8 @@ class CoordinateSystem:
         :rtype: tuple(np.ndarray, dict)
         """
         if apply_pre_converter:
-            self.pre_convert(system)
-            system.pre_convert(self)
+            kw = self.pre_convert_to(system, kw)
+            kw = system.pre_convert_from(self, kw)
 
         converter_opts = self.converter_options
         if converter_opts is None:
@@ -502,6 +509,7 @@ class CoordinateSystem:
                  converter_options=None,
                  all_numerical=False,
                  analytic_deriv_order=None,
+                 allow_fd=True,
                  **finite_difference_options
                  ):
         """
@@ -525,12 +533,14 @@ class CoordinateSystem:
 
         # print(system)
         from McUtils.Zachary import FiniteDifferenceDerivative
-
-        self.pre_convert(system)
-        system.pre_convert(self)
+        finite_difference_options, copts = dev.OptionsSet(finite_difference_options).split(FiniteDifferenceDerivative)
 
         if converter_options is None:
             converter_options = {} # convert_coords tracks the other conversion options for us
+        converter_options = converter_options | copts
+
+        converter_options = self.pre_convert_to(system, converter_options)
+        converter_options = system.pre_convert_from(self, converter_options)
 
         deriv_tensors = None # default return value
 
@@ -552,7 +562,8 @@ class CoordinateSystem:
             ret_d_key = self.return_derivs_key
             rd = converter_options.get(ret_d_key)
             converter_options[ret_d_key] = order if analytic_deriv_order is None else (analytic_deriv_order != 0)
-            test_crd, test_opts = self.convert_coords(coords, system, order=order,
+            test_crd, test_opts = self.convert_coords(coords, system,
+                                                      order=order,
                                                       apply_pre_converter=False, **converter_options)
             if rd is None:
                 del converter_options[ret_d_key]
@@ -596,8 +607,10 @@ class CoordinateSystem:
         else:
             convert = self._converter(system, None, self, None, converter_options)
             # convert = lambda c, s=system, kw=converter_options: self.convert_coords(c, s, **kw)[0]
-        need_derivs = (len(order) > 0 and max(order) > 0) if not isinstance(order, int) else order > 0
+        need_derivs = (len(order) > 0 and max(order) > 0) if not nput.is_int(order) else order > 0
         if need_derivs:
+            if not allow_fd:
+                raise ValueError(f"Finite difference disabled, but {order} derivatives are still required")
             other_shape = system.coordinate_shape
             # if other_shape is None:
             #     raise CoordinateSystemException(

@@ -2515,7 +2515,29 @@ def inverse_internal_coordinate_tensors(expansion,
 def rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0., axis_order=0):
     axis = vec_normalize(axis)
     if axis.ndim > 1:
-        raise NotImplementedError("multi-axis broadcasting is tedious")
+        ## TODO: get this off the slow path
+        ax_shape = axis.shape[:-1]
+        coords = np.asanyarray(coords)
+        coord_shape = coords.shape[:-2]
+        if ax_shape == coord_shape:
+            blocks = [
+                rotation_expansion_from_axis_angle(c, a, order=order, angle=angle, axis_order=axis_order)
+                for c,a in zip(
+                    coords.reshape((-1,) + coords.shape[-2:]),
+                    axis.reshape((-1,) + axis.shape[-1:])
+                )
+            ]
+            #TODO: handle mixed axis orders
+            return [
+                np.concatenate([
+                    exp[i][np.newaxis, ...]
+                    for exp in blocks
+                ], axis=0)
+                for i in range(order+1)
+            ]
+        else:
+            raise NotImplementedError("multi-axis broadcasting is tedious")
+
     R_expansion = geom.axis_rot_gen_deriv(angle, axis, angle_order=order, axis_order=axis_order)
     if axis_order == 0:
         return [
