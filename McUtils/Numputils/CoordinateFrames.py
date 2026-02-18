@@ -481,7 +481,7 @@ def translation_rotation_projector(coords, masses=None, mass_weighted=False, ret
     _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
     if not mass_weighted:
         g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
-        inv = np.tensordot(tr_modes, g12)
+        inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
     else:
         inv = np.moveaxis(tr_modes, -2, -1)
     if orthonormal:

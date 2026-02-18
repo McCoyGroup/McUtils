@@ -208,10 +208,16 @@ def iterative_step_minimize(
         max_iterations=100,
         convergence_metric=None,
         track_best=False,
+        return_trajectory=False,
         logger=None,
         log_guess=True
 ):
     logger = dev.Logger.lookup(logger)
+
+    if return_trajectory:
+        traj = []
+    else:
+        traj = None
 
     step_predictor = get_step_finder(step_predictor,
                                      method=method,
@@ -325,6 +331,8 @@ def iterative_step_minimize(
             mask = new_mask
             guess[mask,] += step
             its[mask,] += 1
+            if return_trajectory:
+                traj.append((mask, guess[mask,].copy()))
     else:
         converged = False
         its[mask,] = max_iterations
@@ -341,7 +349,10 @@ def iterative_step_minimize(
     else:
         res = guess, converged, (errs, its)
 
-    return res
+    if return_trajectory:
+        return res, traj
+    else:
+        return res
 
 default_chain_step_finder='neb'
 def iterative_chain_minimize(

@@ -5,6 +5,7 @@ __all__ = [
 ]
 
 import sys
+import tempfile
 
 import numpy as np, io, os
 from .. import Numputils as nput
@@ -177,11 +178,32 @@ class ASEMolecule(ExternalMolecule):
             )
         return ret_tup
 
+    default_optimizer = 'bfgs'
+    def resolve_optimizer(self, method):
+        if method is None:
+            method = self.default_optimizer
+        if isinstance(method, str):
+            optimize = ASEInterface.submodule('optimize')
+            if method == 'bfgs':
+                method = optimize.BFGS
+            elif method == 'bfgs-linesearch':
+                method = optimize.BFGSLineSearch
+            else:
+                method = getattr(optimize, method)
+        return method
 
     convergence_criterion = 1e-4
     max_steps = 100
-    def optimize_structure(self, geoms=None, calc=None, quiet=True, logfile=None, fmax=None, steps=None, **opts):
-        BFGS = ASEInterface.submodule('optimize').BFGS
+    def optimize_structure(self,
+                           geoms=None,
+                           calc=None,
+                           quiet=True,
+                           logfile=None,
+                           fmax=None,
+                           steps=None,
+                           method=None,
+                           **opts):
+        BFGS = self.resolve_optimizer(method)
 
         if logfile is None:
             if quiet:
