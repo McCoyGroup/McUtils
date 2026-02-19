@@ -2225,6 +2225,9 @@ def internal_conversion_specs(specs, angle_ordering='ijk', coord_type_dispatch=N
                     break
             else:
                 raise ValueError("can't parse coordinate spec {}".format(idx))
+        elif hasattr(idx, 'get_expansion'): # forward integrate with Internals stuff
+            coord_type = idx.get_expansion
+            subopts = {}
         else:
             nidx = len(idx)
             if nidx == 2:
@@ -2239,7 +2242,11 @@ def internal_conversion_specs(specs, angle_ordering='ijk', coord_type_dispatch=N
 
         if coord_type in {'bend', 'rock'}: # very common to change
             subopts['angle_ordering'] = subopts.get('angle_ordering', angle_ordering)
-        targets.append((coord_type_dispatch[coord_type], idx, dict(opts, **subopts)))
+        targets.append(
+            (coord_type_dispatch[coord_type], idx, dict(opts, **subopts))
+                if isinstance(coord_type, str) else
+            (coord_type, (), dict(opts, **subopts))
+        )
 
     return targets
 

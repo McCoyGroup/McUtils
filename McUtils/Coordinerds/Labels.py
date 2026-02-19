@@ -3,6 +3,8 @@ import itertools
 from collections import namedtuple
 from ..Data import UnitsData
 from .. import Numputils as nput
+from .. import Devutils as dev
+from .Internals import InternalCoordinateType
 
 __all__ = [
     "coordinate_label",
@@ -26,9 +28,13 @@ def get_coordinate_label(coord, atom_labels, atom_order=None):
     if not isinstance(atom_order, dict):
         atom_order = {a:i for i,a in enumerate(atom_order)}
 
+    ## TODO: use new infrastrcture for labels
+    # coord = InternalCoordinateType.resolve(coord)
     if isinstance(coord, dict):
         coord, tag = next(iter(coord.items()))
-    if len(coord) == 2:
+    if isinstance(coord, str):
+        tag, coord = coord, tag
+    if dev.str_is(tag, 'dist') or (tag is None and nput.is_int(coord[0]) and len(coord) == 2):
         if tag is None:
             tag = "stretch"
 
@@ -58,7 +64,7 @@ def get_coordinate_label(coord, atom_labels, atom_order=None):
         a,b = sorted([a1,a2], key=lambda c:atom_order.get(c, len(atom_order)))
         motif_lab = a+b
 
-    elif len(coord) == 3:
+    elif dev.str_is(tag, 'bend') or (tag is None and nput.is_int(coord[0]) and len(coord) == 3):
         if tag is None:
             tag = "bend"
 
@@ -91,7 +97,7 @@ def get_coordinate_label(coord, atom_labels, atom_order=None):
         if atom_order.get(a1, len(atom_order)) > atom_order.get(a3, len(atom_order)):
             a1, a2, a3 = a3, a2, a1
         motif_lab = a1 + a2 + a3
-    else:
+    elif dev.str_is(tag, 'dihed') or (tag is None and nput.is_int(coord[0]) and len(coord) == 4):
         if tag is None:
             tag = "dihedral"
 
@@ -122,6 +128,11 @@ def get_coordinate_label(coord, atom_labels, atom_order=None):
         if atom_order.get(a1, len(atom_order)) > atom_order.get(a4, len(atom_order)):
             a1, a2, a3, a4 = a4, a3, a2, a1
         motif_lab = a1 + a2 + a3 + a4
+    else:
+        if nput.is_int(coord[0]):
+            motif_lab = "".join(atom_labels[i].atom for i in coord)
+        else:
+            motif_lab = "".join(atom_labels[i].atom for c in coord for i in c)
 
     return coordinate_label(ring_lab, group_lab, motif_lab, tag)
 
@@ -167,7 +178,6 @@ def get_mode_labels(
     mode_coords = []
     if isinstance(internals, dict):
         indices = list(internals.keys())
-
         tags = list(internals.values())
     else:
         indices = list(range(len(internals)))

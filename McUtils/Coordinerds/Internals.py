@@ -28,6 +28,7 @@ __all__ = [
     "get_internal_cartesian_conversion",
     "validate_internals",
     # "RADInternalCoordinateSet"
+    'InternalCoordinateType',
     'InternalSpec'
 ]
 
@@ -99,6 +100,9 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_indices(self) -> Tuple[int, ...]:
         ...
+
+    def __hash__(self):
+        return hash((type(self), self.get_indices()))
     @abc.abstractmethod
     def reindex(self, reindexing):
         ...
@@ -264,6 +268,9 @@ class OutOfPlane(BasicInternalType):
 class TranslatonRotation(BasicInternalType):
     forward_conversion = nput.transrot_vecs
     inverse_conversion = nput.transrot_expansion
+    def __init__(self,  indices: Sequence[int], masses=None):
+        super().__init__(indices)
+        self.masses = masses
     def canonicalize(self):
         return type(self)(np.sort(self.inds))
     def get_carried_atoms(self, context:InternalSpec):
@@ -275,21 +282,29 @@ class TranslatonRotation(BasicInternalType):
                 break
         return moved_indices
     def get_inverse_expansion(self, coords, *, order=None,
-                              context=None, moved_indices=None, extra_atoms=None, **opts):
+                              context=None, moved_indices=None, extra_atoms=None,
+                              masses=None,
+                              **opts):
         if extra_atoms is None:
             if moved_indices is None and context is not None:
                 moved_indices = self.get_carried_atoms(context)
             if moved_indices is not None:
                 extra_atoms = np.setdiff1d(moved_indices, self.inds)
+        if masses is None:
+            masses = self.masses
         return self.inverse_conversion(coords, *self.inds,
                                        order=order,
                                        extra_atoms=extra_atoms,
+                                       masses=masses,
                                        **opts)
 
-InternalCoordinateType.register("orientation")
+@InternalCoordinateType.register("orientation")
 class Orientation(BasicInternalType):
     forward_conversion = nput.orientation_vecs
     inverse_conversion = nput.orientation_expansion
+    def __init__(self,  indices: Sequence[int], masses=None):
+        super().__init__(indices)
+        self.masses = masses
     def canonicalize(self):
         return type(self)((np.sort(self.inds[0]), np.sort(self.inds[1])))
     def get_indices(self):
@@ -313,15 +328,18 @@ class Orientation(BasicInternalType):
                 break
         return moved_indices_left, moved_indices_right
     def get_inverse_expansion(self, coords, *, order=None, moved_indices=None, context=None,
-                              left_extra_atoms=None, right_extra_atoms=None, **opts):
+                              left_extra_atoms=None, right_extra_atoms=None, masses=None, **opts):
         left_extra_atoms, right_extra_atoms = self._prep_left_right_atoms(context, moved_indices, left_extra_atoms, right_extra_atoms)
         if left_extra_atoms is not None:
             left_extra_atoms = np.setdiff1d(left_extra_atoms, self.inds[0])
         if right_extra_atoms is not None:
             right_extra_atoms = np.setdiff1d(right_extra_atoms, self.inds[1])
+        if masses is None:
+            masses = self.masses
         return self.inverse_conversion(coords, *self.inds,
                                        order=order,
                                        left_extra_atoms=left_extra_atoms, right_extra_atoms=right_extra_atoms,
+                                       masses=masses,
                                        **opts)
 
 class InternalSpec:

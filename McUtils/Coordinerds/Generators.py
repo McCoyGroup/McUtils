@@ -133,7 +133,7 @@ def get_fragment_coordinate_system(bond_graph:EdgeGraph,
                     intra_frag_dists.get((i,j), intra_frag_dists.get((j,i)))
                 )
             )
-            for i in range(len(intra_frag_dists))
+            for i in range(len(fragments))
         ]
         added = set()
         for i,j in enumerate(neighbors):
