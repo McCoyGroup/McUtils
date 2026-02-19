@@ -152,8 +152,10 @@ class OptionsMethodDispatch:
         if method is None and self.attributes_map is not None:
             for params, method_name in sorted(
                     self.attributes_map.items(),
-                    key=lambda kt: -len(kt[0])
+                    key=lambda kt: -len(kt[0]) if not isinstance(kt[0], str) else 1
             ):
+                if isinstance(params, str):
+                    params = [params]
                 if params is not None and all(p in opts for p in params):
                     return method_name
 
@@ -180,10 +182,13 @@ class OptionsMethodDispatch:
 
     def resolve(self, method_spec):
         method, opts = self.prep_method_spec(method_spec)
-        if self.allow_custom_methods and callable(method):
+        methods_table = self.load_methods_table()
+        if callable(method) and (
+                self.allow_custom_methods
+                or method in methods_table.values()
+        ):
             return method, opts
 
-        methods_table = self.load_methods_table()
         if (
                 self.methods_enum is not None
                 and not core.is_default(method, allow_None=True)
