@@ -160,20 +160,27 @@ class EdgeGraph:
         else:
             return groups
 
-    def break_bonds(self, bonds, return_subgraphs=True):
-        new_adj = self.graph.copy()
-        for i,j in bonds:
-            new_adj[i, j] = 0
-            new_adj[j, i] = 0
-        ncomp, labels = sparse.csgraph.connected_components(new_adj, directed=False, return_labels=True)
-        _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
-        if return_subgraphs:
-            return [
-                self._take(pos, self.labels, new_adj)
-                for pos in groups
-            ]
+    def break_bonds(self, bonds, return_subgraphs=True, return_single_graph=False):
+        if return_single_graph:
+            bonds = {tuple(sorted(b)) for b in bonds}
+            return type(self)(self.labels,
+                              [b for b in self.edges
+                               if tuple(sorted(b)) not in bonds
+                               ])
         else:
-            return groups
+            new_adj = self.graph.copy()
+            for i,j in bonds:
+                new_adj[i, j] = 0
+                new_adj[j, i] = 0
+            ncomp, labels = sparse.csgraph.connected_components(new_adj, directed=False, return_labels=True)
+            _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
+            if return_subgraphs:
+                return [
+                    self._take(pos, self.labels, new_adj)
+                    for pos in groups
+                ]
+            else:
+                return groups
 
     @classmethod
     def _subgraph_match(cls,
@@ -379,7 +386,10 @@ class EdgeGraph:
             if cur_node < 0:
                 break
             path.append(cur_node)
-        return tuple(reversed(path))
+        if path[-1] != start:
+            return None
+        else:
+            return tuple(reversed(path))
     @classmethod
     def get_longest_path_from_data(cls, shortest_path_data, root=None):
         dist_matrix, predecessors = shortest_path_data

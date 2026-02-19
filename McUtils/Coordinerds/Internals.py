@@ -97,7 +97,7 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def get_indices(self) -> Tuple[int]:
+    def get_indices(self) -> Tuple[int, ...]:
         ...
     @abc.abstractmethod
     def reindex(self, reindexing):
@@ -151,24 +151,48 @@ class BasicInternalType(InternalCoordinateType):
         return self.inds
     def get_dropped_internals(self):
         return [self]
-    def get_carried_atoms(self, context:InternalSpec):
+    def get_carried_atoms(self, context:InternalSpec, max_branching=5):
         subgraph:EdgeGraph = context.get_dropped_internal_bond_graph(self.get_dropped_internals())
         left_atoms = None
         right_atoms = None
+        atom_mapping = {a:i for i,a in enumerate(context.atoms)}
+        inv_mapping = {i:a for a,i in atom_mapping.items()}
+        prev_left = None
+        m = 0
+        start = atom_mapping[self.inds[0]]
+        end = atom_mapping[self.inds[-1]]
         while left_atoms is right_atoms:
             groups = subgraph.get_fragments()
             for g in groups:
-                if self.inds[0] in g:
+                if start in g:
                     left_atoms = g
                     break
             for g in groups:
-                if self.inds[-1] in g:
+                if end in g:
                     right_atoms = g
                     break
             if left_atoms is right_atoms:
-                subpath = subgraph.get_path(self.inds[0], self.inds[-1])
+                subpath = subgraph.get_path(start, end)
+                if subpath is None:
+                    raise ValueError(
+                        f"no path between {start} and {end}, but frags are {groups}"
+                    )
                 n = len(subpath) // 2
-                subgraph = subgraph.break_bonds([(subpath[n], subpath[n+1])])
+                subgraph = subgraph.break_bonds([(subpath[n], subpath[n-1])], return_single_graph=True)
+            if (
+                    prev_left is not None
+                    and left_atoms is not None
+                    and len(left_atoms) == len(prev_left)
+                    and np.allclose(left_atoms, prev_left)
+            ):
+                m += 1
+            else:
+                m = 0
+            if m > max_branching:
+                raise ValueError(f"can't resolve carried atoms on {left_atoms} between {self.inds[0], self.inds[-1]}...")
+            prev_left = left_atoms
+        left_atoms = [inv_mapping[i] for i in left_atoms]
+        right_atoms = [inv_mapping[i] for i in right_atoms]
         return left_atoms, right_atoms
     def get_expansion(self, coords, *, order=None, **opts):
         return self.forward_conversion(coords, *self.inds, order=order, **opts)
@@ -338,6 +362,13 @@ class InternalSpec:
         self._atoms = None
         self._bond_graph = bond_graph
         self._tri_di = triangulation
+    @classmethod
+    def from_zmatrix(cls, zmat, **opts):
+        from .ZMatrices import extract_zmatrix_internals
+        return cls(
+            extract_zmatrix_internals(zmat),
+            **opts
+        )
 
     @property
     def atom_sets(self) -> Tuple[Tuple[int]]:
@@ -356,45 +387,86 @@ class InternalSpec:
         return self._tri_di
     def get_bond_graph(self) -> EdgeGraph:
         if self._bond_graph is None:
-            self._bond_graph = get_internal_bond_graph(self.rad_set, len(self.atoms),
+            self._bond_graph = get_internal_bond_graph(self.rad_set, self.atoms,
                                                        triangles_and_dihedrons=self.get_triangulation())
         return self._bond_graph
-    def get_dropped_internal_bond_graph(self, internals):
+    graph_split_method = 'dists'
+    def get_dropped_internal_bond_graph(self, internals, method=None):
+        if method is None:
+            method = self.graph_split_method
         bg = self.get_bond_graph()
-        cur_bonds = bg.edges
-        core_atoms, sub_triangulation, _ = update_triangulation(
-            self.get_triangulation(),
-            [],
-            [
-                i.get_indices() for i in internals
-                if isinstance(i, (Distance, Angle, Dihedral))
-            ],
-            triangulation_internals=[
-                canonicalize_internal(i)
-                for i in self.rad_set
-            ],
-            return_split=True
-        )
+        cur_bonds = [
+            (bg.labels[i], bg.labels[j])
+            for i,j in bg.edges
+        ]
+        mapping = {a: i for i, a in enumerate(bg.labels)}
+        if method == 'dists':
+            internals = [
+                i for i in internals
+                if isinstance(i, Distance)
+            ]
+            definite_edges = {
+                i.get_indices()
+                for i in self.coords
+                if isinstance(i, Distance) and i not in internals
+            }
+            dropped_atoms = {
+                i
+                for d in internals
+                for i in d.get_indices()
+            }
+            dropped_bonds = [
+                (i,j)
+                for (i,j) in cur_bonds
+                if (i,j) not in definite_edges and (j,i) not in definite_edges
+                    and (i in dropped_atoms or j in dropped_atoms)
+            ]
 
-        target_bonds = [b for b in cur_bonds if all(i in core_atoms for i in b)]
-        kept_bonds = [b for b in cur_bonds if any(i not in core_atoms for i in b)]
+            wtf = bg.break_bonds(
+                [
+                    (mapping[i], mapping[j])
+                    for i,j in dropped_bonds
+                ],
+                return_single_graph=True
+            )
+            return wtf
+        else:
+            core_atoms, sub_triangulation, _ = update_triangulation(
+                self.get_triangulation(),
+                [],
+                [
+                    i.get_indices() for i in internals
+                    if isinstance(i, (Distance, Angle, Dihedral))
+                ],
+                triangulation_internals=[
+                    canonicalize_internal(i)
+                    for i in self.rad_set
+                ],
+                return_split=True
+            )
 
-        if len(target_bonds) == 0:
-            return bg
+            target_bonds = [b for b in cur_bonds if all(i in core_atoms for i in b)]
+            kept_bonds = [b for b in cur_bonds if any(i not in core_atoms for i in b)]
 
-        _, (shapes, funs) = get_internal_distance_conversion(internals,
-                                                             allow_completion=False,
-                                                             missing_val=None,
-                                                             triangles_and_dihedrons=sub_triangulation,
-                                                             return_conversions=True,
-                                                             include_shapes=True,
-                                                             dist_set=target_bonds)
-        target_bonds = [d for d, f in zip(target_bonds, funs) if f is not None]
-        # target_shapes = [d for d, f in zip(shapes, funs) if f is not None]
-        return EdgeGraph(
-            bg.labels,
-            target_bonds + kept_bonds
-        )
+            if len(target_bonds) == 0:
+                return bg
+
+            _, (shapes, funs) = get_internal_distance_conversion(internals,
+                                                                 allow_completion=False,
+                                                                 missing_val=None,
+                                                                 triangles_and_dihedrons=sub_triangulation,
+                                                                 return_conversions=True,
+                                                                 include_shapes=True,
+                                                                 dist_set=target_bonds)
+            target_bonds = [d for d, f in zip(target_bonds, funs) if f is not None]
+            # target_shapes = [d for d, f in zip(shapes, funs) if f is not None]
+            target_bonds = [(mapping[i], mapping[j]) for i, j in target_bonds]
+            kept_bonds = [(mapping[i], mapping[j]) for i, j in kept_bonds]
+
+            return EdgeGraph(
+                bg.labels,
+                target_bonds + kept_bonds
+            )
 
 
     def get_direct_derivatives(self, coords, order=1,
@@ -506,6 +578,7 @@ class InternalSpec:
                       return_inverse=False,
                       remove_translation_rotations=True,
                       orthogonalize=True,
+                      # mass_weighted=True,
                       **opts) -> List[np.ndarray]:
         coords = np.asanyarray(coords)
         # base_dim = coords.ndim - 2
@@ -522,11 +595,24 @@ class InternalSpec:
                 terms = return_inverse
             else:
                 terms = None
+            # if mass_weighted and self.masses is not None:
+            #     g_matrix = np.diag(np.sqrt(self.masses))
+            #     coords = np.moveaxis(
+            #         np.tensordot(coords, g_matrix, axes=[-2, 0]),
+            #         -1, -2
+            #     )
             base_inverses = self.get_direct_inverses(coords,
                                                      order=1,
                                                      combine_expansions=not orthogonalize,
                                                      terms=terms,
                                                      **opts)
+            # if mass_weighted and self.masses is not None:
+            #     g_matrix = np.diag(np.repeat(1/np.sqrt(self.masses), 3))
+            #     #TODO: if we ever return base_inverses[0] we need to remove mass weighting
+            #     base_inverses = [base_inverses[0]] + [
+            #         np.tensordot(b, g_matrix, axes=[-1, 0])
+            #         for b in base_inverses[1:]
+            #     ]
             if orthogonalize:
                 return self.orthogonalize_transformations(
                     expansion, base_inverses,
@@ -545,11 +631,13 @@ class InternalSpec:
 
     def get_direct_inverses(self, coords, order=1, terms=None, combine_expansions=True, **opts) -> List[np.ndarray]:
         coords = np.asanyarray(coords)
-        expansions = [
-            c.get_inverse_expansion(coords, order=order, context=self, **opts)
-            for i,c in enumerate(self.coords)
-            if (terms is None or i in terms)
-        ]
+
+        # from ...Profilers import Timer
+        expansions = []
+        for i, c in enumerate(self.coords):
+            if (terms is None or i in terms):
+                # with Timer(str(c)):
+                expansions.append(c.get_inverse_expansion(coords, order=order, context=self, **opts))
         if combine_expansions:
             expansions = nput.combine_coordinate_inverse_expansions(expansions, order=order)
         return expansions
@@ -1338,7 +1426,6 @@ def _permute_dihed_data(terms, perm):
     return new
 def _validate_dihed_triangulation(mod_sets, key, internals, adding=None):
     for a in mod_sets[key]:
-        print(key, mod_sets[key])
         idx = nput.dihedron_property_specifiers(a)["coord"]
         c = canonicalize_internal(tuple(key[i] for i in idx))
         if len(c) == 4 and c not in internals:
@@ -2167,15 +2254,19 @@ def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure
                 return False, (k,t)
     return True, None
 
-def get_internal_bond_graph(internals, natoms=None, triangles_and_dihedrons=None, dist_set=None):
+def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None, dist_set=None):
     dist_set, funs = get_internal_distance_conversion(internals,
-                                                   allow_completion=False,
-                                                   missing_val=None,
-                                                   triangles_and_dihedrons=triangles_and_dihedrons,
-                                                   return_conversions=True,
-                                                   dist_set=dist_set)
+                                                      allow_completion=False,
+                                                      missing_val=None,
+                                                      triangles_and_dihedrons=triangles_and_dihedrons,
+                                                      return_conversions=True,
+                                                      dist_set=dist_set)
     edges = [d for d, f in zip(dist_set, funs) if f is not None]
-    if natoms is None:
-        natoms = len(np.unique(np.concatenate(internals)))
-    return EdgeGraph(np.arange(natoms), edges)
+    if atoms is None:
+        atoms = np.unique(np.concatenate(internals))
+
+    mapping = {a:i for i,a in enumerate(atoms)}
+    edges = [(mapping[i], mapping[j]) for i,j in edges]
+
+    return EdgeGraph(atoms, edges)
 

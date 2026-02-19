@@ -8,6 +8,7 @@ from . import PermutationOps as perms, vec_tensordiag, identity_tensors
 from . import VectorOps as vec_ops
 from . import SetOps as set_ops
 from .Misc import is_numeric, is_zero
+from .Options import Options
 
 __all__ = [
     "nca_op_deriv",
@@ -857,6 +858,8 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None):
 
     a = vec_expansion[0]
     r = np.linalg.norm(a, axis=-1)
+    if r < Options.zero_threshold:
+        raise ValueError("can't get derivatives of zero vector")
     a_expansion = [a, vec_ops.identity_tensors(a.shape[:-1], a.shape[-1])]
 
     if not is_numeric(order):

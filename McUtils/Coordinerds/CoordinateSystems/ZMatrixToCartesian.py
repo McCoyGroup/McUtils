@@ -30,6 +30,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                      return_derivs=False,
                      order=None,
                      check_overlapping=False,
+                     check_ordering=False,
                      use_direct_expansions=False,
                      orthogonalize_derivatives=True,
                      spec=None,
@@ -88,13 +89,26 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         if ordering.ndim == 2:
             ordering = np.repeat(ordering[np.newaxis], sysnum, axis=0)
 
+        if check_ordering:
+            from ..ZMatrices import validate_zmatrix
+            for o in ordering:
+                validate_zmatrix(o)
+
+
         if ordering.shape[-1] > 3:
             atom_ordering = ordering[:, :, 0]
             ordering = ordering[:, 1:, 1:]
         else:
             atom_ordering = None
 
-        total_points = np.empty((sysnum, coordnum+1, 3))
+        #TODO: figure out what else I changed that required this...
+        reord = np.argsort(atom_ordering, axis=-1)
+        ordering = np.array([
+            r[o]
+            for o, r in zip(ordering, reord)
+        ])
+
+        total_points = np.zeros((sysnum, coordnum+1, 3))
         if return_derivs:
             if order is not None:
                 return_deriv_order = order
@@ -229,7 +243,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                 total_points[:, i+1] = ref_points_1
 
         if atom_ordering is not None:
-            rev_ord = atom_ordering#np.argsort(atom_ordering, axis=1)
+            rev_ord = np.argsort(atom_ordering, axis=1)
             total_points = total_points[np.arange(len(atom_ordering))[:, np.newaxis], rev_ord] #wat?
 
         converter_opts = dict(use_rad=use_rad, ordering=ordering)
