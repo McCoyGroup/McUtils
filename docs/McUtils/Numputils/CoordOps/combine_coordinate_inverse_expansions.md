@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.CoordOps.combine_coordinate_inverse_expansions">combine_coordinate_inverse_expansions</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2965)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2965?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2972)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2972?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ combine_coordinate_inverse_expansions(expansions, order=None, base_dim=None, bas
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/combine_coordinate_inverse_expansions.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/combine_coordinate_inverse_expansions.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2965?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2972?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

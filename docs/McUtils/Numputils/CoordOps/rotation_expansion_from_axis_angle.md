@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.CoordOps.rotation_expansion_from_axis_angle">rotation_expansion_from_axis_angle</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2522?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0.0, axis_ord
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/rotation_expansion_from_axis_angle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/rotation_expansion_from_axis_angle.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2515?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2522?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
