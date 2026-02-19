@@ -61,6 +61,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
     def convert(self, coords, *, ordering, use_rad=True, return_derivs=None, order=None,
                 strip_embedding=False,
                 derivative_method='new',
+                validate=True,
                 **kw):
         """The ordering should be specified like:
 
@@ -84,6 +85,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         :return: z-matrix coords
         :rtype: np.ndarray
         """
+        from ..ZMatrices import validate_zmatrix
 
 
         if return_derivs is None and order is not None and order > 0:
@@ -91,6 +93,8 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
 
         ncoords = len(coords)
         orig_ol = ZMatrixCoordinates.canonicalize_order_list(ncoords, ordering)
+        if validate:
+            validate_zmatrix(orig_ol)
         ol = orig_ol
         nol = len(ol)
         ncol = len(ol[0])
@@ -103,6 +107,9 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
         if multiconfig:
             ol = ZMatrixCoordinates.tile_order_list(ol, ncoords)
             mc_ol = ol.copy()
+
+        if validate:
+            validate_zmatrix(ol)
 
         # we define an order map that we'll index into to get the new indices for a
         # given coordinate
@@ -426,16 +433,21 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
             origins = coords[ol[0, 1]]
             axes = np.array([coords[ol[0, 0]] - origins, coords[ol[1, 0]] - origins])
 
-        ol = orig_ol
-        om = om - 1
-        if ncol == 5:
-            ordering = np.array([
-                        np.argsort(ol[:, 0]), om[ol[:, 1]], om[ol[:, 2]], om[ol[:, 3]], ol[:, 4]
-                    ]).T
-        else:
-            ordering = np.array([
-                    np.argsort(ol[:, 0]), om[ol[:, 1]], om[ol[:, 2]], om[ol[:, 3]]
-                ]).T
+        ## ordering fixed in ZMat -> Cartesian
+        ## so we can fix it here too, now
+        # print("~~", ordering[15:20])
+        # ol = orig_ol
+        # om = om - 1
+        # if ncol == 5:
+        #     ordering = np.array([
+        #                 np.argsort(ol[:, 0]), om[ol[:, 1]], om[ol[:, 2]], om[ol[:, 3]], ol[:, 4]
+        #             ]).T
+        # else:
+        #     ordering = np.array([
+        #             np.argsort(ol[:, 0]), om[ol[:, 1]], om[ol[:, 2]], om[ol[:, 3]]
+        #         ]).T
+        # if validate:
+        #     validate_zmatrix(ordering)
         opts = dict(use_rad=use_rad, ordering=ordering, origins=origins, axes=axes)
 
         # if we're returning derivs, we also need to make sure that they're ordered the same way the other data is...
