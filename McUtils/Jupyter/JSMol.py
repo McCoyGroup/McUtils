@@ -107,6 +107,7 @@ class JSMol:
                      recording_options=None,
                      create_applet_loader=None,
                      style=None,
+                     autobond=False,
                      **attrs):
             if suffix is None:
                 suffix = str(uuid.uuid4())[:6].replace("-", "")
@@ -154,6 +155,8 @@ class JSMol:
 
             self.load_script = load_script
             self.width, self.height = width, height
+            self.model_file = model_file
+            self.autobond = autobond
             if create_applet_loader:
                 elems = self.create_applet(model_file, include_script_interface=include_script_interface) + list(rest)
             else:
@@ -180,15 +183,18 @@ class JSMol:
             width, height = self.width, self.height
             load_script = self.prep_load_script()
             if model_file is None:
-                loader = f"jmolApplet([{width}, {height}], 'load {model_file}; {load_script}', '{targ}')"
+                load_command = f"'load {model_file};'"
             elif (
                     model_file.startswith("https://")
                     or model_file.startswith("file://")
                     or model_file.startswith("http://")
             ):
-                loader = f"jmolApplet([{width}, {height}], 'load {model_file}; {load_script}', '{targ}')"
+                load_command = f"'load {model_file};'"
             else:
-                loader = f"jmolAppletInline([{width}, {height}], `{model_file}`, '{load_script}', '{targ}')"
+                load_command = f"""`load DATA "inline"\n {model_file}\n END "inline";`"""
+            if not self.autobond:
+                load_command = "'set autobond OFF;' +" + load_command
+            loader = f"""jmolApplet([{width}, {height}], {load_command} + '{load_script}', '{targ}')"""
 
             kill_id = "tmp-" + str(uuid.uuid4())[:10]
             if include_script_interface:
