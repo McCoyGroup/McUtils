@@ -37,6 +37,7 @@ def center_of_mass(coords, masses=None):
 
     if masses is None:
         masses = np.ones(coords.shape[-2])
+    masses = np.asanyarray(masses)
 
     masses = masses.copy()
     masses[masses < 0] = 0
@@ -59,6 +60,7 @@ def inertia_tensors(coords, masses=None, mass_weighted=False, return_com=False):
 
     if masses is None:
         masses = np.ones(coords.shape[-2])
+    masses = np.asanyarray(masses)
 
     com = center_of_mass(coords, masses)
     coords = coords - com[..., np.newaxis, :]
@@ -161,6 +163,8 @@ def moments_of_inertia(coords, masses=None, force_rotation=True, return_com=Fals
     :rtype:
     """
 
+    coords = np.asanyarray(coords)
+
     if coords.ndim == 1:
         raise ValueError("can't get moment of inertia for single point (?)")
     elif coords.ndim == 2:
@@ -193,9 +197,11 @@ def moments_of_inertia(coords, masses=None, force_rotation=True, return_com=Fals
     if multiconfig:
         moms = moms.reshape(extra_shape + (3,))
         axes = axes.reshape(extra_shape + (3, 3))
+        com = com.reshape(extra_shape + (3,))
     else:
         moms = moms[0]
         axes = axes[0]
+        com = com[0]
 
     if return_com:
         return (moms, axes), com
@@ -590,6 +596,7 @@ def _prep_eckart_data(ref, coords, masses, in_paf=False, sel=None):
 
     if masses is None:
         masses = np.ones(coords.shape[-2])
+    masses = np.asanyarray(masses)
 
     if coords.ndim == 2:
         coords = np.broadcast_to(coords, (1,) + coords.shape)
