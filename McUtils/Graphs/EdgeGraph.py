@@ -541,7 +541,7 @@ class EdgeGraph:
                 validate=validate
             )
 
-    def get_canonical_fragments(self, ordering=None):
+    def get_canonical_fragments(self, ordering=None, validate=False):
         if ordering is None:
             ordering = np.arange(len(self.labels))
         fragment_map = {}
@@ -555,6 +555,12 @@ class EdgeGraph:
             else: # time to branch
                 for f in cur_frag:
                     fragment_map[f] = (branch_point, cur_frag)
+                if (
+                        validate
+                        and branch_point is not None
+                        and any(i == j for i, j in itertools.combinations(branch_point, 2))
+                ):
+                    raise ValueError(f"bad attachment point {branch_point} for {cur_frag}")
                 branches.append(
                     (branch_point, cur_frag)
                 )
@@ -575,15 +581,25 @@ class EdgeGraph:
                                 branch_point = (i, fragment_i[pos_i - 1], branch_i[0])
                         else:
                             if branch_i is None:
-                                branch_point = (i, fragment_i[pos_i - 1], fragment_i[pos_i - 2])
+                                branch_point = (i, -1, -2)
                             else:
                                 j = branch_i[0]
                                 branch_j, fragment_j = fragment_map[j]
                                 if branch_j is None:
                                     pos_j = fragment_j.index(j)
                                     if pos_j > 0:
+                                        if (
+                                                validate
+                                                and fragment_j[pos_j - 1] == i
+                                        ):
+                                            raise ValueError(f"bad pos for {i} in {fragment_j} ({pos_j - 1})")
                                         branch_point = (i, j, fragment_j[pos_j - 1])
                                     elif len(fragment_j) > 1:
+                                        if (
+                                                validate
+                                                and fragment_j[pos_j + 1] == i
+                                        ):
+                                            raise ValueError(f"bad pos for {i} in {fragment_j} ({pos_j + 1})")
                                         branch_point = (i, j, fragment_j[pos_j + 1])
                                     else:
                                         branch_point = (i, j, -1)
@@ -592,6 +608,12 @@ class EdgeGraph:
                         break
                 else:
                     branch_point = None
+        if (
+            validate
+            and branch_point is not None
+            and any(i==j for i,j in itertools.combinations(branch_point, 2))
+        ):
+            raise ValueError(f"bad attachment point {branch_point} for {cur_frag}")
         branches.append((branch_point, cur_frag))
         return branches
 

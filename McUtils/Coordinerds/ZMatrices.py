@@ -720,6 +720,13 @@ def validate_zmatrix(ordering,
                 any(i > n for i in row)
                 or any(i > row[0] for i in row[1:])
                 or len(set(row)) < len(row)
+                or (
+                    ensure_nonnegative and (
+                        (n > 3 and any(i < 0 for i in row[1:]))
+                        or (n > 2 and any(i < 0 for i in row[1:2]))
+                        or (n > 1 and any(i < 0 for i in row[1:3]))
+                    )
+                )
         ):
             reason = f"Z-matrix line {n} invalid: {row}"
             if raise_exception:
@@ -767,7 +774,15 @@ def center_bound_zmatrix(n, center=-1):
         for i in range(n)
     ]
 
-def attached_zmatrix_fragment(n, fragment, attachment_points):
+def attached_zmatrix_fragment(n, zm, fragment, attachment_points):
+    _ = []
+    order = [f[0] for f in zm]
+    for a in attachment_points:
+        if a < 0:
+            if len(order) >= (-a):
+                a = order[a]
+        _.append(a)
+    attachment_points = _
     return [
         [attachment_points[-r-1] if r < 0 else n+r for r in row]
         for row in fragment
@@ -805,6 +820,7 @@ def functionalized_zmatrix(
         single_atoms:list[int]=None, # individual components, embedding doesn't matter
         methyl_positions:list[int]=None, # all bonds attached to central atom, angles relative to eachother
         ethyl_positions:list[int]=None, # all bonds attached to central atom, angles relative to eachother
+        validate=False
 ):
     if nput.is_numeric(base_zm):
         zm = chain_zmatrix(base_zm)
@@ -828,9 +844,14 @@ def functionalized_zmatrix(
             raise ValueError(f"error attaching at {attachment_points} with previous atoms {prev_atoms}")
         zm = zm + attached_zmatrix_fragment(
             len(zm),
+            zm,
             fragment,
             attachment_points
         )
+        if validate:
+            is_valid, reason = validate_zmatrix(zm, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"attached zmatrix invalid after adding to {attachment_points} with {fragment} ({reason}) in {zm}")
     if single_atoms is not None:
         #TODO: make this bond graph relevant
         for atom in single_atoms:
@@ -865,6 +886,7 @@ def functionalized_zmatrix(
             else:
                 zm = zm + attached_zmatrix_fragment(
                     len(zm),
+                    zm,
                     [[0, -1, -2, -3]],
                     [
                         (
@@ -882,6 +904,7 @@ def functionalized_zmatrix(
         for atom in methyl_positions:
             zm = zm + attached_zmatrix_fragment(
                 len(zm),
+                zm,
                 [
                     [0, -1, -2, -3],
                     [1, -1,  0, -2],
@@ -903,6 +926,7 @@ def functionalized_zmatrix(
         for atom in ethyl_positions:
             zm = zm + attached_zmatrix_fragment(
                 len(zm),
+                zm,
                 [
                     [0, -1, -2, -3],
                     [1, -1,  0, -2]
@@ -1285,7 +1309,8 @@ def canonical_fragment_zmatrix(canonical_framents, validate_additions=False):
             if len(attachment_points) > 0:
                 backbone = functionalized_zmatrix(
                     backbone,
-                    attachment_points
+                    attachment_points,
+                    validate=validate_additions
                 )
                 attachment_points = []
             n = len(backbone)
@@ -1299,9 +1324,12 @@ def canonical_fragment_zmatrix(canonical_framents, validate_additions=False):
                 (bb, submat)
             )
     if len(attachment_points) > 0:
+        # for a in attachment_points:
+        #     print("???", a)
         backbone = functionalized_zmatrix(
             backbone,
-            attachment_points
+            attachment_points,
+            validate=validate_additions
         )
 
     if validate_additions:

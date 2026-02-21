@@ -5,11 +5,13 @@ __all__ = [
 ]
 
 import base64
+import itertools
 import uuid
 
 import numpy as np, io, os
 from .. import Numputils as nput
 from .. import Devutils as dev
+from ..Data import AtomData
 
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule
@@ -47,6 +49,10 @@ class RDMolecule(ExternalMolecule):
     @property
     def coords(self):
         return self.mol.GetPositions()
+    @coords.setter
+    def coords(self, coords):
+        coords = np.asanyarray(coords)
+        self.mol.SetPositions(coords)
     @property
     def rings(self):
         return self.rdmol.GetRingInfo().AtomRings()
@@ -81,10 +87,18 @@ class RDMolecule(ExternalMolecule):
             for at in self.rdmol.GetAtoms()
         ]
 
+    class NullContext:
+        def __enter__(self):
+            ...
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            ...
     @classmethod
-    def quiet_errors(cls):
+    def quiet_errors(cls, verbose=False):
         from rdkit.rdBase import BlockLogs
-        return BlockLogs()
+        if verbose:
+            return cls.NullContext()
+        else:
+            return BlockLogs()
 
     @classmethod
     def chem_api(cls):
@@ -132,7 +146,7 @@ class RDMolecule(ExternalMolecule):
 
         no_confs = False
         try:
-            conf_0 = rdmol.GetConformer(0)
+            conf_0 = rdmol.GetConformer(conf_id)
         except ValueError:
             no_confs = True
 
@@ -303,81 +317,87 @@ class RDMolecule(ExternalMolecule):
         mol = mol.GetMol()
         cls._prep_mol(mol)
         if implicit_hydrogen_method is None:
-            implicit_hydrogen_method = 'align' if num_confs is not None else 'builtin'
-        if add_implicit_hydrogens and implicit_hydrogen_method == 'align':
+            implicit_hydrogen_method = cls.implicit_hydrogen_to_conformer_method
+            if (
+                    implicit_hydrogen_method != "initial"
+                    and num_confs is not None
+            ):
+                implicit_hydrogen_method = 'align'
+        if add_implicit_hydrogens and implicit_hydrogen_method != "builtin":
+            old_pos = {}
+            cur_map_nums = [a.GetAtomMapNum() for a in mol.GetAtoms()]
+            for i,a in enumerate(mol.GetAtoms()):
+                a.SetAtomMapNum(i+1)
             mol = Chem.AddHs(mol, explicitOnly=False)
-            dm = nput.distance_matrix(coords)
+            for n,a in enumerate(mol.GetAtoms()):
+                i = a.GetAtomMapNum()
+                if i > 0:
+                    a.SetAtomMapNum(cur_map_nums[i-1])
+                    old_pos[n] = i - 1
+
             if confgen_opts is None:
                 confgen_opts = {}
             if take_min is None:
                 take_min = num_confs is None
             if num_confs is None:
                 num_confs = 1
-
-            conf_ids = cls.generate_conformers_for_mol(
-                mol,
-                distance_constraints={
-                    (i, j): (dm[i, j]-distance_matrix_tol, dm[i, j]+distance_matrix_tol)
-                    for i in range(len(coords))
-                    for j in range(i + 1, len(coords))
-                },
+            base_opts = dict(
                 num_confs=num_confs,
                 optimize=optimize,
                 take_min=take_min,
-                force_field_type=force_field_type,
-                **dict(opts, **confgen_opts)
+                force_field_type=force_field_type
+            ) | opts | confgen_opts
+            if implicit_hydrogen_method == 'align':
+                dm = nput.distance_matrix(coords)
+                distance_constraints = {
+                    (old_pos[i], old_pos[j]): (dm[i, j] - distance_matrix_tol, dm[i, j] + distance_matrix_tol)
+                    for i in range(len(coords))
+                    for j in range(i + 1, len(coords))
+                }
+                base_opts["distance_constraints"] = distance_constraints
+            elif implicit_hydrogen_method == "initial":
+                base_opts["initial_coordinates"] = {
+                    old_pos[i]:c
+                    for i,c in enumerate(coords)
+                }
+            else:
+                raise NotImplementedError(f"unknown initial hydrogen method {implicit_hydrogen_method}")
+
+            conf_ids = cls.generate_conformers_for_mol(
+                mol,
+                **base_opts
             )
             if nput.is_int(conf_ids):
                 try:
                     conf = mol.GetConformer(conf_ids)
                 except ValueError:
                     import pprint
-                    settings = pprint.pformat(dict(
-                        distance_constraints={
-                            (i, j): round(float(dm[i, j]), 3)
-                            for i in range(len(coords))
-                            for j in range(i + 1, len(coords))
-                        },
-                        num_confs=num_confs,
-                        optimize=optimize,
-                        take_min=take_min,
-                        force_field_type=force_field_type,
-                        **dict(opts, **confgen_opts)
-                    ))
+                    settings = pprint.pformat(base_opts)
                     smi = Chem.MolToSmiles(mol, canonical=False)
                     raise ValueError(f"failed to build conformer {conf_ids} for {smi} with settings {settings}")
-                coords2 = conf.GetPositions()
-                coords3 = cls._align_new_conf_coords(mol, coords, coords2)
-                conf.SetPositions(coords3)
+                if implicit_hydrogen_method == 'align':
+                    coords2 = conf.GetPositions()
+                    coords3 = cls._align_new_conf_coords(mol, coords, coords2)
+                    conf.SetPositions(coords3)
                 return cls.from_rdmol(mol, conf_id=conf_ids, charge=charge, guess_bonds=guess_bonds,
                                       sanitize=sanitize)
             else:
                 mols = []
                 for i in conf_ids:
-                    try:
-                        conf = mol.GetConformer(i)
-                    except ValueError:
-                        continue
-                    coords2 = conf.GetPositions()
-                    conf.SetPositions(cls._align_new_conf_coords(mol, coords, coords2))
+                    if implicit_hydrogen_method == 'align':
+                        try:
+                            conf = mol.GetConformer(i)
+                        except ValueError:
+                            continue
+                        coords2 = conf.GetPositions()
+                        conf.SetPositions(cls._align_new_conf_coords(mol, coords, coords2))
                     mols.append(
                         cls.from_rdmol(mol, conf_id=i, charge=charge, guess_bonds=guess_bonds,
                                        sanitize=sanitize)
                     )
                 if len(mols) == 0:
                     import pprint
-                    settings = pprint.pformat(dict(
-                        distance_constraints={
-                            (i, j): round(float(dm[i, j]), 3)
-                            for i in range(len(coords))
-                            for j in range(i + 1, len(coords))
-                        },
-                        num_confs=num_confs,
-                        optimize=optimize,
-                        take_min=take_min,
-                        force_field_type=force_field_type,
-                        **dict(opts, **confgen_opts)
-                    ))
+                    settings = pprint.pformat(dict(base_opts))
                     smi = Chem.MolToSmiles(mol, canonical=False)
                     raise ValueError(f"failed to build conformers {conf_ids} for {smi} with settings {settings}")
                 return mols
@@ -601,6 +621,119 @@ class RDMolecule(ExternalMolecule):
                                                   **mol_opts
                                                   )
 
+    default_fragment_placement_method = 'centroid'
+    different_fragment_embedding_distance = 0
+    @classmethod
+    def _set_fragment_centroids(cls, frag_inds, frag_atoms, frag_bonds, frag_coord_sets, frag_positions, min_dist=None):
+        if min_dist is None:
+            min_dist = cls.different_fragment_embedding_distance
+        masses = [[AtomData[a, "Mass"] for a in fa] for fa in frag_atoms]
+        # align axes by default
+        conf_sets = []
+        disp_vec = np.array([[0, 0, min_dist]])
+        remapping = np.argsort(np.concatenate(frag_inds))
+        for frag_coords in frag_coord_sets:
+            cur_mass = masses[0]
+            cur_coords = frag_coords[0]
+            for m,c in zip(masses[1:], frag_coords[1:]):
+                if len(cur_coords) == 1:
+                    cur_com = cur_coords[0]
+                    cur_axes = np.eye(3)
+                else:
+                    (_, cur_axes), cur_com = nput.moments_of_inertia(cur_coords, cur_mass, return_com=True)
+                if len(frag_coords) == 1:
+                    f_com = frag_coords[0]
+                    f_axes = np.eye(3)
+                else:
+                    (_, f_axes), f_com = nput.moments_of_inertia(c, m, return_com=True)
+                new_coords = (
+                        (c - f_com[np.newaxis]) @ f_axes
+                        + disp_vec
+                ) @ cur_axes.T + cur_com[np.newaxis]
+                cur_mass = np.concatenate([cur_mass, m])
+                cur_coords = np.concatenate([cur_coords, new_coords], axis=0)
+            conf_sets.append(cur_coords[remapping, :])
+        return conf_sets
+    @classmethod
+    def _set_fragment_positions(cls, frag_inds, frag_atoms, frag_bonds,
+                                frag_coord_sets,
+                                frag_positions,
+                                use_actual=False):
+        # align axes by default
+        conf_sets = []
+        remapping = np.argsort(np.concatenate(frag_inds))
+        masses = [[AtomData[a, "Mass"] for a in fa] for fa in frag_atoms]
+        for frag_coords in frag_coord_sets:
+            cur_coords = None
+            # ref = list(frag_positions[0].values())[0]
+            for m,x,c in zip(masses, frag_positions, frag_coords):
+                subc = [c[og] for og in x.keys()]
+                m = [m[og] for og in x.keys()]
+                targ = list(x.values())
+                if len(targ) == 1:
+                    dx = targ[0] - subc[0]
+                    new_coords = c + dx[np.newaxis]
+                else:
+                    alignment = nput.eckart_embedding(
+                        targ, subc, m
+                    )
+                    new_coords = (
+                        # embed new coords in the original frame
+                            (c - alignment.coord_data.com[np.newaxis])
+                            @ alignment.coord_data.axes
+                            @ alignment.rotations
+                            @ alignment.reference_data.axes.T
+                            + alignment.reference_data.com[np.newaxis]
+                    )
+                    if use_actual:
+                        for og, pos in x.items():
+                            new_coords[og] = pos
+                if cur_coords is None:
+                    cur_coords = new_coords
+                else:
+                    cur_coords = np.concatenate([cur_coords, new_coords], axis=0)
+            conf_sets.append(cur_coords[remapping, :])
+        return conf_sets
+
+    @classmethod
+    def _centroid_frag_dists(cls, mol, graph, fragments, min_dist=None):
+        from ..Graphs import EdgeGraph
+        graph: EdgeGraph
+        centroids = [
+            graph.take(f).get_centroid(check_fragments=False)
+            for f in fragments
+        ]
+        points = [
+            (fragments[i][centroids[i]], fragments[j][centroids[j]])
+            for i,j in itertools.combinations(range(len(centroids)), 2)
+        ]
+        return cls._connection_point_frag_distances(
+            mol,
+            points,
+            min_dist=min_dist
+        )
+    @classmethod
+    def _take_submol(cls, atoms, bonds, inds):
+        Chem = cls.allchem_api()
+        mol = Chem.EditableMol(Chem.Mol())
+        bond_map = {}
+        for b in bonds:
+            i, j = (b.GetBeginAtomIdx(), b.GetEndAtomIdx())
+            if i not in bond_map:
+                bond_map[i] = {}
+            bond_map[i][j] = b
+            # if j not in bond_map:
+            #     bond_map[j] = {}
+            # bond_map[j][i] = b
+        remapping = {i:j for j,i in enumerate(inds)}
+        for i in inds:
+            mol.AddAtom(atoms[i])
+        for i in inds:
+            for j,b in bond_map.get(i, {}).items():
+                if j in inds:
+                    mol.AddBond(remapping[b.GetBeginAtomIdx()], remapping[b.GetEndAtomIdx()], b.GetBondType())
+        mol.CommitBatchEdit()
+        return mol.GetMol()
     @classmethod
     def generate_conformers_for_mol(cls, mol,
                                     *,
@@ -610,46 +743,180 @@ class RDMolecule(ExternalMolecule):
                                     force_field_type='mmff',
                                     add_implicit_hydrogens=False,
                                     distance_constraints=None,
+                                    initial_coordinates=None,
+                                    fragment_placement_method=None,
+                                    fragments=None,
+                                    embedding_mol=None,
+                                    verbose=False,
                                     **opts
                                     ):
 
         AllChem = cls.allchem_api()
+        if embedding_mol is None:
+            embedding_mol = AllChem.AddHs(mol, explicitOnly=not add_implicit_hydrogens)
 
-        AllChem.AddHs(mol, explicitOnly=not add_implicit_hydrogens)
+        if fragments is None:
+            fragments = cls.get_mol_edge_graph(mol).get_fragments()
+
+        if len(fragments) > 1:
+            if fragment_placement_method is None:
+                if initial_coordinates is None:
+                    fragment_placement_method = cls.default_fragment_placement_method
+                else:
+                    fragment_placement_method = cls._set_fragment_positions
+            if fragment_placement_method == "centroid":
+                fragment_placement_method = cls._set_fragment_centroids
+            elif not callable(fragment_placement_method):
+                raise NotImplementedError(
+                    f"unhandled fragment embedding method {fragment_placement_method}")
+            subatoms = []
+            subbonds = []
+            subconfs = []
+            subpos = []
+            single = False
+            mol_atoms = list(mol.GetAtoms())
+            mol_bonds = list(mol.GetBonds())
+            for frag in fragments:
+                frag_mol = cls._take_submol(mol_atoms, mol_bonds, frag)
+                cls._prep_mol(frag_mol)
+                if distance_constraints is not None:
+                    raise NotImplementedError("adding per fragment distance constraints still required")
+                if initial_coordinates is not None:
+                    frag_coords = {
+                        n: initial_coordinates[i]
+                        for n, i in enumerate(frag)
+                        if i in initial_coordinates
+                    }
+                else:
+                    frag_coords = None
+                subpos.append(frag_coords)
+                frag_set = cls.generate_conformers_for_mol(
+                    frag_mol,
+                    num_confs=num_confs,
+                    optimize=optimize,
+                    take_min=take_min,
+                    force_field_type=force_field_type,
+                    add_implicit_hydrogens=False,
+                    verbose=verbose,
+                    fragments=[list(range(len(frag)))],
+                    embedding_mol=frag_mol,
+                    embed_fragments_separately=False,
+                    initial_coordinates=frag_coords,
+                    **opts
+                )
+                single = nput.is_int(frag_set)
+                if single:
+                    frag_set = [frag_set]
+                subatoms.append(
+                    [a.GetSymbol() for a in frag_mol.GetAtoms()]
+                )
+                subbonds.append(
+                    [
+                        (bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
+                        for bond in frag_mol.GetBonds()
+                    ]
+                )
+                subconfs.append(
+                    [
+                        frag_mol.GetConformer(i).GetPositions()
+                        for i in frag_set
+                    ]
+                )
+
+            coords = fragment_placement_method(
+                fragments,
+                subatoms,
+                subbonds,
+                list(zip(*subconfs)),
+                subpos
+            )
+
+            conf_ids = list(range(len(coords)))
+            for i,c in enumerate(coords):
+                conf = AllChem.Conformer(len(c))
+                conf.SetPositions(np.asanyarray(c))
+                conf.SetId(i)
+                mol.AddConformer(conf)
+            if single:
+                conf_ids = conf_ids[0]
+            return conf_ids
+
+        if embedding_mol is None:
+            embedding_mol = mol
+
 
         params = cls.get_confgen_opts(**opts)
         if distance_constraints is not None:
             if hasattr(distance_constraints, 'items'):
-                distance_constraints = distance_constraints.items()
-            if nput.is_numeric_array_like(distance_constraints):
-                bmat = np.array(distance_constraints)
+                distance_constraints = list(distance_constraints.items())
+            if len(distance_constraints) > 0:
+                if (
+                        len(distance_constraints) == len(mol.GetAtoms())
+                        and nput.is_numeric_array_like(distance_constraints, 2)
+                        and len(distance_constraints[0]) == len(distance_constraints)
+                ):
+                    bmat = np.array(distance_constraints)
+                else:
+                    cls._prep_mol(mol)
+                    bmat = AllChem.GetMoleculeBoundsMatrix(mol)
+                    for (i, j), (min_dist, max_dist) in distance_constraints:
+                        if j > i: i,j = j,i
+                        if max_dist is None or max_dist < 0:
+                            bmat[i, j] = min_dist
+                            if bmat[j, i] < min_dist:
+                                bmat[j, i] += min_dist
+                        elif min_dist is None or min_dist < 0:
+                            bmat[j, i] = max_dist
+                            if bmat[i, j] > max_dist:
+                                bmat[i, j] = max_dist - .05
+                        else:
+                            if max_dist < min_dist: min_dist, max_dist = max_dist, min_dist
+                            bmat[i, j] = min_dist
+                            bmat[j, i] = max_dist
+                params.SetBoundsMat(bmat)
+
+        if initial_coordinates is not None:
+            from rdkit.Geometry.rdGeometry import Point3D
+            if not isinstance(initial_coordinates, dict):
+                initial_coordinates = {
+                    i:Point3D(*c)
+                    for i,c in enumerate(initial_coordinates)
+                }
             else:
-                cls._prep_mol(mol)
-                bmat = AllChem.GetMoleculeBoundsMatrix(mol)
-                for (i, j), (min_dist, max_dist) in distance_constraints:
-                    if j > i: i,j = j,i
-                    if max_dist < min_dist: min_dist, max_dist = max_dist, min_dist
-                    bmat[i, j] = min_dist
-                    bmat[j, i] = max_dist
-            params.SetBoundsMat(bmat)
-        try:
-            # with OutputRedirect():
-            with cls.quiet_errors():
-                conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=params)
-        except AllChem.rdchem.MolSanitizeException:
-            conformer_set = None
-            cls._prep_mol(mol)
-        if conformer_set is None:
-            params.embedFragmentsSeparately = False
-            # with OutputRedirect():
-            with cls.quiet_errors():
-                conformer_set = AllChem.EmbedMultipleConfs(mol, numConfs=num_confs, params=params)
+                initial_coordinates = {
+                    i: Point3D(*c)
+                    for i, c in initial_coordinates.items()
+                }
+            params.SetCoordMap(initial_coordinates)
+
+        if "embed_fragments_separately" in opts: # let this just error out
+            cls._prep_mol(embedding_mol)
+            conformer_set = AllChem.EmbedMultipleConfs(embedding_mol, numConfs=num_confs, params=params)
+        else:
+            try:
+                # with OutputRedirect():
+                with cls.quiet_errors(verbose=verbose):
+                    conformer_set = AllChem.EmbedMultipleConfs(embedding_mol, numConfs=num_confs, params=params)
+            except AllChem.rdchem.MolSanitizeException:
+                conformer_set = None
+                cls._prep_mol(embedding_mol)
+            if conformer_set is None:
+                params.embedFragmentsSeparately = False
+                # with OutputRedirect():
+                with cls.quiet_errors(verbose=verbose):
+                    conformer_set = AllChem.EmbedMultipleConfs(embedding_mol, numConfs=num_confs, params=params)
+        if len(conformer_set) == 0:
+            conf_opts = opts | {
+                "distance_constraints":distance_constraints,
+                "initial_coordinates":initial_coordinates
+            }
+            raise ValueError(f"failed to generate conformers for {embedding_mol} with settings {conf_opts}")
         if optimize:
             rdForceFieldHelpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
             if force_field_type == 'mmff':
-                rdForceFieldHelpers.MMFFOptimizeMoleculeConfs(mol)
+                rdForceFieldHelpers.MMFFOptimizeMoleculeConfs(embedding_mol)
             elif force_field_type == 'uff':
-                rdForceFieldHelpers.UFFOptimizeMoleculeConfs(mol)
+                rdForceFieldHelpers.UFFOptimizeMoleculeConfs(embedding_mol)
             else:
                 raise NotImplementedError(f"no basic preoptimization support for {force_field_type}")
 
@@ -663,12 +930,12 @@ class RDMolecule(ExternalMolecule):
                     prop_gen = None
 
                 if prop_gen is not None:
-                    props = prop_gen(mol)
+                    props = prop_gen(embedding_mol)
                 else:
                     props = None
 
                 engs = [
-                    force_field_type(mol, props, confId=conf_id).CalcEnergy()
+                    force_field_type(embedding_mol, props, confId=conf_id).CalcEnergy()
                     for conf_id in conf_ids
                 ]
 
@@ -677,6 +944,14 @@ class RDMolecule(ExternalMolecule):
                 conf_id = 0
         else:
             conf_id = list(conformer_set)
+
+        if embedding_mol is not mol and conf_id is not None:
+            # copy conformers back to mol
+            emb_ids = conf_id
+            if nput.is_int(emb_ids): emb_ids = [emb_ids]
+            for i in emb_ids:
+                conf = embedding_mol.GetConformer(i)
+                mol.AddConformer(conf)
 
         return conf_id
 
@@ -1648,21 +1923,21 @@ class RDMolecule(ExternalMolecule):
         """
         if byte_size == 16:
             base_type = np.uint16
-            # float_type = np.float16
+            float_type = np.float16
             if pack_angles:
                 pack_type = np.uint8
             else:
                 pack_type = np.uint16
         elif byte_size == 32:
             base_type = np.uint32
-            # float_type = np.float32
+            float_type = np.float32
             if pack_angles:
                 pack_type = np.uint16
             else:
                 pack_type = np.uint32
         elif byte_size == 64:
             base_type = np.uint64
-            # float_type = np.float64
+            float_type = np.float64
             if pack_angles:
                 pack_type = np.uint32
             else:
@@ -1682,7 +1957,8 @@ class RDMolecule(ExternalMolecule):
         packaged_dists[compressed] = comp_vals
         # takes advantage of the fact that we are never negative to use that
         # bit for this encoding
-        packaged_dists[~compressed] = dists[~compressed].view(base_type) + step_max
+        dx = dists[~compressed].astype(float_type)
+        packaged_dists[~compressed] = dx.view(base_type) + step_max
 
         full_max = 2 ** byte_size - 1
         if pack_angles:
