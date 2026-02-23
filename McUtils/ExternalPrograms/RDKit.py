@@ -622,7 +622,7 @@ class RDMolecule(ExternalMolecule):
                                                   )
 
     default_fragment_placement_method = 'centroid'
-    different_fragment_embedding_distance = 0
+    different_fragment_embedding_distance = 5
     @classmethod
     def _set_fragment_centroids(cls, frag_inds, frag_atoms, frag_bonds, frag_coord_sets, frag_positions, min_dist=None):
         if min_dist is None:
