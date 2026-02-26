@@ -278,22 +278,21 @@ class EdgeGraph:
         for n in range(n_inds):
             if len(edge_map[n]) < 2: continue
             visited = set()
-            test_rings.append(
-                tree.tree_traversal(
-                    edge_map,
-                    lambda parent, child, visited: (
-                        visited
-                        if len(visited & edge_map[child]) > 1 else
-                        None
-                    ),
-                    root=n,
-                    get_children=lambda h: [c for c in edge_map[h] if len(edge_map[c]) > 1],
-                    get_item=lambda _, h: h,
-                    visited=visited,
-                    call_order='post',
-                    traversal_ordering='bfs'
-                )
+            r = tree.tree_traversal(
+                edge_map,
+                lambda parent, child, visited: (
+                    visited
+                    if len(visited & edge_map[child]) > 1 else
+                    None
+                ),
+                root=n,
+                get_children=lambda h: [c for c in edge_map[h] if len(edge_map[c]) > 1],
+                get_item=lambda _, h: h,
+                visited=visited,
+                call_order='post',
+                traversal_ordering='bfs'
             )
+            test_rings.append(r)
 
         filt_rings = itut.delete_duplicates(
             (t for t in test_rings if t is not None),
@@ -391,8 +390,10 @@ class EdgeGraph:
         else:
             return tuple(reversed(path))
     @classmethod
-    def get_longest_path_from_data(cls, shortest_path_data, root=None):
+    def get_longest_path_from_data(cls, shortest_path_data, root=None, check_connected=True):
         dist_matrix, predecessors = shortest_path_data
+        if check_connected:
+            dist_matrix = np.nan_to_num(dist_matrix, posinf=-9999, neginf=-9999)
         if root is None:
             max_cols = np.argmax(dist_matrix, axis=1)
             max_row = np.argmax(dist_matrix[np.arange(len(max_cols)), max_cols])
@@ -423,6 +424,41 @@ class EdgeGraph:
         return counts
 
     @classmethod
+    def _get_bond_breaks(cls, rings, map, use_highest_valencies=True):
+        if use_highest_valencies:
+            new_valencies = [
+                cls.compute_ring_centralities(r, rings)
+                for r in rings
+            ]
+            new_valencies = [
+                cls.compute_edge_centralities(r, map)
+                if len(np.unique(v)) == 1 else
+                v
+                for r, v in zip(rings, new_valencies)
+            ]
+            break_pos = [
+                np.array(r)[np.where(v == np.max(v))]
+                for r, v in zip(rings, new_valencies)
+            ]
+        else:
+            break_pos = rings
+        break_bonds = [
+            list(itut.delete_duplicates(
+                (
+                    (p, j)
+                    if p < j else
+                    (j, p)
+                )  # enumerate all ring bonds starting at the breakpos, could be more efficient
+                for p in bp
+                for j in map[p]
+                if j in r
+            ))
+            for r, bp in zip(rings, break_pos)
+        ]
+        return break_bonds
+
+    intermediate_break_threshold = 10
+    @classmethod
     def find_longest_chain_from_breakpoints(cls,
                                             map,
                                             graph=None,
@@ -430,7 +466,9 @@ class EdgeGraph:
                                             root=None,
                                             use_highest_valencies=True,
                                             shortest_path_data=None,
-                                            raise_on_failure=True
+                                            raise_on_failure=True,
+                                            allow_intermediate_breaks=True,
+                                            return_breakpoints=False
                                             ):
         if rings is None:
             rings = cls.find_rings_in_graph(len(map), map)
@@ -447,32 +485,7 @@ class EdgeGraph:
             # and if breaking can lead to a long ring will again be near a high-valency
             # atom in non-fused rings
             # each potential high-valency bond can be broken
-            if use_highest_valencies:
-                ring_valencies = [
-                    cls.compute_ring_centralities(r, rings)
-                    for r in rings
-                ]
-                ring_valencies = [
-                    cls.compute_edge_centralities(r, map)
-                        if len(np.unique(v)) == 1 else
-                    v
-                    for r,v in zip(rings, ring_valencies)
-                ]
-                break_pos = [
-                    np.array(r)[np.where(v == np.max(v))]
-                    for r,v in zip(rings, ring_valencies)
-                ]
-            else:
-                break_pos = rings
-            break_bonds = [
-                [
-                    (p, j)  # enumerate all ring bonds starting at the breakpos, could be more efficient
-                    for p in bp
-                    for j in map[p]
-                    if j in r
-                ]
-                for r, bp in zip(rings, break_pos)
-            ]
+            break_bonds = cls._get_bond_breaks(rings, map, use_highest_valencies=use_highest_valencies)
             if root is not None:
                 # sort break bonds to priortize breaks by the root
                 break_bonds = [
@@ -480,32 +493,75 @@ class EdgeGraph:
                     for bl in break_bonds
                 ]
 
-            # chain = None
-            n_inds = len(map)
-            for p_list in itertools.product(*break_bonds):
-                if len({tuple(sorted(p)) for p in p_list}) < len(p_list): continue # dupe bond in fused ring
-                # print(p_list)
-                new_map: dict[int, set[int]] = {k: v.copy() for k, v in map.items()}
-                for center, bond in p_list:
-                    new_map[center].remove(bond)
-                    new_map[bond].remove(center)
+            # we then reduce these down by matching up intersecting sets and iterating
+            # over just the non-dupes
 
-                new_rings = cls.find_rings_in_graph(n_inds, new_map)
-                if len(new_rings) == 0:
-                    chain = cls.find_longest_chain_from_breakpoints(
-                        new_map,
-                        root=root,
-                        rings=new_rings
-                    )
-                    if chain is not None:
-                        break
-            else:
-                if raise_on_failure:
-                    raise ValueError("couldn't find a way to break rings?")
+            old_rings = {}
+            test_rings = {tuple(sorted(r)) for r in rings}
+            chain = None
+            breakpoints = None
+            if allow_intermediate_breaks is None:
+                allow_intermediate_breaks = len(break_bonds) > cls.intermediate_break_threshold
+            while chain is None and len(test_rings) > len(old_rings):
+                n_inds = len(map)
+                prev_rings = None
+                for p_list in itut.unique_product(*break_bonds):
+                    if len({tuple(sorted(p)) for p in p_list}) < len(p_list): continue # dupe bond in fused ring
+                    # print(p_list)
+                    new_map: dict[int, set[int]] = {k: v.copy() for k, v in map.items()}
+                    for center, bond in p_list:
+                        new_map[center].remove(bond)
+                        new_map[bond].remove(center)
+
+                    new_rings = cls.find_rings_in_graph(n_inds, new_map)
+                    if len(new_rings) == 0:
+                        prev_rings = None
+                        chain = cls.find_longest_chain_from_breakpoints(
+                            new_map,
+                            root=root,
+                            rings=new_rings
+                        )
+                        breakpoints = p_list
+                        if chain is not None:
+                            break
+                    elif allow_intermediate_breaks:
+                        new_tests = [tuple(sorted(r)) for r in new_rings]
+                        proper_new_rings = [
+                            (r,t) for r,t in zip(new_rings, new_tests)
+                            if t not in test_rings
+                        ]
+                        if len(proper_new_rings) > 0:
+                            prev_rings = None
+                            new_rings = [r for r,t in proper_new_rings]
+                            new_tests = {t for r,t in proper_new_rings}
+                            new_breaks = cls._get_bond_breaks(new_rings, map, use_highest_valencies=use_highest_valencies)
+                            break_bonds = break_bonds + new_breaks
+                            old_rings = test_rings
+                            test_rings = test_rings | new_tests
+                            break
+                        else:
+                            if prev_rings is None:
+                                prev_rings = new_rings
+                            elif prev_rings == new_rings:
+                                # force these rings to be broken
+                                prev_rings = None
+                                new_tests = {tuple(sorted(r)) for r in new_rings}
+                                new_breaks = cls._get_bond_breaks(new_rings, map,
+                                                                  use_highest_valencies=use_highest_valencies)
+                                break_bonds = break_bonds + new_breaks
+                                old_rings = set()
+                                test_rings = test_rings | new_tests
+                                break
+                                # raise ValueError(f"different breakpoints lead to same rings: {new_rings}")
                 else:
-                    return None
-
-            return chain
+                    if raise_on_failure:
+                        raise ValueError("couldn't find a way to break rings?")
+                    else:
+                        return None
+            if return_breakpoints:
+                return chain, breakpoints
+            else:
+                return chain
 
     def find_longest_chain(self,
                            rings=None,

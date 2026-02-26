@@ -2,6 +2,7 @@ import uuid
 
 from .CommonCoordinateSystems import InternalCoordinateSystem, CartesianCoordinates3D
 from .CoordinateSystemConverter import CoordinateSystemConverter
+from ..Internals import InternalSpec
 from ... import Numputils as nput
 # import weakref
 
@@ -23,6 +24,7 @@ class GenericInternalCoordinateSystem(InternalCoordinateSystem):
                  dimension=(None,),
                  coordinate_shape=(None,),
                  angle_ordering='ijk',
+                 internal_spec=None,
                  **opts):
         """
         :param converter_options: options to be passed through to a `CoordinateSystemConverter`
@@ -38,6 +40,24 @@ class GenericInternalCoordinateSystem(InternalCoordinateSystem):
             converter_options = opts
         converter_options['angle_ordering'] = converter_options.get('angle_ordering', angle_ordering)
         super().__init__(dimension=dimension, coordinate_shape=coordinate_shape, converter_options=converter_options)
+
+    def _prep_spec(self):
+        if 'internal_spec' not in self.converter_options:
+            self.converter_options['internal_spec'] = InternalSpec(self.converter_options['specs'])
+        return self.converter_options['internal_spec']
+
+    def pre_convert_to(self, system, opts=None):
+        if opts is None:
+            opts = {}
+        if 'internal_spec' not in opts:
+            opts = opts | {'internal_spec':self._prep_spec()}
+        return opts
+    def pre_convert_from(self, system, opts=None):
+        if opts is None:
+            opts = {}
+        if 'internal_spec' not in opts:
+            opts = opts | {'internal_spec': self._prep_spec()}
+        return opts
 
     # def jacobian(self,
     #              coords,
@@ -76,7 +96,8 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
     def types(self):
         return (CartesianCoordinates3D, GenericInternalCoordinates)
 
-    def convert_many(self, coords, *, specs, order=0, masses=None, remove_translation_rotation=True,
+    def convert_many(self, coords, *, specs, order=0, masses=None,
+                     remove_translation_rotation=True,
                      reference_coordinates=None,
                      return_derivs=None,
                      derivs=None,
@@ -121,6 +142,8 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                      remove_translation_rotation=True,
                      derivs=None,
                      return_derivs=None,
+                     internal_spec=None,
+                     method='direct',
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?
@@ -131,19 +154,34 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
         if return_derivs == 0: return_derivs = 1
         if not nput.is_numeric(return_derivs):
             return_derivs = max(return_derivs)
-        (expansions, errors), _ = nput.inverse_coordinate_solve(specs, coords, reference_coordinates,
-                                                                order=return_derivs,
-                                                                return_expansions=True,
-                                                                return_internals=True,
-                                                                masses=masses,
-                                                                remove_translation_rotation=remove_translation_rotation,
-                                                                **kw
-                                                                )
-        carts, derivs = expansions[0], expansions[1:]
+        if method == 'iterative':
+            (expansions, errors), _ = nput.inverse_coordinate_solve(specs, coords, reference_coordinates,
+                                                                    order=return_derivs,
+                                                                    return_expansions=True,
+                                                                    return_internals=True,
+                                                                    masses=masses,
+                                                                    remove_translation_rotation=remove_translation_rotation,
+                                                                    **kw
+                                                                    )
+            carts, derivs = expansions[0], expansions[1:]
+        elif method == 'direct':
+            if internal_spec is None:
+                internal_spec = InternalSpec(specs)
+            expansions = internal_spec.internals_to_cartesians(coords, reference_coordinates,
+                                                               order=return_derivs,
+                                                               return_expansions=True,
+                                                               return_internals=True,
+                                                               masses=masses,
+                                                               remove_translation_rotation=remove_translation_rotation,
+                                                               **kw)
+            carts, derivs = expansions[0], expansions[1:]
+        else:
+            raise ValueError(f"unknown conversion method {method}")
         return carts, {
             'specs':specs,
             'derivs': derivs,
             'masses': masses,
+            'internal_spec':internal_spec,
             'remove_translation_rotation': remove_translation_rotation
         }
 

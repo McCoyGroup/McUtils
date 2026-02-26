@@ -1,3 +1,4 @@
+import collections
 import itertools
 import numbers
 
@@ -13,7 +14,8 @@ __all__ = [
     "transpose",
     "riffle",
     "flatten",
-    "delete_duplicates"
+    "delete_duplicates",
+    "unique_product"
 ]
 
 def is_fixed_size(iterable):
@@ -199,3 +201,68 @@ def delete_duplicates(iterable, key=None, hashable=None, cache=None):
             cache.append(test)
 
         yield o
+
+def unique_product(*iterables, key=None, filter=None):
+    queue = collections.deque()
+    its = [
+        iter(i) if hasattr(i, 'keys') else i # handle dict iteration by default
+        for i in iterables
+    ]
+    caches = [
+        []
+        for _ in iterables
+    ]
+    it_lens = [
+        len(it) if hasattr(it, '__getitem__') else -1
+        for it in its
+    ]
+    queue.append((0, 0, (), ()))
+    if filter is None:
+        filter = lambda p,v: v not in p
+    while queue:
+        i, n, p, k = queue.pop()
+        if i < len(its):
+            it = its[i]
+            m = it_lens[i]
+            if m > 0:
+                if n < m:
+                    v = it[n]
+                    if n + 1 < m:
+                        queue.append((i, n+1, p, k))
+                    if key is None:
+                        if filter(p, v):
+                            queue.append((i+1, 0, p + (v,), k))
+                    else:
+                        k2 = key(v)
+                        if filter(k, k2):
+                            queue.append((i+1, 0, p + (v,), k + (k2,)))
+            else:
+                cache = caches[i]
+                if n < len(cache):
+                    v = cache[n]
+                    if n + 1 < m:
+                        queue.append((i, n+1, p, k))
+                    if key is None:
+                        if filter(p, v):
+                            queue.append((i+1, 0, p + (v,), k))
+                    else:
+                        k2 = key(v)
+                        if filter(k, k2):
+                            queue.append((i+1, 0, p + (v,), k + (k2,)))
+                else:
+                    try:
+                        v = next(it)
+                    except StopIteration:
+                        it_lens[i] = 0 # faster termination next time around
+                    else:
+                        cache.append(v)
+                        queue.append((i, n+1, p, k))
+                        if key is None:
+                            if filter(p, v):
+                                queue.append((i+1, 0, p + (v,), k))
+                        else:
+                            k2 = key(v)
+                            if filter(k, k2):
+                                queue.append((i+1, 0, p + (v,), k + (k2,)))
+        else:
+            yield p
