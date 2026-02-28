@@ -11,6 +11,7 @@ __all__ = [
 
 import enum, abc, contextlib, numpy as np
 import uuid
+import functools
 
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -402,7 +403,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
     def get_default_backends(cls):
         return {
             cls.DefaultBackends.MPL.value: MPLBackend,
-            cls.DefaultBackends.MPL3D.value: MPLBackend,
+            cls.DefaultBackends.MPL3D.value: MPLBackend3D,
             cls.DefaultBackends.VTK.value: VTKBackend,
             cls.DefaultBackends.VPython2D.value: VPythonBackend,
             cls.DefaultBackends.VPython.value: VPythonBackend3D,
@@ -662,10 +663,51 @@ class MPLManager:
 class MPLAxes(GraphicsAxes):
     def __init__(self, mpl_axes_object, **opts):
         self.obj = mpl_axes_object
+        self.computed_zorder = self.obj.computed_zorder
+        self._monkeypatch_draw(self.obj)
         self.opts = self.canonicalize_opts(opts)
         super().__init__()
         self.xaxis = self.obj.xaxis
         self.yaxis = self.obj.yaxis
+    @classmethod
+    def _get_dist(cls, artist):
+        from mpl_toolkits.mplot3d import proj3d
+        try:
+            dist = artist.do_3d_projection()
+        except (AttributeError, TypeError):
+            if hasattr(artist, '_verts3d'):
+                # if artist.axes.M is not None:
+                xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
+                dist = np.max([v[-1] for v in xyzs_list])
+                # else:
+                #     dist = np.min(artist._verts3d[-1])
+            else:
+                dist = 1000000
+        # print(artist, dist)
+        return dist
+    def _monkeypatch_draw(self, obj):
+        cur_draw = obj.draw
+        obj.computed_zorder = False
+        @functools.wraps(obj.draw)
+        def draw(renderer):
+            if self.computed_zorder:
+                obj.M = obj.get_proj()
+                obj.invM = np.linalg.inv(obj.M)
+                zorder_offset = max(axis.get_zorder()
+                                    for axis in obj._axis_map.values()) + 1
+                artists = (
+                    artist for artist in self.obj._children
+                    if artist.get_visible() and artist.zorder > 0
+                )
+                for artist in sorted(artists,
+                                     key=lambda artist: self._get_dist(artist),
+                                     reverse=True):
+                    artist.zorder = zorder_offset+1
+                    zorder_offset += 1
+
+            cur_draw(renderer)
+        obj.draw = draw
+
     def clear(self, *, backend=None):
         ax = self.obj
         all_things = ax.artists + ax.patches
@@ -703,8 +745,10 @@ class MPLAxes(GraphicsAxes):
             ),
         )
     def set_frame_visible(self, frame_spec):
-        if frame_spec is True or frame_spec is False:
+        if frame_spec is True:
             self.obj.set_frame_on(frame_spec)
+        elif frame_spec is False:
+            self.obj.set_frame_off(frame_spec)
         else:
             lr, bt = frame_spec
             if lr is None:
@@ -967,10 +1011,108 @@ class MPLAxes3D(MPLAxes):
         super().__init__(mpl_axes_object, **opts)
         self.zaxis = self.obj.zaxis
 
+    def set_frame_visible(self, frame_spec):
+        if frame_spec is True:
+            self.obj.set_axis_on()
+        elif frame_spec is False:
+            self.obj.set_axis_off()
+
+    def get_zlim(self):
+        return self.obj.get_zlim()
+    def set_zlim(self, val, **opts):
+        self.obj.set_zlim(val, **opts)
+
+    def get_zticks(self):
+        return self.obj.get_zticks()
+    def set_zticks(self, val, **opts):
+        self.obj.set_zticks(val, **opts)
+
+    def get_ztick_style(self):
+        return self.obj.tick_params(axis='z')
+    def set_ztick_style(self, **opts):
+        return self.obj.tick_params(axis='z', **opts)
+
     def get_view_settings(self):
         return {'elev': self.obj.elev, 'azim':self.obj.azim,
-                'roll':self.obj.roll, 'vertical_axis':self.obj.vertical_axis}
-    def set_view_settings(self, **values):
+                'roll':self.obj.roll, 'vertical_axis':self.obj.vertical_axis,
+                'dist':self.obj.dist}
+    def set_view_settings(self,
+                          elev=None, azim=None, roll=None, vertical_axis=None, dist=None,
+                          up_vector=None, right_vector=None, view_vector=None, view_distance=None,
+                          view_matrix=None,
+                          **values):
+        if view_distance is not None:
+            dist = view_distance
+        if view_matrix is None and (
+                view_vector is not None
+                or right_vector is not None
+                or up_vector is not None
+        ):
+            if view_vector is None:
+                if (
+                        up_vector is not None and right_vector is not None
+                ):
+                    view_vector = nput.vec_crosses(up_vector, right_vector, normalize=True)
+                elif right_vector is not None:
+                    view_vector = nput.vec_crosses([0, 0, 1], right_vector, normalize=True)
+                elif up_vector is not None:
+                    view_vector = nput.vec_crosses(up_vector, [0, 1, 0], normalize=True)
+
+            if view_vector is not None:
+                m = nput.rotation_matrix(
+                    view_vector,
+                    [1, 0, 0]
+                )
+            else:
+                m = np.eye(3)
+
+            if up_vector is None and right_vector is not None:
+                if view_vector is None:
+                    view_vector = [1, 0, 0]
+                up_vector = nput.vec_normalize(
+                    nput.vec_crosses(right_vector, view_vector)
+                )
+            elif up_vector is not None and view_vector is not None:
+                up_vector = nput.vec_crosses(
+                    view_vector,
+                    nput.vec_crosses(view_vector, up_vector),
+                    normalize=True
+                )
+            if up_vector is not None:
+                m = m @ nput.rotation_matrix(
+                    m.T @ up_vector,
+                    [1, 0, 0]
+                )
+            view_matrix = m
+
+        if view_matrix is not None:
+            if vertical_axis is None:
+                target_vertical = [0, 0, 1]
+                target_view = [1, 0, 0]
+            else:
+                target_vertical = [
+                    [1, 0, 0]
+                        if vertical_axis == 'x' else
+                    [0, 1, 0]
+                        if vertical_axis == 'y' else
+                    [0, 0, 1]
+                ]
+                target_view = [
+                    [0, 0, 1]
+                        if vertical_axis == 'x' else
+                    [0, 1, 0]
+                        if vertical_axis == 'y' else
+                    [1, 0, 0]
+                ]
+            # roll, cross = nput.extract_rotation_angle_axis(view_matrix)
+            view_vector, right_vector, up_vector = view_matrix.T
+            elev = np.rad2deg(nput.vec_angles(target_vertical, up_vector, return_crosses=False))
+            azim = np.rad2deg(nput.vec_angles(right_vector, target_view,
+                                              up_vectors=np.asanyarray(target_vertical),
+                                              return_crosses=False))
+            # roll = np.rad2deg(nput.vec_angles([1, 0, 0], view_vector, return_crosses=False))
+            # elev = nput.vec_angles([1, 0, 0], view_vector, return_crosses=False)
+
         # if isinstance(value, dict):
         #     if 'elev' not in value:
         #         value['elev'] = self.obj.elev
@@ -982,53 +1124,360 @@ class MPLAxes3D(MPLAxes):
         #         value['vertical_axis'] = self.obj.vertical_axis
         # else:
         #     value = dict(zip(['elev', 'azim', 'roll', 'vertical_axis'], value))
+        values = values | {
+            k:v for k,v in
+            dict(elev=elev, azim=azim, roll=roll, vertical_axis=vertical_axis).items()
+            if v is not None
+        }
         self.obj.view_init(**values)
+        if dist is not None:
+            self.obj.set_box_aspect(None, zoom=(1.8294640721620434 * 25/24) / (dist / 10)) # magic number from MPL
 
-    def draw_sphere(self, center, radius, sphere_points=48, **opts):
-        surface = self.get_plotter('plot_surface')
+    def draw_sphere(self, center, radius, sphere_points=48, rendering='standard',
+                    s=None,
+                    box_scalings=None,
+                    edgecolors=None,
+                    edge_color=None,
+                    color='white',
+                    plotter='scatter',
+                    **opts):
+        if dev.str_is(rendering, 'flat'):
+            center = np.asanyarray(center)
+            if center.ndim == 1:
+                center = center[np.newaxis]
+            if edgecolors is None:
+                if edge_color is not None:
+                    edgecolors = edge_color
+                else:
+                    edgecolors = [[0.] * 3 + [.3]]
+            if isinstance(edgecolors, str) or nput.is_numeric(edgecolors[0]):
+                edgecolors = [edgecolors] * len(center)
+            if isinstance(color, str) or nput.is_numeric(color[0]):
+                color = [color] * len(center)
+            if s is None:
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                s = (radius * max(box_scalings) * 72)**2
+            if nput.is_numeric(s):
+                s = [s] * len(center)
+            if plotter == 'plot':
+                surface = self.get_plotter('plot')
+                spheres = []
+                s = np.sqrt(s)
+                for x,s,c,ec in zip(center, s, color, edgecolors):
+                    spheres.append(
+                        surface([x[0], x[0]], [x[1], x[1]], [x[2], x[2]],
+                                   markersize=s,
+                                   marker='o',
+                                   linestyle='',
+                                   markerfacecolor=c,
+                                   markeredgecolor=ec,
+                                   **opts)
+                    )
+            else:
+                spheres = self.get_plotter('scatter')(
+                    center[:, 0], center[:, 1], center[:, 2],
+                    edgecolors=edgecolors,
+                    color=color,
+                    s=s,
+                    **opts
+                )
+            return spheres
+        else:
+            surface = self.get_plotter('plot_surface')
 
-        u = np.linspace(0, 2 * np.pi, sphere_points)
-        v = np.linspace(0, np.pi, sphere_points)
-        x = radius * np.outer(np.cos(u), np.sin(v))
-        y = radius * np.outer(np.sin(u), np.sin(v))
-        z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+            u = np.linspace(0, 2 * np.pi, sphere_points)
+            v = np.linspace(0, np.pi, sphere_points)
+            x = radius * np.outer(np.cos(u), np.sin(v))
+            y = radius * np.outer(np.sin(u), np.sin(v))
+            z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
 
-        return surface(x + center[0], y + center[1], z + center[2], **opts)
+            return surface(x + center[0], y + center[1], z + center[2], **opts)
 
-    def draw_cylinder(self, start, end, rad, circle_points=48, **opts):
-        surface = self.get_plotter('plot_surface')
+    # @classmethod
+    # def _load_patch_line(cls):
+    #     mpl_toolkits.mplot3d.art3d
+    #     fr
+    #     class PatchLine()
+    def draw_cylinder(self, start, end, rad, circle_points=48, rendering=None,
+                      box_scalings=None,
+                      edge_color=None,
+                      color='black',
+                      segments=8,
+                      edge_width=.01,
+                      lw=None,
+                      plotter='plot',
+                      **opts):
+        if dev.str_is(rendering, 'flat'):
+            from mpl_toolkits.mplot3d.art3d import Line3DCollection
+            start = np.asanyarray(start)
+            if start.ndim == 1:
+                start = start[np.newaxis]
+            end = np.asanyarray(end)
+            if end.ndim == 1:
+                end = end[np.newaxis]
+            plot = self.get_plotter('plot')
+            if lw is None:
+                rad = np.asanyarray(rad)
+                if rad.ndim == 0:
+                    rad = np.array([rad])
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                lw = rad * 72 * max(box_scalings)
+            if edge_color is None:
+                edge_color = [None] * len(start)
+            elif isinstance(edge_color, str) or nput.is_numeric(edge_color[0]):
+                edge_color = [edge_color] * len(start)
+            if isinstance(color, str) or nput.is_numeric(color[0]):
+                color = [color] * len(start)
 
-        u = np.linspace(0, 2 * np.pi, circle_points)
-        v = np.linspace(0, np.pi, circle_points)
+            coll = []
+            # lines = []
+            # colors = []
+            # linewidths = []
+            # if plotter == 'plot':
+            for s, e, w, ec in zip(start, end, lw, edge_color):
+                if ec is not None:
+                    v = nput.vec_normalize(e - s)
+                    s = s + edge_width/2 * v
+                    e = e - edge_width/2 * v
+                    # x_points = np.linspace(s[0], e[0], segments)
+                    # y_points = np.linspace(s[1], e[1], segments)
+                    # z_points = np.linspace(s[2], e[2], segments)
+                    x_points = [s[0], e[0]]
+                    y_points = [s[1], e[1]]
+                    z_points = [s[2], e[2]]
+                    # lines.append(
+                    #     np.vstack([x_points, y_points, z_points]).T
+                    # )
+                    # colors.append(ec)
+                    # linewidths.append(w + (.05 * 72 * max(box_scalings)))
+                    coll.append(
+                        plot(
+                            x_points,
+                            y_points,
+                            zs=z_points,
+                            color=ec,
+                            lw=w + (edge_width * 72 * max(box_scalings)),
+                            zorder=-1000,
+                            **opts
+                        )
+                    )
+            for s, e, w, c in zip(start, end, lw, color):
+                x_points = np.linspace(s[0], e[0], segments)
+                y_points = np.linspace(s[1], e[1], segments)
+                z_points = np.linspace(s[2], e[2], segments)
+                # for (x1,y1,z1,x2,y2,z2) in zip(
+                #     x_points[:-1],y_points[:-1],z_points[:-1],
+                #     x_points[1:],y_points[1:],z_points[1:],
+                # ):
+                #     lines.append(
+                #         [[x1, y1, z1], [x2, y2, z2]]
+                #     )
+                #     colors.append(c)
+                #     linewidths.append(w)
+                # cycle = ['red', 'green', 'blue', 'orange', 'pink']
+                for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
+                    x_points[:-1],y_points[:-1],z_points[:-1],
+                    x_points[1:],y_points[1:],z_points[1:],
+                )):
+                    coll.append(
+                        plot(
+                            [x1, x2],
+                            [y1, y2],
+                            zs=[z1, z2],
+                            lw=w,
+                            color=c,#cycle[i%5],
+                            **opts
+                        )
+                    )
+                # coll.append(
+                #     plot(
+                #         x_points,
+                #         y_points,
+                #         zs=z_points,
+                #         lw=w,
+                #         color=c,
+                #         **opts
+                #     )
+                # )
+            # elif plotter == 'rect':
+            #     import matplotlib.patches as patches
+            #     import mpl_toolkits.mplot3d.art3d as art3d
+            #     # Create a 2D Rectangle patch object
+            #     lw = lw / (72 * max(box_scalings))
+            #     z_positions = None
+            #     for s, e, w, c in zip(start, end, lw, color):
+            #         x_points = np.linspace(s[0], e[0], segments)
+            #         y_points = np.linspace(s[1], e[1], segments)
+            #         z_points = np.linspace(s[2], e[2], segments)
+            #         # for (x1,y1,z1,x2,y2,z2) in zip(
+            #         #     x_points[:-1],y_points[:-1],z_points[:-1],
+            #         #     x_points[1:],y_points[1:],z_points[1:],
+            #         # ):
+            #         #     lines.append(
+            #         #         [[x1, y1, z1], [x2, y2, z2]]
+            #         #     )
+            #         #     colors.append(c)
+            #         #     linewidths.append(w)
+            #         # cycle = ['red', 'green', 'blue', 'orange', 'pink']
+            #         for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
+            #             x_points[:-1],y_points[:-1],z_points[:-1],
+            #             x_points[1:],y_points[1:],z_points[1:],
+            #         )):
+            #             x0 = min([x1,x2])
+            #             x0 = min([x1,x2])
+            #
+            #             w = x2-x1
+            #             h = y2-y1
+            #             coll.append(
+            #                 patches.Rectangle(xy_center, width, height, color=color, alpha=alpha)
+            #                 plot(
+            #                     [x1, x2],
+            #                     [y1, y2],
+            #                     zs=[z1, z2],
+            #                     lw=w,
+            #                     color=c,#cycle[i%5],
+            #                     edgecolor=ec,
+            #                     **opts
+            #                 )
+            #             )
+            #     rect = patches.Rectangle(xy_center, width, height, color=color, alpha=alpha)
+            #
+            #     for z_pos,rect in zip(z_positions, coll):
+            #         # Convert the 2D patch to a 3D patch and add it to the axes
+            #         self.obj.add_patch(rect)
+            #         art3d.pathpatch_2d_to_3d(rect, z_pos=z_pos, zdir='z')
+            # else:
+            #     coll = Line3DCollection(lines, colors=colors, linewidths=linewidths, **opts)
+            #
+            #     min_x = np.min(start[:, 0])
+            #     max_x = np.max(start[:, 0])
+            #     xl_m, xl_M = self.get_xlim()
+            #     if xl_m > min_x:
+            #         xl_m = min_x
+            #     if xl_M < max_x:
+            #         xl_M = max_x
+            #     self.set_xlim([xl_m, xl_M])
+            #     min_y = np.min(start[:, 1])
+            #     max_y = np.max(start[:, 1])
+            #     yl_m, yl_M = self.get_ylim()
+            #     if xl_m > min_y:
+            #         yl_m = min_y
+            #     if yl_M < max_y:
+            #         yl_M = max_y
+            #     self.set_ylim([yl_m, yl_M])
+            #     min_z = np.min(start[:, 2])
+            #     max_z = np.max(start[:, 2])
+            #     zl_m, zl_M = self.get_zlim()
+            #     if zl_m > min_z:
+            #         zl_m = min_z
+            #     if zl_M < max_z:
+            #         zl_M = max_z
+            #     self.set_zlim([zl_m, zl_M])
+            #     self.obj.add_collection(coll)
+            return coll
+        else:
+            surface = self.get_plotter('plot_surface')
 
-        # pulled from SO: https://stackoverflow.com/a/32383775/5720002
+            u = np.linspace(0, 2 * np.pi, circle_points)
+            v = np.linspace(0, np.pi, circle_points)
 
-        # vector in direction of axis
-        v = end - start
-        # find magnitude of vector
-        mag = np.linalg.norm(v)
-        # unit vector in direction of axis
-        v = v / mag
-        # make some vector not in the same direction as v
-        not_v = np.array([1, 0, 0])
-        if (v == not_v).all():
-            not_v = np.array([0, 1, 0])
-        # make vector perpendicular to v
-        n1 = np.cross(v, not_v)
-        # normalize n1
-        n1 /= np.linalg.norm(n1)
-        # make unit vector perpendicular to v and n1
-        n2 = np.cross(v, n1)
-        # surface ranges over t from 0 to length of axis and 0 to 2*pi
-        t = np.linspace(0, mag, circle_points)
-        theta = np.linspace(0, 2 * np.pi, circle_points)
-        # use meshgrid to make 2d arrays
-        t, theta = np.meshgrid(t, theta)
-        # generate coordinates for surface
-        X, Y, Z = [start[i] + v[i] * t + rad * np.sin(theta) * n1[i] + rad * np.cos(theta) * n2[i] for i
-                   in [0, 1, 2]]
+            # pulled from SO: https://stackoverflow.com/a/32383775/5720002
 
-        return surface(X, Y, Z, **opts)
+            # vector in direction of axis
+            v = end - start
+            # find magnitude of vector
+            mag = np.linalg.norm(v)
+            # unit vector in direction of axis
+            v = v / mag
+            # make some vector not in the same direction as v
+            not_v = np.array([1, 0, 0])
+            if (v == not_v).all():
+                not_v = np.array([0, 1, 0])
+            # make vector perpendicular to v
+            n1 = np.cross(v, not_v)
+            # normalize n1
+            n1 /= np.linalg.norm(n1)
+            # make unit vector perpendicular to v and n1
+            n2 = np.cross(v, n1)
+            # surface ranges over t from 0 to length of axis and 0 to 2*pi
+            t = np.linspace(0, mag, circle_points)
+            theta = np.linspace(0, 2 * np.pi, circle_points)
+            # use meshgrid to make 2d arrays
+            t, theta = np.meshgrid(t, theta)
+            # generate coordinates for surface
+            X, Y, Z = [start[i] + v[i] * t + rad * np.sin(theta) * n1[i] + rad * np.cos(theta) * n2[i] for i
+                       in [0, 1, 2]]
+
+            return surface(X, Y, Z, **opts)
+
+    _Arrow3D = None
+    @classmethod
+    def _load_arrow_drawer(cls):
+        if cls._Arrow3D is None:
+            from mpl_toolkits.mplot3d.proj3d import proj_transform
+            from matplotlib.patches import FancyArrowPatch
+            class Arrow3D(FancyArrowPatch):
+
+                def __init__(self, x, y, z, dx, dy, dz, *args, **kwargs):
+                    super().__init__((0, 0), (0, 0), *args, **kwargs)
+                    self._xyz = (x, y, z)
+                    self._dxdydz = (dx, dy, dz)
+
+                def draw(self, renderer):
+                    x1, y1, z1 = self._xyz
+                    dx, dy, dz = self._dxdydz
+                    x2, y2, z2 = (x1 + dx, y1 + dy, z1 + dz)
+
+                    xs, ys, zs = proj_transform((x1, x2), (y1, y2), (z1, z2), self.axes.M)
+                    self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+                    super().draw(renderer)
+
+                def do_3d_projection(self, renderer=None):
+                    x1, y1, z1 = self._xyz
+                    dx, dy, dz = self._dxdydz
+                    x2, y2, z2 = (x1 + dx, y1 + dy, z1 + dz)
+
+                    xs, ys, zs = proj_transform((x1, x2), (y1, y2), (z1, z2), self.axes.M)
+                    self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+
+                    return np.min(zs)
+            cls._Arrow3D = Arrow3D
+        return cls._Arrow3D
+
+    def draw_arrow(self, points, radius=None, rendering=None, segments=8, box_scalings=None,
+                   lw=None,
+                   **styles):
+        if dev.str_is(rendering, 'flat'):
+            points = np.asanyarray(points)
+            if points.ndim == 1:
+                points = points[np.newaxis]
+            Arrow3D = self._load_arrow_drawer()
+            points = np.asanyarray(points)
+            if points.ndim == 2:
+                points = points[np.newaxis]
+            diffs = points[:, 1, :] - points[:, 0, :]
+            if lw is None:
+                radius = np.asanyarray(radius)
+                if radius.ndim == 0:
+                    radius = np.array([radius])
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                lw = radius * 72 * max(box_scalings)
+            # if head_width is None:
+            #     head_width = lw*1.5
+            # if head_length is None:
+            #     head_length = head_width
+            arrows = [
+                Arrow3D(x, y, z, dx, dy, dz, mutation_scale=w, **styles)
+                for (x,y,z),(dx,dy,dz),w in zip(points[:, 0, :], diffs, lw)
+            ]
+            for a in arrows:
+                self.obj.add_artist(a)
+            return arrows
+        else:
+            raise NotImplementedError("too annoying")
 
 class MPLFigure(GraphicsFigure):
     Axes = MPLAxes
@@ -1225,7 +1674,7 @@ class MPLBackend3D(MPLBackend):
     def create_figure(self, *args, subplot_kw=None, **kwargs):
         from mpl_toolkits.mplot3d import Axes3D
         subplot_kw = dict({"projection": '3d'}, **({} if subplot_kw is None else subplot_kw))
-        return super().create_axes(*args, subplot_kw=subplot_kw, **kwargs)
+        return super().create_figure(*args, subplot_kw=subplot_kw, **kwargs)
 
 class GraphicsRegionAxes(GraphicsAxes):
     def __init__(self, figure_region):

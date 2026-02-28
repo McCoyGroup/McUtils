@@ -112,6 +112,10 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
+    def get_constraint_rads(self) -> list[Distance|Angle|Dihedral]:
+        ...
+
+    @abc.abstractmethod
     def get_expansion(self, coords, order=None, **opts) -> List[np.ndarray]:
         ...
 
@@ -221,6 +225,8 @@ class Distance(BasicInternalType):
             and nput.is_int(input[0])
             and nput.is_int(input[1])
         )
+    def get_constraint_rads(self):
+        return [self]
 
 @InternalCoordinateType.register("bend")
 class Angle(BasicInternalType):
@@ -234,6 +240,8 @@ class Angle(BasicInternalType):
             and nput.is_int(input[0])
             and nput.is_int(input[1])
         )
+    def get_constraint_rads(self):
+        return [self]
     def get_dropped_internals(self):
         i,j,k = self.get_indices()
         return [self, Distance((i, j)), Distance((j, k))]
@@ -250,6 +258,8 @@ class Dihedral(BasicInternalType):
             and nput.is_int(input[0])
             and nput.is_int(input[1])
         )
+    def get_constraint_rads(self):
+        return [self]
     def get_dropped_internals(self):
         i,j,k,l = self.get_indices()
         return [self, Distance((i, j)), Distance((j, k)), Distance((k, l))]
@@ -258,6 +268,8 @@ class Dihedral(BasicInternalType):
 class Wag(BasicInternalType):
     forward_conversion = nput.wag_vec
     inverse_conversion = nput.wag_expansion
+    def get_constraint_rads(self):
+        return [Dihedral()]
 
 @InternalCoordinateType.register("oop")
 class OutOfPlane(BasicInternalType):
@@ -374,7 +386,6 @@ class InternalSpec:
                     or c not in self.ungraphed_internals
             )
         ]
-
         self.masses = masses
         self._atom_lists = None
         self._atoms = None
@@ -382,11 +393,16 @@ class InternalSpec:
         self._tri_di = triangulation
         self._rad_conv = None
         self._zm_conv = None
+        self._carried_atoms = [None] * len(coords)
     @classmethod
-    def from_zmatrix(cls, zmat, **opts):
+    def from_zmatrix(cls, *zmats, additions=None, **opts):
         from .ZMatrices import extract_zmatrix_internals
+        vars = [
+            extract_zmatrix_internals(z)
+            for z in zmats
+        ]
         return cls(
-            extract_zmatrix_internals(zmat),
+            (sum(vars, []) + ([] if additions is None else list(additions))),
             **opts
         )
 
@@ -676,7 +692,11 @@ class InternalSpec:
         expansions = []
         for i, c in enumerate(self.coords):
             if (terms is None or i in terms):
-                expansions.append(c.get_inverse_expansion(coords, order=order, context=self, **opts))
+                if self._carried_atoms[i] is None:
+                    self._carried_atoms[i] = c.get_carried_atoms(self)
+                exp = c.get_inverse_expansion(coords, order=order, moved_indices=self._carried_atoms[i], **opts)
+                coords = exp[0]
+                expansions.append(exp)
         if combine_expansions:
             expansions = nput.combine_coordinate_inverse_expansions(expansions, order=order)
         return expansions
@@ -687,7 +707,7 @@ class InternalSpec:
     def internals_to_cartesians(self, coords, order=None):
         from .ZMatrices import zmatrix_from_values
         from .Conveniences import zmatrix_to_cartesian
-        zmatrix, prep = self.get_zmat_conv()
+        (sel, zmatrix, prep) = self.get_zmat_conv()
         print(prep)
         flat_z = prep(coords)
         zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
@@ -1455,20 +1475,20 @@ def _permute_dihed_data(terms, perm):
         new.add(nput.dihedron_property_specifiers(y)["name"])
     return new
 def _validate_dihed_triangulation(mod_sets, key, internals, adding=None):
-    if None in key: return
-    for p in itertools.permutations(key):
-        if p != key and p in mod_sets:
-            raise ValueError(f"key {key} is duped as {p} ({mod_sets[p]})")
-    for a in mod_sets[key]:
+    if None not in key:
+        for p in itertools.permutations(key):
+            if p != key and p in mod_sets:
+                raise ValueError(f"key {key} is duped as {p} ({mod_sets[p]})")
+    for a in mod_sets.get(key, []):
         idx = nput.dihedron_property_specifiers(a)["coord"]
         c = canonicalize_internal(tuple(key[i] for i in idx))
-        if len(c) == 4 and c not in internals:
+        if len(c) == 4 and c not in internals: # check the inverse too
             c = canonicalize_internal([c[0], c[2], c[1], c[3]])
         if c not in internals:
             if adding is None:
-                raise ValueError(f"internal list {internals} doesn't contain {c} (from '{a}' on {key})")
+                raise ValueError(f"internal list doesn't contain {c} (from '{a}' on {key}) : {internals} ")
             else:
-                raise ValueError(f"internal list {internals} doesn't contain {c} (from '{a}' on {key}, adding {adding})")
+                raise ValueError(f"internal list doesn't contain {c} (from '{a}' on {key}, adding '{adding}') : {internals} ")
 
 def get_internal_triangles_and_dihedrons(internals,
                                          canonicalize=True,
@@ -1516,10 +1536,16 @@ def get_internal_triangles_and_dihedrons(internals,
                     if i == k:
                         if j == l:
                             v.add("a")
+                            key = (k, l, m, n)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif j == m:
                             v.add("x")
+                            key = (k, l, m, n)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif j == n:
                             v.add("z")
+                            key = (k, l, m, n)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif m is None:
                             key = (k, l, j, None)
                             mod_sets[key] = mod_sets.get(key, set()) | v | {"x"}
@@ -1532,10 +1558,16 @@ def get_internal_triangles_and_dihedrons(internals,
                     elif i == l:
                         if j == k:
                             v.add("a")
+                            key = (k, l, m, n)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif j == m:
                             v.add("b")
+                            key = (k, l, m, n)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif j == n:
                             v.add("y")
+                            key = (k, l, m, n)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif m is None:
                             key = (k,l,j,n)
                             mod_sets[key] = mod_sets.get(key, set()) | v | {"b"}
@@ -1587,7 +1619,7 @@ def get_internal_triangles_and_dihedrons(internals,
                             key, z, perm = _get_dihedron_bond_key_name(mod_sets, k, l, m, i, i, j)
                             v = _permute_dihed_data(v, perm)
                             mod_sets[key] = mod_sets.get(key, set()) | v | {z}
-                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals, z)
                     if key is not None:
                         if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                 else:
@@ -1597,8 +1629,8 @@ def get_internal_triangles_and_dihedrons(internals,
         elif len(coord) == 3:
             i,j,k = coord
             C = i,j,k
-            A = canonicalize_internal((i,k,j))
-            B = canonicalize_internal((j,i,k))
+            A, sA = canonicalize_internal((i,k,j), return_sign=True)
+            B, sB = canonicalize_internal((j,i,k), return_sign=True)
             if C in tri_sets:
                 tri_sets[C].add("C")
             elif A in tri_sets:
@@ -1630,28 +1662,35 @@ def get_internal_triangles_and_dihedrons(internals,
                             if j == l:
                                 key = (a, l, k, n)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {"X"}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                             elif k == l:
                                 key = (a, l, j, n)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {"A"}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                             else:
                                 key, z, perm = _get_dihedron_angle_key_name(mod_sets, a,l,j,k, i, j, k)
                                 v = _permute_dihed_data(v, perm)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {z}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif i == l:
                             if j == a:
                                 key = (a, l, k, n)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {"B1"}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                             elif k == a:
                                 key = (a, l, j, n)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {"A"}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                             else:
                                 key, z, perm = _get_dihedron_angle_key_name(mod_sets, a,l,j,k, i, j, k)
                                 v = _permute_dihed_data(v, perm)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {z}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif j == a:
                             if k == l:
                                 key = (a, l, i, n)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {"B1"}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                             else:
                                 key, z, perm = _get_dihedron_angle_key_name(mod_sets, a,l,i,k, i, j, k)
                                 v = _permute_dihed_data(v, perm)
@@ -1660,25 +1699,31 @@ def get_internal_triangles_and_dihedrons(internals,
                             if k == a:
                                 key = (a, l, i, n)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {"X"}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                             else:
                                 key, z, perm = _get_dihedron_angle_key_name(mod_sets, a,l,i,k, i, j, k)
                                 v = _permute_dihed_data(v, perm)
                                 mod_sets[key] = mod_sets.get(key, set()) | v | {z}
+                                if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         elif k in {a,l}:
                             key, z, perm = _get_dihedron_angle_key_name(mod_sets, a,l,i,j, i, j, k)
                             v = _permute_dihed_data(v, perm)
                             mod_sets[key] = mod_sets.get(key, set()) | v | {z}
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                     elif n is None:
-                        C1 = canonicalize_internal((a, l, m))
+                        C1, s = canonicalize_internal((a, l, m), return_sign=True)
                         if C == C1:
                             key = (a, l, m, n)
                             mod_sets[key].add("X")
-                        elif A == C1: # i,k,j
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
+                        elif A == C1: # i,k,j == (a,l,m)
                             key = (a, l, m, n)
-                            mod_sets[key].add("A")
-                        elif B == C1:
+                            mod_sets[key].add("A" if (sA * s) > 0 else "B1")
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
+                        elif B == C1: # k,i,j == (a,l,m)
                             key = (a, l, m, n)
-                            mod_sets[key].add("B1")
+                            mod_sets[key].add("B1" if (sB * s) > 0 else "A")
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                         else:
                             if i in (a,l,m):
                                 if j in (a,l,m):
@@ -2342,10 +2387,18 @@ def enumerate_zmatrices_from_internals(internals,
             else:
                 raise ValueError(f"can't complete {k}")
 
+    # determine connected components
+    # from dihedral framework
+    # raise Exception(comps.get_fragments())
+
     if atoms is None:
         atoms = np.unique(np.concatenate(internals))
-    atom_mapping = {a:i for i,a in enumerate(atoms)}
-    if roots is None:
+    # atom_mapping = {a:i for i,a in enumerate(atoms)}
+
+    comps = EdgeGraph.from_map(known_atom_graph)
+    zm_generators = []
+    for atoms in comps.get_fragments():
+        # if roots is None:
         #TODO: add canonicalization to cut down on comps
         for i,j,k in itertools.combinations(atoms, 3):
             if ((i, j) in internals or (j, i) in internals) and (
@@ -2363,62 +2416,78 @@ def enumerate_zmatrices_from_internals(internals,
         else:
             raise ValueError("can't find three atoms to serve as root")
 
-    # try to find an ordering of the dihedrals that gives
-    # a valid set
+        # try to find an ordering of the dihedrals that gives
+        # a valid set
 
-    idx_props = _get_dihedron_index_props()
-    i, j, k = roots #
-    d_blocks = [
-        [(i, -1, -2, -3)],
-        [(j, i, -1, -2)],
-        [
-            (k, j, i, -1)
-                if (k,j) in internals or (j, k) in internals else
-            (k, i, j, -1)
-        ],
-    ]
-    for a in atoms[3:]:
-        d_choices = []
-        for k,d in complete_dihedrals.items():
-            if a in k:
-                for p,v in idx_props.items():
-                    if (
-                            len(v['coord']) == 4
-                            and d[v['index']] is not None
-                    ):
-                        if (a == k[p[0]] or a == k[p[-1]]):
-                            k = [k[i] for i in p]
-                            if a == k[-1]: k = list(reversed(k))
-                            d_choices.append(k)
-        if len(d_choices) == 0:
-            raise ValueError(
-                a,
-                [
-                    k for k in d2
-                    if a in k
+        idx_props = _get_dihedron_index_props()
+        i, j, k = roots #
+        d_blocks = [
+            [(i, -1, -2, -3)],
+            [(j, i, -1, -2)],
+            [
+                (k, j, i, -1)
+                    if (k,j) in internals or (j, k) in internals else
+                (k, i, j, -1)
+            ],
+        ]
+        for a in atoms[3:]:
+            d_choices = []
+            for k,d in complete_dihedrals.items():
+                if a in k:
+                    for p,v in idx_props.items():
+                        if (
+                                len(v['coord']) == 4
+                                and d[v['index']] is not None
+                        ):
+                            if (a == k[p[0]] or a == k[p[-1]]):
+                                k = [k[i] for i in p]
+                                if a == k[-1]: k = list(reversed(k))
+                                d_choices.append(k)
+            if len(d_choices) == 0:
+                raise ValueError(
+                    a,
+                    [
+                        k for k in d2
+                        if a in k
+                    ]
+                )
+            d_blocks.append(d_choices)
+
+        # for b in d_blocks: print(b)
+        def _filter(p, v):
+            p_set = {pp[0] for pp in p}
+            for i in v[1:]:
+                if i > 0 and i not in p_set:
+                    return False
+            return True
+        possible_mats = itut.unique_product(
+            *d_blocks,
+            filter=_filter
+        )
+        zm_generators.append(possible_mats)
+
+    if len(zm_generators) == 1:
+        possible_mats = zm_generators[0]
+        for zm in possible_mats:
+            if build_conversion:
+                targets = extract_zmatrix_internals(zm)
+                yield zm, find_internal_conversion(internals, targets,
+                                                    triangles_and_dihedrons=triangles_and_dihedrons,
+                                                    **conversion_options)
+            else:
+                yield zm
+    else:
+        for zm_list in itertools.product(*zm_generators):
+            if build_conversion:
+                convs = [
+                    find_internal_conversion(internals, extract_zmatrix_internals(zm),
+                                             triangles_and_dihedrons=triangles_and_dihedrons,
+                                             **conversion_options)
+                    for zm in zm_list
                 ]
-            )
-        d_blocks.append(d_choices)
-
-    # for b in d_blocks: print(b)
-    def _filter(p, v):
-        p_set = {pp[0] for pp in p}
-        for i in v[1:]:
-            if i > 0 and i not in p_set:
-                return False
-        return True
-    possible_mats = itut.unique_product(
-        *d_blocks,
-        filter=_filter
-    )
-    for zm in possible_mats:
-        if build_conversion:
-            targets = extract_zmatrix_internals(zm)
-            yield zm, find_internal_conversion(internals, targets,
-                                                triangles_and_dihedrons=triangles_and_dihedrons,
-                                                **conversion_options)
-        else:
-            yield zm
+                yield zm_list, convs
+            else:
+                yield zm_list
 
 def get_internal_distance_conversion(
         internals,

@@ -28,6 +28,16 @@ class EdgeGraph:
         self._rings = None
         self._sp_data = None
 
+    @classmethod
+    def from_map(cls, edge_map):
+        nodes = {e:i for i,e in enumerate(edge_map.keys())}
+        edges = []
+        submap = {}
+        for e,s in edge_map.items():
+            submap[nodes[e]] = {nodes[f] for f in s}
+            edges.extend([nodes[e], nodes[f]] for f in s)
+        return cls(list(nodes.keys()), edges, edge_map=submap)
+
     def graph_difference(self, other):
         diff = (other.graph - self.graph)
         if isinstance(diff, np.ndarray):
