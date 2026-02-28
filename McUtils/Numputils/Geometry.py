@@ -1355,8 +1355,10 @@ def _get_triangle_completions(tri:TriangleData):
         ]
 def triangle_is_complete(tri:TriangleData):
     return _check_bond_valid_triangle(tri)
-def _permutation_trie(comb_lists):
-    _ = []
+def _permutation_trie(comb_lists, cache=None):
+    # _ = []
+    if cache is not None and comb_lists in cache:
+        return cache[comb_lists]
     trie = {}
     for c,completion_func in comb_lists:
         for p in itertools.permutations(c):
@@ -1369,6 +1371,8 @@ def _permutation_trie(comb_lists):
                 t = t[k]
             else:
                 t[p[-1]] = (c, completion_func)
+    if cache is not None:
+        cache[comb_lists] = trie
     return trie
 def _expand_trie(t):
     comps = {}
@@ -1651,31 +1655,33 @@ def _triangle_property_C_from_saa(a, B, A):
     return tri_saa_to_sas(a, B, A)[1]
 def _triangle_property_C_from_asa(A, c, B):
     return tri_asa_to_sas(A, c, B)[1]
-def triangle_completions_c(a, b, A, B, C):
+def triangle_completions_c(a, b, A, B, C, cache=None):
     return _permutation_trie(
-            [
-                ([a, C, b], _triangle_property_c_from_sas),
-                ([a, B, A], _triangle_property_c_from_saa),
-                ([b, A, B], _triangle_property_c_from_saa),
-                ([C, a, B], _triangle_property_c_from_asa),
-                ([C, b, A], _triangle_property_c_from_asa)
-            ]
-        )
-def triangle_completions_C(a, b, c, A, B):
+        (
+            ((a, C, b), _triangle_property_c_from_sas),
+            ((a, B, A), _triangle_property_c_from_saa),
+            ((b, A, B), _triangle_property_c_from_saa),
+            ((C, a, B), _triangle_property_c_from_asa),
+            ((C, b, A), _triangle_property_c_from_asa)
+        ),
+        cache=cache
+    )
+def triangle_completions_C(a, b, c, A, B, cache=None):
     return _permutation_trie(
-            [
-                ([a, b, c], _triangle_property_C_from_sss),
-                ([a, B, c], _triangle_property_C_from_sas),
-                ([b, A, c], _triangle_property_C_from_sas),
-                ([a, B, A], _triangle_property_C_from_saa),
-                ([b, A, B], _triangle_property_C_from_saa),
-                ([A, c, B], _triangle_property_c_from_asa)
-            ]
-        )
+        (
+            ((a, b, c), _triangle_property_C_from_sss),
+            ((a, B, c), _triangle_property_C_from_sas),
+            ((b, A, c), _triangle_property_C_from_sas),
+            ((a, B, A), _triangle_property_C_from_saa),
+            ((b, A, B), _triangle_property_C_from_saa),
+            ((A, c, B), _triangle_property_c_from_asa)
+        ),
+        cache=cache
+    )
 class TriangleCoordinateType(enum.Enum):
     Distance = "distance"
     Angle = "angle"
-def triangle_completions_trie(tdata:TriangleData, field_name, return_args=False):
+def triangle_completions_trie(tdata:TriangleData, field_name, return_args=False, cache=None):
     if field_name == tdata.a:
         args = tdata.b, tdata.c, tdata.B, tdata.C, tdata.A
         type = TriangleCoordinateType.Distance
@@ -1698,9 +1704,9 @@ def triangle_completions_trie(tdata:TriangleData, field_name, return_args=False)
         raise ValueError(f"can't interepret field name {field_name}")
 
     if type == TriangleCoordinateType.Distance:
-        trie = triangle_completions_c(*args)
+        trie = triangle_completions_c(*args, cache=cache)
     else:
-        trie = triangle_completions_C(*args)
+        trie = triangle_completions_C(*args, cache=cache)
 
     if return_args:
         return (args, type), trie
@@ -3485,7 +3491,7 @@ def dihedron_property(ddata:DihedralTetrahedronData, field_name, allow_completio
             raise ValueError(f"bad property name {field_name}")
     else:
         return _dihed_prop(ddata, field_name)
-def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2):
+def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2, cache=None):
     """
         elif field_name == dd.Tb:
         args = [dd.b, dd.a, dd.x, dd.y, dd.c, dd.A, dd.X, dd.Y, dd.C, dd.z, dd.Z, dd.Z2]
@@ -3494,64 +3500,78 @@ def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2):
         args = [dd.a, dd.b, dd.x, dd.y, dd.z, dd.B1, dd.X, dd.Y3, dd.Z, dd.c, dd.C, dd.C4]
         completion_type = DihedronCoordinateType.Dihedral
     """
+    if cache is None: raise Exception(...)
     return _permutation_trie(
-        [
-            ([X, Z, C], dihedral_from_XZC),
-            ([A, Z2, Y], dihedral_from_XZC),
-            ([a, y, X, C, z], dihedral_from_ayXCz),
-            ([x, c, A, Y, z], dihedral_from_ayXCz),
-            ([a, b, c, x, y, z], dihedral_from_abcxyz),
-            ([a, b, c, x, Y, z], dihedral_from_abcxYz),
-            ([c, b, a, y, X, z], dihedral_from_abcxYz),
-            ([a, b, c, X, Y, z], dihedral_from_abcXYz),
-            ([x, b, y, A, C, z], dihedral_from_abcXYz),
-            ([x, b, y, a, C, z], dihedral_from_abcxYz),
-            ([y, b, x, c, A, z], dihedral_from_abcxYz)
-        ]
+        (
+            ((X, Z, C), dihedral_from_XZC),
+            ((A, Z2, Y), dihedral_from_XZC),
+            ((a, y, X, C, z), dihedral_from_ayXCz),
+            ((x, c, A, Y, z), dihedral_from_ayXCz),
+            ((a, b, c, x, y, z), dihedral_from_abcxyz),
+            ((a, b, c, x, Y, z), dihedral_from_abcxYz),
+            ((c, b, a, y, X, z), dihedral_from_abcxYz),
+            ((a, b, c, X, Y, z), dihedral_from_abcXYz),
+            ((x, b, y, A, C, z), dihedral_from_abcXYz),
+            ((x, b, y, a, C, z), dihedral_from_abcxYz),
+            ((y, b, x, c, A, z), dihedral_from_abcxYz)
+        ),
+        cache=cache
     )
 def dihedral_b_completions_trie(a, x, A, X, B1,
                                 y, c, Y, C, B2,
                                 z, Y3, C4, A3, X4,
-                                Tz):
+                                Tz, cache=None):
     b = object()
+    if cache is None: raise Exception(...)
     dihed_comps = _permutation_trie(
-            [
-                ([x, a, Y3, C4, Tz], dihedral_z_from_ayXCt),
-                ([y, c, A3, X4, Tz], dihedral_z_from_ayXCt),
-                # a b c X Y Tb -> z a c X4 Y3 T
-                ([a, z, c, Y3, X4, Tz], dihedral_z_from_abcXYt),
-                ([a, z, c, y, X4, Tz], dihedral_z_from_abcxYt),
-                ([c, z, a, x, Y3, Tz], dihedral_z_from_abcxYt),
-                ([a, z, c, y, x, Tz], dihedral_z_from_abcxyt),
-                # x b y A C Tb -> x a y C4 Z2 T
-                ([y, z, x, A3, C4, Tz], dihedral_z_from_abcXYt),
-                ([y, z, x, a, C4, Tz], dihedral_z_from_abcxYt),
-                ([x, z, y, c, A3, Tz], dihedral_z_from_abcxYt)
-            ]
-        )
+        (
+            ((x, a, Y3, C4, Tz), dihedral_z_from_ayXCt),
+            ((y, c, A3, X4, Tz), dihedral_z_from_ayXCt),
+            # a b c X Y Tb -> z a c X4 Y3 T
+            ((a, z, c, Y3, X4, Tz), dihedral_z_from_abcXYt),
+            ((a, z, c, y, X4, Tz), dihedral_z_from_abcxYt),
+            ((c, z, a, x, Y3, Tz), dihedral_z_from_abcxYt),
+            ((a, z, c, y, x, Tz), dihedral_z_from_abcxyt),
+            # x b y A C Tb -> x a y C4 Z2 T
+            ((y, z, x, A3, C4, Tz), dihedral_z_from_abcXYt),
+            ((y, z, x, a, C4, Tz), dihedral_z_from_abcxYt),
+            ((x, z, y, c, A3, Tz), dihedral_z_from_abcxYt)
+        ),
+        cache=cache
+    )
     return _trie_merge(
         dihed_comps,
         _trie_merge(
-            triangle_completions_trie(make_triangle(a=a, b=b, c=x, A=A, B=B1, C=X), b),
-            triangle_completions_trie(make_triangle(a=y, b=b, c=c, A=Y, B=B2, C=C), b),
+            triangle_completions_trie(make_triangle(a=a, b=b, c=x, A=A, B=B1, C=X), b, cache=cache),
+            triangle_completions_trie(make_triangle(a=y, b=b, c=c, A=Y, B=B2, C=C), b, cache=cache),
         )
     )
-def dihedral_Z_completions_trie(X, C, Tb, z, a, y, A3, Y3):
+def dihedral_Z_completions_trie(X, C, Tb, z, a, y, A3, Y3, cache=None):
     Z = object()
+    if cache is None: raise Exception(...)
     return _trie_merge(
         _permutation_trie(
-            [
-                ([X, Tb, C], dihedral_Z_from_XtC),
-            ]
+            (
+                ((X, Tb, C), dihedral_Z_from_XtC),
+            ),
+            cache=cache
         ),
-        triangle_completions_trie(make_triangle(a=a, b=y, c=z, A=A3, B=Y3, C=Z), Z)
+        triangle_completions_trie(make_triangle(a=a, b=y, c=z, A=A3, B=Y3, C=Z), Z, cache=cache)
     )
 
 class DihedronCoordinateType(enum.Enum):
     Distance = "distance"
     Angle = "angle"
     Dihedral = "dihedral"
-def dihedral_completions_trie(dd, field_name, return_args=True):
+def dihedral_completions_trie(dd, field_name, return_args=True, cache=None):
+    if cache is not None and (dd, field_name) in cache:
+        (args, completion_type), trie = cache[(dd, field_name)]
+
+        if return_args:
+            return (args, completion_type), trie
+        else:
+            return trie
+
     if field_name == 'a': # (01)
         #       (21)  (20)                     (31)  (30)
         args = [dd.b, dd.x, dd.B1, dd.X, dd.A, dd.y, dd.z, dd.Y3, dd.Z, dd.A3, dd.c, dd.Y, dd.Z2, dd.B2, dd.X4, dd.Tc]
@@ -3635,19 +3655,22 @@ def dihedral_completions_trie(dd, field_name, return_args=True):
         raise ValueError(f"can't interepret field name {field_name}")
 
     if completion_type == DihedronCoordinateType.Distance:
-        trie = dihedral_b_completions_trie(*args)
+        trie = dihedral_b_completions_trie(*args, cache=cache)
     elif completion_type == DihedronCoordinateType.Angle:
-        trie = dihedral_Z_completions_trie(*args)
+        trie = dihedral_Z_completions_trie(*args, cache=cache)
     else:
-        trie = dihedral_Tb_completions_trie(*args)
+        trie = dihedral_Tb_completions_trie(*args, cache=cache)
+
+    if cache is not None:
+        cache[(dd, field_name)] = (args, completion_type), trie
 
     if return_args:
         return (args, completion_type), trie
     else:
         return trie
-def dihedral_completions(field_name, return_trie=False, return_args=False, **dihedron_values):
+def dihedral_completions(field_name, return_trie=False, return_args=False, cache=None, **dihedron_values):
     dd = make_symbolic_dihedron(**dihedron_values)
-    args, trie = dihedral_completions_trie(dd, field_name, return_args=True)
+    args, trie = dihedral_completions_trie(dd, field_name, return_args=True, cache=cache)
     if not return_trie:
         completions = _expand_trie(trie)
     else:
@@ -3656,19 +3679,27 @@ def dihedral_completions(field_name, return_trie=False, return_args=False, **dih
         return args, completions
     else:
         return completions
+
 def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
                               return_trie=False,
                               indices=None,
                               positions=False,
-                              return_args=False
+                              return_args=False,
+                              cache=None
                               ):
-    args, completions_trie = dihedral_completions(field_name,
-                                                  return_trie=True,
-                                                  return_args=True,
-                                                  indices=indices,
-                                                  positions=positions)
+    if cache is None:
+        cache = {}
+    if dd not in cache:
+        args, completions_trie = dihedral_completions(field_name,
+                                                      return_trie=True,
+                                                      return_args=True,
+                                                      indices=indices,
+                                                      positions=positions,
+                                                      cache=cache)
 
-    res = _completion_paths(dd, completions_trie, _dihed_prop, return_trie=return_trie)
+        res = _completion_paths(dd, completions_trie, _dihed_prop, return_trie=return_trie)
+        cache[dd] = (args, res)
+    (args, res) = cache[dd]
 
 
     if return_args:
@@ -3689,7 +3720,7 @@ def dihedron_is_complete(dd: DihedralTetrahedronData):
                 if dihedron_property(dd, x, allow_completion=False) is not None:
                     return True
     return False
-def enumerate_dihedron_completions(dd):
+def enumerate_dihedron_completions(dd, priortize_dihedrals=True):
     if dihedron_is_complete(dd):
         yield ()
     else:
@@ -3701,32 +3732,70 @@ def enumerate_dihedron_completions(dd):
             dihedron_triangle_4(dd)
         ]
         comps = [triangle_is_complete(t) for t in tris]
-        pair_scoring = {
-            (i,j): (1 if comps[i] else 0) + (1 if comps[j] else 0)
-            for i,j in itertools.combinations(range(4), 2)
-        }
-        max_score = max(pair_scoring.values())
-        pair_scoring = [k for k,v in pair_scoring.items() if v == max_score]
+        if sum(comps) > 1:
+            pair_scoring = {
+                (i,j): (
+                    (1 if comps[i] else 0)
+                    + (1 if comps[j] else 0)
+                    + (
+                        (2 if priortize_dihedrals else 1)
+                            if any(_dihed_prop(dd, x) is not None for x in dihedron_triangle_pair_dihedrals[(i, j)]) else
+                       0
+                    )
+                )
+                for i,j in itertools.combinations(range(4), 2)
+            }
+            max_score = max(pair_scoring.values())
+            pair_scoring = [k for k,v in pair_scoring.items() if v == max_score]
+            comp_lists = [None] * 4
+        else:
+            comp_lists = [
+                list(enumerate_triangle_completions(t))
+                for t in tris
+            ]
+            pair_scoring = {
+                (i, j): (
+                    min(len(c) for c in comp_lists[i])
+                    + min(len(c) for c in comp_lists[j])
+                    + (
+                        (-1 if priortize_dihedrals else 0)
+                            if any(_dihed_prop(dd, x) is not None for x in dihedron_triangle_pair_dihedrals[(i, j)]) else
+                       1
+                    )
+                )
+                for i, j in itertools.combinations(range(4), 2)
+            }
+            min_score = min(pair_scoring.values())
+            pair_scoring = [k for k,v in pair_scoring.items() if v == min_score]
         for i,j in pair_scoring:
+            if not comps[i] and comp_lists[i] is None:
+                comp_lists[i] = list(enumerate_triangle_completions(tris[i]))
             subenums = [
-                enumerate_triangle_completions(tris[i])
+                comp_lists[i]
                     if not comps[i] else
                 [[]],
-                enumerate_triangle_completions(tris[j])
+                comp_lists[j]
                     if not comps[j] else
                 [[]],
-                dihedron_triangle_pair_dihedrals[(i, j)]
+                [()]
+                    if any(_dihed_prop(dd, x) is not None for x in dihedron_triangle_pair_dihedrals[(i, j)]) else
+                [dihedron_triangle_pair_dihedrals[(i, j)]]
             ]
             tri_map_1 = dict(zip(tris[i]._asdict().keys(), dihedron_triangle_fields[i]))
             tri_map_2 = dict(zip(tris[j]._asdict().keys(), dihedron_triangle_fields[j]))
             for c_i, c_j, p in itertools.product(*subenums):
-                yield tuple(tri_map_1[x] for x in c_i) + tuple(tri_map_2[y] for y in c_j) + (p,)
+                yield (
+                        tuple(tri_map_1[x] for x in c_i)
+                        + tuple(tri_map_2[y] for y in c_j)
+                        + p
+                )
 
 def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name,
                                disallowed_conversions=None,
                                allow_completion=True,
                                raise_on_missing=True,
-                               return_depth=False):
+                               return_depth=False,
+                               cache=None):
     field_props = dihedron_property_specifiers(field_name)
     field_name = field_props['name']
     if sample_dihed[field_props['index']] is not None:
@@ -3740,11 +3809,15 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
         else:
             return convert
     else:
+        sub_dict = sample_dihed._asdict()
+        og_dihed = sample_dihed
+        sample_dihed = DihedralTetrahedronData(**{k:(k if v is not None else v) for k,v in sub_dict.items()})
         args, (complete, conversion_specs) = dihedral_completion_paths(
             sample_dihed,
             field_name,
             return_trie=True,
-            return_args=True
+            return_args=True,
+            cache=cache
         )
         if complete:
             args, func = conversion_specs
@@ -3763,9 +3836,15 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
             if allow_completion:
                 possible_conversions = {}
                 convertable_keys = {}
-                for base_args, trie in conversion_specs:
-                    for l,f in _expand_trie(trie).items():
-                        props = [_dihed_prop(sample_dihed, ll) is not None for ll in l]
+                if 'trie_expansions' not in cache:
+                    cache['trie_expansions'] = {}
+                if sample_dihed not in cache['trie_expansions']:
+                    cache['trie_expansions'][sample_dihed] = (
+                        conversion_specs, [_expand_trie(trie) for _, trie in conversion_specs]
+                    )
+                for (base_args, trie), trie_expansion in zip(*cache['trie_expansions'][sample_dihed]):
+                    for l,f in trie_expansion.items():
+                        props = [sub_dict[ll] is not None for ll in l]
                         rem_inds = [i for i,j in enumerate(props) if not j]
                         base_inds = [i for i,j in enumerate(props) if j]
                         rem_list = tuple(sorted(l[i] for i in rem_inds))
@@ -3782,11 +3861,12 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                     for k in kl:
                         if k not in convertable_keys:
                             if k in disallowed_conversions: break
-                            d2 = dihedron_property_function(sample_dihed, k,
+                            d2 = dihedron_property_function(og_dihed, k,
                                                             disallowed_conversions=disallowed_conversions,
                                                             allow_completion=True,
                                                             raise_on_missing=False,
-                                                            return_depth=True)
+                                                            return_depth=True,
+                                                            cache=cache)
                             if d2 is None:
                                 disallowed_conversions.add(k)
                                 break

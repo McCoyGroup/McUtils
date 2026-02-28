@@ -570,6 +570,8 @@ class GraphicsPropertyManager:
     @background.setter
     def background(self, bg):
         self._background = bg
+        if isinstance(bg, str) and bg == 'transparent':
+            bg = 'none'
         if not self.managed and not self.graphics.inset:
             self.figure.set_facecolor(bg)
         self.axes.set_facecolor(bg)

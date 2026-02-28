@@ -33,7 +33,9 @@ __all__ = [
     "canonical_fragment_zmatrix",
     "reindex_zmatrix",
     "sort_complex_attachment_points",
-    "complex_zmatrix"
+    "complex_zmatrix",
+    "graph_backbone_zmatrix",
+    "segmented_complex_backbone_zmatrix"
 ]
 
 
@@ -1489,3 +1491,133 @@ def complex_zmatrix(
                 raise ValueError(f"new zmatrix after reindexing invalid ({reason}) in {zm}")
 
     return zm
+
+def graph_backbone_zmatrix(bond_graph: EdgeGraph,
+                     root=None, segments=None, return_remainder=False, return_segments=False,
+                     validate=True
+                     ):
+    if segments is None:
+        segments = bond_graph.segment_by_chains(root=root)
+        if validate:
+            flat_frags = list(itut.flatten(segments))
+            frag_counts = itut.counts(flat_frags)
+            bad_frags = {k: v for k, v in frag_counts.items() if v > 1}
+            if len(bad_frags) > 0:
+                raise ValueError(f"diplicate atoms {list(bad_frags.keys())} encountered in {segments}")
+
+    bond_list = bond_graph.edges
+    base_graph = bond_graph_zmatrix(
+        bond_list,
+        segments,
+        validate_additions=validate
+    )
+    zmat, new_bonds = add_missing_zmatrix_bonds(
+        base_graph,
+        bond_list,
+        validate_additions=validate
+    )
+
+    if return_segments or return_remainder:
+        res = (zmat,)
+        if return_segments:
+            res = res + (segments,)
+        if return_remainder:
+            res = res + (new_bonds,)
+
+        return res
+    else:
+        return zmat
+
+def segmented_complex_backbone_zmatrix(bond_graph: EdgeGraph,
+                                       fragments=None, segments=None, root=None,
+                                       attachment_points=None,
+                                       check_attachment_points=True,
+                                       validate=True,
+                                       for_fragment=None,
+                                       fragment_ordering=None,
+                                       distance_matrix=None):
+    no_frag = fragments is None
+    if fragments is None:
+        fragments = bond_graph.get_fragments()
+    if for_fragment is not None:
+        if nput.is_int(for_fragment):
+            for_fragment = fragments[for_fragment]
+        if attachment_points is not None:
+            frag_map = dict(zip(for_fragment, np.arange(len(for_fragment))))
+            if hasattr(attachment_points, 'items'):
+                attachment_points = {
+                    frag_map[i]: (frag_map[k] if nput.is_numeric(k) else tuple(frag_map[kk] for kk in k))
+                    for i,k in attachment_points.items()
+                }
+            else:
+                attachment_points = [
+                    frag_map[i] for i in attachment_points
+                ]
+
+        if distance_matrix is not None:
+            distance_matrix = distance_matrix[np.ix_(for_fragment, for_fragment)]
+        base_ints = segmented_complex_backbone_zmatrix(
+            bond_graph.take(for_fragment),
+            fragments=fragments, segments=segments, root=root,
+            attachment_points=attachment_points,
+            check_attachment_points=check_attachment_points,
+            fragment_ordering=fragment_ordering,
+            distance_matrix=distance_matrix,
+            validate=validate
+        )
+        return reindex_zmatrix(base_ints, for_fragment)
+    else:
+
+        if len(fragments) == 1:
+            if segments is not None and len(segments) == 1:
+                segments = segments[0]
+            return graph_backbone_zmatrix(
+                bond_graph,
+                root=root, segments=segments,
+                validate=validate
+                )
+        else:
+            inds = fragments
+            if no_frag:
+                if fragment_ordering is None:
+                    fragment_ordering = np.argsort([-len(x) for x in inds])
+                inds = [inds[i] for i in fragment_ordering]
+            if root is not None:
+                if nput.is_numeric(root):
+                    inds = list(sorted(inds, key=lambda x:root not in x))
+                else:
+                    inds = list(
+                        sorted(inds,
+                               key=lambda x:sum(i if r is not None and r in x else len(inds) for i,r in enumerate(root))
+                               )
+                    )
+
+            sort_attch = isinstance(attachment_points, dict)
+            if sort_attch:
+                check_attachment_points = False
+                inds, attachment_points = sort_complex_attachment_points(
+                    inds,
+                    attachment_points
+                )
+
+            frags = [bond_graph.take(ix) for ix in inds]
+            if root is None and sort_attch:
+                root = [ix[0] for ix in inds]
+            if root is None:
+                root = [root]
+
+            root = list(root) + [None] * (len(inds) - len(root))
+            zmats = [
+                graph_backbone_zmatrix(f, root=r)
+                for r,f in zip(root, frags)
+            ]
+
+            return complex_zmatrix(
+                bond_graph.edges,
+                inds,
+                zmats,
+                distance_matrix=distance_matrix,
+                attachment_points=attachment_points,
+                check_attachment_points=check_attachment_points,
+                validate_additions=validate
+            )
