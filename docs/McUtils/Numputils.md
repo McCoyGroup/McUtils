@@ -977,9 +977,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-82e942" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-82e942"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-3f5020" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3f5020"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-82e942" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3f5020" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -1025,9 +1025,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-336dca" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-336dca"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-b9c81f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b9c81f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-336dca" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b9c81f" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

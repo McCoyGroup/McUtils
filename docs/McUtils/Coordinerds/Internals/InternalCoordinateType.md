@@ -135,13 +135,23 @@ get_carried_atoms(self, context: 'InternalSpec'):
 </div>
 
 
+<a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_constraint_rads" class="docs-object-method">&nbsp;</a> 
+```python
+get_constraint_rads(self) -> 'list[Distance | Angle | Dihedral]': 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L114?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_expansion" class="docs-object-method">&nbsp;</a> 
 ```python
 get_expansion(self, coords, order=None, **opts) -> 'List[np.ndarray]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L118)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L118?message=Update%20Docs)]
 </div>
 
 
@@ -150,8 +160,8 @@ get_expansion(self, coords, order=None, **opts) -> 'List[np.ndarray]':
 get_inverse_expansion(self, coords, order=None, moved_indices=None, **opts) -> 'List[np.ndarray]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L122?message=Update%20Docs)]
 </div>
  </div>
 </div>

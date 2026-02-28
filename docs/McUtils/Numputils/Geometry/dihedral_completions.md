@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.Geometry.dihedral_completions">dihedral_completions</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L3648)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3648?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L3671)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3671?message=Update%20Docs)]
 </div>
 
 ```python
-dihedral_completions(field_name, return_trie=False, return_args=False, **dihedron_values): 
+dihedral_completions(field_name, return_trie=False, return_args=False, cache=None, **dihedron_values): 
 ```
 
 
@@ -59,7 +59,7 @@ dihedral_completions(field_name, return_trie=False, return_args=False, **dihedro
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/dihedral_completions.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/dihedral_completions.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3648?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L3671?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

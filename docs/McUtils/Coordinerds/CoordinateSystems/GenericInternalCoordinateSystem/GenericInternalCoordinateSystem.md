@@ -1,8 +1,8 @@
 ## <a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GenericInternalCoordinateSystem">GenericInternalCoordinateSystem</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L17?message=Update%20Docs)]
 </div>
 
 Represents ZMatrix coordinates generally
@@ -23,11 +23,11 @@ name: str
 ```
 <a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GenericInternalCoordinateSystem.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, converter_options=None, dimension=(None,), coordinate_shape=(None,), angle_ordering='ijk', **opts): 
+__init__(self, converter_options=None, dimension=(None,), coordinate_shape=(None,), angle_ordering='ijk', internal_spec=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L22)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L22?message=Update%20Docs)]
 </div>
 
   - `converter_options`: `None | dict`
@@ -38,6 +38,26 @@ __init__(self, converter_options=None, dimension=(None,), coordinate_shape=(None
     > the dimension of the coordinate system
   - `opts`: `Any`
     > other options, if `converter_options` is None, these are used as the `converter_options`
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GenericInternalCoordinateSystem.pre_convert_to" class="docs-object-method">&nbsp;</a> 
+```python
+pre_convert_to(self, system, opts=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.py#L49?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GenericInternalCoordinateSystem.pre_convert_from" class="docs-object-method">&nbsp;</a> 
+```python
+pre_convert_from(self, system, opts=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.py#L55)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.py#L55?message=Update%20Docs)]
+</div>
  </div>
 </div>
 
@@ -91,7 +111,7 @@ __init__(self, converter_options=None, dimension=(None,), coordinate_shape=(None
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GenericInternalCoordinateSystem.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L16?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem.py#L17?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
