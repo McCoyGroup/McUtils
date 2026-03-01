@@ -764,6 +764,7 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
     def __init__(self, graphics, figure, axes, managed=False):
         super().__init__(graphics, figure, axes, managed=managed)
         self._view_settings = None
+        self._box_ratios = None
 
     @property
     def axes_labels(self):
@@ -809,9 +810,25 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
             self.axes.set_zlabel(zlab)
 
     @property
+    def box_ratios(self):
+        if self._box_ratios is None:
+            self._box_ratios = self.axes.get_box_aspect()
+        return self._box_ratios
+    @box_ratios.setter
+    def box_ratios(self, br):
+        self._box_ratios = br
+        if dev.str_is(br, 'auto'):
+            (x, X), (y, Y), (z, Z) = self.plot_range
+            dx = X - x
+            dy = Y - y
+            dz = (Z - z)
+            br = (dx / dz, dy / dz, 1)
+        self.axes.set_box_aspect(br)
+
+    @property
     def plot_range(self):
         if self._plot_range is None:
-            pr = (self.axes.get_xlim(), self.axes.get_ylim())
+            pr = (self.axes.get_xlim(), self.axes.get_ylim(), self.axes.get_zlim())
         else:
             pr = self._plot_range
         return pr

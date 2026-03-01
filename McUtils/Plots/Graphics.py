@@ -1258,7 +1258,7 @@ class Graphics(GraphicsBase):
         self._prop_manager.colorbar = value
 
     def _prep_show(self, parent=False):
-        super()._prep_show()
+        super()._prep_show(parent=parent)
         if parent:
             if self.plot_legend or any(hasattr(c, 'plot_legend') and c.plot_legend for c in self.children):
                 pls = self.plot_legend
@@ -1420,6 +1420,12 @@ class Graphics3D(Graphics):
     @view_settings.setter
     def view_settings(self, value):
         self._prop_manager.view_settings = value
+
+    def _prep_show(self, parent=False):
+        super()._prep_show(parent=parent)
+        br = self._prop_manager._box_ratios
+        if dev.str_is(br, 'auto'):
+            self.box_ratios = 'auto' # a bit of a hack, sets the actual aspect ratio
 
 ########################################################################################################################
 #
