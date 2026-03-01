@@ -827,6 +827,8 @@ class MPLAxes(GraphicsAxes):
     def get_facecolor(self):
         return self.obj.get_facecolor()
     def set_facecolor(self, fg):
+        if isinstance(fg, str) and fg == 'transparent':
+            fg = 'none'
         return self.obj.set_facecolor(fg)
 
     def get_padding(self):
@@ -1220,7 +1222,7 @@ class MPLAxes3D(MPLAxes):
             y = radius * np.outer(np.sin(u), np.sin(v))
             z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
 
-            return surface(x + center[0], y + center[1], z + center[2], **opts)
+            return surface(x + center[0], y + center[1], z + center[2], color=color, **opts)
 
     # @classmethod
     # def _load_patch_line(cls):
@@ -1466,7 +1468,7 @@ class MPLAxes3D(MPLAxes):
             X, Y, Z = [start[i] + v[i] * t + rad * np.sin(theta) * n1[i] + rad * np.cos(theta) * n2[i] for i
                        in [0, 1, 2]]
 
-            return surface(X, Y, Z, **opts)
+            return surface(X, Y, Z, color=color, **opts)
 
     _Arrow3D = None
     @classmethod
@@ -1615,6 +1617,8 @@ class MPLFigure(GraphicsFigure):
     def get_facecolor(self):
         return self.obj.get_facecolor()
     def set_facecolor(self, fg):
+        if isinstance(fg, str) and fg == 'transparent':
+            fg = 'none'
         return self.obj.set_facecolor(fg)
 
     def savefig(self, file, **opts):
