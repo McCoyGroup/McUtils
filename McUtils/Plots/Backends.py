@@ -663,50 +663,10 @@ class MPLManager:
 class MPLAxes(GraphicsAxes):
     def __init__(self, mpl_axes_object, **opts):
         self.obj = mpl_axes_object
-        self.computed_zorder = self.obj.computed_zorder
-        self._monkeypatch_draw(self.obj)
         self.opts = self.canonicalize_opts(opts)
         super().__init__()
         self.xaxis = self.obj.xaxis
         self.yaxis = self.obj.yaxis
-    @classmethod
-    def _get_dist(cls, artist):
-        from mpl_toolkits.mplot3d import proj3d
-        try:
-            dist = artist.do_3d_projection()
-        except (AttributeError, TypeError):
-            if hasattr(artist, '_verts3d'):
-                # if artist.axes.M is not None:
-                xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
-                dist = np.max([v[-1] for v in xyzs_list])
-                # else:
-                #     dist = np.min(artist._verts3d[-1])
-            else:
-                dist = 1000000
-        # print(artist, dist)
-        return dist
-    def _monkeypatch_draw(self, obj):
-        cur_draw = obj.draw
-        obj.computed_zorder = False
-        @functools.wraps(obj.draw)
-        def draw(renderer):
-            if self.computed_zorder:
-                obj.M = obj.get_proj()
-                obj.invM = np.linalg.inv(obj.M)
-                zorder_offset = max(axis.get_zorder()
-                                    for axis in obj._axis_map.values()) + 1
-                artists = (
-                    artist for artist in self.obj._children
-                    if artist.get_visible() and artist.zorder > 0
-                )
-                for artist in sorted(artists,
-                                     key=lambda artist: self._get_dist(artist),
-                                     reverse=True):
-                    artist.zorder = zorder_offset+1
-                    zorder_offset += 1
-
-            cur_draw(renderer)
-        obj.draw = draw
 
     def clear(self, *, backend=None):
         ax = self.obj
@@ -1010,6 +970,54 @@ class MPLAxes3D(MPLAxes):
     def __init__(self, mpl_axes_object, **opts):
         super().__init__(mpl_axes_object, **opts)
         self.zaxis = self.obj.zaxis
+        self.computed_zorder = self.obj.computed_zorder
+        self._monkeypatch_draw(self.obj)
+
+    @classmethod
+    def _get_dist(cls, artist):
+        from mpl_toolkits.mplot3d import proj3d
+        try:
+            dist = artist.do_3d_projection()
+        except (AttributeError, TypeError):
+            if hasattr(artist, '_verts3d'):
+                # if artist.axes.M is not None:
+                xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
+                dist = np.min(xyzs_list[-1])
+                # else:
+                #     dist = np.min(artist._verts3d[-1])
+            else:
+                dist = 1000000
+        if hasattr(artist, 'zdist_offset'):
+            offset = artist.zdist_offset
+            if callable(offset):
+                offset = offset(artist)
+            dist += offset
+        return dist
+
+    def _monkeypatch_draw(self, obj):
+        cur_draw = obj.draw
+        obj.computed_zorder = False
+
+        @functools.wraps(obj.draw)
+        def draw(renderer):
+            if self.computed_zorder:
+                obj.M = obj.get_proj()
+                obj.invM = np.linalg.inv(obj.M)
+                zorder_offset = max(axis.get_zorder()
+                                    for axis in obj._axis_map.values()) + 1
+                artists = (
+                    artist for artist in self.obj._children
+                    if artist.get_visible() and artist.zorder > 0
+                )
+                for artist in sorted(artists,
+                                     key=lambda artist: self._get_dist(artist),
+                                     reverse=True):
+                    artist.zorder = zorder_offset + 1
+                    zorder_offset += 1
+
+            cur_draw(renderer)
+
+        obj.draw = draw
 
     def set_frame_visible(self, frame_spec):
         if frame_spec is True:
@@ -1031,6 +1039,11 @@ class MPLAxes3D(MPLAxes):
         return self.obj.tick_params(axis='z')
     def set_ztick_style(self, **opts):
         return self.obj.tick_params(axis='z', **opts)
+
+    def get_box_aspect(self):
+        return self.obj.get_box_aspect()
+    def set_box_aspect(self, br, **kwargs):
+        return self.obj.set_box_aspect(br, **kwargs)
 
     def get_view_settings(self):
         return {'elev': self.obj.elev, 'azim':self.obj.azim,
@@ -1138,6 +1151,8 @@ class MPLAxes3D(MPLAxes):
                     box_scalings=None,
                     edgecolors=None,
                     edge_color=None,
+                    lw=None,
+                    edge_width=.01,
                     color='white',
                     plotter='scatter',
                     **opts):
@@ -1158,13 +1173,19 @@ class MPLAxes3D(MPLAxes):
                 if box_scalings is None:
                     box_scalings = [1, 1, 1]
                 s = (radius * max(box_scalings) * 72)**2
+            if lw is None:
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                lw = (edge_width * max(box_scalings) * 72)
+
             if nput.is_numeric(s):
                 s = [s] * len(center)
+            areas = s
             if plotter == 'plot':
                 surface = self.get_plotter('plot')
                 spheres = []
                 s = np.sqrt(s)
-                for x,s,c,ec in zip(center, s, color, edgecolors):
+                for x,s,c,ec,w in zip(center, s, color, edgecolors, lw):
                     spheres.append(
                         surface([x[0], x[0]], [x[1], x[1]], [x[2], x[2]],
                                    markersize=s,
@@ -1172,16 +1193,23 @@ class MPLAxes3D(MPLAxes):
                                    linestyle='',
                                    markerfacecolor=c,
                                    markeredgecolor=ec,
+                                   markerlw=w,
                                    **opts)
                     )
+                # dists = np.sqrt(areas) / 72
+                # for s, r in zip(spheres, dists):
+                #     s.zdist_offset = -r
             else:
                 spheres = self.get_plotter('scatter')(
                     center[:, 0], center[:, 1], center[:, 2],
                     edgecolors=edgecolors,
                     color=color,
                     s=s,
+                    lw=lw,
                     **opts
                 )
+                # dists = np.sqrt(areas) / 72
+                # spheres.zdist_offset = -np.max(dists)
             return spheres
         else:
             surface = self.get_plotter('plot_surface')
@@ -1199,17 +1227,23 @@ class MPLAxes3D(MPLAxes):
     #     mpl_toolkits.mplot3d.art3d
     #     fr
     #     class PatchLine()
+    @classmethod
+    def _get_line_outline_proj(cls, artist):
+        from mpl_toolkits.mplot3d import proj3d
+        xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
+        # print(np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
+        return 1.5 * (np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
     def draw_cylinder(self, start, end, rad, circle_points=48, rendering=None,
                       box_scalings=None,
                       edge_color=None,
                       color='black',
-                      segments=8,
+                      segments=4,
                       edge_width=.01,
                       lw=None,
                       plotter='plot',
                       **opts):
         if dev.str_is(rendering, 'flat'):
-            from mpl_toolkits.mplot3d.art3d import Line3DCollection
+            # from mpl_toolkits.mplot3d.art3d import Line3DCollection
             start = np.asanyarray(start)
             if start.ndim == 1:
                 start = start[np.newaxis]
@@ -1236,17 +1270,18 @@ class MPLAxes3D(MPLAxes):
             # colors = []
             # linewidths = []
             # if plotter == 'plot':
+
             for s, e, w, ec in zip(start, end, lw, edge_color):
                 if ec is not None:
-                    v = nput.vec_normalize(e - s)
-                    s = s + edge_width/2 * v
-                    e = e - edge_width/2 * v
-                    # x_points = np.linspace(s[0], e[0], segments)
-                    # y_points = np.linspace(s[1], e[1], segments)
-                    # z_points = np.linspace(s[2], e[2], segments)
-                    x_points = [s[0], e[0]]
-                    y_points = [s[1], e[1]]
-                    z_points = [s[2], e[2]]
+                    # v = nput.vec_normalize(e - s)
+                    # s = s + edge_width/2 * v
+                    # e = e - edge_width/2 * v
+                    x_points = np.linspace(s[0], e[0], 2)
+                    y_points = np.linspace(s[1], e[1], 2)
+                    z_points = np.linspace(s[2], e[2], 2)
+                    # x_points = [s[0], e[0]]
+                    # y_points = [s[1], e[1]]
+                    # z_points = [s[2], e[2]]
                     # lines.append(
                     #     np.vstack([x_points, y_points, z_points]).T
                     # )
@@ -1259,14 +1294,31 @@ class MPLAxes3D(MPLAxes):
                             zs=z_points,
                             color=ec,
                             lw=w + (edge_width * 72 * max(box_scalings)),
-                            zorder=-1000,
+                            # zorder=-1,
                             **opts
                         )
                     )
+                    for l in coll[-1]:
+                        l.zdist_offset = self._get_line_outline_proj
+                    # for i, (x1, y1, z1, x2, y2, z2) in enumerate(zip(
+                    #         x_points[:-1], y_points[:-1], z_points[:-1],
+                    #         x_points[1:], y_points[1:], z_points[1:],
+                    # )):
+                    #     coll.append(
+                    #         plot(
+                    #             [x1, x2],
+                    #             [y1, y2],
+                    #             zs=[z1, z2],
+                    #             lw=w + (edge_width * 72 * max(box_scalings)),
+                    #             color=ec,  # cycle[i%5],
+                    #             **opts
+                    #         )
+                    #     )
+
             for s, e, w, c in zip(start, end, lw, color):
-                x_points = np.linspace(s[0], e[0], segments)
-                y_points = np.linspace(s[1], e[1], segments)
-                z_points = np.linspace(s[2], e[2], segments)
+                x_points = np.linspace(s[0], e[0], segments+1)
+                y_points = np.linspace(s[1], e[1], segments+1)
+                z_points = np.linspace(s[2], e[2], segments+1)
                 # for (x1,y1,z1,x2,y2,z2) in zip(
                 #     x_points[:-1],y_points[:-1],z_points[:-1],
                 #     x_points[1:],y_points[1:],z_points[1:],
@@ -1291,6 +1343,8 @@ class MPLAxes3D(MPLAxes):
                             **opts
                         )
                     )
+                    # for l in coll[-1]:
+                    #     l.zdist_offset = .00001
                 # coll.append(
                 #     plot(
                 #         x_points,
@@ -1301,6 +1355,8 @@ class MPLAxes3D(MPLAxes):
                 #         **opts
                 #     )
                 # )
+
+
             # elif plotter == 'rect':
             #     import matplotlib.patches as patches
             #     import mpl_toolkits.mplot3d.art3d as art3d
