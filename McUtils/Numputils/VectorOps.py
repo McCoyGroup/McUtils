@@ -229,7 +229,7 @@ def vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None, return_norms=Fals
     else:
         return vecs/e_norms
 
-def vec_rescale(vecs, target_range=None, cur_range=None, midpoint=None, axis=-1):
+def vec_rescale(vecs, target_range=None, cur_range=None, midpoint=None, axis=-1, clip=False):
     vecs = np.asanyarray(vecs)
     if cur_range is None:
         cur_mins = np.expand_dims(np.min(vecs, axis=axis), axis)
@@ -256,6 +256,10 @@ def vec_rescale(vecs, target_range=None, cur_range=None, midpoint=None, axis=-1)
             if not util.is_numeric(t_max):
                 t_max = np.expand_dims(np.asanyarray(t_max), axis)
             rescaled = rescaled*(t_max - t_min) + t_min
+        if clip:
+            rescaled = np.clip(rescaled, *target_range)
+    elif clip:
+        rescaled = np.clip(rescaled, 0, 1)
     return rescaled
 
 ################################################

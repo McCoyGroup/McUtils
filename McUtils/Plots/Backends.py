@@ -12,6 +12,8 @@ __all__ = [
 import enum, abc, contextlib, numpy as np
 import uuid
 import functools
+import io
+import base64
 
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -20,6 +22,7 @@ from . import VTKInterface as vtk
 from ..ExternalPrograms import VPythonInterface as vpython
 from . import X3DInterface as x3d
 from .SceneJSON import SceneJSON as sceneJSON
+from .Colors import ColorPalette
 
 DPI_SCALING = 72
 
@@ -89,6 +92,8 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
         ...
     @abc.abstractmethod
     def clear(self, *, backend):
+        ...
+    def prep_show(self):
         ...
 
     @abc.abstractmethod
@@ -250,6 +255,11 @@ class GraphicsAxes3D(GraphicsAxes):
     def set_ztick_style(self, **opts):
         ...
 
+    def set_projection_type(self, proj_type, **kwargs):
+        ...
+    def get_projection_type(self):
+        ...
+
     @abc.abstractmethod
     def get_view_settings(self):
         ...
@@ -303,6 +313,10 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
         return [
             a.get_bbox() for a in self.axes
         ]
+    def prep_show(self):
+        if self.axes is not None:
+            for a in self.axes:
+                a.prep_show()
 
     @abc.abstractmethod
     def get_size_inches(self):
@@ -368,6 +382,8 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def show_figure(self, figure, reshow=None):
         ...
+    def to_widget(self, figure:GraphicsFigure):
+        return figure.to_widget()
 
     @abc.abstractmethod
     def get_available_themes(self):
@@ -424,6 +440,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
 class MPLManager:
     _plt = None
     _patch = None
+    _path = None
     _coll = None
     _mpl = None
     _colors = None
@@ -456,6 +473,12 @@ class MPLManager:
             import matplotlib.patches as patch
             cls._patch = patch
         return cls._patch
+    @classmethod
+    def path_api(cls):
+        if cls._path is None:
+            import matplotlib.path as patch
+            cls._path = patch
+        return cls._path
     @classmethod
     def collections_api(cls):
         if cls._coll is None:
@@ -974,6 +997,13 @@ class MPLAxes3D(MPLAxes):
         self.zaxis = self.obj.zaxis
         self.computed_zorder = self.obj.computed_zorder
         self._monkeypatch_draw(self.obj)
+        self._dist = None
+
+    def set_projection_type(self, proj_type, **kwargs):
+        if proj_type is not None:
+            return self.obj.set_proj_type(proj_type, **kwargs)
+    def get_projection_type(self):
+        return self.obj.get_proj_type()
 
     @classmethod
     def _get_dist(cls, artist):
@@ -996,25 +1026,141 @@ class MPLAxes3D(MPLAxes):
             dist += offset
         return dist
 
+    @classmethod
+    def _artist_predraw(cls, obj, dist):
+        if hasattr(obj, 'predraw'):
+            obj.predraw(dist)
+
+    zdir_map = {
+        'x':[1, 0, 0],
+        'y':[0, 1, 0],
+        'z':[0, 0, 1],
+    }
+    @classmethod
+    def _transform_zdir(cls, zdir):
+        #https://stackoverflow.com/a/76151563/5720002
+        zn = nput.vec_normalize(cls.zdir_map[zdir] if isinstance(zdir, str) else zdir)
+
+        cos_angle = zn[2]
+        sin_angle = np.linalg.norm(zn[:2])
+        if sin_angle == 0:
+            return np.sign(cos_angle) * np.eye(3)
+
+        d = np.array((zn[1], -zn[0], 0))
+        d /= sin_angle
+        ddt = np.outer(d, d)
+        skew = np.array([[0, 0, -d[1]], [0, 0, d[0]], [d[1], -d[0], 0]], dtype=np.float64)
+        return ddt + cos_angle * (np.eye(3) - ddt) + sin_angle * skew
+
+    @classmethod
+    def _set_patch_3d_properties(cls, self, verts, zs, zdir="z", axlim_clip=None):
+        zs = np.broadcast_to(zs, len(verts))
+        self._axlim_clip = axlim_clip
+        self._segment3d = np.asarray(
+            [
+                np.dot(cls._transform_zdir(zdir), (x, y, 0)) + (0, 0, z)
+                for ((x, y), z) in zip(verts, zs)
+            ]
+        )
+
+    @classmethod
+    def _set_pathpatch_3d_properties(cls, self, path, zs, zdir="z", axlim_clip=None):
+        cls._set_patch_3d_properties(self, path.vertices, zs, zdir=zdir, axlim_clip=axlim_clip)
+        self._code3d = path.codes
+
+    @classmethod
+    def _pathpatch_translate(cls, pathpatch, delta):
+        pathpatch._segment3d += np.asarray(delta)
+
+    @classmethod
+    def _patch_do_3d_projection(cls, self, mode=None):
+        import mpl_toolkits.mplot3d.art3d as art3d
+        from mpl_toolkits.mplot3d import proj3d
+        mpath = MPLManager().path_api()
+
+        s = self._segment3d
+        if self._axlim_clip:
+            xs, ys, zs = art3d._viewlim_mask(*zip(*s), self.axes)
+        else:
+            xs, ys, zs = zip(*s)
+        vxs, vys, vzs, vis = proj3d._proj_transform_clip(xs, ys, zs,
+                                                         self.axes.M,
+                                                         self.axes._focal_length)
+        self._path2d = mpath.Path(np.ma.column_stack([vxs, vys]))
+
+        if mode is None:
+            mode = self.distance_mode
+
+        return mode(vzs)
+
+    @classmethod
+    def _pathpatch_do_3d_projection(cls, self, mode=None):
+        import mpl_toolkits.mplot3d.art3d as art3d
+        from mpl_toolkits.mplot3d import proj3d
+        mpath = MPLManager().path_api()
+
+        s = self._segment3d
+        if self._axlim_clip:
+            xs, ys, zs = art3d._viewlim_mask(*zip(*s), self.axes)
+        else:
+            xs, ys, zs = zip(*s)
+        vxs, vys, vzs, vis = proj3d._proj_transform_clip(xs, ys, zs,
+                                                         self.axes.M,
+                                                         self.axes._focal_length)
+        self._path2d = mpath.Path(np.ma.column_stack([vxs, vys]), self._code3d)
+
+        if mode is None:
+            mode = self.distance_mode
+
+        return mode(vzs)
+
+    def _monkeypatch_patch(self, patch, pos, zdir="z", zorder_mode=None):
+        import mpl_toolkits.mplot3d.art3d as art3d
+        import matplotlib.patches as patches
+        if isinstance(patch, patches.PathPatch):
+            patch.set_3d_properties = functools.partial(self._set_pathpatch_3d_properties, patch)
+            patch.translate = functools.partial(self._pathpatch_translate, patch)
+            art3d.pathpatch_2d_to_3d(patch, z=0, zdir=zdir)
+            patch.do_3d_projection =  functools.partial(self._patch_do_3d_projection, patch)
+        else:
+            patch.set_3d_properties = functools.partial(self._set_patch_3d_properties, patch)
+            patch.translate = functools.partial(self._pathpatch_translate, patch)
+            art3d.patch_2d_to_3d(patch, z=0, zdir=zdir)
+            patch.do_3d_projection =  functools.partial(self._pathpatch_do_3d_projection, patch)
+        patch.translate(pos)
+
+        if zorder_mode is None:
+            zorder_mode = np.min
+        patch.distance_mode = zorder_mode
+
     def _monkeypatch_draw(self, obj):
         cur_draw = obj.draw
         obj.computed_zorder = False
 
         @functools.wraps(obj.draw)
         def draw(renderer):
+            from mpl_toolkits.mplot3d import proj3d
+            if self._dist is not None:
+                obj.set_box_aspect(obj.get_box_aspect(), zoom=(1.8294640721620434 * 25/24) / (self._dist / 10)) # magic number from MPL)
             if self.computed_zorder:
                 obj.M = obj.get_proj()
                 obj.invM = np.linalg.inv(obj.M)
                 zorder_offset = max(axis.get_zorder()
                                     for axis in obj._axis_map.values()) + 1
-                artists = (
+                artists = [
                     artist for artist in self.obj._children
                     if artist.get_visible() and artist.zorder > 0
-                )
-                for artist in sorted(artists,
-                                     key=lambda artist: self._get_dist(artist),
+                ]
+                mean_point = proj3d.proj_transform([0], [0], [0], obj.M)
+                dists = [
+                    self._get_dist(artist) - mean_point[-1][0]
+                    for artist in artists
+                ]
+                for artist, dist in sorted(zip(artists, dists),
+                                     key=lambda ad: ad[1],
                                      reverse=True):
                     artist.zorder = zorder_offset + 1
+                    self._artist_predraw(artist, dist)
                     zorder_offset += 1
 
             cur_draw(renderer)
@@ -1146,7 +1292,47 @@ class MPLAxes3D(MPLAxes):
         }
         self.obj.view_init(**values)
         if dist is not None:
-            self.obj.set_box_aspect(None, zoom=(1.8294640721620434 * 25/24) / (dist / 10)) # magic number from MPL
+            self._dist = dist
+            self.obj.dist = dist
+            # self.obj.set_box_aspect(None, zoom=(1.8294640721620434 * 25/24) / (dist / 10)) # magic number from MPL
+
+    def prep_show(self):
+        if self._dist is not None:
+            self.obj.dist = self._dist
+
+    @classmethod
+    def _flat_sphere_predraw(cls, sphere_path, dist, *,
+                             depth_shading_range, depth_shading_targets,
+                             depth_shrink_range, depth_shrink_targets
+                             ):
+        if depth_shading_range is not None and depth_shading_targets is not None:
+            perc = nput.vec_rescale(dist, depth_shading_targets, cur_range=depth_shading_range, clip=True)
+            try:
+                cur_fc = sphere_path._og_facecolors
+            except AttributeError:
+                cur_fc = sphere_path._og_facecolors = np.asanyarray(sphere_path.get_facecolors())
+            new_fc = ColorPalette.color_lighten(cur_fc[:, :3].T * 255, -perc, shift=True, modification_space='lab') / 255
+            sphere_path.set_facecolors(np.concatenate([new_fc.T, cur_fc[:, (3,)]], axis=1))
+        else:
+            perc = None
+
+        if depth_shrink_range is not None or depth_shrink_targets is not None:
+            if depth_shrink_range is None:
+                depth_shrink_range = depth_shading_range
+            elif depth_shrink_targets is None:
+                depth_shrink_targets = depth_shading_targets
+            if depth_shrink_range is not None and depth_shrink_targets is not None:
+                perc = nput.vec_rescale(dist, depth_shrink_targets, cur_range=depth_shrink_range, clip=True)
+            else:
+                perc = None
+
+        if perc is not None:
+            try:
+                cur_size = sphere_path._og_sizes
+            except AttributeError:
+                cur_size = sphere_path._og_sizes = np.asanyarray(sphere_path.get_sizes())
+            new_size = ((1 - perc)**2) * cur_size
+            sphere_path.set_sizes(new_size)
 
     def draw_sphere(self, center, radius, sphere_points=48, rendering='standard',
                     s=None,
@@ -1155,10 +1341,22 @@ class MPLAxes3D(MPLAxes):
                     edge_color=None,
                     lw=None,
                     edge_width=.01,
+                    glow=None,
                     color='white',
                     plotter='scatter',
+                    depth_shading_range=(-1, 1),
+                    depth_shading_targets=(-.5, .5),
+                    depth_shrink_range=None,
+                    depth_shrink_targets=None,
                     **opts):
         if dev.str_is(rendering, 'flat'):
+
+            if glow is not None:
+                if color is None:
+                    color = glow
+                else:
+                    color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+
             center = np.asanyarray(center)
             if center.ndim == 1:
                 center = center[np.newaxis]
@@ -1198,9 +1396,14 @@ class MPLAxes3D(MPLAxes):
                                    markerlw=w,
                                    **opts)
                     )
-                # dists = np.sqrt(areas) / 72
-                # for s, r in zip(spheres, dists):
-                #     s.zdist_offset = -r
+                dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
+                for s, r in zip(spheres, dists):
+                    s.zdist_offset = -r
+                    s.predraw = functools.partial(self._flat_sphere_predraw, s,
+                                                  depth_shading_range=depth_shading_range,
+                                                  depth_shading_targets=depth_shading_targets,
+                                                  depth_shrink_range=depth_shrink_range,
+                                                  depth_shrink_targets=depth_shrink_targets)
             else:
                 spheres = self.get_plotter('scatter')(
                     center[:, 0], center[:, 1], center[:, 2],
@@ -1210,8 +1413,13 @@ class MPLAxes3D(MPLAxes):
                     lw=lw,
                     **opts
                 )
-                # dists = np.sqrt(areas) / 72
-                # spheres.zdist_offset = -np.max(dists)
+                dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
+                spheres.zdist_offset = -np.max(dists)
+                spheres.predraw = functools.partial(self._flat_sphere_predraw, spheres,
+                                                    depth_shading_range=depth_shading_range,
+                                                    depth_shading_targets=depth_shading_targets,
+                                                    depth_shrink_range=depth_shrink_range,
+                                                    depth_shrink_targets=depth_shrink_targets)
             return spheres
         else:
             surface = self.get_plotter('plot_surface')
@@ -1230,20 +1438,59 @@ class MPLAxes3D(MPLAxes):
     #     fr
     #     class PatchLine()
     @classmethod
-    def _get_line_outline_proj(cls, artist):
+    def _get_line_outline_proj(cls, artist, radius=None):
         from mpl_toolkits.mplot3d import proj3d
         xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
-        # print(np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
-        return 1.5 * (np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
+        base_shift = 1.5 * (np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
+        if radius is not None:
+            if xyzs_list[-1][0] > xyzs_list[-1][-1]:
+                base_shift += radius
+        return base_shift
+    @classmethod
+    def _get_line_proj(cls, artist, radius=None):
+        from mpl_toolkits.mplot3d import proj3d
+        xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
+        # base_shift = 1.5 * (np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
+        base_shift = 0
+        if radius is not None:
+            if xyzs_list[-1][0] > xyzs_list[-1][-1]:
+                base_shift += radius
+        return base_shift
+    @classmethod
+    def _flat_cylinder_predraw(cls, line3d, dist, *,
+                             depth_shading_range, depth_shading_targets
+                             ):
+        if depth_shading_range is not None and depth_shading_targets is not None:
+            perc = nput.vec_rescale(dist, depth_shading_targets, cur_range=depth_shading_range, clip=True)
+            try:
+                cur_fc = line3d._og_facecolors
+            except AttributeError:
+                c = line3d.get_color()
+                if isinstance(c, str): c = np.array(ColorPalette.parse_color_string(c)) / 255
+                if len(c) == 3: c = np.concatenate([c, [1]])
+                cur_fc = line3d._og_facecolors = np.asanyarray(c)
+            new_fc = ColorPalette.color_lighten(cur_fc[:3] * 255, -perc, shift=True, modification_space='lab') / 255
+            line3d.set_color(np.concatenate([new_fc, cur_fc[(3,),]], axis=0))
+        else:
+            perc = None
     def draw_cylinder(self, start, end, rad, circle_points=48, rendering=None,
                       box_scalings=None,
                       edge_color=None,
                       color='black',
-                      segments=4,
+                      glow=None,
+                      segments=1,
                       edge_width=.01,
                       lw=None,
+                      depth_shading_range=(-1, 1),
+                      depth_shading_targets=(-.5, .5),
+                      color_cycle=False,
                       plotter='plot',
                       **opts):
+        if glow is not None:
+            if color is None:
+                color = glow
+            else:
+                color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
         if dev.str_is(rendering, 'flat'):
             # from mpl_toolkits.mplot3d.art3d import Line3DCollection
             start = np.asanyarray(start)
@@ -1275,9 +1522,11 @@ class MPLAxes3D(MPLAxes):
 
             for s, e, w, ec in zip(start, end, lw, edge_color):
                 if ec is not None:
-                    # v = nput.vec_normalize(e - s)
-                    # s = s + edge_width/2 * v
-                    # e = e - edge_width/2 * v
+                    ww = w + (edge_width * 72 * max(box_scalings))
+                    cw = ww / (72 * max(box_scalings))
+                    v = nput.vec_normalize(e - s)
+                    s = s + cw/2 * v
+                    e = e - cw/2 * v
                     x_points = np.linspace(s[0], e[0], 2)
                     y_points = np.linspace(s[1], e[1], 2)
                     z_points = np.linspace(s[2], e[2], 2)
@@ -1295,13 +1544,13 @@ class MPLAxes3D(MPLAxes):
                             y_points,
                             zs=z_points,
                             color=ec,
-                            lw=w + (edge_width * 72 * max(box_scalings)),
+                            lw=ww,
                             # zorder=-1,
                             **opts
                         )
                     )
                     for l in coll[-1]:
-                        l.zdist_offset = self._get_line_outline_proj
+                        l.zdist_offset = functools.partial(self._get_line_outline_proj, radius=cw)
                     # for i, (x1, y1, z1, x2, y2, z2) in enumerate(zip(
                     #         x_points[:-1], y_points[:-1], z_points[:-1],
                     #         x_points[1:], y_points[1:], z_points[1:],
@@ -1317,36 +1566,37 @@ class MPLAxes3D(MPLAxes):
                     #         )
                     #     )
 
+            if color_cycle is True:
+                color_cycle = ["red", "blue", "green", "orange", "purple"]
             for s, e, w, c in zip(start, end, lw, color):
-                x_points = np.linspace(s[0], e[0], segments+1)
-                y_points = np.linspace(s[1], e[1], segments+1)
-                z_points = np.linspace(s[2], e[2], segments+1)
-                # for (x1,y1,z1,x2,y2,z2) in zip(
-                #     x_points[:-1],y_points[:-1],z_points[:-1],
-                #     x_points[1:],y_points[1:],z_points[1:],
-                # ):
-                #     lines.append(
-                #         [[x1, y1, z1], [x2, y2, z2]]
-                #     )
-                #     colors.append(c)
-                #     linewidths.append(w)
-                # cycle = ['red', 'green', 'blue', 'orange', 'pink']
+                cw = w / (72 * max(box_scalings))
+                v, n = nput.vec_normalize(e - s, return_norms=True)
+                # s = s + cw * v
+                # e = e - cw * v
+                d = np.linspace(0, n, segments+1)
+                x_points, y_points, z_points = (s[np.newaxis] + v[np.newaxis] * d[:, np.newaxis]).T
                 for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
                     x_points[:-1],y_points[:-1],z_points[:-1],
                     x_points[1:],y_points[1:],z_points[1:],
                 )):
+                    if color_cycle:
+                        c = color_cycle[i%len(color_cycle)]
                     coll.append(
                         plot(
                             [x1, x2],
                             [y1, y2],
                             zs=[z1, z2],
                             lw=w,
-                            color=c,#cycle[i%5],
+                            color=c,
                             **opts
                         )
                     )
-                    # for l in coll[-1]:
-                    #     l.zdist_offset = .00001
+                    for l in coll[-1]:
+                        for l in coll[-1]:
+                            l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
+                        l.predraw = functools.partial(self._flat_cylinder_predraw, l,
+                                                            depth_shading_range=depth_shading_range,
+                                                            depth_shading_targets=depth_shading_targets)
                 # coll.append(
                 #     plot(
                 #         x_points,
@@ -1470,6 +1720,111 @@ class MPLAxes3D(MPLAxes):
 
             return surface(X, Y, Z, color=color, **opts)
 
+    @classmethod
+    def _arc_proj_max(cls, zs):
+        return 2*np.min(zs) - np.max(zs)
+    def draw_disk(self, centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None,
+                  theta1=None, theta2=None,
+                  rendering='flat', box_scalings=None,
+                  line_color=None, line_thickness=None,
+                  color=None,
+                  glow=None,
+                  lw=None,
+                  **styles):
+        patches = MPLManager.patch_api()
+        paths = MPLManager.path_api()
+        # coll = MPLManager.collections_api()
+        centers = np.asanyarray(centers)
+        if centers.ndim == 1:
+            centers = centers[np.newaxis]
+
+        if rendering != 'flat':
+            raise NotImplementedError(f'arc rendering {rendering}')
+
+        if glow is not None:
+            if color is None:
+                color = glow
+            else:
+                color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+
+        if uv_axes is not None:
+            u, v = uv_axes
+            base_ang, base_norm = nput.vec_angles(u, v, return_crosses=True)
+            base_norm = nput.vec_normalize(base_norm)
+            if normal is None:
+                normal = base_norm
+            angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
+            embedding_axes = nput.rotation_matrix(crosses, angs).T
+            local_x, local_y, local_z = embedding_axes
+            # uv_sign = np.sign(np.dot(local_y, v))
+            if np.dot(local_x, u) > np.dot(local_x, v):
+                emb_angle, ax2 = nput.vec_angles(local_x, u)
+            else:
+                emb_angle, ax2 = nput.vec_angles(local_x, v)
+            # emb_angle = uv_sign * emb_angle
+            if angle is None:
+                angle = base_ang
+            # if np.dot(ax2, local_z) < 0:
+            #     emb_angle = (emb_angle - angle)
+            #     if emb_angle < 0:
+            #         emb_angle = 2*np.pi + emb_angle
+            if theta1 is None:
+                theta1 = np.rad2deg(emb_angle)
+            if theta2 is None:
+                theta2 = np.rad2deg(emb_angle + angle)
+        if zdir is None:
+            zdir = normal
+
+        if theta1 is None or nput.is_numeric(theta1):
+            theta1 = [theta1] * len(centers)
+        if theta2 is None or nput.is_numeric(theta2):
+            theta2 = [theta2] * len(centers)
+        if radius is None or nput.is_numeric(radius):
+            radius = [radius] * len(centers)
+        if isinstance(zdir, str) or zdir is None or nput.is_numeric(zdir[0]):
+            zdir = [zdir] * len(centers)
+        if isinstance(line_color, str) or line_color is None:
+            line_color = [line_color] * len(centers)
+        if lw is None:
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            if line_thickness is None or nput.is_numeric(line_thickness):
+                line_thickness = [line_thickness] * len(centers)
+            lw = np.asanyarray(line_thickness) * 72 * max(box_scalings)
+        if lw is None or nput.is_numeric(lw):
+            lw = [lw] * len(centers)
+        if isinstance(color, str) or color is None:
+            color = [color] * len(centers)
+
+        arcs = []
+
+        for c,r,t1,t2,zd,col,lc,w in zip(centers, radius, theta1, theta2, zdir,
+                                       color, line_color,lw):
+            if col is None:
+                a = patches.Arc((0, 0), 2 * r, 2 * r,
+                                theta1=t1, theta2=t2)
+                p = a.get_path()
+                # codes = list(p.codes)
+                # codes[-1] = p.STOP
+                a = patches.PathPatch(
+                    paths.Path(p.vertices, p.codes),
+                    lw=w,
+                    facecolor='none',
+                    edgecolor=lc,
+                    **styles
+                )
+                # raise Exception(a.codes)
+            else:
+                a = patches.Wedge((0, 0), r,
+                                  theta1=t1, theta2=t2,
+                                  color=col, edgecolor=lc, lw=w,
+                                  # facecolor='none',
+                                  **styles)
+            self._monkeypatch_patch(a, c, zdir=zd, zorder_mode=self._arc_proj_max)
+            self.obj.add_patch(a)
+
+        return arcs
+
     _Arrow3D = None
     @classmethod
     def _load_arrow_drawer(cls):
@@ -1492,7 +1847,8 @@ class MPLAxes3D(MPLAxes):
                     self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
                     super().draw(renderer)
 
-                def do_3d_projection(self, renderer=None):
+                distance_mode = staticmethod(np.min)
+                def do_3d_projection(self, renderer=None, mode=None):
                     x1, y1, z1 = self._xyz
                     dx, dy, dz = self._dxdydz
                     x2, y2, z2 = (x1 + dx, y1 + dy, z1 + dz)
@@ -1500,7 +1856,9 @@ class MPLAxes3D(MPLAxes):
                     xs, ys, zs = proj_transform((x1, x2), (y1, y2), (z1, z2), self.axes.M)
                     self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
 
-                    return np.min(zs)
+                    if mode is None:
+                        mode = self.distance_mode
+                    return mode(zs)
             cls._Arrow3D = Arrow3D
         return cls._Arrow3D
 
@@ -1537,14 +1895,26 @@ class MPLAxes3D(MPLAxes):
         else:
             raise NotImplementedError("too annoying")
 
+    def draw_text(self, points, vals, billboard=True, normal=None, rendering='flat',
+                  box_scalings=None, zdir=None,
+                  **styles):
+        if billboard:
+            normal = None
+        if zdir is None:
+            zdir = normal
+            if isinstance(zdir, np.ndarray): zdir = tuple(float(z) for z in zdir)
+        return super().draw_text(points, vals, zdir=zdir, **styles)
 class MPLFigure(GraphicsFigure):
     Axes = MPLAxes
-
+    default_display_format = 'png'
     _refs = set()
-    def __init__(self, mpl_figure_object, **opts):
+    def __init__(self, mpl_figure_object, display_format=None, **opts):
         if mpl_figure_object in self._refs: raise ValueError(...)
         self._refs.add(mpl_figure_object)
         self.obj = mpl_figure_object
+        if display_format is None:
+            display_format = self.default_display_format
+        self.display_format = display_format
         super().__init__(**self.canonicalize_opts(opts))
     def __hash__(self): # we need weakref to behave right
         return hash(self.obj)
@@ -1621,8 +1991,10 @@ class MPLFigure(GraphicsFigure):
             fg = 'none'
         return self.obj.set_facecolor(fg)
 
-    def savefig(self, file, **opts):
-        return self.obj.savefig(file, **opts)
+    def savefig(self, file, facecolor=None, **opts):
+        if dev.str_is(facecolor, 'transparent'):
+            facecolor = 'none'
+        return self.obj.savefig(file, facecolor=facecolor, **opts)
 
     def animate_frames(self, frames, export_html=True, **animation_opts):
         fig = self.obj
@@ -1647,19 +2019,36 @@ class MPLFigure(GraphicsFigure):
             display = JHTML.APIs.get_display_api()
             animation = display.HTML(animation.to_jshtml())
         return animation
-    def to_html(self):
-        return self.obj._repr_html_()
+    def to_html(self, format=None):
+        if format is None:
+            format = self.display_format
+        if format == 'svg':
+            html = self.to_svg()
+        else:
+            html = self.obj._repr_html_()
+        return html
     def to_data_url(self):
-        import io
-        import base64
         buf = io.BytesIO()
         self.obj.savefig(buf, format='png')
         buf.seek(0)
         b64_img = base64.b64encode(buf.getvalue()).decode('utf-8')
         return f"data:image/png;base64,{b64_img}"
-    def to_widget(self):
+    def to_svg(self):
+        buf = io.StringIO()
+        self.obj.savefig(buf, format='svg')
+        buf.seek(0)
+        return buf.read()
+    def to_widget(self, format=None, autoclose=True):
         from .. import Jupyter as interactive
-        return interactive.JHTML.Image(src=self.to_data_url())
+        if format is None:
+            format = self.display_format
+        if format == 'svg':
+            widg = interactive.JHTML.HTML.RawHTML(self.to_svg())
+        elif format == 'html':
+            widg = interactive.JHTML.HTML.RawHTML(self.to_html(format='html'))
+        else:
+            widg = interactive.JHTML.Image(src=self.to_data_url())
+        return widg
     def tight_layout(self):
         self.obj.tight_layout()
 
@@ -1710,9 +2099,26 @@ class MPLBackend(GraphicsBackend):
         def __exit__(self, exc_type, exc_val, exc_tb):
             return self.context.__exit__(exc_type, exc_val, exc_tb)
 
-    def show_figure(self, graphics, reshow=None):
-        self.plt.show()
+    def show_figure(self, graphics:MPLFigure, autoclose=True, reshow=None):
+        from ..Jupyter.JHTML import JupyterAPIs
+        dynamic_loading = JupyterAPIs().in_jupyter_environment()
+        if not dynamic_loading:
+            self.plt.show()
+        else:
+            display = JupyterAPIs().display_api
+            graphics.shown = True
+            html = graphics._repr_html_()
+            if autoclose:
+                self.close_figure(graphics)
+            display.clear_output(wait=True)
+            return display.display(display.HTML(html))
+        # self.plt.show()
         # return graphics.show_mpl(self, reshow=reshow)
+    def to_widget(self, figure:GraphicsFigure, autoclose=True):
+        widg = super().to_widget(figure)
+        if autoclose:
+            self.close_figure(figure)
+        return widg
 
     def get_interactive_status(self) -> 'bool':
         return self.plt.isinteractive()
@@ -1727,6 +2133,7 @@ class MPLBackend(GraphicsBackend):
 
 class MPLFigure3D(MPLFigure):
     Axes = MPLAxes3D
+    default_display_format = 'svg'
     def create_axes(self, rows, cols, spans, projection='3d', **kw):
         return super().create_axes(rows, cols, spans, projection=projection, **kw)
 class MPLBackend3D(MPLBackend):
