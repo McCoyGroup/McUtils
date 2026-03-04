@@ -19,6 +19,7 @@ A namespace for holding various HTML attributes
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
+RawHTML: RawHTML
 XMLElement: XMLElement
 base_element: XMLElement
 Comment: Comment
