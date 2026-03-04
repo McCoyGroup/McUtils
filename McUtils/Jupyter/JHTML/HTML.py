@@ -698,6 +698,30 @@ class HTML(XMLBase):
     A namespace for holding various HTML attributes
     """
 
+    class RawHTML:
+        def __init__(self, text):
+            self.text = text
+        def tostring(self):
+            return self.text
+        def display(self):
+            from .WidgetTools import JupyterAPIs
+
+            use_ipython = JupyterAPIs.in_jupyter_environment()
+            if use_ipython:
+                self.display_ipython()
+            else:
+                self.display_in_browser()
+        def display_in_browser(self):
+            return HTML.XMLElement.display_in_browser_from_wrapper(self)
+        def display_ipython(self):
+            return HTML.XMLElement.display_ipython_from_wrapper(self)
+        def _repr_html_(self):
+            return self.tostring()
+        def _ipython_display_(self):
+            self.display()
+        def get_display_element(self):
+            return HTML.Div(self, cls='jhtml')
+
     class XMLElement(XMLBase.ElementBase):
         """
         Convenience API for ElementTree
@@ -1273,7 +1297,8 @@ class HTML(XMLBase):
             }
             return data
 
-        def _cross_plat_open(self, file, delay=5):
+        @classmethod
+        def _cross_plat_open(cls, file, delay=5):
             import os, sys, subprocess, time
             if sys.platform.startswith('darwin'):  # macOS
                 subprocess.run(['open', file])
@@ -1285,9 +1310,18 @@ class HTML(XMLBase):
                 raise NotImplementedError(f"unsure how to open file on {sys.platform}")
             time.sleep(delay)
 
-        def display_in_browser(self):
+        @classmethod
+        def display_in_browser_from_wrapper(cls, wrapper):
             import tempfile as tf
 
+            with tf.NamedTemporaryFile(suffix='.html', prefix=type(wrapper).__name__+"-", mode='w+',
+                                       # delete=False
+                                       ) as tmp_html:
+                tmp_html.write(wrapper.tostring())
+                tmp_html.seek(0)
+                tmp_html.flush()
+                cls._cross_plat_open(tmp_html.name)
+        def display_in_browser(self):
             if self.tag.lower() != 'html':
                 if self.tag.lower() != 'body':
                     wrapper = HTML.Body(self.get_display_element())
@@ -1296,21 +1330,16 @@ class HTML(XMLBase):
                 wrapper = HTML.Html(wrapper)
             else:
                 wrapper = self
+            return self.display_in_browser_from_wrapper(wrapper)
 
-            with tf.NamedTemporaryFile(suffix='.html', prefix=type(self).__name__+"-", mode='w+',
-                                       # delete=False
-                                       ) as tmp_html:
-                tmp_html.write(wrapper.tostring())
-                tmp_html.seek(0)
-                tmp_html.flush()
-                self._cross_plat_open(tmp_html.name)
-
-        def display_ipython(self):
+        @classmethod
+        def display_ipython_from_wrapper(self, wrapper):
             from .WidgetTools import JupyterAPIs
 
             display = JupyterAPIs.get_display_api()
-            wrapper = self.get_display_element()
             return display.display(display.HTML(wrapper.tostring()))
+        def display_ipython(self):
+            return self.display_ipython_from_wrapper(self.get_display_element())
 
         def display(self):
             from .WidgetTools import JupyterAPIs

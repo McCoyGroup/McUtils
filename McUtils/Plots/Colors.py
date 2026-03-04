@@ -56,7 +56,7 @@ class ColorPalette:
             if color_space != 'rgb':
                 raise ValueError(f"only rgb color codes supported (got {colors})")
             color_lists = colors
-            rgb_array = np.array([cls.parse_rgb_code(c) for c in colors])
+            rgb_array = np.array([cls.parse_color_string(c) for c in colors])
             if lab_colors is None:
                 lab_colors = cls.color_convert(rgb_array.T, "rgb", "lab").T
         else:

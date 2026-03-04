@@ -824,6 +824,13 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
         self.axes.set_box_aspect(br)
 
     @property
+    def projection_type(self):
+        return self.axes.get_projection_type()
+    @projection_type.setter
+    def projection_type(self, ptype):
+        self.axes.set_projection_type(ptype)
+
+    @property
     def plot_range(self):
         if self._plot_range is None:
             pr = (self.axes.get_xlim(), self.axes.get_ylim(), self.axes.get_zlim())

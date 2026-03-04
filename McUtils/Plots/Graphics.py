@@ -590,6 +590,8 @@ class GraphicsBase(metaclass=ABCMeta):
             self._epilog_graphics = [e.plot(self.axes, graphics=self) for e in self.epilog]
         if self.tighten:
             self.figure.tight_layout()
+        self.figure.prep_show()
+        self.axes.prep_show()
         self._shown = True
         return self
 
@@ -715,7 +717,7 @@ class GraphicsBase(metaclass=ABCMeta):
     def to_widget(self):
         self.prep_show()
         self.figure.tight_layout()
-        return self.figure.to_widget()
+        return self.backend.to_widget(self.figure)
 
     def _repr_png_(self):
         return self.to_png().read()
@@ -1337,7 +1339,7 @@ class Graphics(GraphicsBase):
 #
 class Graphics3D(Graphics):
 
-    opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios'}
+    opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios', 'projection_type'}
     known_keys = Graphics.opt_keys | {'animate'}
 
     # layout_keys = axes_keys | figure_keys | GraphicsBase.layout_keys
@@ -1361,6 +1363,7 @@ class Graphics3D(Graphics):
                  background=None,
                  view_settings=None,
                  box_ratios=None,
+                 projection_type=None,
                  backend='matplotlib3D',
                  **kwargs
                  ):
@@ -1387,12 +1390,14 @@ class Graphics3D(Graphics):
             background=background,
             box_ratios=box_ratios,
             prop_manager=GraphicsPropertyManager3D,
+            projection_type=projection_type,
             **kwargs
         )
 
     def set_options(self,
                     view_settings=None,
                     box_ratios=None,
+                    projection_type=None,
                     **parent_opts
                     ):
 
@@ -1401,6 +1406,7 @@ class Graphics3D(Graphics):
         opts = (
             ('view_settings', view_settings),
             ('box_ratios', box_ratios),
+            ('projection_type', projection_type)
         )
         for oname, oval in opts:
             oval = self._get_def_opt(oname, oval, {})
