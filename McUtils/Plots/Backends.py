@@ -260,6 +260,11 @@ class GraphicsAxes3D(GraphicsAxes):
     def get_projection_type(self):
         ...
 
+    def get_autoscale(self):
+        ...
+    def set_autoscale(self, autoscale):
+        ...
+
     @abc.abstractmethod
     def get_view_settings(self):
         ...
@@ -1005,16 +1010,22 @@ class MPLAxes3D(MPLAxes):
     def get_projection_type(self):
         return self.obj.get_proj_type()
 
+    def get_autoscale(self):
+        return self.obj.autoscale()
+    def set_autoscale(self, autoscale):
+        return self.obj.autoscale(autoscale)
+
     @classmethod
     def _get_dist(cls, artist):
         from mpl_toolkits.mplot3d import proj3d
         try:
             dist = artist.do_3d_projection()
-        except (AttributeError, TypeError):
+        except AttributeError:
             if hasattr(artist, '_verts3d'):
                 # if artist.axes.M is not None:
-                xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
-                dist = np.min(xyzs_list[-1])
+                xs, ys, zs, vis = proj3d._proj_transform_clip(*artist._verts3d, artist.axes.M,
+                                                              artist.axes._focal_length)
+                dist = np.min(zs)
                 # else:
                 #     dist = np.min(artist._verts3d[-1])
             else:
@@ -1114,6 +1125,24 @@ class MPLAxes3D(MPLAxes):
 
         return mode(vzs)
 
+    @classmethod
+    def _line_do_3d_projection(cls, self, mode=None):
+        # import mpl_toolkits.mplot3d.art3d as art3d
+        from mpl_toolkits.mplot3d import proj3d
+        try:
+            verts = self._og_verts
+        except AttributeError:
+            verts = self._og_verts = self._verts3d
+        vxs, vys, vzs, vis = proj3d._proj_transform_clip(*verts,
+                                                         self.axes.M,
+                                                         self.axes._focal_length)
+        # self._verts3d = (vxs, vys, vzs)
+
+        if mode is None:
+            mode = self.distance_mode
+
+        return mode(vzs)
+
     def _monkeypatch_patch(self, patch, pos, zdir="z", zorder_mode=None):
         import mpl_toolkits.mplot3d.art3d as art3d
         import matplotlib.patches as patches
@@ -1162,6 +1191,9 @@ class MPLAxes3D(MPLAxes):
                     artist.zorder = zorder_offset + 1
                     self._artist_predraw(artist, dist)
                     zorder_offset += 1
+
+                # print(self.get_xlim(), self.get_ylim(), self.get_zlim())
+                # print(self.get_box_aspect())
 
             cur_draw(renderer)
 
@@ -1301,9 +1333,32 @@ class MPLAxes3D(MPLAxes):
             self.obj.dist = self._dist
 
     @classmethod
+    def _get_axis_scaling(cls, sphere_path):
+        try:
+            cur_aspect = sphere_path.axes._og_lims
+        except AttributeError:
+            cur_aspect = sphere_path.axes._og_lims = (
+                sphere_path.axes.get_xlim3d(),
+                sphere_path.axes.get_ylim3d(),
+                sphere_path.axes.get_zlim3d()
+            )
+        size_rescaling = np.max([
+                (B-b) / (A-a)
+                for (a,A), (b,B) in zip(
+                (
+                    sphere_path.axes.get_xlim3d(),
+                    sphere_path.axes.get_ylim3d(),
+                    sphere_path.axes.get_zlim3d()
+                ), cur_aspect
+            )
+        ])
+        return size_rescaling
+
+    @classmethod
     def _flat_sphere_predraw(cls, sphere_path, dist, *,
                              depth_shading_range, depth_shading_targets,
-                             depth_shrink_range, depth_shrink_targets
+                             depth_shrink_range, depth_shrink_targets,
+                             radius=None
                              ):
         if depth_shading_range is not None and depth_shading_targets is not None:
             perc = nput.vec_rescale(dist, depth_shading_targets, cur_range=depth_shading_range, clip=True)
@@ -1326,14 +1381,23 @@ class MPLAxes3D(MPLAxes):
             else:
                 perc = None
 
+        try:
+            cur_size = sphere_path._og_sizes
+        except AttributeError:
+            cur_size = sphere_path._og_sizes = np.asanyarray(sphere_path.get_sizes())
+        sphere_path.set_sizes((cls._get_axis_scaling(sphere_path)**2) * cur_size)
+
         if perc is not None:
-            try:
-                cur_size = sphere_path._og_sizes
-            except AttributeError:
-                cur_size = sphere_path._og_sizes = np.asanyarray(sphere_path.get_sizes())
+            cur_size = np.asanyarray(sphere_path.get_sizes())
             new_size = ((1 - perc)**2) * cur_size
             sphere_path.set_sizes(new_size)
 
+    @classmethod
+    def _get_sphere_proj(cls, artist, *, radius):
+        # from mpl_toolkits.mplot3d import proj3d
+        # xyzs_list = proj3d.proj_transform([0], [0], [radius], artist.axes.M)
+        # base_shift = np.linalg.norm([xyzs_list[0], xyzs_list[1], xyzs_list[2]])
+        return -radius / 10 #1.5 * (radius / base_shift) # account for distortion due to projection
     def draw_sphere(self, center, radius, sphere_points=48, rendering='standard',
                     s=None,
                     box_scalings=None,
@@ -1398,8 +1462,9 @@ class MPLAxes3D(MPLAxes):
                     )
                 dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
                 for s, r in zip(spheres, dists):
-                    s.zdist_offset = -r
+                    s.zdist_offset = functools.partial(self._get_sphere_proj, radius=r)
                     s.predraw = functools.partial(self._flat_sphere_predraw, s,
+                                                  radius=r * 10,
                                                   depth_shading_range=depth_shading_range,
                                                   depth_shading_targets=depth_shading_targets,
                                                   depth_shrink_range=depth_shrink_range,
@@ -1414,8 +1479,10 @@ class MPLAxes3D(MPLAxes):
                     **opts
                 )
                 dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
-                spheres.zdist_offset = -np.max(dists)
-                spheres.predraw = functools.partial(self._flat_sphere_predraw, spheres,
+                spheres.zdist_offset = functools.partial(self._get_sphere_proj, radius=np.max(dists))
+                spheres.predraw = functools.partial(self._flat_sphere_predraw,
+                                                    spheres,
+                                                    radius=dists * 10,
                                                     depth_shading_range=depth_shading_range,
                                                     depth_shading_targets=depth_shading_targets,
                                                     depth_shrink_range=depth_shrink_range,
@@ -1440,11 +1507,16 @@ class MPLAxes3D(MPLAxes):
     @classmethod
     def _get_line_outline_proj(cls, artist, radius=None):
         from mpl_toolkits.mplot3d import proj3d
-        xyzs_list = proj3d.proj_transform(*artist._verts3d, artist.axes.M)
+        x,y,z = artist._verts3d
+        xyzs_list = proj3d.proj_transform(x,y,z, artist.axes.M)
         base_shift = 1.5 * (np.max(xyzs_list[-1]) - np.min(xyzs_list[-1]))
         if radius is not None:
-            if xyzs_list[-1][0] > xyzs_list[-1][-1]:
-                base_shift += radius
+            ortho = radius*nput.vec_crosses(
+                [x[-1] - x[0], y[-1] - y[0], z[-1] - z[0]], [0, 0, 1],
+                normalize=True
+            )
+            x,y,z = proj3d.proj_transform([ortho[0]], [ortho[1]], [ortho[2]], artist.axes.M)
+            base_shift += np.linalg.norm([x[0], y[0], z[0]]) / 5
         return base_shift
     @classmethod
     def _get_line_proj(cls, artist, radius=None):
@@ -1456,10 +1528,47 @@ class MPLAxes3D(MPLAxes):
             if xyzs_list[-1][0] > xyzs_list[-1][-1]:
                 base_shift += radius
         return base_shift
+
+    _off_stroke = None
+    @classmethod
+    def _load_stroke(cls):
+        if cls._off_stroke is None:
+            import matplotlib.patheffects as pe
+            class OffsetStroke(pe.Stroke):
+                def __init__(self, offset=(0, 0), pixel_scaling=1, stroke_offset=.025, **kwargs):
+                    self._scaling = pixel_scaling
+                    super().__init__(offset, **kwargs)
+                    self._stroke_offset = stroke_offset
+
+                def draw_path(self, renderer, gc, tpath, affine, rgbFace):
+                    # lw = self._gc.get('linewidth')
+                    # if lw is not None:
+                    verts = tpath.vertices
+                    # n = lw * self._scaling / 2
+                    # dx, m = nput.vec_normalize(verts[-1] - verts[0], return_norms=True)
+                    # n = m / 4
+                    # if m < n:
+                    #     tpath = None
+                    # else:
+                    dx = (verts[-1] - verts[0])
+                    new_verts = np.array([
+                        verts[0] + self._stroke_offset * dx,
+                        verts[-1] - self._stroke_offset * dx
+                    ])
+                    # raise Exception(new_verts, verts, dx, n)
+                    tpath = type(tpath)(new_verts, tpath.codes)
+                    # if tpath is not None:
+                    super().draw_path(renderer, gc, tpath, affine, rgbFace)
+            cls._off_stroke = OffsetStroke
+        return cls._off_stroke
     @classmethod
     def _flat_cylinder_predraw(cls, line3d, dist, *,
-                             depth_shading_range, depth_shading_targets
-                             ):
+                               depth_shading_range, depth_shading_targets,
+                               edge_color=None, edge_width=None, pixel_scaling=1
+                               ):
+
+        import matplotlib.patheffects as pe
+
         if depth_shading_range is not None and depth_shading_targets is not None:
             perc = nput.vec_rescale(dist, depth_shading_targets, cur_range=depth_shading_range, clip=True)
             try:
@@ -1473,19 +1582,45 @@ class MPLAxes3D(MPLAxes):
             line3d.set_color(np.concatenate([new_fc, cur_fc[(3,),]], axis=0))
         else:
             perc = None
+
+        # print(dir(line3d))
+        try:
+            cur_size = line3d._og_sizes
+        except AttributeError:
+            cur_size = line3d._og_sizes = np.asanyarray(line3d.get_linewidth())
+        sclaing = cls._get_axis_scaling(line3d)
+        lw = sclaing * cur_size
+        line3d.set_linewidth(lw)
+        if edge_color is not None and edge_width is not None:
+            # offset_vector = line3d.get_data()
+            # x = nput.vec_normalize(offset_vector[-1] - offset_vector[0])
+            # y = np.array([-x[1], x[0]])
+            OffStroke = cls._load_stroke()
+            line3d.set_path_effects(
+                [
+                    OffStroke(linewidth=lw+edge_width,
+                              foreground=edge_color,
+                              capstyle='butt'),
+                    pe.Normal()
+                ]
+            )
     def draw_cylinder(self, start, end, rad, circle_points=48, rendering=None,
                       box_scalings=None,
                       edge_color=None,
                       color='black',
                       glow=None,
                       segments=1,
+                      segment_overdraw=.05,
                       edge_width=.01,
                       lw=None,
                       depth_shading_range=(-1, 1),
                       depth_shading_targets=(-.5, .5),
                       color_cycle=False,
+                      capstyle='butt',
                       plotter='plot',
                       **opts):
+        import matplotlib.patheffects as pe
+
         if glow is not None:
             if color is None:
                 color = glow
@@ -1519,65 +1654,72 @@ class MPLAxes3D(MPLAxes):
             # colors = []
             # linewidths = []
             # if plotter == 'plot':
-
-            for s, e, w, ec in zip(start, end, lw, edge_color):
-                if ec is not None:
-                    ww = w + (edge_width * 72 * max(box_scalings))
-                    cw = ww / (72 * max(box_scalings))
-                    v = nput.vec_normalize(e - s)
-                    s = s + cw/2 * v
-                    e = e - cw/2 * v
-                    x_points = np.linspace(s[0], e[0], 2)
-                    y_points = np.linspace(s[1], e[1], 2)
-                    z_points = np.linspace(s[2], e[2], 2)
-                    # x_points = [s[0], e[0]]
-                    # y_points = [s[1], e[1]]
-                    # z_points = [s[2], e[2]]
-                    # lines.append(
-                    #     np.vstack([x_points, y_points, z_points]).T
-                    # )
-                    # colors.append(ec)
-                    # linewidths.append(w + (.05 * 72 * max(box_scalings)))
-                    coll.append(
-                        plot(
-                            x_points,
-                            y_points,
-                            zs=z_points,
-                            color=ec,
-                            lw=ww,
-                            # zorder=-1,
-                            **opts
-                        )
-                    )
-                    for l in coll[-1]:
-                        l.zdist_offset = functools.partial(self._get_line_outline_proj, radius=cw)
-                    # for i, (x1, y1, z1, x2, y2, z2) in enumerate(zip(
-                    #         x_points[:-1], y_points[:-1], z_points[:-1],
-                    #         x_points[1:], y_points[1:], z_points[1:],
-                    # )):
-                    #     coll.append(
-                    #         plot(
-                    #             [x1, x2],
-                    #             [y1, y2],
-                    #             zs=[z1, z2],
-                    #             lw=w + (edge_width * 72 * max(box_scalings)),
-                    #             color=ec,  # cycle[i%5],
-                    #             **opts
-                    #         )
-                    #     )
+            #
+            # for s, e, w, ec, c in zip(start, end, lw, edge_color, color):
+            #     if ec is not None:
+            #         ww = w + (edge_width * 72 * max(box_scalings))
+            #         cw = ww / (72 * max(box_scalings))
+            #         v, n = nput.vec_normalize(e - s, return_norms=True)
+            #         d = np.linspace(cw, n-cw, segments+1)
+            #         # print(c, v, n)
+            #         x_points, y_points, z_points = (s[np.newaxis] + v[np.newaxis] * d[:, np.newaxis]).T
+            #         # x_points = [s[0], e[0]]
+            #         # y_points = [s[1], e[1]]
+            #         # z_points = [s[2], e[2]]
+            #         # lines.append(
+            #         #     np.vstack([x_points, y_points, z_points]).T
+            #         # )
+            #         # colors.append(ec)
+            #         # linewidths.append(w + (.05 * 72 * max(box_scalings)))
+            #         coll.append(
+            #             plot(
+            #                 x_points,
+            #                 y_points,
+            #                 zs=z_points,
+            #                 color=ec,
+            #                 lw=ww,
+            #                 # zorder=-1,
+            #                 **opts
+            #             )
+            #         )
+            #         for l in coll[-1]:
+            #             l.zdist_offset = functools.partial(self._get_line_outline_proj, radius=cw)
+            #             l.do_3d_projection = functools.partial(self._line_do_3d_projection, l)
+            #             l.distance_mode = np.max
+            #         # for i, (x1, y1, z1, x2, y2, z2) in enumerate(zip(
+            #         #         x_points[:-1], y_points[:-1], z_points[:-1],
+            #         #         x_points[1:], y_points[1:], z_points[1:],
+            #         # )):
+            #         #     coll.append(
+            #         #         plot(
+            #         #             [x1, x2],
+            #         #             [y1, y2],
+            #         #             zs=[z1, z2],
+            #         #             lw=w + (edge_width * 72 * max(box_scalings)),
+            #         #             color=ec,  # cycle[i%5],
+            #         #             **opts
+            #         #         )
+            #         #     )
 
             if color_cycle is True:
                 color_cycle = ["red", "blue", "green", "orange", "purple"]
-            for s, e, w, c in zip(start, end, lw, color):
+            ew = edge_width * (72 * max(box_scalings))
+            for s, e, w, ec, c in zip(start, end, lw, edge_color, color):
                 cw = w / (72 * max(box_scalings))
                 v, n = nput.vec_normalize(e - s, return_norms=True)
-                # s = s + cw * v
-                # e = e - cw * v
+                # s = s - cw * v
+                # e = e + cw * v
                 d = np.linspace(0, n, segments+1)
                 x_points, y_points, z_points = (s[np.newaxis] + v[np.newaxis] * d[:, np.newaxis]).T
+                if segment_overdraw > 0:
+                    d = d + (n * segment_overdraw)
+                    # d[-1] = n
+                    x2_points, y2_points, z2_points = (s[np.newaxis] + v[np.newaxis] * d[1:, np.newaxis]).T
+                else:
+                    x2_points, y2_points, z2_points = x_points[1:], y_points[1:], z_points[1:]
                 for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
                     x_points[:-1],y_points[:-1],z_points[:-1],
-                    x_points[1:],y_points[1:],z_points[1:],
+                    x2_points, y2_points, z2_points
                 )):
                     if color_cycle:
                         c = color_cycle[i%len(color_cycle)]
@@ -1588,15 +1730,25 @@ class MPLAxes3D(MPLAxes):
                             zs=[z1, z2],
                             lw=w,
                             color=c,
+                            solid_capstyle=capstyle,
+                            path_effects=(
+                                [pe.Stroke(linewidth=w+ew, foreground=ec, capstyle='butt'), pe.Normal()]
+                                    if ec is not None and ew > 0 else
+                                None
+                            ),
                             **opts
                         )
                     )
                     for l in coll[-1]:
-                        for l in coll[-1]:
-                            l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
+                        l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
+                        l.do_3d_projection = functools.partial(self._line_do_3d_projection, l)
+                        l.distance_mode = np.min
                         l.predraw = functools.partial(self._flat_cylinder_predraw, l,
-                                                            depth_shading_range=depth_shading_range,
-                                                            depth_shading_targets=depth_shading_targets)
+                                                      depth_shading_range=depth_shading_range,
+                                                      depth_shading_targets=depth_shading_targets,
+                                                      edge_color=ec,
+                                                      edge_width=ew,
+                                                      pixel_scaling=1/(72 * np.max(box_scalings)))
                 # coll.append(
                 #     plot(
                 #         x_points,
@@ -1754,13 +1906,21 @@ class MPLAxes3D(MPLAxes):
             if normal is None:
                 normal = base_norm
             angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
-            embedding_axes = nput.rotation_matrix(crosses, angs).T
-            local_x, local_y, local_z = embedding_axes
-            # uv_sign = np.sign(np.dot(local_y, v))
-            if np.dot(local_x, u) > np.dot(local_x, v):
-                emb_angle, ax2 = nput.vec_angles(local_x, u)
-            else:
-                emb_angle, ax2 = nput.vec_angles(local_x, v)
+            embedding_axes = nput.rotation_matrix(crosses, angs)
+            # local_x, local_y, local_z = embedding_axes
+            emb_u, emb_v = np.array([u, v]) @ embedding_axes
+            # emb_angle, ax2 = nput.vec_angles(local_x, emb_u)
+            emb_u = nput.vec_normalize(emb_u)
+            # emb_v = nput.vec_normalize(emb_v)
+            # det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+            emb_angle = np.arccos(emb_u[0])
+            # raise Exception(angs, det)
+            if normal[2] > 0:
+                emb_angle = 2*np.pi - emb_angle
+            # emb_angle = np.arccos(emb_v[0])
+            #     emb_angle, ax2 = nput.vec_angles(local_x, u)
+            # else:
+            #     emb_angle, ax2 = nput.vec_angles(local_x, v)
             # emb_angle = uv_sign * emb_angle
             if angle is None:
                 angle = base_ang

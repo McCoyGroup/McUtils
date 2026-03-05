@@ -831,6 +831,13 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
         self.axes.set_projection_type(ptype)
 
     @property
+    def autoscale(self):
+        return self.axes.get_autoscale()
+    @autoscale.setter
+    def autoscale(self, autoscale):
+        self.axes.set_autoscale(autoscale)
+
+    @property
     def plot_range(self):
         if self._plot_range is None:
             pr = (self.axes.get_xlim(), self.axes.get_ylim(), self.axes.get_zlim())

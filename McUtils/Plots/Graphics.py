@@ -1339,7 +1339,7 @@ class Graphics(GraphicsBase):
 #
 class Graphics3D(Graphics):
 
-    opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios', 'projection_type'}
+    opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios', 'projection_type', 'autoscale', 'aspect_ratio'}
     known_keys = Graphics.opt_keys | {'animate'}
 
     # layout_keys = axes_keys | figure_keys | GraphicsBase.layout_keys
@@ -1364,6 +1364,8 @@ class Graphics3D(Graphics):
                  view_settings=None,
                  box_ratios=None,
                  projection_type=None,
+                 aspect_ratio=None,
+                 autoscale=None,
                  backend='matplotlib3D',
                  **kwargs
                  ):
@@ -1391,6 +1393,8 @@ class Graphics3D(Graphics):
             box_ratios=box_ratios,
             prop_manager=GraphicsPropertyManager3D,
             projection_type=projection_type,
+            aspect_ratio=aspect_ratio,
+            autoscale=autoscale,
             **kwargs
         )
 
@@ -1398,6 +1402,8 @@ class Graphics3D(Graphics):
                     view_settings=None,
                     box_ratios=None,
                     projection_type=None,
+                    aspect_ratio=None,
+                    autoscale=None,
                     **parent_opts
                     ):
 
@@ -1406,7 +1412,9 @@ class Graphics3D(Graphics):
         opts = (
             ('view_settings', view_settings),
             ('box_ratios', box_ratios),
-            ('projection_type', projection_type)
+            ('projection_type', projection_type),
+            ('autoscale', autoscale),
+            ('aspect_ratio', aspect_ratio)
         )
         for oname, oval in opts:
             oval = self._get_def_opt(oname, oval, {})
