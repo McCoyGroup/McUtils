@@ -1429,6 +1429,20 @@ class Graphics3D(Graphics):
         self._prop_manager.box_ratios = value
 
     @property
+    def autoscale(self):
+        return self._prop_manager.autoscale
+    @autoscale.setter
+    def autoscale(self, value):
+        self._prop_manager.autoscale = value
+
+    @property
+    def projection_type(self):
+        return self._prop_manager.projection_type
+    @projection_type.setter
+    def projection_type(self, value):
+        self._prop_manager.projection_type = value
+
+    @property
     def view_settings(self):
         return self._prop_manager.view_settings
     @view_settings.setter
