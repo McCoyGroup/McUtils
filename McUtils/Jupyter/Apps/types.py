@@ -14,6 +14,14 @@ class HTMLableType(typing.Protocol):
     def to_tree(self):
         ...
 @typing.runtime_checkable
+class IPyHTMLableType(typing.Protocol):
+    def _repr_html_(self):
+        ...
+@typing.runtime_checkable
+class ImageableType(typing.Protocol):
+    def _repr_png_(self):
+        ...
+@typing.runtime_checkable
 class WidgetableType(typing.Protocol):
     def to_widget(self):
         ...
@@ -21,7 +29,9 @@ InterfaceElementBaseType = typing.Union[
     str,
     typing.Mapping,
     HTMLableType,
-    WidgetableType
+    WidgetableType,
+    IPyHTMLableType,
+    ImageableType
 ]
 InterfaceElementType = typing.Union[
     InterfaceElementBaseType,

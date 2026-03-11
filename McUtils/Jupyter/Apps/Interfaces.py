@@ -123,7 +123,7 @@ class WidgetInterface(metaclass=abc.ABCMeta):
     def to_static_html(self, include_bootstrap=True, create_body=True):
         w = self.to_widget()
         if not isinstance(w, JHTML.HTML.XMLElement):
-            raise ValueError("widget {} can't reduce to static HTML")
+            raise ValueError(f"widget {w} can't reduce to static HTML")
         if include_bootstrap:
             if create_body:
                 w = JHTML.HTML.Html(
@@ -422,6 +422,8 @@ class WrapperComponent(Component):
                 or cls._check_is_widget_class(items)
                 or hasattr(items, 'to_tree')
                 or hasattr(items, 'to_widget')
+                or hasattr(items, '_repr_html_')
+                or hasattr(items, '_repr_png_')
         ):
             items = [items]
         elif items is None:
@@ -566,6 +568,11 @@ class ComponentContainer(WrapperComponent):
         self.components = dict(self.components, **components)
         self.component_args = component_args if component_args is not None else {}
         self.component_kwargs = component_kwargs if component_kwargs is not None else {}
+        if 'dynamic' in attrs:
+            for key in self.components.keys():
+                if key not in self.component_kwargs:
+                    self.component_kwargs[key] = {}
+                self.component_kwargs[key]['dynamic'] = attrs['dynamic']
     def create_components(self):
         return {
             k:c(
@@ -574,7 +581,11 @@ class ComponentContainer(WrapperComponent):
                 **self.component_kwargs.get(k, {})
             )
             for k,c in self.components.items()
-            if not (len(self.component_args.get(k, [])) == 1 and len(self.component_kwargs.get(k, [])) == 0 and self.component_args.get(k, [])[0] is None) # components to ignore
+            if not (
+                    len(self.component_args.get(k, [])) == 1
+                    and len(self.component_kwargs.get(k, [])) == 0
+                    and self.component_args.get(k, [])[0] is None
+            ) # components to ignore
         }
     def handle_variants(self, theme):
         return theme
@@ -1477,6 +1488,14 @@ if (shown) {
                 title = title.to_tree().tostring()
                 if data_bs_html is None:
                     data_bs_html = True
+            elif hasattr(title, '_repr_html_'):
+                title = title._repr_html_()
+                if data_bs_html is None:
+                    data_bs_html = True
+            elif hasattr(title, '_repr_png_'):
+                title = JHTML.image_from_string(title._repr_png_())
+                if data_bs_html is None:
+                    data_bs_html = True
             else:
                 raise TypeError('tooltip title must be a string')
         if data_bs_html is not None:
@@ -1602,6 +1621,14 @@ if (widget.popover !== null && widget.popover !== undefined) {
                         title = title.elem
                     if data_bs_html is None:
                         data_bs_html = True
+                elif hasattr(title, '_repr_html_'):
+                    title = title._repr_html_()
+                    if data_bs_html is None:
+                        data_bs_html = True
+                elif hasattr(title, '_repr_png_'):
+                    title = JHTML.image_from_string(title._repr_png_())
+                    if data_bs_html is None:
+                        data_bs_html = True
                 else:
                     raise TypeError('popover title must be a string')
             kwargs['title'] = title
@@ -1621,6 +1648,14 @@ if (widget.popover !== null && widget.popover !== undefined) {
                 body = body.to_widget()
                 if hasattr(body, 'elem'):
                     body = body.elem
+                if data_bs_html is None:
+                    data_bs_html = True
+            elif hasattr(body, '_repr_html_'):
+                body = body._repr_html_()
+                if data_bs_html is None:
+                    data_bs_html = True
+            elif hasattr(body, '_repr_png_'):
+                body = JHTML.image_from_string(body._repr_png_())
                 if data_bs_html is None:
                     data_bs_html = True
             else:

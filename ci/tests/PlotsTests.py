@@ -184,7 +184,7 @@ class PlotsTests(TestCase):
         Sphere(color='red').plot(plot)
         plot.show()
 
-    @debugTest
+    @validationTest
     def test_ColorPalettes(self):
         rgb_code = np.array([255, 255, 255])
         conv = ColorPalette.color_convert(rgb_code, 'rgb', 'hsl')
@@ -360,3 +360,10 @@ class PlotsTests(TestCase):
 
         p.savefig(self.result_file("test_Plot3DDelayed.gif"))
         p.close()
+
+    @debugTest
+    def test_PlotlyBackend(self):
+        Plot([0, 1, 2], [0, 1, 2],
+             backend='plotly',
+             ticks=[[0, 1, 2], [0, 1, 2]]
+             ).show()

@@ -232,15 +232,15 @@ class JHTML:
         return base
 
     @classmethod
-    def _check_widg(cls, elems):
-        wapi = JupyterAPIs.get_widgets_api()
-        if wapi is None:
-            return False
-
-        Widget = JupyterAPIs.get_widgets_api().Widget
+    def _check_widg_static(cls, elems, Widget):
         if isinstance(elems, (list, tuple)) and len(elems) == 0:
             return False
         elif isinstance(elems, HTML.XMLElement):
+            return False
+        elif (
+                hasattr(elems, '_repr_html_')
+                or hasattr(elems, '_repr_png_')
+        ):
             return False
         elif (
                 isinstance(elems, (ActiveHTMLWrapper, Widget))
@@ -248,18 +248,25 @@ class JHTML:
         ):
             return True
         else:
+            return None
+
+    @classmethod
+    def _check_widg(cls, elems):
+        wapi = JupyterAPIs.get_widgets_api()
+        if wapi is None:
+            return False
+
+        Widget = JupyterAPIs.get_widgets_api().Widget
+        stat = cls._check_widg_static(elems, Widget)
+        if stat is None:
             return any(
                 cls._check_widg(e)
                     if isinstance(e, (list, tuple)) else
-                (
-                    (not isinstance(e, HTML.XMLElement))
-                    and (
-                            isinstance(e, (ActiveHTMLWrapper, Widget))
-                            or (hasattr(e, 'to_widget') and not isinstance(e.to_widget(), HTML.XMLElement))
-                    )
-                )
+                cls._check_widg_static(e, Widget)
                 for e in elems
             )
+        else:
+            return stat
 
     @classmethod
     def _resolve_source(jhtml, plain, widget, *elems,
@@ -436,6 +443,9 @@ class JHTML:
     @classmethod
     @dispatcher
     def Image(jhtml, *elements, **styles): ...
+    @classmethod
+    def image_from_string(cls, image_string:bytes|str, format='image/png', **styles):
+        return cls.HTML.image_from_string(image_string, format=format, **styles)
     @classmethod
     @dispatcher
     def Img(jhtml, *elements, **styles): ...

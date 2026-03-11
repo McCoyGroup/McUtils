@@ -67,7 +67,11 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     so that other backends can plug in cleanly
     """
     def __init__(self):
-        self.xaxis = XAxisManager(
+        self.xaxis = self.get_xaxis_manager()
+        self.yaxis = self.get_yaxis_manager()
+
+    def get_xaxis_manager(self):
+        return XAxisManager(
             self.get_xticks,
             self.set_xticks,
             None,
@@ -75,7 +79,8 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
             None,
             None
         )
-        self.yaxis = YAxisManager(
+    def get_yaxis_manager(self):
+        return YAxisManager(
             self.get_yticks,
             self.set_yticks,
             None,
@@ -83,6 +88,14 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
             None,
             None
         )
+
+    class TicksManager:
+        class Locator:
+            ...
+        class FixedLocator(Locator):
+            def __init__(self, locs, **opts):
+                self.locs = locs
+                self.opts = opts
 
     @classmethod
     def canonicalize_opts(cls, opts):
@@ -354,6 +367,20 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
         raise NotImplementedError("needs an overload")
     def _repr_html_(self):
         return self.to_html()
+    def get_mime_bundle(self):
+        try:
+            html = self.to_html()
+        except NotImplementedError:
+            buf = io.BytesIO()
+            self.savefig(buf, format='png')
+            data = {
+                'image/png':buf.getvalue()
+            }
+        else:
+            data = {
+                'text/html': html
+            }
+        return data
     def tight_layout(self):
         ...
 
@@ -418,6 +445,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         VPython2D = 'vpython2D'
         X3D = 'x3d'
         SceneJSON = 'json'
+        Plotly = 'plotly'
 
     registered_backends = {}
     @classmethod
@@ -425,6 +453,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         return {
             cls.DefaultBackends.MPL.value: MPLBackend,
             cls.DefaultBackends.MPL3D.value: MPLBackend3D,
+            cls.DefaultBackends.Plotly.value: PlotlyBackend,
             cls.DefaultBackends.VTK.value: VTKBackend,
             cls.DefaultBackends.VPython2D.value: VPythonBackend,
             cls.DefaultBackends.VPython.value: VPythonBackend3D,
@@ -695,6 +724,18 @@ class MPLAxes(GraphicsAxes):
         super().__init__()
         self.xaxis = self.obj.xaxis
         self.yaxis = self.obj.yaxis
+
+    class TicksManager:
+        def __init__(self):
+            import matplotlib.ticker as ticks
+            self._Locator = ticks.Locator
+            self._FixedLocator = ticks.FixedLocator
+        @property
+        def Locator(self):
+            return self._Locator
+        @property
+        def FixedLocator(self):
+            return self._FixedLocator
 
     def clear(self, *, backend=None):
         ax = self.obj
@@ -2209,6 +2250,13 @@ class MPLFigure(GraphicsFigure):
         else:
             widg = interactive.JHTML.Image(src=self.to_data_url())
         return widg
+    def get_mime_bundle(self):
+        if self.display_format == 'svg':
+            return {
+                'image/svg+xml':self.to_svg()
+            }
+        else:
+            return super().get_mime_bundle()
     def tight_layout(self):
         self.obj.tight_layout()
 
@@ -2302,6 +2350,334 @@ class MPLBackend3D(MPLBackend):
         from mpl_toolkits.mplot3d import Axes3D
         subplot_kw = dict({"projection": '3d'}, **({} if subplot_kw is None else subplot_kw))
         return super().create_figure(*args, subplot_kw=subplot_kw, **kwargs)
+
+class PlotlyAxes(GraphicsAxes):
+    def __init__(self, elements=None, xaxis=None, yaxis=None, **opts):
+        if elements is None:
+            elements = []
+        self.elements = elements
+        if xaxis is None:
+            xaxis = dict(linecolor='black',
+                         showline=True,
+                         ticks="outside",
+                         ticklen=5,  # length in px
+                         tickwidth=1,  # width in px
+                         tickcolor='black')
+        if yaxis is None:
+            yaxis = dict(linecolor='black',
+                         showline=True,
+                         ticks="outside",
+                         ticklen=5,  # length in px
+                         tickwidth=1,  # width in px
+                         tickcolor='black')
+        self.opts = self.canonicalize_opts(opts|dict(yaxis=yaxis, xaxis=xaxis))
+        super().__init__()
+
+    def clear(self, *, backend=None):
+        self.elements = []
+    def remove(self, *, backend):
+        self.elements = []
+
+    def prep_elems(self):
+        return self.elements
+    def prep_opts(self):
+        opts = self.opts
+        for lab in ['xaxis', 'yaxis']:
+            if lab in opts:
+                opts[lab] = {k:v for k,v in opts[lab].items() if v is not None}
+        return opts
+    def get_plot_label(self):
+        return self.opts.get('title')
+    def set_plot_label(self, val, **style):
+        self.opts['title'] = (val, style)
+
+    def get_style_list(self):
+        raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props):
+        self._prop_cycle = props
+
+    def get_frame_visible(self):
+        return None
+    def set_frame_visible(self, frame_spec):
+        None
+
+    def get_frame_style(self):
+        ...
+    def set_frame_style(self, frame_spec):
+        ...
+
+    def get_xlabel(self):
+        return self.opts.get('xaxis', {}).get('title_text')
+    def set_xlabel(self, val, **style):
+        self.opts['xaxis'] = self.opts.get('xaxis', {}) | dict(
+            title_text=val,
+            **style
+        )
+    def get_ylabel(self):
+        return self.opts.get('yaxis', {}).get('title_text')
+    def set_ylabel(self, val, **style):
+        self.opts['yaxis'] = self.opts.get('yaxis', {}) | dict(
+            title_text=val,
+            **style
+        )
+
+    def get_xlim(self):
+        ...
+    def set_xlim(self, val, **opts):
+        ...
+    def get_ylim(self):
+        ...
+    def set_ylim(self, val, **opts):
+        ...
+
+    def get_xticks(self):
+        return self.opts.get('xaxis', {}).get('tickvals')
+    def set_xticks(self, val, **opts):
+        if isinstance(val, self.TicksManager.FixedLocator):
+            val = val.locs
+        self.opts['xaxis'] = self.opts.get('xaxis', {}) | dict(
+            tickvals=val,
+            tickmode='array',
+            **opts
+        )
+    def get_yticks(self):
+        return self.opts.get('yaxis', {}).get('tickvals')
+    def set_yticks(self, val, **opts):
+        if isinstance(val, self.TicksManager.FixedLocator):
+            val = val.locs
+        self.opts['yaxis'] = self.opts.get('yaxis', {}) | dict(
+            tickvals=val,
+            tickmode='array',
+            **opts
+        )
+
+    def get_xtick_style(self):
+        base_opts = self.opts.get('xaxis', {}).copy()
+        base_opts.pop('title_text', None)
+        base_opts.pop('tickvals', None)
+        return base_opts
+    def set_xtick_style(self, **opts):
+        self.opts['xaxis'] = self.opts.get('xaxis', {}) | opts
+    def get_ytick_style(self):
+        base_opts = self.opts.get('yaxis', {}).copy()
+        base_opts.pop('title_text', None)
+        base_opts.pop('tickvals', None)
+        return base_opts
+    def set_ytick_style(self, **opts):
+        self.opts['yaxis'] = self.opts.get('yaxis', {}) | opts
+
+    def set_aspect_ratio(self, ar):
+        ...
+
+    def get_bbox(self):
+        ...
+    def set_bbox(self, bbox):
+        ...
+
+    style_mapping = {
+        'c':'color',
+        'linewidth':'width',
+        'linestyle':'dash',
+        'label':'name'
+    }
+    line_options = [
+        'name',
+        'color',
+        'width',
+        'dash'
+    ]
+    def _prep_line_opts(self, line, opts):
+        for k,a in self.style_mapping.items():
+            if k in opts:
+                opts[a] = opts.pop(k)
+        if line is None:
+            line = {}
+            for k in self.line_options:
+                if k in opts:
+                    line[k] = opts.pop(k)
+        return line, opts
+    def plot(self, x, y, line=None, mode='lines', **opts):
+        # import plotly.graph_objects as go
+        opts['mode'] = mode
+        line, opts = self._prep_line_opts(line, opts)
+        plot_dict = dict(type='scatter', x=x, y=y, line=line, **opts)
+        self.elements.append(plot_dict)
+        return plot_dict
+    def scatter(self, x, y, line=None, mode='markers', **opts):
+        # import plotly.graph_objects as go
+        opts['mode'] = mode
+        line, opts = self._prep_line_opts(line, opts)
+        plot_dict = dict(type='scatter', x=x, y=y, line=line, **opts)
+        self.elements.append(plot_dict)
+        return plot_dict
+
+    def get_plotter(self, method, **opts):
+        if method == 'plot':
+            return self.plot
+        elif method == 'scatter':
+            return self.scatter
+        else:
+            raise ValueError(f"don't know method {method}")
+
+    def get_facecolor(self):
+        return self.opts.get('plot_bgcolor')
+    def set_facecolor(self, fg):
+        self.opts['plot_bgcolor'] = fg
+
+    def get_padding(self):
+        return None
+
+    def legend(self, **opts):
+        raise NotImplementedError(...)
+
+    def get_graphics_properties(self, obj, property=None):
+        raise NotImplementedError(...)
+    def set_graphics_properties(self, obj, **props):
+        raise NotImplementedError(...)
+    def draw_line(self, points, **styles):
+        raise NotImplementedError(...)
+    def draw_disk(self, points, radius=None, s=None, **styles):
+        raise NotImplementedError(...)
+    def draw_rect(self, points, **styles):
+        raise NotImplementedError(...)
+    def draw_poly(self, points, **styles):
+        raise NotImplementedError(...)
+    def draw_arrow(self, points, **styles):
+        raise NotImplementedError(...)
+    def draw_text(self, points, vals, **styles):
+        raise NotImplementedError(...)
+
+class PlotlyFigure(GraphicsFigure):
+    Axes = PlotlyAxes
+    default_display_format = 'png'
+    def __init__(self, axes=None, layout=None, display_format=None,
+                 width=500,
+                 height=500,
+                 **opts):
+        if axes is None:
+            axes = []
+        if layout is None:
+            layout = {}
+        self.layout = layout
+        if display_format is None:
+            display_format = self.default_display_format
+        self.display_format = display_format
+        self.opts = self.canonicalize_opts(opts)
+        self.width = width
+        self.height = height
+        self.shown = False
+        super().__init__(axes=axes)
+    def __setitem__(self, key, value):
+        self.opts[key] = value
+    def __getitem__(self, item):
+        return self.opts[item]
+    def clear(self, *, backend):
+        self.axes = []
+    def close(self, *, backend):
+        self.clear(backend=backend)
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError(...)
+    def create_axes(self, **kw) -> 'GraphicsAxes':
+        ax = self.Axes(**kw)
+        return self.add_axes(ax)
+    @classmethod
+    def construct(cls, **kw) -> 'GraphicsFigure':
+        return cls(**kw)
+    def get_size_inches(self):
+        return [self.width/DPI_SCALING, self.height/DPI_SCALING]
+    def set_size_inches(self, w, h):
+        self.width, self.height = w*DPI_SCALING, h*DPI_SCALING
+    def set_extents(self, extents):
+        (l, r), (b, t) = extents
+        self.layout['margin'] = self.layout.get('margin', {}) | dict(
+            l=l,
+            r=r,
+            t=t,
+            b=b
+        )
+    def get_facecolor(self):
+        return self.layout.get('paper_bgcolor')
+    def set_facecolor(self, fg):
+        self.layout['paper_bgcolor'] = fg
+
+    def savefig(self, file, facecolor=None, **opts):
+        return self.to_plotly().savefig(file, facecolor=facecolor, **opts)
+
+    def prep_dict(self):
+        elems = []
+        axes_layout = {}
+        for ax in self.axes:
+            elems.extend(ax.prep_elems())
+            axes_layout = axes_layout | ax.prep_opts()
+        layout = axes_layout | self.layout
+        layout['width'] = self.width
+        layout['height'] = self.height
+        return {
+            'data':elems,
+            'layout':layout
+        }
+    def to_plotly(self):
+        import plotly.graph_objects as go
+        return go.Figure(self.prep_dict())
+
+    plotly_cdn = "https://cdn.plot.ly/plotly-3.4.0.min.js"
+    def to_html(self):
+        # print(fig)
+        buf = io.StringIO()
+        self.to_plotly().write_html(buf, include_plotlyjs=False)
+        buf.seek(0)
+        html = buf.read()
+        uuh = html.split("<body>")[1].rsplit("</body>")[0].strip().replace(
+            """<script type="text/javascript">""",
+            f"""<script src="{self.plotly_cdn}" charset="utf-8" onload='(function(){{""",
+            1
+        ).replace("</script>", "})()'></script>", 1)
+        return uuh
+    def to_svg(self):
+        buf = io.StringIO()
+        self.to_plotly().savefig(buf, format='svg')
+        buf.seek(0)
+        return buf.read()
+    def to_widget(self, format=None, autoclose=True):
+        from .. import Jupyter as interactive
+        widg = interactive.JHTML.HTML.RawHTML(self.to_html())
+        return widg
+    def animate_frames(self, frames, **animation_opts):
+        raise NotImplementedError(...)
+class PlotlyBackend(GraphicsBackend):
+    Figure = PlotlyFigure
+    def create_figure(self, *args, **kwargs):
+        Axes = self.Figure.Axes
+        fig = self.Figure(*args, **kwargs)
+        ax = fig.create_axes()
+        return fig, ax
+    class ThemeContextManager(GraphicsBackend.ThemeContextManager):
+        theme_stack = []
+
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec):
+            return []
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            ...
+
+    def show_figure(self, graphics:PlotlyFigure, reshow=None):
+        if not graphics.shown:
+            widg = graphics.to_widget()
+            graphics.shown = True
+            return widg.display()
+
+    def get_interactive_status(self) -> 'bool':
+        return True
+    def disable_interactivity(self):
+        ...
+    def enable_interactivity(self):
+        ...
+    def get_available_themes(self):
+        return []
 
 class GraphicsRegionAxes(GraphicsAxes):
     def __init__(self, figure_region):
@@ -3463,11 +3839,10 @@ class X3DAxes(GraphicsAxes3D):
                 disk_set = x3d.X3DCircle2D(points,
                                            normal=normal,
                                            radius=radius,
-                                           glow=line_color,
                                            rotation=rotation,
                                            solid=False if solid is None else solid,
                                            angle=angle,
-                                           **styles
+                                           **(styles | dict(glow=line_color))
                                            )
             else:
                 if color is None:
@@ -3479,11 +3854,10 @@ class X3DAxes(GraphicsAxes3D):
                                         normal=normal,
                                         inner_radius=innerRadius if color is None else line_thickness,
                                         radius=outerRadius if color is None else radius,
-                                        color=line_color,
                                         solid=solid,
                                         rotation=rotation,
                                         angle=angle,
-                                        **styles
+                                        **(styles | dict(color=line_color))
                                         )
             objects.append(disk_set)
 
@@ -3768,6 +4142,8 @@ class X3DFigure(GraphicsFigure):
         )
     def to_widget(self, **opts):
         return self.to_x3d(**opts).to_widget()
+    def to_html(self):
+        return self.to_widget().tostring()
 
     def animate_frames(self, frames: list['X3DAxes'], mode=None, **animation_opts):
         frame_data = [

@@ -58,11 +58,15 @@ class Manipulator(Card):
             'output': {}
         }
     )
-    def __init__(self, func, *controls, debounce=None, autoclear=True, **etc):
+    def __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, **etc):
         super().__init__(**etc)
-        self.controls = [self.canonicalize_control(c) for c in controls]
+        if namespace is None:
+            namespace = InterfaceVars.unique_namespace()
+        self.controls = [self.canonicalize_control(c, namespace=namespace) for c in controls]
         vars = [c.var for c in self.controls]
-        self.output = FunctionDisplay(func, vars, debounce=debounce, autoclear=autoclear, **self.theme.get('output', {}))
+        self.output = FunctionDisplay(func, vars, debounce=debounce, autoclear=autoclear,
+                                      namespace=namespace,
+                                      **self.theme.get('output', {}))
         body = Flex(
             [
                 self.output,
@@ -72,7 +76,7 @@ class Manipulator(Card):
         )
         self.component_args['body'] = (body,)
     @classmethod
-    def canonicalize_control(cls, settings):
+    def canonicalize_control(cls, settings, namespace=None):
         if isinstance(settings, (WidgetControl, Control)):
             return settings
         else:
@@ -82,6 +86,8 @@ class Manipulator(Card):
                     settings = {'range':settings}
                 else:
                     settings = {'value':settings}
+            if namespace is not None:
+                settings['namespace'] = settings.get('namespace', namespace)
             # try:
             control = Control.construct(var, **settings)
             # except:
