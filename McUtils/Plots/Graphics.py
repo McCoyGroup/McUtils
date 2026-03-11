@@ -675,6 +675,8 @@ class GraphicsBase(metaclass=ABCMeta):
     def _repr_html_(self):
         # hacky, but hopefully enough to make it work?
         return self.figure._repr_html_()
+    def get_mime_bundle(self):
+        return self.figure.get_mime_bundle()
 
     def savefig(self, where, expanduser=True, format=None, **kw):
         """

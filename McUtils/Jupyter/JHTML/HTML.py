@@ -393,6 +393,10 @@ class HTMLManager:
             val = int(val)
         elif isinstance(val, np.floating):
             val = float(val)
+        elif (not hasattr(val, 'to_tree')) and hasattr(val, '_repr_html_'):
+            val = HTML.parse(val._repr_html_())
+        elif hasattr(val, '_repr_png_'):
+            val = HTML.image_from_string(val._repr_png_())
         return val
 
     @classmethod
@@ -1523,6 +1527,15 @@ class HTML(XMLBase):
     class Bold(TagElement): tag='b'
     class Italic(TagElement): tag='i'
     class Image(TagElement): tag='img'
+    @classmethod
+    def image_from_string(cls, image_string: bytes | str, format='image/png', **styles):
+        import base64
+        if isinstance(image_string, bytes):
+            image_string = base64.b64encode(image_string).decode()
+        return cls.Image(
+            src=f"data:{format};base64,{image_string}",
+            **styles
+        )
     class ListItem(TagElement): tag='li'
     class BaseList(TagElement):
         def __init__(self, *elems, item_attributes=None, **attrs):

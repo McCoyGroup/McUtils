@@ -1,6 +1,7 @@
 
 import abc, uuid, numpy as np
 import asyncio, traceback, sys
+import time
 
 from ..JHTML import JHTML
 
@@ -60,6 +61,8 @@ class Control(Component):
         if self._widget_cache is None:
             raise ValueError("not initialized")
         return self._widget_cache.to_widget().observe(fn, names=names)
+    def unobserve(self, fn, names=None):
+        return self._widget_cache.to_widget().unobserve(fn, names=names)
 
     control_types = {}
     @classmethod
@@ -90,8 +93,8 @@ class Control(Component):
             raise NotImplementedError("can't infer control type without 'field_type'")
 
 class ValueWidget(Control):
-    def __init__(self, var, value=None):
-        super().__init__(var)
+    def __init__(self, var, value=None, namespace=None):
+        super().__init__(var, namespace=namespace)
         if value is not None:
             self.var.value = value
         if self.var.value is None:
@@ -110,8 +113,8 @@ class ValueWidget(Control):
             self.var.value = self._widget_cache.value
 class InputField(ValueWidget):
     base_cls = ['form-control']
-    def __init__(self, var, value=None, tag='input', track_value=True, continuous_update=False, base_cls=None, cls=None, **attrs):
-        super().__init__(var, value=value)
+    def __init__(self, var, value=None, tag='input', track_value=True, continuous_update=False, base_cls=None, cls=None, namespace=None, **attrs):
+        super().__init__(var, value=value, namespace=namespace)
         if base_cls is not None:
             self.base_cls = base_cls
         attrs['cls'] = self.base_cls + JHTML.manage_class(cls)
@@ -322,7 +325,7 @@ class VariableDisplay(Control):
             self.set_value()
         return self.out
 class FunctionDisplay(Component):
-    def __init__(self, fn, vars, pane=None, autoclear=True, debounce=None, **attrs):
+    def __init__(self, fn, vars, pane=None, autoclear=True, debounce=None, delay_time=.1, namespace=None, **attrs):
         super().__init__()
         if pane is None:
             pane = JHTML.OutputArea(autoclear=autoclear, **attrs)
@@ -331,7 +334,9 @@ class FunctionDisplay(Component):
         self.debounce = debounce
         self._delayed_executor = None
         # self._executions = []
-        self.vars = InterfaceVars(*vars) if not isinstance(vars, InterfaceVars) else vars
+        self.vars = InterfaceVars(*vars, namespace=namespace) if not isinstance(vars, InterfaceVars) else vars
+        self._prev_call = None
+        self.delay_time = delay_time
     def link_vars(self, *var):
         self.update = self.update  # weakref patch
         for v in self.vars:
@@ -340,31 +345,43 @@ class FunctionDisplay(Component):
         self.vars.callbacks.add(self.link_vars)
     def to_widget(self, parent=None):
         needs_link = self._widget_cache is None
-        widg = super().to_widget(parent=parent)
-        if needs_link:
-            self.link_vars()
+        dt = self.delay_time
+        db = self.debounce
+        try:
+            self.delay_time = 1000
+            self.debounce = 10
+            widg = super().to_widget(parent=parent)
+            if needs_link:
+                self.link_vars()
+        finally:
+            self.delay_time = dt
+            self.debounce = db
         return widg
     def observe(self, fn, names=None):
         if self._widget_cache is None:
             raise ValueError("not initialized")
         return self._widget_cache.to_widget().observe(fn, names=names)
+    def unobserve(self, fn, names=None):
+        return self._widget_cache.to_widget().unobserve(fn, names=names)
 
     # directly from the jupyter docs
     async def _delayed_update(self, event):
         await asyncio.sleep(self.debounce)
         return self._update(event)
     def update(self, event):
-        try:
-            if self.debounce is not None:
-                if self._delayed_executor is not None:
-                    self._delayed_executor.cancel()
-                self._delayed_executor = asyncio.ensure_future(self._delayed_update(event))
-            else:
-                self._update(event)
-        except:
-            with self.out:
-                _, _, tb = sys.exc_info()
-                traceback.print_tb(tb)
+        if self._prev_call is None or (time.time() - self._prev_call) > self.delay_time:
+            self._prev_call = time.time()
+            try:
+                if self.debounce is not None:
+                    if self._delayed_executor is not None:
+                        self._delayed_executor.cancel()
+                    self._delayed_executor = asyncio.ensure_future(self._delayed_update(event))
+                else:
+                    self._update(event)
+            except:
+                with self.out:
+                    _, _, tb = sys.exc_info()
+                    traceback.print_tb(tb)
 
     def _update(self, e):
         res = self.fn(event=e, pane=self, **self.vars.dict)

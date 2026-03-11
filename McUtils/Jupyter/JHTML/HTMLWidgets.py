@@ -249,6 +249,10 @@ class ActiveHTMLWrapper:
             return elem
         elif hasattr(x, 'to_widget'):
             return cls.canonicalize_widget(x.to_widget())
+        elif hasattr(x, '_repr_html_'):
+            return cls.canonicalize_widget(HTML.parse(x._repr_html_()))
+        elif hasattr(x, '_repr_png_'):
+            return cls.canonicalize_widget(HTML.image_from_string(x._repr_png_()))
         else:
             raise NotImplementedError("don't know what to do with object {} of type {}".format(
                 x, type(x)
@@ -1313,14 +1317,10 @@ class HTMLWidgets:
             with self:
                 return JupyterAPIs().display_api.display(*args, **kwargs)
 
-        def _get_display_data(self, args):
+        def _get_display_data(self, args, mimetype=None):
             outs = []
             for output in args:
                 # Jupyter Widgets is broken so we need to patch...
-                if hasattr(output, 'savefig'):
-                    buf = io.BytesIO()
-                    output.savefig(buf, format='png')
-                    output = JupyterAPIs.get_display_api().Image(buf.getvalue())
                 if output is not None:
                     if hasattr(output, 'get_mime_bundle'):
                         outs.append({
@@ -1329,6 +1329,10 @@ class HTMLWidgets:
                             'metadata': {}
                         })
                     else:
+                        if hasattr(output, 'savefig'):
+                            buf = io.BytesIO()
+                            output.savefig(buf, format='png')
+                            output = JupyterAPIs.get_display_api().Image(buf.getvalue())
                         if isinstance(output, str):
                             outs.append({
                                 'output_type': 'display_data',

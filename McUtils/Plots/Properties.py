@@ -235,7 +235,7 @@ class GraphicsPropertyManager:
                    set_formatter, set_minor_formatter,
                    **opts):
         #TODO: make this backend independent
-        import matplotlib.ticker as ticks
+        ticks = self.axes.TicksManager()
         inherit_opts = dict(
             set_ticks = set_ticks,
             set_locator = set_locator,
@@ -258,6 +258,8 @@ class GraphicsPropertyManager:
         elif isinstance(x, ticks.Locator):
             if set_locator is not None:
                 set_locator(x)
+            else:
+                set_ticks(x)
 
             minor = opts.get('minor', False)
             if minor is not False and minor is not None:
@@ -314,12 +316,12 @@ class GraphicsPropertyManager:
                                 )
             elif len(x) == 2 and dev.is_list_like(x[0]):
                 self._set_ticks(ticks.FixedLocator(x[0]),
-                            **inherit_opts,
+                                **inherit_opts,
                                 labels=x[1],
                                 **opts)
             else:
                 self._set_ticks(ticks.FixedLocator(x),
-                            **inherit_opts,
+                                **inherit_opts,
                                 **opts)
         elif dev.is_number(x):
             self._set_ticks(ticks.MultipleLocator(x),

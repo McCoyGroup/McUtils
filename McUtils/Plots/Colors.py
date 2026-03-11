@@ -33,7 +33,7 @@ class ColorPalette:
 
     named_colors = {}
     @classmethod
-    def parse_color_string(cls, name:str, include_named_alpha=False):
+    def parse_color_string(cls, name:str, include_named_alpha=False, return_padding=False):
         if not name.startswith('#'):
             c = cls.named_colors.get(name)
             if c is None:
@@ -42,10 +42,12 @@ class ColorPalette:
                 c = [255 * x for x in vals[:3]]
                 if include_named_alpha:
                     c = c + list(vals[3:])
+            if return_padding:
+                c = (c, 2)
         else:
             c = name
         if isinstance(c, str):
-            c = cls.parse_rgb_code(c)
+            c = cls.parse_rgb_code(c, return_padding=return_padding)
         return c
 
     @classmethod
@@ -338,7 +340,7 @@ class ColorPalette:
         if as_code:
             if color_space != 'rgb':
                 raise ValueError(f"only rgb color codes supported (got {color})")
-            color, padding = cls.parse_rgb_code(color, return_padding=True)
+            color, padding = cls.parse_color_string(color, return_padding=True)
         if color_space != modification_space:
             lab_color = cls.color_convert(color, color_space, modification_space)
         else:
