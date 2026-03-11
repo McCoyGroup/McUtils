@@ -2289,7 +2289,7 @@ class MPLBackend(GraphicsBackend):
 
         @classmethod
         def canonicalize_theme_opts(self, theme_parents, theme_opts) -> 'tuple[list[str], dict]':
-            from matplotlib import cycler
+            from cycler import cycler
 
             theme_dict = {}
             for k,v in theme_opts.items():
@@ -2352,25 +2352,17 @@ class MPLBackend3D(MPLBackend):
         return super().create_figure(*args, subplot_kw=subplot_kw, **kwargs)
 
 class PlotlyAxes(GraphicsAxes):
+    base_axis_theme = {}
+    base_theme = {}
     def __init__(self, elements=None, xaxis=None, yaxis=None, **opts):
         if elements is None:
             elements = []
         self.elements = elements
         if xaxis is None:
-            xaxis = dict(linecolor='black',
-                         showline=True,
-                         ticks="outside",
-                         ticklen=5,  # length in px
-                         tickwidth=1,  # width in px
-                         tickcolor='black')
+            xaxis = self.base_axis_theme
         if yaxis is None:
-            yaxis = dict(linecolor='black',
-                         showline=True,
-                         ticks="outside",
-                         ticklen=5,  # length in px
-                         tickwidth=1,  # width in px
-                         tickcolor='black')
-        self.opts = self.canonicalize_opts(opts|dict(yaxis=yaxis, xaxis=xaxis))
+            yaxis = self.base_axis_theme
+        self.opts = self.canonicalize_opts(self.base_theme|opts|dict(yaxis=yaxis, xaxis=xaxis))
         super().__init__()
 
     def clear(self, *, backend=None):
@@ -2397,14 +2389,55 @@ class PlotlyAxes(GraphicsAxes):
         self._prop_cycle = props
 
     def get_frame_visible(self):
-        return None
+        return (
+            (
+                self.opts.get('yaxis', {}).get('showline', True),
+                self.opts.get('yaxis2', {}).get('showline', False)
+            ),
+            (
+                self.opts.get('xaxis', {}).get('showline', True),
+                self.opts.get('xaxis2', {}).get('showline', False)
+            )
+        )
     def set_frame_visible(self, frame_spec):
-        None
+        if frame_spec is True or frame_spec is False:
+            frame_spec = (frame_spec, frame_spec)
+        lr, bt = frame_spec
+        if lr in {True, False}:
+            l,r = lr,lr
+        else:
+            l,r = lr
+        if bt in {True, False}:
+            b,t = bt,bt
+        else:
+            b,t = bt
+        if l:
+            if r:
+                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+            else:
+                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black'}
+        elif r:
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'right'}
+        if b:
+            if b:
+                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+            else:
+                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black'}
+        elif t:
+            self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'top'}
 
     def get_frame_style(self):
-        ...
+        raise NotImplementedError(...)
     def set_frame_style(self, frame_spec):
-        ...
+        (l, r), (b, t) = frame_spec
+        if l:
+            self.opts['xaxis'] = self.opts.get('xaxis', {}) | l
+        if r:
+            self.opts['yaxis2'] = self.opts.get('yaxis2', {}) | r
+        if b:
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | b
+        if t:
+            self.opts['xaxis2'] = self.opts.get('xaxis2', {}) | t
 
     def get_xlabel(self):
         return self.opts.get('xaxis', {}).get('title_text')
@@ -2421,14 +2454,58 @@ class PlotlyAxes(GraphicsAxes):
             **style
         )
 
+    def get_plot_range(self):
+        min_x = None
+        max_x = None
+        min_y = None
+        max_y = None
+        for e in self.elements:
+            if 'x' in e:
+                if min_x is None:
+                    min_x = np.min(e['x'])
+                else:
+                    min_x = min([min_x, np.min(e['x'])])
+                if max_x is None:
+                    max_x = np.max(e['x'])
+                else:
+                    max_x = max([max_x, np.max(e['x'])])
+            if 'y' in e:
+                if min_y is None:
+                    min_y = np.min(e['y'])
+                else:
+                    min_y = min([min_x, np.min(e['y'])])
+                if max_y is None:
+                    max_y = np.max(e['y'])
+                else:
+                    max_y = max([max_y, np.max(e['y'])])
+        xrange = [min_x, max_x]
+        if xrange == [None, None]:
+            xrange = None
+        yrange = [min_y, max_y]
+        if yrange == [None, None]:
+            yrange = None
+        return xrange, yrange
+
     def get_xlim(self):
-        ...
+        xrange = self.opts.get('xaxis', {}).get('range')
+        if xrange is None:
+            xrange, _ = self.get_plot_range()
+        return xrange
     def set_xlim(self, val, **opts):
-        ...
+        self.opts['xaxis'] = self.opts.get('xaxis', {}) | dict(
+            range=val,
+            **opts
+        )
     def get_ylim(self):
-        ...
+        yrange = self.opts.get('yaxis', {}).get('range')
+        if yrange is None:
+            _, yrange = self.get_plot_range()
+        return yrange
     def set_ylim(self, val, **opts):
-        ...
+        self.opts['yaxis'] = self.opts.get('yaxis', {}) | dict(
+            range=val,
+            **opts
+        )
 
     def get_xticks(self):
         return self.opts.get('xaxis', {}).get('tickvals')
@@ -2452,22 +2529,37 @@ class PlotlyAxes(GraphicsAxes):
         )
 
     def get_xtick_style(self):
-        base_opts = self.opts.get('xaxis', {}).copy()
-        base_opts.pop('title_text', None)
-        base_opts.pop('tickvals', None)
-        return base_opts
+        return {
+            k:v
+            for k,v in self.opts.get('xaxis', {}).items()
+            if k.startswith('tick') or k.startswith('minor')
+        }
     def set_xtick_style(self, **opts):
         self.opts['xaxis'] = self.opts.get('xaxis', {}) | opts
     def get_ytick_style(self):
-        base_opts = self.opts.get('yaxis', {}).copy()
-        base_opts.pop('title_text', None)
-        base_opts.pop('tickvals', None)
-        return base_opts
+        return {
+            k:v
+            for k,v in self.opts.get('yaxis', {}).items()
+            if k.startswith('tick') or k.startswith('minor')
+        }
     def set_ytick_style(self, **opts):
         self.opts['yaxis'] = self.opts.get('yaxis', {}) | opts
 
+    def get_aspect_ratio(self):
+        y = self.opts.get('yaxis', {})
+        if y.get('scaleanchor', '') == 'x':
+            return y.get('scaleratio')
+        else:
+            return None
     def set_aspect_ratio(self, ar):
-        ...
+        if not dev.str_is(ar, 'auto'):
+            # self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'scaleratio': 1}
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {
+                'scaleanchor': 'x',
+                'scaleratio': ar,
+                'constrain': "domain"
+            }
+
 
     def get_bbox(self):
         ...
@@ -2481,7 +2573,6 @@ class PlotlyAxes(GraphicsAxes):
         'label':'name'
     }
     line_options = [
-        'name',
         'color',
         'width',
         'dash'
@@ -2527,8 +2618,8 @@ class PlotlyAxes(GraphicsAxes):
     def get_padding(self):
         return None
 
-    def legend(self, **opts):
-        raise NotImplementedError(...)
+    def legend(self, show=True, **opts):
+        self.opts['showlegend'] = show
 
     def get_graphics_properties(self, obj, property=None):
         raise NotImplementedError(...)
@@ -2553,6 +2644,7 @@ class PlotlyFigure(GraphicsFigure):
     def __init__(self, axes=None, layout=None, display_format=None,
                  width=500,
                  height=500,
+                 figsize=None,
                  **opts):
         if axes is None:
             axes = []
@@ -2565,6 +2657,8 @@ class PlotlyFigure(GraphicsFigure):
         self.opts = self.canonicalize_opts(opts)
         self.width = width
         self.height = height
+        if figsize is not None:
+            self.set_size_inches(*figsize)
         self.shown = False
         super().__init__(axes=axes)
     def __setitem__(self, key, value):
@@ -2590,10 +2684,10 @@ class PlotlyFigure(GraphicsFigure):
     def set_extents(self, extents):
         (l, r), (b, t) = extents
         self.layout['margin'] = self.layout.get('margin', {}) | dict(
-            l=l,
-            r=r,
-            t=t,
-            b=b
+            l=self.width*l,
+            r=(1-r)*self.width,
+            t=(1-t)*self.height,
+            b=b*self.height
         )
     def get_facecolor(self):
         return self.layout.get('paper_bgcolor')
@@ -2605,17 +2699,37 @@ class PlotlyFigure(GraphicsFigure):
 
     def prep_dict(self):
         elems = []
-        axes_layout = {}
+        axes_layout = self.opts
+        aspect_ratio = None
         for ax in self.axes:
             elems.extend(ax.prep_elems())
             axes_layout = axes_layout | ax.prep_opts()
+            aspect_ratio = ax.get_aspect_ratio()
         layout = axes_layout | self.layout
         layout['width'] = self.width
         layout['height'] = self.height
-        return {
+        if aspect_ratio is not None:
+            if nput.is_numeric(aspect_ratio):
+                margin = layout.get('margin', {})
+                h = self.width * aspect_ratio
+                dh = self.height - h
+                if dh > 0:
+                    margin['b'] = dh/2
+                    margin['t'] = dh/2
+                else:
+                    w = self.height / aspect_ratio
+                    dw = self.width - w
+                    margin['l'] = dw/2
+                    margin['r'] = dw/2
+                layout['margin'] = margin
+        fig_dict = {
             'data':elems,
             'layout':layout
         }
+        # import pprint
+        # pprint.pprint(fig_dict)
+        # raise Exception(...)
+        return fig_dict
     def to_plotly(self):
         import plotly.graph_objects as go
         return go.Figure(self.prep_dict())
@@ -2646,23 +2760,131 @@ class PlotlyFigure(GraphicsFigure):
         raise NotImplementedError(...)
 class PlotlyBackend(GraphicsBackend):
     Figure = PlotlyFigure
-    def create_figure(self, *args, **kwargs):
-        Axes = self.Figure.Axes
-        fig = self.Figure(*args, **kwargs)
+    def create_figure(self, *args, template=None, **kwargs):
+        if template is None:
+            template = self.ThemeContextManager.current_theme()
+        fig = self.Figure(*args, template=dict(layout=template), **kwargs)
         ax = fig.create_axes()
         return fig, ax
+
+    @classmethod
+    def prep_color(cls, v):
+        v, padding = ColorPalette.parse_color_string(v, return_padding=True)
+        return ColorPalette.rgb_code(v, padding)
+
+    property_mapping = {
+        'labelsize':'fontsize'
+    }
+    axes_props = {'xtick':'xaxis', 'ytick':'yaxis'}
+    @classmethod
+    def remap_property(cls, name, value, context=None):
+        handler = cls.property_mapping.get(name, name)
+        if not isinstance(handler, str):
+            return handler(value)
+        name = handler
+        if name == 'axes':
+            vals = {}
+            for k,v in value.items():
+                vals = vals | cls.remap_property(k, v)
+            return vals
+        elif name in cls.axes_props:
+            subname = cls.axes_props[name]
+            vals = {}
+            for k,v in value.items():
+                vals = vals | cls.remap_property(k, v, context='axis')
+            return {subname:vals}
+        elif name == 'prop_cycle':
+            vals = {}
+            if 'color' in value:
+                vals['colorway'] = tuple(cls.prep_color(v) for v in value['color'])
+            return vals
+        elif name in {
+            'patch'
+        }:
+            return {}
+        elif name == 'padding':
+            return {
+                'margin': {
+                    'l':value,
+                    'r':value,
+                    'b':value,
+                    't':value
+                }
+            }
+        elif name == 'aspect_ratio':
+            if value == 'auto':
+                return {}
+            else:
+                return {
+                    'xaxis': {'scaleratio':1},
+                    'yaxis': {'scaleratio':value}
+                }
+        elif name == 'figsize':
+            w, h = value
+            return {
+                'width':DPI_SCALING * w,
+                'height':DPI_SCALING * h
+            }
+        elif name.startswith('font'):
+            key = name.split('font', 1)[-1]
+            if context == 'axis':
+                ax = 'tickfont'
+            else:
+                ax = 'font'
+            return {ax:{key:value}}
+        else:
+            return {name:value}
+
     class ThemeContextManager(GraphicsBackend.ThemeContextManager):
         theme_stack = []
+        base_axis_theme = dict(linecolor='black',
+                               showline=True,
+                               showgrid=False,
+                               zeroline=False,
+                               ticks="outside",
+                               ticklen=5,  # length in px
+                               tickwidth=1,  # width in px
+                               tickcolor='black',
+                               minor_ticks="outside",
+                               minor=dict(ticklen=2))
+        base_theme = dict(
+            plot_bgcolor='white',
+            showlegend=False
+        )
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_opts) -> 'tuple[list[str], dict]':
+            # theme_dict = {}
+            # for k, v in theme_opts.items():
+            #     if isinstance(v, dict):
+            #         for sk, sv in v.items():
+            #             if isinstance(sv, dict):
+            #                 sv = cycler(**sv)
+            #             theme_dict[k + '.' + sk] = sv
+            #     # else:
+            #     #     theme_dict[k] = v
+            return theme_parents + [theme_opts]
+        def prep_spec(self):
+            layout = self.base_theme | {
+                'xaxis':self.base_axis_theme,
+                'yaxis':self.base_axis_theme
+            }
+            for subspec in self.spec:
+                for obj_type,opts in subspec.items():
+                    layout = dev.merge_dicts(layout, PlotlyBackend.remap_property(obj_type, opts))
+            return layout
 
         @classmethod
-        def canonicalize_theme_opts(self, theme_parents, theme_spec):
-            return []
+        def current_theme(cls):
+            if len(cls.theme_stack) == 0:
+                return 'plotly'
+            else:
+                return cls.theme_stack[-1]
 
         def __enter__(self):
-            return self
+            self.theme_stack.append(self.prep_spec())
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            ...
+            self.theme_stack.pop()
 
     def show_figure(self, graphics:PlotlyFigure, reshow=None):
         if not graphics.shown:

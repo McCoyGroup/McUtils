@@ -1,3 +1,4 @@
+import re
 import uuid
 
 import numpy as np
@@ -30,20 +31,27 @@ class ColorPalette:
 
     def __hash__(self):
         return hash((type(self), self.color_strings))
-
-    named_colors = {}
+    @classmethod
+    def _color_code_like(cls, name):
+        if len(name) % 3 == 0 or len(name) % 4 == 0:
+            return re.match("\w+", name)
+        else:
+            return False
     @classmethod
     def parse_color_string(cls, name:str, include_named_alpha=False, return_padding=False):
         if not name.startswith('#'):
-            c = cls.named_colors.get(name)
+            c = ColorData['Named'].data.get(name)
             if c is None:
-                from matplotlib.colors import to_rgba
-                vals = to_rgba(name)
-                c = [255 * x for x in vals[:3]]
-                if include_named_alpha:
-                    c = c + list(vals[3:])
-            if return_padding:
-                c = (c, 2)
+                if cls._color_code_like(name):
+                    c = '#'+name
+                else:
+                    from matplotlib.colors import to_rgba
+                    vals = to_rgba(name)
+                    c = [255 * x for x in vals[:3]]
+                    if include_named_alpha:
+                        c = c + list(vals[3:])
+                    if return_padding:
+                        c = (c, 2)
         else:
             c = name
         if isinstance(c, str):

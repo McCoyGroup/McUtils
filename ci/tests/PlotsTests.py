@@ -365,5 +365,8 @@ class PlotsTests(TestCase):
     def test_PlotlyBackend(self):
         Plot([0, 1, 2], [0, 1, 2],
              backend='plotly',
-             ticks=[[0, 1, 2], [0, 1, 2]]
+             ticks=[[0, 1, 2], [0, 1, 2]],
+             # plot_range=[[0, 2], [0, 2]],
+             frame=True,
+             # aspect_ratio=1/1.6
              ).show()
