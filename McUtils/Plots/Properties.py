@@ -182,7 +182,13 @@ class GraphicsPropertyManager:
     @property
     def plot_range(self):
         if self._plot_range is None:
-            pr = (list(sorted(self.axes.get_xlim())), list(sorted(self.axes.get_ylim())))
+            xl = self.axes.get_xlim()
+            yl = self.axes.get_ylim()
+            if xl is not None:
+                xl = list(sorted(xl))
+            if yl is not None:
+                yl = list(sorted(yl))
+            pr = (xl, yl)
         else:
             pr = self._plot_range
         return pr
@@ -480,12 +486,7 @@ class GraphicsPropertyManager:
         return self._aspect_ratio
     @aspect_ratio.setter
     def aspect_ratio(self, ar):
-        if isinstance(ar, (float, int)):
-            a, b = self.absolute_plot_range
-            cur_ar = abs(b[1] - b[0]) / abs(a[1] - a[0])
-            targ_ar = ar / cur_ar
-            self.axes.set_aspect_ratio(targ_ar)
-        elif isinstance(ar, str):
+        if dev.is_atomic(ar):
             self.axes.set_aspect_ratio(ar)
         else:
             self.axes.set_aspect_ratio(ar[0], **ar[1])
