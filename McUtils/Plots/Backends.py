@@ -870,6 +870,11 @@ class MPLAxes(GraphicsAxes):
         return self.obj.tick_params(axis='y', **opts)
 
     def set_aspect_ratio(self, ar):
+        if nput.is_numeric(ar):
+            a, b = self.get_xlim(), self.get_ylim()
+            if a is not None and b is not None:
+                cur_ar = abs(b[1] - b[0]) / abs(a[1] - a[0])
+                ar = ar / cur_ar
         self.obj.set_aspect(ar)
 
     def get_bbox(self):
@@ -2315,11 +2320,12 @@ class MPLBackend(GraphicsBackend):
         else:
             display = JupyterAPIs().display_api
             graphics.shown = True
-            html = graphics._repr_html_()
+            html = graphics.to_widget()
             if autoclose:
                 self.close_figure(graphics)
             display.clear_output(wait=True)
-            return display.display(display.HTML(html))
+            return html.display()
+            # return display.display(display.HTML(html))
         # self.plt.show()
         # return graphics.show_mpl(self, reshow=reshow)
     def to_widget(self, figure:GraphicsFigure, autoclose=True):
@@ -2419,7 +2425,7 @@ class PlotlyAxes(GraphicsAxes):
         elif r:
             self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'right'}
         if b:
-            if b:
+            if t:
                 self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
             else:
                 self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black'}
@@ -2546,19 +2552,21 @@ class PlotlyAxes(GraphicsAxes):
         self.opts['yaxis'] = self.opts.get('yaxis', {}) | opts
 
     def get_aspect_ratio(self):
-        y = self.opts.get('yaxis', {})
-        if y.get('scaleanchor', '') == 'x':
-            return y.get('scaleratio')
-        else:
-            return None
+        return self.opts.get('aspect_ratio')
+        # y = self.opts.get('yaxis', {})
+        # if y.get('scaleanchor', '') == 'x':
+        #     return y.get('scaleratio')
+        # else:
+        #     return None
     def set_aspect_ratio(self, ar):
-        if not dev.str_is(ar, 'auto'):
-            # self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'scaleratio': 1}
-            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {
-                'scaleanchor': 'x',
-                'scaleratio': ar,
-                'constrain': "domain"
-            }
+        self.opts['aspect_ratio'] = ar
+        # if not dev.str_is(ar, 'auto'):
+        #     # self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'scaleratio': 1}
+        #     self.opts['yaxis'] = self.opts.get('yaxis', {}) | {
+        #         'scaleanchor': 'x',
+        #         'scaleratio': ar,
+        #         'constrain': "domain"
+        #     }
 
 
     def get_bbox(self):
@@ -2700,27 +2708,28 @@ class PlotlyFigure(GraphicsFigure):
     def prep_dict(self):
         elems = []
         axes_layout = self.opts
-        aspect_ratio = None
         for ax in self.axes:
             elems.extend(ax.prep_elems())
             axes_layout = axes_layout | ax.prep_opts()
-            aspect_ratio = ax.get_aspect_ratio()
         layout = axes_layout | self.layout
         layout['width'] = self.width
         layout['height'] = self.height
+        aspect_ratio = layout.pop('aspect_ratio', None)
         if aspect_ratio is not None:
             if nput.is_numeric(aspect_ratio):
                 margin = layout.get('margin', {})
-                h = self.width * aspect_ratio
-                dh = self.height - h
+                cur_w = self.width - (margin.get('l', 0) + margin.get('r', 0))
+                cur_h = self.height - (margin.get('b', 0) + margin.get('t', 0))
+                h = cur_w * aspect_ratio
+                dh = cur_h - h
                 if dh > 0:
-                    margin['b'] = dh/2
-                    margin['t'] = dh/2
+                    margin['b'] = margin.get('b', 0) + dh/2
+                    margin['t'] = margin.get('t', 0) + dh/2
                 else:
-                    w = self.height / aspect_ratio
-                    dw = self.width - w
-                    margin['l'] = dw/2
-                    margin['r'] = dw/2
+                    w = cur_h / aspect_ratio
+                    dw = cur_w - w
+                    margin['l'] = margin.get('l', 0) + dw/2
+                    margin['r'] = margin.get('r', 0) + dw/2
                 layout['margin'] = margin
         fig_dict = {
             'data':elems,
@@ -2734,19 +2743,55 @@ class PlotlyFigure(GraphicsFigure):
         import plotly.graph_objects as go
         return go.Figure(self.prep_dict())
 
+    split_plot_fragment = True
+    embed_mathjax = True
+    preload_plotly = True
+    mathjax_cdn = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"
     plotly_cdn = "https://cdn.plot.ly/plotly-3.4.0.min.js"
+    def get_core_body(self, html):
+        return html.split("<body>")[1].rsplit("</body>")[0].strip()
+    def set_plotly_script_id(self, html, id):
+        return f"""<script type="text/javascript" id="{id}">""".join(html.rsplit("""<script type="text/javascript">""", 1))
+    def configure_mathjax(self, html, id):
+        plotly_tag = f"""<script type="text/javascript" id="{id}">"""
+        mathjax_load_script = """
+        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {
+            // window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});
+            window.PlotlyConfig = {MathJaxConfig: 'local'};
+        }
+        """
+        mathjax_config = f"""<script src="{self.mathjax_cdn}" onload='function(){{
+        {mathjax_load_script}
+        }}()'>
+        </script>"""
+        return html.replace(
+            plotly_tag,
+            f"""{mathjax_config}\n{plotly_tag}"""
+        )
+    def postprocess_plotly_html(self, html):
+        id = 'plotly-plot-' + str(uuid.uuid4())[:6]
+        html = self.set_plotly_script_id(html, id)
+        if self.split_plot_fragment:
+            html = self.get_core_body(html)
+        if self.embed_mathjax:
+            html = self.configure_mathjax(html, id)
+        if self.preload_plotly:
+            # tag_pos = html.index(f"""<script type="text/javascript" id="{id}">""")
+            html = html.replace(
+                f"""<script type="text/javascript" id="{id}">""",
+                f"""<script src="{self.plotly_cdn}" charset="utf-8" id="{id}" onload='(function(){{""",
+                1
+            )
+            # replace from end, should replace with version that starts from the plotly tag
+            html = "})()'></script>".join(html.rsplit("</script>", 1))
+        return html
     def to_html(self):
         # print(fig)
         buf = io.StringIO()
         self.to_plotly().write_html(buf, include_plotlyjs=False)
         buf.seek(0)
         html = buf.read()
-        uuh = html.split("<body>")[1].rsplit("</body>")[0].strip().replace(
-            """<script type="text/javascript">""",
-            f"""<script src="{self.plotly_cdn}" charset="utf-8" onload='(function(){{""",
-            1
-        ).replace("</script>", "})()'></script>", 1)
-        return uuh
+        return self.postprocess_plotly_html(html)
     def to_svg(self):
         buf = io.StringIO()
         self.to_plotly().savefig(buf, format='svg')
@@ -2762,7 +2807,8 @@ class PlotlyBackend(GraphicsBackend):
     Figure = PlotlyFigure
     def create_figure(self, *args, template=None, **kwargs):
         if template is None:
-            template = self.ThemeContextManager.current_theme()
+            template, others = self.ThemeContextManager.current_theme()
+            kwargs = others | kwargs
         fig = self.Figure(*args, template=dict(layout=template), **kwargs)
         ax = fig.create_axes()
         return fig, ax
@@ -2776,32 +2822,40 @@ class PlotlyBackend(GraphicsBackend):
         'labelsize':'fontsize'
     }
     axes_props = {'xtick':'xaxis', 'ytick':'yaxis'}
+    unthemed_props = {'aspect_ratio'}
     @classmethod
     def remap_property(cls, name, value, context=None):
         handler = cls.property_mapping.get(name, name)
         if not isinstance(handler, str):
             return handler(value)
         name = handler
-        if name == 'axes':
+        if name in cls.unthemed_props:
+            return {}, {name:value}
+        elif name == 'axes':
             vals = {}
+            others = {}
             for k,v in value.items():
-                vals = vals | cls.remap_property(k, v)
-            return vals
+                remapped, unhandled = cls.remap_property(k, v)
+                vals = vals | remapped
+                others = others | unhandled
+            return vals, others
         elif name in cls.axes_props:
             subname = cls.axes_props[name]
             vals = {}
+            others = {}
             for k,v in value.items():
-                vals = vals | cls.remap_property(k, v, context='axis')
-            return {subname:vals}
+                remapped, unhandled = cls.remap_property(k, v, context='axis')
+                vals = vals | remapped
+                others = others | unhandled
+            return {subname:vals}, others
         elif name == 'prop_cycle':
             vals = {}
+            others = {}
             if 'color' in value:
                 vals['colorway'] = tuple(cls.prep_color(v) for v in value['color'])
-            return vals
-        elif name in {
-            'patch'
-        }:
-            return {}
+            return vals, others
+        elif name in {'patch'}:
+            return {}, {}
         elif name == 'padding':
             return {
                 'margin': {
@@ -2810,30 +2864,22 @@ class PlotlyBackend(GraphicsBackend):
                     'b':value,
                     't':value
                 }
-            }
-        elif name == 'aspect_ratio':
-            if value == 'auto':
-                return {}
-            else:
-                return {
-                    'xaxis': {'scaleratio':1},
-                    'yaxis': {'scaleratio':value}
-                }
+            }, {}
         elif name == 'figsize':
             w, h = value
             return {
                 'width':DPI_SCALING * w,
                 'height':DPI_SCALING * h
-            }
+            }, {}
         elif name.startswith('font'):
             key = name.split('font', 1)[-1]
             if context == 'axis':
                 ax = 'tickfont'
             else:
                 ax = 'font'
-            return {ax:{key:value}}
+            return {ax:{key:value}}, {}
         else:
-            return {name:value}
+            return {name:value}, {}
 
     class ThemeContextManager(GraphicsBackend.ThemeContextManager):
         theme_stack = []
@@ -2847,10 +2893,8 @@ class PlotlyBackend(GraphicsBackend):
                                tickcolor='black',
                                minor_ticks="outside",
                                minor=dict(ticklen=2))
-        base_theme = dict(
-            plot_bgcolor='white',
-            showlegend=False
-        )
+        base_theme = dict(plot_bgcolor='white',
+                          showlegend=False)
         @classmethod
         def canonicalize_theme_opts(self, theme_parents, theme_opts) -> 'tuple[list[str], dict]':
             # theme_dict = {}
@@ -2868,10 +2912,15 @@ class PlotlyBackend(GraphicsBackend):
                 'xaxis':self.base_axis_theme,
                 'yaxis':self.base_axis_theme
             }
+            others = {
+
+            }
             for subspec in self.spec:
                 for obj_type,opts in subspec.items():
-                    layout = dev.merge_dicts(layout, PlotlyBackend.remap_property(obj_type, opts))
-            return layout
+                    template_props, other_props = PlotlyBackend.remap_property(obj_type, opts)
+                    layout = dev.merge_dicts(layout, template_props)
+                    others = dev.merge_dicts(others, other_props)
+            return layout, others
 
         @classmethod
         def current_theme(cls):

@@ -129,10 +129,10 @@ class ThemeManager:
             ([],),
             {
                 'axes': {
-                    'prop_cycle':{'color': ['001C7F', '017517', '8C0900', '7600A1', 'B8860B', '006374']},
+                    'prop_cycle':{'color': ['#001C7F', '#017517', '#8C0900', '#7600A1', '#B8860B', '#006374']},
                     'labelsize':13
                 },
-                'patch': {'facecolor': '001C7F'},
+                'patch': {'facecolor': '#001C7F'},
                 'xtick': {'labelsize': 13},
                 'ytick': {'labelsize': 13},
                 'padding': 50,

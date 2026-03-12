@@ -725,6 +725,27 @@ class HTML(XMLBase):
             self.display()
         def get_display_element(self):
             return HTML.Div(self, cls='jhtml')
+        def dump(self, prefix="", linewidth=80):
+            print(self.tostring())
+        def write(self, file, **opts):
+            ## Stream version is faster but more fragile
+            # def write_str(tree, **base_opts):
+            #     if isinstance(tree, str):
+            #         if hasattr(file, 'write'):
+            #             file.write(tree)
+            #         else:
+            #             with open(file, 'w+') as f:
+            #                 f.write(tree)
+            #     elif hasattr(tree, 'write'):
+            #         tree.write(file, **base_opts)
+            #     else:
+            #         write_str(ElementTree.tostring(tree), **base_opts)
+            base_str = self.tostring(**opts)
+            if hasattr(file, 'write'):
+                file.write(base_str)
+            else:
+                with open(file, 'w+') as dump:
+                    dump.write(base_str)
 
     class XMLElement(XMLBase.ElementBase):
         """

@@ -363,10 +363,11 @@ class PlotsTests(TestCase):
 
     @debugTest
     def test_PlotlyBackend(self):
-        Plot([0, 1, 2], [0, 1, 2],
+        g = np.linspace(0, 2*np.pi, 25)
+        Plot(g, np.sin(g),
              backend='plotly',
-             ticks=[[0, 1, 2], [0, 1, 2]],
+             # ticks=[[0, 1, 2], [0, 1, 2]],
              # plot_range=[[0, 2], [0, 2]],
              frame=True,
-             # aspect_ratio=1/1.6
+             aspect_ratio=1/1.16
              ).show()
