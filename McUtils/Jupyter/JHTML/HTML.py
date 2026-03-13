@@ -702,51 +702,6 @@ class HTML(XMLBase):
     A namespace for holding various HTML attributes
     """
 
-    class RawHTML:
-        def __init__(self, text):
-            self.text = text
-        def tostring(self):
-            return self.text
-        def display(self):
-            from .WidgetTools import JupyterAPIs
-
-            use_ipython = JupyterAPIs.in_jupyter_environment()
-            if use_ipython:
-                self.display_ipython()
-            else:
-                self.display_in_browser()
-        def display_in_browser(self):
-            return HTML.XMLElement.display_in_browser_from_wrapper(self)
-        def display_ipython(self):
-            return HTML.XMLElement.display_ipython_from_wrapper(self)
-        def _repr_html_(self):
-            return self.tostring()
-        def _ipython_display_(self):
-            self.display()
-        def get_display_element(self):
-            return HTML.Div(self, cls='jhtml')
-        def dump(self, prefix="", linewidth=80):
-            print(self.tostring())
-        def write(self, file, **opts):
-            ## Stream version is faster but more fragile
-            # def write_str(tree, **base_opts):
-            #     if isinstance(tree, str):
-            #         if hasattr(file, 'write'):
-            #             file.write(tree)
-            #         else:
-            #             with open(file, 'w+') as f:
-            #                 f.write(tree)
-            #     elif hasattr(tree, 'write'):
-            #         tree.write(file, **base_opts)
-            #     else:
-            #         write_str(ElementTree.tostring(tree), **base_opts)
-            base_str = self.tostring(**opts)
-            if hasattr(file, 'write'):
-                file.write(base_str)
-            else:
-                with open(file, 'w+') as dump:
-                    dump.write(base_str)
-
     class XMLElement(XMLBase.ElementBase):
         """
         Convenience API for ElementTree
@@ -1519,6 +1474,44 @@ class HTML(XMLBase):
 
     base_element = XMLElement
 
+    class RawHTML(XMLElement):
+        """
+        Not a properly constructed subclass, but inserted as part of the
+        type hierarchy for explicit isintance check purposes, should have a
+        trait-style base class but too much work now
+        """
+        def __init__(self, text):
+            self.text = text
+        def tostring(self, **opts):
+            return self.text
+        def display(self):
+            from .WidgetTools import JupyterAPIs
+
+            use_ipython = JupyterAPIs.in_jupyter_environment()
+            if use_ipython:
+                self.display_ipython()
+            else:
+                self.display_in_browser()
+        def display_in_browser(self):
+            return self.display_in_browser_from_wrapper(self)
+        def display_ipython(self):
+            return self.display_ipython_from_wrapper(self)
+        def _repr_html_(self):
+            return self.tostring()
+        def _ipython_display_(self):
+            self.display()
+        def get_display_element(self):
+            return HTML.Div(self, cls='jhtml')
+        def dump(self, prefix="", linewidth=80):
+            print(self.tostring())
+        def write(self, file, **opts):
+            base_str = self.tostring(**opts)
+            if hasattr(file, 'write'):
+                file.write(base_str)
+            else:
+                with open(file, 'w+') as dump:
+                    dump.write(base_str)
+
     class Comment(XMLElement):
         def __init__(self, *elems, **attrs):
             super().__init__(ElementTree.Comment, *elems, **attrs)
@@ -1637,6 +1630,7 @@ class HTML(XMLBase):
     i = Italic
     class Iframe(TagElement): tag= "iframe"
     Img = Image
+    class Inline(TagElement): tag= "inline"
     class Input(TagElement): tag= "input"
     class Ins(TagElement): tag= "ins"
     class Kbd(TagElement): tag= "kbd"

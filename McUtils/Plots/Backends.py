@@ -10,6 +10,7 @@ __all__ = [
 ]
 
 import enum, abc, contextlib, numpy as np
+import re
 import uuid
 import functools
 import io
@@ -291,6 +292,10 @@ class GraphicsAxes3D(GraphicsAxes):
 
     @abc.abstractmethod
     def draw_cylinder(self, start, end, rad, circle_points=48, **opts):
+        ...
+
+    @abc.abstractmethod
+    def draw_box(self, start, end, **opts):
         ...
 
 class GraphicsFigure(metaclass=abc.ABCMeta):
@@ -2110,6 +2115,9 @@ class MPLAxes3D(MPLAxes):
             zdir = normal
             if isinstance(zdir, np.ndarray): zdir = tuple(float(z) for z in zdir)
         return super().draw_text(points, vals, zdir=zdir, **styles)
+
+    def draw_box(self, start, end, **opts):
+        raise NotImplementedError(...)
 class MPLFigure(GraphicsFigure):
     Axes = MPLAxes
     default_display_format = 'png'
@@ -2746,7 +2754,7 @@ class PlotlyFigure(GraphicsFigure):
     split_plot_fragment = True
     embed_mathjax = True
     preload_plotly = True
-    mathjax_cdn = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"
+    mathjax_cdn = "https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"
     plotly_cdn = "https://cdn.plot.ly/plotly-3.4.0.min.js"
     def get_core_body(self, html):
         return html.split("<body>")[1].rsplit("</body>")[0].strip()
@@ -3828,12 +3836,13 @@ class VPythonBackend3D(GraphicsBackend):
         return []
 
 class X3DAxes(GraphicsAxes3D):
-    def __init__(self, *children, title=None, background=None, **opts):
+    def __init__(self, *children, title=None, background=None, include_mathjax=None, **opts):
         super().__init__()
         self.children = list(children)
         self.title = title
         self.background = background
         self.opts = opts
+        self.include_mathjax = include_mathjax
 
     @classmethod
     def canonicalize_opts(cls, opts):
@@ -4158,9 +4167,122 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(arrows)
         return arrows
 
-    def draw_text(self, points, vals, **styles):
-        text = x3d.X3DText(points, text=vals, **styles)
-        self.children.append(text)
+    default_texture_font = {
+        'font_family':'sans-serif',
+        'font_size':'6px',
+        # 'fill':'black',
+        'dominant_baseline':'central'
+    }
+    font_style_remapping = {
+        'color':'fill'
+    }
+    def texture_svg(self, text, id, font_style=None, resolution=72):
+        from ..Jupyter.JHTML import CSS
+        if font_style is None:
+            font_style = {}
+        fs = self.default_texture_font | font_style
+        fs = {self.font_style_remapping.get(k, k):v for k,v in fs.items()}
+        fs = CSS(f"text", **fs).tostring()
+        lines = text.splitlines()
+        w = resolution * max(len(t) for t in lines)
+        vh = 20 + 10 * len(lines)
+        return re.sub("\s+", " ", f"""
+<svg version="1.1" viewBox="0 0 100 {vh}" width="{w}" height="auto" id='{id}-svg' xmlns="http://www.w3.org/2000/svg">
+  <style>{fs}</style>
+  <text 
+    x="0" y="10" 
+    textLength="90" 
+    lengthAdjust="spacingAndGlyphs">""") + text + "</text></svg>"
+    def mathjax_load_script(self, text, id, loader_id, resolution_upscaling=10, font_style=None):
+        from ..Jupyter.JHTML import CSS
+        if font_style is None:
+            font_style = {}
+        fs = self.default_texture_font | font_style
+        # fs = {self.font_style_remapping.get(k, k):v for k,v in fs.items()}
+        fs = CSS(**fs).tostring()
+        return re.sub("\s+", " ", f"""(function() {{
+    let textureNode = document.getElementById('{id}-appearance-texture');
+    if (textureNode??null !== null) {{
+      MathJax.tex2svgPromise('""") + "\\\\text{" + text.replace("\\", "") + re.sub("\s+", " ", """}', {display: true}).then((textWrapper) => {
+          MathJax.tex2svgPromise('""") + text + re.sub("\s+", " ", f"""', {{display: true}})
+            .then((svgWrapper) => {{
+                let textNode = textWrapper.getElementsByTagName('svg')[0];
+                let svgNode = svgWrapper.getElementsByTagName("svg")[0];
+                let serializer = new XMLSerializer();
+                let w = parseFloat(svgNode.getAttribute('width')) * {resolution_upscaling};
+                let h = parseFloat(svgNode.getAttribute('height')) * {resolution_upscaling};
+                svgNode.setAttribute('width', w.toString() + "ex");
+                svgNode.setAttribute('height', h.toString() + "ex");
+                let w0 = parseFloat(textNode.getAttribute('width')) * {resolution_upscaling};
+                let h0 = parseFloat(textNode.getAttribute('height')) * {resolution_upscaling};
+                textNode.setAttribute('width', w0.toString() + "ex");
+                textNode.setAttribute('height', h0.toString() + "ex");
+                svgNode.style.cssText = '{fs}';
+                let svgString = serializer.serializeToString(svgNode);
+                console.log(svgNode);
+                textureNode.url = 'data:image/svg+xml,' + encodeURIComponent(svgString); 
+                
+                let rectNode = document.getElementById('{id}');
+                let curSize = rectNode.size.split(/\s+/).map(Number);
+                let aspect = h / w;
+                let scaling = w / w0;
+                let scalingH = (w * aspect) / h0;
+                if (scalingH < scaling) {{
+                    scaling = scalingH;
+                }}
+                rectNode.size = (scaling * curSize[0]).toString() + " " + (scaling * curSize[0] * aspect).toString();
+            }})
+            .catch((err) => console.error(err));
+        }});
+        let loader = document.getElementById('{loader_id}');
+        if (loader) {{ loader.remove() }}
+    }}
+}})()""")
+    @classmethod
+    def _is_math(cls, text):
+        text = text.strip()
+        num_dollar = text.count("$")
+        return num_dollar == 2 and text[0] == "$" and text[-1] == "$"
+    def draw_text(self, points, vals, endpoint=None, allow_mathjax=True, line_height=10, char_width=None, char_width_scaling=1/30, font_style=None, **styles):
+        from ..Jupyter.JHTML import JHTML
+        if allow_mathjax and self._is_math(vals):
+            vals = vals.strip("$")
+            id = 'x3d-obj-' + str(uuid.uuid4())[:6]
+            if not isinstance(vals, str):
+                raise NotImplementedError("need to dispatch")
+            if font_style is None:
+                font_style = styles
+            if endpoint is None:
+                points = np.asanyarray(points)
+                if len(points) == 2:
+                    points, endpoint = points
+                else:
+                    lines = vals.splitlines()
+                    if char_width is None:
+                        font_size = font_style.get('font_size', 6)
+                        char_width = font_size * char_width_scaling
+                    w = char_width * max(len(t) for t in lines)
+                    vh = char_width * line_height * len(lines)
+                    points = np.asanyarray(points)
+                    endpoint = points + [w/2, vh/2, 0]
+                    points = points - [w/2, vh/2, 0]
+            loader_id = 'tex-loader-' + str(uuid.uuid4())[:6]
+            loader = JHTML.HTML.Image(
+                id=loader_id,
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                onload=self.mathjax_load_script(vals.replace("\\", "\\\\"), id, loader_id, font_style=font_style)
+            )
+            text = [
+                x3d.X3DRectangle2D(points, endpoint,
+                                      id=id,
+                                      texture={'url':'data:image/svg+xml,'+self.texture_svg(vals, id, font_style)},
+                                      **styles),
+                loader
+            ]
+        else:
+            text = [x3d.X3DText(points, text=vals, font_style=font_style, **styles)]
+        self.children.extend(text)
+        self.include_mathjax = True
         return text
 
     @classmethod
@@ -4312,6 +4434,10 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(cyls)
 
         return cyls
+    def draw_box(self, start, end, **opts):
+        box = x3d.X3DBox(start, end, **opts)
+        self.children.append(box)
+        return box
     def prep_opts(self):
         return dict(
             self.opts,
@@ -4407,6 +4533,12 @@ class X3DFigure(GraphicsFigure):
         )
     def to_x3d(self, **opts):
         opts = dict(self.prep_opts(), **opts)
+        if 'include_mathjax' not in opts:
+            opts['include_mathjax'] = ([
+                a.include_mathjax
+                for a in self.axes
+                if a.include_mathjax is not None
+            ] + [False])[0]
         return x3d.X3D(
             *[a.to_x3d() for a in self.axes],
             **opts

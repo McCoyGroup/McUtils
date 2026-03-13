@@ -22,6 +22,7 @@ __all__ = [
     "X3DLine",
     "X3DSphere",
     "X3DCone",
+    "X3DBox",
     "X3DCylinder",
     "X3DCappedCylinder",
     "X3DArrow",
@@ -72,6 +73,7 @@ class X3D(X3DObject):
     def __init__(self, *children, id=None, dynamic_loading=True,
                  x3dom_path=None,
                  x3dom_css_path=None,
+                 include_mathjax=False,
                  recording_options=None,
                  include_export_button=False,
                  include_record_button=False,
@@ -101,11 +103,12 @@ class X3D(X3DObject):
             self.X3DOM_JS = x3dom_path
         if x3dom_css_path is not None:
             self.X3DOM_CSS = x3dom_css_path
-
+        self.include_mathjax = include_mathjax
         self._widg = None
 
     X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
     X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
+    MATHJAX_CDN = 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js'
 
     @classmethod
     def get_export_script(self, id):
@@ -220,9 +223,14 @@ class X3D(X3DObject):
             include_view_settings_button = self.include_view_settings_button
 
         if not dynamic_loading:
-            base_fig = JHTML.Div(
+            elems = [
                 JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-                JHTML.Script(src=self.X3DOM_JS),
+                JHTML.Script(src=self.X3DOM_JS)
+            ]
+            if self.include_mathjax:
+                elems.append(JHTML.Script(src=self.MATHJAX_CDN))
+            base_fig = JHTML.Div(
+                *elems,
                 x3d_embed,
                 id=id,
                 width=x3d_embed['width'],
@@ -231,7 +239,17 @@ class X3D(X3DObject):
             )
         else:
             JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-            load_script = JHTML.Script(src=self.X3DOM_JS).tostring()
+            load_scripts = [
+                JHTML.Script(src=self.X3DOM_JS)
+            ]
+            if self.include_mathjax:
+                load_scripts.append(JHTML.Script(src=self.MATHJAX_CDN))
+            loader_frags = "\n".join([
+                f'''
+                const frag = document.createRange().createContextualFragment(`{load_script.tostring()}`);
+                document.head.appendChild(frag);'''
+                for load_script in load_scripts
+            ])
             kill_id = "tmp-"+str(uuid.uuid4())[:10]
             base_fig = JHTML.Figure(
                 # JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
@@ -244,8 +262,7 @@ class X3D(X3DObject):
                         let killElem = document.getElementById("{kill_id}");
                         if (killElem !== null) {{
                             killElem.remove();
-                            const frag = document.createRange().createContextualFragment(`{load_script}`);
-                            document.head.appendChild(frag);
+                            {loader_frags}
                         }}
                     }})()"""
                     ),
@@ -442,6 +459,55 @@ class X3DMaterial(X3DOptionsSet):
     def to_x3d(self):
         return X3DHTML.Material(**self.prep_attrs(self.attrs))
 
+class X3DTexture(X3DOptionsSet):
+    __props__ = {
+        "url",
+        "image",
+        "crossOrigin",
+        "hideChildren",
+        "metadata",
+        "repeatS",
+        "repeatT",
+        "scale",
+        "textureProperties",
+        "texture_type"
+    }
+    conversion_map = {
+    }
+    # def prep_attrs(self, attrs: dict):
+    #     if 'color' in attrs:
+    #         new_attrs = attrs.copy()
+    #         color, transparency = self.parse_color(attrs['color'])
+    #         new_attrs['color'] = color
+    #         if transparency is not None:
+    #             new_attrs['transparency'] = transparency
+    #     else:
+    #         new_attrs = attrs
+    #     return super().prep_attrs(new_attrs)
+    texture_type_mapping = {
+        "pixel":X3DHTML.PixelTexture,
+        "image":X3DHTML.ImageTexture,
+        "movie":X3DHTML.MovieTexture
+    }
+    movie_types = ['.mp4', '.webm']
+    @classmethod
+    def infer_texture_type(self, ats):
+        if "image" in ats:
+            return "pixel"
+        elif "loop" in ats or any(ats['url'].endswith(mt) for mt in self.movie_types):
+            return "movie"
+        else:
+            return "image"
+    def to_x3d(self):
+        ats = self.prep_attrs(self.attrs)
+        texture_type = ats.pop('texture_type', None)
+        if texture_type is None:
+            texture_type = self.infer_texture_type(ats)
+        if isinstance(texture_type, str):
+            texture_type = self.texture_type_mapping[texture_type]
+        texture_type:X3DHTML.Texture|X3DHTML.MovieTexture|X3DHTML.PixelTexture|X3DHTML.ImageTexture
+        return texture_type(**ats)
+
 class X3DAppearance(X3DOptionsSet):
     __props__ = {
         "alphaClipThreshold",
@@ -502,6 +568,16 @@ class X3DAppearance(X3DOptionsSet):
             if isinstance(point_props, X3DPointProperties):
                 point_props = point_props.to_x3d()
             comps.append(point_props)
+
+        texture_props = base_attrs.pop('texture', None)
+        if texture_props is not None:
+            if isinstance(texture_props, str):
+                texture_props = {'url':texture_props}
+            if isinstance(texture_props, dict):
+                texture_props = X3DTexture(id=self.id+'-texture', **texture_props)
+            if isinstance(texture_props, X3DTexture):
+                texture_props = texture_props.to_x3d()
+            comps.append(texture_props)
 
         material_props = base_attrs.pop('material', None)
         if material_props is not None:
@@ -807,10 +883,10 @@ class X3DSwitch(X3DPrimitive):
 
 class X3DGeometryObject(X3DPrimitive):
     wrapper_class = X3DHTML.Shape
-    def __init__(self, *args, **opts):
+    def __init__(self, *args, id=None, **opts):
         geom_opts, self.material_opts = self.split_opts(opts)
         self.geometry_opts = self.prep_geometry_opts(*args, **geom_opts)
-        super().__init__()
+        super().__init__(id=id)
     def get_interpolated_attributes(self):
         return dict(self.geometry_opts, **self.material_opts)
     @abc.abstractmethod
@@ -937,7 +1013,32 @@ class X3DSphere(X3DGeometryGroup):
     def prep_geometry_opts(self, centers, radius=1, **opts):
         centers = self.prep_vecs(centers)
         rads = self.prep_const(radius, centers.shape[0])
-        return [{"translation":c, "radius":r} for c,r in zip(centers, rads)]
+        return [{"translation":c, "radius":r, **opts} for c,r in zip(centers, rads)]
+
+class X3DBox(X3DGeometryGroup):
+    tag_class = X3DHTML.Box
+
+    def prep_geometry_opts(self, starts, ends, normal=None, rotation=None, **opts):
+        starts = self.prep_vecs(starts)
+        ends = self.prep_vecs(ends)
+        if normal is None:
+            normal = [0, 1, 0]
+        normal = self.prep_vecs(normal, len(starts))
+        axes = self.prep_vecs([0, 1, 0], len(starts))
+        rots, norms = self.get_rotation(axes, normal)
+
+        rmats = nput.rotation_matrix(rots[:, :3], rots[:, 3])
+        sizes = ((ends - starts) @ rmats).reshape(starts.shape)
+
+        if rotation is not None:
+            rots = self.prep_vecs(rotation, len(starts))
+
+        return [
+            {"translation": s, "rotation": a,
+             "size": " ".join(np.round(size, 4).astype(str)) if not isinstance(size, str) else size,
+             **opts}
+            for s,a,size in zip((starts + ends) / 2, rots, sizes)
+        ]
 
 class X3DCylinder(X3DGeometryGroup):
     tag_class = X3DHTML.Cylinder
@@ -951,7 +1052,7 @@ class X3DCylinder(X3DGeometryGroup):
         rots, norms = self.get_rotation(axes)
 
         return [
-            {"translation":s, "rotation":a, "height":n, "radius":r}
+            {"translation":s, "rotation":a, "height":n, "radius":r, **opts}
             for s,a,n,r in zip((starts + ends) / 2, rots, norms, radius)
         ]
 
@@ -968,7 +1069,7 @@ class X3DCone(X3DGeometryGroup):
         rots, norms = self.get_rotation(axes)
 
         return [
-            {"translation":s, "rotation":a, "height":n, "bottomRadius":r, "topRadius":t}
+            {"translation":s, "rotation":a, "height":n, "bottomRadius":r, "topRadius":t, **opts}
             for s,a,n,r,t in zip((starts + ends) / 2, rots, norms, radius, top_radius)
         ]
 
@@ -1051,12 +1152,14 @@ class X3DCappedCylinder(X3DGroup):
 class X3DText(X3DGeometryGroup):
     tag_class = X3DHTML.Text
 
-    def __init__(self, *args, billboard=True, billboard_opts=None, **opts):
+    def __init__(self, *args, billboard=True, solid=None, billboard_opts=None, **opts):
         if billboard:
             if billboard_opts is None:
                 billboard_opts = {'axisOfRotation':'0 0 0'}
             self.wrapper_class = lambda *x,**y:X3DHTML.Billboard(X3DHTML.Shape(*x, **y), **billboard_opts)
-        super().__init__(*args, **opts)
+        if solid is None:
+            solid = not billboard
+        super().__init__(*args, solid=solid, **opts)
     def create_tag_object(self, font_style=None, **core_opts):
         body = []
         if font_style is not None:
@@ -1074,7 +1177,7 @@ class X3DText(X3DGeometryGroup):
             for fs in self.prep_const(font_style, len(centers))
         ]
         return [
-            {"translation": c, 'string': t, 'length': len(t), 'font_style':fs, 'rotation':r, 'normal':n}
+            {"translation": c, 'string': t, 'length': len(t), 'font_style':fs, 'rotation':r, 'normal':n, **opts}
             for c, t, fs, r, n in zip(centers, text, font_style, rotation, normal)
         ]
 
@@ -1139,6 +1242,12 @@ class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
         return [base_dict]
 
 class X3DGeometry2DGroup(X3DGeometryGroup):
+    def __init__(self, *args, billboard=False, billboard_opts=None, **opts):
+        if billboard:
+            if billboard_opts is None:
+                billboard_opts = {'axisOfRotation':'0 0 0'}
+            self.wrapper_class = lambda *x,**y:X3DHTML.Billboard(X3DHTML.Shape(*x, **y), **billboard_opts)
+        super().__init__(*args, **opts)
     @classmethod
     def prep_2d_coords(cls, coords):
         coords = np.asanyarray(coords)

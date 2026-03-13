@@ -5,6 +5,7 @@ Provides stuff like Disk, Sphere, etc. and lets them figure out how to plot them
 
 __all__ = [
     "GraphicsPrimitive",
+    "Cube",
     "Sphere",
     "Cylinder",
     "Disk",
@@ -120,6 +121,20 @@ class Sphere(GraphicsPrimitive):
         if hasattr(axes, 'axes'):
             axes = axes.axes
         return axes.draw_sphere(self.pos, self.rad, **self.opts)
+
+class Cube(GraphicsPrimitive):
+    def __init__(self, p1, p2, **opts):
+        self.pos1 = p1
+        self.pos2 = p2
+        self.opts = opts
+
+    def get_bbox(self):
+        return (self.pos1, self.pos2)
+
+    def plot(self, axes, *args, circle_points=None, graphics=None, **kwargs):
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_box(self.pos1, self.pos2, **self.opts)
 
 class Cylinder(GraphicsPrimitive):
     def __init__(self, p1, p2, radius, circle_points = 32, **opts):
