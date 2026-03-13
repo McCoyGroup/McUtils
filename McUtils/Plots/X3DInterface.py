@@ -78,6 +78,8 @@ class X3D(X3DObject):
                  include_export_button=False,
                  include_record_button=False,
                  include_view_settings_button=False,
+                 preload_scripts=None,
+                 onload_scripts=None,
                  **opts):
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
@@ -104,6 +106,8 @@ class X3D(X3DObject):
         if x3dom_css_path is not None:
             self.X3DOM_CSS = x3dom_css_path
         self.include_mathjax = include_mathjax
+        self.preload_scripts = preload_scripts
+        self.onload_scripts = onload_scripts
         self._widg = None
 
     X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
@@ -162,7 +166,7 @@ class X3D(X3DObject):
         let videoFormat = (typeof canvas.videoFormat === 'undefined') ? "{video_format}" : canvas.videoFormat;
         let videoExtension = canvas.videoExtension;
         if (typeof canvas.videoExtension === 'undefined') {{
-            videoExtension = ""
+            videoExtension = ''
         }}
         let x3DRecordingStream = canvas.captureStream(pollingRate);
         let mediaRecorder = new MediaRecorder(x3DRecordingStream, {{mimeType: videoFormat}});
@@ -201,6 +205,47 @@ class X3D(X3DObject):
     }})()
            """
 
+    @classmethod
+    def _create_loader_fragment(cls, i, s):
+        if isinstance(s, dict):
+            lib, callback = list(s.items())[0]
+            if not isinstance(lib, str):
+                var, lib = lib
+                if isinstance(var, str):
+                    return f'''
+try {{
+    window._vcontext{i} = {var};
+    delete {var};
+}} catch (e) {{}}
+const frag{i} = document.createElement('script');
+frag{i}.src='{lib}';
+frag{i}.onload=function() {{window._vcontext{i}; {callback}; var {var} = window._vcontext{i};}};
+document.head.append(frag{i});
+'''
+                else:
+                    var, target = var
+                    return f'''
+try {{
+    window._vcontext{i} = {var};
+    delete {var};
+}} catch (e) {{}}
+const frag{i} = document.createElement('script');
+frag{i}.src='{lib}';
+frag{i}.onload=function() {{let {target} = {var}; {callback}; {var} = window._vcontext{i};}};
+document.head.append(frag{i});
+'''
+            else:
+                return f'''
+const frag{i} = document.createElement('script');
+frag{i}.src='{lib}';
+frag{i}.onload=function() {{{callback}}};
+document.head.append(frag{i});
+'''
+        elif isinstance(s, str):
+            return f'''(function() {{ {s} }})()'''
+        else:
+            return f'''const frag{i} = document.createRange().createContextualFragment(`{s.tostring()}`); document.head.appendChild(frag{i});'''
+
     def to_widget(self,
                   dynamic_loading=None,
                   include_export_button=None,
@@ -229,6 +274,10 @@ class X3D(X3DObject):
             ]
             if self.include_mathjax:
                 elems.append(JHTML.Script(src=self.MATHJAX_CDN))
+            if self.preload_scripts is not None:
+                elems.extend(
+                    JHTML.Script(s) if isinstance(s, str) else s for s in self.preload_scripts
+                )
             base_fig = JHTML.Div(
                 *elems,
                 x3d_embed,
@@ -244,11 +293,15 @@ class X3D(X3DObject):
             ]
             if self.include_mathjax:
                 load_scripts.append(JHTML.Script(src=self.MATHJAX_CDN))
+            if self.preload_scripts is not None:
+                load_scripts.extend(
+                    JHTML.Script(s) if isinstance(s, str) else s for s in self.preload_scripts
+                )
             loader_frags = "\n".join([
                 f'''
-                const frag = document.createRange().createContextualFragment(`{load_script.tostring()}`);
-                document.head.appendChild(frag);'''
-                for load_script in load_scripts
+                const frag{i} = document.createRange().createContextualFragment(`{load_script.tostring()}`);
+                document.head.appendChild(frag{i});'''
+                for i,load_script in enumerate(load_scripts)
             ])
             kill_id = "tmp-"+str(uuid.uuid4())[:10]
             base_fig = JHTML.Figure(
@@ -259,7 +312,7 @@ class X3D(X3DObject):
                     id=kill_id,
                     onload=f"""
                     (function() {{
-                        let killElem = document.getElementById("{kill_id}");
+                        let killElem = document.getElementById('{kill_id}');
                         if (killElem !== null) {{
                             killElem.remove();
                             {loader_frags}
@@ -289,6 +342,27 @@ class X3D(X3DObject):
                         JHTML.Textarea(id=self.id + '-view-matrix')
                     ],
                     display="block"
+                )
+            )
+
+        if self.onload_scripts is not None and len(self.onload_scripts) > 0:
+            loader_frags = "\n".join([
+                self._create_loader_fragment(i, load_script)
+                for i, load_script in enumerate(self.onload_scripts)
+            ])
+            kill_id = "tmp-loader-"+str(uuid.uuid4())[:10]
+            elems.append(
+                JHTML.Image(
+                    src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                    id=kill_id,
+                    onload=f"""
+                                (function() {{
+                                    let killElem = document.getElementById('{kill_id}');
+                                    if (killElem !== null) {{
+                                        killElem.remove();
+                                        {loader_frags}
+                                    }}
+                                }})()"""
                 )
             )
 
@@ -1394,7 +1468,7 @@ class X3DGenericAnimator(X3DGroup):
         if slider:
             elements.append(
                 JHTML.Input(type="range", value="0", min="0", max=f"{nframes}", step="1", cls="slider",
-                            oninput=f"""document.getElementById("{id}").setAttribute("whichChoice", this.value)""")
+                            oninput=f"""document.getElementById('{id}').setAttribute('whichChoice', this.value)""")
             )
         elements.extend(animated_objects)
         # if running:
