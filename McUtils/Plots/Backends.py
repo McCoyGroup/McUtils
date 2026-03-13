@@ -3843,6 +3843,7 @@ class X3DAxes(GraphicsAxes3D):
         self.background = background
         self.opts = opts
         self.include_mathjax = include_mathjax
+        self.onloads = []
 
     @classmethod
     def canonicalize_opts(cls, opts):
@@ -4167,6 +4168,7 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(arrows)
         return arrows
 
+    mathjax_cdn = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.min.js'
     default_texture_font = {
         'font_family':'sans-serif',
         'font_size':'6px',
@@ -4193,7 +4195,7 @@ class X3DAxes(GraphicsAxes3D):
     x="0" y="10" 
     textLength="90" 
     lengthAdjust="spacingAndGlyphs">""") + text + "</text></svg>"
-    def mathjax_load_script(self, text, id, loader_id, resolution_upscaling=10, font_style=None):
+    def mathjax_load_script(self, text, id, resolution_upscaling=10, font_style=None):
         from ..Jupyter.JHTML import CSS
         if font_style is None:
             font_style = {}
@@ -4203,39 +4205,36 @@ class X3DAxes(GraphicsAxes3D):
         return re.sub("\s+", " ", f"""(function() {{
     let textureNode = document.getElementById('{id}-appearance-texture');
     if (textureNode??null !== null) {{
-      MathJax.tex2svgPromise('""") + "\\\\text{" + text.replace("\\", "") + re.sub("\s+", " ", """}', {display: true}).then((textWrapper) => {
-          MathJax.tex2svgPromise('""") + text + re.sub("\s+", " ", f"""', {{display: true}})
+      MathJax_3.tex2svgPromise('""") + "\\\\text{" + text.replace("\\", "") + re.sub("\s+", " ", """}', {display: true}).then((textWrapper) => {
+          MathJax_3.tex2svgPromise('""") + text + re.sub("\s+", " ", f"""', {{display: true}})
             .then((svgWrapper) => {{
                 let textNode = textWrapper.getElementsByTagName('svg')[0];
-                let svgNode = svgWrapper.getElementsByTagName("svg")[0];
+                let svgNode = svgWrapper.getElementsByTagName('svg')[0];
                 let serializer = new XMLSerializer();
                 let w = parseFloat(svgNode.getAttribute('width')) * {resolution_upscaling};
                 let h = parseFloat(svgNode.getAttribute('height')) * {resolution_upscaling};
-                svgNode.setAttribute('width', w.toString() + "ex");
-                svgNode.setAttribute('height', h.toString() + "ex");
+                svgNode.setAttribute('width', w.toString() + 'ex');
+                svgNode.setAttribute('height', h.toString() + 'ex');
                 let w0 = parseFloat(textNode.getAttribute('width')) * {resolution_upscaling};
                 let h0 = parseFloat(textNode.getAttribute('height')) * {resolution_upscaling};
-                textNode.setAttribute('width', w0.toString() + "ex");
-                textNode.setAttribute('height', h0.toString() + "ex");
+                textNode.setAttribute('width', w0.toString() + 'ex');
+                textNode.setAttribute('height', h0.toString() + 'ex');
                 svgNode.style.cssText = '{fs}';
                 let svgString = serializer.serializeToString(svgNode);
-                console.log(svgNode);
-                textureNode.url = 'data:image/svg+xml,' + encodeURIComponent(svgString); 
+                textureNode.setAttribute('url', 'data:image/svg+xml,' + encodeURIComponent(svgString)); 
                 
                 let rectNode = document.getElementById('{id}');
-                let curSize = rectNode.size.split(/\s+/).map(Number);
+                let curSize = rectNode.getAttribute('size').trim().split().map(parseFloat);
                 let aspect = h / w;
                 let scaling = w / w0;
                 let scalingH = (w * aspect) / h0;
                 if (scalingH < scaling) {{
                     scaling = scalingH;
                 }}
-                rectNode.size = (scaling * curSize[0]).toString() + " " + (scaling * curSize[0] * aspect).toString();
+                rectNode.setAttribute('size', (scaling * curSize[0]).toString() + " " + (scaling * curSize[0] * aspect).toString());
             }})
             .catch((err) => console.error(err));
         }});
-        let loader = document.getElementById('{loader_id}');
-        if (loader) {{ loader.remove() }}
     }}
 }})()""")
     @classmethod
@@ -4244,7 +4243,6 @@ class X3DAxes(GraphicsAxes3D):
         num_dollar = text.count("$")
         return num_dollar == 2 and text[0] == "$" and text[-1] == "$"
     def draw_text(self, points, vals, endpoint=None, allow_mathjax=True, line_height=10, char_width=None, char_width_scaling=1/30, font_style=None, **styles):
-        from ..Jupyter.JHTML import JHTML
         if allow_mathjax and self._is_math(vals):
             vals = vals.strip("$")
             id = 'x3d-obj-' + str(uuid.uuid4())[:6]
@@ -4266,23 +4264,29 @@ class X3DAxes(GraphicsAxes3D):
                     points = np.asanyarray(points)
                     endpoint = points + [w/2, vh/2, 0]
                     points = points - [w/2, vh/2, 0]
-            loader_id = 'tex-loader-' + str(uuid.uuid4())[:6]
-            loader = JHTML.HTML.Image(
-                id=loader_id,
-                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-                onload=self.mathjax_load_script(vals.replace("\\", "\\\\"), id, loader_id, font_style=font_style)
+            # loader_id = 'tex-loader-' + str(uuid.uuid4())[:6]
+            # loader = JHTML.HTML.Image(
+            #     id=loader_id,
+            #     src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+            #     onload=self.mathjax_load_script(vals.replace("\\", "\\\\"), id, font_style=font_style)
+            # )
+            self.onloads.append(
+                {
+                    (("MathJax", "MathJax_3"), self.mathjax_cdn):
+                    self.mathjax_load_script(vals.replace("\\", "\\\\"), id, font_style=font_style)
+                }
             )
             text = [
                 x3d.X3DRectangle2D(points, endpoint,
                                       id=id,
                                       texture={'url':'data:image/svg+xml,'+self.texture_svg(vals, id, font_style)},
                                       **styles),
-                loader
+                # loader
             ]
+            # self.include_mathjax = True
         else:
             text = [x3d.X3DText(points, text=vals, font_style=font_style, **styles)]
         self.children.extend(text)
-        self.include_mathjax = True
         return text
 
     @classmethod
@@ -4539,6 +4543,8 @@ class X3DFigure(GraphicsFigure):
                 for a in self.axes
                 if a.include_mathjax is not None
             ] + [False])[0]
+        if 'onload_scripts' not in opts:
+            opts['onload_scripts'] = sum((a.onloads for a in self.axes), [])
         return x3d.X3D(
             *[a.to_x3d() for a in self.axes],
             **opts
