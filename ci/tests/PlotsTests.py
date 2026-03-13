@@ -363,11 +363,23 @@ class PlotsTests(TestCase):
 
     @debugTest
     def test_PlotlyBackend(self):
-        g = np.linspace(0, 2*np.pi, 25)
-        Plot(g, np.sin(g),
-             backend='plotly',
-             # ticks=[[0, 1, 2], [0, 1, 2]],
-             # plot_range=[[0, 2], [0, 2]],
-             frame=True,
-             aspect_ratio=1/1.16
-             ).show()
+        fig = Graphics3D(backend='x3d', view_settings={'view_distance':5})
+        # Cube([0, 0, 0], [(1 - 1 + 0) / np.sqrt(6), (1 + 1 + 0)/ np.sqrt(6), (0 + 0 + np.sqrt(2)) / np.sqrt(6)],
+        #      normal=[1, 1, 0],
+        #      # rotation=[1, 1, 0, 1],
+        #      color='gray').plot(fig)
+        Text("$\\sqrt{5}$", [1, 0, 0], color='red', billboard=False, solid=False).plot(fig)
+        Text("$\\int_{x=10}^{100} \\sqrt{20} e^{(-x^2)}$", [-1, 0, 0], color='blue', font_size=20, billboard=False, solid=False).plot(fig)
+        # Text("s5", [-1, 0, 0], color='black', billboard=False, solid=False).plot(fig)
+        # print(fig.to_widget().tostring(prettify=True))
+        # fig.to_widget().write("/Users/Mark/Desktop/new_text.html")
+        fig.show()
+
+        # g = np.linspace(0, 2*np.pi, 25)
+        # Plot(g, np.sin(g),
+        #      backend='plotly',
+        #      # ticks=[[0, 1, 2], [0, 1, 2]],
+        #      # plot_range=[[0, 2], [0, 2]],
+        #      frame=True,
+        #      aspect_ratio=1/1.16
+        #      ).show()
