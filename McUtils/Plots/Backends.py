@@ -451,6 +451,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         X3D = 'x3d'
         SceneJSON = 'json'
         Plotly = 'plotly'
+        Plotly3D = 'plotly3D'
 
     registered_backends = {}
     @classmethod
@@ -459,6 +460,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             cls.DefaultBackends.MPL.value: MPLBackend,
             cls.DefaultBackends.MPL3D.value: MPLBackend3D,
             cls.DefaultBackends.Plotly.value: PlotlyBackend,
+            cls.DefaultBackends.Plotly3D.value: PlotlyBackend3D,
             cls.DefaultBackends.VTK.value: VTKBackend,
             cls.DefaultBackends.VPython2D.value: VPythonBackend,
             cls.DefaultBackends.VPython.value: VPythonBackend3D,
@@ -2386,9 +2388,10 @@ class PlotlyAxes(GraphicsAxes):
 
     def prep_elems(self):
         return self.elements
+    axes_props = ['xaxis', 'xaxis2', 'yaxis', 'yaxis2']
     def prep_opts(self):
-        opts = self.opts
-        for lab in ['xaxis', 'yaxis']:
+        opts = self.opts.copy()
+        for lab in self.axes_props:
             if lab in opts:
                 opts[lab] = {k:v for k,v in opts[lab].items() if v is not None}
         return opts
@@ -2405,12 +2408,18 @@ class PlotlyAxes(GraphicsAxes):
     def get_frame_visible(self):
         return (
             (
-                self.opts.get('yaxis', {}).get('showline', True),
-                self.opts.get('yaxis2', {}).get('showline', False)
+                self.opts.get('yaxis', {}).get('showline', True)
+                and self.opts.get('yaxis', {}).get('side', 'left') == 'left',
+                self.opts.get('yaxis', {}).get('showline', True)
+                and (self.opts.get('yaxis', {}).get('mirror', False)
+                     or self.opts.get('yaxis', {}).get('side', 'left') == 'right'),
             ),
             (
-                self.opts.get('xaxis', {}).get('showline', True),
-                self.opts.get('xaxis2', {}).get('showline', False)
+                self.opts.get('xaxis', {}).get('showline', True)
+                and self.opts.get('xaxis', {}).get('side', 'bottom') == 'bottom',
+                self.opts.get('xaxis', {}).get('showline', True)
+                and (self.opts.get('xaxis', {}).get('mirror', False)
+                     or self.opts.get('xaxis', {}).get('side', 'bottom') == 'top'),
             )
         )
     def set_frame_visible(self, frame_spec):
@@ -2418,27 +2427,29 @@ class PlotlyAxes(GraphicsAxes):
             frame_spec = (frame_spec, frame_spec)
         lr, bt = frame_spec
         if lr in {True, False}:
-            l,r = lr,lr
+            l, r = lr, lr
         else:
-            l,r = lr
+            l, r = lr
         if bt in {True, False}:
-            b,t = bt,bt
+            b, t = bt, bt
         else:
-            b,t = bt
+            b, t = bt
         if l:
             if r:
-                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor': 'black',
+                                                                   'mirror': True}
             else:
-                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black'}
+                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor': 'black'}
         elif r:
-            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'right'}
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor': 'black', 'side': 'right'}
         if b:
             if t:
-                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor': 'black',
+                                                                   'mirror': True}
             else:
-                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black'}
+                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor': 'black'}
         elif t:
-            self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'top'}
+            self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor': 'black', 'side': 'top'}
 
     def get_frame_style(self):
         raise NotImplementedError(...)
@@ -2503,7 +2514,7 @@ class PlotlyAxes(GraphicsAxes):
     def get_xlim(self):
         xrange = self.opts.get('xaxis', {}).get('range')
         if xrange is None:
-            xrange, _ = self.get_plot_range()
+            xrange = self.get_plot_range()[0]
         return xrange
     def set_xlim(self, val, **opts):
         self.opts['xaxis'] = self.opts.get('xaxis', {}) | dict(
@@ -2513,7 +2524,7 @@ class PlotlyAxes(GraphicsAxes):
     def get_ylim(self):
         yrange = self.opts.get('yaxis', {}).get('range')
         if yrange is None:
-            _, yrange = self.get_plot_range()
+            yrange = self.get_plot_range()[1]
         return yrange
     def set_ylim(self, val, **opts):
         self.opts['yaxis'] = self.opts.get('yaxis', {}) | dict(
@@ -2603,18 +2614,18 @@ class PlotlyAxes(GraphicsAxes):
                 if k in opts:
                     line[k] = opts.pop(k)
         return line, opts
-    def plot(self, x, y, line=None, mode='lines', **opts):
+    def plot(self, x, y, line=None, type='scatter', mode='lines', **opts):
         # import plotly.graph_objects as go
         opts['mode'] = mode
         line, opts = self._prep_line_opts(line, opts)
-        plot_dict = dict(type='scatter', x=x, y=y, line=line, **opts)
+        plot_dict = dict(type=type, x=x, y=y, line=line, **opts)
         self.elements.append(plot_dict)
         return plot_dict
-    def scatter(self, x, y, line=None, mode='markers', **opts):
+    def scatter(self, x, y, line=None, type='scatter', mode='markers', **opts):
         # import plotly.graph_objects as go
         opts['mode'] = mode
         line, opts = self._prep_line_opts(line, opts)
-        plot_dict = dict(type='scatter', x=x, y=y, line=line, **opts)
+        plot_dict = dict(type=type, x=x, y=y, line=line, **opts)
         self.elements.append(plot_dict)
         return plot_dict
 
@@ -2629,6 +2640,8 @@ class PlotlyAxes(GraphicsAxes):
     def get_facecolor(self):
         return self.opts.get('plot_bgcolor')
     def set_facecolor(self, fg):
+        if dev.str_is(fg, 'transparent'):
+            fg = None
         self.opts['plot_bgcolor'] = fg
 
     def get_padding(self):
@@ -2708,11 +2721,30 @@ class PlotlyFigure(GraphicsFigure):
     def get_facecolor(self):
         return self.layout.get('paper_bgcolor')
     def set_facecolor(self, fg):
+        if dev.str_is(fg, 'transparent'):
+            fg = None
         self.layout['paper_bgcolor'] = fg
 
     def savefig(self, file, facecolor=None, **opts):
         return self.to_plotly().savefig(file, facecolor=facecolor, **opts)
 
+    @classmethod
+    def _prep_layout_props(cls, layout):
+        # template = layout.pop('template', None)
+        # if template is not None:
+        #     if 'layout' in template:
+        #         template['layout'] = cls._prep_layout_props(template['layout'])
+        #
+        # scene = layout.pop('scene', {})
+        # for lab in cls.Axes.axes_props:
+        #     if lab in layout:
+        #         scene[lab] = {k:v for k,v in layout.pop(lab).items() if v is not None}
+        # if len(scene) > 0:
+        #     layout['scene'] = scene
+        #
+        # print(scene)
+
+        return layout
     def prep_dict(self):
         elems = []
         axes_layout = self.opts
@@ -2739,6 +2771,7 @@ class PlotlyFigure(GraphicsFigure):
                     margin['l'] = margin.get('l', 0) + dw/2
                     margin['r'] = margin.get('r', 0) + dw/2
                 layout['margin'] = margin
+        layout = self._prep_layout_props(layout)
         fig_dict = {
             'data':elems,
             'layout':layout
@@ -2915,11 +2948,13 @@ class PlotlyBackend(GraphicsBackend):
             #     # else:
             #     #     theme_dict[k] = v
             return theme_parents + [theme_opts]
-        def prep_spec(self):
-            layout = self.base_theme | {
+        def get_axes_theme(self):
+            return {
                 'xaxis':self.base_axis_theme,
                 'yaxis':self.base_axis_theme
             }
+        def prep_spec(self):
+            layout = self.base_theme | self.get_axes_theme()
             others = {
 
             }
@@ -2957,6 +2992,552 @@ class PlotlyBackend(GraphicsBackend):
         ...
     def get_available_themes(self):
         return []
+
+
+class PlotlyAxes3D(PlotlyAxes):
+    axes_props = ['xaxis', 'yaxis', 'zaxis', 'xaxis2', 'yaxis2', 'zaxis2']
+    def __init__(self, elements=None, *, zaxis=None, **opts):
+        if zaxis is None:
+            zaxis = self.base_axis_theme
+        super().__init__(
+            elements=elements,
+            zaxis=zaxis,
+            **opts
+        )
+        self.zaxis = self.get_zaxis_manager()
+
+    def get_zaxis_manager(self):
+        return ZAxisManager(
+            self.get_zticks,
+            self.set_zticks,
+            None,
+            None,
+            None,
+            None
+        )
+
+    def set_projection_type(self, proj_type, **kwargs):
+        ...
+    def get_projection_type(self):
+        ...
+
+    def get_autoscale(self):
+        ...
+    def set_autoscale(self, autoscale):
+        ...
+
+    def get_frame_visible(self):
+        return (
+            (
+                self.opts.get('yaxis', {}).get('showline', True)
+                and self.opts.get('yaxis', {}).get('side', 'left') == 'left',
+                self.opts.get('yaxis', {}).get('showline', True)
+                and (self.opts.get('yaxis', {}).get('mirror', False)
+                     or self.opts.get('yaxis', {}).get('side', 'left') == 'right'),
+            ),
+            (
+                self.opts.get('xaxis', {}).get('showline', True)
+                and self.opts.get('xaxis', {}).get('side', 'bottom') == 'bottom',
+                self.opts.get('xaxis', {}).get('showline', True)
+                and (self.opts.get('xaxis', {}).get('mirror', False)
+                     or self.opts.get('xaxis', {}).get('side', 'bottom') == 'top'),
+            ),
+            (
+                self.opts.get('zaxis', {}).get('showline', True)
+                and self.opts.get('zaxis', {}).get('side', 'left') in {'left', 'bottom'},
+                self.opts.get('zaxis', {}).get('showline', True)
+                and (self.opts.get('zaxis', {}).get('mirror', False)
+                     or self.opts.get('zaxis', {}).get('side', 'left') in {'left', 'bottom'}),
+            )
+        )
+    def set_frame_visible(self, frame_spec):
+        if frame_spec is True or frame_spec is False:
+            frame_spec = (frame_spec, frame_spec, frame_spec)
+        lr, bt, xy = frame_spec
+        if lr in {True, False}:
+            l,r = lr,lr
+        else:
+            l,r = lr
+        if bt in {True, False}:
+            b,t = bt,bt
+        else:
+            b,t = bt
+        if xy in {True, False}:
+            x,y = xy,xy
+        else:
+            x,y = xy
+        if l:
+            if r:
+                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+            else:
+                self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black'}
+        elif r:
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'right'}
+        elif l is not None:
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | {'showline': False, 'tickvals':[], 'title_text':""}
+        if b:
+            if t:
+                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+            else:
+                self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black'}
+        elif t:
+            self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'top'}
+        elif b is not None:
+            self.opts['xaxis'] = self.opts.get('xaxis', {}) | {'showline': False, 'tickvals':[], 'title_text':""}
+        if x:
+            if y:
+                self.opts['zaxis'] = self.opts.get('zaxis', {}) | {'showline': True, 'linecolor':'black', 'mirror':True}
+            else:
+                self.opts['zaxis'] = self.opts.get('zaxis', {}) | {'showline': True, 'linecolor':'black'}
+        elif y:
+            self.opts['zaxis'] = self.opts.get('zaxis', {}) | {'showline': True, 'linecolor':'black', 'side':'left'}
+        elif x is not None:
+            self.opts['zaxis'] = self.opts.get('zaxis', {}) | {'showline': False, 'tickvals':[], 'title_text':""}
+
+    def get_frame_style(self):
+        raise NotImplementedError(...)
+    def set_frame_style(self, frame_spec):
+        (l, r), (b, t), (x, y) = frame_spec
+        if l:
+            self.opts['yaxis'] = self.opts.get('yaxis', {}) | l
+        if r:
+            self.opts['yaxis2'] = self.opts.get('yaxis2', {}) | r
+        if b:
+            self.opts['xaxis'] = self.opts.get('xaxis', {}) | b
+        if t:
+            self.opts['xaxis2'] = self.opts.get('xaxis2', {}) | t
+        if x:
+            self.opts['zaxis'] = self.opts.get('zaxis', {}) | x
+        if y:
+            self.opts['zaxis2'] = self.opts.get('zaxis2', {}) | y
+
+    def get_plot_range(self):
+        xrange, yrange = super().get_plot_range()
+        min_z = None
+        max_z = None
+        for e in self.elements:
+            if 'z' in e:
+                if min_z is None:
+                    min_z = np.min(e['z'])
+                else:
+                    min_z = min([min_z, np.min(e['z'])])
+                if max_z is None:
+                    max_z = np.max(e['z'])
+                else:
+                    max_z = max([max_z, np.max(e['z'])])
+        zrange = [min_z, max_z]
+        if zrange == [None, None]:
+            zrange = None
+        return xrange, yrange, zrange
+
+    def get_zlabel(self):
+        return self.opts.get('zaxis', {}).get('title_text')
+    def set_zlabel(self, val, **style):
+        self.opts['zaxis'] = self.opts.get('zaxis', {}) | dict(
+            title_text=val,
+            **style
+        )
+
+    def get_zlim(self):
+        zrange = self.opts.get('zaxis', {}).get('range')
+        if zrange is None:
+            zrange = self.get_plot_range()[2]
+        return zrange
+    def set_zlim(self, val, **opts):
+        self.opts['zaxis'] = self.opts.get('zaxis', {}) | dict(
+            range=val,
+            **opts
+        )
+    def get_zticks(self):
+        return self.opts.get('zaxis', {}).get('tickvals')
+    def set_zticks(self, val, **opts):
+        if isinstance(val, self.TicksManager.FixedLocator):
+            val = val.locs
+        self.opts['zaxis'] = self.opts.get('zaxis', {}) | dict(
+            tickvals=val,
+            tickmode='array',
+            **opts
+        )
+    def get_ztick_style(self):
+        return {
+            k:v
+            for k,v in self.opts.get('zaxis', {}).items()
+            if k.startswith('tick') or k.startswith('minor')
+        }
+    def set_ztick_style(self, **opts):
+        self.opts['zaxis'] = self.opts.get('zaxis', {}) | opts
+
+    def plot(self, x, y, z, line=None,  type='scatter3d', mode='lines', **opts):
+        return super().plot(x, y, z=z, type=type, line=line, mode=mode, **opts)
+    def scatter(self, x, y, z, line=None, type='scatter3d', mode='markers',
+                marker=None,
+                edge_color=None,
+                size=None,
+                line_width=None,
+                **opts):
+        marker_line_props = {k:v for k,v in dict(width=line_width, color=edge_color).items() if v is not None}
+        if len(marker_line_props) > 0:
+            if marker is None: marker = {}
+            marker['line'] = marker_line_props | marker.pop('line', {})
+        if size is not None:
+            if marker is None: marker = {}
+            marker['size'] = marker.get('size', size)
+        return super().scatter(x, y, z=z, type=type, line=line, mode=mode, marker=marker, **opts)
+    def draw_sphere(self, center, radius,
+                    sphere_points=48,
+                    rendering='flat',
+                    s=None,
+                    box_scalings=None,
+                    edgecolors=None,
+                    edge_color=None,
+                    lw=None,
+                    edge_width=.01,
+                    glow=None,
+                    color='white',
+                    **opts):
+        if dev.str_is(rendering, 'flat'):
+            if glow is not None:
+                if color is None:
+                    color = glow
+                else:
+                    color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+
+            center = np.asanyarray(center)
+            if center.ndim == 1:
+                center = center[np.newaxis]
+            if edgecolors is None:
+                if edge_color is not None:
+                    edgecolors = edge_color
+                else:
+                    edgecolors = [[0.] * 3 + [.3]]
+            if isinstance(edgecolors, str) or nput.is_numeric(edgecolors[0]):
+                edgecolors = [edgecolors] * len(center)
+            if isinstance(color, str) or nput.is_numeric(color[0]):
+                color = [color] * len(center)
+            if s is None:
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                s = (radius * max(box_scalings) * 72)**2
+            if lw is None:
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                lw = (edge_width * max(box_scalings) * 72)
+
+            if nput.is_numeric(s):
+                s = [s] * len(center)
+
+            # if box_scalings is None:
+            #     box_scalings = [1, 1, 1]
+            sizes = np.sqrt(s) / 2 #/ (72 * max(box_scalings))
+            line_width = lw #/ (72 * max(box_scalings))
+            spheres = [
+                self.get_plotter('scatter')(
+                    [cent[0]], [cent[1]], [cent[2]],
+                    edge_color=ec,
+                    color=c,
+                    size=sz,
+                    line_width=line_width,
+                    **opts
+                )
+                for (cent, ec, sz, c) in zip(
+                    center, edgecolors, sizes, color
+                )
+            ]
+            # dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
+            # spheres.zdist_offset = functools.partial(self._get_sphere_proj, radius=np.max(dists))
+            # spheres.predraw = functools.partial(self._flat_sphere_predraw,
+            #                                     spheres,
+            #                                     radius=dists * 10,
+            #                                     depth_shading_range=depth_shading_range,
+            #                                     depth_shading_targets=depth_shading_targets,
+            #                                     depth_shrink_range=depth_shrink_range,
+            #                                     depth_shrink_targets=depth_shrink_targets)
+            return spheres
+        else:
+            surface = self.get_plotter('mesh3d')
+
+            u = np.linspace(0, 2 * np.pi, sphere_points)
+            v = np.linspace(0, np.pi, sphere_points)
+            x = radius * np.outer(np.cos(u), np.sin(v))
+            y = radius * np.outer(np.sin(u), np.sin(v))
+            z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+            return surface(x + center[0], y + center[1], z + center[2], color=color, **opts)
+    def draw_cylinder(self, start, end, rad, circle_points=48,
+                      rendering='flat',
+                      box_scalings=None,
+                      edge_color=None,
+                      color='black',
+                      glow=None,
+                      segments=1,
+                      segment_overdraw=0,
+                      edge_width=.01,
+                      lw=None,
+                      color_cycle=False,
+                      capstyle='butt',
+                      **opts):
+        if glow is not None:
+            if color is None:
+                color = glow
+            else:
+                color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+        if dev.str_is(rendering, 'flat'):
+            # from mpl_toolkits.mplot3d.art3d import Line3DCollection
+            start = np.asanyarray(start)
+            if start.ndim == 1:
+                start = start[np.newaxis]
+            end = np.asanyarray(end)
+            if end.ndim == 1:
+                end = end[np.newaxis]
+            plot = self.get_plotter('plot')
+            if lw is None:
+                rad = np.asanyarray(rad)
+                if rad.ndim == 0:
+                    rad = np.array([rad])
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                lw = rad * 72 * max(box_scalings)
+            if edge_color is None:
+                edge_color = [None] * len(start)
+            elif isinstance(edge_color, str) or nput.is_numeric(edge_color[0]):
+                edge_color = [edge_color] * len(start)
+            if isinstance(color, str) or nput.is_numeric(color[0]):
+                color = [color] * len(start)
+
+            coll = []
+            if color_cycle is True:
+                color_cycle = ["red", "blue", "green", "orange", "purple"]
+            ew = edge_width * (72 * max(box_scalings))
+            for s, e, w, ec, c in zip(start, end, lw, edge_color, color):
+                cw = w / (72 * max(box_scalings))
+                v, n = nput.vec_normalize(e - s, return_norms=True)
+                # s = s - cw * v
+                # e = e + cw * v
+                d = np.linspace(0, n, segments+1)
+                x_points, y_points, z_points = (s[np.newaxis] + v[np.newaxis] * d[:, np.newaxis]).T
+                if segment_overdraw > 0:
+                    d = d + (n * segment_overdraw)
+                    # d[-1] = n
+                    x2_points, y2_points, z2_points = (s[np.newaxis] + v[np.newaxis] * d[1:, np.newaxis]).T
+                else:
+                    x2_points, y2_points, z2_points = x_points[1:], y_points[1:], z_points[1:]
+                for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
+                    x_points[:-1],y_points[:-1],z_points[:-1],
+                    x2_points, y2_points, z2_points
+                )):
+                    if color_cycle:
+                        c = color_cycle[i%len(color_cycle)]
+                    coll.append(
+                        plot(
+                            [x1, x2],
+                            [y1, y2],
+                            [z1, z2],
+                            width=w+ew,
+                            color=ec,
+                            **opts
+                        )
+                    )
+            for s, e, w, ec, c in zip(start, end, lw, edge_color, color):
+                cw = w / (72 * max(box_scalings))
+                v, n = nput.vec_normalize(e - s, return_norms=True)
+                # s = s - cw * v
+                # e = e + cw * v
+                d = np.linspace(0, n, segments+1)
+                x_points, y_points, z_points = (s[np.newaxis] + v[np.newaxis] * d[:, np.newaxis]).T
+                if segment_overdraw > 0:
+                    d = d + (n * segment_overdraw)
+                    # d[-1] = n
+                    x2_points, y2_points, z2_points = (s[np.newaxis] + v[np.newaxis] * d[1:, np.newaxis]).T
+                else:
+                    x2_points, y2_points, z2_points = x_points[1:], y_points[1:], z_points[1:]
+                for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
+                    x_points[:-1],y_points[:-1],z_points[:-1],
+                    x2_points, y2_points, z2_points
+                )):
+                    if color_cycle:
+                        c = color_cycle[i%len(color_cycle)]
+                    coll.append(
+                        plot(
+                            [x1, x2],
+                            [y1, y2],
+                            [z1, z2],
+                            width=w,
+                            color=c,
+                            # solid_capstyle=capstyle,
+                            # path_effects=(
+                            #     [pe.Stroke(linewidth=w+ew, foreground=ec, capstyle='butt'), pe.Normal()]
+                            #         if ec is not None and ew > 0 else
+                            #     None
+                            # ),
+                            **opts
+                        )
+                    )
+                    # for l in coll[-1]:
+                    #     l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
+                    #     l.do_3d_projection = functools.partial(self._line_do_3d_projection, l)
+                    #     l.distance_mode = np.min
+                    #     l.predraw = functools.partial(self._flat_cylinder_predraw, l,
+                    #                                   depth_shading_range=depth_shading_range,
+                    #                                   depth_shading_targets=depth_shading_targets,
+                    #                                   edge_color=ec,
+                    #                                   edge_width=ew,
+                    #                                   pixel_scaling=1/(72 * np.max(box_scalings)))
+                # coll.append(
+                #     plot(
+                #         x_points,
+                #         y_points,
+                #         zs=z_points,
+                #         lw=w,
+                #         color=c,
+                #         **opts
+                #     )
+                # )
+
+
+            # elif plotter == 'rect':
+            #     import matplotlib.patches as patches
+            #     import mpl_toolkits.mplot3d.art3d as art3d
+            #     # Create a 2D Rectangle patch object
+            #     lw = lw / (72 * max(box_scalings))
+            #     z_positions = None
+            #     for s, e, w, c in zip(start, end, lw, color):
+            #         x_points = np.linspace(s[0], e[0], segments)
+            #         y_points = np.linspace(s[1], e[1], segments)
+            #         z_points = np.linspace(s[2], e[2], segments)
+            #         # for (x1,y1,z1,x2,y2,z2) in zip(
+            #         #     x_points[:-1],y_points[:-1],z_points[:-1],
+            #         #     x_points[1:],y_points[1:],z_points[1:],
+            #         # ):
+            #         #     lines.append(
+            #         #         [[x1, y1, z1], [x2, y2, z2]]
+            #         #     )
+            #         #     colors.append(c)
+            #         #     linewidths.append(w)
+            #         # cycle = ['red', 'green', 'blue', 'orange', 'pink']
+            #         for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
+            #             x_points[:-1],y_points[:-1],z_points[:-1],
+            #             x_points[1:],y_points[1:],z_points[1:],
+            #         )):
+            #             x0 = min([x1,x2])
+            #             x0 = min([x1,x2])
+            #
+            #             w = x2-x1
+            #             h = y2-y1
+            #             coll.append(
+            #                 patches.Rectangle(xy_center, width, height, color=color, alpha=alpha)
+            #                 plot(
+            #                     [x1, x2],
+            #                     [y1, y2],
+            #                     zs=[z1, z2],
+            #                     lw=w,
+            #                     color=c,#cycle[i%5],
+            #                     edgecolor=ec,
+            #                     **opts
+            #                 )
+            #             )
+            #     rect = patches.Rectangle(xy_center, width, height, color=color, alpha=alpha)
+            #
+            #     for z_pos,rect in zip(z_positions, coll):
+            #         # Convert the 2D patch to a 3D patch and add it to the axes
+            #         self.obj.add_patch(rect)
+            #         art3d.pathpatch_2d_to_3d(rect, z_pos=z_pos, zdir='z')
+            # else:
+            #     coll = Line3DCollection(lines, colors=colors, linewidths=linewidths, **opts)
+            #
+            #     min_x = np.min(start[:, 0])
+            #     max_x = np.max(start[:, 0])
+            #     xl_m, xl_M = self.get_xlim()
+            #     if xl_m > min_x:
+            #         xl_m = min_x
+            #     if xl_M < max_x:
+            #         xl_M = max_x
+            #     self.set_xlim([xl_m, xl_M])
+            #     min_y = np.min(start[:, 1])
+            #     max_y = np.max(start[:, 1])
+            #     yl_m, yl_M = self.get_ylim()
+            #     if xl_m > min_y:
+            #         yl_m = min_y
+            #     if yl_M < max_y:
+            #         yl_M = max_y
+            #     self.set_ylim([yl_m, yl_M])
+            #     min_z = np.min(start[:, 2])
+            #     max_z = np.max(start[:, 2])
+            #     zl_m, zl_M = self.get_zlim()
+            #     if zl_m > min_z:
+            #         zl_m = min_z
+            #     if zl_M < max_z:
+            #         zl_M = max_z
+            #     self.set_zlim([zl_m, zl_M])
+            #     self.obj.add_collection(coll)
+            return coll
+        else:
+            surface = self.get_plotter('mesh3d')
+
+            u = np.linspace(0, 2 * np.pi, circle_points)
+            v = np.linspace(0, np.pi, circle_points)
+
+            # pulled from SO: https://stackoverflow.com/a/32383775/5720002
+
+            # vector in direction of axis
+            v = end - start
+            # find magnitude of vector
+            mag = np.linalg.norm(v)
+            # unit vector in direction of axis
+            v = v / mag
+            # make some vector not in the same direction as v
+            not_v = np.array([1, 0, 0])
+            if (v == not_v).all():
+                not_v = np.array([0, 1, 0])
+            # make vector perpendicular to v
+            n1 = np.cross(v, not_v)
+            # normalize n1
+            n1 /= np.linalg.norm(n1)
+            # make unit vector perpendicular to v and n1
+            n2 = np.cross(v, n1)
+            # surface ranges over t from 0 to length of axis and 0 to 2*pi
+            t = np.linspace(0, mag, circle_points)
+            theta = np.linspace(0, 2 * np.pi, circle_points)
+            # use meshgrid to make 2d arrays
+            t, theta = np.meshgrid(t, theta)
+            # generate coordinates for surface
+            X, Y, Z = [start[i] + v[i] * t + rad * np.sin(theta) * n1[i] + rad * np.cos(theta) * n2[i] for i
+                       in [0, 1, 2]]
+
+            return surface(X, Y, Z, color=color, **opts)
+class PlotlyFigure3D(PlotlyFigure):
+    Axes = PlotlyAxes3D
+
+    omitted_tick_properties = {'minor', 'minor_ticks'}
+    @classmethod
+    def _prep_layout_props(cls, layout):
+        template = layout.pop('template', None)
+        if template is not None:
+            if 'layout' in template:
+                template['layout'] = cls._prep_layout_props(template['layout'])
+            layout['template'] = template
+
+        scene = layout.pop('scene', {})
+        for lab in cls.Axes.axes_props:
+            if lab in layout:
+                scene[lab] = {
+                    k:v for k,v in layout.pop(lab).items()
+                    if v is not None and k not in cls.omitted_tick_properties
+                }
+        if len(scene) > 0:
+            layout['scene'] = scene
+
+        return layout
+class PlotlyBackend3D(PlotlyBackend):
+    Figure = PlotlyFigure3D
+
+    axes_props = {'xtick':'xaxis', 'ytick':'yaxis', 'ztick':'zaxis'}
+    class ThemeContextManager(PlotlyBackend.ThemeContextManager):
+        def get_axes_theme(self):
+            return {
+                'xaxis': self.base_axis_theme,
+                'yaxis': self.base_axis_theme,
+                'zaxis': self.base_axis_theme,
+            }
 
 class GraphicsRegionAxes(GraphicsAxes):
     def __init__(self, figure_region):
