@@ -870,7 +870,6 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
         # else:
         #     if isinstance(x, int) or isinstance(x, float):
         #         x, y, z = ranges = (self._plot_range[0], self._plot_range[1], ranges)
-
         self._plot_range = tuple(ranges)
 
         if isinstance(x, Styled):  # name feels wrong here...
@@ -903,6 +902,70 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
                                set_minor_formatter=self.axes.zaxis.set_minor_formatter,
                                **opts
                                )
+
+    @property
+    def frame(self):
+        return self._frame
+    @frame.setter
+    def frame(self, fr):
+        self._frame = fr
+        if fr is True or fr is False:
+            self.axes.set_frame_visible(fr)
+        else:
+            lr, bt, xy = fr
+            if len(lr) == 2:
+                l, r = lr
+            else:
+                l = lr; r = lr
+            if len(bt) == 2:
+                b, t = bt
+            else:
+                b = bt; t = bt
+            if len(xy) == 2:
+                x, y = xy
+            else:
+                x = xy; y = xy
+            self.axes.set_frame_visible(
+                ((l, r), (b, t), (x, y))
+            )
+
+    @property
+    def frame_style(self):
+        return self._frame_style
+    @frame_style.setter
+    def frame_style(self, f_style):
+        if self._frame_style is None:
+            self._frame_style = ((None, None), (None, None), (None, None))
+        if isinstance(f_style, dict):
+            f_style = ((f_style, f_style), (f_style, f_style), (f_style, f_style))
+
+        try:
+            x, y, z = f_style
+        except ValueError:
+            x, y, z = f_style = (f_style, f_style, f_style)
+        if isinstance(y, dict):
+            y = (y, y)
+        if isinstance(x, dict):
+            x = (x, x)
+        if isinstance(z, dict):
+            z = (z, z)
+        if len(y) == 2:
+            b, t = y
+        else:
+            b = t = y
+        if len(x) == 2:
+            l, r = x
+        else:
+            l = r = x
+        if len(z) == 2:
+            zl, zr = z
+        else:
+            zl = zr = z
+
+        self._frame_style = ((l, r), (b, t), (zl, zr))
+        self.axes.set_frame_style(
+            self._frame_style
+        )
 
     @property
     def ticks(self):

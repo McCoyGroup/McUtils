@@ -1011,7 +1011,7 @@ class Graphics(GraphicsBase):
         if axes_labels is None:
             return [[None, None], [None, None]]
         else:
-            x,y = axes_labels
+            x,y = axes_labels[:2]
             return [
                 [None, None] if y is None or len(y) == 0 else [p, None],
                 [None, None] if x is None or len(x) == 0 else [p, None]
@@ -1341,6 +1341,7 @@ class Graphics(GraphicsBase):
 #
 class Graphics3D(Graphics):
 
+    default_style = Graphics.default_style | dict(frame=((True, False), (True, False), (True, False)))
     opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios', 'projection_type', 'autoscale', 'aspect_ratio'}
     known_keys = Graphics.opt_keys | {'animate'}
 
