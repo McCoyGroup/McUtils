@@ -2628,6 +2628,19 @@ class PlotlyAxes(GraphicsAxes):
         plot_dict = dict(type=type, x=x, y=y, line=line, **opts)
         self.elements.append(plot_dict)
         return plot_dict
+    def text(self, text, x, y, line=None, type='scatter', mode='text', textposition="middle center", color=None, textfont=None, **opts):
+        # import plotly.graph_objects as go
+        opts['mode'] = mode
+        line, opts = self._prep_line_opts(line, opts)
+        if textfont is None:
+            textfont = {o.partition("_")[-1]:v for o,v in opts.items() if o.startswith('font_')}
+        if textfont is not None:
+            textfont['color'] = color
+        if len(textfont) > 0:
+            opts['textfont'] = textfont
+        plot_dict = dict(type=type, text=text, x=x, y=y, line=line, textposition=textposition, **opts)
+        self.elements.append(plot_dict)
+        return plot_dict
 
     def get_plotter(self, method, **opts):
         if method == 'plot':
@@ -2793,7 +2806,7 @@ class PlotlyFigure(GraphicsFigure):
     split_plot_fragment = True
     embed_mathjax = True
     preload_plotly = True
-    mathjax_cdn = "https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"
+    mathjax_cdn = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.min.js"
     plotly_cdn = "https://cdn.plot.ly/plotly-3.4.0.min.js"
     def get_core_body(self, html):
         return html.split("<body>")[1].rsplit("</body>")[0].strip()
@@ -2803,39 +2816,44 @@ class PlotlyFigure(GraphicsFigure):
         plotly_tag = f"""<script type="text/javascript" id="{id}">"""
         mathjax_load_script = """
         if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {
-            // window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});
-            window.PlotlyConfig = {MathJaxConfig: 'local'};
+            window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});
         }
+        window.PlotlyConfig = {MathJaxConfig: "local"};
         """
-        mathjax_config = f"""<script src="{self.mathjax_cdn}" onload='function(){{
+        mathjax_config = f"""
+        <script src="{self.mathjax_cdn}" onload='(function(){{
         {mathjax_load_script}
-        }}()'>
+        }})()'>
         </script>"""
-        return html.replace(
-            plotly_tag,
-            f"""{mathjax_config}\n{plotly_tag}"""
-        )
+        header, tag, footer = html.partition(plotly_tag)
+        footer = footer.replace("</script>", f"</script>\n{mathjax_config}", 1)
+        return header + tag + footer
     def postprocess_plotly_html(self, html):
         id = 'plotly-plot-' + str(uuid.uuid4())[:6]
         html = self.set_plotly_script_id(html, id)
         if self.split_plot_fragment:
             html = self.get_core_body(html)
-        if self.embed_mathjax:
-            html = self.configure_mathjax(html, id)
+        # if self.embed_mathjax:
+        #     html = self.configure_mathjax(html, id)
         if self.preload_plotly:
-            # tag_pos = html.index(f"""<script type="text/javascript" id="{id}">""")
+            tag = f"""<script type="text/javascript" id="{id}">"""
+            new_tag = f"""<script src="{self.plotly_cdn}" charset="utf-8" id="{id}" onload='(function(){{"""
             html = html.replace(
-                f"""<script type="text/javascript" id="{id}">""",
-                f"""<script src="{self.plotly_cdn}" charset="utf-8" id="{id}" onload='(function(){{""",
+                tag,
+                new_tag,
                 1
             )
             # replace from end, should replace with version that starts from the plotly tag
-            html = "})()'></script>".join(html.rsplit("</script>", 1))
+            header, tag, footer = html.partition(new_tag)
+            footer = footer.replace("</script>",  "})()'></script>", 1)
+            return header + tag + footer
         return html
     def to_html(self):
         # print(fig)
         buf = io.StringIO()
-        self.to_plotly().write_html(buf, div_id=self.id, include_plotlyjs=False)
+        self.to_plotly().write_html(buf, div_id=self.id,
+                                    include_plotlyjs=False,
+                                    include_mathjax='cdn' if self.embed_mathjax else False)
         buf.seek(0)
         html = buf.read()
         return self.postprocess_plotly_html(html)
@@ -3266,9 +3284,100 @@ class PlotlyAxes3D(PlotlyAxes):
     def set_ztick_style(self, **opts):
         self.opts['zaxis'] = self.opts.get('zaxis', {}) | opts
 
-    def plot(self, x, y, z, line=None,  type='scatter3d', mode='lines', **opts):
-        return super().plot(x, y, z=z, type=type, line=line, mode=mode, **opts)
-    def scatter(self, x, y, z, line=None, type='scatter3d', mode='markers',
+    def get_view_settings(self):
+        return self.opts.get('scene_camera')
+    def set_view_settings(self,
+                          up=None, eye=None, center=None,
+                          vertical_axis=None,
+                          up_vector=None, right_vector=None, view_vector=None, view_distance=None,
+                          view_matrix=None, view_center=None):
+        if view_matrix is None and (
+                view_vector is not None
+                or right_vector is not None
+                or up_vector is not None
+        ):
+            if view_vector is None:
+                if (
+                        up_vector is not None and right_vector is not None
+                ):
+                    view_vector = nput.vec_crosses(up_vector, right_vector, normalize=True)
+                elif right_vector is not None:
+                    view_vector = nput.vec_crosses([0, 0, 1], right_vector, normalize=True)
+                elif up_vector is not None:
+                    view_vector = nput.vec_crosses(up_vector, [0, 1, 0], normalize=True)
+
+            if view_vector is not None:
+                m = nput.rotation_matrix(
+                    view_vector,
+                    [1, 0, 0]
+                )
+            else:
+                m = np.eye(3)
+
+            if up_vector is None and right_vector is not None:
+                if view_vector is None:
+                    view_vector = [1, 0, 0]
+                up_vector = nput.vec_normalize(
+                    nput.vec_crosses(right_vector, view_vector)
+                )
+            elif up_vector is not None and view_vector is not None:
+                up_vector = nput.vec_crosses(
+                    view_vector,
+                    nput.vec_crosses(view_vector, up_vector),
+                    normalize=True
+                )
+            if up_vector is not None:
+                m = m @ nput.rotation_matrix(
+                    m.T @ up_vector,
+                    [1, 0, 0]
+                )
+            view_matrix = m
+
+        camera = {}
+        if up is not None:
+            camera['up'] = up
+        if eye is not None:
+            camera['eye'] = eye
+        if center is not None:
+            camera['center'] = center
+        if view_matrix is not None:
+            if vertical_axis is None:
+                target_vertical = [0, 0, 1]
+                target_view = [1, 0, 0]
+            else:
+                target_vertical = [
+                    [1, 0, 0]
+                    if vertical_axis == 'x' else
+                    [0, 1, 0]
+                    if vertical_axis == 'y' else
+                    [0, 0, 1]
+                ]
+                target_view = [
+                    [0, 0, 1]
+                    if vertical_axis == 'x' else
+                    [0, 1, 0]
+                    if vertical_axis == 'y' else
+                    [1, 0, 0]
+                ]
+            # roll, cross = nput.extract_rotation_angle_axis(view_matrix)
+            view_vector, right_vector, up_vector = view_matrix.T
+            if view_distance is None:
+                view_distance = np.sqrt(25 / 16 * 3)
+
+            camera = camera | {
+                'up':dict(zip('xyz', up_vector)) if up is None else up,
+                'eye':dict(zip('xyz', view_vector * view_distance)) if eye is None else eye
+            }
+
+        if view_center is not None:
+            camera['center'] = dict(zip('xyz', view_center)) if center is None else center
+
+        if len(camera) > 0:
+            self.opts['scene_camera'] = camera
+
+    def plot(self, x, y, z, line=None,  type='scatter3d', **opts):
+        return super().plot(x, y, z=z, type=type, line=line, **opts)
+    def scatter(self, x, y, z, line=None, type='scatter3d',
                 marker=None,
                 edge_color=None,
                 size=None,
@@ -3281,7 +3390,9 @@ class PlotlyAxes3D(PlotlyAxes):
         if size is not None:
             if marker is None: marker = {}
             marker['size'] = marker.get('size', size)
-        return super().scatter(x, y, z=z, type=type, line=line, mode=mode, marker=marker, **opts)
+        return super().scatter(x, y, z=z, type=type, line=line, marker=marker, **opts)
+    def text(self, text, x, y, z, line=None,  type='scatter3d', **opts):
+        return super().text(text, x, y, z=z, type=type, line=line, **opts)
     def draw_sphere(self, center, radius,
                     sphere_points=48,
                     rendering='flat',
@@ -3293,6 +3404,7 @@ class PlotlyAxes3D(PlotlyAxes):
                     edge_width=.01,
                     glow=None,
                     color='white',
+                    default_view_distance='auto',
                     **opts):
         if dev.str_is(rendering, 'flat'):
             if glow is not None:
@@ -3300,6 +3412,16 @@ class PlotlyAxes3D(PlotlyAxes):
                     color = glow
                 else:
                     color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+
+            eye = self.get_view_settings().get('eye')
+            if eye is not None and default_view_distance is not None:
+                view_distance = np.linalg.norm([eye[x] for x in ['x', 'y', 'z']])
+                if dev.str_is(default_view_distance, 'auto'):
+                    default_view_distance = np.sqrt(25 / 16 * 3)
+                view_distance_scaling = default_view_distance / view_distance
+            else:
+                view_distance_scaling = 1
+
 
             center = np.asanyarray(center)
             if center.ndim == 1:
@@ -3327,8 +3449,8 @@ class PlotlyAxes3D(PlotlyAxes):
 
             # if box_scalings is None:
             #     box_scalings = [1, 1, 1]
-            sizes = np.sqrt(s) / 2 #/ (72 * max(box_scalings))
-            line_width = lw / 2 #/ (72 * max(box_scalings))
+            sizes = view_distance_scaling * np.sqrt(s) / 2 #/ (72 * max(box_scalings))
+            line_width = view_distance_scaling * lw / 2 #/ (72 * max(box_scalings))
             spheres = []
             if lw is not None:
                 spheres += [
@@ -3384,7 +3506,8 @@ class PlotlyAxes3D(PlotlyAxes):
                       edge_width=.01,
                       lw=None,
                       color_cycle=False,
-                      capstyle='butt',
+                      # capstyle='butt',
+                      default_view_distance='auto',
                       **opts):
         if glow is not None:
             if color is None:
@@ -3392,7 +3515,15 @@ class PlotlyAxes3D(PlotlyAxes):
             else:
                 color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
         if dev.str_is(rendering, 'flat'):
-            # from mpl_toolkits.mplot3d.art3d import Line3DCollection
+            eye = self.get_view_settings().get('eye')
+            if eye is not None and default_view_distance is not None:
+                view_distance = np.linalg.norm([eye[x] for x in ['x', 'y', 'z']])
+                if dev.str_is(default_view_distance, 'auto'):
+                    default_view_distance = np.sqrt(25 / 16 * 3)
+                view_distance_scaling = default_view_distance / view_distance
+            else:
+                view_distance_scaling = 1
+
             start = np.asanyarray(start)
             if start.ndim == 1:
                 start = start[np.newaxis]
@@ -3418,6 +3549,8 @@ class PlotlyAxes3D(PlotlyAxes):
             if color_cycle is True:
                 color_cycle = ["red", "blue", "green", "orange", "purple"]
             ew = edge_width * (72 * max(box_scalings))
+            lw = lw * view_distance_scaling
+            ew = ew * view_distance_scaling
             for s, e, w, ec, c in zip(start, end, lw, edge_color, color):
                 cw = w / (72 * max(box_scalings))
                 v, n = nput.vec_normalize(e - s, return_norms=True)
@@ -3482,103 +3615,6 @@ class PlotlyAxes3D(PlotlyAxes):
                             **opts
                         )
                     )
-                    # for l in coll[-1]:
-                    #     l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
-                    #     l.do_3d_projection = functools.partial(self._line_do_3d_projection, l)
-                    #     l.distance_mode = np.min
-                    #     l.predraw = functools.partial(self._flat_cylinder_predraw, l,
-                    #                                   depth_shading_range=depth_shading_range,
-                    #                                   depth_shading_targets=depth_shading_targets,
-                    #                                   edge_color=ec,
-                    #                                   edge_width=ew,
-                    #                                   pixel_scaling=1/(72 * np.max(box_scalings)))
-                # coll.append(
-                #     plot(
-                #         x_points,
-                #         y_points,
-                #         zs=z_points,
-                #         lw=w,
-                #         color=c,
-                #         **opts
-                #     )
-                # )
-
-
-            # elif plotter == 'rect':
-            #     import matplotlib.patches as patches
-            #     import mpl_toolkits.mplot3d.art3d as art3d
-            #     # Create a 2D Rectangle patch object
-            #     lw = lw / (72 * max(box_scalings))
-            #     z_positions = None
-            #     for s, e, w, c in zip(start, end, lw, color):
-            #         x_points = np.linspace(s[0], e[0], segments)
-            #         y_points = np.linspace(s[1], e[1], segments)
-            #         z_points = np.linspace(s[2], e[2], segments)
-            #         # for (x1,y1,z1,x2,y2,z2) in zip(
-            #         #     x_points[:-1],y_points[:-1],z_points[:-1],
-            #         #     x_points[1:],y_points[1:],z_points[1:],
-            #         # ):
-            #         #     lines.append(
-            #         #         [[x1, y1, z1], [x2, y2, z2]]
-            #         #     )
-            #         #     colors.append(c)
-            #         #     linewidths.append(w)
-            #         # cycle = ['red', 'green', 'blue', 'orange', 'pink']
-            #         for i,(x1,y1,z1,x2,y2,z2) in enumerate(zip(
-            #             x_points[:-1],y_points[:-1],z_points[:-1],
-            #             x_points[1:],y_points[1:],z_points[1:],
-            #         )):
-            #             x0 = min([x1,x2])
-            #             x0 = min([x1,x2])
-            #
-            #             w = x2-x1
-            #             h = y2-y1
-            #             coll.append(
-            #                 patches.Rectangle(xy_center, width, height, color=color, alpha=alpha)
-            #                 plot(
-            #                     [x1, x2],
-            #                     [y1, y2],
-            #                     zs=[z1, z2],
-            #                     lw=w,
-            #                     color=c,#cycle[i%5],
-            #                     edgecolor=ec,
-            #                     **opts
-            #                 )
-            #             )
-            #     rect = patches.Rectangle(xy_center, width, height, color=color, alpha=alpha)
-            #
-            #     for z_pos,rect in zip(z_positions, coll):
-            #         # Convert the 2D patch to a 3D patch and add it to the axes
-            #         self.obj.add_patch(rect)
-            #         art3d.pathpatch_2d_to_3d(rect, z_pos=z_pos, zdir='z')
-            # else:
-            #     coll = Line3DCollection(lines, colors=colors, linewidths=linewidths, **opts)
-            #
-            #     min_x = np.min(start[:, 0])
-            #     max_x = np.max(start[:, 0])
-            #     xl_m, xl_M = self.get_xlim()
-            #     if xl_m > min_x:
-            #         xl_m = min_x
-            #     if xl_M < max_x:
-            #         xl_M = max_x
-            #     self.set_xlim([xl_m, xl_M])
-            #     min_y = np.min(start[:, 1])
-            #     max_y = np.max(start[:, 1])
-            #     yl_m, yl_M = self.get_ylim()
-            #     if xl_m > min_y:
-            #         yl_m = min_y
-            #     if yl_M < max_y:
-            #         yl_M = max_y
-            #     self.set_ylim([yl_m, yl_M])
-            #     min_z = np.min(start[:, 2])
-            #     max_z = np.max(start[:, 2])
-            #     zl_m, zl_M = self.get_zlim()
-            #     if zl_m > min_z:
-            #         zl_m = min_z
-            #     if zl_M < max_z:
-            #         zl_M = max_z
-            #     self.set_zlim([zl_m, zl_M])
-            #     self.obj.add_collection(coll)
             return coll
         else:
             surface = self.get_plotter('mesh3d')
@@ -3614,6 +3650,133 @@ class PlotlyAxes3D(PlotlyAxes):
                        in [0, 1, 2]]
 
             return surface(X, Y, Z, color=color, **opts)
+    @classmethod
+    def _get_arc_points(self, center, zdir, radius, theta1, theta2, angular_density=None):
+        # in angles b.c. copied from mpl
+        start_angle_rad = np.deg2rad(theta1)
+        end_angle_rad = np.deg2rad(theta2)
+        if angular_density is None:
+            angular_density = 36/(2*np.pi)
+        npoints = angular_density * (end_angle_rad - start_angle_rad)
+        angles = np.linspace(start_angle_rad, end_angle_rad, int(np.ceil(npoints)))
+        points = np.array([radius * np.cos(angles), radius * np.sin(angles), np.zeros(len(angles))]).T
+        points = center[np.newaxis] + np.reshape(
+            points[:, np.newaxis, :] @ nput.rotation_matrix([0, 0, 1], zdir)[np.newaxis],
+            (-1, 3)
+        )
+        return points
+
+    def draw_disk(self, centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None,
+                  theta1=None, theta2=None,
+                  rendering='flat', box_scalings=None,
+                  line_color=None, line_thickness=None,
+                  color=None,
+                  glow=None,
+                  lw=None,
+                  **styles):
+        # patches = MPLManager.patch_api()
+        # paths = MPLManager.path_api()
+        # coll = MPLManager.collections_api()
+        centers = np.asanyarray(centers)
+        if centers.ndim == 1:
+            centers = centers[np.newaxis]
+
+        if rendering != 'flat':
+            raise NotImplementedError(f'arc rendering {rendering}')
+
+        if glow is not None:
+            if color is None:
+                color = glow
+            else:
+                color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+
+        if uv_axes is not None:
+            u, v = uv_axes
+            base_ang, base_norm = nput.vec_angles(u, v, return_crosses=True)
+            base_norm = nput.vec_normalize(base_norm)
+            if normal is None:
+                normal = base_norm
+            angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
+            embedding_axes = nput.rotation_matrix(crosses, angs)
+            # local_x, local_y, local_z = embedding_axes
+            emb_u, emb_v = np.array([u, v]) @ embedding_axes
+            # emb_angle, ax2 = nput.vec_angles(local_x, emb_u)
+            emb_u = nput.vec_normalize(emb_u)
+            # emb_v = nput.vec_normalize(emb_v)
+            # det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+            emb_angle = np.arccos(emb_u[0])
+            # raise Exception(angs, det)
+            if normal[2] > 0:
+                emb_angle = 2*np.pi - emb_angle
+            # emb_angle = np.arccos(emb_v[0])
+            #     emb_angle, ax2 = nput.vec_angles(local_x, u)
+            # else:
+            #     emb_angle, ax2 = nput.vec_angles(local_x, v)
+            # emb_angle = uv_sign * emb_angle
+            if angle is None:
+                angle = base_ang
+            # if np.dot(ax2, local_z) < 0:
+            #     emb_angle = (emb_angle - angle)
+            #     if emb_angle < 0:
+            #         emb_angle = 2*np.pi + emb_angle
+            if theta1 is None:
+                theta1 = np.rad2deg(emb_angle)
+            if theta2 is None:
+                theta2 = np.rad2deg(emb_angle + angle)
+        if zdir is None:
+            zdir = normal
+
+        if theta1 is None or nput.is_numeric(theta1):
+            theta1 = [theta1] * len(centers)
+        if theta2 is None or nput.is_numeric(theta2):
+            theta2 = [theta2] * len(centers)
+        if radius is None or nput.is_numeric(radius):
+            radius = [radius] * len(centers)
+        if isinstance(zdir, str) or zdir is None or nput.is_numeric(zdir[0]):
+            zdir = [zdir] * len(centers)
+        if isinstance(line_color, str) or line_color is None:
+            line_color = [line_color] * len(centers)
+        if lw is None:
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            if line_thickness is None or nput.is_numeric(line_thickness):
+                line_thickness = [line_thickness] * len(centers)
+            lw = np.asanyarray(line_thickness) * 72 * max(box_scalings)
+        if lw is None or nput.is_numeric(lw):
+            lw = [lw] * len(centers)
+        if isinstance(color, str) or color is None:
+            color = [color] * len(centers)
+
+        arcs = []
+
+        for c,r,t1,t2,zd,col,lc,w in zip(centers, radius, theta1, theta2, zdir,
+                                       color, line_color,lw):
+            if col is None:
+                pts = self._get_arc_points(c, zd, r, t1, t2).T
+                a = self.plot(*pts, color=lc, width=w)
+            else:
+                raise NotImplementedError(...)
+            arcs.append(a)
+
+        return arcs
+
+    def draw_text(self, points, vals, billboard=True, normal=None, rendering='flat',
+                  box_scalings=None, zdir=None,
+                  **styles):
+        points = np.asanyarray(points)
+        if points.ndim == 1:
+            points = points[np.newaxis]
+            vals = [vals]
+        return self.text(vals, *points.T, **styles)
+    # fig = go.Figure(data=[go.Scatter3d(
+    #     x=[1, 2, 3],
+    #     y=[2, 1, 3],
+    #     z=[3, 2, 1],
+    #     mode='markers+text',
+    #     text=['Label A', 'Label B', 'Label C'],
+    #     textposition='top center',
+    #     marker=dict(size=8)
+    # )])
 class PlotlyFigure3D(PlotlyFigure):
     Axes = PlotlyAxes3D
 
