@@ -388,6 +388,7 @@ class PlotsTests(TestCase):
 
     @debugTest
     def test_Plotly3D(self):
-        fig = Graphics3D(backend='plotly3D', frame=False)
+        fig = Graphics3D(backend='plotly3D', frame=False, subplot_kw={'include_save_buttons':True})
         Sphere([1, 0, 0], .1, color='red').plot(fig)
+        # print(fig.to_widget().tostring(prettify=True))
         fig.show()

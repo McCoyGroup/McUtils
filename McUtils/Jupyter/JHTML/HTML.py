@@ -1,5 +1,6 @@
 import itertools
 import numbers
+import uuid
 from xml.etree import ElementTree
 import weakref, numpy as np, copy, textwrap, inspect
 import contextlib
@@ -570,11 +571,14 @@ class HTMLManager:
             return "{}({}, {})".format(type(self).__name__, self.el, self.styles)
 
     @classmethod
-    def xml_to_json(cls, tree:ElementTree.Element):
+    def xml_to_json(cls, tree:ElementTree.Element, root=None):
         children = []
-        node = dict(tag=tree.tag, body=tree.text, tail=tree.tail, children=children, attrs=tree.attrib)
-        for child in tree.getchildren():
-            children.append(cls.xml_to_json(child))
+        if root is not None and tree.text in root._raw_html_cache:
+            node = dict(tag='raw', body=root._raw_html_cache[tree.text])
+        else:
+            node = dict(tag=tree.tag, body=tree.text, tail=tree.tail, children=children, attrs=tree.attrib)
+            for child in tree.getchildren():
+                children.append(cls.xml_to_json(child))
         return node
 
 class XMLBase:
@@ -748,6 +752,7 @@ class HTML(XMLBase):
             self._attr_view = None
             self._parents = weakref.WeakSet()
             self._tree_cache = None
+            self._tree_root = None
             self._json_cache = None
             self._on_update_callbacks = self._canonicalize_callback_dict(on_update)
             self.activator = activator
@@ -923,6 +928,7 @@ class HTML(XMLBase):
         def invalidate_cache(self):
             if self._tree_cache is not None:
                 self._tree_cache = None
+                self._tree_root = None
                 for p in tuple(self._parents):
                     p.invalidate_cache()
                     self._parents.remove(p)
@@ -972,11 +978,15 @@ class HTML(XMLBase):
 
         atomic_types = (int, bool, float)
         @classmethod
-        def construct_etree_element(cls, elem, root, parent=None, attr_converter=None):
+        def construct_etree_element(cls, elem, root, top, parent=None, attr_converter=None):
             if isinstance(elem, cls.atomic_types):
                 elem = str(elem)
+            elif isinstance(elem, HTML.RawHTML):
+                key = f"$~raw:{elem.id}~$"
+                top._raw_html_cache[key] = elem
+                elem = key
             if hasattr(elem, 'to_tree'):
-                elem.to_tree(root=root, parent=parent, attr_converter=attr_converter)
+                elem.to_tree(root=root, parent=parent, top=top, attr_converter=attr_converter)
             elif hasattr(elem, 'modify'):
                 elem.modify().to_tree(root=root, parent=parent, attr_converter=attr_converter)
             elif isinstance(elem, ElementTree.Element):
@@ -999,7 +1009,7 @@ class HTML(XMLBase):
                         "It looks like a Jupyter widget so look for the appropriate `JHTML` subclass."
                     )
                 else:
-                    cls.construct_etree_element(elem, root, parent=parent, attr_converter=attr_converter)
+                    cls.construct_etree_element(elem, root, top, parent=parent, attr_converter=attr_converter)
             else:
                 raise ValueError(f"don't know what to do with {elem} in converting {parent}")
 
@@ -1037,25 +1047,41 @@ class HTML(XMLBase):
         @property
         def tree(self):
             return self.to_tree()
-        def to_tree(self, root=None, parent=None, attr_converter=None):
+        class TreeRoot(ElementTree.Element):
+            def __init__(self):
+                super().__init__('root')
+                self._raw_html_cache = {}
+            def __repr__(self):
+                return f'{type(self).__name__}()'
+        def to_tree(self, root=None, top=None, parent=None, attr_converter=None):
             if parent is not None:
                 self._parents.add(parent)
-            attr_converter = self.__dict__.get('attr_converter') # don't want to resolve to class-level converter
+            if attr_converter is None:
+                attr_converter = self.__dict__.get('attr_converter') # don't want to resolve to class-level converter
             if self._tree_cache is None:
+                if top is None:
+                    top = self._tree_root
+                if top is None and parent is not None:
+                    top = parent._tree_root
+                if top is None:
+                    top = self.TreeRoot()
                 if root is None:
-                    root = ElementTree.Element('root')
+                    root = top
                 attrs = self.construct_etree_attrs(self.attrs, attr_converter=attr_converter)
                 my_el = ElementTree.SubElement(root, self.tag, attrs)
                 if all(isinstance(e, str) for e in self.elems):
                     my_el.text = "\n".join(self.elems)
                 else:
                     for elem in self.elems:
-                        self.construct_etree_element(elem, my_el, parent=self, attr_converter=attr_converter)
+                        self.construct_etree_element(elem, my_el, top, parent=self, attr_converter=attr_converter)
+                self._tree_root = top
                 self._tree_cache = my_el
             elif root is not None:
                 if self._tree_cache not in root:
                     root.append(self._tree_cache)
-            return self._tree_cache
+                if self._tree_root is None and top is not None:
+                    self._tree_root = top
+            return self._tree_cache, self._tree_root
         def modify(self, elems=None, **attrs):
             attrs = self.context.manage_attrs(attrs)
             extra_styles, attrs = self.context.extract_styles(attrs, style_props=self.style_props, ignored_styles=self.ignored_styles)
@@ -1077,8 +1103,8 @@ class HTML(XMLBase):
                 **(attr_converter(self.attrs) if attr_converter is not None else self.attrs)
             )
         def to_json(self, root=None, parent=None, attr_converter=None):
-            tree = self.to_tree(root=root, parent=parent, attr_converter=attr_converter)
-            return self.context.xml_to_json(tree)
+            tree, root = self.to_tree(root=root, parent=parent, attr_converter=attr_converter)
+            return self.context.xml_to_json(tree, root)
         @classmethod
         def _prettyify(cls, current, *, indent, riffle, parent=None, index=-1, depth=0):
             # lightly adapted from https://stackoverflow.com/a/65808327/5720002
@@ -1115,7 +1141,7 @@ class HTML(XMLBase):
         def tostring(self, attr_converter=None, indent=None, method='html', riffle=True, prettify=False,
                      write_string=None,
                      **base_etree_opts):
-            tree = self.to_tree(attr_converter=attr_converter)
+            tree, root = self.to_tree(attr_converter=attr_converter)
             if prettify:
                 if indent is not False:
                     if indent is None or indent is True:
@@ -1159,6 +1185,13 @@ class HTML(XMLBase):
 
             if hasattr(base_str, 'decode'):
                 base_str = base_str.decode()
+            try:
+                replacements = root._raw_html_cache
+            except AttributeError:
+                replacements = {}
+            if len(replacements) > 0:
+                for key,elem in replacements.items():
+                    base_str = base_str.replace(key, elem.tostring())
             return base_str
 
         def sanitize_key(self, key):
@@ -1480,7 +1513,10 @@ class HTML(XMLBase):
         type hierarchy for explicit isintance check purposes, should have a
         trait-style base class but too much work now
         """
-        def __init__(self, text):
+        def __init__(self, text, id=None):
+            if id is None:
+                id = str(uuid.uuid4())
+            self.id = id
             self.text = text
         def tostring(self, **opts):
             return self.text
