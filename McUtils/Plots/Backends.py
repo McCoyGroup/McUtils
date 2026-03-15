@@ -2669,26 +2669,32 @@ class PlotlyAxes(GraphicsAxes):
 
 class PlotlyFigure(GraphicsFigure):
     Axes = PlotlyAxes
-    default_display_format = 'png'
-    def __init__(self, axes=None, layout=None, display_format=None,
+    default_export_format = 'svg'
+    def __init__(self, axes=None, layout=None, export_format=None,
                  width=500,
                  height=500,
                  figsize=None,
+                 id=None,
+                 include_save_buttons=False,
                  **opts):
+        if id is None:
+            id = 'plotly-' + str(uuid.uuid4())[:6]
         if axes is None:
             axes = []
         if layout is None:
             layout = {}
         self.layout = layout
-        if display_format is None:
-            display_format = self.default_display_format
-        self.display_format = display_format
+        if export_format is None:
+            export_format = self.default_export_format
+        self.export_format = export_format
+        self.id = id
         self.opts = self.canonicalize_opts(opts)
         self.width = width
         self.height = height
         if figsize is not None:
             self.set_size_inches(*figsize)
         self.shown = False
+        self.include_save_buttons = include_save_buttons
         super().__init__(axes=axes)
     def __setitem__(self, key, value):
         self.opts[key] = value
@@ -2829,7 +2835,7 @@ class PlotlyFigure(GraphicsFigure):
     def to_html(self):
         # print(fig)
         buf = io.StringIO()
-        self.to_plotly().write_html(buf, include_plotlyjs=False)
+        self.to_plotly().write_html(buf, div_id=self.id, include_plotlyjs=False)
         buf.seek(0)
         html = buf.read()
         return self.postprocess_plotly_html(html)
@@ -2838,9 +2844,93 @@ class PlotlyFigure(GraphicsFigure):
         self.to_plotly().savefig(buf, format='svg')
         buf.seek(0)
         return buf.read()
+
+    @classmethod
+    def get_export_script(self, id, format='svg'):
+        return f"""
+    (function(){{
+      let base_name = '{id}';
+      let canvas = document.getElementById('{id}');
+      let format = canvas.exportFormat??'{format}'
+      Plotly.toImage(canvas, {{format: format}})
+        .then(function(url) {{
+            let link = document.createElement('a');
+            link.download = base_name + '.' + format;
+            link.href = url;
+            link.click();
+        }})
+    }})()
+           """
+    @classmethod
+    def set_export_format_script(self, id):
+        return f"""
+        (function(){{
+            let canvas = document.getElementById('{id}');
+            let input = document.getElementById('{id}-export-format');
+
+            canvas.exportFormat = input.value;
+        }})()
+               """
+    @classmethod
+    def get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'):
+        return f"""
+        (function(){{
+            let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
+
+            let pollingRate = (typeof canvas.pollingRate === 'undefined') ? {polling_rate} : canvas.pollingRate;
+            let videoFormat = (typeof canvas.videoFormat === 'undefined') ? "{video_format}" : canvas.videoFormat;
+            let videoExtension = canvas.videoExtension;
+            if (typeof canvas.videoExtension === 'undefined') {{
+                videoExtension = ''
+            }}
+            let x3DRecordingStream = canvas.captureStream(pollingRate);
+            let mediaRecorder = new MediaRecorder(x3DRecordingStream, {{mimeType: videoFormat}});
+
+            mediaRecorder.frames = [];
+            mediaRecorder.ondataavailable = function(e) {{
+              mediaRecorder.frames.push(e.data);
+            }};
+
+            mediaRecorder.onstop = function(e) {{
+              link = document.createElement('a');
+              const base_name = '{id}';
+              const blob = mediaRecorder.frames[0];
+              link.download = base_name + videoExtension;
+              console.log(blob);
+              const blobURL = window.URL.createObjectURL(blob);
+              link.href = blobURL;
+              console.log(blobURL);
+              mediaRecorder.frames = [];
+              link.click();
+            }};
+
+            let duration = (typeof canvas.recordingDuration === 'undefined') ? {recording_duration} : canvas.recordingDuration;
+            setTimeout(() => {{mediaRecorder.stop()}}, duration * 1000);
+            mediaRecorder.start()
+        }})()
+               """
+    @classmethod
+    def set_animation_duration_script(self, id):
+        return f"""
+        (function(){{
+            let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
+            let input = document.getElementById('{id}-duration-input');
+
+            canvas.recordingDuration = input.value;
+        }})()
+               """
     def to_widget(self, format=None, autoclose=True):
         from .. import Jupyter as interactive
         widg = interactive.JHTML.HTML.RawHTML(self.to_html())
+        if self.include_save_buttons:
+            widg = interactive.JHTML.Div([
+                widg,
+                interactive.JHTML.Button("Save Image",
+                             onclick=self.get_export_script(self.id, format=self.export_format)),
+                interactive.JHTML.Input(value=str(self.export_format),
+                            id=self.id + '-export-format', width="50px",
+                            oninput=self.set_export_format_script(self.id))
+            ])
         return widg
     def animate_frames(self, frames, **animation_opts):
         raise NotImplementedError(...)
@@ -3025,6 +3115,15 @@ class PlotlyAxes3D(PlotlyAxes):
         ...
     def set_autoscale(self, autoscale):
         ...
+
+    def get_box_aspect(self):
+        return self.opts.get('aspectratio')
+    def set_box_aspect(self, br, **kwargs):
+        if isinstance(br, str):
+            self.opts['aspectmode'] = br
+        else:
+            self.opts['aspectmode'] = 'manual'
+            self.opts['aspectratio'] = dict(zip(['x','y','z'], br), **kwargs)
 
     def get_frame_visible(self):
         return (
@@ -3229,14 +3328,25 @@ class PlotlyAxes3D(PlotlyAxes):
             # if box_scalings is None:
             #     box_scalings = [1, 1, 1]
             sizes = np.sqrt(s) / 2 #/ (72 * max(box_scalings))
-            line_width = lw #/ (72 * max(box_scalings))
-            spheres = [
+            line_width = lw / 2 #/ (72 * max(box_scalings))
+            spheres = []
+            if lw is not None:
+                spheres += [
+                    self.get_plotter('scatter')(
+                        [cent[0]], [cent[1]], [cent[2]],
+                        color=ec,
+                        size=sz + line_width,
+                        **opts
+                    )
+                    for (cent, ec, sz, c) in zip(
+                    center, edgecolors, sizes, color
+                )
+                ]
+            spheres += [
                 self.get_plotter('scatter')(
                     [cent[0]], [cent[1]], [cent[2]],
-                    edge_color=ec,
                     color=c,
                     size=sz,
-                    line_width=line_width,
                     **opts
                 )
                 for (cent, ec, sz, c) in zip(
@@ -3508,6 +3618,7 @@ class PlotlyFigure3D(PlotlyFigure):
     Axes = PlotlyAxes3D
 
     omitted_tick_properties = {'minor', 'minor_ticks'}
+    scene_props = ['xaxis', 'yaxis', 'zaxis', 'xaxis2', 'yaxis2', 'zaxis2', 'aspectmode', 'aspectratio']
     @classmethod
     def _prep_layout_props(cls, layout):
         template = layout.pop('template', None)
@@ -3517,12 +3628,16 @@ class PlotlyFigure3D(PlotlyFigure):
             layout['template'] = template
 
         scene = layout.pop('scene', {})
-        for lab in cls.Axes.axes_props:
+        for lab in cls.scene_props:
             if lab in layout:
-                scene[lab] = {
-                    k:v for k,v in layout.pop(lab).items()
-                    if v is not None and k not in cls.omitted_tick_properties
-                }
+                base_prop = layout.pop(lab)
+                if isinstance(base_prop, dict):
+                    scene[lab] = {
+                        k: v for k, v in base_prop.items()
+                        if v is not None and k not in cls.omitted_tick_properties
+                    }
+                else:
+                    scene[lab] = base_prop
         if len(scene) > 0:
             layout['scene'] = scene
 
