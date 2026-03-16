@@ -982,14 +982,24 @@ class X3DGeometryObject(X3DPrimitive):
         if normal is not None:
             if up_vector is None:
                 up_vector = [0, 0, 1]
-            angs, crosses = nput.vec_angles(up_vector, normal, return_crosses=True, return_norms=False)
+            angs, crosses, cn = nput.vec_angles(up_vector, normal, return_crosses=True, return_norms=False, return_cross_norms=True)
+            if cn < 1e-6:
+                orth = [1, 0, 0]
+                if abs(np.dot(up_vector, orth)) < 1e-6:
+                    orth = [0, 1, 0]
+                crosses = nput.vec_crosses(orth, up_vector, normalize=True)
+                if np.dot(normal, up_vector) > 0:
+                    angs = 0
+                else:
+                    angs = np.pi
             if rotation is not None:
                 if isinstance(rotation, str):
                     rotation = np.array(rotation.split()).astype(float)
-                angs, crosses = nput.extract_rotation_angle_axis(
+                full_rot = (
                     nput.rotation_matrix(crosses, angs)
                         @ nput.rotation_matrix(rotation[:3], rotation[3])
                 )
+                angs, crosses = nput.extract_rotation_angle_axis(full_rot)
             rotation = np.concatenate([crosses, [angs]])
         for k,v in [["translation",translation], ["rotation",rotation], ["scale", scale], ['bboxcenter', bbox_center]]:
             if v is not None:
@@ -1227,12 +1237,12 @@ class X3DText(X3DGeometryGroup):
     tag_class = X3DHTML.Text
 
     def __init__(self, *args, billboard=True, solid=None, billboard_opts=None, **opts):
+        if solid is None:
+            solid = bool(billboard)
         if billboard:
             if billboard_opts is None:
                 billboard_opts = {'axisOfRotation':'0 0 0'}
             self.wrapper_class = lambda *x,**y:X3DHTML.Billboard(X3DHTML.Shape(*x, **y), **billboard_opts)
-        if solid is None:
-            solid = not billboard
         super().__init__(*args, solid=solid, **opts)
     def create_tag_object(self, font_style=None, **core_opts):
         body = []
@@ -1244,6 +1254,14 @@ class X3DText(X3DGeometryGroup):
         rotation = self.prep_vecs(rotation, len(centers))
         normal = self.prep_vecs(normal, len(centers))
         text = self.prep_const(text, len(centers))
+        if font_style is None:
+            font_style = {}
+        subfonts =  {o.partition("_")[-1]: v for o, v in opts.items() if o.startswith('font_')}
+        for f in subfonts:
+            del opts['font_' + f]
+        font_style = subfonts | font_style
+        if len(font_style) == 0:
+            font_style = None
         font_style = [
             X3DHTML.FontStyle(**fs)
                 if fs is not None else

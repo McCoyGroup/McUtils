@@ -160,8 +160,14 @@ def rotation_matrix_align_vectors(vec1, vec2):
     s = vec1 + vec2
     i = vec_ops.identity_tensors(vec1.shape[:-1], vec1.shape[-1])
     inner = 1 + vec1[..., np.newaxis, :] @ vec2[..., :, np.newaxis]
-
-    return i - s[..., :, np.newaxis] * (s[..., np.newaxis, :]/inner) + 2 * vec1[..., :, np.newaxis] * vec2[..., np.newaxis, :]
+    flip_masks = inner < 1e-4
+    inner[flip_masks] = 1
+    mats = i - s[..., :, np.newaxis] * (s[..., np.newaxis, :]/inner) + 2 * vec1[..., :, np.newaxis] * vec2[..., np.newaxis, :]
+    base_shape = mats.shape[:-2]
+    mats = np.reshape(mats, (-1, 3, 3))
+    flip_masks = flip_masks.reshape(-1)
+    mats[flip_masks] = -1*np.eye(3)[np.newaxis]
+    return mats.reshape(base_shape + (3, 3))
 
 def rotation_matrix(axis, theta=None):
     """
@@ -254,10 +260,18 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
             rem_pos = np.setdiff1d(rem_pos, bad_pos)
             shift_rot = 1/2 * (rot_mat[bad_pos,] + vec_ops.identity_tensors((len(bad_pos),), rot_mat.shape[-1]))
             for b,r in zip(bad_pos, shift_rot):
-                ord = np.lexsort(r)
+                ord = np.argsort(np.max(np.abs(r), axis=1))
                 ax[b] = r[ord[-1]]
             if normalize:
                 ax[bad_pos,] = vec_ops.vec_normalize(ax[bad_pos,])
+
+            bad_ax = np.where(vec_ops.vec_norms(ax[bad_pos,]) < 1e-6)
+            if len(bad_ax) > 0:
+                bad_ax = bad_pos[bad_ax]
+                shift_rot = 1/2 * (rot_mat[bad_ax,] - vec_ops.identity_tensors((len(bad_ax),), rot_mat.shape[-1]))
+                for b,r in zip(bad_ax, shift_rot):
+                    ord = np.argsort(np.max(np.abs(r), axis=1))
+                    ax[b] = r[ord[-1]]
 
             # check identity
             id_mask = np.abs(np.trace(rot_mat[bad_pos,], axis1=-1, axis2=-2) > 3-3e-6)
@@ -279,38 +293,6 @@ def extract_rotation_angle_axis(rot_mat, normalize=True):
             w = np.reshape(rot_mat[rem_pos,] @ ort_vec[:, :, np.newaxis], ort_vec.shape)
             ang[rem_pos,] = np.arctan2(vec_ops.vec_dots(w, normal), vec_ops.vec_dots(w, ort_vec))
 
-
-        # """
-        # ovec = w - axis Dot[w, axis];
-        # nvec = Cross[axis, ovec];
-        # w1 = m . ovec;
-        # """
-        #
-        # tr_rot = np.trace(rot_mat, axis1=-2, axis2=-1)
-        # ang = np.arccos((tr_rot - 1) / 2)
-        #
-        # zero_mask = np.abs(ang) < 1e-6
-        # zero_pos = np.where(zero_mask)
-        # gimbal_mask = np.abs(np.abs(ang) - np.pi) < 1e-6
-        # gimbal_locked = np.where(gimbal_mask)
-        # rem = np.where(np.logical_not(np.logical_or(zero_mask, gimbal_mask)))
-        #
-        # ax = np.zeros(rot_mat.shape[:-1])
-        # if len(zero_pos) > 0 and len(zero_pos[0]) > 0:
-        #     ax[zero_pos] = np.repeat([[0, 0, 1]], len(zero_pos[0]), axis=0)
-        # if len(gimbal_locked) > 0:
-        #     eigs, gimb_ax = np.linalg.eigh(rot_mat[gimbal_locked])
-        #     one_pos = np.where(eigs > 1-1e-4)
-        #     ax[gimbal_locked] = gimb_ax[one_pos[0], :, one_pos[1]]
-        # if len(rem) > 0 and len(rem[0]) > 0:
-        #     skew = (rot_mat[rem] - np.moveaxis(rot_mat[rem], -1, -2)) / 2
-        #     rows, cols = (np.array([2, 0, 1]), np.array([1, 2, 0]))
-        #     ax[rem] = skew[..., rows, cols]
-        #     ax[rem] = skew[..., rows, cols]
-        # if normalize:
-        #     ax = vec_normalize(ax)
-        # else:
-        #     ax = ax
         return ang.reshape(base_shape), ax.reshape(base_shape + ax.shape[-1:])
     else:
         base_shape = rot_mat.shape[:-2]
