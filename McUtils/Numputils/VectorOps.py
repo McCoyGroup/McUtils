@@ -357,6 +357,7 @@ def vec_sins(vectors1, vectors2, zero_thresh=None, axis=-1):
 def vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None, axis=-1,
                return_norms=False,
                return_crosses=True,
+               return_cross_norms=False,
                check_zeros=True
                ):
     """
@@ -412,12 +413,14 @@ def vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None
         orientations = np.sign(vec_dots(up_vectors, crosses))
         angles = orientations * angles
 
-    if return_crosses or return_norms:
+    if return_crosses or return_norms or return_cross_norms:
         ret = (angles,)
         if return_crosses:
             ret = ret + (crosses,)
         if return_norms:
             ret = ret + (norms,)
+        if return_cross_norms:
+            ret = ret + (cross_norms,)
     else:
         ret = angles
 

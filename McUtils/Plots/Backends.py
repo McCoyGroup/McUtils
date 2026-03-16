@@ -1958,18 +1958,17 @@ class MPLAxes3D(MPLAxes):
             base_norm = nput.vec_normalize(base_norm)
             if normal is None:
                 normal = base_norm
-            angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
-            embedding_axes = nput.rotation_matrix(crosses, angs)
-            # local_x, local_y, local_z = embedding_axes
+            angs, crosses, cns = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_cross_norms=True)
+            if cns < 1e-6:
+                embedding_axes = np.eye(3)
+            else:
+                embedding_axes = nput.rotation_matrix(crosses, angs)
             emb_u, emb_v = np.array([u, v]) @ embedding_axes
-            # emb_angle, ax2 = nput.vec_angles(local_x, emb_u)
             emb_u = nput.vec_normalize(emb_u)
-            # emb_v = nput.vec_normalize(emb_v)
-            # det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+            emb_v = nput.vec_normalize(emb_v)
             emb_angle = np.arccos(emb_u[0])
-            # raise Exception(angs, det)
-            if normal[2] > 0:
-                emb_angle = 2*np.pi - emb_angle
+            if (normal[2] * emb_v[1]) < 0:
+                emb_angle = 2 * np.pi - emb_angle
             # emb_angle = np.arccos(emb_v[0])
             #     emb_angle, ax2 = nput.vec_angles(local_x, u)
             # else:
@@ -2634,6 +2633,8 @@ class PlotlyAxes(GraphicsAxes):
         line, opts = self._prep_line_opts(line, opts)
         if textfont is None:
             textfont = {o.partition("_")[-1]:v for o,v in opts.items() if o.startswith('font_')}
+            for f in textfont:
+                del opts['font_'+f]
         if textfont is not None:
             textfont['color'] = color
         if len(textfont) > 0:
@@ -3696,23 +3697,19 @@ class PlotlyAxes3D(PlotlyAxes):
             base_norm = nput.vec_normalize(base_norm)
             if normal is None:
                 normal = base_norm
-            angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
-            embedding_axes = nput.rotation_matrix(crosses, angs)
-            # local_x, local_y, local_z = embedding_axes
+            angs, crosses, cns = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_cross_norms=True)
+            if cns < 1e-6:
+                embedding_axes = np.eye(3)
+            else:
+                embedding_axes = nput.rotation_matrix(crosses, angs)
             emb_u, emb_v = np.array([u, v]) @ embedding_axes
-            # emb_angle, ax2 = nput.vec_angles(local_x, emb_u)
             emb_u = nput.vec_normalize(emb_u)
-            # emb_v = nput.vec_normalize(emb_v)
+            emb_v = nput.vec_normalize(emb_v)
             # det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+            # raise Exception(np.round(normal, 3), np.round(emb_u, 3), np.round(emb_v, 3), det)
             emb_angle = np.arccos(emb_u[0])
-            # raise Exception(angs, det)
-            if normal[2] > 0:
+            if (normal[2] * emb_v[1]) < 0:
                 emb_angle = 2*np.pi - emb_angle
-            # emb_angle = np.arccos(emb_v[0])
-            #     emb_angle, ax2 = nput.vec_angles(local_x, u)
-            # else:
-            #     emb_angle, ax2 = nput.vec_angles(local_x, v)
-            # emb_angle = uv_sign * emb_angle
             if angle is None:
                 angle = base_ang
             # if np.dot(ax2, local_z) < 0:
@@ -4957,17 +4954,25 @@ class X3DAxes(GraphicsAxes3D):
             base_norm = nput.vec_normalize(base_norm)
             if normal is None:
                 normal = base_norm
-            angs, crosses = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_norms=False)
-            embedding_axes = nput.rotation_matrix(crosses, angs).T
-            local_x, local_y, local_z = embedding_axes
-            emb_angle, ax2 = nput.vec_angles(local_x, v)
-            if uv_sign is None:
-                # print(np.dot(local_x, v))
-                # print(np.dot(local_y, v))
-                # print(np.dot(local_x, u))
-                # print(np.dot(local_y, u))
-                uv_sign = np.sign(np.dot(local_y, v))
-            emb_angle = uv_sign * emb_angle
+            angs, crosses, cns = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_cross_norms=True)
+            if cns < 1e-6:
+                if np.dot([0, 0, 1], normal) > 0:
+                    embedding_axes = np.eye(3)
+                else:
+                    embedding_axes = -np.eye(3)
+            else:
+                embedding_axes = nput.rotation_matrix(crosses, angs)
+            emb_u, emb_v = np.array([u, v]) @ embedding_axes
+            emb_u = nput.vec_normalize(emb_u)
+            emb_v = nput.vec_normalize(emb_v)
+            if normal[2] < 0:
+                emb_angle = np.arccos(emb_u[0])
+                if emb_v[1] < 0:
+                    emb_angle = 2 * np.pi - emb_angle
+            else:
+                emb_angle = np.arccos(emb_v[0])
+                if emb_u[1] < 0:
+                    emb_angle = 2 * np.pi - emb_angle
             if rotation is None:
                 rotation = [0, 0, 1, emb_angle]
             if angle is None:
