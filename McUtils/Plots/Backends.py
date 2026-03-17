@@ -1042,6 +1042,10 @@ class MPLAxes(GraphicsAxes):
             vals = [vals]
 
         text_plotter = self.get_plotter('text')
+        styles = {
+            o.partition("_")[-1] if o.startswith('font_') else o:v
+            for o,v in styles.items()
+        }
         text = [
              text_plotter(*pt, txt, **styles)
              for pt, txt in zip(points, vals)
@@ -2032,10 +2036,36 @@ class MPLAxes3D(MPLAxes):
                                   color=col, edgecolor=lc, lw=w,
                                   # facecolor='none',
                                   **styles)
+            arcs.append(a)
             self._monkeypatch_patch(a, c, zdir=zd, zorder_mode=self._arc_proj_max)
             self.obj.add_patch(a)
 
         return arcs
+
+    def draw_line(self, points,
+                  rendering='flat', box_scalings=None,
+                  line_thickness=None,
+                  lw=None,
+                  s=None,
+                  edgecolors=None,
+                  **styles):
+        points = np.asanyarray(points)
+        if points.ndim > 2:
+            points = points.reshape(-1, 3)
+        if lw is None and line_thickness is not None:
+            rad = np.asanyarray(line_thickness)
+            if rad.ndim == 0:
+                rad = np.array([rad])
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            lw = rad * 72 * max(box_scalings)
+        return self.get_plotter('plot')(
+            points[:, 0],
+            points[:, 1],
+            zs=points[:, 2],
+            lw=lw,
+            **styles
+        )
 
     _Arrow3D = None
     @classmethod
@@ -3286,7 +3316,7 @@ class PlotlyAxes3D(PlotlyAxes):
         self.opts['zaxis'] = self.opts.get('zaxis', {}) | opts
 
     def get_view_settings(self):
-        return self.opts.get('scene_camera')
+        return self.opts.get('scene_camera', {})
     def set_view_settings(self,
                           up=None, eye=None, center=None,
                           vertical_axis=None,
@@ -5106,7 +5136,29 @@ class X3DAxes(GraphicsAxes3D):
         text = text.strip()
         num_dollar = text.count("$")
         return num_dollar == 2 and text[0] == "$" and text[-1] == "$"
-    def draw_text(self, points, vals, endpoint=None, allow_mathjax=True, line_height=10, char_width=None, char_width_scaling=1/30, font_style=None, **styles):
+    @classmethod
+    def _prep_font_size(cls, text, font_style, opts,
+                        line_height=10, char_width=None, char_width_scaling=1 / 30):
+        if font_style is None:
+            font_style = {}
+        subfonts =  {o.partition("_")[-1]: v for o, v in opts.items() if o.startswith('font_')}
+        for f in subfonts:
+            del opts['font_' + f]
+        font_style = subfonts | font_style
+        font_size = font_style.get('size', 48)
+
+        # lines = text.splitlines()
+        # if char_width is None:
+        #     font_size = font_style.get('font_size', 6)
+        #     char_width = font_size * char_width_scaling
+        # w = char_width * max(len(t) for t in lines)
+        # vh = char_width * line_height * len(lines)
+        font_size = font_size / 12
+        font_style['size'] = font_size
+
+        return font_style, opts
+    def draw_text(self, points, vals, endpoint=None, allow_mathjax=True,
+                  line_height=10, char_width=None, char_width_scaling=1/30, font_style=None, **styles):
         if allow_mathjax and self._is_math(vals):
             vals = vals.strip("$")
             id = 'x3d-obj-' + str(uuid.uuid4())[:6]
@@ -5149,6 +5201,10 @@ class X3DAxes(GraphicsAxes3D):
             ]
             # self.include_mathjax = True
         else:
+            font_style, styles = self._prep_font_size(vals, font_style, styles,
+                                                      line_height=line_height, char_width=char_width,
+                                                      char_width_scaling=char_width_scaling)
+
             text = [x3d.X3DText(points, text=vals, font_style=font_style, **styles)]
         self.children.extend(text)
         return text

@@ -1421,6 +1421,7 @@ class RDMolecule(ExternalMolecule):
                             pos = (coords[0] + coords[1])/2 + np.dot(offset, [x, y])
                         label_position = pos
                         label_style = label.copy()
+                        label_style = label_style | v.pop('label_style', {})
                         for k in (
                                 'text', 'offset', 'position', 'offset_scaled'
                         ): label_style.pop(k, None)
@@ -1502,9 +1503,11 @@ class RDMolecule(ExternalMolecule):
                             label = {'text':label}
                         label_text = label['text']
                         pos = label.get('position')
+                        label_style = label.copy()
+                        label_style = label_style | v.pop('label_style', {})
                         if pos is None:
-                            offset = label.get('offset', 2)
-                            scaled_offset = label.get('offset_scaled', True)
+                            offset = label_style.get('offset', 2)
+                            scaled_offset = label_style.get('offset_scaled', True)
                             if nput.is_numeric(offset):
                                 offset = [offset, 0]
                             x = (
@@ -1522,7 +1525,6 @@ class RDMolecule(ExternalMolecule):
                                     break
                             pos = center + ov
                         label_position = pos
-                        label_style = label.copy()
                         for k in (
                                 'text', 'offset', 'position', 'offset_scaled'
                         ): label_style.pop(k, None)

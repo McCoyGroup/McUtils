@@ -14,6 +14,7 @@ from .. import Devutils as dev
 from .VectorOps import *
 from . import TensorDerivatives as td
 from . import Misc as misc
+from . import TransformationMatrices as tmats
 
 __all__ = [
     "triangle_convert",
@@ -42,7 +43,9 @@ __all__ = [
     "cos_deriv",
     "tan_deriv",
     "cot_deriv",
-    "axis_rot_gen_deriv"
+    "axis_rot_gen_deriv",
+    "angle_arc_parameters",
+    "arc_points"
 ]
 
 
@@ -4011,3 +4014,37 @@ def axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, moments_of_inerti
         return [m + s * K - c * K2 for m,K,K2 in zip(mom_expansion, K_expansion, K2_expansion)]
     else:
         raise NotImplementedError("cross terms are tedious")
+
+def angle_arc_parameters(u, v, normal=None, up_vector=(0, 0, 1)):
+    base_ang, base_norm = vec_angles(u, v, return_crosses=True)
+    base_norm = vec_normalize(base_norm)
+    if normal is None:
+        normal = base_norm
+    angs, crosses, cns = vec_angles(up_vector, normal, return_crosses=True, return_cross_norms=True)
+    if cns < 1e-6:
+        embedding_axes = np.eye(3)
+    else:
+        embedding_axes = tmats.rotation_matrix(crosses, angs)
+    emb_u, emb_v = np.array([u, v]) @ embedding_axes
+    emb_u = vec_normalize(emb_u)
+    emb_v = vec_normalize(emb_v)
+    # det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+    emb_angle = np.arccos(emb_u[0])
+    if (np.dot(up_vector, normal) * emb_v[1]) < 0:
+        emb_angle = 2 * np.pi - emb_angle
+
+    return normal, emb_angle, base_ang
+
+def arc_points(center, normal, radius, offset_angle, span_angle, angular_density=None, npoints=None):
+    end_angle_rad = offset_angle + span_angle
+    start_angle_rad = offset_angle
+    if angular_density is None:
+        angular_density = 36 / (2 * np.pi)
+    npoints = angular_density * (end_angle_rad - start_angle_rad)
+    angles = np.linspace(start_angle_rad, end_angle_rad, int(np.ceil(npoints)))
+    points = np.array([radius * np.cos(angles), radius * np.sin(angles), np.zeros(len(angles))]).T
+    points = center[np.newaxis] + np.reshape(
+        points[:, np.newaxis, :] @ tmats.rotation_matrix([0, 0, 1], normal)[np.newaxis],
+        (-1, 3)
+    )
+    return points
