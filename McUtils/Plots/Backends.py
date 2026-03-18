@@ -5145,7 +5145,7 @@ class X3DAxes(GraphicsAxes3D):
         for f in subfonts:
             del opts['font_' + f]
         font_style = subfonts | font_style
-        font_size = font_style.get('size', 48)
+        font_size = font_style.get('size', 12)
 
         # lines = text.splitlines()
         # if char_width is None:
@@ -5153,7 +5153,7 @@ class X3DAxes(GraphicsAxes3D):
         #     char_width = font_size * char_width_scaling
         # w = char_width * max(len(t) for t in lines)
         # vh = char_width * line_height * len(lines)
-        font_size = font_size / 12
+        font_size = font_size / 48
         font_style['size'] = font_size
 
         return font_style, opts
