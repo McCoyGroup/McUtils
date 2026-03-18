@@ -2399,10 +2399,13 @@ class MPLBackend3D(MPLBackend):
 class PlotlyAxes(GraphicsAxes):
     base_axis_theme = {}
     base_theme = {}
-    def __init__(self, elements=None, xaxis=None, yaxis=None, **opts):
+    def __init__(self, elements=None, xaxis=None, yaxis=None, annotations=None, **opts):
         if elements is None:
             elements = []
         self.elements = elements
+        if annotations is None:
+            annotations = []
+        self.annotations = annotations
         if xaxis is None:
             xaxis = self.base_axis_theme
         if yaxis is None:
@@ -2417,6 +2420,8 @@ class PlotlyAxes(GraphicsAxes):
 
     def prep_elems(self):
         return self.elements
+    def prep_annotations(self):
+        return self.annotations
     axes_props = ['xaxis', 'xaxis2', 'yaxis', 'yaxis2']
     def prep_opts(self):
         opts = self.opts.copy()
@@ -2699,17 +2704,51 @@ class PlotlyAxes(GraphicsAxes):
     def set_graphics_properties(self, obj, **props):
         raise NotImplementedError(...)
     def draw_line(self, points, **styles):
-        raise NotImplementedError(...)
+        return self.plot(*np.asanyarray(points).T, **styles)
     def draw_disk(self, points, radius=None, s=None, **styles):
         raise NotImplementedError(...)
     def draw_rect(self, points, **styles):
         raise NotImplementedError(...)
     def draw_poly(self, points, **styles):
         raise NotImplementedError(...)
-    def draw_arrow(self, points, **styles):
-        raise NotImplementedError(...)
+
+    def annotation(self, points, **opts):
+        if nput.is_numeric(points[0]):
+            x, y = points
+            ax, ay = None, None
+            showarrow = False
+        else:
+            (ax, ay), (x, y) = points
+            showarrow = True
+        annotation_dict = {
+            'x':x,
+            'y':y,
+            'ax':ax,
+            'ay':ay,
+            'showarrow':showarrow,
+            **opts
+        }
+        annotation_dict = {
+            k:v for k,v in annotation_dict.items()
+            if v is not None
+        }
+        self.annotations.append(annotation_dict)
+        return annotation_dict
+    def draw_arrow(self, points, color=None, width=None, size=None, head=None, **styles):
+        styles = dict(
+            arrowcolor=color,
+            arrowwidth=width,
+            arrowsize=size,
+            arrowhead=head,
+        ) | styles
+        return self.annotation(points, **styles)
+
     def draw_text(self, points, vals, **styles):
-        raise NotImplementedError(...)
+        points = np.asanyarray(points)
+        if points.ndim == 1:
+            points = points[np.newaxis]
+            vals = [vals]
+        return self.text(vals, *points.T, **styles)
 
 class PlotlyFigure(GraphicsFigure):
     Axes = PlotlyAxes
@@ -2797,9 +2836,11 @@ class PlotlyFigure(GraphicsFigure):
         return layout
     def prep_dict(self):
         elems = []
+        annotations = []
         axes_layout = self.opts
         for ax in self.axes:
             elems.extend(ax.prep_elems())
+            annotations.extend(ax.prep_annotations())
             axes_layout = axes_layout | ax.prep_opts()
         layout = axes_layout | self.layout
         layout['width'] = self.width
@@ -2824,6 +2865,7 @@ class PlotlyFigure(GraphicsFigure):
         layout = self._prep_layout_props(layout)
         fig_dict = {
             'data':elems,
+            'annotations':annotations,
             'layout':layout
         }
         # import pprint
@@ -3317,12 +3359,17 @@ class PlotlyAxes3D(PlotlyAxes):
 
     def get_view_settings(self):
         return self.opts.get('scene_camera', {})
+
+    default_up_vector = (0, 0, 1)
+    default_right_vector = (0, 1, 0)
+    default_view_vector = (1, 0, 0)
     def set_view_settings(self,
                           up=None, eye=None, center=None,
                           vertical_axis=None,
                           up_vector=None, right_vector=None, view_vector=None, view_distance=None,
                           view_matrix=None, view_center=None):
-        if view_matrix is None and (
+
+        if view_matrix is None and  (
                 view_vector is not None
                 or right_vector is not None
                 or up_vector is not None
@@ -3333,21 +3380,21 @@ class PlotlyAxes3D(PlotlyAxes):
                 ):
                     view_vector = nput.vec_crosses(up_vector, right_vector, normalize=True)
                 elif right_vector is not None:
-                    view_vector = nput.vec_crosses([0, 0, 1], right_vector, normalize=True)
+                    view_vector = nput.vec_crosses(self.default_up_vector, right_vector, normalize=True)
                 elif up_vector is not None:
-                    view_vector = nput.vec_crosses(up_vector, [0, 1, 0], normalize=True)
+                    view_vector = nput.vec_crosses(up_vector, self.default_right_vector, normalize=True)
 
             if view_vector is not None:
                 m = nput.rotation_matrix(
                     view_vector,
-                    [1, 0, 0]
+                    self.default_view_vector
                 )
             else:
                 m = np.eye(3)
 
             if up_vector is None and right_vector is not None:
                 if view_vector is None:
-                    view_vector = [1, 0, 0]
+                    view_vector = self.default_view_vector
                 up_vector = nput.vec_normalize(
                     nput.vec_crosses(right_vector, view_vector)
                 )
@@ -3360,7 +3407,7 @@ class PlotlyAxes3D(PlotlyAxes):
             if up_vector is not None:
                 m = m @ nput.rotation_matrix(
                     m.T @ up_vector,
-                    [1, 0, 0]
+                    self.default_up_vector
                 )
             view_matrix = m
 
@@ -3372,32 +3419,23 @@ class PlotlyAxes3D(PlotlyAxes):
         if center is not None:
             camera['center'] = center
         if view_matrix is not None:
-            if vertical_axis is None:
-                target_vertical = [0, 0, 1]
-                target_view = [1, 0, 0]
-            else:
-                target_vertical = [
-                    [1, 0, 0]
-                    if vertical_axis == 'x' else
-                    [0, 1, 0]
-                    if vertical_axis == 'y' else
-                    [0, 0, 1]
-                ]
-                target_view = [
-                    [0, 0, 1]
-                    if vertical_axis == 'x' else
-                    [0, 1, 0]
-                    if vertical_axis == 'y' else
-                    [1, 0, 0]
-                ]
             # roll, cross = nput.extract_rotation_angle_axis(view_matrix)
-            view_vector, right_vector, up_vector = view_matrix.T
+            view_vector, up_vector, right_vector = view_matrix.T
             if view_distance is None:
                 view_distance = np.sqrt(25 / 16 * 3)
-
+            if view_center is not None:
+                camera['center'] = dict(zip('xyz', view_center)) if center is None else center
+            view_axis = view_vector * view_distance
             camera = camera | {
                 'up':dict(zip('xyz', up_vector)) if up is None else up,
-                'eye':dict(zip('xyz', view_vector * view_distance)) if eye is None else eye
+                'eye': dict(zip('xyz', view_axis + camera.get('center', np.zeros(3)))) if eye is None else eye
+            }
+        elif view_distance is not None:
+            if view_center is not None:
+                camera['center'] = dict(zip('xyz', view_center)) if center is None else center
+            view_axis = np.array([view_distance, view_distance, view_distance])
+            camera = camera | {
+                'eye': dict(zip('xyz', view_axis + camera.get('center', np.zeros(3)))) if eye is None else eye
             }
 
         if view_center is not None:
@@ -3795,6 +3833,71 @@ class PlotlyAxes3D(PlotlyAxes):
             points = points[np.newaxis]
             vals = [vals]
         return self.text(vals, *points.T, **styles)
+
+    def draw_line(self, points,
+                  line_thickness=None,
+                  width=None,
+                  s=None,
+                  edgecolors=None,
+                  box_scalings=None, **styles):
+        if width is None:
+            if line_thickness is not None:
+                if box_scalings is None:
+                    box_scalings = [1, 1, 1]
+                # if radius is None or nput.is_numeric(radius):
+                #     radius = [radius] * len(centers)
+                width = np.asanyarray(line_thickness) * 72 * max(box_scalings)
+        return super().draw_line(points, width=width, **styles)
+
+    def draw_mesh(self, points, i=None, j=None, k=None, type='mesh3d', **styles):
+        x,y,z = points.T
+        opts = dict(
+            x=x,
+            y=y,
+            z=z,
+            i=i,
+            j=j,
+            k=k,
+            type=type
+        ) | styles
+        mesh_params = {k:v for k,v in opts.items() if v is not None}
+        self.elements.append(mesh_params)
+        return mesh_params
+    def draw_arrow(self, points, radius, width=None, arrowhead=None,
+                   arrowhead_scaling=1.2, arrowhead_points=None, normal=None,
+                   rendering='flat',
+                   box_scalings=None,
+                   **styles):
+        points = np.asanyarray(points)
+        if width is None:
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            # if radius is None or nput.is_numeric(radius):
+            #     radius = [radius] * len(centers)
+            width = np.asanyarray(radius) * 72 * max(box_scalings)
+        if arrowhead is None:
+            arrowhead = np.asanyarray(radius) * arrowhead_scaling
+        line_params = self.draw_line(points, width=width, **styles)
+        if arrowhead_points is None:
+            ax = nput.vec_normalize(points[-1] - points[-2])
+            if normal is None:
+                normal = [0, 0, 1]
+            if np.dot(normal, ax) == 1:
+                normal = [1, 0, 0]
+            right = nput.vec_crosses(ax, normal, normalize=True)
+            tf = np.array([
+                ax,
+                right,
+                normal
+            ]).T
+            arrowhead_points = arrowhead * np.array([
+                [0, -1/2, 0],
+                [0,  1/2, 0],
+                [np.sqrt(3)/2, 0, 0]
+            ]) @ tf
+        arrow_points = points[-1][np.newaxis] + arrowhead_points
+        mesh_params = self.draw_mesh(arrow_points, i=[0], j=[1], k=[2], **styles)
+        return [line_params, mesh_params]
     # fig = go.Figure(data=[go.Scatter3d(
     #     x=[1, 2, 3],
     #     y=[2, 1, 3],
