@@ -2659,6 +2659,130 @@ class RDMolecule(ExternalMolecule):
                 chunks.append((None, text[chunk_iter:]))
             return chunks
 
+        @classmethod
+        def _path_addition_function(cls, xml_modifier):
+            from ...Jupyter import JHTML
+            def create_new_element(t):
+                uuh = JHTML.HTML.parse(t)
+                new_mod = xml_modifier(uuh)
+                if not isinstance(new_mod, str):
+                    new_mod = new_mod.tostring()
+                return new_mod
+
+            return create_new_element
+
+        @classmethod
+        def _text_addition_function(cls, text, mode='text', font_options=None, **modifiers):
+            if mode == 'text':
+                def modify_text_element(parsed_elem):
+                    opts = parsed_elem.attrs | modifiers
+                    path: str = opts.pop('d', None)
+                    path = path.replace("M", "").replace("Q", "").replace("L", "").replace(",", "")
+                    centroid = np.average(np.array(path.split()).astype(float).reshape(-1, 2), axis=0)
+                    x, y = centroid
+                    return JHTML.HTML.XMLElement("text", text, x=f"{x:.1f}", y=f"{y:.1f}", **opts)
+            else:
+                if font_options is None:
+                    font_options = {}
+                text_path = cls._text_to_path(text, **font_options)
+
+                def modify_text_element(parsed_elem):
+                    opts = parsed_elem.attrs | modifiers
+                    path: str = opts.pop('d', None)
+                    path = path.replace("M", "").replace("Q", "").replace("L", "").replace(",", "")
+                    verts = np.array(path.split()).astype(float).reshape(-1, 2)
+                    bbox = (
+                        (np.min(verts[:, 0]), np.max(verts[:, 0])),
+                        (np.min(verts[:, 1]), np.max(verts[:, 1]))
+                    )
+                    d = cls._path_to_svg(text_path, bbox)
+                    return JHTML.HTML.XMLElement("path", d=d, **opts)
+            return cls._path_addition_function(modify_text_element)
+        @classmethod
+        def _text_to_path(cls, text, **font_opts):
+            from matplotlib.textpath import TextPath
+            from matplotlib.font_manager import FontProperties
+            fp = FontProperties(**font_opts)
+            return TextPath((0, 0), text, prop=fp)
+        @classmethod
+        def _path_to_svg(cls, path,
+                         target_bbox: tuple[tuple[float, float], tuple[float, float]],
+                         base_height=None,
+                         y_flip: bool = True):
+            from matplotlib.path import Path
+            # Matplotlib path code → SVG command mapping
+            _CMD_MAP = {
+                Path.MOVETO: "M",
+                Path.LINETO: "L",
+                Path.CURVE3: "Q",  # quadratic Bézier
+                Path.CURVE4: "C",  # cubic Bézier
+                Path.CLOSEPOLY: "Z",
+            }
+            # Number of vertices consumed by each code (including the "current" vertex)
+            _VERT_COUNT = {
+                Path.MOVETO: 1,
+                Path.LINETO: 1,
+                Path.CURVE3: 2,  # 1 control + 1 end
+                Path.CURVE4: 3,  # 2 controls + 1 end
+                Path.CLOSEPOLY: 0,  # vertex is ignored
+            }
+
+            verts = np.asarray(path.vertices, dtype=float)
+            bbox_init = (
+                (np.min(verts[:, 0]), np.max(verts[:, 0])),
+                (np.min(verts[:, 1]), np.max(verts[:, 1]))
+            )
+            dims_init = (
+                bbox_init[0][1] - bbox_init[0][0],
+                bbox_init[1][1] - bbox_init[1][0],
+            )
+            codes = path.codes if path.codes is not None else (
+                    [Path.MOVETO] + [Path.LINETO] * (len(verts) - 1)
+            )
+
+            if y_flip:
+                h = dims_init[1] if base_height is None else base_height
+                verts = verts.copy()
+                verts[:, 1] = h - verts[:, 1]
+
+            dims_target = (
+                target_bbox[0][1] - target_bbox[0][0],
+                target_bbox[1][1] - target_bbox[1][0],
+            )
+            scaling = max(np.array(dims_target) / np.array(dims_init))
+
+            verts = (
+                    (verts - np.array([[bbox_init[0][0], bbox_init[1][0]]])) * scaling
+                    + np.array([[target_bbox[0][0], target_bbox[1][0]]])
+            )
+
+            parts = []
+            i = 0
+            while i < len(codes):
+                code = codes[i]
+
+                if code == Path.STOP:
+                    i += 1
+                    continue
+
+                cmd = _CMD_MAP.get(code)
+                if cmd is None:
+                    i += 1
+                    continue
+
+                if code == Path.CLOSEPOLY:
+                    parts.append("Z")
+                    i += 1
+                    continue
+
+                n = _VERT_COUNT[code]
+                seg_verts = verts[i: i + n]
+                coord_str = " ".join(f"{x:.6g},{y:.6g}" for x, y in seg_verts)
+                parts.append(f"{cmd} {coord_str}")
+                i += n
+
+            return " ".join(parts)
+
         multivalue_attrs = {'class'}
         @classmethod
         def _prep_svg_val(cls, attr, old, val):
@@ -2865,6 +2989,9 @@ class RDMolecule(ExternalMolecule):
                 matches = attrs_dict.pop('pattern', None)
                 excludes = attrs_dict.pop('exclude', cls.default_annotation_exclude)
                 rep = attrs_dict.pop('replacement', None)
+                if isinstance(rep, dict):
+                    text = rep.pop('text')
+                    rep = cls._text_addition_function(text, **rep)
                 for k,v in attrs_dict.items():
                     f = cls._attr_annotation_function(k, v)
                     funcs.append(f)
@@ -2918,13 +3045,13 @@ class RDMolecule(ExternalMolecule):
             postdraw = self.postdraw
             if dev.str_is(self.postdraw, 'annotate'):
                 postdraw = {'annotate':{}}
-            if not callable(postdraw):
-                if 'annotate' not in postdraw:
-                    annotation_function = postdraw
-                else:
-                    annotation_function = postdraw['annotate']
-                postdraw = functools.partial(self.annotate_text, annotation_map=annotation_function)
             if postdraw is not None:
+                if not callable(postdraw):
+                    if 'annotate' not in postdraw:
+                        annotation_function = postdraw
+                    else:
+                        annotation_function = postdraw['annotate']
+                    postdraw = functools.partial(self.annotate_text, annotation_map=annotation_function)
                 text = postdraw(text, self.splits)
             # print(text)
             # raise Exception(...)
