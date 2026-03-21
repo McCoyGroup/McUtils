@@ -3772,15 +3772,18 @@ class PlotlyAxes3D(PlotlyAxes):
             else:
                 embedding_axes = nput.rotation_matrix(crosses, angs)
             emb_u, emb_v = np.array([u, v]) @ embedding_axes
-            emb_u = nput.vec_normalize(emb_u)
-            emb_v = nput.vec_normalize(emb_v)
+            # emb_u = nput.vec_normalize(emb_u)
+            # emb_v = nput.vec_normalize(emb_v)
+            emb_angle = np.arctan2(emb_u[1], emb_u[0])
             # det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
             # raise Exception(np.round(normal, 3), np.round(emb_u, 3), np.round(emb_v, 3), det)
-            emb_angle = np.arccos(emb_u[0])
-            if (normal[2] * emb_v[1]) < 0:
-                emb_angle = 2*np.pi - emb_angle
-            if angle is None:
-                angle = base_ang
+            # emb_angle = np.arccos(emb_u[0])
+            # if normal[2] > 0:
+            #     emb_angle = np.arctan2(emb_u[1], emb_u[0])
+            # else:
+            #     emb_angle = np.arctan2(emb_v[1], emb_v[0])
+            # if angle is None:
+            #     angle = base_ang
             # if np.dot(ax2, local_z) < 0:
             #     emb_angle = (emb_angle - angle)
             #     if emb_angle < 0:
@@ -5097,16 +5100,12 @@ class X3DAxes(GraphicsAxes3D):
             else:
                 embedding_axes = nput.rotation_matrix(crosses, angs)
             emb_u, emb_v = np.array([u, v]) @ embedding_axes
-            emb_u = nput.vec_normalize(emb_u)
-            emb_v = nput.vec_normalize(emb_v)
-            if normal[2] < 0:
-                emb_angle = np.arccos(emb_u[0])
-                if emb_v[1] < 0:
-                    emb_angle = 2 * np.pi - emb_angle
-            else:
-                emb_angle = np.arccos(emb_v[0])
-                if emb_u[1] < 0:
-                    emb_angle = 2 * np.pi - emb_angle
+            # emb_u = nput.vec_normalize(emb_u)
+            # emb_v = nput.vec_normalize(emb_v)
+            # if normal[2] > 0:
+            # emb_angle = np.arctan2(emb_u[1], emb_u[0])
+            # else:
+            emb_angle = np.arctan2(emb_v[1], emb_v[0])
             if rotation is None:
                 rotation = [0, 0, 1, emb_angle]
             if angle is None:
@@ -5136,7 +5135,7 @@ class X3DAxes(GraphicsAxes3D):
                                         solid=solid,
                                         rotation=rotation,
                                         angle=angle,
-                                        **(styles | dict(color=line_color))
+                                        **(styles | dict(color='black', glow=line_color))
                                         )
             objects.append(disk_set)
 
