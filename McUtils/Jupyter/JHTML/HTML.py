@@ -699,6 +699,31 @@ class XMLBase:
             converter = cls.convert
 
         return converter(etree, strip=strip)
+    # @classmethod
+    # def split_roots(cls, xml_chunk:str, end_tag="/>", open_tag="<"):
+    #     #TODO: pull this out of the RDKit parser code
+    #     chunk = ""
+    #     cur_l = -1
+    #     end_l = len(xml_chunk)
+    #     cur_counts = 0
+    #     end_counts = 0
+    #     while cur_l < end_l:
+    #         tag_end = xml_chunk.find(end_tag, cur_l+1)
+    #         if tag_end < 0:
+    #             break
+    #         end_counts += 1
+    #         sub_chunk = xml_chunk[cur_l:tag_end]
+    #         chunk += sub_chunk
+    #         cur_l += len(sub_chunk)
+    #         cur_counts += sub_chunk.count(open_tag)
+    #         if cur_counts == end_counts:
+    #             yield chunk
+    #             cur_counts = 0
+    #             end_counts = 0
+    # @classmethod
+    # def parse_iter(cls, xml_chunk:str, end_tag="/>", open_tag="<", **opts):
+    #     for chunk in cls.split_roots(xml_chunk, end_tag=end_tag, open_tag=open_tag):
+    #         yield cls.parse(chunk, **opts)
 
 
 class HTML(XMLBase):

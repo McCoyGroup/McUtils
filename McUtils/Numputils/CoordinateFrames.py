@@ -792,7 +792,7 @@ def eckart_embedding(ref, coords,
                      planar_ref_tolerance=1e-6,
                      proper_rotation=False,
                      permutable_groups=None,
-                     transform_coordinates=True):
+                     transform_coordinates=True) -> EckartData:
     # if permutable_groups is None:
     return _eckart_embedding(
         ref, coords,

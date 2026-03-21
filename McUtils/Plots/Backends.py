@@ -3575,6 +3575,7 @@ class PlotlyAxes3D(PlotlyAxes):
                       edge_width=.01,
                       lw=None,
                       color_cycle=False,
+                      layer='above',
                       # capstyle='butt',
                       default_view_distance='auto',
                       **opts):
@@ -3876,7 +3877,7 @@ class PlotlyAxes3D(PlotlyAxes):
             #     radius = [radius] * len(centers)
             width = np.asanyarray(radius) * 72 * max(box_scalings)
         if arrowhead is None:
-            arrowhead = np.asanyarray(radius) * arrowhead_scaling
+            arrowhead = np.asanyarray(radius) * arrowhead_scaling * max(box_scalings)
         line_params = self.draw_line(points, width=width, **styles)
         if arrowhead_points is None:
             ax = nput.vec_normalize(points[-1] - points[-2])
@@ -3889,7 +3890,7 @@ class PlotlyAxes3D(PlotlyAxes):
                 ax,
                 right,
                 normal
-            ]).T
+            ])
             arrowhead_points = arrowhead * np.array([
                 [0, -1/2, 0],
                 [0,  1/2, 0],
