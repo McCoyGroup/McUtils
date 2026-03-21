@@ -2672,7 +2672,7 @@ class RDMolecule(ExternalMolecule):
             return create_new_element
 
         @classmethod
-        def _text_addition_function(cls, text, mode='text', font_options=None, **modifiers):
+        def _text_addition_function(cls, text, mode='svg', font_options=None, **modifiers):
             if mode == 'text':
                 def modify_text_element(parsed_elem):
                     opts = parsed_elem.attrs | modifiers
