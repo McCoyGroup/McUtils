@@ -1060,6 +1060,7 @@ class MPLAxes3D(MPLAxes):
         self.computed_zorder = self.obj.computed_zorder
         self._monkeypatch_draw(self.obj)
         self._dist = None
+        self._view_scaling = 1
 
     def set_projection_type(self, proj_type, **kwargs):
         if proj_type is not None:
@@ -1291,8 +1292,6 @@ class MPLAxes3D(MPLAxes):
                           up_vector=None, right_vector=None, view_vector=None, view_distance=None,
                           view_matrix=None,
                           **values):
-        if view_distance is not None:
-            dist = view_distance
         if view_matrix is None and (
                 view_vector is not None
                 or right_vector is not None
@@ -1304,21 +1303,21 @@ class MPLAxes3D(MPLAxes):
                 ):
                     view_vector = nput.vec_crosses(up_vector, right_vector, normalize=True)
                 elif right_vector is not None:
-                    view_vector = nput.vec_crosses([0, 0, 1], right_vector, normalize=True)
+                    view_vector = nput.vec_crosses(self.default_up_vector, right_vector, normalize=True)
                 elif up_vector is not None:
-                    view_vector = nput.vec_crosses(up_vector, [0, 1, 0], normalize=True)
+                    view_vector = nput.vec_crosses(up_vector, self.default_right_vector, normalize=True)
 
             if view_vector is not None:
                 m = nput.rotation_matrix(
                     view_vector,
-                    [1, 0, 0]
+                    self.default_view_vector
                 )
             else:
                 m = np.eye(3)
 
             if up_vector is None and right_vector is not None:
                 if view_vector is None:
-                    view_vector = [1, 0, 0]
+                    view_vector = self.default_view_vector
                 up_vector = nput.vec_normalize(
                     nput.vec_crosses(right_vector, view_vector)
                 )
@@ -1331,14 +1330,14 @@ class MPLAxes3D(MPLAxes):
             if up_vector is not None:
                 m = m @ nput.rotation_matrix(
                     m.T @ up_vector,
-                    [1, 0, 0]
+                    self.default_up_vector
                 )
             view_matrix = m
 
         if view_matrix is not None:
             if vertical_axis is None:
-                target_vertical = [0, 0, 1]
-                target_view = [1, 0, 0]
+                target_vertical = [0, 1, 0]
+                target_view = [0, 0, 1]
             else:
                 target_vertical = [
                     [1, 0, 0]
@@ -1354,32 +1353,49 @@ class MPLAxes3D(MPLAxes):
                         if vertical_axis == 'y' else
                     [1, 0, 0]
                 ]
-            # roll, cross = nput.extract_rotation_angle_axis(view_matrix)
+
+            # v1 = R(azim, z) . x
+            # n = z x v1
+            # v = R(elev, n) . v1
             view_vector, right_vector, up_vector = view_matrix.T
-            elev = np.rad2deg(nput.vec_angles(target_vertical, up_vector, return_crosses=False))
-            azim = np.rad2deg(nput.vec_angles(right_vector, target_view,
-                                              up_vectors=np.asanyarray(target_vertical),
-                                              return_crosses=False))
+            elev = np.arctan2(view_vector[-1], np.linalg.norm(view_vector[:2]))
+            azim = np.arctan2(view_vector[1], view_vector[0])
+            roll = nput.vec_angles(target_vertical, up_vector,
+                                   up_vectors=view_vector,
+                                   return_crosses=False)
+
+            elev = np.rad2deg(elev)
+            azim = np.rad2deg(azim)
+            roll = np.rad2deg(roll)
+
+            if view_distance is not None:
+                v_box = np.array([self.get_xlim(), self.get_ylim(), self.get_zlim()]).T @ view_matrix
+                default_view_distance =  np.max(np.abs(v_box[1][:2] - v_box[0][:2]))
+                scaling = view_distance / default_view_distance
+                dist = 10 * scaling
+            elif dist is not None:
+                scaling = dist / 10
+            else:
+                scaling = 1
+        elif view_distance is not None:
+            v_box = np.array([self.get_xlim(), self.get_ylim(), self.get_zlim()]).T
+            default_view_distance =  np.max(np.abs(v_box[1][:2] - v_box[0][:2]))
+            scaling = view_distance / default_view_distance
+            dist = 10 * scaling
+        elif dist is not None:
+            scaling = dist / 10
+        else:
+            scaling = 1
             # roll = np.rad2deg(nput.vec_angles([1, 0, 0], view_vector, return_crosses=False))
             # elev = nput.vec_angles([1, 0, 0], view_vector, return_crosses=False)
 
-        # if isinstance(value, dict):
-        #     if 'elev' not in value:
-        #         value['elev'] = self.obj.elev
-        #     if 'azim' not in value:
-        #         value['azim'] = self.obj.azim
-        #     if 'roll' not in value:
-        #         value['roll'] = self.obj.arollzim
-        #     if 'vertical_axis' not in value:
-        #         value['vertical_axis'] = self.obj.vertical_axis
-        # else:
-        #     value = dict(zip(['elev', 'azim', 'roll', 'vertical_axis'], value))
         values = values | {
             k:v for k,v in
             dict(elev=elev, azim=azim, roll=roll, vertical_axis=vertical_axis).items()
             if v is not None
         }
         self.obj.view_init(**values)
+        self._view_scaling = 1 / scaling
         if dist is not None:
             self._dist = dist
             self.obj.dist = dist
@@ -1490,13 +1506,13 @@ class MPLAxes3D(MPLAxes):
                 edgecolors = [edgecolors] * len(center)
             if isinstance(color, str) or nput.is_numeric(color[0]):
                 color = [color] * len(center)
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            if box_scalings is not None:
+                box_scalings = np.array(box_scalings) * self._view_scaling
             if s is None:
-                if box_scalings is None:
-                    box_scalings = [1, 1, 1]
-                s = (radius * max(box_scalings) * 72)**2
+                s = (radius * max(box_scalings) * 72)**2 * np.pi
             if lw is None:
-                if box_scalings is None:
-                    box_scalings = [1, 1, 1]
                 lw = (edge_width * max(box_scalings) * 72)
 
             if nput.is_numeric(s):
@@ -1519,7 +1535,7 @@ class MPLAxes3D(MPLAxes):
                     )
                 dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
                 for s, r in zip(spheres, dists):
-                    s.zdist_offset = functools.partial(self._get_sphere_proj, radius=r)
+                    # s.zdist_offset = functools.partial(self._get_sphere_proj, radius=r)
                     s.predraw = functools.partial(self._flat_sphere_predraw, s,
                                                   radius=r * 10,
                                                   depth_shading_range=depth_shading_range,
@@ -1536,7 +1552,7 @@ class MPLAxes3D(MPLAxes):
                     **opts
                 )
                 dists = (np.sqrt(areas) / (max(box_scalings) * 72)) / 10
-                spheres.zdist_offset = functools.partial(self._get_sphere_proj, radius=np.max(dists))
+                # spheres.zdist_offset = functools.partial(self._get_sphere_proj, radius=np.max(dists))
                 spheres.predraw = functools.partial(self._flat_sphere_predraw,
                                                     spheres,
                                                     radius=dists * 10,
@@ -1692,12 +1708,14 @@ class MPLAxes3D(MPLAxes):
             if end.ndim == 1:
                 end = end[np.newaxis]
             plot = self.get_plotter('plot')
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            if box_scalings is not None:
+                box_scalings = np.array(box_scalings) * self._view_scaling
             if lw is None:
                 rad = np.asanyarray(rad)
                 if rad.ndim == 0:
                     rad = np.array([rad])
-                if box_scalings is None:
-                    box_scalings = [1, 1, 1]
                 lw = rad * 72 * max(box_scalings)
             if edge_color is None:
                 edge_color = [None] * len(start)
@@ -1762,7 +1780,7 @@ class MPLAxes3D(MPLAxes):
                 color_cycle = ["red", "blue", "green", "orange", "purple"]
             ew = edge_width * (72 * max(box_scalings))
             for s, e, w, ec, c in zip(start, end, lw, edge_color, color):
-                cw = w / (72 * max(box_scalings))
+                # cw = w / (72 * max(box_scalings))
                 v, n = nput.vec_normalize(e - s, return_norms=True)
                 # s = s - cw * v
                 # e = e + cw * v
@@ -1797,7 +1815,7 @@ class MPLAxes3D(MPLAxes):
                         )
                     )
                     for l in coll[-1]:
-                        l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
+                        # l.zdist_offset = functools.partial(self._get_line_proj, radius=cw)
                         l.do_3d_projection = functools.partial(self._line_do_3d_projection, l)
                         l.distance_mode = np.min
                         l.predraw = functools.partial(self._flat_cylinder_predraw, l,
@@ -1929,6 +1947,9 @@ class MPLAxes3D(MPLAxes):
 
             return surface(X, Y, Z, color=color, **opts)
 
+    default_up_vector = (0, 0, 1)
+    default_right_vector = (0, 1, 0)
+    default_view_vector = (1, 0, 0)
     @classmethod
     def _arc_proj_max(cls, zs):
         return 2*np.min(zs) - np.max(zs)
@@ -1968,11 +1989,9 @@ class MPLAxes3D(MPLAxes):
             else:
                 embedding_axes = nput.rotation_matrix(crosses, angs)
             emb_u, emb_v = np.array([u, v]) @ embedding_axes
-            emb_u = nput.vec_normalize(emb_u)
-            emb_v = nput.vec_normalize(emb_v)
-            emb_angle = np.arccos(emb_u[0])
-            if (normal[2] * emb_v[1]) < 0:
-                emb_angle = 2 * np.pi - emb_angle
+            # emb_u = nput.vec_normalize(emb_u)
+            # emb_v = nput.vec_normalize(emb_v)
+            emb_angle = np.arctan2(emb_u[1], emb_u[0])
             # emb_angle = np.arccos(emb_v[0])
             #     emb_angle, ax2 = nput.vec_angles(local_x, u)
             # else:
@@ -2001,9 +2020,11 @@ class MPLAxes3D(MPLAxes):
             zdir = [zdir] * len(centers)
         if isinstance(line_color, str) or line_color is None:
             line_color = [line_color] * len(centers)
+        if box_scalings is None:
+            box_scalings = [1, 1, 1]
+        if box_scalings is not None:
+            box_scalings = np.array(box_scalings) * self._view_scaling
         if lw is None:
-            if box_scalings is None:
-                box_scalings = [1, 1, 1]
             if line_thickness is None or nput.is_numeric(line_thickness):
                 line_thickness = [line_thickness] * len(centers)
             lw = np.asanyarray(line_thickness) * 72 * max(box_scalings)
@@ -2017,13 +2038,14 @@ class MPLAxes3D(MPLAxes):
         for c,r,t1,t2,zd,col,lc,w in zip(centers, radius, theta1, theta2, zdir,
                                        color, line_color,lw):
             if col is None:
-                a = patches.Arc((0, 0), 2 * r, 2 * r,
-                                theta1=t1, theta2=t2)
-                p = a.get_path()
-                # codes = list(p.codes)
-                # codes[-1] = p.STOP
+                # a = patches.Arc((0, 0), 2 * r, 2 * r,
+                #                 theta1=t1, theta2=t2)
+                # from matplotlib.path import Path as paths
+                n = int(72 / 360 * (t2 - t1))
+                p = paths.Path.arc(theta1=t1, theta2=t2, n=n)
                 a = patches.PathPatch(
-                    paths.Path(p.vertices, p.codes),
+                    p,
+                    # paths.Path(p.vertices, p.codes),
                     lw=w,
                     facecolor='none',
                     edgecolor=lc,
@@ -2052,12 +2074,14 @@ class MPLAxes3D(MPLAxes):
         points = np.asanyarray(points)
         if points.ndim > 2:
             points = points.reshape(-1, 3)
+        if box_scalings is None:
+            box_scalings = [1, 1, 1]
+        if box_scalings is not None:
+            box_scalings = np.array(box_scalings) * self._view_scaling
         if lw is None and line_thickness is not None:
             rad = np.asanyarray(line_thickness)
             if rad.ndim == 0:
                 rad = np.array([rad])
-            if box_scalings is None:
-                box_scalings = [1, 1, 1]
             lw = rad * 72 * max(box_scalings)
         return self.get_plotter('plot')(
             points[:, 0],
@@ -2086,7 +2110,10 @@ class MPLAxes3D(MPLAxes):
                     x2, y2, z2 = (x1 + dx, y1 + dy, z1 + dz)
 
                     xs, ys, zs = proj_transform((x1, x2), (y1, y2), (z1, z2), self.axes.M)
-                    self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+                    fuzz = np.random.rand(2, 2) * 1e-8
+                    xs = xs[:2] + fuzz[0]
+                    ys = ys[:2] + fuzz[1]
+                    self.set_positions((xs[0], ys[0]), (xs[1], ys[1]+1e-8))
                     super().draw(renderer)
 
                 distance_mode = staticmethod(np.min)
@@ -2116,6 +2143,10 @@ class MPLAxes3D(MPLAxes):
             if points.ndim == 2:
                 points = points[np.newaxis]
             diffs = points[:, 1, :] - points[:, 0, :]
+            if box_scalings is None:
+                box_scalings = [1, 1, 1]
+            if box_scalings is not None:
+                box_scalings = np.array(box_scalings) * self._view_scaling
             if lw is None:
                 radius = np.asanyarray(radius)
                 if radius.ndim == 0:
@@ -3726,7 +3757,7 @@ class PlotlyAxes3D(PlotlyAxes):
         start_angle_rad = np.deg2rad(theta1)
         end_angle_rad = np.deg2rad(theta2)
         if angular_density is None:
-            angular_density = 36/(2*np.pi)
+            angular_density = 72/(2*np.pi)
         npoints = angular_density * (end_angle_rad - start_angle_rad)
         angles = np.linspace(start_angle_rad, end_angle_rad, int(np.ceil(npoints)))
         points = np.array([radius * np.cos(angles), radius * np.sin(angles), np.zeros(len(angles))]).T
