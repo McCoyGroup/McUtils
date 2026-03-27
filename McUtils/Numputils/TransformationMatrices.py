@@ -5,7 +5,7 @@ import scipy.linalg
 
 from .VectorOps import vec_normalize#, vec_angles
 from . import VectorOps as vec_ops
-# from . import Misc as misc
+from . import Misc as misc
 from . import PermutationOps as perm_ops
 import math, numpy as np, scipy as sp
 
@@ -25,6 +25,9 @@ __all__ = [
     "extract_rotation_angle_axis",
     "extract_reflection_axis",
     "view_matrix",
+    "perspective_matrix",
+    "world_matrix",
+    "render_matrix",
     "find_coordinate_matching_permutation",
     "symmetry_permutation",
     "apply_symmetries",
@@ -524,7 +527,6 @@ def view_matrix(
         view_vector=(0, 0, 1),
         output_order=None
 ):
-
     up_vector = vec_ops.vec_normalize(up_vector)
     d = up_vector.shape[-1]
     base_shape = up_vector.shape[:-1]
@@ -577,6 +579,236 @@ def view_matrix(
         axes[..., :, 1] *= sign
 
     return axes
+
+default_near_scaling = .1
+def perspective_matrix(view_angle=None, aspect=None, near=None, far=None, view_distance=None):
+    if view_angle is None:
+        view_angle = np.pi/2
+    view_angle = np.asanyarray(view_angle)
+    if aspect is None:
+        aspect = 1
+    aspect = np.asanyarray(aspect)
+    if near is not None:
+        if far is None and view_distance is not None:
+            far = near + view_distance
+        else:
+            far = near / default_near_scaling
+    elif far is not None:
+        if view_distance is not None:
+            near = far - view_distance
+        else:
+            near = far * default_near_scaling
+    elif view_distance is not None:
+        far = view_distance
+        near = far * default_near_scaling
+    base_shape = view_angle.shape
+
+    f = 1/np.tan(view_angle / 2)
+    if near is not None:
+        fn = (far - near)
+        focus = 2 * far * near / fn
+        focal_scale = (far + near) / fn
+    else:
+        focus = 1e6
+        focal_scale = 0
+
+    mats = np.zeros(base_shape + (4, 4), dtype=float)
+    mats[..., 3, 2] = -1.0
+    for i,j,v in [
+        (0, 0, f/aspect),
+        (1, 1, f),
+        (2, 2, focal_scale),
+        (2, 3, focus)
+    ]:
+        mats[..., i, j] = v
+    return mats
+
+
+def world_matrix(bbox, rescale=True):
+    x_range, y_range, z_range = bbox
+    if misc.is_numeric(x_range):
+        x_range = [-x_range/2, x_range/2]
+    if misc.is_numeric(y_range):
+        y_range = [-y_range/2, y_range/2]
+    if misc.is_numeric(z_range):
+        z_range = [-z_range/2, z_range/2]
+    (left, right), (top, bottom), (near, far) = x_range, y_range, z_range
+    left = np.asanyarray(left)
+    right = np.asanyarray(right)
+    top = np.asanyarray(top)
+    bottom = np.asanyarray(bottom)
+    near = np.asanyarray(near)
+    far = np.asanyarray(far)
+    base_shape = left.shape
+
+    mats = np.zeros(base_shape + (4, 4), dtype=float)
+    mats[..., 3, 3] = 1.0
+    rl, tb, fn = right-left, top-bottom, far-near
+
+    if rescale:
+        sx, sy, sz = 2/rl, 2/tb, -2/fn
+        dx, dy, dz = -(right+left)/rl, -(top+bottom)/tb, -(far+near)/fn
+    else:
+        sx, sy, sz = 1, 1, -1
+        dx, dy, dz = -(right+left)/2, -(top+bottom)/2, -(far+near)/2
+    for i, j, v in [
+        (0, 0, sx),
+        (1, 1, sy),
+        (2, 2, sz),
+        (0, 3, dx),
+        (1, 3, dy),
+        (2, 3, dz)
+    ]:
+        mats[..., i, j] = v
+    return mats
+
+_view_transform = view_matrix
+_projection_transform = perspective_matrix
+_world_transform = world_matrix
+def render_matrix(
+        view_matrix=None,
+        projection_matrix=None,
+        world_matrix=None,
+        view_position=None,
+        view_center=None,
+        up_vector=None,
+        view_vector=None,
+        right_vector=None,
+        view_angle=None,
+        aspect_ratio=None,
+        view_distance=None,
+        clip_distance=None,
+        bbox=None
+):
+    if view_position is not None:
+        view_position = np.asanyarray(view_position)
+        if view_center is None:
+            if view_vector is not None:
+                if view_distance is not None:
+                    view_vector = vec_ops.vec_normalize(view_vector)
+                    view_center = view_position - view_vector * view_distance
+                else:
+                    raise ValueError(...)
+            else:
+                base_shape = view_position.shape[:-1]
+                view_center = np.zeros(base_shape + (3,))
+        if view_vector is None:
+            view_vector, vd = vec_ops.vec_normalize(view_center - view_position, return_norms=True)
+            if view_distance is None:
+                view_distance = vd
+        if view_distance is None:
+            view_distance = vec_ops.vec_norms(view_center - view_position)
+
+    if view_matrix is None and (
+            view_vector is not None
+            or right_vector is not None
+            or up_vector is not None
+    ):
+        if view_vector is not None:
+            if up_vector is not None:
+                view_matrix = _view_transform(
+                    up_vector,
+                    view_vector,
+                    output_order=['x', 'y', 'z']
+                )
+            elif right_vector is not None:
+                view_matrix = _view_transform(
+                    right_vector,
+                    view_vector,
+                    output_order=['x', 'z', 'y']
+                )
+            else:
+                view_matrix = _view_transform(
+                    [0, 0, 1],
+                    view_vector,
+                    output_order=['x', 'y', 'z']
+                )
+        elif up_vector is not None:
+            if right_vector is not None:
+                view_matrix = _view_transform(
+                    up_vector,
+                    right_vector,
+                    output_order=['y', 'x', 'z']
+                )
+            else:
+                view_matrix = _view_transform(
+                    up_vector,
+                    [0, 0, 1],
+                    output_order=['y', 'x', 'z']
+                )
+        elif right_vector is not None:
+            view_matrix = _view_transform(
+                [0, 0, 1],
+                right_vector,
+                output_order=['y', 'x', 'z']
+            )
+
+    if world_matrix is None and bbox is not None:
+        world_matrix = _world_transform(bbox, rescale=True)
+
+    if projection_matrix is None:
+        if (
+                view_angle is not None
+                or view_distance is not None
+                or clip_distance is not None
+        ):
+            projection_matrix = _projection_transform(
+                view_angle=projection_matrix,
+                aspect=aspect_ratio,
+                view_distance=view_distance,
+                near=clip_distance
+            )
+        elif aspect_ratio is not None:
+            aspect_ratio = np.asanyarray(aspect_ratio)
+            base_shape = aspect_ratio.shape
+            projection_matrix = vec_ops.identity_tensors(base_shape, 4)
+            projection_matrix[..., 1, 1] /= aspect_ratio
+            projection_matrix[..., 2, 2] = -1
+
+    base_shape = None
+    if view_matrix is not None:
+        view_matrix = np.asanyarray(view_matrix)
+        if base_shape is None:
+            base_shape = view_matrix.shape[:-2]
+
+    if view_center is not None:
+        view_center = np.asanyarray(view_center)
+        if base_shape is None:
+            base_shape = view_center.shape[:-1]
+
+    if projection_matrix is not None:
+        projection_matrix = np.asanyarray(projection_matrix)
+        if base_shape is None:
+            base_shape = projection_matrix.shape[:-2]
+
+
+    if world_matrix is not None:
+        world_matrix = np.asanyarray(world_matrix)
+        if base_shape is None:
+            base_shape = world_matrix.shape[:-2]
+
+    if base_shape is None:
+        base_shape = ()
+
+    mats = np.zeros(base_shape + (4, 4), dtype=float)
+    mats[..., 3, 3] = 1.0
+    if view_matrix is not None:
+        mats[..., :3, :3] = view_matrix
+    else:
+        mats[..., 0, 0] = 1.0
+        mats[..., 1, 1] = 1.0
+        mats[..., 2, 2] = -1.0
+
+    if view_center is not None:
+        mats[..., :3, 3] = view_center
+
+    if projection_matrix is not None:
+        mats = mats @ projection_matrix
+
+    if world_matrix is not None:
+        mats = mats @ world_matrix
+
+    return mats
 
 def reflection_matrix(axes):
     # need to find space of "null" vectors

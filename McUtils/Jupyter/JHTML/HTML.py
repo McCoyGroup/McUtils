@@ -1,4 +1,5 @@
 import itertools
+import re
 import numbers
 import uuid
 from xml.etree import ElementTree
@@ -8,12 +9,513 @@ import contextlib
 __all__ = [
     "HTML",
     "CSS",
-    "ContentXML"
+    "ContentXML",
+    "SVG",
 ]
 
+from ...Data import ColorData
 from ...Misc import mixedmethod
 from .Enums import Options
 from .WidgetTools import frozendict
+
+class ValidationError(ValueError):
+    ...
+
+_CSS_COLOR_KEYWORDS = {
+    "none", "inherit", "currentcolor", "transparent"
+}
+
+_RE_HEX3  = re.compile(r"^#[0-9a-f]{3}$",  re.I)
+_RE_HEX4  = re.compile(r"^#[0-9a-f]{4}$",  re.I)
+_RE_HEX6  = re.compile(r"^#[0-9a-f]{6}$",  re.I)
+_RE_HEX8  = re.compile(r"^#[0-9a-f]{8}$",  re.I)
+_RE_RGB   = re.compile(r"^rgb\(\s*(\d+%?)\s*,\s*(\d+%?)\s*,\s*(\d+%?)\s*\)$", re.I)
+_RE_RGBA  = re.compile(r"^rgba\(\s*(\d+%?)\s*,\s*(\d+%?)\s*,\s*(\d+%?)\s*,\s*([0-9.]+)\s*\)$", re.I)
+_RE_HSL   = re.compile(r"^hsl\(\s*[\d.]+\s*,\s*[\d.]+%\s*,\s*[\d.]+%\s*\)$",  re.I)
+_RE_HSLA  = re.compile(r"^hsla\(\s*[\d.]+\s*,\s*[\d.]+%\s*,\s*[\d.]+%\s*,\s*[0-9.]+\s*\)$", re.I)
+_RE_URL   = re.compile(r"^url\(#[^)]+\)$")
+_RE_NUM   = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$")
+_RE_LEN   = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?(px|pt|pc|mm|cm|in|em|ex|rem|vh|vw|vmin|vmax|%)?$")
+_RE_ANGLE = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)(deg|rad|grad|turn)?$", re.I)
+
+
+def _is_number(v: str|numbers.Number) -> bool:
+    return isinstance(v, numbers.Number) or bool(_RE_NUM.match(v.strip()))
+
+def _is_length(v: str) -> bool:
+    return bool(_RE_LEN.match(v.strip()))
+
+def _is_angle(v: str) -> bool:
+    return bool(_RE_ANGLE.match(v.strip()))
+
+def _is_color(v: str) -> bool:
+    s = v.strip().lower()
+    return (
+        s in _CSS_COLOR_KEYWORDS
+        or s in ColorData['Named'].data
+        or bool(_RE_HEX3.match(s))
+        or bool(_RE_HEX4.match(s))
+        or bool(_RE_HEX6.match(s))
+        or bool(_RE_HEX8.match(s))
+        or bool(_RE_RGB.match(s))
+        or bool(_RE_RGBA.match(s))
+        or bool(_RE_HSL.match(s))
+        or bool(_RE_HSLA.match(s))
+    )
+
+
+def _is_paint(v: str) -> bool:
+    """Paint value: colour, none, inherit, or url(#id) optionally followed by a fallback colour."""
+    s = v.strip()
+    if _is_color(s):
+        return True
+    if _RE_URL.match(s):
+        return True
+    # url(#id) <fallback-color>
+    m = re.match(r"^(url\(#[^)]+\))\s+(.+)$", s)
+    if m:
+        return _is_color(m.group(2))
+    return False
+
+
+def _is_opacity(v: str|numbers.Number) -> bool:
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return False
+    else:
+        return 0.0 <= f <= 1.0
+
+def _check_oneof(value, attr, types) -> list[ValidationError]:
+    if value not in types:
+        types = sorted(list(types))
+        if len(types) == 1:
+            typeset = f"'{types[0]}'"
+        elif len(types) == 2:
+            typeset = f"'{types[0]}' or '{types[1]}'"
+        else:
+            typeset = ", ".join(f"'{t}'" for t in types[:-1]) + f" or '{types[-1]}'"
+        return [ValidationError(attr, value, f"must be {typeset}")]
+    else:
+        return []
+
+# ── fill & stroke ──────────────────────────────────────────────────────────
+
+def _check_paint(attr: str, value) -> list[ValidationError]:
+    if not isinstance(value, str):
+        return [ValidationError(attr, value, "must be a string")]
+    elif not _is_paint(value):
+        return [ValidationError(attr, value,
+                    "must be a color, 'none', 'inherit', 'currentColor', or url(#id)")]
+    else:
+        return []
+
+def check_fill(value): return _check_paint("fill", value)
+def check_stroke(value): return _check_paint("stroke", value)
+def check_color(value): return _check_paint("color", value)
+def check_flood_color(value):_check_paint("flood-color", value)
+def check_stop_color(value): _check_paint("stop-color", value)
+def check_lighting_color(value): return _check_paint("lighting-color", value)
+
+# ── opacity ────────────────────────────────────────────────────────────────
+
+def _check_opacity_attr(attr: str, value) -> list[ValidationError]:
+    if isinstance(value, str) and value.strip().lower() == "inherit":
+        return []
+    elif not _is_opacity(value):
+        return [ValidationError(attr, value, "must be a number in [0, 1] or 'inherit'")]
+    else:
+        return []
+
+def check_opacity(value): return _check_opacity_attr("opacity", value)
+def check_fill_opacity(value): return _check_opacity_attr("fill-opacity", value)
+def check_stroke_opacity(value): return _check_opacity_attr("stroke-opacity", value)
+def check_flood_opacity(value): return _check_opacity_attr("flood-opacity", value)
+def check_stop_opacity(value): return _check_opacity_attr("stop-opacity", value)
+
+
+# ── fill-rule ──────────────────────────────────────────────────────────────
+
+def check_fill_rule(value) -> list[ValidationError]:
+    if value not in ("nonzero", "evenodd", "inherit"):
+        return [ValidationError("fill-rule", value, "must be 'nonzero', 'evenodd', or 'inherit'")]
+    else:
+        return []
+
+# ── stroke-width ───────────────────────────────────────────────────────────
+
+def check_stroke_width(value) -> list[ValidationError]:
+    if isinstance(value, str) and value.strip().lower() == "inherit":
+        return []
+    if isinstance(value, numbers.Number):
+        if value < 0: return [ValidationError("stroke-width", value, "must be non-negative")]
+        value = f"{value:.0f}px"
+    s = str(value).strip()
+    if not _is_length(s):
+        return [ValidationError("stroke-width", value, "must be a non-negative length or 'inherit'")]
+    else:
+        value = re.sub(r"[a-z%]+$", "", s, flags=re.I)
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return [ValidationError("stroke-width", value, "must be a non-negative length or 'inherit'")]
+        else:
+            if value < 0:
+                return [ValidationError("stroke-width", value, "must be a non-negative length or 'inherit'")]
+            else:
+                return []
+
+
+# ── stroke-linecap ─────────────────────────────────────────────────────────
+linecap_types = {"butt", "round", "square", "inherit"}
+def check_stroke_linecap(value) -> list[ValidationError]:
+    return _check_oneof(value, "stroke-linecap", linecap_types)
+
+# ── stroke-linejoin ────────────────────────────────────────────────────────
+linejoin_types = {"miter", "miter-clip", "round", "bevel", "arcs", "inherit"}
+def check_stroke_linejoin(value) -> list[ValidationError]:
+    return _check_oneof(value, "stroke-linejoin", linejoin_types)
+
+# ── stroke-miterlimit ──────────────────────────────────────────────────────
+
+def check_stroke_miterlimit(value) -> list[ValidationError]:
+    if isinstance(value, str) and value.strip().lower() == "inherit":
+        return []
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return [ValidationError("stroke-miterlimit", value, "must be a number ≥ 1 or 'inherit'")]
+    if value < 1:
+        return  [
+            ValidationError("stroke-miterlimit", value, "must be ≥ 1")
+        ]
+    else:
+        return []
+
+
+# ── stroke-dasharray ───────────────────────────────────────────────────────
+
+def check_stroke_dasharray(value) -> list[ValidationError]:
+    if not isinstance(value, str):
+        value = " ".join(f"{v:.0f}px" if not isinstance(v, str) else v for v in value)
+    s = value.strip().lower()
+    if s in ("none", "inherit"):
+        return []
+    tokens = re.split(r"[\s,]+", s)
+    bad = [t for t in tokens if t and not _is_length(t)]
+    if len(bad) > 0:
+        return [ValidationError("stroke-dasharray", value,
+                                f"contains invalid length tokens: {bad}")]
+    else:
+        return []
+
+
+# ── stroke-dashoffset ──────────────────────────────────────────────────────
+
+def check_stroke_dashoffset(value) -> list[ValidationError]:
+    if isinstance(value, str) and value.strip().lower() == "inherit":
+        return []
+    if not isinstance(value, str):
+        value = f"{value:.0f}px"
+    if not _is_length(str(value).strip()):
+        return [ValidationError("stroke-dashoffset", value,
+                                "must be a length/percentage or 'inherit'")]
+    else:
+        return []
+
+# ── visibility ─────────────────────────────────────────────────────────────
+visibility_types = {"visible", "hidden", "collapse", "inherit"}
+def check_visibility(value) -> list[ValidationError]:
+    return _check_oneof(value, "visibility", visibility_types)
+
+# ── display ────────────────────────────────────────────────────────────────
+
+display_types = {
+    "inline", "block", "list-item", "run-in", "compact",
+    "marker", "table", "inline-table", "table-row-group",
+    "table-header-group", "table-footer-group", "table-row",
+    "table-column-group", "table-column", "table-cell",
+    "table-caption", "none", "inherit",
+}
+def check_display(value) -> list[ValidationError]:
+    return _check_oneof(value, "display", display_types)
+
+
+# ── paint-order ────────────────────────────────────────────────────────────
+paint_order_tokens = {"fill", "stroke", "markers"}
+def check_paint_order(value) -> list[ValidationError]:
+    if not isinstance(value, str):
+        value = " ".join(value)
+    s = value.strip().lower()
+    if s in ("normal", "inherit"):
+        return []
+    tokens = s.split()
+    if not all(t in paint_order_tokens for t in tokens) or len(tokens) != len(set(tokens)):
+        return [
+            ValidationError("paint-order", value,
+                            "must be 'normal', or a unique permutation of 'fill', 'stroke', 'markers'")
+        ]
+    else:
+        return []
+
+# ── clip-path / mask / filter ──────────────────────────────────────────────
+
+def _check_uri_or_none(attr: str, value: str) -> list[ValidationError]:
+    s = value.strip().lower()
+    if s in ("none", "inherit") or _RE_URL.match(value.strip()):
+        return []
+    else:
+        return [
+            ValidationError(attr, value, "must be 'none', 'inherit', or url(#id)")
+        ]
+
+def check_clip_path(value): return _check_uri_or_none("clip-path", value)
+def check_mask(value): return _check_uri_or_none("mask", value)
+def check_filter(value): return _check_uri_or_none("filter", value)
+
+
+# ── transform ──────────────────────────────────────────────────────────────
+
+_RE_TRANSFORM = re.compile(
+    r"(?:matrix|translate|scale|rotate|skewX|skewY)"
+    r"\(\s*[+-]?[\d.eE+\-]+(?:\s*[,\s]\s*[+-]?[\d.eE+\-]+)*\s*\)",
+    re.I,
+)
+
+def check_transform(value) -> list[ValidationError]:
+    if not isinstance(value, str):
+        if isinstance(value, numbers.Number):
+            value = f"scale({value:.3f})"
+        elif isinstance(value[0], numbers.Number):
+            value = "translate(" + ",".join(f"{v:.3f}" for v in value) + ")"
+        else:
+            value = "matrix(" + ",".join(f"{v:.3f}" for l in value for v in l) + ")"
+    s = value.strip().lower()
+    if s in ("none", "inherit"):
+        return []
+    remainder = _RE_TRANSFORM.sub("", value).strip().replace(",", "").strip()
+    if remainder:
+        return [
+            ValidationError("transform", value,
+                    "contains unrecognised transform functions or syntax")
+        ]
+    else:
+        return []
+
+
+# ── pointer-events ─────────────────────────────────────────────────────────
+
+_POINTER_EVENTS = {
+    "bounding-box", "visiblepainted", "visiblefill", "visiblestroke",
+    "visible", "painted", "fill", "stroke", "all", "none", "inherit",
+}
+def check_pointer_events(value) -> list[ValidationError]:
+    return _check_oneof(value, "pointer", _POINTER_EVENTS)
+
+
+# ── cursor ─────────────────────────────────────────────────────────────────
+
+_CURSOR_KEYWORDS = {
+    "auto", "default", "none", "context-menu", "help", "pointer",
+    "progress", "wait", "cell", "crosshair", "text", "vertical-text",
+    "alias", "copy", "move", "no-drop", "not-allowed", "grab", "grabbing",
+    "e-resize", "n-resize", "ne-resize", "nw-resize", "s-resize",
+    "se-resize", "sw-resize", "w-resize", "ew-resize", "ns-resize",
+    "nesw-resize", "nwse-resize", "col-resize", "row-resize",
+    "all-scroll", "zoom-in", "zoom-out", "inherit",
+}
+
+def check_cursor(value) -> list[ValidationError]:
+    parts = [p.strip() for p in value.split(",")]
+    for part in parts:
+        low = part.lower()
+        if low in _CURSOR_KEYWORDS:
+            continue
+        if _RE_URL.match(part):
+            continue
+        return [ValidationError("cursor", value,
+                                f"unknown cursor value '{part}'; must be a keyword or url(#id)")]
+    else:
+        return []
+
+
+# ── vector-effect ──────────────────────────────────────────────────────────
+vector_effect_types = {"none", "non-scaling-stroke", "non-scaling-size",
+               "non-rotation", "fixed-position", "inherit"}
+def check_vector_effect(value) -> list[ValidationError]:
+    return _check_oneof(value, "vector-effect", vector_effect_types)
+
+
+# ── font-family ────────────────────────────────────────────────────────────
+
+def check_font_family(value) -> list[ValidationError]:
+    return []
+
+# ── font-size ──────────────────────────────────────────────────────────────
+
+_FONT_SIZE_KEYWORDS = {
+    "xx-small", "x-small", "small", "medium", "large",
+    "x-large", "xx-large", "smaller", "larger", "inherit",
+}
+def check_font_size(value) -> list[ValidationError]:
+    if not isinstance(value, str):
+        value = f"{value:.0f}"
+    s = value.strip().lower()
+    if s in _FONT_SIZE_KEYWORDS or _is_length(s):
+        return []
+    else:
+        return [ValidationError("font-size", value,
+                                "must be a length, percentage, or keyword "
+                                f"({sorted(_FONT_SIZE_KEYWORDS)})")]
+
+
+# ── font-weight ────────────────────────────────────────────────────────────
+font_weight_types = {"normal", "bold", "bolder", "lighter", "inherit"}
+def check_font_weight(value) -> list[ValidationError]:
+    if isinstance(value, str) and value.strip().lower() in font_weight_types:
+        return []
+    elif not isinstance(value, str):
+        w = value
+    else:
+        try:
+            w = int(value)
+        except (TypeError, ValueError):
+            return [ValidationError("font-weight", value,
+                                    "must be 'normal', 'bold', 'bolder', 'lighter', 'inherit', "
+                                    "or a multiple of 100 in [100, 1000]")]
+    if 100 <= w and w <= 1000 and w % 100 == 0:
+        return []
+    else:
+        return [ValidationError("font-weight", value,
+                                "must be 'normal', 'bold', 'bolder', 'lighter', 'inherit', "
+                                "or a multiple of 100 in [100, 1000]")]
+
+
+# ── font-style ─────────────────────────────────────────────────────────────
+font_style_types = {"normal", "italic", "oblique", "inherit"}
+def check_font_style(value) -> list[ValidationError]:
+    return _check_oneof(value, "font-style", font_style_types)
+
+
+# ── font-variant ───────────────────────────────────────────────────────────
+font_variant_types = {"normal", "small-caps", "inherit"}
+def check_font_variant(value) -> list[ValidationError]:
+    return _check_oneof(value, "font-variant", font_variant_types)
+
+
+# ── text-anchor ────────────────────────────────────────────────────────────
+text_anchor_types = {"start", "middle", "end", "inherit"}
+def check_text_anchor(value) -> list[ValidationError]:
+    return _check_oneof(value, "text-anchor", text_anchor_types)
+
+
+# ── dominant-baseline ──────────────────────────────────────────────────────
+
+_DOMINANT_BASELINE = {
+    "auto", "text-bottom", "alphabetic", "ideographic", "middle",
+    "central", "mathematical", "hanging", "text-top", "inherit",
+}
+def check_dominant_baseline(value) -> list[ValidationError]:
+    return _check_oneof(value, "dominant-baseline", _DOMINANT_BASELINE)
+
+
+# ── text-decoration ────────────────────────────────────────────────────────
+text_decoration_types = {"underline", "overline", "line-through", "blink"}
+def check_text_decoration(value) -> list[ValidationError]:
+    if not isinstance(value, str):
+        tokens = set(value)
+    else:
+        s = value.strip().lower()
+        if s in {"none", "inherit"}:
+            return []
+        tokens = set(s.split())
+    if not tokens.issubset(text_decoration_types):
+        return [ValidationError("text-decoration", value,
+                    f"must be 'none', 'inherit', or a combination of: {sorted(text_decoration_types)}")]
+    else:
+       return []
+
+
+# ── letter-spacing / word-spacing ──────────────────────────────────────────
+
+def _check_spacing(attr: str, value) -> list[ValidationError]:
+    s = value.strip().lower()
+    if s in {"normal", "inherit"} or _is_length(s):
+        return []
+    else:
+        return [
+            ValidationError(attr, value, "must be 'normal', 'inherit', or a length value")
+        ]
+
+def check_letter_spacing(value) -> list[ValidationError]: return _check_spacing("letter-spacing", value)
+def check_word_spacing(value)   -> list[ValidationError]: return _check_spacing("word-spacing", value)
+
+
+# ── writing-mode ───────────────────────────────────────────────────────────
+writing_mode_types =  {
+        "lr-tb", "rl-tb", "tb-rl", "lr", "rl", "tb",
+        "horizontal-tb", "vertical-rl", "vertical-lr", "inherit",
+    }
+def check_writing_mode(value) -> list[ValidationError]:
+    return _check_oneof(value, "writing-mode", writing_mode_types)
+
+BASE_VALIDATORS = {
+        "fill": check_fill,
+        "fill-opacity": check_fill_opacity,
+        "fill-rule": check_fill_rule,
+        "stroke": check_stroke,
+        "stroke-width": check_stroke_width,
+        "stroke-opacity": check_stroke_opacity,
+        "stroke-linecap": check_stroke_linecap,
+        "stroke-linejoin": check_stroke_linejoin,
+        "stroke-miterlimit": check_stroke_miterlimit,
+        "stroke-dasharray": check_stroke_dasharray,
+        "stroke-dashoffset": check_stroke_dashoffset,
+        "opacity": check_opacity,
+        "visibility": check_visibility,
+        "display": check_display,
+        "color": check_color,
+        "paint-order": check_paint_order,
+        "clip-path": check_clip_path,
+        "mask": check_mask,
+        "filter": check_filter,
+        "transform": check_transform,
+        "pointer-events": check_pointer_events,
+        "cursor": check_cursor,
+        "vector-effect": check_vector_effect,
+        # COMMON_TEXT_PRESENTATION
+        "font-family": check_font_family,
+        "font-size": check_font_size,
+        "font-weight": check_font_weight,
+        "font-style": check_font_style,
+        "font-variant": check_font_variant,
+        "text-anchor": check_text_anchor,
+        "dominant-baseline": check_dominant_baseline,
+        "text-decoration": check_text_decoration,
+        "letter-spacing": check_letter_spacing,
+        "word-spacing": check_word_spacing,
+        "writing-mode": check_writing_mode,
+    }
+
+def validate_props(props:dict, validators:dict, raise_on_invalid=True, undefined_is_missing=False):
+    errors = []
+    for k, v in props.items():
+        if v is None: continue
+        validator = validators.get(k)
+        if validator is not None:
+            errors.extend(validator(k, v))
+        elif undefined_is_missing:
+            errors.append(ValidationError("unknown property for validation", k))
+    if len(errors) > 0 and raise_on_invalid:
+        if len(errors) > 1:
+            error = ValidationError(
+                "\n".join(str(e) for e in errors)
+            )
+        else:
+            error = errors[0]
+        raise error
+    return errors
 
 class CSS:
     """
@@ -351,6 +853,10 @@ class CSS:
         else:
             return " ".join("{k}:{v};".format(k=k,v=v) for k,v in self.props.items())
 
+    validators = BASE_VALIDATORS
+    def validate(self, **kwargs):
+        return validate_props(self.props, self.validators, **kwargs)
+
 class HTMLManager:
     @classmethod
     def manage_class(kls, cls):
@@ -377,6 +883,7 @@ class HTMLManager:
 
     keyword_replacements = {
         'cls': 'class',
+        'in_': 'in',
         'use_for': 'for',
         'custom_type': 'is'
     }
@@ -406,9 +913,9 @@ class HTMLManager:
             if k in attrs:
                 attrs[v] = attrs[k]
                 del attrs[k]
-        attrs = {k.replace("_", "-"): v for k, v in attrs.items()}
+        required = {k.replace("_", "-"): v for k, v in attrs.items()}
         if sanitize:
-            attrs = {k: cls.sanitize_value(v) for k, v in attrs.items()}
+            required = {k: cls.sanitize_value(v) for k, v in attrs.items()}
         return attrs
 
     @classmethod
@@ -423,6 +930,11 @@ class HTMLManager:
                 styles[k] = v
                 del attrs[k]
         return styles, attrs
+
+    validators = BASE_VALIDATORS
+    @classmethod
+    def validate_props(cls, props, **kwargs):
+        return validate_props(props, cls.validators, **kwargs)
 
     class ElementModifier:
         def __init__(self, my_el, copy=False):
@@ -1392,6 +1904,9 @@ class HTML(XMLBase):
             from ...Docs import jdoc
             return jdoc(self)
 
+        def validate_props(self, **kwargs):
+            return self.context.validate_props(self._attrs, **kwargs)
+
         def make_class_list(self):
             self._attrs['class'] = self._attrs['class'].split()
         def add_class(self, *cls, copy=True):
@@ -1815,3 +2330,435 @@ class ContentXML(XMLBase):
             )
 
 
+COMMON_PRESENTATION = {
+    "fill": "black",  # interior fill colour
+    "fill-opacity": 1.0,  # 0–1
+    "fill-rule": "nonzero",  # "nonzero" | "evenodd"
+    "stroke": "none",  # outline colour
+    "stroke-width": 1,  # in user units
+    "stroke-opacity": 1.0,
+    "stroke-linecap": "butt",  # "butt" | "round" | "square"
+    "stroke-linejoin": "miter",  # "miter" | "round" | "bevel"
+    "stroke-miterlimit": 4,
+    "stroke-dasharray": "none",  # e.g. "5 3" for dashes
+    "stroke-dashoffset": 0,
+    "opacity": 1.0,  # applies to fill + stroke together
+    "visibility": "visible",  # "visible" | "hidden" | "collapse"
+    "display": "inline",
+    "color": "inherit",
+    "paint-order": "fill",  # "fill" | "stroke" | "markers"
+    "clip-path": "none",  # url(#id)
+    "mask": "none",  # url(#id)
+    "filter": "none",  # url(#id)
+    "transform": None,  # e.g. "rotate(45) translate(10,0)"
+    "pointer-events": "visiblePainted",
+    "cursor": "auto",
+    "vector-effect": "none",  # "non-scaling-stroke" is very useful
+}
+
+COMMON_TEXT_PRESENTATION = {
+    "font-family": "sans-serif",
+    "font-size": "16px",
+    "font-weight": "normal",  # "normal" | "bold" | 100–900
+    "font-style": "normal",  # "normal" | "italic" | "oblique"
+    "font-variant": "normal",
+    "text-anchor": "start",  # "start" | "middle" | "end"
+    "dominant-baseline": "auto",  # "auto" | "central" | "hanging" …
+    "text-decoration": "none",
+    "letter-spacing": "normal",
+    "word-spacing": "normal",
+    "writing-mode": "lr-tb",
+}
+
+COMMON_ALL = COMMON_PRESENTATION | COMMON_TEXT_PRESENTATION
+class SVG(HTML):
+    COMMON_PRESENTATION = COMMON_PRESENTATION
+    COMMON_ALL = COMMON_ALL
+    COMMON_TEXT_PRESENTATION = COMMON_TEXT_PRESENTATION
+
+    class TagElement(HTML.TagElement):
+        tag = None
+        required: dict
+        optional: dict
+        display_opts: dict
+
+        def __init__(self, *elems, **attrs):
+            super().__init__(self.tag, *elems, **attrs)
+
+
+        @classmethod
+        def convert_attrs(cls, attrs: dict):
+            copied = False
+            for k, v in attrs.items():
+                if isinstance(v, str):
+                    continue
+                if not copied:
+                    copied = True
+                    attrs = attrs.copy()
+                if v is None:
+                    del attrs[k]
+                else:
+                    if hasattr(v, "__getitem__") or hasattr(v, "__iter__"):
+                        v = " ".join(str(x) for x in v)
+                    else:
+                        v = str(v)
+                    attrs[k] = v
+            return attrs
+        attr_converter = convert_attrs
+        
+        def validate(self, **kwargs):
+            attrs = self.attrs
+            missing = attrs.keys() - self.required.keys()
+            if len(missing) > 0:
+                raise ValueError(f"missing required attributes {missing}")
+            #TODO: check other props
+            self.validate_props(**kwargs)
+
+        def __call__(self, *elems, **kwargs):
+            return type(self)(
+                self._elems + list(elems),
+                activator=self.activator,
+                on_update=self.on_update,
+                **dict(self.attrs, **kwargs)
+            )
+    class Svg(TagElement):
+       '''Root element. Always set viewBox for responsive sizing.'''
+       tag = 'svg'
+       required = {'xmlns': str, 'width': str, 'height': str}
+       optional = {'viewBox': None, 'preserveAspectRatio': str, 'version': str, 'x': numbers.Number, 'y': numbers.Number}
+       styles = ['transform', 'overflow']
+       def __init__(self, *elems, xmlns='http://www.w3.org/2000/svg', width='100%', height='100%', **kwargs):
+           super().__init__(*elems, xmlns=xmlns, width=width, height=height, **kwargs)
+    class G(TagElement):
+       '''Group element. Inherits presentation attrs to all children.'''
+       tag = 'g'
+       required = {}
+       optional = {'id': None, 'transform': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Defs(TagElement):
+       '''Container for reusable definitions (markers, gradients, etc.).'''
+       tag = 'defs'
+       required = {}
+       optional = {'id': None}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Symbol(TagElement):
+       '''Reusable graphic referenced via <use>. Not rendered directly.'''
+       tag = 'symbol'
+       required = {'id': None}
+       optional = {'viewBox': None, 'preserveAspectRatio': str, 'x': numbers.Number, 'y': numbers.Number, 'width': None, 'height': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, id=None, **kwargs):
+           super().__init__(*elems, id=id, **kwargs)
+    class Use(TagElement):
+       '''Instantiates a <symbol> or any element by id.'''
+       tag = 'use'
+       required = {'href': None}
+       optional = {'x': numbers.Number, 'y': numbers.Number, 'width': None, 'height': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, href=None, **kwargs):
+           super().__init__(*elems, href=href, **kwargs)
+    class Rect(TagElement):
+       '''Axis-aligned rectangle. rx/ry round the corners.'''
+       tag = 'rect'
+       required = {'x': numbers.Number, 'y': numbers.Number, 'width': None, 'height': None}
+       optional = {'rx': numbers.Number, 'ry': numbers.Number}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, x=0, y=0, width=None, height=None, **kwargs):
+           super().__init__(*elems, x=x, y=y, width=width, height=height, **kwargs)
+    class Circle(TagElement):
+       '''Circle defined by centre (cx, cy) and radius r.'''
+       tag = 'circle'
+       required = {'cx': numbers.Number, 'cy': numbers.Number, 'r': None}
+       optional = {}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, cx=0, cy=0, r=None, **kwargs):
+           super().__init__(*elems, cx=cx, cy=cy, r=r, **kwargs)
+    class Ellipse(TagElement):
+       '''Ellipse with independent x- and y-radii.'''
+       tag = 'ellipse'
+       required = {'cx': numbers.Number, 'cy': numbers.Number, 'rx': None, 'ry': None}
+       optional = {}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, cx=0, cy=0, rx=None, ry=None, **kwargs):
+           super().__init__(*elems, cx=cx, cy=cy, rx=rx, ry=ry, **kwargs)
+    class Line(TagElement):
+       '''Straight line. stroke must be set; fill has no effect.'''
+       tag = 'line'
+       required = {'x1': numbers.Number, 'y1': numbers.Number, 'x2': numbers.Number, 'y2': numbers.Number}
+       optional = {'marker-start': None, 'marker-mid': None, 'marker-end': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, x1=0, y1=0, x2=0, y2=0, **kwargs):
+           super().__init__(*elems, x1=x1, y1=y1, x2=x2, y2=y2, **kwargs)
+    class Polyline(TagElement):
+       '''Open polygon (not closed). Use fill='none' for pure outline.'''
+       tag = 'polyline'
+       required = {'points': None}
+       optional = {'marker-start': None, 'marker-mid': None, 'marker-end': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, points=None, **kwargs):
+           super().__init__(*elems, points=points, **kwargs)
+    class Polygon(TagElement):
+       '''Closed polygon. Last point auto-connects to first.'''
+       tag = 'polygon'
+       required = {'points': None}
+       optional = {'marker-start': None, 'marker-mid': None, 'marker-end': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, points=None, **kwargs):
+           super().__init__(*elems, points=points, **kwargs)
+    class Path(TagElement):
+       '''Most versatile shape. Path commands: M/m (move), L/l (line), H/h (horiz), V/v (vert), C/c (cubic bezier), S/s (smooth cubic), Q/q (quadratic), T/t (smooth quad), A/a (arc), Z/z (close).'''
+       tag = 'path'
+       required = {'d': None}
+       optional = {'pathLength': None, 'marker-start': None, 'marker-mid': None, 'marker-end': None}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, d=None, **kwargs):
+           super().__init__(*elems, d=d, **kwargs)
+    class Text(TagElement):
+       '''Text element. Contains plain text or <tspan> children.'''
+       tag = 'text'
+       required = {'x': numbers.Number, 'y': numbers.Number}
+       optional = {'dx': numbers.Number, 'dy': numbers.Number, 'rotate': None, 'textLength': None, 'lengthAdjust': str}
+       styles = COMMON_ALL
+       def __init__(self, *elems, x=0, y=0, **kwargs):
+           super().__init__(*elems, x=x, y=y, **kwargs)
+    class Tspan(TagElement):
+       '''Inline text span; child of <text>. Use dy='1.2em' for line breaks.'''
+       tag = 'tspan'
+       required = {}
+       optional = {'x': None, 'y': None, 'dx': None, 'dy': None, 'rotate': None, 'textLength': None, 'lengthAdjust': str}
+       styles = COMMON_ALL
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Textpath(TagElement):
+       '''Renders text along a <path>.'''
+       tag = 'textPath'
+       required = {'href': None}
+       optional = {'startOffset': str, 'method': str, 'spacing': str, 'side': str}
+       styles = COMMON_ALL
+       def __init__(self, *elems, href=None, **kwargs):
+           super().__init__(*elems, href=href, **kwargs)
+    class Image(TagElement):
+       '''Embeds a raster or SVG image.'''
+       tag = 'image'
+       required = {'href': None, 'x': numbers.Number, 'y': numbers.Number, 'width': None, 'height': None}
+       optional = {'preserveAspectRatio': str, 'crossorigin': None, 'decoding': str, 'image-rendering': str}
+       styles = ['opacity', 'transform', 'clip-path', 'mask', 'filter']
+       def __init__(self, *elems, href=None, x=0, y=0, width=None, height=None, **kwargs):
+           super().__init__(*elems, href=href, x=x, y=y, width=width, height=height, **kwargs)
+    class Foreignobject(TagElement):
+       '''Embeds arbitrary XML (e.g. HTML) inside SVG.'''
+       tag = 'foreignObject'
+       required = {'x': numbers.Number, 'y': numbers.Number, 'width': None, 'height': None}
+       optional = {}
+       styles = ['opacity', 'transform', 'clip-path', 'mask']
+       def __init__(self, *elems, x=0, y=0, width=None, height=None, **kwargs):
+           super().__init__(*elems, x=x, y=y, width=width, height=height, **kwargs)
+    class Lineargradient(TagElement):
+       '''Define with <stop> children; apply via fill='url(#id)'.'''
+       tag = 'linearGradient'
+       required = {'id': None}
+       optional = {'x1': str, 'y1': str, 'x2': str, 'y2': str, 'gradientUnits': str, 'gradientTransform': None, 'spreadMethod': str, 'href': None}
+       styles = []
+       def __init__(self, *elems, id=None, **kwargs):
+           super().__init__(*elems, id=id, **kwargs)
+    class Radialgradient(TagElement):
+       '''Radial gradient. fx/fy shift the highlight off-centre.'''
+       tag = 'radialGradient'
+       required = {'id': None}
+       optional = {'cx': str, 'cy': str, 'r': str, 'fx': None, 'fy': None, 'fr': str, 'gradientUnits': str, 'gradientTransform': None, 'spreadMethod': str, 'href': None}
+       styles = []
+       def __init__(self, *elems, id=None, **kwargs):
+           super().__init__(*elems, id=id, **kwargs)
+    class Stop(TagElement):
+       '''Colour stop inside a gradient. Always set stop-color.'''
+       tag = 'stop'
+       required = {'offset': None}
+       optional = {'stop-color': str, 'stop-opacity': numbers.Number}
+       styles = []
+       def __init__(self, *elems, offset=None, **kwargs):
+           super().__init__(*elems, offset=offset, **kwargs)
+    class Pattern(TagElement):
+       '''Tiling pattern paint server. Apply via fill='url(#id)'.'''
+       tag = 'pattern'
+       required = {'id': None, 'width': None, 'height': None}
+       optional = {'x': numbers.Number, 'y': numbers.Number, 'patternUnits': str, 'patternContentUnits': str, 'patternTransform': None, 'viewBox': None, 'preserveAspectRatio': str, 'href': None}
+       styles = []
+       def __init__(self, *elems, id=None, width=None, height=None, **kwargs):
+           super().__init__(*elems, id=id, width=width, height=height, **kwargs)
+    class Clippath(TagElement):
+       '''Hard clip. Apply via clip-path='url(#id)' on the target.'''
+       tag = 'clipPath'
+       required = {'id': None}
+       optional = {'clipPathUnits': str, 'transform': None}
+       styles = []
+       def __init__(self, *elems, id=None, **kwargs):
+           super().__init__(*elems, id=id, **kwargs)
+    class Mask(TagElement):
+       '''Luminance mask (white=visible, black=hidden). Apply via mask='url(#id)'.'''
+       tag = 'mask'
+       required = {'id': None}
+       optional = {'x': str, 'y': str, 'width': str, 'height': str, 'maskUnits': str, 'maskContentUnits': str}
+       styles = []
+       def __init__(self, *elems, id=None, **kwargs):
+           super().__init__(*elems, id=id, **kwargs)
+    class Marker(TagElement):
+       '''Arrowhead / endpoint decoration. orient='auto-start-reverse' flips for start markers automatically.'''
+       tag = 'marker'
+       required = {'id': None, 'viewBox': str, 'refX': numbers.Number, 'refY': numbers.Number, 'markerWidth': numbers.Number, 'markerHeight': numbers.Number}
+       optional = {'orient': str, 'markerUnits': str, 'preserveAspectRatio': str}
+       styles = COMMON_PRESENTATION
+       def __init__(self, *elems, id=None, viewBox='0 0 10 10', refX=5, refY=5, markerWidth=6, markerHeight=6, **kwargs):
+           super().__init__(*elems, id=id, viewBox=viewBox, refX=refX, refY=refY, markerWidth=markerWidth, markerHeight=markerHeight, **kwargs)
+    class Filter(TagElement):
+       '''Container for filter primitives. Apply via filter='url(#id)'.'''
+       tag = 'filter'
+       required = {'id': None}
+       optional = {'x': str, 'y': str, 'width': str, 'height': str, 'filterUnits': str, 'primitiveUnits': str, 'color-interpolation-filters': str}
+       styles = []
+       def __init__(self, *elems, id=None, **kwargs):
+           super().__init__(*elems, id=id, **kwargs)
+    class Fegaussianblur(TagElement):
+       '''Gaussian blur. stdDeviation='x y' for asymmetric blur.'''
+       tag = 'feGaussianBlur'
+       required = {'stdDeviation': None}
+       optional = {'in': str, 'result': None, 'edgeMode': str}
+       styles = []
+       def __init__(self, *elems, stdDeviation=None, **kwargs):
+           super().__init__(*elems, stdDeviation=stdDeviation, **kwargs)
+    class Fecolormatrix(TagElement):
+       '''Colour transform. type='saturate' values='0' → grayscale.'''
+       tag = 'feColorMatrix'
+       required = {'type': str}
+       optional = {'in': str, 'result': None, 'values': None}
+       styles = []
+       def __init__(self, *elems, type='matrix', **kwargs):
+           super().__init__(*elems, type=type, **kwargs)
+    class Feblend(TagElement):
+       '''Composites two inputs using a blend mode.'''
+       tag = 'feBlend'
+       required = {'in': str, 'in2': str}
+       optional = {'mode': str, 'result': None}
+       styles = []
+       def __init__(self, *elems, in_='SourceGraphic', in2='BackgroundImage', **kwargs):
+           super().__init__(*elems, in_=in_, in2=in2, **kwargs)
+    class Fecomposite(TagElement):
+       '''Alpha compositing of two filter inputs.'''
+       tag = 'feComposite'
+       required = {'in': str, 'in2': str}
+       optional = {'operator': str, 'k1': numbers.Number, 'k2': numbers.Number, 'k3': numbers.Number, 'k4': numbers.Number, 'result': None}
+       styles = []
+       def __init__(self, *elems, in_='SourceGraphic', in2='SourceGraphic', **kwargs):
+           super().__init__(*elems, in_=in_, in2=in2, **kwargs)
+    class Feoffset(TagElement):
+       '''Shifts its input. Combine with feGaussianBlur for drop shadows.'''
+       tag = 'feOffset'
+       required = {'dx': numbers.Number, 'dy': numbers.Number}
+       optional = {'in': str, 'result': None}
+       styles = []
+       def __init__(self, *elems, dx=0, dy=0, **kwargs):
+           super().__init__(*elems, dx=dx, dy=dy, **kwargs)
+    class Femerge(TagElement):
+       '''Combines multiple filter results. Children are <feMergeNode in_='…'>.'''
+       tag = 'feMerge'
+       required = {}
+       optional = {'result': None}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Femergenode(TagElement):
+       '''Child of <feMerge>; references a filter result by name.'''
+       tag = 'feMergeNode'
+       required = {}
+       optional = {'in': None}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Feflood(TagElement):
+       '''Fills filter region with a solid colour.'''
+       tag = 'feFlood'
+       required = {'flood-color': None}
+       optional = {'flood-opacity': numbers.Number, 'result': None}
+       styles = []
+       def __init__(self, *elems, flood_color=None, **kwargs):
+           super().__init__(*elems, flood_color=flood_color, **kwargs)
+    class Feturbulence(TagElement):
+       '''Perlin / fractal noise. Good base for texture effects.'''
+       tag = 'feTurbulence'
+       required = {'baseFrequency': None}
+       optional = {'type': str, 'numOctaves': numbers.Number, 'seed': numbers.Number, 'stitchTiles': str, 'result': None}
+       styles = []
+       def __init__(self, *elems, baseFrequency=None, **kwargs):
+           super().__init__(*elems, baseFrequency=baseFrequency, **kwargs)
+    class Fedisplacementmap(TagElement):
+       '''Warps 'in' using a displacement map from 'in2'.'''
+       tag = 'feDisplacementMap'
+       required = {'in': str, 'in2': None, 'scale': numbers.Number}
+       optional = {'xChannelSelector': str, 'yChannelSelector': str, 'result': None}
+       styles = []
+       def __init__(self, *elems, in_='SourceGraphic', in2=None, scale=0, **kwargs):
+           super().__init__(*elems, in_=in_, in2=in2, scale=scale, **kwargs)
+    class Animate(TagElement):
+       '''SMIL animation of a single attribute on the parent element.'''
+       tag = 'animate'
+       required = {'attributeName': None}
+       optional = {'from': None, 'to': None, 'values': None, 'keyTimes': None, 'keySplines': None, 'calcMode': str, 'dur': None, 'repeatCount': str, 'repeatDur': None, 'begin': str, 'end': None, 'fill': str, 'additive': str, 'accumulate': str}
+       styles = []
+       def __init__(self, *elems, attributeName=None, **kwargs):
+           super().__init__(*elems, attributeName=attributeName, **kwargs)
+    class Animatetransform(TagElement):
+       '''Animates a transform. type='rotate' from/to can include cx,cy: '0 50 50'.'''
+       tag = 'animateTransform'
+       required = {'attributeName': str, 'type': str}
+       optional = {'from': None, 'to': None, 'values': None, 'dur': None, 'repeatCount': str, 'begin': str, 'fill': str, 'additive': str}
+       styles = []
+       def __init__(self, *elems, attributeName='transform', type='rotate', **kwargs):
+           super().__init__(*elems, attributeName=attributeName, type=type, **kwargs)
+    class Animatemotion(TagElement):
+       '''Moves element along a path. Add <mpath href='#path-id'> as child.'''
+       tag = 'animateMotion'
+       required = {}
+       optional = {'path': None, 'keyPoints': None, 'rotate': str, 'dur': None, 'repeatCount': str, 'begin': str, 'calcMode': str}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Set(TagElement):
+       '''Discretely sets an attribute value for a duration (no interpolation).'''
+       tag = 'set'
+       required = {'attributeName': None, 'to': None}
+       optional = {'begin': str, 'dur': None, 'end': None, 'fill': str}
+       styles = []
+       def __init__(self, *elems, attributeName=None, to=None, **kwargs):
+           super().__init__(*elems, attributeName=attributeName, to=to, **kwargs)
+    class Title(TagElement):
+       '''Accessible name for the SVG or a group. First child of <svg> or <g>.'''
+       tag = 'title'
+       required = {}
+       optional = {}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Desc(TagElement):
+       '''Longer accessible description. Complements <title>.'''
+       tag = 'desc'
+       required = {}
+       optional = {}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+    class Metadata(TagElement):
+       '''Container for non-SVG metadata (e.g. RDF, XMP).'''
+       tag = 'metadata'
+       required = {}
+       optional = {}
+       styles = []
+       def __init__(self, *elems, **kwargs):
+           super().__init__(*elems, **kwargs)
+
+
+del COMMON_ALL
+del COMMON_PRESENTATION
+del COMMON_TEXT_PRESENTATION

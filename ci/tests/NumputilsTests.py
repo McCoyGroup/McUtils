@@ -2636,7 +2636,7 @@ class NumputilsTests(TestCase):
         )
 
 
-    @debugTest
+    @validationTest
     def test_TransrotExpansion(self):
         np.random.seed(2123)
         coords = np.random.rand(15, 3)
@@ -2689,3 +2689,45 @@ class NumputilsTests(TestCase):
         concat_der = [np.concatenate(p, axis=-1) for p in zip(rot_der[1:], rot_der2[1:])]
         print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8).shape)
         print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8))
+
+    @validationTest
+    def test_RenderMatrix(self):
+        np.random.seed(2123)
+        coords = np.random.rand(15, 3)
+
+        rm = nput.render_matrix(
+            # view_vector=[0, 1, 1],
+            bbox=[[0, 2], [-2, 2], [-2, 2]],
+            view_position=[0, 1, 1],
+            view_center=[0, 1, 0],
+            view_angle=np.pi
+        )
+        print(rm)
+
+    @validationTest
+    def test_Bezier(self):
+        print(
+            nput.bezier_solve([0, .5, 1, 2])
+        )
+
+    @debugTest
+    def test_Arc(self):
+        import McUtils.Plots as plt
+
+        points, arc = nput.arc_points_from_endpoints(
+            [.8, 0],
+            [-.8, 0],
+            radius=nput.vec_normalize([1, 2]) * 2,
+            return_arc=True,
+            clockwise=True,
+            use_major_rotation=False,
+            rotation=np.pi/3
+        )
+        """(array([ 0. , -0.6]), array([1., 1.]), array(0.64350111), array(-4.42859487), None)"""
+        print(arc)
+        print(points)
+        plt.Plot(*points.T,
+                 plot_range=[[-2, 2], [-2, 2]],
+                 padding=[[0, 0], [0, 0]],
+                 image_size=500,
+                 aspect_ratio=1).show()
