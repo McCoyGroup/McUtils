@@ -1,5 +1,5 @@
 
-from .HTML import HTML, CSS, ContentXML, HTMLManager
+from .HTML import HTML, CSS, SVG, ContentXML, HTMLManager
 from .Bootstrap import Bootstrap
 from .HTMLWidgets import ActiveHTMLWrapper, HTMLWidgets
 from .BootstrapWidgets import BootstrapWidgets
@@ -13,6 +13,7 @@ __reload_hook__ = [".HTML", ".HTMLWidgets", ".Bootstrap", ".BootstrapWidgets", "
 
 class JHTML:
     HTML = HTML
+    SVGContext = SVG
     HTMLManager = HTMLManager
     CSS = CSS
     XML = ContentXML

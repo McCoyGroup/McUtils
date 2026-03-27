@@ -4,8 +4,8 @@ ZachLib to serve more general purposes
 """
 
 import numpy as np, math
-import itertools
-from .. import Numputils as nput
+# import itertools
+# from .. import Numputils as nput
 
 __all__ = [
     "StirlingS1",

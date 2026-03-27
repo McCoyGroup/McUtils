@@ -5,6 +5,8 @@ of features, but I think we'll 90% of the time just want to use MPL or VTK so wh
 If that happens, lots of the 'if backend == MPL' stuff will change to use a Backend object
 """
 
+from __future__ import annotations
+
 __all__ = [
     "GraphicsBackend"
 ]
@@ -388,7 +390,6 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
         return data
     def tight_layout(self):
         ...
-
 
 class GraphicsBackend(metaclass=abc.ABCMeta):
     Figure = GraphicsFigure

@@ -45,7 +45,13 @@ __all__ = [
     "cot_deriv",
     "axis_rot_gen_deriv",
     "angle_arc_parameters",
-    "arc_points"
+    "arc_points",
+    "arc_angles_from_endpoints",
+    "arc_center_from_endpoints",
+    "arc_points_from_endpoints",
+    "bezier_coeffs",
+    "bezier_eval",
+    "bezier_solve"
 ]
 
 
@@ -4035,16 +4041,315 @@ def angle_arc_parameters(u, v, normal=None, up_vector=(0, 0, 1)):
 
     return normal, emb_angle, base_ang
 
-def arc_points(center, normal, radius, offset_angle, span_angle, angular_density=None, npoints=None):
+def arc_points(center, radius, offset_angle, span_angle,
+               normal=None, angular_density=None, npoints=None, minor_radius=None):
+    #TODO: vectorize on angles
+    center = np.asanyarray(center)
     end_angle_rad = offset_angle + span_angle
     start_angle_rad = offset_angle
-    if angular_density is None:
-        angular_density = 36 / (2 * np.pi)
-    npoints = angular_density * (end_angle_rad - start_angle_rad)
+    if npoints is None:
+        if angular_density is None:
+            angular_density = 72 / (2 * np.pi)
+        npoints = angular_density * np.abs(span_angle)
     angles = np.linspace(start_angle_rad, end_angle_rad, int(np.ceil(npoints)))
-    points = np.array([radius * np.cos(angles), radius * np.sin(angles), np.zeros(len(angles))]).T
-    points = center[np.newaxis] + np.reshape(
-        points[:, np.newaxis, :] @ tmats.rotation_matrix([0, 0, 1], normal)[np.newaxis],
-        (-1, 3)
-    )
+    if minor_radius is None:
+        radius = np.asanyarray(radius)
+        if radius.ndim == center.ndim:
+            radius, minor_radius = radius[..., 0], radius[..., 1]
+        else:
+            minor_radius = radius
+    if center.shape[-1] == 2:
+        points = np.moveaxis(
+            np.array([radius * np.cos(angles), minor_radius * np.sin(angles)]),
+            0, -1
+        )
+    else:
+        points = np.moveaxis(
+            np.array([radius * np.cos(angles), minor_radius * np.sin(angles), np.zeros(len(angles))]),
+            0, -1
+        )
+        if normal is not None:
+            points = np.reshape(
+                points[:, np.newaxis, :] @ tmats.rotation_matrix([0, 0, 1], normal)[np.newaxis],
+                (-1, 3)
+            )
+    points = center[..., np.newaxis, :] + points
+
     return points
+
+def arc_center_from_endpoints(
+        start, end,
+        rotation=None,
+        normal=None,
+        radius=None,
+        check_radius=True,
+        use_major_rotation=None,
+        clockwise=None,
+        return_angles=False
+):
+    end = np.asanyarray(end, dtype=float)
+    start = np.asanyarray(start, dtype=float)
+    base_shape = end.shape[:-1]
+    ndim = end.shape[-1]
+    diff = (start - end) / 2
+    if rotation is not None:
+        if ndim == 3:
+            rot = tmats.view_matrix(
+                diff,
+                view_vector=normal,
+                output_order=['z', 'y', 'x']
+            ) @ tmats.rotation_matrix([0, 0, 1], -rotation)
+        else:
+            rot = tmats.rotation_matrix("2d", -rotation)
+        diff = np.reshape(diff[..., np.newaxis, :] @ rot.T, diff.shape)
+    diff = diff[..., :2]
+    if radius is None:
+        radius = vec_norms(diff) / 2
+    radius = np.asanyarray(radius, dtype=float)
+    if radius.ndim == len(base_shape):
+        if radius.ndim == 0:
+            radius = np.array([radius, radius])
+        else:
+            radius = np.concatenate([radius[..., np.newaxis], radius[..., np.newaxis]],
+                                    axis=-1)
+
+    sdiff = diff / radius
+    if check_radius:
+        lams = vec_norms(sdiff)
+        bad_lams = lams > 1
+        radius[bad_lams] *= lams[bad_lams][..., np.newaxis]
+        sdiff[bad_lams] = diff[bad_lams] / radius[bad_lams]
+
+    r2 = radius**2
+    sqrad = np.prod(r2, axis=-1)
+    offset = np.asanyarray(np.sum(diff**2 * r2[..., (1, 0)], axis=-1))
+    num = np.clip(sqrad - offset, 0, np.max(sqrad))
+    bad_pos = offset < 1e-8
+    offset[bad_pos] = 1.
+    sq = np.asanyarray(np.sqrt(num / offset))
+    sq[bad_pos] = 0.
+
+    centers = sq * radius[..., (0, 1)] * sdiff[..., (1, 0)]
+    centers[..., 1] *= -1
+    if clockwise is not None:
+        if use_major_rotation is None:
+            u_axis = (diff - centers) / radius
+            v_axis = -(diff + centers) / radius
+            det = u_axis[..., 0] * v_axis[..., 1] - u_axis[..., 1] * v_axis[..., 0]
+            if clockwise:
+                centers[det < 0] *= -1
+            else:
+                centers[det > 0] *= -1
+        else:
+            if bool(use_major_rotation) == bool(clockwise):
+                centers *= -1
+    elif clockwise is None and use_major_rotation is not None:
+            u_axis = (diff - centers) / radius
+            v_axis = -(diff + centers) / radius
+            det = u_axis[..., 0] * v_axis[..., 1] - u_axis[..., 1] * v_axis[..., 0]
+            if use_major_rotation:
+                centers[det < 0] *= -1
+            else:
+                centers[det > 0] *= -1
+
+    if return_angles:
+        scenter = -centers / radius
+        u_axis = (sdiff + scenter)
+        v_axis = (-sdiff + scenter)
+        offset_angle, span_angle = arc_angles_from_endpoints(None, None, None,
+                                                             uv_axes=[u_axis, v_axis],
+                                                             use_major_rotation=use_major_rotation,
+                                                             clockwise=clockwise)
+
+    if rotation is not None:
+        if ndim == 3:
+            centers = np.concatenate([centers, np.zeros(centers.shape[:-2] + (1,))], axis=-1)
+        centers = np.reshape(centers[..., np.newaxis, :] @ rot, centers.shape)
+
+    centers = centers + (end + start) / 2
+    if return_angles:
+        return (centers, radius), (span_angle, offset_angle)
+    else:
+        return (centers, radius)
+
+def arc_angles_from_endpoints(centers, starts, ends,
+                              rotation=None,
+                              uv_axes=None,
+                              use_major_rotation=None,
+                              clockwise=None):
+    if uv_axes is None:
+        centers = np.asanyarray(centers)
+        starts = np.asanyarray(starts)
+        ends = np.asanyarray(ends)
+        uv_axes = [
+            starts-centers,
+            ends-centers
+        ]
+    uv_axes = np.asanyarray(uv_axes)
+    u_axis, v_axis = uv_axes
+    base_shape = u_axis.shape[:-1]
+    ndim = u_axis.shape[-1]
+    if rotation is not None:
+        if ndim == 3:
+            normal = vec_crosses(u_axis, v_axis, normalize=True)
+            uv_axes = uv_axes @ tmats.rotation_matrix(normal, -rotation)
+            rot = tmats.view_matrix(
+                uv_axes[0],
+                view_vector=normal,
+                output_order=['x', 'y', 'z']
+            )
+        else:
+            rot = tmats.rotation_matrix("2d", -rotation)
+        u_axis, v_axis = uv_axes @ rot
+
+    u_axis = u_axis[..., :2]
+    v_axis = v_axis[..., :2]
+    x_axes = np.zeros(base_shape + (2,), dtype=float)
+    x_axes[..., 0] = 1
+    offset_angle = np.asanyarray(vec_angles(x_axes, u_axis, return_crosses=False))
+    span_angle = np.asanyarray(vec_angles(u_axis, v_axis, return_crosses=False))
+
+    if clockwise is not None:
+        if not clockwise:
+            span_angle[span_angle > 0] -= 2 * np.pi
+        else:
+            span_angle[span_angle < 0] += 2 * np.pi
+
+    if use_major_rotation is not None:
+        abs_span = np.abs(span_angle)
+        if use_major_rotation:
+            mask = abs_span < np.pi
+        else:
+            mask = abs_span > np.pi
+        span_angle[mask] = np.sign(span_angle[mask]) * (2*np.pi - abs_span[mask])
+
+    return offset_angle, span_angle
+
+def arc_points_from_endpoints(
+        start, end,
+        rotation=None,
+        normal=None,
+        radius=None,
+        check_radius=True,
+        use_major_rotation=None,
+        clockwise=None,
+        return_arc=False,
+        npoints=None,
+        angular_density=None
+    ):
+    (centers, radii), (span_angles, offset_angles) = arc_center_from_endpoints(
+        start, end,
+        rotation=rotation,
+        normal=normal,
+        radius=radius,
+        check_radius=check_radius,
+        use_major_rotation=use_major_rotation,
+        clockwise=clockwise,
+        return_angles=True
+    )
+    if rotation is None:
+        points = arc_points(centers, radii, offset_angles, span_angles, normal,
+                            npoints=npoints,
+                            angular_density=angular_density)
+    else:
+        points = arc_points(np.zeros_like(centers), radii, offset_angles, span_angles,
+                            normal=None,
+                            npoints=npoints,
+                            angular_density=angular_density)
+    ndim = points.shape[-1]
+    if rotation is not None:
+        centers = np.asanyarray(centers)
+        if ndim == 3:
+            start = np.asanyarray(start)
+            end = np.asanyarray(end)
+            u_axis = start - centers
+            v_axis = end - centers
+            normal = vec_crosses(u_axis, v_axis, normalize=True)
+            u_axis = u_axis[..., np.newaxis, :] @ tmats.rotation_matrix(normal, rotation)
+            rot = tmats.view_matrix(
+                u_axis[..., 0, :],
+                view_vector=normal,
+                output_order=['x', 'y', 'z']
+            )
+        else:
+            rot = tmats.rotation_matrix("2d", -rotation)
+        points = points @ rot + centers[..., np.newaxis, :]
+    if return_arc:
+        return points, (centers, radii, offset_angles, span_angles, normal)
+    else:
+        return points
+
+_binoms = [None]
+def _get_binom(n):
+    from ..Combinatorics import Binomial
+    a = _binoms[-1]
+    if a is None or len(a) < n:
+        _binoms[-1] = Binomial(n)
+        a = _binoms[-1]
+    return a
+def bezier_coeffs(n, t):
+    u = 1 - t
+    t_exp = t**np.flip(np.arange(n))
+    u_exp = u**np.arange(n)
+    binoms = _get_binom(n)[n, :n]
+    return binoms*t_exp*u_exp
+
+def bezier_eval(control_points, t):
+    n = len(control_points)
+    control_points = np.asanyarray(control_points)
+    return np.dot(control_points, bezier_coeffs(n, t))
+
+def bezier_solve(control_points):
+    if len(control_points) <= 2:
+        control_points = np.asanyarray(control_points)
+        smol = control_points.ndim == 1
+        if smol:
+            return -1
+        else:
+            return np.full(len(control_points), -1)
+    elif len(control_points) == 3:
+        control_points = np.asanyarray(control_points)
+        smol = control_points.ndim == 1
+        if smol: control_points = control_points[:, np.newaxis]
+        p1, p0, p2 = control_points
+        denom = p0 - 2 * p1 + p2
+        bad_denoms = np.where(denom < 1e-12)
+        denom[bad_denoms] = 1
+        t = (p0 - p1) / denom
+        t[bad_denoms] = -1
+        t[(0 > t) | (t > 1)] = -1
+        if smol: t = t[0]
+        return t
+    elif len(control_points) == 4:
+        control_points = np.asanyarray(control_points)
+        smol = control_points.ndim == 1
+        if smol: control_points = control_points[:, np.newaxis]
+        p0, p1, p2, p3 = control_points
+        a = -p0 + 3 * p1 - 3 * p2 + p3
+        b = 2 * p0 - 4 * p1 + 2 * p2
+        c = -p0 + p1
+        quad_polys = np.abs(a) < 1e-12
+        cube_polys = ~quad_polys
+        qb = b[quad_polys]
+        bad_b = np.abs(qb) < 1e-12
+        qb[bad_b] = -1
+        t_quad = -c[quad_polys] / qb
+        t_quad[bad_b] = -1
+        a, b, c = a[cube_polys], b[cube_polys], c[cube_polys]
+        disc = b**2 - 4*a*c
+        bad_cubes = disc < 0
+        disc[bad_cubes] = 1
+        sq = np.sqrt(disc)
+        left_sol, right_sol = (-b + sq) / (2 * a), (-b - sq) / (2 * a)
+        left_sol[bad_cubes] = -1
+        right_sol[bad_cubes] = -1
+        full_solns = np.full(p0.shape + (2,), -1)
+        quad_polys = quad_polys
+        full_solns[quad_polys, 0] = t_quad
+        full_solns[cube_polys, 0] = left_sol
+        full_solns[cube_polys, 1] = right_sol
+        full_solns[(0 > full_solns) | (full_solns > 1)] = -1
+        if smol: full_solns = full_solns[0]
+        return full_solns
+    else:
+        raise NotImplementedError("higher order Bezier requires numerical solutions")

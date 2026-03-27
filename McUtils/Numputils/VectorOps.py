@@ -372,57 +372,70 @@ def vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None
     :return: angles and normals between two vectors
     :rtype: (np.ndarray, np.ndarray)
     """
-    dots = vec_dots(vectors1, vectors2, axis=axis)
-    crosses = vec_crosses(vectors1, vectors2, axis=axis)
-    if norms is not None:
-        norms1, norms2 = norms
+    vectors1 = np.asanyarray(vectors1)
+    vectors2 = np.asanyarray(vectors2)
+    if vectors1.shape[axis] == 2:
+        vectors1 = vec_normalize(vectors1, axis=axis)
+        vectors2 = vec_normalize(vectors2, axis=axis)
+        x1 = np.take(vectors1, 0, axis=axis)
+        y1 = np.take(vectors1, 1, axis=axis)
+        x2 = np.take(vectors2, 0, axis=axis)
+        y2 = np.take(vectors2, 1, axis=axis)
+        sin = x1 * y2 - x2 * y1
+        dots = vec_dots(vectors1, vectors2, axis=axis)
+        return np.arctan2(sin, dots)
     else:
-        norms1 = vec_norms(vectors1, axis=axis)
-        norms2 = vec_norms(vectors2, axis=axis)
-        norms = (norms1, norms2)
-
-    norm_prod = norms1*norms2
-    if check_zeros:
-        zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
-        smol = util.is_numeric(norm_prod)
-        if smol:
-            bad_norms = norm_prod < zero_thresh
-            if bad_norms:
-                norm_prod = np.array(1.)
+        dots = vec_dots(vectors1, vectors2, axis=axis)
+        crosses = vec_crosses(vectors1, vectors2, axis=axis)
+        if norms is not None:
+            norms1, norms2 = norms
         else:
-            bad_norm_prods = np.where(np.abs(norm_prod) <= zero_thresh)
-            norm_prod[bad_norm_prods] = 1.
+            norms1 = vec_norms(vectors1, axis=axis)
+            norms2 = vec_norms(vectors2, axis=axis)
+            norms = (norms1, norms2)
 
-    cos_comps = dots/norm_prod
-    cross_norms = vec_norms(crosses, axis=axis)
-    sin_comps = cross_norms/norm_prod
+        norm_prod = norms1*norms2
+        if check_zeros:
+            zero_thresh = Options.norm_zero_threshold if zero_thresh is None else zero_thresh
+            smol = util.is_numeric(norm_prod)
+            if smol:
+                bad_norms = norm_prod < zero_thresh
+                if bad_norms:
+                    norm_prod = np.array(1.)
+            else:
+                bad_norm_prods = np.where(np.abs(norm_prod) <= zero_thresh)
+                norm_prod[bad_norm_prods] = 1.
 
-    angles = np.arctan2(sin_comps, cos_comps)
+        cos_comps = dots/norm_prod
+        cross_norms = vec_norms(crosses, axis=axis)
+        sin_comps = cross_norms/norm_prod
 
-    if check_zeros:
-        if smol:
-            if bad_norms:
-                angles = np.array(0.)
+        angles = np.arctan2(sin_comps, cos_comps)
+
+        if check_zeros:
+            if smol:
+                if bad_norms:
+                    angles = np.array(0.)
+            else:
+                angles[bad_norm_prods] = 0.
+
+        # return signed angles
+        if up_vectors is not None:
+            if up_vectors.ndim < crosses.ndim:
+                up_vectors = np.broadcast_to(up_vectors, crosses.shape[:-len(up_vectors.shape)] + up_vectors.shape)
+            orientations = np.sign(vec_dots(up_vectors, crosses))
+            angles = orientations * angles
+
+        if return_crosses or return_norms or return_cross_norms:
+            ret = (angles,)
+            if return_crosses:
+                ret = ret + (crosses,)
+            if return_norms:
+                ret = ret + (norms,)
+            if return_cross_norms:
+                ret = ret + (cross_norms,)
         else:
-            angles[bad_norm_prods] = 0.
-
-    # return signed angles
-    if up_vectors is not None:
-        if up_vectors.ndim < crosses.ndim:
-            up_vectors = np.broadcast_to(up_vectors, crosses.shape[:-len(up_vectors.shape)] + up_vectors.shape)
-        orientations = np.sign(vec_dots(up_vectors, crosses))
-        angles = orientations * angles
-
-    if return_crosses or return_norms or return_cross_norms:
-        ret = (angles,)
-        if return_crosses:
-            ret = ret + (crosses,)
-        if return_norms:
-            ret = ret + (norms,)
-        if return_cross_norms:
-            ret = ret + (cross_norms,)
-    else:
-        ret = angles
+            ret = angles
 
     return ret
 
