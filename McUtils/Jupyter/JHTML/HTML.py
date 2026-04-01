@@ -528,6 +528,7 @@ class CSS:
     @classmethod
     def construct(cls,
                   *selectors,
+                  aspect_ratio=None,
                   background=None,
                   background_attachment=None,
                   background_color=None,
@@ -748,6 +749,7 @@ class CSS:
         :rtype:
         """
         common_props = dict(
+            aspect_ratio=aspect_ratio,
             background=background,
             background_attachment=background_attachment,
             background_color=background_color,
@@ -913,9 +915,9 @@ class HTMLManager:
             if k in attrs:
                 attrs[v] = attrs[k]
                 del attrs[k]
-        required = {k.replace("_", "-"): v for k, v in attrs.items()}
+        attrs = {k.replace("_", "-"): v for k, v in attrs.items()}
         if sanitize:
-            required = {k: cls.sanitize_value(v) for k, v in attrs.items()}
+            attrs = {k: cls.sanitize_value(v) for k, v in attrs.items()}
         return attrs
 
     @classmethod
@@ -2376,15 +2378,30 @@ class SVG(HTML):
     COMMON_ALL = COMMON_ALL
     COMMON_TEXT_PRESENTATION = COMMON_TEXT_PRESENTATION
 
+
+    _class_map = None
+    @classmethod
+    def get_class_map(cls):
+        if cls._class_map is None:
+            cls._class_map = {}
+            for v in cls.__dict__.values():
+                if isinstance(v, type) and hasattr(v, 'tag'):
+                    cls._class_map[v.tag] = v
+        return cls._class_map
+
+
     class TagElement(HTML.TagElement):
         tag = None
         required: dict
         optional: dict
         display_opts: dict
 
-        def __init__(self, *elems, **attrs):
-            super().__init__(self.tag, *elems, **attrs)
+        ignored_styles = {"height", "width", "position", "color"}
+        can_be_dynamic = False
 
+        @classmethod
+        def get_class_map_updates(cls):
+            return SVG.get_class_map()
 
         @classmethod
         def convert_attrs(cls, attrs: dict):
@@ -2400,6 +2417,8 @@ class SVG(HTML):
                 else:
                     if hasattr(v, "__getitem__") or hasattr(v, "__iter__"):
                         v = " ".join(str(x) for x in v)
+                    elif v in {True, False}:
+                        v = str(v).lower()
                     else:
                         v = str(v)
                     attrs[k] = v
@@ -2427,7 +2446,7 @@ class SVG(HTML):
        required = {'xmlns': str, 'width': str, 'height': str}
        optional = {'viewBox': None, 'preserveAspectRatio': str, 'version': str, 'x': numbers.Number, 'y': numbers.Number}
        styles = ['transform', 'overflow']
-       def __init__(self, *elems, xmlns='http://www.w3.org/2000/svg', width='100%', height='100%', **kwargs):
+       def __init__(self, *elems, xmlns='http://www.w3.org/2000/svg', width='100%', height='auto', **kwargs):
            super().__init__(*elems, xmlns=xmlns, width=width, height=height, **kwargs)
     class G(TagElement):
        '''Group element. Inherits presentation attrs to all children.'''

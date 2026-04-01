@@ -2704,13 +2704,41 @@ class NumputilsTests(TestCase):
         )
         print(rm)
 
-    @validationTest
-    def test_Bezier(self):
-        print(
-            nput.bezier_solve([0, .5, 1, 2])
-        )
-
     @debugTest
+    def test_Bezier(self):
+        import McUtils.Plots as plt
+
+        knots = np.array([
+            [0, 0],
+            [.1, 1],
+            [.5, 2],
+            [.8, 0],
+            [1, 0],
+            [1.2, 0],
+            [2, 2]
+        ])
+        n = 100
+        x = nput.bezier_eval(knots[:, 0], np.linspace(0, 1, n))
+        y = nput.bezier_eval(knots[:, 1], np.linspace(0, 1, n))
+
+        # points, arc = nput.arc_points_from_endpoints(
+        #     [.8, 0],
+        #     [-.8, 0],
+        #     radius=nput.vec_normalize([1, 2]) * 2,
+        #     return_arc=True,
+        #     clockwise=True,
+        #     use_major_rotation=False,
+        #     rotation=np.pi/3
+        # )
+        fig = plt.Plot(x, y,
+                 plot_range=[[0, 2], [0, 2]],
+                 padding=[[0, 0], [0, 0]],
+                 image_size=500,
+                 aspect_ratio=1)
+        fig = plt.Plot(*knots.T, figure=fig)
+        fig.show()
+
+    @validationTest
     def test_Arc(self):
         import McUtils.Plots as plt
 
@@ -2723,9 +2751,6 @@ class NumputilsTests(TestCase):
             use_major_rotation=False,
             rotation=np.pi/3
         )
-        """(array([ 0. , -0.6]), array([1., 1.]), array(0.64350111), array(-4.42859487), None)"""
-        print(arc)
-        print(points)
         plt.Plot(*points.T,
                  plot_range=[[-2, 2], [-2, 2]],
                  padding=[[0, 0], [0, 0]],

@@ -57,7 +57,7 @@ a {
         SVG = JHTML.SVGContext
 
         uuh = SVG.Svg(
-                SVG.Rect(x=0, y=0, width=10, height=10)
+                SVG.Rect(x=0, y=0, width=10, height=10),
             )
         uuh.display()
         # print(uuh.tostring(prettify=True))

@@ -24,6 +24,7 @@ from .. import Devutils as dev
 from . import VTKInterface as vtk
 from ..ExternalPrograms import VPythonInterface as vpython
 from . import X3DInterface as x3d
+from . import SVG as svg
 from .SceneJSON import SceneJSON as sceneJSON
 from .Colors import ColorPalette
 
@@ -307,6 +308,7 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
     """
     Axes = None
     def __init__(self, axes=None):
+        self.shown = False
         self.axes = axes
     @classmethod
     def construct(self, **kw) -> 'GraphicsFigure':
@@ -450,6 +452,8 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         VPython = 'vpython'
         VPython2D = 'vpython2D'
         X3D = 'x3d'
+        SVG = 'svg'
+        SVG3D = 'svg3D'
         SceneJSON = 'json'
         Plotly = 'plotly'
         Plotly3D = 'plotly3D'
@@ -466,6 +470,8 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             cls.DefaultBackends.VPython2D.value: VPythonBackend,
             cls.DefaultBackends.VPython.value: VPythonBackend3D,
             cls.DefaultBackends.X3D.value: X3DBackend,
+            cls.DefaultBackends.SVG.value: SVGBackend,
+            cls.DefaultBackends.SVG3D.value: SVGBackend3D,
             cls.DefaultBackends.SceneJSON.value: SceneJSONBackend,
         }
     @classmethod
@@ -2728,16 +2734,21 @@ class PlotlyAxes(GraphicsAxes):
         self.opts['showlegend'] = show
 
     def get_graphics_properties(self, obj, property=None):
+        if property is not None:
+            return obj.get(property)
+        else:
+            return obj
+    def set_graphics_properties(self, obj:dict, **props):
+        obj.update(props)
+
+    def draw_poly(self, points, **styles):
         raise NotImplementedError(...)
-    def set_graphics_properties(self, obj, **props):
-        raise NotImplementedError(...)
+
     def draw_line(self, points, **styles):
         return self.plot(*np.asanyarray(points).T, **styles)
     def draw_disk(self, points, radius=None, s=None, **styles):
         raise NotImplementedError(...)
     def draw_rect(self, points, **styles):
-        raise NotImplementedError(...)
-    def draw_poly(self, points, **styles):
         raise NotImplementedError(...)
 
     def annotation(self, points, **opts):
@@ -2912,7 +2923,7 @@ class PlotlyFigure(GraphicsFigure):
     def get_core_body(self, html):
         return html.split("<body>")[1].rsplit("</body>")[0].strip()
     def set_plotly_script_id(self, html, id):
-        return f"""<script type="text/javascript" id="{id}">""".join(html.rsplit("""<script type="text/javascript">""", 1))
+        return f'<script id="{id}"'.join(html.rsplit("""<script""", 1))
     def configure_mathjax(self, html, id):
         plotly_tag = f"""<script type="text/javascript" id="{id}">"""
         mathjax_load_script = """
@@ -2937,17 +2948,37 @@ class PlotlyFigure(GraphicsFigure):
         # if self.embed_mathjax:
         #     html = self.configure_mathjax(html, id)
         if self.preload_plotly:
-            tag = f"""<script type="text/javascript" id="{id}">"""
-            new_tag = f"""<script src="{self.plotly_cdn}" charset="utf-8" id="{id}" onload='(function(){{"""
-            html = html.replace(
-                tag,
-                new_tag,
-                1
-            )
+            tag =  f"""<script id="{id}" type="text/javascript">"""
+            if tag in html:
+                new_tag = f"""<script src="{self.plotly_cdn}" charset="utf-8" id="{id}" onload='(function(){{"""
+                html = html.replace(
+                    tag,
+                    new_tag,
+                    1
+                )
+            else:
+                tag = f"""<script id="{id}">"""
+                if tag in html:
+                    new_tag = f"""<script src="{self.plotly_cdn}" charset="utf-8" id="{id}" onload='(function(){{"""
+                    html = html.replace(
+                        tag,
+                        new_tag,
+                        1
+                    )
+                else:
+                    preamble, div_id, core = html.partition(f'id="{id}"')
+                    tag = ">"
+                    new_tag = f""" src="{self.plotly_cdn}" charset="utf-8" onload='(function(){{"""
+                    core = core.replace(
+                        tag,
+                        new_tag,
+                        1
+                    )
+                    html = preamble + div_id + core
             # replace from end, should replace with version that starts from the plotly tag
             header, tag, footer = html.partition(new_tag)
             footer = footer.replace("</script>",  "})()'></script>", 1)
-            return header + tag + footer
+            html = header + tag + footer
         return html
     def to_html(self):
         # print(fig)
@@ -3490,6 +3521,22 @@ class PlotlyAxes3D(PlotlyAxes):
         return super().scatter(x, y, z=z, type=type, line=line, marker=marker, **opts)
     def text(self, text, x, y, z, line=None,  type='scatter3d', **opts):
         return super().text(text, x, y, z=z, type=type, line=line, **opts)
+
+    def mesh(self, verts, indices=None, type='mesh3d', **opts):
+        verts = np.asanyarray(verts)
+        if indices is not None:
+            indices = np.asanyarray(indices)
+            plot_dict = dict(type=type,
+                             x=verts[:, 0], y=verts[:, 1], z=verts[:, 2],
+                             i=indices[:, 0], j=indices[:, 1], k=indices[:, 2], **opts)
+        else:
+            plot_dict = dict(type=type,
+                             x=verts[:, 0], y=verts[:, 1], z=verts[:, 2], **opts)
+        self.elements.append(plot_dict)
+        return plot_dict
+    def draw_poly(self, points, flatshading=True, **styles):
+        indices = nput.triangulate_polygon(points)
+        return self.mesh(points, indices, flatshading=flatshading, **styles)
     def draw_sphere(self, center, radius,
                     sphere_points=48,
                     rendering='flat',
@@ -3854,6 +3901,26 @@ class PlotlyAxes3D(PlotlyAxes):
             vals = [vals]
         return self.text(vals, *points.T, **styles)
 
+    def draw_rect(self, points, rotation=None, normal=None, **styles):
+        points = np.asanyarray(points)
+        if normal is None:
+            ax = points[1] - points[0]
+            normal = nput.vec_normalize(nput.project_out([0, 0, 1], ax[:, np.newaxis]))
+        rot = nput.rotation_normal_view_matrix(rotation, normal)
+        eps = points @ rot
+        (x1, y1, z1), (x2, y2, z2) = eps
+        w = x2 - x1
+        h = y2 - y1
+        mesh_points = np.array(
+            [
+                [0, 0, 0],
+                [0, h, 0],
+                [w, h, 0],
+                [w, 0, 0]
+            ]
+        ) @ rot.T + points[0][np.newaxis]
+        return self.draw_poly(mesh_points, **styles)
+
     def draw_line(self, points,
                   line_thickness=None,
                   width=None,
@@ -3991,6 +4058,433 @@ class GraphicsRegionAxes(GraphicsAxes):
         else:
             crds = [x, y]
         return np.moveaxis(np.array(crds), 0, -1)
+
+class SVGAxes(GraphicsAxes):
+    def __init__(self,
+                 base_fig=None,
+                 label_text=None,
+                 frame=None,
+                 prop_cycle=None
+                 ):
+        if base_fig is None:
+            base_fig = svg.SVGFigure()
+        self.figure = base_fig
+        self.frame = frame
+        self.label_text = label_text
+        self.prop_cyle = prop_cycle
+        super().__init__()
+
+    def remove(self, *, backend):
+        raise NotImplementedError(f"remove doesn't make sense for SVG")
+    def clear(self, *, backend):
+        self.figure = svg.SVGFigure()
+
+    def prep_show(self):
+        ...
+
+    def get_plotter(self, method):
+        ...
+
+    def get_plot_label(self):
+        return self.label_text
+    def set_plot_label(self, val, **style):
+        self.label_text = (val, style)
+
+    def get_style_list(self):
+        return self.prop_cyle
+    def set_style_list(self, props):
+        self.prop_cyle = props
+
+    def get_frame_visible(self):
+        return False if self.frame else self.frame
+    def set_frame_visible(self, frame_spec):
+        self.frame = frame_spec
+
+    def get_frame_style(self):
+        return self.frame_style
+    def set_frame_style(self, frame_spec):
+        self.frame_style = frame_spec
+
+    def get_xlabel(self):
+        return self.x_label
+    def set_xlabel(self, val, **style):
+        self.x_label = (val, style)
+
+    def get_ylabel(self):
+        return self.y_label
+    def set_ylabel(self, val, **style):
+        self.y_label = (val, style)
+
+    num_axes = 2
+    def get_limit(self, axis):
+        vb = self.figure.view_box
+        if vb is None:
+            vb = self.figure.compute_viewbox()
+        if vb is None:
+            vb = [(None, None)] * self.num_axes
+        return vb[axis]
+    def set_limit(self, axis, lims):
+        vb = self.figure.view_box
+        just_axis = vb is None
+        if just_axis:
+            vb = self.figure.compute_viewbox()
+        if just_axis:
+            vb = [(None, None),] * self.num_axes
+        else:
+            vb = list(vb)
+        vb[axis] = lims
+        self.figure.view_box = tuple(tuple(v) for v in vb)
+    def get_xlim(self):
+        return self.get_limit(0)
+    def set_xlim(self, val, **opts):
+        self.set_limit(0, val)
+
+    def get_ylim(self):
+        return self.get_limit(1)
+    def set_ylim(self, val, **opts):
+        self.set_limit(1, val)
+
+    def get_xticks(self):
+        ...
+    def set_xticks(self, val, **opts):
+        ...
+    def get_yticks(self):
+        ...
+    def set_yticks(self, val, **opts):
+        ...
+    def get_xtick_style(self):
+        raise NotImplementedError("ticks not implemented for SVG")
+    def set_xtick_style(self, **opts):
+        raise NotImplementedError("ticks not implemented for SVG")
+    def get_ytick_style(self):
+        raise NotImplementedError("ticks not implemented for SVG")
+    def set_ytick_style(self, **opts):
+        raise NotImplementedError("ticks not implemented for SVG")
+
+    def set_aspect_ratio(self, ar):
+        if ar is None or dev.str_is(ar, 'auto'):
+            self.figure.kwargs.pop('aspect_ratio', None)
+        else:
+            self.figure.kwargs['aspect_ratio'] = ar
+    def get_bbox(self):
+        vb = self.figure.view_box
+        if vb is None:
+            vb = self.figure.compute_viewbox()
+        return vb
+    def set_bbox(self, bbox):
+        self.figure.view_box = bbox
+    def get_facecolor(self):
+        return self.figure.kwargs.get('background')
+    def set_facecolor(self, fg):
+        self.figure.kwargs['background'] = fg
+    def get_padding(self):
+        return self.figure.kwargs.get('margin')
+    def set_padding(self, padding):
+        self.figure.kwargs['margin'] = padding
+
+    def legend(self, **opts):
+        raise NotImplementedError("legend")
+
+    def get_graphics_properties(self, obj, property=None):
+        if property is None:
+            return obj.styles | obj.attrs
+        else:
+            return obj.attrs.get(property, obj.styles.get(property))
+    def set_graphics_properties(self, obj, **props):
+        obj.styles.update(props)
+
+    def draw_line(self, points, **styles):
+        points = np.asanyarray(points)
+        if len(points) > 2:
+            return self.figure.add_polyline(points=points, **styles)
+        else:
+            (x1, y1), (x2, y2) = points
+            return self.figure.add_line(x1=x1, y1=y1, x2=x2, y2=y2, **styles)
+    def draw_point(self, points, **styles):
+        return self.draw_disk(points, **styles)
+    def draw_disk(self, points, *, radius, **styles):
+        x, y = np.asanyarray(points)
+        return self.figure.add_circle(x=x, y=y, r=radius, **styles)
+    def draw_rect(self, points, **styles):
+        (x1, y1), (x2, y2) = np.asanyarray(points)
+        return self.figure.add_rect(x=x1, y=y1, width=x2-x1, height=y2-y1, **styles)
+    def draw_triangle(self, points, **styles):
+        raise NotImplementedError(...)
+    def draw_poly(self, points, **styles):
+        return self.figure.add_polygon(points=np.asanyarray(points), **styles)
+    default_arrowhead = dict(
+        body=svg.SVG.Path(d="M 0 0 L 10 5 L 0 10 z"),
+        viewBox="0 0 10 10",
+        refX="5",
+        refY="5",
+        markerWidth="6",
+        markerHeight="6",
+        orient="auto-start-reverse"
+    )
+    def draw_arrow(self, points, arrowhead=None, marker=None, **styles):
+        if marker is None:
+            if arrowhead is None:
+                arrowhead = self.default_arrowhead
+            self.figure.add_def(
+                "arrowhead",
+                tag="marker",
+                **arrowhead
+            )
+            marker = 'url(#arrowhead)'
+        self.draw_line(points, marker=marker, **styles)
+
+    @classmethod
+    def _text_to_path(cls, origin, text, **font_opts):
+        from matplotlib.textpath import TextPath
+        from matplotlib.font_manager import FontProperties
+        fp = FontProperties(**font_opts)
+        return TextPath(origin, text, prop=fp)
+    def draw_text(self, points, vals, use_path=False, **styles):
+        if use_path:
+            mpl_path = self._text_to_path(points, vals, **styles)
+            verts = mpl_path.vertices
+            bbox = (np.min(verts[:, 0]), np.min(verts[:, 1])), (np.max(verts[:, 0]), np.max(verts[:, 1]))
+            return svg.SVGPath.from_mpl(
+                self._text_to_path(points, vals, **styles),
+                bbox
+            )
+        else:
+            self.figure.add_text()
+
+class SVGFigure(GraphicsFigure):
+    Axes = SVGAxes
+    def __init__(self, axes=None, layout=None, figsize=None, **kwargs):
+        super().__init__(axes=axes)
+        self.layout = layout
+        self.kwargs = kwargs
+        if figsize is not None:
+            self.set_size_inches(*figsize)
+    def create_axes(self, rows, cols, spans, **kw):
+        if rows == 1 and cols == 1:
+            self.axes = [self.Axes(**kw)]
+            axes = self.axes[0]
+        else:
+            raise NotImplementedError("grid layout not implemented")
+        return axes
+
+    def create_inset(self, bbox, **kw) -> 'GraphicsAxes':
+        raise NotImplementedError("create_inset")
+
+    def create_colorbar(self, graphics, axes, norm=None, cmap=None, **kw):
+        raise NotImplementedError("create_colorbar")
+
+    def add_axes(self, ax) -> 'GraphicsAxes':
+        if self.axes is None: self.axes = []
+        if not isinstance(ax, self.Axes): ax = self.Axes(ax)
+        self.axes.append(ax)
+        return ax
+
+    def clear(self, *, backend):
+        self.axes = []
+
+    def close(self, *, backend):
+        ...
+
+    def get_size_inches(self):
+        width = self.kwargs.get('width')
+        height = self.kwargs.get('height')
+        if isinstance(width, str) and width.endswith("px"):
+            width = float(width.split("px")[0].strip())
+        if nput.is_numeric(width):
+            width = width / DPI_SCALING
+        else:
+            width = 0
+        if isinstance(height, str) and height.endswith("px"):
+            height = float(height.split("px")[0].strip())
+        if nput.is_numeric(height):
+            height = height / DPI_SCALING
+        else:
+            height = 0
+        return width, height
+
+    def set_size_inches(self, w, h):
+        if nput.is_numeric(w): w = w * DPI_SCALING
+        self.kwargs['width'] = f"{w:.0f}px"
+        if nput.is_numeric(h): h = h * DPI_SCALING
+        self.kwargs['height'] = f"{h:.0f}px"
+
+    def set_extents(self, extents):
+        (l, r), (b, t) = extents
+        ml = l * 100
+        mr = (1 - r) * 100
+        mt = (1 - t) * 100
+        mb = (b) * 100
+        self.kwargs['pad'] = f"{mt:.0f}% {mr:.0f}% {mb:.0f}% {ml:.0f}%"
+
+    def get_facecolor(self):
+        return self.kwargs.get('background')
+    def set_facecolor(self, fg):
+        self.kwargs['background'] = fg
+
+    def savefig(self, file, **opts):
+        return self.to_widget().write(file, **opts)
+
+    def animate_frames(self, frames, **animation_opts):
+        raise NotImplementedError("animate_frames")
+
+    def to_html(self):
+        return self.to_widget().tostring()
+
+    def prep_args(self, opts):
+        kwargs = self.kwargs | opts
+        ...
+    def to_svg_figure(self, **opts):
+        from ..Jupyter import JHTML
+        sub_svgs = [
+            s.figure.to_svg()
+            for s in self.axes
+        ]
+        #TODO: handle layout
+        return JHTML.Div(sub_svgs, **(self.kwargs | opts))
+    def to_svg(self):
+        sub_svgs = [
+            s.figure.to_svg()
+            for s in self.axes
+        ]
+        buf = io.StringIO()
+        for s in sub_svgs:
+            s.write(buf)
+        buf.seek(0)
+        return buf.read()
+    def to_widget(self, **opts):
+        return self.to_svg_figure(**opts)
+
+    def _repr_html_(self):
+        return self.to_html()
+
+    def get_mime_bundle(self):
+        html = self.to_html()
+        return {
+            'image/svg':  html
+        }
+
+class SVGBackend(GraphicsBackend):
+    Figure = SVGFigure
+    def create_figure(self, *args, **kwargs):
+        figure = self.Figure(*args, **kwargs)
+        axes = figure.create_axes(1, 1, 1)
+        return figure, axes
+
+    class ThemeContextManager(GraphicsBackend.ThemeContextManager):
+        theme_stack = []
+
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec):
+            return []
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            ...
+
+    def show_figure(self, graphics:SVGFigure, reshow=None):
+        if not graphics.shown:
+            graphics.shown = True
+            graphics.to_svg_figure().display()
+
+    def get_interactive_status(self) -> 'bool':
+        return False
+    def disable_interactivity(self):
+        ...
+    def enable_interactivity(self):
+        ...
+    def get_available_themes(self):
+        return []
+
+class SVGAxes3D(SVGAxes):
+    figure: svg.SVGFigure3D
+    def __init__(self,
+                 base_fig=None,
+                 **opts
+                 ):
+        if base_fig is None:
+            base_fig = svg.SVGFigure3D()
+        super().__init__(base_fig=base_fig, **opts)
+        self.zaxis = self.get_zaxis_manager()
+
+    def get_zaxis_manager(self):
+        return ZAxisManager(
+            self.get_zticks,
+            self.set_zticks,
+            None,
+            None,
+            None,
+            None
+        )
+
+    num_axes = 3
+    def get_zlim(self):
+        return self.get_limit(2)
+    def set_zlim(self, val, **opts):
+        self.set_limit(2, val)
+
+    def get_zticks(self):
+        ...
+    def set_zticks(self, val, **opts):
+        ...
+    def get_ztick_style(self):
+        raise NotImplementedError("ticks not implemented for SVG")
+    def set_ztick_style(self, **opts):
+        raise NotImplementedError("ticks not implemented for SVG")
+
+    def set_projection_type(self, proj_type, **kwargs):
+        ...
+    def get_projection_type(self):
+        ...
+
+    def get_autoscale(self):
+        ...
+    def set_autoscale(self, autoscale):
+        ...
+
+    def get_view_settings(self):
+        return self.figure.get_projection_kwargs()
+    def set_view_settings(self, **ops):
+        return self.figure.set_projection_kwargs(**ops)
+
+
+    def embedding_matrix(self, rotation, normal):
+        if normal is None:
+            normal = np.array([0, 0, 1])
+        if rotation is not None:
+            up_vector = nput.rotation_matrix(normal, rotation)[:, 0]
+        else:
+            up_vector = nput.vec_crosses([1, 0, 0], normal)
+        return nput.view_matrix(
+            up_vector,
+            view_vector=normal,
+            output_order=['x', 'y', 'z']
+        )
+    def draw_disk(self, points, *, radius, **styles):
+        x, y = np.asanyarray(points)
+        return self.figure.add_circle(x=x, y=y, r=radius, **styles)
+    def draw_rect(self, points, rotation=None, normal=None, **styles):
+        points = np.asanyarray(points)
+        if normal is None:
+            ax = points[1] - points[0]
+            normal = nput.vec_normalize(nput.project_out([0, 0, 1], ax[:, np.newaxis]))
+        eps = points @ self.embedding_matrix(rotation, normal)
+        (x1, y1, z1), (x2, y2, z2) = eps
+        x, y, z = points[0]
+        return self.figure.add_rect(x=x, y=y, z=z, width=x2-x1, height=y2-y1, rotation=rotation, normal=normal, **styles)
+    def draw_sphere(self, points, rads, **styles):
+        return self.figure.add_sphere(points, rads, **styles)
+    def draw_cylinder(self, start, end, rad, **opts):
+        return self.figure.add_cylinder(start, end, rad, **opts)
+    def draw_box(self, start, end, **opts):
+        return self.figure.add_box(start, end, **opts)
+
+class SVGFigure3D(SVGFigure):
+    Axes = SVGAxes3D
+
+class SVGBackend3D(SVGBackend):
+    Figure = SVGFigure3D
 
 class VTKAxes(GraphicsRegionAxes):
 

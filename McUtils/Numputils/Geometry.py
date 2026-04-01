@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...build.lib.McUtils.Numputils import is_numeric
+
 """
 Provides analytic derivatives for some common base terms with the hope that we can reuse them elsewhere
 """
@@ -51,7 +53,9 @@ __all__ = [
     "arc_points_from_endpoints",
     "bezier_coeffs",
     "bezier_eval",
-    "bezier_solve"
+    "bezier_solve",
+    "polygon_normal",
+    "triangulate_polygon"
 ]
 
 
@@ -4288,16 +4292,23 @@ def _get_binom(n):
         a = _binoms[-1]
     return a
 def bezier_coeffs(n, t):
+    t = np.asanyarray(t)
     u = 1 - t
-    t_exp = t**np.flip(np.arange(n))
-    u_exp = u**np.arange(n)
-    binoms = _get_binom(n)[n, :n]
+    t_exp = t[..., np.newaxis] ** np.broadcast_to(
+        np.expand_dims(np.flip(np.arange(n)), list(range(t.ndim))),
+        t.shape + (n,)
+    )
+    u_exp = u[..., np.newaxis] ** np.broadcast_to(
+        np.expand_dims(np.arange(n), list(range(t.ndim))),
+        t.shape + (n,)
+    )
+    binoms = _get_binom(n)[n-1, :n]
     return binoms*t_exp*u_exp
 
 def bezier_eval(control_points, t):
     n = len(control_points)
     control_points = np.asanyarray(control_points)
-    return np.dot(control_points, bezier_coeffs(n, t))
+    return np.tensordot(control_points, bezier_coeffs(n, t), axes=[-1, -1])
 
 def bezier_solve(control_points):
     if len(control_points) <= 2:
@@ -4324,7 +4335,7 @@ def bezier_solve(control_points):
         control_points = np.asanyarray(control_points)
         smol = control_points.ndim == 1
         if smol: control_points = control_points[:, np.newaxis]
-        p0, p1, p2, p3 = control_points
+        p1, p0, p2, p3 = control_points
         a = -p0 + 3 * p1 - 3 * p2 + p3
         b = 2 * p0 - 4 * p1 + 2 * p2
         c = -p0 + p1
@@ -4353,3 +4364,165 @@ def bezier_solve(control_points):
         return full_solns
     else:
         raise NotImplementedError("higher order Bezier requires numerical solutions")
+
+def polygon_normal(vertices, normalize=True):
+    # Newell's method for best fit normal
+    verts = np.asanyarray(vertices)
+    if verts.ndim < 2 or verts.shape[-1] != 3 or verts.shape[-2] == 1:
+        raise ValueError(f"can't compute best fit normal for poly with vertices of shape {verts.shape}")
+    n = verts.shape[-2]
+    r, c = np.triu_indices(verts.shape[-1])
+    roll_verts = verts[..., np.roll(np.arange(n), 1), :]
+    normals = vec_crosses(verts, roll_verts)
+    vouters = verts[..., r] * verts[..., c]
+    routers = roll_verts[..., r] * roll_verts[..., c]
+    normals += vouters[..., (2, 1, 0)] - routers[..., (2, 1, 0)]  # yz, xz, xy
+    normal = np.sum(normals, axis=-2)
+    if normalize:
+        normal = vec_normalize(normal)
+    return normal
+
+
+def winding_sign(u, v, axis1=0, axis2=1, return_component=False, zero_threshold=1e-8):
+    u = np.asanyarray(u)
+    v = np.asanyarray(v)
+    z = u[..., axis1] * v[..., axis2] - u[..., axis2] * v[..., axis1]
+    if not return_component:
+        z = np.asanyarray(z)
+        z[np.abs(z) < zero_threshold] = 0
+        z = np.sign(z)
+    return z
+
+def point_in_triangle(p, a, b, c, diffs=None, windings=None, **winding_args):
+    #TODO: handle coincident lines
+    if windings is not None:
+        d1, d2, d3 = windings
+    else:
+        if diffs is not None:
+            a, b, c = diffs
+        else:
+            a, b, c = a - p, b - p, c - p
+        d1 = winding_sign(a, b, **winding_args)
+        d2 = winding_sign(b, c, **winding_args)
+        d3 = winding_sign(c, a)
+    if is_numeric(d1):
+        has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+        has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+        return not (has_neg and has_pos)
+    else:
+        d1, d2, d3 = np.asanyarray(d1), np.asanyarray(d2), np.asanyarray(d3)
+        has_neg = (d1 < 0) | (d2 < 0) | (d3 < 0)
+        has_pos = (d1 > 0) | (d2 > 0) | (d3 > 0)
+        return ~(has_neg & has_pos)
+
+def is_polygon_ear(plane_points, indices, i, j, k, diffs=None, windings=None):
+    a, b, c = plane_points[i], plane_points[j], plane_points[k]
+    # Ear must be a convex vertex (positive cross product = CCW winding)
+    if windings is None: # precomputed winding signs
+        if diffs is not None:
+            if winding_sign(diffs[j, i], diffs[k, i]) <= 0:
+                return False
+        else:
+            if winding_sign(b - a, c - a) <= 0:
+                return False
+    else:
+        if windings[i, j, k] <= 0:
+            return False
+
+    # No other vertex may lie inside the candidate ear triangle
+    for m, idx in enumerate(indices):
+        if idx in (i, j, k):
+            continue
+        if windings is None:
+            if diffs is not None:
+                if point_in_triangle(None, None, None, None,
+                                     diffs=(diffs[i, idx], diffs[j, idx], diffs[k, idx])):
+                    return False
+            else:
+                if point_in_triangle(plane_points[idx], a, b, c):
+                    return False
+        else:
+            if point_in_triangle(None, None, None, None,
+                                 windings=(windings[idx, a, b], windings[idx, b, c], windings[idx, c, a])):
+                return False
+    return True
+
+def ear_clipping_triangulation(plane_points, indices, diffs=None, windings=None):
+    plane_points = np.asanyarray(plane_points)
+    n = len(plane_points)
+
+    if diffs is None:
+        diffs = plane_points[..., :, np.newaxis, :] - plane_points[..., np.newaxis, :, :]
+
+    if windings is True:
+        # compute all winding signs
+        raise NotImplementedError("not sure precomputing windings is useful")
+
+    triangles = []
+    indices = list(indices)
+    for _ in range(n**2):
+        ear_found = False
+        for i in range(len(indices)):
+            prev = indices[(i - 1) % len(indices)]
+            curr = indices[i]
+            next = indices[(i + 1) % len(indices)]
+            if is_polygon_ear(plane_points, indices, prev, curr, next, diffs=diffs, windings=windings):
+                triangles.append((prev, curr, next))
+                indices.pop(i)
+                ear_found = True
+                break
+
+        if not ear_found:
+            raise ValueError("No ear found — polygon may be self-intersecting or degenerate")
+
+        if len(indices) <= 3:
+            break
+    else:
+        raise ValueError("Ear-clipping failed — polygon may be self-intersecting")
+
+    triangles.append((indices[0], indices[1], indices[2]))
+    return triangles
+
+def triangulate_polygon(vertices):
+    verts = np.asanyarray(vertices)
+    if verts.ndim != 2 or verts.shape[-1] != 3:
+        raise ValueError(f"can't triangulate poly with vertices of shape {verts.shape}")
+
+    n = verts.shape[-2]
+    base_shape = verts.shape[:-2]
+    if n < 3:
+        raise ValueError("Polygon must have at least 3 vertices")
+    if n == 3:
+        return broadcast_constant([0, 1, 2], base_shape + (3,))
+
+    # embed vertices in best fit plane of polygon
+    normal = polygon_normal(verts)
+    right_vecs = broadcast_constant(tmats.default_right_vector, normal.shape)
+    proj = vec_dots(right_vecs, normal) # good for completeness...should probably have a fast path for projecting onto x/y/z
+    bad_vecs = np.abs(proj > .9)
+    if np.any(bad_vecs):
+        right_vecs[bad_vecs] = broadcast_constant(tmats.default_up_vector, right_vecs[bad_vecs])
+    vm = tmats.view_matrix(right_vecs, view_vector=normal, output_order=["x", "y", "z"])
+    plane_points = vec_tensordot(verts, vm, axes=[-1, -2])
+
+    # Ensure CCW winding in 2D (so convex vertices have positive cross product)
+    clipping_indices = broadcast_constant(np.arange(n), base_shape + (n,)).copy()
+    poly_area = np.sum(
+        winding_sign(
+            plane_points[..., 1:-1, :] - plane_points[..., (0,), :],
+            plane_points[..., 2:, :] - plane_points[..., (0,), :],
+            return_component=True
+        ),
+        axis=-1
+    )
+    mask = poly_area < 0
+    clipping_indices[mask] = np.flip(clipping_indices[mask], axis=-1)
+
+    plane_points = np.reshape(plane_points, (-1, n, 3))
+    clipping_indices = np.reshape(clipping_indices, (-1, n))
+    triangles = np.array([
+        ear_clipping_triangulation(points, indices)
+        for points, indices in zip(plane_points, clipping_indices)
+    ])
+
+    return triangles.reshape(base_shape + triangles.shape[-2:])

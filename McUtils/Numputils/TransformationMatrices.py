@@ -25,6 +25,7 @@ __all__ = [
     "extract_rotation_angle_axis",
     "extract_reflection_axis",
     "view_matrix",
+    "rotation_normal_view_matrix",
     "perspective_matrix",
     "world_matrix",
     "render_matrix",
@@ -809,6 +810,22 @@ def render_matrix(
         mats = mats @ world_matrix
 
     return mats
+
+default_right_vector = [1, 0, 0]
+default_up_vector = [0, 1, 0]
+default_view_vector = [0, 0, 1]
+def rotation_normal_view_matrix(rotation, normal, output_order=("x", "y", "z")):
+    if normal is None:
+        normal = default_view_vector
+    if rotation is not None:
+        up_vector = rotation_matrix(normal, rotation)[:, 0]
+    else:
+        up_vector = vec_ops.vec_crosses(default_right_vector, normal)
+    return view_matrix(
+        up_vector,
+        view_vector=normal,
+        output_order=output_order
+    )
 
 def reflection_matrix(axes):
     # need to find space of "null" vectors
