@@ -27,6 +27,7 @@ __all__ = [
     "points_from_distance_matrix",
     "identity_tensors",
     "block_broadcast_indices",
+    "broadcast_constant",
     "semisparse_tensordot",
     "frac_powh",
     "vec_crosses",
@@ -656,6 +657,14 @@ def block_broadcast_indices(base_pos, block_inds, block_size=None):
         base_pos[..., :, np.newaxis] * block_size
         + block_inds[..., np.newaxis, :]
     ).flatten()
+
+def broadcast_constant(base_array, target_shape):
+    if util.is_numeric(base_array):
+        return np.full(target_shape, base_array)
+    else:
+        base_array = np.asanyarray(base_array)
+        base_array = np.expand_dims(base_array, list(range(len(target_shape) - base_array.ndim)))
+        return np.broadcast_to(base_array, target_shape)
 
 #################################################################################
 #
@@ -1530,12 +1539,17 @@ def unitarize_transformation(tf):
     shared_dim = min((u.shape[-1], v.shape[-2]))
     return u[..., :, :shared_dim] @ v[..., :shared_dim, :]
 
-def polar_decomposition(tf):
+def polar_decomposition(tf, order='scale-first'):
     u, s, v = np.linalg.svd(tf)
     shared_dim = min((u.shape[-1], v.shape[-2]))
     Q = u[..., :, :shared_dim] @ v[..., :shared_dim, :]
-    P = u @ vec_tensordiag(s) @ np.moveaxis(u, -1, -2)
-    return P, Q
+    if order == 'scale-first':
+        P = u @ vec_tensordiag(s) @ np.moveaxis(u, -1, -2)
+        return P, Q
+    else:
+        Q = Q.T
+        P = np.moveaxis(v, -1, -2) @ vec_tensordiag(s) @ v
+        return Q, P
 
 def maximum_similarity_transformation(basis, target, apply_transformation=True):
     lstsq_tf = np.linalg.lstsq(basis, target, rcond=None)[0]

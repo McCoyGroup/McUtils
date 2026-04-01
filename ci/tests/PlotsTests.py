@@ -1,4 +1,3 @@
-
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Plots import *
@@ -386,9 +385,105 @@ class PlotsTests(TestCase):
         # fig.to_widget().write("/Users/Mark/Desktop/new_text2.html")
         fig.show()
 
-    @debugTest
+    @validationTest
     def test_Plotly3D(self):
         fig = Graphics3D(backend='plotly3D', frame=False, subplot_kw={'include_save_buttons':True})
         Sphere([1, 0, 0], .1, color='red').plot(fig)
         # print(fig.to_widget().tostring(prettify=True))
+        fig.show()
+
+    @validationTest
+    def test_BaseSVG(self):
+        fig = SVGFigure(height=800)
+        fig.add_rect(x=0, y=0, width=100, height=100, fill='red',
+                     transform=[
+                         ['rotate', [30]]
+                     ])
+        fig.add_rect(x=100, y=100, width=100, height=100, fill='blue')
+        fig.add_path(d=[
+            ["M", [0, 0]],
+            ["L", [0, 0, 100, 100]],
+            ["Q", [100, 0, 0, 0]],
+            ["l", [100, 0, 0, 100]],
+        ], stroke='green', fill='none')
+        print(
+            fig.to_svg().tostring(prettify=True)
+        )
+        fig.to_svg().display()
+
+    @validationTest
+    def test_SVGBackend2D(self):
+        fig = Graphics(backend='svg')
+        Rectangle(
+            [[0, 0], [100, 100]],
+            fill='red',
+            transform=[
+                ['rotate', [30]]
+            ]
+        ).plot(fig)
+        Rectangle(
+            [[100, 100], [200, 200]],
+            fill='blue',
+            # transform=[
+            #     ['rotate', [30]]
+            # ]
+        ).plot(fig)
+        # print(
+        #     fig.to_widget().tostring(prettify=True)
+        # )
+        fig.show()
+
+    @debugTest
+    def test_SVGBackend3D(self):
+
+        fig = Graphics3D(backend='svg3D',
+                         image_size=[500, 500],
+                         padding=0,
+                         plot_range=[[-100, 100], [-100, 100], [-100, 100]],
+                         background='gray',
+                         view_settings={
+                             "view_vector":[0, 0, 1],
+                             "up_vector":[0, 1, 0]
+                         })
+        Rectangle(
+            [[0, 0, 0], [100, 100, 0]],
+            fill='red',
+            # rotation=np.pi/6
+        ).plot(fig)
+        Rectangle(
+            [[-100, -100, 0], [0, 0, 50]],
+            fill='pink',
+            # rotation=np.pi/6
+        ).plot(fig)
+        # print(
+        #     fig.to_widget().tostring(prettify=True)
+        # )
+        fig.show()
+
+        fig = Graphics3D(backend='plotly3D',
+                         image_size=[500, 500],
+                         padding=0,
+                         plot_range=[[-100, 100], [-100, 100], [-100, 100]],
+                         view_settings={
+                             "view_vector":[0, 0, -1],
+                             "up_vector":[1, 0, 0]
+                         })
+        Rectangle(
+            [[-100, -100, 0], [100, 100, 0]],
+            color='gray',
+            # rotation=np.pi/6
+        ).plot(fig)
+        Rectangle(
+            [[0, 0, 0], [100, 100, 0]],
+            color='red',
+            # rotation=np.pi/6
+        ).plot(fig)
+        Rectangle(
+            [[-100, -100, 0], [0, 0, 50]],
+            color='pink',
+            # rotation=np.pi/6
+        ).plot(fig)
+        # print(
+        #     fig.to_widget().tostring(prettify=True)
+        # )
         fig.show()

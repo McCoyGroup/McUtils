@@ -307,6 +307,8 @@ class GraphicsBase(metaclass=ABCMeta):
                     asp = 4.8/6.4
                 h = w * asp
             if padding is not None:
+                if dev.is_number(padding):
+                    padding = [padding, padding]
                 pw, ph = padding
                 try:
                     pwx, pwy = pw
@@ -1031,13 +1033,13 @@ class Graphics(GraphicsBase):
                     t = t + (t_m if t_m is not None else 0)
                 padding = ((l,r), (b, t))
         else:
-            if isinstance(padding, (int, np.integer)):
+            if dev.is_number(padding):
                 padding = [[padding, padding], [padding, padding]]
             lr, bt = padding
-            if lr is None or isinstance(lr, (int, np.integer)):
-                lr = [[lr, lr]]
-            if bt is None or isinstance(bt, (int, np.integer)):
-                bt = [[bt, bt]]
+            if lr is None or dev.is_number(lr):
+                lr = [lr, lr]
+            if bt is None or dev.is_number(bt):
+                bt = [bt, bt]
             l,r = lr
             b,t = bt
 

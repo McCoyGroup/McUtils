@@ -5,17 +5,18 @@ from .. import Numputils as nput
 from ..Jupyter import JHTML
 import re
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
-# ---------------------------------------------------------------------------
-# Bounding box
-# ---------------------------------------------------------------------------
+__all__ = [
+    "SVGFigure",
+    "SVGFigure3D"
+]
 
 @dataclass
-class BoundingBox:
+class SVGBoundingBox:
     x:      float   # left edge
     y:      float   # top edge
     width:  float
@@ -30,17 +31,20 @@ class BoundingBox:
     @property
     def cy(self) -> float: return self.y + self.height / 2
 
-    def union(self, other: BoundingBox) -> BoundingBox:
+    def union(self, other: SVGBoundingBox) -> SVGBoundingBox:
         x  = min(self.x,  other.x)
         y  = min(self.y,  other.y)
         x2 = max(self.x2, other.x2)
         y2 = max(self.y2, other.y2)
-        return BoundingBox(x, y, x2 - x, y2 - y)
+        return SVGBoundingBox(x, y, x2 - x, y2 - y)
+
+    def to_array(self):
+        return (self.x, self.x2, self.y, self.y2)
 
     def __repr__(self) -> str:
         return (f"BoundingBox(x={self.x:.3g}, y={self.y:.3g}, w={self.width:.3g}, h={self.height:.3g})")
 
-class Transform:
+class SVGTransform:
     __slots__ = ("_m",)
     def __init__(self, m):
         self._m = np.asanyarray(m)
@@ -93,39 +97,82 @@ class Transform:
         smol = points.ndim == 1
         if smol:
             points = points[np.newaxis]
-        points = points @ m[:2, :2] + m[:2, 2][np.newaxis]
+        points = points @ m[:2, :2].T + m[:2, 2][np.newaxis]
         if smol:
             points = points[0]
         return points
 
-    def apply_bbox(self, bb: BoundingBox) -> BoundingBox:
+    def apply_bbox(self, bb: SVGBoundingBox) -> SVGBoundingBox:
         """Transform all four corners then take the axis-aligned envelope."""
-        points = bb.to_array()
-        corners = self.apply(points)
+        (l, r, b, t) = bb.to_array()
+        corners = self.apply([
+            [l, b],
+            [l, r],
+            [r, b],
+            [r, t]
+        ])
         xs = corners[:, 0]
         ys = corners[:, 1]
         x = np.min(xs); y = np.min(ys)
-        return BoundingBox(x, y, np.max(xs)-x, np.max(ys)-y)
-
-    # ── parsing ────────────────────────────────────────────────────────────
+        return SVGBoundingBox(x, y, np.max(xs) - x, np.max(ys) - y)
 
     @classmethod
-    def from_str(cls, s: str) -> Transform:
+    def from_str(cls, s: str) -> SVGTransform:
         """Parse an SVG transform attribute string into a Transform."""
         _fn = re.compile(
             r"(matrix|translate|scale|rotate|skewX|skewY)"
             r"\s*\(([^)]*)\)", re.I)
+        commands = [
+            (
+                name,
+                [float(v) for v in re.split(r"[\s,]+", args_str.strip()) if v]
+            )
+            for name, args_str in _fn.findall(s)
+        ]
+        return cls.from_commands(commands)
+    @classmethod
+    def matrix_to_commands(cls, mat):
+        pure_scale, pure_rot = nput.polar_decomposition(mat[:2, :2])
+        commands = []
+        x_scale = pure_scale[0, 0]
+        y_scale = pure_scale[1, 1]
+        if abs(x_scale - 1) > 1e-2 or abs(y_scale - 1) > 1e-2:
+            commands.append(["scale", (x_scale, y_scale)])
+        x_skew = pure_scale[0, 1]
+        if abs(x_skew) > 1e-2:
+            commands.append(["skewx", [x_skew]])
+        y_skew = pure_scale[1, 0]
+        if abs(y_skew) > 1e-2:
+            commands.append(["skewy", [y_skew]])
+        rot_angle = np.rad2deg(np.arctan2(pure_rot[1, 0], pure_rot[0, 0]))
+        if abs(rot_angle) > .5 and abs(rot_angle) < 359.5:
+            commands.append(["rotate", [rot_angle]])
+        translation = mat[2, :2]
+        if np.linalg.norm(translation) > 1e-2:
+            commands.append(["translate", translation])
+        if len(commands) > 2:
+            return [["matrix", mat.flatten()]]
+        else:
+            return commands
+    def to_str(self):
+        bits = []
+        for cmd, args in self.matrix_to_commands(self._m):
+            arg_str=",".join(f"{a:.3g}" for a in args)
+            bits.append(f"{cmd}({arg_str})")
+        return "\n".join(bits)
+
+    @classmethod
+    def from_commands(cls, commands):
         result = cls.identity()
-        for name, args_str in _fn.findall(s):
-            args = [float(v) for v in re.split(r"[\s,]+", args_str.strip()) if v]
+        for name, args in commands:
             name = name.lower()
             if name == "matrix":
-                a,b,c,d,e,f = args
-                t = np.array([[a,c,e], [b,d,f], [0,0,1]])
+                a, b, c, d, e, f = args
+                t = np.array([[a, c, e], [b, d, f], [0, 0, 1]])
             elif name == "translate":
-                t = cls.translate(args[0], args[1] if len(args)>1 else 0.0)
+                t = cls.translate(args[0], args[1] if len(args) > 1 else 0.0)
             elif name == "scale":
-                t = cls.scale(args[0], args[1] if len(args)>1 else None)
+                t = cls.scale(args[0], args[1] if len(args) > 1 else None)
             elif name == "rotate":
                 cx, cy = (args[1], args[2]) if len(args) == 3 else (0.0, 0.0)
                 t = cls.rotate(args[0], [cx, cy])
@@ -138,29 +185,12 @@ class Transform:
             result = result @ t
         return cls(result)
 
-
-# ---------------------------------------------------------------------------
-# Base class
-# ---------------------------------------------------------------------------
 SVG = JHTML.SVGContext
 class SVGPrimitive(ABC):
-    """
-    Abstract base for SVG 2-D shape primitives.
-
-    Parameters
-    ----------
-    presentation : dict
-        Any SVG presentation attributes (fill, stroke, transform, …).
-        Validated against COMMON_PRESENTATION + COMMON_TEXT_PRESENTATION
-        when svg_validator is available.
-    extra_attrs  : dict
-        Additional element-level attributes not covered by presentation
-        (e.g. id, class, data-*).
-    """
-
     wrapper: SVG.TagElement
-    def __init__(self, **attrs):
+    def __init__(self, *body, **attrs):
         self.styles, self.attrs = self.split_attrs(attrs)
+        self.body = body
 
     def get_attr(self, attr):
         return self.attrs.get(attr)
@@ -182,22 +212,29 @@ class SVGPrimitive(ABC):
         merged: dict[str, Any] = {**shape_attrs, **self.presentation, **self.extra_attrs}
         return {k: str(v) for k, v in merged.items() if v is not None}
 
-    def _transform(self) -> Transform | None:
-        t = self.styles.get("transform")
-        return Transform.from_str(t) if t else None
+    def _transform(self) -> SVGTransform | None:
+        transform = self.styles.get("transform")
+        if transform is not None:
+            if isinstance(transform, str):
+                transform = SVGTransform.from_str(transform)
+            elif not isinstance(transform, SVGTransform):
+                transform = SVGTransform.from_commands(transform)
+        return transform
 
-    def _apply_transform(self, bb: BoundingBox) -> BoundingBox:
+    def _apply_transform(self, bb: SVGBoundingBox) -> SVGBoundingBox:
         t = self._transform()
         return t.apply_bbox(bb) if t else bb
 
-    def _fmt(self, v: float, precision: int = 6) -> str:
-        """Format a float compactly (strip trailing zeros)."""
-        return f"{v:.{precision}f}".rstrip("0").rstrip(".")
-
     def _prep_attrs(self, attrs:dict):
+        tf = attrs.pop("transform", None)
+        if tf is not None and not isinstance(tf, str):
+            if not isinstance(tf, SVGTransform):
+                tf = SVGTransform.from_commands(tf)
+            tf = tf.to_str()
+            attrs["transform"] = tf
         return attrs
     def to_svg(self) -> str:
-        return self.wrapper(self._prep_attrs(self.styles | self.attrs))
+        return self.wrapper(*self.body, **self._prep_attrs(self.styles | self.attrs))
 
     @abstractmethod
     def _raw_bbox(self) -> list[float]:
@@ -206,14 +243,14 @@ class SVGPrimitive(ABC):
         (i.e. after any transform has been applied).
         """
 
-    def get_bbox(self) -> BoundingBox:
-        return self._apply_transform(BoundingBox(*self._raw_bbox()))
+    def get_bbox(self) -> SVGBoundingBox:
+        return self._apply_transform(SVGBoundingBox(*self._raw_bbox()))
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}(bbox={self.get_bbox()})"
 
 
-class Rect(SVGPrimitive):
+class SVGRect(SVGPrimitive):
     wrapper = SVG.Rect
     def __init__(self, x, y, width, height, **kwargs):
         super().__init__(x=x, y=y, width=width, height=height, **kwargs)
@@ -236,8 +273,8 @@ class Rect(SVGPrimitive):
     def height(self, value): self.set_attr("height", value)
 
     def _raw_bbox(self):
-        ...
-class Circle(SVGPrimitive):
+        return [self.x, self.y, self.x + self.width, self.y + self.height]
+class SVGCircle(SVGPrimitive):
     wrapper = SVG.Circle
     def __init__(self, cx, cy, r, **kwargs):
         super().__init__(cx=cx, cy=cy, r=r, **kwargs)
@@ -257,7 +294,7 @@ class Circle(SVGPrimitive):
 
     def _raw_bbox(self):
         return [self.cx - self.r, self.cy - self.r, self.r * 2, self.r * 2]
-class Ellipse(SVGPrimitive):
+class SVGEllipse(SVGPrimitive):
     wrapper = SVG.Ellipse
     def __init__(self, cx, cy, rx, ry, **kwargs):
         super().__init__(cx=cx, cy=cy, rx=rx, ry=ry, **kwargs)
@@ -284,8 +321,7 @@ class Ellipse(SVGPrimitive):
             self.cx - self.rx, self.cy - self.ry,
             self.rx * 2, self.ry * 2
         ]
-
-class Line(SVGPrimitive):
+class SVGLine(SVGPrimitive):
     wrapper = SVG.Line
     def __init__(self, x1, y1, x2, y2, **kwargs):
         super().__init__(x1=x1, y1=y1, x2=x2, y2=y2, **kwargs)
@@ -310,8 +346,7 @@ class Line(SVGPrimitive):
     def _raw_bbox(self):
         x = min(self.x1, self.x2); y = min(self.y1, self.y2)
         return [x, y, abs(self.x2 - self.x1), abs(self.y2 - self.y1)]
-
-class Polyline(SVGPrimitive):
+class SVGPolyline(SVGPrimitive):
     wrapper = SVG.Polyline
     def __init__(self, points, **kwargs):
         points = np.asanyarray(points)
@@ -323,11 +358,11 @@ class Polyline(SVGPrimitive):
     def points(self, value): self.set_attr("points", value)
 
     def _raw_bbox(self):
-        x = np.min(self.points, axis=0)
-        y = np.min(self.points, axis=1)
-        bb = BoundingBox(x, y, np.max(self.points, axis=0) - x, np.max(self.points, axis=1) - y)
+        x = np.min(self.points[:, 0])
+        y = np.min(self.points[:, 1])
+        bb = SVGBoundingBox(x, y, np.max(self.points[:, 0]) - x, np.min(self.points[:, 1]) - y)
         return self._apply_transform(bb)
-class Polygon(SVGPrimitive):
+class SVGPolygon(SVGPrimitive):
     wrapper = SVG.Polygon
     def __init__(self, points, **kwargs):
         super().__init__(points=points, **kwargs)
@@ -338,11 +373,18 @@ class Polygon(SVGPrimitive):
     def points(self, value): self.set_attr("points", value)
 
     def _raw_bbox(self):
-        x = np.min(self.points, axis=0)
-        y = np.min(self.points, axis=1)
-        bb = BoundingBox(x, y, np.max(self.points, axis=0) - x, np.max(self.points, axis=1) - y)
-        return self._apply_transform(bb)
-class Path(SVGPrimitive):
+        x = np.min(self.points[:, 0])
+        y = np.min(self.points[:, 1])
+        return [x, y, np.max(self.points[:, 0]) - x, np.max(self.points[:, 1]) - y]
+
+    def _prep_points(self, points):
+        return " ".join(f"{a:.2f}" + " " + f"{b:.2f}" for a, b in points)
+    def _prep_attrs(self, attrs:dict):
+        attrs = super()._prep_attrs(attrs)
+        attrs["points"] = self._prep_points(attrs["points"])
+        return attrs
+
+class SVGPath(SVGPrimitive):
     wrapper = SVG.Path
     def __init__(self, d, **kwargs):
         if isinstance(d, str):
@@ -356,7 +398,7 @@ class Path(SVGPrimitive):
         """Return list of (command, [args]) tuples."""
         tokens = []
         for part in cls._CMD_RE.split(d):
-            part = part.strip().upper()
+            part = part.strip()
             if not part:
                 continue
             if cls._CMD_RE.fullmatch(part):
@@ -371,12 +413,29 @@ class Path(SVGPrimitive):
     @d.setter
     def d(self, value): self.set_attr("d", value)
 
+    def _prep_attrs(self, attrs:dict):
+        attrs = super()._prep_attrs(attrs)
+        attrs["d"] = self._prep_path(attrs["d"])
+        return attrs
+
+    def _prep_path(self, d):
+        if not isinstance(d, str):
+            bits = []
+            for cmd, args in d:
+                args = " ".join(
+                    f"{a:.3g}" if a not in {True, False} else str(int(a))
+                    for a in args
+                )
+                bits.append(f"{cmd} {args}")
+            d = "\n".join(bits)
+        return d
+
     def _raw_bbox(self):
         extrema = self._all_extrema()
-        x = np.min(extrema, axis=0)
-        y = np.min(extrema, axis=1)
-        X = np.max(x, axis=0)
-        Y = np.max(x, axis=1)
+        x = np.min(extrema[:, 0])
+        y = np.min(extrema[:, 1])
+        X = np.max(extrema[:, 0])
+        Y = np.max(extrema[:, 1])
         return [x, y, X-x, Y-y]
 
     def _quadratic_solve(self, cx, cy, x1, y1, x2, y2):
@@ -424,6 +483,87 @@ class Path(SVGPrimitive):
         ], axis=1))
 
         return subpoints
+
+    @classmethod
+    def from_mpl(cls,
+                 path,
+                 target_bbox: tuple[tuple[float, float], tuple[float, float]],
+                 base_height=None,
+                 y_flip: bool = True):
+        from matplotlib.path import Path
+        # Matplotlib path code → SVG command mapping
+        _CMD_MAP = {
+            Path.MOVETO: "M",
+            Path.LINETO: "L",
+            Path.CURVE3: "Q",  # quadratic Bézier
+            Path.CURVE4: "C",  # cubic Bézier
+            Path.CLOSEPOLY: "Z",
+        }
+        # Number of vertices consumed by each code (including the "current" vertex)
+        _VERT_COUNT = {
+            Path.MOVETO: 1,
+            Path.LINETO: 1,
+            Path.CURVE3: 2,  # 1 control + 1 end
+            Path.CURVE4: 3,  # 2 controls + 1 end
+            Path.CLOSEPOLY: 0,  # vertex is ignored
+        }
+
+        verts = np.asarray(path.vertices, dtype=float)
+        bbox_init = (
+            (np.min(verts[:, 0]), np.max(verts[:, 0])),
+            (np.min(verts[:, 1]), np.max(verts[:, 1]))
+        )
+        dims_init = (
+            bbox_init[0][1] - bbox_init[0][0],
+            bbox_init[1][1] - bbox_init[1][0],
+        )
+        codes = path.codes if path.codes is not None else (
+                [Path.MOVETO] + [Path.LINETO] * (len(verts) - 1)
+        )
+
+        if y_flip:
+            h = dims_init[1] if base_height is None else base_height
+            verts = verts.copy()
+            verts[:, 1] = h - verts[:, 1]
+
+        dims_target = (
+            target_bbox[0][1] - target_bbox[0][0],
+            target_bbox[1][1] - target_bbox[1][0],
+        )
+        scaling = max(np.array(dims_target) / np.array(dims_init))
+
+        verts = (
+                (verts - np.array([[bbox_init[0][0], bbox_init[1][0]]])) * scaling
+                + np.array([[target_bbox[0][0], target_bbox[1][0]]])
+        )
+
+        parts = []
+        i = 0
+        while i < len(codes):
+            code = codes[i]
+
+            if code == Path.STOP:
+                i += 1
+                continue
+
+            cmd = _CMD_MAP.get(code)
+            if cmd is None:
+                i += 1
+                continue
+
+            if code == Path.CLOSEPOLY:
+                parts.append("Z")
+                i += 1
+                continue
+
+            n = _VERT_COUNT[code]
+            seg_verts = verts[i: i + n]
+            parts.append(np.asarray(seg_verts))
+            # coord_str = " ".join(f"{x:.6g},{y:.6g}" for x, y in seg_verts)
+            parts.append([cmd, seg_verts])
+            i += n
+
+        return parts
 
     def _all_extrema(self) -> np.ndarray:
         """Walk the path and collect all geometrically significant points."""
@@ -542,296 +682,389 @@ class Path(SVGPrimitive):
 
         return np.concatenate(point_lists, axis=0)
 
-# class SVGAxes(GraphicsAxes3D):
-#     """
-#     3D SVG Renderer
-#     ===============
-#     Renders 3D objects to SVG by projecting geometry through a render matrix,
-#     then dispatching to pluggable draw_* primitives.
-#
-#     Pipeline:
-#       3D world coords → render matrix (model-view-projection) → NDC → SVG coords
-#       → depth-sorted draw calls → SVG document
-#     """
-#
-#     import xml.etree.ElementTree as ET
-#     from dataclasses import dataclass, field
-#     from typing import Callable, Any
-#     import math
-#
-#     # ---------------------------------------------------------------------------
-#     # Linear algebra helpers
-#     # ---------------------------------------------------------------------------
-#
-#     Vec3 = tuple[float, float, float]
-#     Vec4 = tuple[float, float, float, float]
-#     Mat4 = list[list[float]]  # row-major 4×4
-#
-#     def mat4_identity() -> Mat4:
-#         return [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-#
-#     def mat4_mul(a: Mat4, b: Mat4) -> Mat4:
-#         return [
-#             [sum(a[r][k] * b[k][c] for k in range(4)) for c in range(4)]
-#             for r in range(4)
-#         ]
-#
-#     def mat4_transform(m: Mat4, v: Vec4) -> Vec4:
-#         return tuple(sum(m[r][c] * v[c] for c in range(4)) for r in range(4))
-#
-#     def perspective_matrix(fov_deg: float, aspect: float,
-#                            near: float, far: float) -> Mat4:
-#         f = 1.0 / math.tan(math.radians(fov_deg) / 2)
-#         nf = 1.0 / (near - far)
-#         return [
-#             [f / aspect, 0, 0, 0],
-#             [0, f, 0, 0],
-#             [0, 0, (far + near) * nf, 2 * far * near * nf],
-#             [0, 0, -1, 0],
-#         ]
-#
-#     def look_at(eye: Vec3, center: Vec3, up: Vec3) -> Mat4:
-#         ex, ey, ez = eye
-#         cx, cy, cz = center
-#         ux, uy, uz = up
-#
-#         fz = _norm((ex - cx, ey - cy, ez - cz))
-#         fx = _norm(_cross((ux, uy, uz), fz))
-#         fy = _cross(fz, fx)
-#
-#         return [
-#             [fx[0], fx[1], fx[2], -_dot(fx, eye)],
-#             [fy[0], fy[1], fy[2], -_dot(fy, eye)],
-#             [fz[0], fz[1], fz[2], -_dot(fz, eye)],
-#             [0, 0, 0, 1],
-#         ]
-#
-#     def _dot(a: Vec3, b: Vec3) -> float:
-#         return sum(x * y for x, y in zip(a, b))
-#
-#     def _cross(a: Vec3, b: Vec3) -> Vec3:
-#         return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
-#
-#     def _norm(v: Vec3) -> Vec3:
-#         n = math.sqrt(sum(x * x for x in v))
-#         return tuple(x / n for x in v)
-#
-#     # ---------------------------------------------------------------------------
-#     # SVG primitive builders  (draw_* functions)
-#     # ---------------------------------------------------------------------------
-#     # Each returns an (element, depth) pair so the renderer can depth-sort.
-#     # All coordinates are already in SVG space when these are called.
-#
-#     Style = dict[str, str]
-#
-#     _DEFAULT_LINE = {"stroke": "black", "stroke-width": "1.5", "stroke-linecap": "round"}
-#     _DEFAULT_DISK = {"fill": "steelblue", "stroke": "black", "stroke-width": "1"}
-#     _DEFAULT_POLY = {"fill": "lightgray", "stroke": "black", "stroke-width": "1"}
-#     _DEFAULT_TEXT = {"font-size": "12", "font-family": "sans-serif", "fill": "black"}
-#
-#     def draw_line(x1: float, y1: float, x2: float, y2: float,
-#                   depth: float = 0.0, style: Style | None = None) -> tuple[ET.Element, float]:
-#         """Straight line between two projected 2-D points."""
-#         attrs = {**_DEFAULT_LINE, **(style or {}),
-#                  "x1": f"{x1:.2f}", "y1": f"{y1:.2f}",
-#                  "x2": f"{x2:.2f}", "y2": f"{y2:.2f}"}
-#         return ET.Element("line", attrs), depth
-#
-#     def draw_disk(cx: float, cy: float, r: float,
-#                   depth: float = 0.0, style: Style | None = None) -> tuple[ET.Element, float]:
-#         """Filled circle (projected sphere cross-section or point marker)."""
-#         attrs = {**_DEFAULT_DISK, **(style or {}),
-#                  "cx": f"{cx:.2f}", "cy": f"{cy:.2f}", "r": f"{r:.2f}"}
-#         return ET.Element("circle", attrs), depth
-#
-#     def draw_polygon(points: list[tuple[float, float]],
-#                      depth: float = 0.0, style: Style | None = None) -> tuple[ET.Element, float]:
-#         """Filled polygon (face of a mesh)."""
-#         pts = " ".join(f"{x:.2f},{y:.2f}" for x, y in points)
-#         attrs = {**_DEFAULT_POLY, **(style or {}), "points": pts}
-#         return ET.Element("polygon", attrs), depth
-#
-#     def draw_text(x: float, y: float, label: str,
-#                   depth: float = 0.0, style: Style | None = None) -> tuple[ET.Element, float]:
-#         """Text label at a projected point."""
-#         attrs = {**_DEFAULT_TEXT, **(style or {}), "x": f"{x:.2f}", "y": f"{y:.2f}"}
-#         el = ET.Element("text", attrs)
-#         el.text = label
-#         return el, depth
-#
-#     # ---------------------------------------------------------------------------
-#     # Projection helpers
-#     # ---------------------------------------------------------------------------
-#
-#     @dataclass
-#     class Viewport:
-#         width: float = 800.0
-#         height: float = 600.0
-#
-#     def project_point(p: Vec3, mvp: Mat4, vp: Viewport) -> tuple[float, float, float] | None:
-#         """
-#         Transform a world-space point through the MVP matrix and map to SVG coords.
-#         Returns (svg_x, svg_y, ndc_z) or None if behind the near plane / clipped.
-#         """
-#         x, y, z = p
-#         clip = mat4_transform(mvp, (x, y, z, 1.0))
-#         cx, cy, cz, cw = clip
-#
-#         if cw <= 0:  # behind camera
-#             return None
-#         if abs(cx / cw) > 1.1 or abs(cy / cw) > 1.1:  # simple frustum cull
-#             return None
-#
-#         ndc_x = cx / cw
-#         ndc_y = cy / cw
-#         ndc_z = cz / cw  # depth in [-1, 1]
-#
-#         svg_x = (ndc_x + 1.0) * 0.5 * vp.width
-#         svg_y = (1.0 - (ndc_y + 1.0) * 0.5) * vp.height  # flip Y
-#         return svg_x, svg_y, ndc_z
-#
-#     # ---------------------------------------------------------------------------
-#     # 3-D object descriptors
-#     # ---------------------------------------------------------------------------
-#
-#     @dataclass
-#     class Object3D:
-#         """Base class — subclass and override `to_draw_calls`."""
-#         style: Style = field(default_factory=dict)
-#
-#         def to_draw_calls(self, mvp: Mat4, vp: Viewport
-#                           ) -> list[tuple[ET.Element, float]]:
-#             raise NotImplementedError
-#
-#     @dataclass
-#     class Point3D(Object3D):
-#         position: Vec3 = (0, 0, 0)
-#         radius: float = 5.0
-#
-#         def to_draw_calls(self, mvp, vp):
-#             proj = project_point(self.position, mvp, vp)
-#             if proj is None:
-#                 return []
-#             sx, sy, depth = proj
-#             return [draw_disk(sx, sy, self.radius, depth, self.style or None)]
-#
-#     @dataclass
-#     class Line3D(Object3D):
-#         start: Vec3 = (0, 0, 0)
-#         end: Vec3 = (1, 0, 0)
-#
-#         def to_draw_calls(self, mvp, vp):
-#             p1 = project_point(self.start, mvp, vp)
-#             p2 = project_point(self.end, mvp, vp)
-#             if p1 is None or p2 is None:
-#                 return []
-#             depth = (p1[2] + p2[2]) / 2
-#             return [draw_line(p1[0], p1[1], p2[0], p2[1], depth, self.style or None)]
-#
-#     @dataclass
-#     class Polygon3D(Object3D):
-#         vertices: list[Vec3] = field(default_factory=list)
-#
-#         def to_draw_calls(self, mvp, vp):
-#             projected = [project_point(v, mvp, vp) for v in self.vertices]
-#             if any(p is None for p in projected):
-#                 return []
-#             pts = [(p[0], p[1]) for p in projected]
-#             depth = sum(p[2] for p in projected) / len(projected)
-#             return [draw_polygon(pts, depth, self.style or None)]
-#
-#     @dataclass
-#     class Label3D(Object3D):
-#         position: Vec3 = (0, 0, 0)
-#         text: str = ""
-#
-#         def to_draw_calls(self, mvp, vp):
-#             proj = project_point(self.position, mvp, vp)
-#             if proj is None:
-#                 return []
-#             sx, sy, depth = proj
-#             return [draw_text(sx, sy, self.text, depth, self.style or None)]
-#
-#     @dataclass
-#     class Mesh3D(Object3D):
-#         """Triangle/quad mesh defined by vertices + face index lists."""
-#         vertices: list[Vec3] = field(default_factory=list)
-#         faces: list[list[int]] = field(default_factory=list)
-#         face_styles: list[Style] = field(default_factory=list)
-#
-#         def to_draw_calls(self, mvp, vp):
-#             calls = []
-#             for i, face in enumerate(self.faces):
-#                 verts = [self.vertices[j] for j in face]
-#                 st = self.face_styles[i] if i < len(self.face_styles) else self.style or {}
-#                 poly = Polygon3D(vertices=verts, style=st)
-#                 calls.extend(poly.to_draw_calls(mvp, vp))
-#             return calls
-#
-#     # ---------------------------------------------------------------------------
-#     # Main renderer
-#     # ---------------------------------------------------------------------------
-#
-#     def render_svg(
-#             objects: list[Object3D],
-#             render_matrix: Mat4,
-#             viewport: Viewport | None = None,
-#             background: str | None = None,
-#             title: str | None = None,
-#             sort_order: str = "back_to_front",  # "back_to_front" | "front_to_back" | "none"
-#     ) -> str:
-#         """
-#         Render a list of Object3D instances to an SVG string.
-#
-#         Parameters
-#         ----------
-#         objects       : Scene objects to render.
-#         render_matrix : Combined MVP (model-view-projection) matrix — a 4×4
-#                         row-major list-of-lists.  Build it with, e.g.:
-#                           mvp = mat4_mul(perspective_matrix(...), look_at(...))
-#         viewport      : SVG canvas size (default 800×600).
-#         background    : Optional background fill colour.
-#         title         : Optional <title> element text.
-#         sort_order    : Painter's-algorithm sort direction.
-#
-#         Returns
-#         -------
-#         SVG markup as a string.
-#         """
-#         vp = viewport or Viewport()
-#
-#         svg = ET.Element("svg", {
-#             "xmlns": "http://www.w3.org/2000/svg",
-#             "width": str(vp.width),
-#             "height": str(vp.height),
-#             "viewBox": f"0 0 {vp.width} {vp.height}",
-#         })
-#
-#         if title:
-#             t = ET.SubElement(svg, "title")
-#             t.text = title
-#
-#         if background:
-#             ET.SubElement(svg, "rect", {
-#                 "width": str(vp.width), "height": str(vp.height), "fill": background
-#             })
-#
-#         # Collect all (element, depth) pairs
-#         draw_calls: list[tuple[ET.Element, float]] = []
-#         for obj in objects:
-#             draw_calls.extend(obj.to_draw_calls(render_matrix, vp))
-#
-#         # Depth sort (painter's algorithm)
-#         if sort_order == "back_to_front":
-#             draw_calls.sort(key=lambda x: -x[1])  # largest ndc_z = furthest away
-#         elif sort_order == "front_to_back":
-#             draw_calls.sort(key=lambda x: x[1])
-#
-#         for el, _ in draw_calls:
-#             svg.append(el)
-#
-#         ET.indent(svg, space="  ")
-#         return ET.tostring(svg, encoding="unicode", xml_declaration=False)
+class SVGText(SVGPrimitive):
+    wrapper = SVG.Text
+    def __init__(self, text, x, y, **kwargs):
+        super().__init__(text, x=x, y=y,  **kwargs)
 
-# class SVGFigure(GraphicsFigure):
-#     Axes = SVGAxes
+    @property
+    def x(self): return self.get_attr("x")
+    @x.setter
+    def x(self, value): self.set_attr("x", value)
+    @property
+    def y(self): return self.get_attr("y")
+    @y.setter
+    def y(self, value): self.set_attr("y", value)
+    @property
+    def text(self): return self.body[0]
+    @text.setter
+    def text(self, value): self.body = (value,)
+
+    def _raw_bbox(self):
+        return [self.x, self.y, self.x, self.y]
+
+class SVGFigure:
+    Circle = SVGCircle
+    Line = SVGLine
+    Ellipse = SVGEllipse
+    Rect = SVGRect
+    Polygon = SVGPolygon
+    Polyline = SVGPolyline
+    Path = SVGPath
+    # 'ellipse': SVGEllipse,
+    # 'rect': SVGRect,
+    # 'line': SVGLine,
+    # 'polyline': SVGPolyline,
+    # 'polygon': SVGPolygon,
+    # 'path': SVGPath
+
+
+    def __init__(self, elements=None, defs=None, view_box=None, preserve_aspect_ratio=None, **svg_kwargs):
+        if elements is None: elements = []
+        self.elements = elements
+        if defs is None: defs = {}
+        self.defs = defs
+        self.view_box = view_box
+        if preserve_aspect_ratio is not None:
+            svg_kwargs['preserveAspectRatio'] = preserve_aspect_ratio
+        self.kwargs = svg_kwargs
+
+    element_mapping = {
+        'circle': SVGCircle,
+        'ellipse': SVGEllipse,
+        'rect': SVGRect,
+        'line': SVGLine,
+        'polyline': SVGPolyline,
+        'polygon': SVGPolygon,
+        'path': SVGPath,
+        'text': SVGText,
+    }
+    def create_element(self, element_type, **kwargs):
+        return self.element_mapping[element_type](**kwargs)
+    def add_element(self, element_type, **kwargs):
+        elem = self.create_element(element_type, **kwargs)
+        self.elements.append(elem)
+        return elem
+    def add_rect(self, **kwargs):
+        return self.add_element('rect', **kwargs)
+    def add_circle(self, **kwargs):
+        return self.add_element('circle', **kwargs)
+    def add_ellipse(self, **kwargs):
+        return self.add_element('ellipse', **kwargs)
+    def add_line(self, **kwargs):
+        return self.add_element('line', **kwargs)
+    def add_polyline(self, **kwargs):
+        return self.add_element('polyline', **kwargs)
+    def add_polygon(self, **kwargs):
+        return self.add_element('polygon', **kwargs)
+    def add_path(self, **kwargs):
+        return self.add_element('path', **kwargs)
+    def add_text(self, **kwargs):
+        return self.add_element('text', **kwargs)
+
+    def compute_viewbox(self):
+        #TODO: add caching, invalidate when elements are added
+        bbox = None
+        for e in self.elements:
+            if bbox is None:
+                (l, r, b, t) = e.get_bbox().to_array()
+                bbox = ((l, r), (b, t))
+            else:
+                bb = e.get_bbox()
+                (left, right, bottom, top) = bb.to_array()
+                ((l, r), (b, t)) = bbox
+                bbox = (
+                    (min([l, left]), max([r, right])),
+                    (min([b, bottom]), max([t, top]))
+                )
+        return bbox
+
+    def add_def(self, id, *, tag, **opts):
+        self.defs[id] = dict(tag=tag) | opts
+    def create_def(self, *, id, tag="marker", body=None, **opts):
+        map = SVG.get_class_map()
+        try:
+            tag_class = map[tag]
+        except KeyError:
+            tag_class = lambda *es, **ats: SVG.base_element(tag, *es, **ats)
+        if body is None:
+            return tag_class(id=id, **opts)
+        else:
+            return tag_class(body, id=id, **opts)
+    def prep_element(self, e):
+        return e.to_svg(), e.get_bbox()
+    def prep_draw_els(self, bbox, compute_bbox=None):
+        els = []
+        if compute_bbox is None:
+            compute_bbox = bbox is None
+        for e in self.elements:
+            drel, bb = self.prep_element(e)
+            els.append(drel)
+            if bbox is None:
+                (l, r, b, t) = bb.to_array()
+                bbox = ((l, r), (b, t))
+            elif compute_bbox:
+                (left, right, bottom, top) = bb.to_array()
+                ((l, r), (b, t)) = bbox
+                bbox = (
+                    (min([l, left]), max([r, right])),
+                    (min([b, bottom]), max([t, top]))
+                )
+        return bbox, els
+    def to_svg(self, compute_bbox=None, **opts):
+        els = []
+        if len(self.defs) > 0:
+            def_el = []
+            for k,v in self.defs.items():
+                def_el.append(self.create_def(id=k, **v))
+            els.append(SVG.Defs(def_el))
+
+        bbox, draw_els = self.prep_draw_els(self.view_box, compute_bbox=compute_bbox)
+        els.extend(draw_els)
+        opts = self.kwargs | opts
+        if bbox is not None:
+            ((l, r), (b, t)) = bbox
+            opts = dict(viewBox=(l, b, r - l, t - b)) | opts
+
+        if 'aspect_ratio' in opts:
+            if opts.get('height') is None:
+                opts['width'] = opts.get('width', '100%')
+                opts['height'] = 'auto'
+                opts['preserveAspectRatio'] = "y"
+            elif opts.get('width') is None:
+                opts['height'] = opts.get('height', '100%')
+                opts['width'] = 'auto'
+                opts['preserveAspectRatio'] = "x"
+
+        return SVG.Svg(
+            *els,
+            **opts
+        )
+
+class SVGPrimitive3D:
+    wrapper: type[SVGPrimitive]
+    @abstractmethod
+    def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
+        ...
+    def to_2d(self, projection_matrix):
+        kwargs, depth = self.prep_kwargs(projection_matrix)
+        return self.wrapper(**kwargs), depth
+    def to_svg(self, projection_matrix):
+        return self.to_2d(projection_matrix).to_svg()
+
+class SVGPointsToShape3D(SVGPrimitive3D):
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+    @abstractmethod
+    def to_points(self):
+        ...
+    @staticmethod
+    def get_depth(points):
+        return (np.min(points[:, 2]), np.max(points[:, 2]))
+    def prep_kwargs(self, projection_matrix):
+        points = self.to_points()
+        pr = np.asanyarray(projection_matrix)
+        if pr.shape[-1] == 3:
+            points = points @ pr
+        elif pr.shape[-1] == 2:
+            zvals = points[:, (2,)]
+            points = np.concatenate([points[:, :2] @ np.asanyarray(projection_matrix), zvals], axis=-1)
+        else:
+            points = np.pad(points, ([0, 0], [0, 1]), constant_values=1)
+            points = (points @ np.asanyarray(projection_matrix))[:, :3]
+        depth = self.get_depth(points)
+        return self.kwargs | dict(
+            points=points[:, :2]
+        ), depth
+
+class SVGPolygon3D(SVGPointsToShape3D):
+    wrapper: SVGPolygon
+    def __init__(self, points, **kwargs):
+        self.points = points
+        super().__init__(**kwargs)
+    def to_points(self):
+        return self.points
+
+class SVGPolyline3D(SVGPointsToShape3D):
+    wrapper: SVGPolyline
+    def __init__(self, points, **kwargs):
+        self.points = points
+        super().__init__(**kwargs)
+    def to_points(self):
+        return self.points
+
+class SVGFlatPointsToShape3D(SVGPointsToShape3D):
+    def __init__(self, normal=None, rotation=None, **kwargs):
+        self.normal = normal
+        self.rotation = rotation
+        super().__init__(**kwargs)
+    @abstractmethod
+    def to_2d_points(self) -> tuple[np.ndarray, np.ndarray]:
+        ...
+    def get_rotation_matrix(self):
+        rotation, normal = self.rotation, self.normal
+        if normal is None:
+            normal = np.array([0, 0, 1])
+        if rotation is not None:
+            up_vector = nput.rotation_matrix(normal, rotation)[:, 0]
+        else:
+            up_vector = nput.vec_crosses([1, 0, 0], normal)
+        return nput.view_matrix(
+            up_vector,
+            view_vector=normal,
+            output_order=['x', 'y', 'z']
+        )
+    def to_points(self):
+        two_d, center = self.to_2d_points()
+        pad = np.concatenate([two_d, np.zeros((len(two_d), 1))], axis=-1)
+        return pad @ self.get_rotation_matrix().T + center
+
+class SVGPolylike3D(SVGFlatPointsToShape3D):
+    def __init__(self, wrapper=None, **kwargs):
+        self._wrapper = wrapper
+        super().__init__(**kwargs)
+    def _infer_wrapper(self) -> type[SVGPrimitive]:
+        if 'fill' in self.kwargs:
+            return SVGPolygon
+        else:
+            return SVGPolyline
+    @property
+    def wrapper(self):
+        if self._wrapper is None:
+            self._wrapper = self._infer_wrapper()
+        return self._wrapper
+    @wrapper.setter
+    def wrapper(self, value):
+        self._wrapper = value
+
+class SVGRect3D(SVGPolylike3D):
+    def __init__(self, x, y, z, width, height, **kwargs):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.width = width
+        self.height = height
+        super().__init__(**kwargs)
+    def to_2d_points(self):
+        return np.array([
+            [0, 0],
+            [self.width,0 ],
+            [self.width, self.height],
+            [0, self.height]
+        ]), np.array([self.x, self.y, self.z])
+
+class SVGCircle3D(SVGPolylike3D):
+    def __init__(self, x, y, z, r, minor_radius=None, npoints=48, offset_angle=0, span_angle=2*np.pi, **kwargs):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.r = r
+        self.minor_radius = minor_radius
+        self.offset_angle = offset_angle
+        self.span_angle = span_angle
+        self.npoints = npoints
+        super().__init__(**kwargs)
+    def to_2d_points(self):
+        nput.arc_points([0, 0], self.r, minor_radius=self.minor_radius,
+                        npoints=self.num_points,
+                        offset_angle=self.offset_angle, span_angle=self.span_angle)
+        return np.array([
+            [self.x, self.y],
+            [self.x + self.width, self.y],
+            [self.x + self.width, self.y + self.height],
+            [self.x, self.y + self.height]
+        ]), np.array([self.x, self.y, self.z])
+
+
+class SVGFigure3D(SVGFigure):
+
+    def __init__(self, elements=None, defs=None,
+                 view_matrix=None,
+                 projection_matrix=None,
+                 world_matrix=None,
+                 view_position=None,
+                 view_center=None,
+                 up_vector=None,
+                 view_vector=None,
+                 right_vector=None,
+                 view_angle=None,
+                 aspect_ratio=None,
+                 view_distance=None,
+                 clip_distance=None,
+                 **kwargs):
+        self._projection_kwargs = dict(
+            view_matrix=view_matrix,
+            projection_matrix=projection_matrix,
+            world_matrix=world_matrix,
+            view_position=view_position,
+            view_center=view_center,
+            up_vector=up_vector,
+            view_vector=view_vector,
+            right_vector=right_vector,
+            view_angle=view_angle,
+            aspect_ratio=aspect_ratio,
+            view_distance=view_distance,
+            clip_distance=clip_distance
+        )
+        self._render_matrix = None
+        super().__init__(elements=elements, defs=defs, **kwargs)
+    def get_projection_matrix(self):
+        if self._render_matrix is None:
+            self._render_matrix = nput.render_matrix(**self._projection_kwargs)
+        return self._render_matrix
+    def get_projection_kwargs(self):
+        return self._projection_kwargs
+    def set_projection_kwargs(self, render_matrix=None, **kwargs):
+        if render_matrix is not None or len(kwargs) > 0:
+            self._render_matrix = render_matrix
+            self._projection_kwargs.update(kwargs)
+
+    element_mapping = {
+        'circle': SVGCircle3D,
+        # 'ellipse': SVGEllipse3D,
+        'rect': SVGRect3D,
+        # 'line': SVGLine3D,
+        'polyline': SVGPolyline3D,
+        'polygon': SVGPolygon3D,
+        # 'path': SVGPath3D,
+        # 'text': SVGText3D
+    }
+    def create_element(self, element_type, **kwargs):
+        return self.element_mapping[element_type](**kwargs)
+
+    def prep_element(self, e):
+        if isinstance(e, SVGPrimitive3D):
+            e, z = e.to_2d(projection_matrix=self.get_projection_matrix())
+            e._depth = z[0]
+        return super().prep_element(e)
+
+    def sort_draw_els(self, els):
+        return sorted(els,
+                      key=lambda e: (e._depth if hasattr(e, '_depth') else -1000),
+                      reverse=True)
+    def prep_draw_els(self, bbox, compute_bbox=None):
+        bbox, els = super().prep_draw_els(bbox, compute_bbox=compute_bbox)
+        if bbox is not None:
+            bbox = bbox[:2]
+        return bbox, self.sort_draw_els(els)
+
+    def compute_viewbox(self):
+        bbox = None
+        for e in self.elements:
+            if isinstance(e, SVGPrimitive3D):
+                e, z = e.to_2d(projection_matrix=self.get_projection_matrix())
+            else:
+                z = (0, 0)
+            if bbox is None:
+                (l, r, b, t) = e.get_bbox().to_array()
+                bbox = ((l, r), (b, t), z)
+            else:
+                bb = e.get_bbox()
+                (left, right, bottom, top) = bb.to_array()
+                ((l, r), (b, t), (n, f)) = bbox
+                bbox = (
+                    (min([l, left]), max([r, right])),
+                    (min([b, bottom]), max([t, top])),
+                    (min([z[0], n]), max([z[1], f]))
+                )
+        return bbox

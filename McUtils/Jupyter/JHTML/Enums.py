@@ -5,6 +5,8 @@ __all__ = [
 ]
 
 class Options(enum.Enum):
+    AspectRatio = "aspect-ratio"
+    Background = "background"
     BackgroundAttachment = "background-attachment"
     BackgroundBlendMode = "background-blend-mode"
     BackgroundColor = "background-color"
