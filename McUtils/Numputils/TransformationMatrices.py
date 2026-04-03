@@ -29,6 +29,7 @@ __all__ = [
     "perspective_matrix",
     "world_matrix",
     "render_matrix",
+    "render_points",
     "find_coordinate_matching_permutation",
     "symmetry_permutation",
     "apply_symmetries",
@@ -574,10 +575,22 @@ def view_matrix(
                 for o in output_order
 
             ]
-        from .PermutationOps import permutation_sign
-        sign = permutation_sign(output_order)
+        sign = perm_ops.permutation_sign(output_order)
         axes = axes[..., :, output_order]
-        axes[..., :, 1] *= sign
+        # modify the axis that makes most like identity matrix
+        flip_axis = np.argmin(axes[..., (0, 1, 2), (0, 1, 2)], axis=-1)
+        if axes.ndim == 2:
+            axes[..., :, flip_axis] *= sign
+        else:
+            # there is a better indexing way to do this
+            # but I am too tired to think of it
+            base_shape = axes.shape[:-2]
+            axes = axes.reshape((-1,) + axes.shape[-2:])
+            sign = sign.reshape(-1)
+            flip_axis = flip_axis.reshape(-1)
+            for i,a in enumerate(flip_axis):
+                axes[i, :, a] *= sign[i]
+            axes = axes.reshape(base_shape + axes.shape[-2:])
 
     return axes
 
@@ -679,17 +692,17 @@ def render_matrix(
         aspect_ratio=None,
         view_distance=None,
         clip_distance=None,
-        bbox=None
+        bbox=None,
+        rescale_world_coordinates=True
 ):
     if view_position is not None:
         view_position = np.asanyarray(view_position)
         if view_center is None:
             if view_vector is not None:
-                if view_distance is not None:
-                    view_vector = vec_ops.vec_normalize(view_vector)
-                    view_center = view_position - view_vector * view_distance
-                else:
-                    raise ValueError(...)
+                view_vector = vec_ops.vec_normalize(view_vector)
+                if view_distance is None:
+                    view_distance = np.dot(view_position, view_vector)
+                view_center = view_position - view_vector * view_distance
             else:
                 base_shape = view_position.shape[:-1]
                 view_center = np.zeros(base_shape + (3,))
@@ -744,9 +757,6 @@ def render_matrix(
                 output_order=['y', 'x', 'z']
             )
 
-    if world_matrix is None and bbox is not None:
-        world_matrix = _world_transform(bbox, rescale=True)
-
     if projection_matrix is None:
         if (
                 view_angle is not None
@@ -766,6 +776,17 @@ def render_matrix(
             projection_matrix[..., 1, 1] /= aspect_ratio
             projection_matrix[..., 2, 2] = -1
 
+    if world_matrix is None:
+        if bbox is None and projection_matrix is not None:
+            bounds = np.array([[-1, -1, -1, 1], [1, 1, 1, 1]]) @ projection_matrix.T
+            bounds = bounds[:, :3]
+            if view_matrix is not None:
+                bounds = bounds @ view_matrix.T
+            bbox = bounds.T
+            rescale_world_coordinates = False
+        if bbox is not None:
+            world_matrix = _world_transform(bbox, rescale=rescale_world_coordinates)
+
     base_shape = None
     if view_matrix is not None:
         view_matrix = np.asanyarray(view_matrix)
@@ -781,7 +802,6 @@ def render_matrix(
         projection_matrix = np.asanyarray(projection_matrix)
         if base_shape is None:
             base_shape = projection_matrix.shape[:-2]
-
 
     if world_matrix is not None:
         world_matrix = np.asanyarray(world_matrix)
@@ -811,6 +831,27 @@ def render_matrix(
 
     return mats
 
+def render_points(points, render_matrix,
+                  camera_cull_threshold=1e-8,
+                  # bbox_cull_threshold=1.1
+                  ):
+    #TODO: support automatic render matrix generation
+    #      from view settings
+    points = np.asanyarray(points)
+    render_matrix = np.asanyarray(render_matrix)
+
+    pad = np.concatenate([points, np.ones(points.shape[:-1] + (1,))], axis=-1)
+
+    pps = pad @ render_matrix
+    in_view = pps[..., 3] > camera_cull_threshold
+
+    pps[in_view, :3] /= pps[in_view, (3,)][..., np.newaxis]
+    # in_view[in_view] &= (
+    #         (pps[in_view, 0] / pps[in_view, 3] <= bbox_cull_threshold)
+    #         & (pps[in_view, 1] / pps[in_view, 3] <= bbox_cull_threshold)
+    # )
+    return pps[..., :3], in_view
+
 default_right_vector = [1, 0, 0]
 default_up_vector = [0, 1, 0]
 default_view_vector = [0, 0, 1]
@@ -820,7 +861,7 @@ def rotation_normal_view_matrix(rotation, normal, output_order=("x", "y", "z")):
     if rotation is not None:
         up_vector = rotation_matrix(normal, rotation)[:, 0]
     else:
-        up_vector = vec_ops.vec_crosses(default_right_vector, normal)
+        up_vector = vec_ops.vec_crosses(normal, default_right_vector)
     return view_matrix(
         up_vector,
         view_vector=normal,

@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-from ...build.lib.McUtils.Numputils import is_numeric
 
 """
 Provides analytic derivatives for some common base terms with the hope that we can reuse them elsewhere
 """
 
+import abc
 import collections
 import itertools
 import math
 import enum
 import warnings
 import numpy as np
+import scipy
 from .. import Devutils as dev
 from .VectorOps import *
 from . import TensorDerivatives as td
@@ -54,8 +55,15 @@ __all__ = [
     "bezier_coeffs",
     "bezier_eval",
     "bezier_solve",
+    "bezier_curvature",
     "polygon_normal",
-    "triangulate_polygon"
+    "triangulate_polygon",
+    "refine_curve",
+    "parametric_curve_evaluate",
+    "parametric_curvature",
+    "parametric_path_points",
+    "parameteric_spline_interpolate",
+    "parameteric_interpolation_curvature"
 ]
 
 
@@ -4295,21 +4303,174 @@ def bezier_coeffs(n, t):
     t = np.asanyarray(t)
     u = 1 - t
     t_exp = t[..., np.newaxis] ** np.broadcast_to(
-        np.expand_dims(np.flip(np.arange(n)), list(range(t.ndim))),
+        np.expand_dims(np.arange(n), list(range(t.ndim))),
         t.shape + (n,)
     )
     u_exp = u[..., np.newaxis] ** np.broadcast_to(
-        np.expand_dims(np.arange(n), list(range(t.ndim))),
+        np.expand_dims(np.flip(np.arange(n)), list(range(t.ndim))),
         t.shape + (n,)
     )
     binoms = _get_binom(n)[n-1, :n]
     return binoms*t_exp*u_exp
 
-def bezier_eval(control_points, t):
-    n = len(control_points)
-    control_points = np.asanyarray(control_points)
-    return np.tensordot(control_points, bezier_coeffs(n, t), axes=[-1, -1])
+def refine_curve(point_generator, t, *, max_arc_len, vals=None, max_subdivisions=3, sort_subdivisions=True):
+    if max_subdivisions is not None and max_subdivisions > 0:
+        ord = np.argsort(t)
+        t = t[ord,]
+        if vals is None:
+            vals = point_generator(t)
+        else:
+            vals = vals[..., ord, :]
+        if vals.ndim > 2:
+            raise NotImplementedError("subdivision for stacks of vals tedious")
+        # introduce arc length based subdivision
+        arc_lengths = vec_norms(np.diff(vals, axis=-2))
+        problem_spots = np.where(arc_lengths > max_arc_len)
+        if len(problem_spots) > 0 and len(problem_spots[0]) > 0:
+            # use recursion for subdivisions because I'm lazy
+            extra_ts = []
+            extra_vals = []
+            for i in problem_spots[0]:
+                t0, t1 = t[i], t[i + 1]
+                target_subdiv = int(arc_lengths[i] // max_arc_len) + 1
+                new_points = np.linspace(t0, t1, target_subdiv + 2)[1:-1]
+                final_div, new_vals = refine_curve(point_generator, new_points,
+                                                   max_arc_len=max_arc_len,
+                                                   max_subdivisions=max_subdivisions-1)
+                extra_vals.append(new_vals)
+                extra_ts.append(final_div)
+                if not sort_subdivisions:
+                    ord = np.concatenate([ord, np.arange(len(ord), len(ord) + len(final_div))], axis=0)
+            t = np.concatenate([t] + extra_ts, axis=0)
+            vals = np.concatenate([vals] + extra_vals, axis=-2)  # looking to the multi-coeffs future
+            if not sort_subdivisions:
+                inv = np.argsort(ord)
+                t = t[inv,]
+                vals = vals[..., inv, :]
+            else:
+                ord = np.argsort(t)
+                t = t[ord,]
+                vals = vals[..., ord, :]
+    else:
+        if sort_subdivisions:
+            ord = np.argsort(t)
+            t = t[ord,]
+            if vals is None:
+                vals = point_generator(t)
+            else:
+                vals = vals[..., ord, :]
+    return t, vals
 
+def parametric_curve_evaluate(evaluators_1d, t,
+                              return_points=False,
+                              max_arc_len=None,
+                              max_subdivisions=3,
+                              sort_subdivisions=True):
+    if misc.is_int(t):
+        t = np.linspace(0, 1, t)
+    t = np.asanyarray(t)
+
+    one_d = len(evaluators_1d) == 1
+    vals = [f(t) for f in evaluators_1d]
+    if not one_d:
+        if return_points is None:
+            return_points = max_arc_len is not None
+        vals = np.concatenate([v[..., np.newaxis] for v in vals], axis=-1)
+        if max_arc_len is not None:
+            generator = lambda new_points: parametric_curve_evaluate(
+                evaluators_1d,
+                new_points,
+                max_arc_len=max_arc_len,
+                max_subdivisions=None,
+                return_points=False
+            )
+            t, vals = refine_curve(
+                generator,
+                t,
+                vals=vals,
+                max_arc_len=max_arc_len,
+                max_subdivisions=max_subdivisions,
+                sort_subdivisions=sort_subdivisions
+            )
+    if return_points:
+        return vals, t
+    else:
+        return vals
+
+def parametric_curvature(
+        first_derivs_1d,
+        second_derivs_1d,
+        t,
+        zero_thresh=1e-8
+):
+    if len(first_derivs_1d) == 1:
+        raise ValueError("can't compute curvature for 1D parametric curve")
+
+    grads = np.concatenate([np.asanyarray(fd(t))[..., np.newaxis] for fd in first_derivs_1d], axis=-1)
+    grad_norms = vec_norms(grads, axis=-1)
+    mask = grad_norms > zero_thresh
+
+    t = t[mask]
+    grads = grads[..., mask, :]
+    secs = np.concatenate([np.asanyarray(fd(t))[..., np.newaxis] for fd in second_derivs_1d], axis=-1)
+
+    curvature = np.zeros(mask.shape, dtype=float)
+    curvature[~mask] = -1
+    if len(first_derivs_1d) == 2:
+        # nonzero component of 3D cross product
+        curvature[mask] = vec_norms(grads[..., 0] * secs[..., 1] - grads[..., 1] * secs[..., 0], axis=-1) / grad_norms**3
+    elif len(first_derivs_1d) == 3:
+        curvature[mask] = vec_norms(vec_crosses(grads, secs), axis=-1) / grad_norms**3
+    else:
+        tans = grads / grad_norms[..., np.newaxis]
+        tan_ders = secs / grad_norms[..., np.newaxis] - tans ** 2
+        curvature[mask] = vec_norms(tan_ders, axis=-1) / grad_norms
+
+    return curvature
+
+def _bezier_evaluators(control_points, order=None):
+    n = len(control_points)
+    if order is None:
+        order = 0
+    shared_coeffs = [None]
+    def get_coeffs(t, order=order):
+        if shared_coeffs[0] is None:
+            c =  np.prod(np.arange(n, n-order, -1)) * bezier_coeffs(n - order, t)
+            shared_coeffs[0] = c
+        return shared_coeffs[0]
+    for i in range(order):
+        control_points = np.diff(control_points, axis=-2)
+    evaluators =  [
+        lambda t, cps=cps, get_coeffs=get_coeffs: np.tensordot(cps, get_coeffs(t), axes=[-1, -1])
+        for cps in np.moveaxis(control_points, -1, 0)
+    ]
+    def finish_eval_pass(t, f=evaluators[-1]):
+        vals = f(t)
+        shared_coeffs[0] = None
+        return vals
+    evaluators[-1] = finish_eval_pass
+    return evaluators
+def bezier_eval(control_points, t, max_arc_len=None, max_subdivisions=3, return_points=None,
+                sort_subdivisions=True,
+                order=None):
+    control_points = np.asanyarray(control_points)
+    one_d = control_points.ndim == 1
+    if control_points.ndim == 1:
+        control_points = control_points[..., np.newaxis]
+    evaluators_1d = _bezier_evaluators(control_points, order=order)
+    vals = parametric_curve_evaluate(evaluators_1d, t,
+                                     max_arc_len=max_arc_len,
+                                     max_subdivisions=max_subdivisions,
+                                     return_points=return_points,
+                                     sort_subdivisions=sort_subdivisions)
+    if one_d:
+        if return_points:
+            vals, t = vals
+            vals = vals[0]
+            vals = (vals, t)
+        else:
+            vals = vals[0]
+    return vals
 def bezier_solve(control_points):
     if len(control_points) <= 2:
         control_points = np.asanyarray(control_points)
@@ -4365,6 +4526,45 @@ def bezier_solve(control_points):
     else:
         raise NotImplementedError("higher order Bezier requires numerical solutions")
 
+def bezier_curvature(control_points, t, **opts):
+    return parametric_curvature(
+        _bezier_evaluators(control_points, order=1),
+        _bezier_evaluators(control_points, order=2),
+        t,
+        **opts
+    )
+
+def parameteric_spline_interpolate(knots, spacings='cumulative', **spline_kwargs):
+    if isinstance(spacings, str):
+        if spacings == 'cumulative':
+            dists = vec_norms(np.diff(knots, axis=-2))
+            spacings = vec_rescale(np.concatenate([[0], np.cumsum(dists)]))
+        elif spacings == 'uniform':
+            spacings = np.linspace(0, 1, len(knots))
+        else:
+            raise ValueError(f"unknown interp spacing type {spacings}")
+    else:
+        spacings = np.concatenate([[0], spacings])
+
+    return [
+        scipy.interpolate.make_interp_spline(spacings, k, **spline_kwargs)
+        for k in knots.T
+    ]
+
+def parameteric_interpolation_curvature(interpolations, t, **opts):
+    first_derivs = [
+        i.derivative() for i in interpolations
+    ]
+    second_derivs = [
+        i.derivative() for i in first_derivs
+    ]
+    return parametric_curvature(
+        first_derivs,
+        second_derivs,
+        t,
+        **opts
+    )
+
 def polygon_normal(vertices, normalize=True):
     # Newell's method for best fit normal
     verts = np.asanyarray(vertices)
@@ -4405,7 +4605,7 @@ def point_in_triangle(p, a, b, c, diffs=None, windings=None, **winding_args):
         d1 = winding_sign(a, b, **winding_args)
         d2 = winding_sign(b, c, **winding_args)
         d3 = winding_sign(c, a)
-    if is_numeric(d1):
+    if misc.is_numeric(d1):
         has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
         has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
         return not (has_neg and has_pos)
@@ -4526,3 +4726,307 @@ def triangulate_polygon(vertices):
     ])
 
     return triangles.reshape(base_shape + triangles.shape[-2:])
+
+class PathElement(metaclass=abc.ABCMeta):
+    def __init__(self, relative=False):
+        self.relative = relative
+
+    element_registry = {}
+    element_aliases = {}
+    @classmethod
+    def resolve(cls, element:str|type[PathElement], *args, **opts):
+        if isinstance(element, str):
+            opts['relative'] = opts.get('relative', element.islower())
+            element = element.upper()
+            element = cls.element_aliases.get(element, element)
+            element = cls.element_registry[element]
+        return element(*args, **opts)
+
+    @classmethod
+    def register(cls, name, element=None, *, aliases=None):
+        if element is not None:
+            cls.element_registry[name] = element
+            if aliases is not None:
+                for h in aliases:
+                    cls.element_aliases[h] = name
+            return element
+        else:
+            def register(element, *, aliases=aliases):
+                return cls.register(name, element, aliases=aliases)
+            return register
+
+    @abc.abstractmethod
+    def to_points(self, *, reference=None, start=None, samples=None, **ignored) -> tuple[np.ndarray, dict]:
+        ...
+
+@PathElement.register("LINE", aliases="L")
+class LineElement(PathElement):
+    def __init__(self, *points, accumulate=True, **kwargs):
+        if len(points) == 1:
+            if misc.is_numeric(points[0]):
+                points = [points]
+            elif misc.is_numeric(points[0][0]):
+                points = points[0]
+        self.points = np.asanyarray(points)
+        self.accumulate = accumulate
+        super().__init__(**kwargs)
+    def to_points(self, *, base_points=None, reference=None, start=None, samples=None, **ignored):
+        if base_points is None:
+            base_points = self.points
+        else:
+            base_points = np.asanyarray(base_points)
+        if reference is not None:
+            base_points = np.reshape(base_points, (-1, len(reference)))
+        elif base_points.ndim == 1:
+            base_points = np.reshape(base_points, (-1, 2))
+        if self.accumulate:
+            base_points = np.cumsum(base_points, axis=0)
+        if self.relative:
+            base_points = base_points + np.asanyarray(reference)[np.newaxis]
+        if samples is None or samples <= 0:
+            points = base_points
+        else:
+            # assume samples is on a _per line_ basis
+            blocks = []
+            samples = samples + 2 # add in endpoints
+            for start, end in zip(base_points[:-1], base_points[1:]):
+                subpoints = np.array([
+                    np.linspace(s, e, samples)
+                    for s, e in zip(start, end)
+                ]).T
+                blocks.append(subpoints)
+            blocks.append(base_points[-1:])
+            points = np.concatenate(blocks, axis=0)
+
+        return points, {}
+
+@PathElement.register("OFFSET")
+class OffsetLineElement(LineElement):
+    def __init__(self, offsets, directions, **kwargs):
+        if misc.is_numeric(offsets):
+            offsets = [offsets]
+        self.offsets = np.asanyarray(offsets)
+        self.directions = directions
+        super().__init__(**kwargs)
+
+    @classmethod
+    def prep_directions(cls, dirs, ref=None):
+        if misc.is_int(dirs):
+            dirs = {'axis':dirs}
+        if dev.is_dict_like(dirs):
+            d = dirs['axis']
+            if ref is None:
+                ndim = max([2, dirs])
+            else:
+                ndim = len(ref)
+            dirs = np.zeros(ndim)
+            dirs[d] = 1
+        else:
+            dirs = np.asanyarray(dirs)
+        return dirs
+
+    def to_points(self, *, reference=None, start=None, samples=None):
+        if reference is None:
+            if start is None:
+                dirs = self.prep_directions(self.directions)
+                ndim = dirs.shape[-1]
+            else:
+                ndim = len(start)
+            ref = np.zeros(ndim)
+        else:
+            ref = np.asanyarray(reference)
+        dirs = self.prep_directions(ref)
+        if dirs.ndim == 1:
+            dirs = broadcast_constant(dirs, (len(self.offsets),) + dirs.shape)
+        points = dirs * self.offsets[..., np.newaxis]
+        if not self.relative:
+            # project out component along the direction from ref iteratively
+            # so we can definitively move to that location
+            for i,(p, d) in zip(self.directions, points):
+                points[i] -= d * np.dot(ref, d)
+                ref = points[i]
+            reference = None
+            points = np.cumsum(points, axis=0)
+        return super().to_points(base_points=points, reference=reference, start=start, samples=samples), {}
+
+
+@PathElement.register("HORIZONTAL", aliases="H")
+class HorizontalLine(OffsetLineElement):
+    def __init__(self, *ys, **kwargs):
+        if len(ys) == 1: ys = ys[0]
+        super().__init__(ys, 0, **kwargs)
+
+
+@PathElement.register("VERTICAL", aliases="V")
+class VerticalLine(OffsetLineElement):
+    def __init__(self, *ys, **kwargs):
+        if len(ys) == 1: ys = ys[0]
+        super().__init__(ys, 1, **kwargs)
+
+@PathElement.register("DEPTH")
+class DepthLine(OffsetLineElement):
+    def __init__(self, *ys, **kwargs):
+        if len(ys) == 1: ys = ys[0]
+        super().__init__(ys, 2, **kwargs)
+
+@PathElement.register("BEZIER")
+class BezierCurve(PathElement):
+    allow_smoothing = False
+    def __init__(self, *points, **kwargs):
+        if len(points) == 1: points = points[0]
+        self.knots = np.asanyarray(points)
+        super().__init__(**kwargs)
+
+    def get_knots(self, reference, *, last_control=None):
+        knots = self.knots
+        if reference is None:
+            reference = np.zeros_like(knots[0])
+        else:
+            knots = np.reshape(knots, (-1, len(reference)))
+        if self.allow_smoothing and last_control is not None and reference is not None:
+            extra = 2 * np.asanyarray(reference) - np.asanyarray(last_control)
+            knots = np.concatenate([[extra], knots], axis=0)
+        if self.relative:
+            knots = knots + np.asanyarray(reference)[np.newaxis]
+        knots = np.concatenate([[reference], knots], axis=0)
+        return knots
+
+    default_samples = 32
+    def to_points(self, *, reference=None, start=None, samples=None, max_arc_len=None, **opts):
+        knots = self.get_knots(reference, **opts)
+
+        if samples is None:
+            samples = self.default_samples
+        points = bezier_eval(knots, samples, max_arc_len=max_arc_len, return_points=False)
+        return points, {'last_control':knots[-2]}
+
+@PathElement.register("QUADRATIC", aliases="Q")
+class QuadraticBezierCurve(BezierCurve):
+    ...
+
+@PathElement.register("SMOOTH_QUADRATIC", aliases="T")
+class SmoothQuadraticBezierCurve(QuadraticBezierCurve):
+    allow_smoothing = True
+
+@PathElement.register("CUBIC", aliases="C")
+class CubicBezierCurve(BezierCurve):
+    ...
+
+@PathElement.register("SMOOTH_CUBIC", aliases="S")
+class SmoothCubicBezierCurve(CubicBezierCurve):
+    allow_smoothing = True
+
+@PathElement.register("ARC", aliases="A")
+class EndpointArcElement(PathElement):
+    def __init__(self, endpoint, radii,
+                 rotation=None, normal=None,
+                 offset_angle=None,
+                 use_major_rotation=None,
+                 clockwise=None,
+                 check_radius=True,
+                 angular_density=None,
+                 **kwargs):
+        self.endpoint = endpoint
+        self.radii = radii
+        self.rotation = rotation
+        self.normal = normal
+        self.check_radius = check_radius
+        self.use_major_rotation = use_major_rotation
+        self.clockwise = clockwise
+        self.angular_density = angular_density
+        super().__init__(**kwargs)
+
+    def to_points(self, *, reference=None, start=None, samples=None, **ignored):
+        if reference is None:
+            reference = np.zeros_like(self.endpoint)
+        return arc_points_from_endpoints(reference, self.endpoint,
+                                         radius=self.radii,
+                                         rotation=self.rotation,
+                                         normal=self.normal,
+                                         check_radius=self.check_radius,
+                                         use_major_rotation=self.use_major_rotation,
+                                         clockwise=self.clockwise,
+                                         return_arc=False,
+                                         npoints=samples,
+                                         angular_density=self.angular_density
+                                         ), {}
+
+@PathElement.register("INTERP")
+class InterpElement(PathElement):
+    def __init__(self, *points, spacings="cumulative", k=3, **kwargs):
+        if len(points) == 1: points = points[0]
+        self.knots = points
+        self.spacings = spacings
+        self.spline_kwargs=dict(k=k)
+        super().__init__(**kwargs)
+
+    def _make_spline(self, reference):
+        knots = np.asanyarray(self.knots)
+        if reference is None:
+            reference = np.zeros_like(knots[0])
+        if self.relative:
+            knots = knots + reference[np.newaxis]
+        knots = np.concatenate([[reference], knots], axis=0)
+        return parameteric_spline_interpolate(knots, self.spacings, **self.spline_kwargs)
+
+    default_samples = 32
+    def to_points(self, *, reference=None, start=None, max_arc_len=None, samples=None, **ignored):
+        interps = self._make_spline(reference)
+        if samples is None:
+            samples = self.default_samples
+        return parametric_curve_evaluate(interps, samples, max_arc_len=max_arc_len), {}
+
+@PathElement.register("MOVE", aliases="M")
+class MoveReferenceElement(PathElement):
+    def __init__(self, *target, **kwargs):
+        if len(target) == 1 and not misc.is_numeric(target[0]): target = target[0]
+        self.target = np.asanyarray(target)
+        super().__init__(**kwargs)
+
+    def to_points(self, *, reference=None, start=None, samples=None, **ignored):
+        target = self.target
+        if self.relative and reference is not None:
+            target = target + reference
+        return np.array([target]), {'reference':target, 'start':target}
+
+@PathElement.register("CLOSE", aliases="Z")
+class ClosePathElement(PathElement):
+    def to_points(self, *, reference=None, start=None, samples=None, **ignored):
+        if start is None:
+            raise ValueError("start required for closing path")
+        return np.array([start]), {'reference': start}
+
+def parametric_path_points(path_elements, return_segments=False):
+    point_lists: list[np.ndarray] = []
+    reference = None
+    start = None
+    opts = {}
+    for el in path_elements:
+        if not isinstance(el, PathElement):
+            if isinstance(el, dict):
+                kwargs = el.copy()
+                element = kwargs.pop('element')
+                args = kwargs.pop('args', [])
+            elif isinstance(el, str):
+                element = el
+                args = []
+                kwargs = {}
+            elif len(el) == 3:
+                element, args, kwargs = el
+            else:
+                element, args = el
+                kwargs = {}
+            el = PathElement.resolve(element, *args, **kwargs)
+        points, opts = el.to_points(reference=reference, start=start, **opts)
+        point_lists.append(points)
+        reference = opts.pop('reference', None)
+        start = opts.pop('start', start)
+        if reference is None:
+            reference = points[-1]
+        if start is None:
+            start = points[0]
+
+    if return_segments:
+        return point_lists
+    else:
+        return np.concatenate(point_lists, axis=0)

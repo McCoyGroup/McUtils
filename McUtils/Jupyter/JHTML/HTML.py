@@ -1442,6 +1442,8 @@ class HTML(XMLBase):
                 self.base_obj.style = self.base_dict
             def __iter__(self):
                 return iter(self.base_dict)
+            def get(self, item, default=None):
+                return self.base_dict.get(item, default)
             def items(self):
                 return self.base_dict.items()
             def keys(self):

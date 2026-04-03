@@ -801,14 +801,20 @@ class HexagonalHistogramPlot(DataPlot):
     known_styles = {'C', 'gridsize', 'bins', 'xscale', 'yscale', 'extent', 'cmap', 'norm', 'vmin',
                     'vmax', 'alpha', 'linewidths', 'edgecolors', 'mincnt', 'marginals', 'data', 'reduce_C_function'} | Plot.patch_parms
 
+class VectorFieldPlot(Plot):
+    """
+    Makes a plot of some 2D vector field with center points and arrows
+    """
+    def _get_plot_data(self, x, y, u, v):
+        return (x, y, u, v)
+
 @Plot.register
-@Plot.register
-class QuiverPlot(DataPlot):
+class QuiverPlot(VectorFieldPlot):
     method = 'quiver'
     known_styles = {"units", "angles", "scale", "scale_units", "width", "headwidth", "headlength",
                     "headaxislength", "minshaft", "minlength", "pivot", "color", "data"} | Plot.patch_parms
 @Plot.register
-class StreamPlot(DataPlot):
+class StreamPlot(VectorFieldPlot):
     method = 'streamplot'
     known_styles = {'density', 'linewidth', 'color', 'cmap', 'norm',
                     'arrowsize', 'arrowstyle', 'minlength', 'transform', 'zorder', 'start_points',

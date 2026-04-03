@@ -240,6 +240,9 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def draw_text(self, points, vals, **styles):
         ...
+    @abc.abstractmethod
+    def draw_path(self, commands, **styles):
+        ...
 
 class GraphicsAxes3D(GraphicsAxes):
     def __init__(self):
@@ -1059,6 +1062,132 @@ class MPLAxes(GraphicsAxes):
         ]
 
         return text
+
+    @classmethod
+    def svg_to_mpl_path(cls,
+                        path,
+                        target_bbox=None,
+                        base_height=None,
+                        y_flip: bool = False):
+        from matplotlib.path import Path
+        _CMD_MAP = {
+            "M": Path.MOVETO,
+            "L": Path.LINETO,
+            "Q": Path.CURVE3,  # quadratic Bézier
+            "C": Path.CURVE4,  # cubic Bézier
+            "Z": Path.CLOSEPOLY
+        }
+
+        point_lists = []
+        codes = []
+        start = np.zeros(2)
+        cur = np.zeros(2)
+        for command, args in path:
+            command:str
+            accumulate = False
+            if command in "Aa":
+                rel = command.islower()
+                if rel:
+                    command = "l"
+                else:
+                    command = "L"
+                rx, ry, phi_deg, large, sweep, x2, y2 = args
+                args = nput.arc_points_from_endpoints(
+                    [0, 0] if rel else cur,
+                    end=[x2, y2] if rel else cur + np.array([x2, y2]),
+                    radius=[rx, ry],
+                    rotation=np.deg2rad(phi_deg),
+                    use_major_rotation=large,
+                    clockwise=sweep
+                )
+            elif command == 'l':
+                accumulate = True
+            code = _CMD_MAP[command.upper()]
+            rel = command.islower()
+            args = np.asanyarray(args).reshape(-1, 2)
+            if accumulate:
+                args = np.cumsum(args, axis=0)
+            if code == Path.CLOSEPOLY:
+                cur = start
+                args = [[-1, -1]]
+            else:
+                if rel:
+                    args = args + cur[np.newaxis]
+                if code == Path.MOVETO:
+                    cur = args[0]
+                else:
+                    cur = args[-1]
+                print(cur)
+                point_lists.append(args)
+            codes.extend([code] * len(args))
+
+        verts = np.concatenate(point_lists, dtype=float, axis=0)
+        # TODO: use proper SVG extrema code
+        bbox_init = (
+            (np.min(verts[:, 0]), np.max(verts[:, 0])),
+            (np.min(verts[:, 1]), np.max(verts[:, 1]))
+        )
+        dims_init = (
+            bbox_init[0][1] - bbox_init[0][0],
+            bbox_init[1][1] - bbox_init[1][0],
+        )
+        if y_flip:
+            h = dims_init[1] if base_height is None else base_height
+            verts = verts.copy()
+            verts[:, 1] = h - verts[:, 1]
+
+        if target_bbox is None:
+            target_bbox = bbox_init
+        dims_target = (
+            target_bbox[0][1] - target_bbox[0][0],
+            target_bbox[1][1] - target_bbox[1][0],
+        )
+        scaling = max(np.array(dims_target) / np.array(dims_init))
+
+        verts = (
+                (verts - np.array([[bbox_init[0][0], bbox_init[1][0]]])) * scaling
+                + np.array([[target_bbox[0][0], target_bbox[1][0]]])
+        )
+
+        return Path(verts, codes)
+
+    def _adjust_limits(self,
+                       xmin: float, xmax: float,
+                       ymin: float, ymax: float,
+                       pad: float = 0.05,
+                       ) -> None:
+        ax = self.obj
+        cur_xl = ax.get_xlim()
+        cur_yl = ax.get_ylim()
+        autoscaling = ax.get_autoscale_on()
+
+        if autoscaling:
+            # No data yet — start from the path's own bounds
+            new_xmin, new_xmax = xmin, xmax
+            new_ymin, new_ymax = ymin, ymax
+        else:
+            new_xmin = min(cur_xl[0], xmin)
+            new_xmax = max(cur_xl[1], xmax)
+            new_ymin = min(cur_yl[0], ymin)
+            new_ymax = max(cur_yl[1], ymax)
+
+        # Apply symmetric fractional padding
+        xspan = new_xmax - new_xmin or 1.0  # guard against zero-width
+        yspan = new_ymax - new_ymin or 1.0
+        ax.set_xlim(new_xmin - pad * xspan, new_xmax + pad * xspan)
+        ax.set_ylim(new_ymin - pad * yspan, new_ymax + pad * yspan)
+        ax.set_autoscale_on(False)  # freeze after first path is added
+    def draw_path(self, commands, **styles):
+        patches = MPLManager.patch_api()
+        path = self.svg_to_mpl_path(commands)
+        path = patches.PathPatch(path, **styles)
+        bbox = path.get_extents()
+        self._adjust_limits(
+            bbox.x0, bbox.x1,
+            bbox.y0, bbox.y1
+        )
+        self.obj.add_patch(path)
+        return path
 
 class MPLAxes3D(MPLAxes):
     def __init__(self, mpl_axes_object, **opts):
@@ -4250,13 +4379,23 @@ class SVGAxes(GraphicsAxes):
             )
         else:
             self.figure.add_text()
+    def draw_path(self, commands, use_polyline=False, **styles):
+        if use_polyline:
+            points = nput.parametric_path_points(commands)
+            # shifts = np.concatenate([[points[0]], np.diff(points, axis=0)], axis=0)
+            return self.draw_line(points, **styles)
+        else:
+            return self.figure.add_path(d=commands, **styles)
 
 class SVGFigure(GraphicsFigure):
     Axes = SVGAxes
-    def __init__(self, axes=None, layout=None, figsize=None, **kwargs):
+    def __init__(self, axes=None, layout=None, figsize=None,
+                 flip_y=True,
+                 **kwargs):
         super().__init__(axes=axes)
         self.layout = layout
         self.kwargs = kwargs
+        self.flip_y = flip_y
         if figsize is not None:
             self.set_size_inches(*figsize)
     def create_axes(self, rows, cols, spans, **kw):
@@ -4340,7 +4479,10 @@ class SVGFigure(GraphicsFigure):
             for s in self.axes
         ]
         #TODO: handle layout
-        return JHTML.Div(sub_svgs, **(self.kwargs | opts))
+        fig = JHTML.Div(sub_svgs, **(self.kwargs | opts))
+        if self.flip_y:
+            fig.style['transform'] = (fig.style.get('transform', '') + ' scaleY(-1)').strip()
+        return fig
     def to_svg(self):
         sub_svgs = [
             s.figure.to_svg()

@@ -360,8 +360,14 @@ class SVGPolyline(SVGPrimitive):
     def _raw_bbox(self):
         x = np.min(self.points[:, 0])
         y = np.min(self.points[:, 1])
-        bb = SVGBoundingBox(x, y, np.max(self.points[:, 0]) - x, np.min(self.points[:, 1]) - y)
-        return self._apply_transform(bb)
+        return [x, y, np.max(self.points[:, 0]) - x, np.max(self.points[:, 1]) - y]
+    def _prep_points(self, points):
+        return " ".join(f"{a:.2f}" + " " + f"{b:.2f}" for a, b in points)
+    def _prep_attrs(self, attrs:dict):
+        attrs = super()._prep_attrs(attrs)
+        attrs["points"] = self._prep_points(attrs["points"])
+        return attrs
+
 class SVGPolygon(SVGPrimitive):
     wrapper = SVG.Polygon
     def __init__(self, points, **kwargs):
@@ -440,20 +446,20 @@ class SVGPath(SVGPrimitive):
 
     def _quadratic_solve(self, cx, cy, x1, y1, x2, y2):
         subpoints = []
-        subpoints.append(np.array([[cx, cy]]))
-        tx = nput.bezier_solve([x1, cx, x2])
+        subpoints.append(np.array([[cx, cy], [x2, y2]]))
+        tx = nput.bezier_solve([cx, x1, x2])
         tx = tx[tx >= 0]
-        xx_points = nput.bezier_eval([x1, cx, x2], tx)
-        xy_points = nput.bezier_eval([y1, cy, y2], tx)
+        xx_points = nput.bezier_eval([cx, x1, x2], tx)
+        xy_points = nput.bezier_eval([cy, y1, y2], tx)
         subpoints.append(np.concatenate([
             xx_points[:, np.newaxis],
             xy_points[:, np.newaxis],
         ], axis=1))
 
-        ty = nput.bezier_solve([y1, cy, y2])
+        ty = nput.bezier_solve([cy, y1, y2])
         ty = ty[ty >= 0]
-        yx_points = nput.bezier_eval([x1, cx, x2], ty)
-        yy_points = nput.bezier_eval([y1, cy, y2], ty)
+        yx_points = nput.bezier_eval([cx, x1, x2], ty)
+        yy_points = nput.bezier_eval([cy, y1, y2], ty)
         subpoints.append(np.concatenate([
             yx_points[:, np.newaxis],
             yy_points[:, np.newaxis],
@@ -487,7 +493,7 @@ class SVGPath(SVGPrimitive):
     @classmethod
     def from_mpl(cls,
                  path,
-                 target_bbox: tuple[tuple[float, float], tuple[float, float]],
+                 target_bbox: tuple[tuple[float, float], tuple[float, float]]=None,
                  base_height=None,
                  y_flip: bool = True):
         from matplotlib.path import Path
@@ -509,9 +515,10 @@ class SVGPath(SVGPrimitive):
         }
 
         verts = np.asarray(path.vertices, dtype=float)
+        bbox = path.get_extents()
         bbox_init = (
-            (np.min(verts[:, 0]), np.max(verts[:, 0])),
-            (np.min(verts[:, 1]), np.max(verts[:, 1]))
+            (bbox.x0, bbox.x1),
+            (bbox.y0, bbox.y1)
         )
         dims_init = (
             bbox_init[0][1] - bbox_init[0][0],
@@ -526,6 +533,8 @@ class SVGPath(SVGPrimitive):
             verts = verts.copy()
             verts[:, 1] = h - verts[:, 1]
 
+        if target_bbox is None:
+            target_bbox = bbox_init
         dims_target = (
             target_bbox[0][1] - target_bbox[0][0],
             target_bbox[1][1] - target_bbox[1][0],
@@ -546,7 +555,7 @@ class SVGPath(SVGPrimitive):
                 i += 1
                 continue
 
-            cmd = _CMD_MAP.get(code)
+            cmd = _CMD_MAP[code] # don't want to fail silently
             if cmd is None:
                 i += 1
                 continue
@@ -591,7 +600,10 @@ class SVGPath(SVGPrimitive):
 
             elif cmd in "Ll":
                 args = np.asanyarray(args).reshape((-1, 2))
-                new_points = args + np.array([[ox, oy]])
+                if cmd.islower():
+                    new_points = np.cumsum(args, axis=0) + np.array([[ox, oy]])
+                else:
+                    new_points = args
                 point_lists.append(new_points)
                 cx, cy = new_points[-1]
                 last_ctrl = None
@@ -672,7 +684,7 @@ class SVGPath(SVGPrimitive):
                             [cx, cy],
                             end=[x2, y2],
                             radius=[rx, ry],
-                            rotation=phi_deg,
+                            rotation=np.deg2rad(phi_deg),
                             use_major_rotation=large,
                             clockwise=sweep
                         )
@@ -870,9 +882,13 @@ class SVGPointsToShape3D(SVGPrimitive3D):
             zvals = points[:, (2,)]
             points = np.concatenate([points[:, :2] @ np.asanyarray(projection_matrix), zvals], axis=-1)
         else:
-            points = np.pad(points, ([0, 0], [0, 1]), constant_values=1)
-            points = (points @ np.asanyarray(projection_matrix))[:, :3]
-        depth = self.get_depth(points)
+            points, in_view = nput.render_points(points, projection_matrix)
+            #TODO: split culled segments
+            points = points[in_view]
+        if len(points) > 0:
+            depth = self.get_depth(points)
+        else:
+            depth = []
         return self.kwargs | dict(
             points=points[:, :2]
         ), depth
@@ -892,6 +908,35 @@ class SVGPolyline3D(SVGPointsToShape3D):
         super().__init__(**kwargs)
     def to_points(self):
         return self.points
+
+class SVGLine3D(SVGPolyline3D):
+    def __init__(self, x1, y1, z1, x2, y2, z2, **kwargs):
+        super().__init__(points=[[x1, y1, z1], [x2, y2, z2]], **kwargs)
+
+    @property
+    def x1(self): return self.points[0, 0]
+    @x1.setter
+    def x1(self, value): self.points[0, 0] = value
+    @property
+    def y1(self): return self.points[0, 1]
+    @y1.setter
+    def y1(self, value): self.points[0, 1] = value
+    @property
+    def z1(self): return self.points[0, 2]
+    @z1.setter
+    def z1(self, value): self.points[0, 2] = value
+    @property
+    def x2(self): return self.points[1, 0]
+    @x2.setter
+    def x2(self, value): self.points[1, 0] = value
+    @property
+    def y2(self): return self.points[1, 1]
+    @y2.setter
+    def y2(self, value): self.points[1, 1] = value
+    @property
+    def z2(self): return self.points[1, 2]
+    @z2.setter
+    def z2(self, value): self.points[1, 2] = value
 
 class SVGFlatPointsToShape3D(SVGPointsToShape3D):
     def __init__(self, normal=None, rotation=None, **kwargs):
@@ -975,6 +1020,58 @@ class SVGCircle3D(SVGPolylike3D):
             [self.x, self.y + self.height]
         ]), np.array([self.x, self.y, self.z])
 
+class SVGEllipse3D(SVGCircle3D):
+    def __init__(self, x, y, z, rx, ry, **kwargs):
+        super().__init__(x, y, z, rx, minor_radius=ry, **kwargs)
+
+    @property
+    def rx(self):
+        return self.r
+    @rx.setter
+    def rx(self, value):
+        self.r = value
+
+    @property
+    def ry(self):
+        return self.minor_radius
+    @ry.setter
+    def ry(self, value):
+        self.minor_radius = value
+
+class SVGNonPlanarPolylike3D(SVGPointsToShape3D):
+    def __init__(self, points, wrapper=None, **kwargs):
+        self.points = points
+        self._wrapper = wrapper
+        super().__init__(**kwargs)
+    def _infer_wrapper(self) -> type[SVGPrimitive]:
+        if 'fill' in self.kwargs:
+            return SVGPolygon
+        else:
+            return SVGPolyline
+    @property
+    def wrapper(self):
+        if self._wrapper is None:
+            self._wrapper = self._infer_wrapper()
+        return self._wrapper
+    @wrapper.setter
+    def wrapper(self, value):
+        self._wrapper = value
+    def to_points(self):
+        return self.points
+
+class SVGPath3D(SVGNonPlanarPolylike3D):
+    def __init__(self, d, rotation=None, normal=None, **kwargs):
+        points = self.prep_points(d, rotation=rotation, normal=normal)
+        super().__init__(points, **kwargs)
+
+    def prep_points(self, commands, rotation=None, normal=None):
+        points = nput.parametric_path_points(commands)
+        if points.shape[-1] == 2:
+            points = np.concatenate([points, np.zeros((len(points), 1))], axis=-1)
+            shift = points - points[0]
+            points =  shift @ nput.rotation_normal_view_matrix(rotation, normal).T + points[0]
+        return points
+
 
 class SVGFigure3D(SVGFigure):
 
@@ -1021,12 +1118,12 @@ class SVGFigure3D(SVGFigure):
 
     element_mapping = {
         'circle': SVGCircle3D,
-        # 'ellipse': SVGEllipse3D,
+        'ellipse': SVGEllipse3D,
         'rect': SVGRect3D,
-        # 'line': SVGLine3D,
+        'line': SVGLine3D,
         'polyline': SVGPolyline3D,
         'polygon': SVGPolygon3D,
-        # 'path': SVGPath3D,
+        'path': SVGPath3D,
         # 'text': SVGText3D
     }
     def create_element(self, element_type, **kwargs):

@@ -394,15 +394,15 @@ class PlotsTests(TestCase):
 
     @validationTest
     def test_BaseSVG(self):
-        fig = SVGFigure(height=800)
-        fig.add_rect(x=0, y=0, width=100, height=100, fill='red',
-                     transform=[
-                         ['rotate', [30]]
-                     ])
-        fig.add_rect(x=100, y=100, width=100, height=100, fill='blue')
+        fig = SVGFigure(height=800)#, view_box=[[0, 100], [0, 100]])
+        # fig.add_rect(x=0, y=0, width=100, height=100, fill='red',
+        #              transform=[
+        #                  ['rotate', [30]]
+        #              ])
+        # fig.add_rect(x=100, y=100, width=100, height=100, fill='blue')
         fig.add_path(d=[
             ["M", [0, 0]],
-            ["L", [0, 0, 100, 100]],
+            ["L", [100, 100]],
             ["Q", [100, 0, 0, 0]],
             ["l", [100, 0, 0, 100]],
         ], stroke='green', fill='none')
@@ -428,6 +428,13 @@ class PlotsTests(TestCase):
             #     ['rotate', [30]]
             # ]
         ).plot(fig)
+        # Path(
+        #     [[100, 100], [200, 200]],
+        #     fill='blue',
+        #     # transform=[
+        #     #     ['rotate', [30]]
+        #     # ]
+        # ).plot(fig)
         # print(
         #     fig.to_widget().tostring(prettify=True)
         # )
@@ -443,47 +450,41 @@ class PlotsTests(TestCase):
                          background='gray',
                          view_settings={
                              "view_vector":[0, 0, 1],
-                             "up_vector":[0, 1, 0]
+                             "up_vector":[0, 1, 0],
+                             # "view_position":[0, 0, 1]
                          })
-        Rectangle(
-            [[0, 0, 0], [100, 100, 0]],
-            fill='red',
-            # rotation=np.pi/6
-        ).plot(fig)
-        Rectangle(
-            [[-100, -100, 0], [0, 0, 50]],
-            fill='pink',
-            # rotation=np.pi/6
-        ).plot(fig)
-        # print(
-        #     fig.to_widget().tostring(prettify=True)
-        # )
+        # Rectangle(
+        #     [[0, 0, 0], [100, 100, 0]],
+        #     fill='red',
+        #     # rotation=np.pi/6
+        # ).plot(fig)
+        # Rectangle(
+        #     [[-100, -100, 0], [0, 0, 50]],
+        #     fill='pink',
+        #     # rotation=np.pi/6
+        # ).plot(fig)
+        Path([
+            ["M", [0, 0]],
+            ["L", [100, 100]],
+            ["Q", [100, 0, 0, 0]],
+            ["l", [100, 0, 0, 100]],
+        ], stroke='green', fill='none', rotation=np.pi/6, normal=[0, 1, 1]).plot(fig)
         fig.show()
 
-        fig = Graphics3D(backend='plotly3D',
-                         image_size=[500, 500],
-                         padding=0,
-                         plot_range=[[-100, 100], [-100, 100], [-100, 100]],
-                         view_settings={
-                             "view_vector":[0, 0, -1],
-                             "up_vector":[1, 0, 0]
-                         })
-        Rectangle(
-            [[-100, -100, 0], [100, 100, 0]],
-            color='gray',
-            # rotation=np.pi/6
-        ).plot(fig)
-        Rectangle(
-            [[0, 0, 0], [100, 100, 0]],
-            color='red',
-            # rotation=np.pi/6
-        ).plot(fig)
-        Rectangle(
-            [[-100, -100, 0], [0, 0, 50]],
-            color='pink',
-            # rotation=np.pi/6
-        ).plot(fig)
-        # print(
-        #     fig.to_widget().tostring(prettify=True)
-        # )
+    @validationTest
+    def test_MPLPath(self):
+        fig = Graphics(backend='svg')
+        # Path([
+        #     ["M", [0, 0]],
+        #     ["L", [100, 100]],
+        #     ["Q", [100, 0, 0, 0]],
+        #     ["l", [100, 0, 0, 100]],
+        # ], stroke='pink').plot(fig)
+
+        Path([
+            ["M", [0, 0]],
+            ["L", [100, 100]],
+            ["Q", [100, 0, 0, 0]],
+            ["l", [100, 0, 0, 100]],
+        ], stroke='pink', use_polyline=True).plot(fig)
         fig.show()
