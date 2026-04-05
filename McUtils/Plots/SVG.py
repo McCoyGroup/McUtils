@@ -1,6 +1,8 @@
 
 from __future__ import annotations
 
+import functools
+
 from .. import Numputils as nput
 from ..Jupyter import JHTML
 import re
@@ -227,10 +229,11 @@ class SVGPrimitive(ABC):
 
     def _prep_attrs(self, attrs:dict):
         tf = attrs.pop("transform", None)
-        if tf is not None and not isinstance(tf, str):
-            if not isinstance(tf, SVGTransform):
-                tf = SVGTransform.from_commands(tf)
-            tf = tf.to_str()
+        if tf is not None:
+            if not isinstance(tf, str):
+                if not isinstance(tf, SVGTransform):
+                    tf = SVGTransform.from_commands(tf)
+                tf = tf.to_str()
             attrs["transform"] = tf
         return attrs
     def to_svg(self) -> str:
@@ -362,7 +365,7 @@ class SVGPolyline(SVGPrimitive):
         y = np.min(self.points[:, 1])
         return [x, y, np.max(self.points[:, 0]) - x, np.max(self.points[:, 1]) - y]
     def _prep_points(self, points):
-        return " ".join(f"{a:.2f}" + " " + f"{b:.2f}" for a, b in points)
+        return " ".join(f"{a:.3g}" + " " + f"{b:.3g}" for a, b in points)
     def _prep_attrs(self, attrs:dict):
         attrs = super()._prep_attrs(attrs)
         attrs["points"] = self._prep_points(attrs["points"])
@@ -384,7 +387,7 @@ class SVGPolygon(SVGPrimitive):
         return [x, y, np.max(self.points[:, 0]) - x, np.max(self.points[:, 1]) - y]
 
     def _prep_points(self, points):
-        return " ".join(f"{a:.2f}" + " " + f"{b:.2f}" for a, b in points)
+        return " ".join(f"{a:.3g}" + " " + f"{b:.3g}" for a, b in points)
     def _prep_attrs(self, attrs:dict):
         attrs = super()._prep_attrs(attrs)
         attrs["points"] = self._prep_points(attrs["points"])
@@ -811,6 +814,7 @@ class SVGFigure:
             compute_bbox = bbox is None
         for e in self.elements:
             drel, bb = self.prep_element(e)
+            if drel is None: continue
             els.append(drel)
             if bbox is None:
                 (l, r, b, t) = bb.to_array()
@@ -823,7 +827,7 @@ class SVGFigure:
                     (min([b, bottom]), max([t, top]))
                 )
         return bbox, els
-    def to_svg(self, compute_bbox=None, **opts):
+    def to_svg(self, compute_bbox=None, view_box=None, **opts):
         els = []
         if len(self.defs) > 0:
             def_el = []
@@ -831,7 +835,9 @@ class SVGFigure:
                 def_el.append(self.create_def(id=k, **v))
             els.append(SVG.Defs(def_el))
 
-        bbox, draw_els = self.prep_draw_els(self.view_box, compute_bbox=compute_bbox)
+        if view_box is None:
+            view_box = self.view_box
+        bbox, draw_els = self.prep_draw_els(view_box, compute_bbox=compute_bbox)
         els.extend(draw_els)
         opts = self.kwargs | opts
         if bbox is not None:
@@ -860,7 +866,31 @@ class SVGPrimitive3D:
         ...
     def to_2d(self, projection_matrix):
         kwargs, depth = self.prep_kwargs(projection_matrix)
-        return self.wrapper(**kwargs), depth
+        if kwargs is None:
+            return None, None
+        else:
+            return self.wrapper(**kwargs), depth
+    def compare_primitive(self, prim, depth1, depth2) -> int:
+        if prim is None:
+            return 1
+        elif depth1 is not None:
+            if depth2 is None:
+                return 1
+            else:
+                if depth1[1] < depth2[0]:
+                    return -1
+                elif depth1[0] > depth2[1]:
+                    return 1
+                elif depth1[1] > depth2[1]:
+                    return 1
+                elif depth1[0] < depth2[0]:
+                    return -1
+                else:
+                    return 0
+        elif depth2 is not None:
+            return -1
+        else:
+            return 0
     def to_svg(self, projection_matrix):
         return self.to_2d(projection_matrix).to_svg()
 
@@ -870,10 +900,9 @@ class SVGPointsToShape3D(SVGPrimitive3D):
     @abstractmethod
     def to_points(self):
         ...
-    @staticmethod
-    def get_depth(points):
+    def get_depth(self, points):
         return (np.min(points[:, 2]), np.max(points[:, 2]))
-    def prep_kwargs(self, projection_matrix):
+    def prep_kwargs(self, projection_matrix, return_w=False, **extra):
         points = self.to_points()
         pr = np.asanyarray(projection_matrix)
         if pr.shape[-1] == 3:
@@ -882,16 +911,27 @@ class SVGPointsToShape3D(SVGPrimitive3D):
             zvals = points[:, (2,)]
             points = np.concatenate([points[:, :2] @ np.asanyarray(projection_matrix), zvals], axis=-1)
         else:
-            points, in_view = nput.render_points(points, projection_matrix)
+            # raise Exception(projection_matrix)
+            # print(">>>")
+            # print(points)
+            bits = nput.render_points(points, projection_matrix, return_w=return_w)
             #TODO: split culled segments
+            if return_w:
+                (points, in_view), w = bits
+                extra['w'] = w
+                # print(w)
+            else:
+                points, in_view = bits
+            # print("  >")
+            # print(points)
+            # print(in_view)
             points = points[in_view]
         if len(points) > 0:
             depth = self.get_depth(points)
         else:
             depth = []
-        return self.kwargs | dict(
-            points=points[:, :2]
-        ), depth
+        extra['points'] = points[:, :2]
+        return self.kwargs | extra, depth
 
 class SVGPolygon3D(SVGPointsToShape3D):
     wrapper: SVGPolygon
@@ -1073,11 +1113,109 @@ class SVGPath3D(SVGNonPlanarPolylike3D):
         return points
 
 
+class SVGCylinder(SVGPointsToShape3D):
+    def __init__(self, start, end, radius, wrapper=None, **kwargs):
+        self.start = np.asanyarray(start)
+        self.end = np.asanyarray(end)
+        self.radius = radius
+        self._wrapper = wrapper
+        super().__init__(**kwargs)
+    def _infer_wrapper(self) -> type[SVGPrimitive]:
+        if 'fill' in self.kwargs:
+            return SVGPolygon
+        else:
+            return SVGPolyline
+    @property
+    def wrapper(self):
+        if self._wrapper is None:
+            self._wrapper = self._infer_wrapper()
+        return self._wrapper
+    @wrapper.setter
+    def wrapper(self, value):
+        self._wrapper = value
+    def to_points(self):
+        return np.array([self.start, self.end])
+    def compare_primitive(self, prim, depth1, depth2) -> int:
+        if isinstance(prim, SVGSphere):
+            return -1 * prim.compare_primitive(self, depth2, depth1)
+        else:
+            return super().compare_primitive(prim, depth1, depth2)
+    def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
+        kwargs, depth = super().prep_kwargs(projection_matrix, return_w=True)
+        w = kwargs.pop('w')
+        pts = kwargs.pop('points')
+        if len(pts) == 0:
+            return None, None
+        w[w <= 0] = 1
+        y_scale = np.linalg.norm(projection_matrix[:3, 1])
+        rad1 = self.radius * y_scale / w[0]
+        rad2 = self.radius * y_scale / w[1]
+        start, end = pts
+        vec = end - start
+        orth = nput.vec_normalize(np.array([vec[1], -vec[0]]))
+        points = np.array([
+            start - rad1 * orth,
+            end - rad2 * orth,
+            end + rad2 * orth,
+            start + rad1 * orth
+        ])
+        b, r, t, l = np.linalg.norm(np.roll(points, 1, axis=0) - points, axis=-1)
+        kwargs['stroke-dasharray']=f"{r:.3g}, {b:.3g}, {l:.3g}, {t:.3g}"
+        return kwargs | dict(points=points), depth
+
+class SVGSphere(SVGPointsToShape3D):
+    wrapper = SVGCircle
+    def __init__(self, center, radius, **kwargs):
+        self.center = np.asanyarray(center)
+        self.radius = radius
+        super().__init__(**kwargs)
+    def to_points(self):
+        return self.center[np.newaxis]
+    def compare_primitive(self, prim, depth1, depth2) -> int:
+        if isinstance(prim, SVGSphere):
+            r1 = self.radius
+            r2 = prim.radius
+            rd1 = r1 + depth1[1]
+            rd2 = r2 + depth2[1]
+            if rd1 < rd2:
+                return -1
+            elif rd1 > rd2:
+                return 1
+            else:
+                return 0
+        elif isinstance(prim, SVGCylinder):
+            r1 = self.radius
+            rd1 = r1 + depth1[1]
+            rd0 = depth1[0] - r1
+            if rd0 < depth2[1] < rd1:
+                return 1
+            elif rd0 < depth2[0] < rd1:
+                return -1
+            else:
+                return super().compare_primitive(prim, depth1, depth2)
+        else:
+            return super().compare_primitive(prim, depth1, depth2)
+    def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
+        kwargs, depth = super().prep_kwargs(projection_matrix, return_w=True)
+        w = kwargs.pop('w')
+        pts = kwargs.pop('points')
+        if len(pts) == 0: return None, None
+        (x, y), = pts
+        w[w <= 0] = 1
+        y_scale = np.linalg.norm(projection_matrix[:3, 1])
+        rad = self.radius * y_scale / w[0]
+        return kwargs | {
+            'cx':x,
+            'cy':y,
+            'r':rad,
+        }, depth
+
+
 class SVGFigure3D(SVGFigure):
 
     def __init__(self, elements=None, defs=None,
                  view_matrix=None,
-                 projection_matrix=None,
+                 perspective_matrix=None,
                  world_matrix=None,
                  view_position=None,
                  view_center=None,
@@ -1087,11 +1225,11 @@ class SVGFigure3D(SVGFigure):
                  view_angle=None,
                  aspect_ratio=None,
                  view_distance=None,
-                 clip_distance=None,
+                 clip_distances=None,
                  **kwargs):
         self._projection_kwargs = dict(
             view_matrix=view_matrix,
-            projection_matrix=projection_matrix,
+            perspective_matrix=perspective_matrix,
             world_matrix=world_matrix,
             view_position=view_position,
             view_center=view_center,
@@ -1101,12 +1239,14 @@ class SVGFigure3D(SVGFigure):
             view_angle=view_angle,
             aspect_ratio=aspect_ratio,
             view_distance=view_distance,
-            clip_distance=clip_distance
+            clip_distances=clip_distances
         )
         self._render_matrix = None
+        self._temp_draw_cache = None
         super().__init__(elements=elements, defs=defs, **kwargs)
     def get_projection_matrix(self):
         if self._render_matrix is None:
+            self._projection_kwargs['bbox'] = self.view_box
             self._render_matrix = nput.render_matrix(**self._projection_kwargs)
         return self._render_matrix
     def get_projection_kwargs(self):
@@ -1124,22 +1264,70 @@ class SVGFigure3D(SVGFigure):
         'polyline': SVGPolyline3D,
         'polygon': SVGPolygon3D,
         'path': SVGPath3D,
+        'cylinder': SVGCylinder,
+        'sphere': SVGSphere,
         # 'text': SVGText3D
     }
     def create_element(self, element_type, **kwargs):
         return self.element_mapping[element_type](**kwargs)
+    def add_cylinder(self, **kwargs):
+        return self.add_element('cylinder', **kwargs)
+    def add_sphere(self, **kwargs):
+        return self.add_element('sphere', **kwargs)
 
     def prep_element(self, e):
         if isinstance(e, SVGPrimitive3D):
-            e, z = e.to_2d(projection_matrix=self.get_projection_matrix())
-            e._depth = z[0]
-        return super().prep_element(e)
+            flat, z = e.to_2d(projection_matrix=self.get_projection_matrix())
+            if flat is None: return None, None
+            self._temp_draw_cache[flat] = (e, z)
+            e = flat
+        two_d, bbox = super().prep_element(e)
+        self._temp_draw_cache[two_d] = (e, bbox)
+        return two_d, bbox
 
+    def compare_primitives(self, e1, e2):
+        #TODO: check that bboxes intersect
+        flat1, bbox1 = self._temp_draw_cache.get(e1, (None, None))
+        flat2, bbox2 = self._temp_draw_cache.get(e2, (None, None))
+        parent1, depth1 = self._temp_draw_cache.get(flat1, (None, None))
+        parent2, depth2 = self._temp_draw_cache.get(flat2, (None, None))
+        if bbox1 is not None and bbox2 is not None: # fast path if no overlap
+            ax1, ay1, ax2, ay2 = bbox1.to_array()
+            bx1, by1, bx2, by2 = bbox2.to_array()
+            if not (ax1 <= bx2 and ax2 >= bx1 and
+                    ay1 <= by2 and ay2 >= by1): # no overlap
+                if depth1 is not None and depth2 is not None:
+                    if depth1[0] < depth2[0]:
+                        return -1
+                    elif depth1[0] > depth2[0]:
+                        return 1
+                    else:
+                        return 0
+                else:
+                    return 0
+        if parent1 is not None:
+            return parent1.compare_primitive(parent2, depth1, depth2)
+        elif parent2 is not None:
+            return -1*parent2.compare_primitive(parent1, depth2, depth1)
+        elif depth1 is not None:
+            if depth2 is None:
+                return 1
+            else:
+                if depth1[0] < depth2[0]:
+                    return -1
+                elif depth1[0] > depth2[0]:
+                    return 1
+                else:
+                    return 0
+        elif depth2 is not None:
+            return -1
+        else:
+            return 0
     def sort_draw_els(self, els):
         return sorted(els,
-                      key=lambda e: (e._depth if hasattr(e, '_depth') else -1000),
-                      reverse=True)
+                      key=functools.cmp_to_key(self.compare_primitives))
     def prep_draw_els(self, bbox, compute_bbox=None):
+        self._temp_draw_cache = {}
         bbox, els = super().prep_draw_els(bbox, compute_bbox=compute_bbox)
         if bbox is not None:
             bbox = bbox[:2]
@@ -1150,6 +1338,7 @@ class SVGFigure3D(SVGFigure):
         for e in self.elements:
             if isinstance(e, SVGPrimitive3D):
                 e, z = e.to_2d(projection_matrix=self.get_projection_matrix())
+                if e is None: continue
             else:
                 z = (0, 0)
             if bbox is None:
@@ -1165,3 +1354,18 @@ class SVGFigure3D(SVGFigure):
                     (min([z[0], n]), max([z[1], f]))
                 )
         return bbox
+
+    def to_svg(self, compute_bbox=None, view_box=None, **opts):
+        vd = self._projection_kwargs.pop('view_distance', None)
+        if vd is not None and self.view_box is None:
+            self.view_box = vd / 4 * np.array([[-1, 1], [-1, 1], [-1, 1]])
+
+        if view_box is None:
+            view_box = self.view_box
+
+        if view_box is not None:
+            if len(view_box) == 3:
+                view_box, _ = nput.render_points(np.asanyarray(view_box).T, self.get_projection_matrix())
+                view_box = np.sort(view_box.T, axis=-1)
+
+        return super().to_svg(compute_bbox=compute_bbox, view_box=view_box, **opts)

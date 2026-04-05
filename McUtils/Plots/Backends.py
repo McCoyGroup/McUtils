@@ -2875,6 +2875,9 @@ class PlotlyAxes(GraphicsAxes):
 
     def draw_line(self, points, **styles):
         return self.plot(*np.asanyarray(points).T, **styles)
+    def draw_path(self, commands, **styles):
+        points = nput.parametric_path_points(commands)
+        return self.draw_line(points, **styles)
     def draw_disk(self, points, radius=None, s=None, **styles):
         raise NotImplementedError(...)
     def draw_rect(self, points, **styles):
@@ -4322,7 +4325,28 @@ class SVGAxes(GraphicsAxes):
     def set_graphics_properties(self, obj, **props):
         obj.styles.update(props)
 
+    style_mapping = {
+        'edgecolor':'stroke',
+        'lw':'stroke-width',
+        'color':'fill',
+        'line_color':'stroke',
+        'line_width':'stroke-width'
+    }
+    def prep_styles(self, styles):
+        glow = styles.pop('glow', None)
+        if glow is not None:
+            color = styles.pop('color')
+            if color is None:
+                color = glow
+            else:
+                color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
+            styles['color'] = color
+        return {
+            self.style_mapping.get(k, k):v
+            for k,v in styles.items()
+        }
     def draw_line(self, points, **styles):
+        styles = self.prep_styles(styles)
         points = np.asanyarray(points)
         if len(points) > 2:
             return self.figure.add_polyline(points=points, **styles)
@@ -4330,16 +4354,20 @@ class SVGAxes(GraphicsAxes):
             (x1, y1), (x2, y2) = points
             return self.figure.add_line(x1=x1, y1=y1, x2=x2, y2=y2, **styles)
     def draw_point(self, points, **styles):
+        styles = self.prep_styles(styles)
         return self.draw_disk(points, **styles)
     def draw_disk(self, points, *, radius, **styles):
+        styles = self.prep_styles(styles)
         x, y = np.asanyarray(points)
         return self.figure.add_circle(x=x, y=y, r=radius, **styles)
     def draw_rect(self, points, **styles):
+        styles = self.prep_styles(styles)
         (x1, y1), (x2, y2) = np.asanyarray(points)
         return self.figure.add_rect(x=x1, y=y1, width=x2-x1, height=y2-y1, **styles)
     def draw_triangle(self, points, **styles):
         raise NotImplementedError(...)
     def draw_poly(self, points, **styles):
+        styles = self.prep_styles(styles)
         return self.figure.add_polygon(points=np.asanyarray(points), **styles)
     default_arrowhead = dict(
         body=svg.SVG.Path(d="M 0 0 L 10 5 L 0 10 z"),
@@ -4351,6 +4379,7 @@ class SVGAxes(GraphicsAxes):
         orient="auto-start-reverse"
     )
     def draw_arrow(self, points, arrowhead=None, marker=None, **styles):
+        styles = self.prep_styles(styles)
         if marker is None:
             if arrowhead is None:
                 arrowhead = self.default_arrowhead
@@ -4369,6 +4398,7 @@ class SVGAxes(GraphicsAxes):
         fp = FontProperties(**font_opts)
         return TextPath(origin, text, prop=fp)
     def draw_text(self, points, vals, use_path=False, **styles):
+        styles = self.prep_styles(styles)
         if use_path:
             mpl_path = self._text_to_path(points, vals, **styles)
             verts = mpl_path.vertices
@@ -4380,6 +4410,7 @@ class SVGAxes(GraphicsAxes):
         else:
             self.figure.add_text()
     def draw_path(self, commands, use_polyline=False, **styles):
+        styles = self.prep_styles(styles)
         if use_polyline:
             points = nput.parametric_path_points(commands)
             # shifts = np.concatenate([[points[0]], np.diff(points, axis=0)], axis=0)
@@ -4389,12 +4420,15 @@ class SVGAxes(GraphicsAxes):
 
 class SVGFigure(GraphicsFigure):
     Axes = SVGAxes
+    default_styles= {
+        "vector-effect":'non-scaling-stroke'
+    }
     def __init__(self, axes=None, layout=None, figsize=None,
                  flip_y=True,
                  **kwargs):
         super().__init__(axes=axes)
         self.layout = layout
-        self.kwargs = kwargs
+        self.kwargs = self.default_styles | kwargs
         self.flip_y = flip_y
         if figsize is not None:
             self.set_size_inches(*figsize)
@@ -4604,8 +4638,9 @@ class SVGAxes3D(SVGAxes):
             output_order=['x', 'y', 'z']
         )
     def draw_disk(self, points, *, radius, **styles):
-        x, y = np.asanyarray(points)
-        return self.figure.add_circle(x=x, y=y, r=radius, **styles)
+        styles = self.prep_styles(styles)
+        x, y, z = np.asanyarray(points)
+        return self.figure.add_circle(x=x, y=y, z=z, r=radius, **styles)
     def draw_rect(self, points, rotation=None, normal=None, **styles):
         points = np.asanyarray(points)
         if normal is None:
@@ -4616,11 +4651,14 @@ class SVGAxes3D(SVGAxes):
         x, y, z = points[0]
         return self.figure.add_rect(x=x, y=y, z=z, width=x2-x1, height=y2-y1, rotation=rotation, normal=normal, **styles)
     def draw_sphere(self, points, rads, **styles):
-        return self.figure.add_sphere(points, rads, **styles)
-    def draw_cylinder(self, start, end, rad, **opts):
-        return self.figure.add_cylinder(start, end, rad, **opts)
-    def draw_box(self, start, end, **opts):
-        return self.figure.add_box(start, end, **opts)
+        styles = self.prep_styles(styles)
+        return self.figure.add_sphere(center=points, radius=rads, **styles)
+    def draw_cylinder(self, start, end, rad, **styles):
+        styles = self.prep_styles(styles)
+        return self.figure.add_cylinder(start=start, end=end, radius=rad, **styles)
+    def draw_box(self, start, end, **styles):
+        styles = self.prep_styles(styles)
+        return self.figure.add_box(start, end, **styles)
 
 class SVGFigure3D(SVGFigure):
     Axes = SVGAxes3D
@@ -5714,6 +5752,9 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(line_set)
 
         return line_set
+    def draw_path(self, commands, **styles):
+        points = nput.parametric_path_points(commands)
+        return self.draw_line(points, **styles)
 
     def draw_disk(self,
                   points,
@@ -5993,7 +6034,7 @@ class X3DAxes(GraphicsAxes3D):
 
         return normal, rotation, angle, embedding_axes
 
-    def draw_rect(self,
+    def draw_rect(self, # TODO: this feels like circle just got duped?
                   points,
                   color=None,
                   line_color=None,

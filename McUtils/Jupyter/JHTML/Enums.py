@@ -120,6 +120,7 @@ class Options(enum.Enum):
     Top = "top"
     UnicodeBidi = "unicode-bidi"
     VerticalAlign = "vertical-align"
+    VectorEffect = "vector-effect"
     Visibility = "visibility"
     WhiteSpace = "white-space"
     Width = "width"
