@@ -2704,7 +2704,7 @@ class NumputilsTests(TestCase):
         )
         print(rm)
 
-    @debugTest
+    @validationTest
     def test_Bezier(self):
         import McUtils.Plots as plt
 
@@ -2717,9 +2717,13 @@ class NumputilsTests(TestCase):
             [1.2, 0],
             [2, 2]
         ])
-        n = 100
-        x = nput.bezier_eval(knots[:, 0], np.linspace(0, 1, n))
-        y = nput.bezier_eval(knots[:, 1], np.linspace(0, 1, n))
+        n = 5
+        points, t = nput.bezier_eval(knots, n, max_arc_len=.05, return_points=True)
+        # points = nput.bezier_eval(knots, t)
+        ders = nput.bezier_eval(knots, t, order=1)
+        points0 = nput.bezier_eval(knots, n, return_points=False)
+        # x = nput.bezier_eval(knots[:, 0], np.linspace(0, 1, n))
+        # y = nput.bezier_eval(knots[:, 1], np.linspace(0, 1, n))
 
         # points, arc = nput.arc_points_from_endpoints(
         #     [.8, 0],
@@ -2730,12 +2734,23 @@ class NumputilsTests(TestCase):
         #     use_major_rotation=False,
         #     rotation=np.pi/3
         # )
-        fig = plt.Plot(x, y,
+        fig = plt.Plot(*points.T,
                  plot_range=[[0, 2], [0, 2]],
                  padding=[[0, 0], [0, 0]],
                  image_size=500,
                  aspect_ratio=1)
-        fig = plt.Plot(*knots.T, figure=fig)
+        # fig = plt.Plot(*points0.T, figure=fig)
+        # fig = plt.Plot(*knots.T, figure=fig, linestyle='dashed')
+        # fig = plt.QuiverPlot(*points.T, *ders.T, figure=fig)
+
+        plt.ScatterPlot(
+            *points.T,
+            color=plt.prep_color(
+                palette='WarioColors',
+                blending=vec_rescale(bezier_curvature(knots, t))
+            ),
+            figure=fig
+        )
         fig.show()
 
     @validationTest
@@ -2756,3 +2771,31 @@ class NumputilsTests(TestCase):
                  padding=[[0, 0], [0, 0]],
                  image_size=500,
                  aspect_ratio=1).show()
+
+    @validationTest
+    def test_ParametricPath(self):
+        import McUtils.Plots as plt
+
+        point = parametric_path_points([
+            ["BEZIER",
+             [
+                 (0, 5),
+                 (5, 10),
+                 (10, 10)
+             ]],
+            ["line",
+             [
+                 (-5, 0),
+                 (-10, -5),
+                 (-10, -10)
+             ]],
+            ["interp",
+             [
+                 (0, 5),
+                 (5, 10),
+                 (10, 10)
+             ], {'k':2}]
+        ])
+        # print(point)
+
+        plt.Plot(*point.T).show()

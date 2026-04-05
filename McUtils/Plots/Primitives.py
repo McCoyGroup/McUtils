@@ -16,7 +16,8 @@ __all__ = [
     "Point",
     "Triangle",
     "Polygon",
-    "Rectangle"
+    "Rectangle",
+    "Path"
 ]
 
 import abc, numpy as np
@@ -107,6 +108,19 @@ class Arrow(GraphicsPrimitive):
         if hasattr(axes, 'axes'):
             axes = axes.axes
         return axes.draw_arrow([self.pos1, self.pos2], **self.opts)
+
+class Path(GraphicsPrimitive):
+    def __init__(self, commands, **opts):
+        self.commands = commands
+        self.opts = opts
+
+    def get_bbox(self):
+        raise NotImplementedError("...")
+
+    def plot(self, axes, *args, **kwargs):
+        if hasattr(axes, 'axes'):
+            axes = axes.axes
+        return axes.draw_path(self.commands, **self.opts)
 
 class Sphere(GraphicsPrimitive):
     def __init__(self, position=(0, 0, 0), radius=1, sphere_points=48, **opts):
