@@ -3943,7 +3943,8 @@ class PlotlyAxes3D(PlotlyAxes):
         )
         return points
 
-    def draw_disk(self, centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None,
+    def draw_disk(self, centers, radius=None, angle=None,
+                  normal=None, uv_axes=None, zdir=None,
                   theta1=None, theta2=None,
                   rendering='flat', box_scalings=None,
                   line_color=None, line_thickness=None,
@@ -4391,6 +4392,27 @@ class SVGAxes(GraphicsAxes):
             marker = 'url(#arrowhead)'
         self.draw_line(points, marker=marker, **styles)
 
+    mpl_font_map = dict(
+        font_family='family',
+        font_style='style',
+        font_variant='variant',
+        font_weight='weight',
+        font_stretch='stretch',
+        font_size='size',
+        font_fname='fname',  # if set, it's a hardcoded filename to use
+        font_math_fontfamily='math_fontfamily'
+    )
+    @classmethod
+    def filter_font_options(cls, styles):
+        font_opts = {}
+        rem_opts = {}
+        for k,v in styles.items():
+            k2 = cls.mpl_font_map.get(k)
+            if k2 is None:
+                rem_opts[k] = v
+            else:
+                font_opts[k2] = v
+        return font_opts, rem_opts
     @classmethod
     def _text_to_path(cls, origin, text, **font_opts):
         from matplotlib.textpath import TextPath
@@ -4400,15 +4422,13 @@ class SVGAxes(GraphicsAxes):
     def draw_text(self, points, vals, use_path=False, **styles):
         styles = self.prep_styles(styles)
         if use_path:
-            mpl_path = self._text_to_path(points, vals, **styles)
-            verts = mpl_path.vertices
-            bbox = (np.min(verts[:, 0]), np.min(verts[:, 1])), (np.max(verts[:, 0]), np.max(verts[:, 1]))
-            return svg.SVGPath.from_mpl(
-                self._text_to_path(points, vals, **styles),
-                bbox
-            )
+            font_opts, styles = self.filter_font_options(styles)
+            mpl_path = self._text_to_path(points, vals, **font_opts)
+            commands = svg.SVGPath.from_mpl(mpl_path)
+            return self.figure.add_path(commands=commands, **styles)
         else:
-            self.figure.add_text()
+            x, y = points
+            return self.figure.add_text(x=x, y=y, text=vals, **styles)
     def draw_path(self, commands, use_polyline=False, **styles):
         styles = self.prep_styles(styles)
         if use_polyline:
@@ -4637,10 +4657,52 @@ class SVGAxes3D(SVGAxes):
             view_vector=normal,
             output_order=['x', 'y', 'z']
         )
-    def draw_disk(self, points, *, radius, **styles):
+    def draw_line(self, points, **styles):
         styles = self.prep_styles(styles)
+        points = np.asanyarray(points)
+        if len(points) > 2:
+            return self.figure.add_polyline(points=points, **styles)
+        else:
+            (x1, y1, z1), (x2, y2, z2) = points
+            return self.figure.add_line(x1=x1, y1=y1, z1=z1, x2=x2, y2=y2, z2=z2, **styles)
+    def draw_disk(self, points, *, radius,
+                  angle=None,
+                  normal=None, uv_axes=None,
+                  offset_angle=None, span_angle=None,
+                  **styles):
+        styles = self.prep_styles(styles)
+        if uv_axes is not None:
+            u, v = uv_axes
+            base_ang, base_norm = nput.vec_angles(u, v, return_crosses=True)
+            base_norm = nput.vec_normalize(base_norm)
+            if normal is None:
+                normal = base_norm
+            angs, crosses, cns = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_cross_norms=True)
+            if cns < 1e-6:
+                embedding_axes = np.eye(3)
+            else:
+                embedding_axes = nput.rotation_matrix(crosses, angs)
+            emb_u, emb_v = np.array([u, v]) @ embedding_axes
+            det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+            emb_z = np.cross(emb_u, emb_v)
+            if det < 0:
+                emb_angle = np.arctan2(emb_v[1], emb_v[0])
+                if emb_z[2] > 0:
+                    emb_angle = -emb_angle
+            else:
+                emb_angle = np.arctan2(emb_u[1], emb_u[0])
+                if emb_z[2] < 0:
+                    emb_angle = -emb_angle
+            if offset_angle is None:
+                offset_angle = emb_angle
+            if span_angle is None:
+                span_angle = angle
         x, y, z = np.asanyarray(points)
-        return self.figure.add_circle(x=x, y=y, z=z, r=radius, **styles)
+        return self.figure.add_circle(x=x, y=y, z=z, r=radius,
+                                      normal=normal,
+                                      offset_angle=offset_angle,
+                                      span_angle=span_angle,
+                                      **styles)
     def draw_rect(self, points, rotation=None, normal=None, **styles):
         points = np.asanyarray(points)
         if normal is None:
@@ -4659,6 +4721,19 @@ class SVGAxes3D(SVGAxes):
     def draw_box(self, start, end, **styles):
         styles = self.prep_styles(styles)
         return self.figure.add_box(start, end, **styles)
+    def draw_text(self, points, vals, projected=False, use_path=False, flip_y=True, **styles):
+        styles = self.prep_styles(styles)
+        if projected or use_path:
+            font_opts, styles = self.filter_font_options(styles)
+            mpl_path = self._text_to_path(points, vals, **font_opts)
+            commands = svg.SVGPath.from_mpl(mpl_path)
+            return self.figure.add_path(commands=commands, **styles)
+        else:
+            x, y, z = points
+            if flip_y:
+                styles['transform'] = (styles.get('transform', ' ') + 'scale(1 -1)')
+                styles['transform-box'] = 'fill-box' # TODO: make this compose well with other transforms...
+            return self.figure.add_text(x=x, y=y, z=z, text=vals, **styles)
 
 class SVGFigure3D(SVGFigure):
     Axes = SVGAxes3D

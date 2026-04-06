@@ -2417,7 +2417,11 @@ class SVG(HTML):
                 if v is None:
                     del attrs[k]
                 else:
+                    if hasattr(v, 'tolists') and hasattr(v, 'ndim') and v.ndim == 0:
+                        v = v.tolists() # flatten len(0) arrays
                     if hasattr(v, "__getitem__") or hasattr(v, "__iter__"):
+                        if hasattr(v, 'reshape'):
+                            v = v.reshape(-1)
                         v = " ".join(str(x) for x in v)
                     elif v in {True, False}:
                         v = str(v).lower()
