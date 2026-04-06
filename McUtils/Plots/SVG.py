@@ -369,6 +369,8 @@ class SVGPolyline(SVGPrimitive):
     def _prep_attrs(self, attrs:dict):
         attrs = super()._prep_attrs(attrs)
         attrs["points"] = self._prep_points(attrs["points"])
+        if 'fill' not in attrs:
+            attrs['fill'] = 'none'
         return attrs
 
 class SVGPolygon(SVGPrimitive):
@@ -934,7 +936,7 @@ class SVGPointsToShape3D(SVGPrimitive3D):
         return self.kwargs | extra, depth
 
 class SVGPolygon3D(SVGPointsToShape3D):
-    wrapper: SVGPolygon
+    wrapper = SVGPolygon
     def __init__(self, points, **kwargs):
         self.points = points
         super().__init__(**kwargs)
@@ -942,7 +944,7 @@ class SVGPolygon3D(SVGPointsToShape3D):
         return self.points
 
 class SVGPolyline3D(SVGPointsToShape3D):
-    wrapper: SVGPolyline
+    wrapper = SVGPolyline
     def __init__(self, points, **kwargs):
         self.points = points
         super().__init__(**kwargs)
@@ -1050,16 +1052,12 @@ class SVGCircle3D(SVGPolylike3D):
         self.npoints = npoints
         super().__init__(**kwargs)
     def to_2d_points(self):
-        nput.arc_points([0, 0], self.r, minor_radius=self.minor_radius,
-                        npoints=self.num_points,
-                        offset_angle=self.offset_angle, span_angle=self.span_angle)
-        return np.array([
-            [self.x, self.y],
-            [self.x + self.width, self.y],
-            [self.x + self.width, self.y + self.height],
-            [self.x, self.y + self.height]
-        ]), np.array([self.x, self.y, self.z])
-
+        points = nput.arc_points([0, 0],
+                                 self.r, minor_radius=self.minor_radius,
+                                 npoints=self.npoints,
+                                 offset_angle=self.offset_angle,
+                                 span_angle=self.span_angle)
+        return points, np.array([self.x, self.y, self.z])
 class SVGEllipse3D(SVGCircle3D):
     def __init__(self, x, y, z, rx, ry, **kwargs):
         super().__init__(x, y, z, rx, minor_radius=ry, **kwargs)
@@ -1210,6 +1208,41 @@ class SVGSphere(SVGPointsToShape3D):
             'r':rad,
         }, depth
 
+class SVGText3D(SVGPointsToShape3D):
+    wrapper = SVGText
+    def __init__(self, text, x, y, z, overlay=True, **kwargs):
+        self.text = text
+        self.points = np.array([[x,y,z]])
+        self.overlay = overlay
+        super().__init__(**kwargs)
+
+    def to_points(self):
+        return self.points
+    def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
+        kwargs, depth = super().prep_kwargs(projection_matrix)
+        kwargs['text'] = self.text
+        (x,y), = kwargs.pop('points')
+        kwargs['x'] = x
+        kwargs['y'] = y
+        if self.overlay:
+            depth = [1000, 1000]
+        return kwargs, depth
+
+    @property
+    def x(self): return self.points[0, 0]
+    @x.setter
+    def x(self, value): self.points[0, 0] = value
+    @property
+    def y(self): return self.points[0, 1]
+    @y.setter
+    def y(self, value): self.points[0, 1] = value
+    @property
+    def z(self): return self.points[0, 2]
+    @z.setter
+    def z(self, value): self.points[0, 2] = value
+
+    def _raw_bbox(self):
+        return [self.x, self.y, self.x, self.y]
 
 class SVGFigure3D(SVGFigure):
 
@@ -1266,7 +1299,7 @@ class SVGFigure3D(SVGFigure):
         'path': SVGPath3D,
         'cylinder': SVGCylinder,
         'sphere': SVGSphere,
-        # 'text': SVGText3D
+        'text': SVGText3D
     }
     def create_element(self, element_type, **kwargs):
         return self.element_mapping[element_type](**kwargs)
