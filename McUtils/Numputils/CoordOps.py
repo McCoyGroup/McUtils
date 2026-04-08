@@ -2645,8 +2645,8 @@ def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=No
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (k,), :]
     axis = shift_coords[..., j, :]
-    right_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle/2, axis_order=axis_order)
-    left_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle/2, axis_order=axis_order)
+    right_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle/2, axis_order=axis_order)
+    left_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle/2, axis_order=axis_order)
     # left might not always be the negation...I think
     left_expansion[0] += coords[..., (k,), :] # shift back from origin
     right_expansion[0] += coords[..., (k,), :] # shift back from origin

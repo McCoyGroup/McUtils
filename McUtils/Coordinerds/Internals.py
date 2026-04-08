@@ -707,6 +707,7 @@ class InternalSpec:
     def internals_to_cartesians(self, coords, order=None,
                                 reference_cartesians=None,
                                 return_fragments=False,
+                                return_inverse=True,
                                 **deriv_opts):
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
         from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
@@ -741,7 +742,6 @@ class InternalSpec:
             u = y - x
             v = z - x
             norms = nput.vec_norms([u, v])
-            print(coord[3], carts[perm[3]])
             if np.all(norms > 1e-8):
                 u, v = nput.vec_normalize([u, v], norms= norms)
                 r1 = nput.rotation_matrix([1, 0, 0], u)
@@ -756,7 +756,13 @@ class InternalSpec:
         if order is None:
             return carts
         else:
-            raise NotImplementedError("need to differentiate newly built Cartesians")
+            expansion = self.get_expansion(
+                carts,
+                order=order,
+                return_inverse=return_inverse,
+                **deriv_opts
+            )
+            return carts, expansion
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
