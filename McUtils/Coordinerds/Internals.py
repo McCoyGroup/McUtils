@@ -704,16 +704,20 @@ class InternalSpec:
     def cartesians_to_internals(self, coords, **opts):
         return self.get_direct_derivatives(coords, order=0, **opts)[0]
 
-    def internals_to_cartesians(self, coords, order=None):
+    def internals_to_cartesians(self, coords, order=None,
+                                reference_cartesians=None,
+                                return_fragments=False,
+                                **deriv_opts):
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
-        from .Conveniences import zmatrix_to_cartesian
+        from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
         conv = self.get_zmat_conv()
-        if callable(conv[1]):
+        unified = callable(conv[1])
+        if unified:
             (zmatrix, prep) = conv
             flat_z = prep(coords)
             zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
             perm, zmatrix = canonicalize_zmatrix(zmatrix)
-            return zmatrix_to_cartesian(zcoords, zmatrix), perm
+            blocks = [[zmatrix_to_cartesian(zcoords, zmatrix), perm]]
         else:
             blocks = []
             for zmatrix, prep in zip(*conv):
@@ -721,7 +725,38 @@ class InternalSpec:
                 zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
                 perm, zmatrix = canonicalize_zmatrix(zmatrix)
                 blocks.append([zmatrix_to_cartesian(zcoords, zmatrix), perm])
+
+        if return_fragments:
+            if order is not None: raise NotImplementedError("can't return derivatives of fragments alone")
             return blocks
+
+        if reference_cartesians is None:
+            all_atoms = np.concatenate([p for c,p in blocks])
+            reference_cartesians = np.zeros((len(all_atoms), 3))
+
+        carts = np.array(reference_cartesians)
+        for coord, perm in blocks:
+            # have to shift and realign fragments if possible...
+            x, y, z = carts[perm[:3], :]
+            u = y - x
+            v = z - x
+            norms = nput.vec_norms([u, v])
+            print(coord[3], carts[perm[3]])
+            if np.all(norms > 1e-8):
+                u, v = nput.vec_normalize([u, v], norms= norms)
+                r1 = nput.rotation_matrix([1, 0, 0], u)
+                z = np.array([0, 0, 1]) @ r1
+                normal = np.cross(u, v)
+                ang, cross = nput.vec_angles(normal, z, return_crosses=True)
+                frame = r1 @ nput.rotation_matrix(cross, ang)
+                coord = coord @ frame
+            coord = coord + x[np.newaxis]
+            carts[perm, :] = coord
+
+        if order is None:
+            return carts
+        else:
+            raise NotImplementedError("need to differentiate newly built Cartesians")
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
@@ -2232,7 +2267,11 @@ def find_internal_conversion(internals, targets,
             # prep conversion based on internal indices
             if tri is not None:
                 if prep_conversions:
-                    args = {k:find_internal(internals, v, missing_val=missing_val) for k,v in tri._asdict().items() if v is not None}
+                    args = {
+                        k: find_internal(internals, v, missing_val=missing_val)
+                            for k, v in tri._asdict().items()
+                        if v is not None
+                    }
                     def convert(internal_list, args=args, conv=conv,  **kwargs):
                         internal_list = np.asanyarray(internal_list)
                         subtri = nput.make_triangle(
@@ -2381,7 +2420,13 @@ def enumerate_zmatrices_from_internals(internals,
         if len(k) == 4:
             for p in itertools.permutations(k):
                 if p in d2:
+                    #TODO: is this sufficient for completability?
                     complete_dihedrals[p] = d2[p]
+                    for a in k:
+                        if a not in known_atom_graph:
+                            known_atom_graph[a] = set()
+                        for b in k:
+                            known_atom_graph[a].add(b)
                     break
                 elif p in dd:
                     d = dd[p]
@@ -2410,7 +2455,8 @@ def enumerate_zmatrices_from_internals(internals,
     sels = comps.get_fragments(return_labels=True)
     idx_props = _get_dihedron_index_props()
     if atoms is None:
-        atoms = np.concatenate(internals)
+        atoms, idx = np.unique(np.concatenate(internals), return_index=True)
+        atoms = atoms[np.argsort(idx)]
     ord, idx = np.unique(atoms, return_index=True)
     ord_map = dict(zip(ord, idx))
     for atoms in sels:
@@ -2445,8 +2491,13 @@ def enumerate_zmatrices_from_internals(internals,
                                             and d[v['index']] is not None
                                     ):
                                         if (a == k[p[0]] or a == k[p[-1]]):
-                                            k = [k[i] for i in p]
-                                            if a == k[-1]: k = list(reversed(k))
+                                            k = tuple(k[i] for i in p)
+                                            if k not in internals:
+                                                x, y, z, w = k
+                                                k2 = (x, z, y, w)
+                                                if k2 in internals:
+                                                    k = k2
+                                            if a == k[-1]: k = tuple(reversed(k))
                                             d_choices.append(k)
                         if len(d_choices) == 0:
                             raise ValueError(
