@@ -711,8 +711,16 @@ class EdgeGraph:
         _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
         return groups
 
-    def get_fragments(self):
-        return self.get_graph_fragment_indices(self.graph)
+    def get_fragments(self, return_labels=False):
+        frags = self.get_graph_fragment_indices(self.graph)
+        if return_labels:
+            l = self.labels
+            return [
+                tuple(l[i] for i in frag)
+                for frag in frags
+            ]
+        else:
+            return frags
 
     @classmethod
     def _reindex_segmentss(cls, frags, remapping):

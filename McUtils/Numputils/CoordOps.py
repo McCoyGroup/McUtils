@@ -1355,7 +1355,7 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, j, k, [i, j, k, l],
+            coords, k, j, [i, j, k, l], #TODO: make sure nothing broke with this flip...
             order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)

@@ -704,14 +704,59 @@ class InternalSpec:
     def cartesians_to_internals(self, coords, **opts):
         return self.get_direct_derivatives(coords, order=0, **opts)[0]
 
-    def internals_to_cartesians(self, coords, order=None):
-        from .ZMatrices import zmatrix_from_values
-        from .Conveniences import zmatrix_to_cartesian
-        (sel, zmatrix, prep) = self.get_zmat_conv()
-        print(prep)
-        flat_z = prep(coords)
-        zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
-        return zmatrix_to_cartesian(zcoords, np.array(zmatrix))  # very borked
+    def internals_to_cartesians(self, coords, order=None,
+                                reference_cartesians=None,
+                                return_fragments=False,
+                                **deriv_opts):
+        from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
+        from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
+        conv = self.get_zmat_conv()
+        unified = callable(conv[1])
+        if unified:
+            (zmatrix, prep) = conv
+            flat_z = prep(coords)
+            zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
+            perm, zmatrix = canonicalize_zmatrix(zmatrix)
+            blocks = [[zmatrix_to_cartesian(zcoords, zmatrix), perm]]
+        else:
+            blocks = []
+            for zmatrix, prep in zip(*conv):
+                flat_z = prep(coords)
+                zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
+                perm, zmatrix = canonicalize_zmatrix(zmatrix)
+                blocks.append([zmatrix_to_cartesian(zcoords, zmatrix), perm])
+
+        if return_fragments:
+            if order is not None: raise NotImplementedError("can't return derivatives of fragments alone")
+            return blocks
+
+        if reference_cartesians is None:
+            all_atoms = np.concatenate([p for c,p in blocks])
+            reference_cartesians = np.zeros((len(all_atoms), 3))
+
+        carts = np.array(reference_cartesians)
+        for coord, perm in blocks:
+            # have to shift and realign fragments if possible...
+            x, y, z = carts[perm[:3], :]
+            u = y - x
+            v = z - x
+            norms = nput.vec_norms([u, v])
+            print(coord[3], carts[perm[3]])
+            if np.all(norms > 1e-8):
+                u, v = nput.vec_normalize([u, v], norms= norms)
+                r1 = nput.rotation_matrix([1, 0, 0], u)
+                z = np.array([0, 0, 1]) @ r1
+                normal = np.cross(u, v)
+                ang, cross = nput.vec_angles(normal, z, return_crosses=True)
+                frame = r1 @ nput.rotation_matrix(cross, ang)
+                coord = coord @ frame
+            coord = coord + x[np.newaxis]
+            carts[perm, :] = coord
+
+        if order is None:
+            return carts
+        else:
+            raise NotImplementedError("need to differentiate newly built Cartesians")
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
@@ -2222,7 +2267,11 @@ def find_internal_conversion(internals, targets,
             # prep conversion based on internal indices
             if tri is not None:
                 if prep_conversions:
-                    args = {k:find_internal(internals, v, missing_val=missing_val) for k,v in tri._asdict().items() if v is not None}
+                    args = {
+                        k: find_internal(internals, v, missing_val=missing_val)
+                            for k, v in tri._asdict().items()
+                        if v is not None
+                    }
                     def convert(internal_list, args=args, conv=conv,  **kwargs):
                         internal_list = np.asanyarray(internal_list)
                         subtri = nput.make_triangle(
@@ -2332,7 +2381,7 @@ def _dihedron_completable(k, dihed_data, known_atom_graph, max_comps=5):
 def enumerate_zmatrices_from_internals(internals,
                                        triangles_and_dihedrons=None,
                                        atoms=None,
-                                       roots=None,
+                                       # roots=None,
                                        build_conversion=True,
                                        **conversion_options
                                        ):
@@ -2371,7 +2420,13 @@ def enumerate_zmatrices_from_internals(internals,
         if len(k) == 4:
             for p in itertools.permutations(k):
                 if p in d2:
+                    #TODO: is this sufficient for completability?
                     complete_dihedrals[p] = d2[p]
+                    for a in k:
+                        if a not in known_atom_graph:
+                            known_atom_graph[a] = set()
+                        for b in k:
+                            known_atom_graph[a].add(b)
                     break
                 elif p in dd:
                     d = dd[p]
@@ -2391,81 +2446,102 @@ def enumerate_zmatrices_from_internals(internals,
     # from dihedral framework
     # raise Exception(comps.get_fragments())
 
-    if atoms is None:
-        atoms = np.unique(np.concatenate(internals))
+    # if atoms is None:
+    #     atoms = np.unique(np.concatenate(internals))
     # atom_mapping = {a:i for i,a in enumerate(atoms)}
 
     comps = EdgeGraph.from_map(known_atom_graph)
     zm_generators = []
-    for atoms in comps.get_fragments():
+    sels = comps.get_fragments(return_labels=True)
+    idx_props = _get_dihedron_index_props()
+    if atoms is None:
+        atoms, idx = np.unique(np.concatenate(internals), return_index=True)
+        atoms = atoms[np.argsort(idx)]
+    ord, idx = np.unique(atoms, return_index=True)
+    ord_map = dict(zip(ord, idx))
+    for atoms in sels:
         # if roots is None:
+        atoms = sorted(atoms, key=lambda a:ord_map[a])
         #TODO: add canonicalization to cut down on comps
-        for i,j,k in itertools.combinations(atoms, 3):
-            if ((i, j) in internals or (j, i) in internals) and (
-                    (
-                            ((i, j, k) in internals or (k, j, i) in internals)
-                            and ((k, j) in internals or (j, k) in internals)
-                    )
-                or (
-                            ((j, i, k) in internals or (k, i, j) in internals)
-                            and ((k, i) in internals or (i, k) in internals)
-                    )
-            ):
-                roots = (i, j, k)
-                break
-        else:
-            raise ValueError("can't find three atoms to serve as root")
-
-        # try to find an ordering of the dihedrals that gives
-        # a valid set
-
-        idx_props = _get_dihedron_index_props()
-        i, j, k = roots #
-        d_blocks = [
-            [(i, -1, -2, -3)],
-            [(j, i, -1, -2)],
-            [
-                (k, j, i, -1)
-                    if (k,j) in internals or (j, k) in internals else
-                (k, i, j, -1)
-            ],
-        ]
-        for a in atoms[3:]:
-            d_choices = []
-            for k,d in complete_dihedrals.items():
-                if a in k:
-                    for p,v in idx_props.items():
-                        if (
-                                len(v['coord']) == 4
-                                and d[v['index']] is not None
-                        ):
-                            if (a == k[p[0]] or a == k[p[-1]]):
-                                k = [k[i] for i in p]
-                                if a == k[-1]: k = list(reversed(k))
-                                d_choices.append(k)
-            if len(d_choices) == 0:
-                raise ValueError(
-                    a,
-                    [
-                        k for k in d2
-                        if a in k
+        generator = None
+        for p in itertools.combinations(atoms, 3):
+            for i,j,k in itertools.permutations(p):
+                has_bond1 = ((i, j) in internals or (j, i) in internals)
+                has_bond2 = ((k, j) in internals or (j, k) in internals)
+                has_angle = ((i, j, k) in internals or (k, j, i) in internals)
+                if has_bond1 and has_bond2 and has_angle:
+                    root = (i,j,k)
+                    d_blocks = [
+                        [(i, -1, -2, -3)],
+                        [(j, i, -1, -2)],
+                        [
+                            (k, j, i, -1)
+                                if (k,j) in internals or (j, k) in internals else
+                            (k, i, j, -1)
+                        ],
                     ]
-                )
-            d_blocks.append(d_choices)
+                    rem = [a for a in atoms if a not in (i,j,k)]
+                    for a in rem:
+                        d_choices = []
+                        for k,d in complete_dihedrals.items():
+                            if a in k:
+                                for p,v in idx_props.items():
+                                    if (
+                                            len(v['coord']) == 4
+                                            and d[v['index']] is not None
+                                    ):
+                                        if (a == k[p[0]] or a == k[p[-1]]):
+                                            k = tuple(k[i] for i in p)
+                                            if k not in internals:
+                                                x, y, z, w = k
+                                                k2 = (x, z, y, w)
+                                                if k2 in internals:
+                                                    k = k2
+                                            if a == k[-1]: k = tuple(reversed(k))
+                                            d_choices.append(k)
+                        if len(d_choices) == 0:
+                            raise ValueError(
+                                a,
+                                [
+                                    k for k in d2
+                                    if a in k
+                                ]
+                            )
+                        d_blocks.append(d_choices)
 
-        # for b in d_blocks: print(b)
-        def _filter(p, v):
-            p_set = {pp[0] for pp in p}
-            for i in v[1:]:
-                if i > 0 and i not in p_set:
-                    return False
-            return True
-        possible_mats = itut.unique_product(
-            *d_blocks,
-            filter=_filter
-        )
-        zm_generators.append(possible_mats)
+                    # for b in d_blocks: print(b)
+                    def _filter(p, v):
+                        p_set = {pp[0] for pp in p}
+                        for i in v[1:]:
+                            if i > 0 and i not in p_set:
+                                return False
+                        return True
+                    possible_mats = itut.unique_product(
+                        *d_blocks,
+                        filter=_filter
+                    )
+                    try:
+                        non_zero = next(possible_mats)
+                    except StopIteration:
+                        # import pprint
+                        # print("failed...", *root)
+                        # pprint.pprint([np.array(d) for d in d_blocks])
+                        # if root == (6, 5, 4):
+                        #     raise ValueError(...)
+                        ...
+                    else:
+                        generator = itut.unique_product(
+                            *d_blocks,
+                            filter=_filter
+                        )
+                        break
+            if generator is not None:
+                zm_generators.append(generator)
+                break
 
+        else:
+            atoms = np.array(atoms)
+            raise ValueError(f"can't find three atoms to serve as root that will generate a Z-matrix for {atoms}")
     if len(zm_generators) == 1:
         possible_mats = zm_generators[0]
         for zm in possible_mats:
