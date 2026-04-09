@@ -706,8 +706,8 @@ def _eckart_embedding(ref, coords,
         if permutable_groups is None:
             A = np.tensordot(
                 masses / np.sum(masses),
-                ref[:, :, :, np.newaxis] * coords[:, :, np.newaxis, :],
-                axes=[0, 1]
+                ref[..., :, :, np.newaxis] * coords[..., :, np.newaxis, :],
+                axes=[0, -3]
             )
         else:
             mw_scaling = np.expand_dims(np.sqrt(masses) / np.sum(masses), [0, 2])
@@ -715,9 +715,9 @@ def _eckart_embedding(ref, coords,
             mw_coords = coords * mw_scaling
             A = sum(
                 np.sum(
-                    mw_ref[:, g, :, np.newaxis],
-                    mw_coords[:, g, np.newaxis, :],
-                    axis=1
+                    mw_ref[..., g, :, np.newaxis],
+                    mw_coords[..., g, np.newaxis, :],
+                    axis=-3
                 ) for g in permutable_groups
             )
         # take SVD of this

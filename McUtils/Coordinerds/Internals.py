@@ -10,7 +10,7 @@ import numpy as np
 from .. import Devutils as dev
 from .. import Numputils as nput
 from .. import Iterators as itut
-from ..Graphs import EdgeGraph
+from ..Graphs import EdgeGraph, graph_iter
 
 __all__ = [
     "canonicalize_internal",
@@ -151,7 +151,7 @@ class BasicInternalType(InternalCoordinateType):
     def reindex(self, reindexing):
         return type(self)([reindexing[i] for i in self.inds])
     def canonicalize(self):
-        if self.inds[0] < self.inds[-1]:
+        if self.inds[-1] < self.inds[0]:
             return type(self)(tuple(self.inds[::-1]))
         else:
             return self
@@ -202,11 +202,11 @@ class BasicInternalType(InternalCoordinateType):
         left_atoms = [inv_mapping[i] for i in left_atoms]
         right_atoms = [inv_mapping[i] for i in right_atoms]
         return left_atoms, right_atoms
-    def get_expansion(self, coords, *, order=None, **opts):
+    def get_expansion(self, coords, *, order=None, masses=None, **opts):
         return self.forward_conversion(coords, *self.inds, order=order, **opts)
     def get_inverse_expansion(self, coords, *, order=None, moved_indices=None,
                               context=None,
-                              left_atoms=None, right_atoms=None, **opts):
+                              left_atoms=None, right_atoms=None, masses=None, **opts):
         left_atoms, right_atoms = self._prep_left_right_atoms(context, moved_indices, left_atoms, right_atoms)
         return self.inverse_conversion(coords, *self.inds,
                                    order=order, left_atoms=left_atoms, right_atoms=right_atoms,
@@ -355,7 +355,7 @@ class Orientation(BasicInternalType):
                                        **opts)
 
 class InternalSpec:
-    def __init__(self, coords, canonicalize=False, bond_graph=None, triangulation=None, masses=None,
+    def __init__(self, coords, canonicalize=True, bond_graph=None, triangulation=None, masses=None,
                  ungraphed_internals=None
                  ):
         self.coords:tuple[InternalCoordinateType] = tuple(
@@ -376,7 +376,8 @@ class InternalSpec:
 
         if canonicalize:
             self.coords = tuple(c.canonicalize() for c in self.coords)
-            self.ungraphed_internals = tuple(c.canonicalize() for c in self.ungraphed_internals)
+            if self.ungraphed_internals is not None:
+                self.ungraphed_internals = tuple(c.canonicalize() for c in self.ungraphed_internals)
 
         self.rad_set = [
             c.inds for c in self.coords
@@ -419,6 +420,7 @@ class InternalSpec:
 
     def get_triangulation(self):
         if self._tri_di is None:
+            print(self.rad_set)
             self._tri_di = get_internal_triangles_and_dihedrons(self.rad_set)
         return self._tri_di
     def get_bond_graph(self) -> EdgeGraph:
@@ -701,30 +703,40 @@ class InternalSpec:
             expansions = nput.combine_coordinate_inverse_expansions(expansions, order=order)
         return expansions
 
-    def cartesians_to_internals(self, coords, **opts):
-        return self.get_direct_derivatives(coords, order=0, **opts)[0]
+    def cartesians_to_internals(self, coords, order=None, **opts):
+        just_coords = order is None
+        if just_coords: order = 0
+        expansions = self.get_direct_derivatives(coords, order=order, **opts)
+        if just_coords:
+            return expansions[0]
+        else:
+            return expansions[0], expansions[1:]
 
     def internals_to_cartesians(self, coords, order=None,
                                 reference_cartesians=None,
                                 return_fragments=False,
+                                return_inverse=True,
                                 **deriv_opts):
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
         from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
         conv = self.get_zmat_conv()
-        unified = callable(conv[1])
-        if unified:
-            (zmatrix, prep) = conv
-            flat_z = prep(coords)
-            zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
-            perm, zmatrix = canonicalize_zmatrix(zmatrix)
-            blocks = [[zmatrix_to_cartesian(zcoords, zmatrix), perm]]
+        if conv[0] is None:
+            raise ValueError(f"specs {self.coords} insufficient to build even a fragment of a Z-matrix")
         else:
-            blocks = []
-            for zmatrix, prep in zip(*conv):
+            unified = callable(conv[1])
+            if unified:
+                (zmatrix, prep) = conv
                 flat_z = prep(coords)
                 zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
                 perm, zmatrix = canonicalize_zmatrix(zmatrix)
-                blocks.append([zmatrix_to_cartesian(zcoords, zmatrix), perm])
+                blocks = [[zmatrix_to_cartesian(zcoords, zmatrix), perm]]
+            else:
+                blocks = []
+                for zmatrix, prep in zip(*conv):
+                    flat_z = prep(coords)
+                    zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
+                    perm, zmatrix = canonicalize_zmatrix(zmatrix)
+                    blocks.append([zmatrix_to_cartesian(zcoords, zmatrix), perm])
 
         if return_fragments:
             if order is not None: raise NotImplementedError("can't return derivatives of fragments alone")
@@ -735,28 +747,43 @@ class InternalSpec:
             reference_cartesians = np.zeros((len(all_atoms), 3))
 
         carts = np.array(reference_cartesians)
-        for coord, perm in blocks:
+        for i,(coord, perm) in enumerate(blocks):
             # have to shift and realign fragments if possible...
-            x, y, z = carts[perm[:3], :]
+            if i == 0:
+                base_shape = coord.shape[:-2]
+                if carts.ndim == 2:
+                    carts = nput.broadcast_constant(carts, base_shape, pad_base=True).copy()
+            x, y, z = np.moveaxis(carts[..., perm[:3], :], -2, 0)
             u = y - x
             v = z - x
             norms = nput.vec_norms([u, v])
-            print(coord[3], carts[perm[3]])
-            if np.all(norms > 1e-8):
-                u, v = nput.vec_normalize([u, v], norms= norms)
-                r1 = nput.rotation_matrix([1, 0, 0], u)
-                z = np.array([0, 0, 1]) @ r1
+            mod_locs = np.all(norms > 1e-8, axis=0)
+            if np.any(mod_locs):
+                u, v = nput.vec_normalize([u[mod_locs, :], v[mod_locs, :]], norms=norms[:, mod_locs])
+                a = nput.broadcast_constant([1, 0, 0], u.shape)
+                b = nput.broadcast_constant([0, 0, 1], u.shape)
+                r1 = nput.rotation_matrix(a, u)
+                z = np.reshape(b[..., np.newaxis, :] @ r1, u.shape)
                 normal = np.cross(u, v)
                 ang, cross = nput.vec_angles(normal, z, return_crosses=True)
                 frame = r1 @ nput.rotation_matrix(cross, ang)
-                coord = coord @ frame
-            coord = coord + x[np.newaxis]
-            carts[perm, :] = coord
+                coord[mod_locs] = coord[mod_locs] @ frame
+            coord = coord + x[..., np.newaxis, :]
+            carts[..., perm, :] = coord
 
         if order is None:
             return carts
         else:
-            raise NotImplementedError("need to differentiate newly built Cartesians")
+            if order == 0:
+                return carts, []
+            else:
+                expansion = self.get_expansion(
+                    carts,
+                    order=order,
+                    return_inverse=return_inverse,
+                    **deriv_opts
+                )
+                return carts, expansion
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
@@ -1447,6 +1474,34 @@ def _find_coord_comp(coord, a, internals, prior_coords, missing_val):
         if dev.str_is(missing_val, 'raise'):
             raise ValueError(f"can't construct {coord} from internals (requires {a})")
     return a_idx, found_main
+_tri_perms = [
+        (0, 1, 2),
+        (0, 2, 1),
+        (1, 0, 2)
+    ]
+def _get_tri_bond_key_name(mod_sets, a,b,c, i, j):
+    base = (a, b, c)
+    for perm in _tri_perms:
+        key = [base[_] for _ in perm]
+        key, sign = canonicalize_internal(key, return_sign=True)
+        if key in mod_sets:
+            break
+    else:
+        perm = (0, 1, 2)
+        key, sign = canonicalize_internal((a, b, c), return_sign=True)
+    if sign == -1:
+        perm = list(reversed(perm))
+    perm = np.argsort(perm)
+
+    b = tuple(sorted(key.index(_) for _ in [i,j]))
+    return key, nput.triangle_property_specifiers(b)["name"], perm
+def _permute_tri_data(terms, perm):
+    new = set()
+    for t in terms:
+        x = nput.triangle_property_specifiers(t)["coord"]
+        y = canonicalize_internal([perm[i] for i in x])
+        new.add(nput.triangle_property_specifiers(y)["name"])
+    return new
 _dihedron_perms = [
         (0, 1, 2, 3),
         (0, 2, 1, 3),
@@ -1557,17 +1612,27 @@ def get_internal_triangles_and_dihedrons(internals,
                     elif j == m:
                         v.add("c")
                     elif m is None:
-                        mod_tris[(k,l,j)] = {"a", "c"}
+                        key, z, perm = _get_tri_bond_key_name(mod_tris, k, l, j, i, j)
+                        v = _permute_tri_data(v, perm)
+                        mod_tris[key] = mod_tris.get(key, set()) | v | {z}
                 elif i == l:
                     if j == k:
                         v.add("a")
                     elif j == m:
                         v.add("b")
                     elif m is None:
-                        c = canonicalize_internal((j,l,k))
-                        mod_tris[c] = {"a", "b"}
-                elif i == m and j == l:
-                    mod_tris[(k,l,m)].add("b")
+                        key, z, perm = _get_tri_bond_key_name(mod_tris, k, l, j, i, j)
+                        v = _permute_tri_data(v, perm)
+                        mod_tris[key] = mod_tris.get(key, set()) | v | {z}
+                elif i == m:
+                    if j == l:
+                        mod_tris[(k,l,m)].add("b")
+                    elif j == k:
+                        mod_tris[(k,l,m)].add("c")
+                elif m is None and j in (k, l):
+                    key, z, perm = _get_tri_bond_key_name(mod_tris, k, l, i, i, j)
+                    v = _permute_tri_data(v, perm)
+                    mod_tris[key] = mod_tris.get(key, set()) | v | {z}
             else:
                 mod_tris[(i,j,None)] = {"a"}
             tri_sets = mod_tris
@@ -1684,19 +1749,19 @@ def get_internal_triangles_and_dihedrons(internals,
                 tri_sets[B].add("B")
             elif (A[0],A[2], None) in tri_sets:
                 if i < j:
-                    tri_sets[C] = {"a" if i < k else "b", "C"}
+                    tri_sets[C] = tri_sets.get(C, set()) | {"a" if i < k else "b", "C"}
                 else:
-                    tri_sets[B] = {"a" if j < k else "b", "C"}
+                    tri_sets[B] = tri_sets.get(B, set()) | {"a" if j < k else "b", "C"}
             elif (B[0],B[2], None) in tri_sets:
                 if j < k:
-                    tri_sets[A] = {"b" if i < j else "a", "C"}
+                    tri_sets[A] = tri_sets.get(A, set()) | {"b" if i < j else "a", "C"}
                 else:
-                    tri_sets[C] = {"b" if i < k else "a", "C"}
+                    tri_sets[C] = tri_sets.get(C, set()) | {"b" if i < k else "a", "C"}
             elif (C[0],C[2], None) in tri_sets:
                 if i < k:
-                    tri_sets[A] = {"a" if i < j else "b", "C"}
+                    tri_sets[A] = tri_sets.get(A, set()) | {"a" if i < j else "b", "C"}
                 else:
-                    tri_sets[B] = {"a" if j < k else "b", "C"}
+                    tri_sets[B] = tri_sets.get(B, set()) | {"a" if j < k else "b", "C"}
 
             if create_dihedra:
                 mod_sets = dihed_sets.copy()
@@ -2378,11 +2443,116 @@ def _dihedron_completable(k, dihed_data, known_atom_graph, max_comps=5):
                 ):
                     return True
         return False
+def enumarate_zmatrix_roots_from_triangles(atoms, tris):
+    for p in itertools.combinations(atoms, 3):
+        proper_tri = None
+        for pp in itertools.permutations(p):
+            proper_tri = tris.get(pp)
+            if proper_tri is not None:
+                proper_tri = pp, proper_tri
+                break
+        if proper_tri is not None:
+            (i, j, k), proper_tri = proper_tri
+            # order groups by minimal completions to make a Z-matrix
+            groups = {
+                (i, j, k): [proper_tri.a, proper_tri.b, proper_tri.C],
+                (j, i, k): [proper_tri.a, proper_tri.c, proper_tri.B],
+                (i, k, j): [proper_tri.c, proper_tri.b, proper_tri.A]
+            }
+            groups = sorted(groups.keys(), key=lambda k: len([a for a in groups[k] if a is not None]))
+            groups = sum((
+                [
+                    p for p in
+                    [(i, j, k), (k, j, i)]
+                    # both versions work,
+                    # but one might be more complete-able than the other?
+                ]
+                for (i, j, k) in groups
+            ),
+                []
+            )
+            yield groups
+def construct_atom_connection_graph_from_triangulation(internals, tris, dihedrons):
+    #TODO: support passing t2 and d2 directly
+    t2 = {k:t for k,t in tris.items() if nput.triangle_is_complete(t)}
+    d2 = {k:d for k,d in dihedrons.items() if nput.dihedron_is_complete(d)}
+    known_atom_graph = {}
+    for k in t2.keys():
+        k = list(k)
+        for n,a in enumerate(k):
+            if a not in known_atom_graph:
+                known_atom_graph[a] = set()
+            for b in k[n+1:]:
+                # if b == a: raise ValueError(k)
+                known_atom_graph[a].add(b)
+                if b not in known_atom_graph:
+                    known_atom_graph[b] = set()
+                known_atom_graph[b].add(a)
+
+    tups = [set(k) for k, _ in d2.items()]
+    for i, k in enumerate(tups):
+        for a in k:
+            if a not in known_atom_graph:
+                known_atom_graph[a] = set()
+            for b in k - {a}:
+                # if b == a: raise ValueError(k)
+                known_atom_graph[a].add(b)
+                if b not in known_atom_graph:
+                    known_atom_graph[b] = set()
+                known_atom_graph[b].add(a)
+        for j, k2 in enumerate(tups[i + 1:]):
+            if len(k & k2) == 3: # i,j,k shared implies remaining two are connected
+                for a in k:
+                    if a not in known_atom_graph:
+                        known_atom_graph[a] = set()
+                    for b in k2 - {a}:
+                        # if b == a: raise ValueError(k2)
+                        known_atom_graph[a].add(b)
+                        if b not in known_atom_graph:
+                            known_atom_graph[b] = set()
+                        known_atom_graph[b].add(a)
+    complete_dihedrals = {}
+    for k in internals:
+        if len(k) == 4:
+            for p in itertools.permutations(k):
+                if p in d2:
+                    # TODO: is this sufficient for completability?
+                    complete_dihedrals[p] = d2[p]
+                    for n,a in enumerate(k):
+                        if a not in known_atom_graph:
+                            known_atom_graph[a] = set()
+                        for b in k[n+1:]:
+                            if b not in known_atom_graph:
+                                known_atom_graph[b] = set()
+                            known_atom_graph[a].add(b)
+                            known_atom_graph[b].add(a)
+                    break
+                elif p in dihedrons: # not definitely completable until we add in prior knowledge
+                    d = dihedrons[p]
+                    if _dihedron_completable(p, d, known_atom_graph):
+                        complete_dihedrals[p] = d
+                        # d2[p] = d
+                        for n, a in enumerate(k):
+                            if a not in known_atom_graph:
+                                known_atom_graph[a] = set()
+                            for b in k[n + 1:]:
+                                if b not in known_atom_graph:
+                                    known_atom_graph[b] = set()
+                                known_atom_graph[a].add(b)
+                                known_atom_graph[b].add(a)
+                        break
+            else:
+                raise ValueError(f"can't complete {k}")
+
+    return known_atom_graph, complete_dihedrals
 def enumerate_zmatrices_from_internals(internals,
                                        triangles_and_dihedrons=None,
                                        atoms=None,
                                        # roots=None,
+                                       ordering=None,
                                        build_conversion=True,
+                                       order_fallback='graph',
+                                       max_ordering_passes=1,
                                        **conversion_options
                                        ):
     from .ZMatrices import extract_zmatrix_internals
@@ -2395,52 +2565,23 @@ def enumerate_zmatrices_from_internals(internals,
         triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
 
     td, dd = triangles_and_dihedrons
+    if atoms is None:
+        atoms, idx = np.unique(np.concatenate(internals), return_index=True)
+        atoms = atoms[np.argsort(idx)]
+
+    known_atom_graph, complete_dihedrals = construct_atom_connection_graph_from_triangulation(
+        internals, td, dd
+    )
+
+    t2 = {k:t for k,t in td.items() if nput.triangle_is_complete(t)}
+    d2 = {k:t for k,t in dd.items() if nput.dihedron_is_complete(t)}
+
     # if atoms is None:
     #     atoms = np.unique(np.concatenate(list(dd.keys()) + list(td.keys())))
-    for i in internals:
-        if len(i) == 4 and all(p not in dd for p in itertools.permutations(i)):
-            raise ValueError(i)
+    # for i in internals: # checking the triangulation
+    #     if len(i) == 4 and all(p not in dd for p in itertools.permutations(i)):
+    #         raise ValueError(i)
 
-    d2 = {k:d for k,d in dd.items() if nput.dihedron_is_complete(d)}
-    known_atom_graph = {}
-    tups = [set(k) for k,_ in d2.items()]
-    for i,k in enumerate(tups):
-        for j,k2 in enumerate(tups[i+1:]):
-            if len(k&k2) == 3:
-                for a in k:
-                    if a not in known_atom_graph:
-                        known_atom_graph[a] = set()
-                    for b in k2:
-                        known_atom_graph[a].add(b)
-                        if b not in known_atom_graph:
-                            known_atom_graph[b] = set()
-                        known_atom_graph[b].add(a)
-    complete_dihedrals = {}
-    for k in internals:
-        if len(k) == 4:
-            for p in itertools.permutations(k):
-                if p in d2:
-                    #TODO: is this sufficient for completability?
-                    complete_dihedrals[p] = d2[p]
-                    for a in k:
-                        if a not in known_atom_graph:
-                            known_atom_graph[a] = set()
-                        for b in k:
-                            known_atom_graph[a].add(b)
-                    break
-                elif p in dd:
-                    d = dd[p]
-                    if _dihedron_completable(p, d, known_atom_graph):
-                        complete_dihedrals[p] = d
-                        # d2[p] = d
-                        for a in k:
-                            if a not in known_atom_graph:
-                                known_atom_graph[a] = set()
-                            for b in k:
-                                known_atom_graph[a].add(b)
-                        break
-            else:
-                raise ValueError(f"can't complete {k}")
 
     # determine connected components
     # from dihedral framework
@@ -2454,95 +2595,162 @@ def enumerate_zmatrices_from_internals(internals,
     zm_generators = []
     sels = comps.get_fragments(return_labels=True)
     idx_props = _get_dihedron_index_props()
-    if atoms is None:
-        atoms, idx = np.unique(np.concatenate(internals), return_index=True)
-        atoms = atoms[np.argsort(idx)]
     ord, idx = np.unique(atoms, return_index=True)
     ord_map = dict(zip(ord, idx))
+    dihed_props = [
+        (p,v) for p, v in idx_props.items()
+        if (
+                len(v['coord']) == 4
+                # and d[v['index']] is not None
+        )
+    ]
+    comp_filts = {} # caching for speed
+    d2_filts = {}
+    label_mapping = {l:i for i,l in enumerate(comps.labels)}
     for atoms in sels:
         # if roots is None:
         atoms = sorted(atoms, key=lambda a:ord_map[a])
         #TODO: add canonicalization to cut down on comps
         generator = None
-        for p in itertools.combinations(atoms, 3):
-            for i,j,k in itertools.permutations(p):
-                has_bond1 = ((i, j) in internals or (j, i) in internals)
-                has_bond2 = ((k, j) in internals or (j, k) in internals)
-                has_angle = ((i, j, k) in internals or (k, j, i) in internals)
-                if has_bond1 and has_bond2 and has_angle:
-                    root = (i,j,k)
-                    d_blocks = [
-                        [(i, -1, -2, -3)],
-                        [(j, i, -1, -2)],
-                        [
-                            (k, j, i, -1)
-                                if (k,j) in internals or (j, k) in internals else
-                            (k, i, j, -1)
-                        ],
-                    ]
-                    rem = [a for a in atoms if a not in (i,j,k)]
-                    for a in rem:
-                        d_choices = []
-                        for k,d in complete_dihedrals.items():
-                            if a in k:
-                                for p,v in idx_props.items():
-                                    if (
-                                            len(v['coord']) == 4
-                                            and d[v['index']] is not None
-                                    ):
-                                        if (a == k[p[0]] or a == k[p[-1]]):
-                                            k = tuple(k[i] for i in p)
-                                            if k not in internals:
-                                                x, y, z, w = k
-                                                k2 = (x, z, y, w)
-                                                if k2 in internals:
-                                                    k = k2
-                                            if a == k[-1]: k = tuple(reversed(k))
-                                            d_choices.append(k)
-                        if len(d_choices) == 0:
-                            raise ValueError(
-                                a,
-                                [
-                                    k for k in d2
-                                    if a in k
-                                ]
-                            )
-                        d_blocks.append(d_choices)
+        subgraph = comps.take([label_mapping[a] for a in atoms])
+        sublabel_mapping = {l:i for i,l in enumerate(subgraph.labels)}
+        atom_ord = {a:i for i,a in enumerate(atoms)}
+        sorted_atom_graph = {
+            k:sorted([x for x in v if x in atom_ord], key=lambda a:atom_ord[a])
+            for k,v in known_atom_graph.items()
+            if k in atom_ord
+        }
+        for root_groups in enumarate_zmatrix_roots_from_triangles(atoms, t2):
+            for i,j,k in root_groups:
+                d_blocks = [
+                    [(i, -1, -2, -3)],
+                    [(j, i, -1, -2)],
+                    [
+                        (k, j, i, -1)
+                            if (k,j) in internals or (j, k) in internals else
+                        (k, i, j, -1)
+                    ],
+                ]
+                root = [i, j, k]
+                nreq = len(atoms) - 2
+                for rem_generators in [
+                    [[a for a in atoms if a not in {i, j, k}]],
+                    order_fallback
+                ]:
+                    (i, j, k) = root
+                    if dev.str_is(rem_generators, 'segment'):
+                        rem_map:EdgeGraph = subgraph.take([sublabel_mapping[a] for a in atoms if a not in {i,j}])
+                        sublabels = rem_map.labels
+                        segments = rem_map.segment_by_chains(root=sublabels.index(k))
+                        rem_generators = [[sublabels[i] for i in itut.flatten(segments)][1:]]
+                    elif dev.str_is(rem_generators, 'graph'):
+                        git = graph_iter(sorted_atom_graph,
+                                         root=k,
+                                         visited={i, j},
+                                         traversal_ordering='dfs',
+                                         yield_paths='terminal',
+                                         enable_disconnectivity=True)
+                        rem_generators = (
+                            tree[1:]
+                            for tree, terminal in git
+                            if len(tree) == nreq
+                        )
+                    for passes, rem in enumerate(rem_generators):
+                        for a in rem:
+                            d_choices = comp_filts.get(a)
+                            if d_choices is None:
+                                d_choices = []
+                                for dihedral_set in [
+                                    complete_dihedrals,
+                                    # d2
+                                ]:
+                                    for k,d in dihedral_set.items():
+                                        if a in k:
+                                            for p,v in dihed_props:
+                                                if d[v['index']] is not None:
+                                                    if (a == k[p[0]] or a == k[p[-1]]):
+                                                        k = tuple(k[i] for i in p)
+                                                        if k not in internals:
+                                                            x, y, z, w = k
+                                                            k2 = (x, z, y, w)
+                                                            if k2 in internals:
+                                                                k = k2
+                                                        if a == k[-1]: k = tuple(reversed(k))
+                                                        d_choices.append(k)
+                                comp_filts[a] = d_choices
 
-                    # for b in d_blocks: print(b)
-                    def _filter(p, v):
-                        p_set = {pp[0] for pp in p}
-                        for i in v[1:]:
-                            if i > 0 and i not in p_set:
-                                return False
-                        return True
-                    possible_mats = itut.unique_product(
-                        *d_blocks,
-                        filter=_filter
-                    )
-                    try:
-                        non_zero = next(possible_mats)
-                    except StopIteration:
-                        # import pprint
-                        # print("failed...", *root)
-                        # pprint.pprint([np.array(d) for d in d_blocks])
-                        # if root == (6, 5, 4):
-                        #     raise ValueError(...)
-                        ...
-                    else:
-                        generator = itut.unique_product(
+                            if len(d_choices) == 0:
+                                d_choices = d2_filts.get(a)
+                                if d_choices is None:
+                                    d_choices = []
+                                    for dihedral_set in [
+                                        d2
+                                    ]:
+                                        for k, d in dihedral_set.items():
+                                            if a in k:
+                                                for p, v in dihed_props:
+                                                    if (a == k[p[0]] or a == k[p[-1]]):
+                                                        k = tuple(k[i] for i in p)
+                                                        if k not in internals:
+                                                            x, y, z, w = k
+                                                            k2 = (x, z, y, w)
+                                                            if k2 in internals:
+                                                                k = k2
+                                                        if a == k[-1]: k = tuple(reversed(k))
+                                                        d_choices.append(k)
+                                    d2_filts[a] = d_choices
+                            if len(d_choices) == 0:
+                                # import pprint
+                                # pprint.pprint(d2)
+                                raise ValueError(f"can't find dihedral choices for {a}")
+                            d_blocks.append(d_choices)
+                        # raise Exception(d_blocks)
+
+                        # for b in d_blocks: print(b)
+                        def _filter(p, v):
+                            p_set = {pp[0] for pp in p}
+                            for i in v[1:]:
+                                if i > 0 and i not in p_set:
+                                    return False
+                            return True
+                        possible_mats = itut.unique_product(
                             *d_blocks,
                             filter=_filter
                         )
+                        try:
+                            non_zero = next(possible_mats)
+                        except StopIteration:
+                            # import pprint
+                            # print("failed...", *root)
+                            # pprint.pprint([np.array(d) for d in d_blocks])
+                            # if root == (6, 5, 4):
+                            #     raise ValueError(...)
+                            # print(rem)
+                            if max_ordering_passes >= 0 and passes+1 >= max_ordering_passes:
+                                break
+                        else:
+                            generator = itut.unique_product(
+                                *d_blocks,
+                                filter=_filter
+                            )
+                            break
+                    if generator is not None:
                         break
+                if generator is not None:
+                    break
             if generator is not None:
                 zm_generators.append(generator)
                 break
-
         else:
             atoms = np.array(atoms)
             raise ValueError(f"can't find three atoms to serve as root that will generate a Z-matrix for {atoms}")
-    if len(zm_generators) == 1:
+
+    if len(zm_generators) == 0:
+        if build_conversion:
+            yield None, None
+        else:
+            yield None
+    elif len(zm_generators) == 1:
         possible_mats = zm_generators[0]
         for zm in possible_mats:
             if build_conversion:
@@ -2564,6 +2772,8 @@ def enumerate_zmatrices_from_internals(internals,
                 yield zm_list, convs
             else:
                 yield zm_list
+
+
 
 def get_internal_distance_conversion(
         internals,

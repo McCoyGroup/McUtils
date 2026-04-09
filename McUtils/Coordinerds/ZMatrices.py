@@ -323,21 +323,27 @@ def extract_zmatrix_values(zmat, inds=None, partial_embedding=False, strip_embed
     flat_mat = np.reshape(zmat, zmat.shape[:-2] + (zmat.shape[-1]*zmat.shape[-2],))
     return flat_mat[..., inds]
 def zmatrix_from_values(flat_z, strip_embedding=True, partial_embedding=False):
+    flat_z = np.asanyarray(flat_z)
+    base_shape = flat_z.shape[:-1]
     if not strip_embedding:
-        return np.asanyarray(flat_z).reshape(-1, 3)
+        return np.asanyarray(flat_z).reshape(base_shape + (-1, 3))
     elif partial_embedding:
-        nats = (len(flat_z) + 3) // 3
-        zcoords = np.zeros((nats, 3))
-        zcoords[0, 0] = flat_z[0]
-        zcoords[1, :2] = flat_z[1:3]
-        zcoords[2:] = flat_z[3:].reshape(-1, 3)
+        nats = (flat_z.shape[-1] + 3) // 3
+        zcoords = np.zeros(base_shape + (nats, 3))
+        zcoords[..., 0, 0] = flat_z[..., 0]
+        if nats > 1:
+            zcoords[..., 1, :2] = flat_z[..., 1:3]
+        if nats > 2:
+            zcoords[..., 2:, :] = flat_z[..., 3:].reshape(base_shape + (-1, 3))
         return zcoords
     else:
-        nats = (len(flat_z) + 6) // 3
-        zcoords = np.zeros((nats, 3))
-        zcoords[1, 0] = flat_z[0]
-        zcoords[2, :2] = flat_z[1:3]
-        zcoords[3:] = flat_z[3:].reshape(-1, 3)
+        nats = (flat_z.shape[-1] + 6) // 3
+        zcoords = np.zeros(base_shape +  (nats, 3))
+        zcoords[..., 1, 0] = flat_z[..., 0]
+        if nats > 1:
+            zcoords[..., 2, :2] = flat_z[..., 1:3]
+        if nats > 2:
+            zcoords[..., 3:, :] = flat_z[..., 3:].reshape(-1, 3)
         return zcoords
 
 scan_spec = collections.namedtuple('scan_spec', ['value', 'steps', 'amount'])

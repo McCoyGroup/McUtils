@@ -658,10 +658,11 @@ def block_broadcast_indices(base_pos, block_inds, block_size=None):
         + block_inds[..., np.newaxis, :]
     ).flatten()
 
-def broadcast_constant(base_array, target_shape):
+def broadcast_constant(base_array, target_shape, pad_base=False):
     if util.is_numeric(base_array):
         return np.full(target_shape, base_array)
     else:
+        if pad_base: target_shape = tuple(target_shape) + base_array.shape
         base_array = np.asanyarray(base_array)
         base_array = np.expand_dims(base_array, list(range(len(target_shape) - base_array.ndim)))
         return np.broadcast_to(base_array, target_shape)
