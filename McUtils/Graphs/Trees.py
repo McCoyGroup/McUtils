@@ -4,7 +4,7 @@ import pprint, collections, enum
 from .. import Devutils as dev
 from .. import Numputils as nput
 
-__all__ = ["TreeWrapper", "tree_traversal", "tree_iter", "TreeSentinels"]
+__all__ = ["TreeWrapper", "tree_traversal", "tree_iter", "graph_iter", "TreeSentinels"]
 
 class TreeTraversalOrder(enum.Enum):
     BreadthFirst = 'bfs'
@@ -101,16 +101,19 @@ def tree_iter(tree,
               root=None,
               get_item=None,
               get_children=None,
-              visited: set=None,
+              visited: set = None,
               check_visited=None,
-              traversal_ordering='bfs'
+              traversal_ordering='bfs',
+              yield_paths=False,
+              per_path_visited=False,
+              enable_disconnectivity=False
               ):
     if get_children is None and get_item is None:
         get_children, get_item = _get_tree_children, _get_tree_item
     elif get_children is not None and get_item is None:
-        raise ValueError("`get_children` must be implemented if `get_item` is provided")
-    elif get_children is None and get_item is not None:
         raise ValueError("`get_item` must be implemented if `get_children` is provided")
+    elif get_children is None and get_item is not None:
+        raise ValueError("`get_children` must be implemented if `get_item` is provided")
 
     if root is dev.default:
         root = get_children(tree)[0]
@@ -122,7 +125,7 @@ def tree_iter(tree,
     if check_visited and visited is None:
         visited = set()
 
-    queue = collections.deque([[None, root]])
+    queue = collections.deque([[None, root, [], visited]])
     if isinstance(traversal_ordering, str):
         traversal_ordering = TreeTraversalOrder(traversal_ordering)
     if traversal_ordering is traversal_ordering.BreadthFirst:
@@ -130,30 +133,98 @@ def tree_iter(tree,
         extend = queue.extend
     else:
         pop = queue.popleft
-        extend = queue.extendleft
+        extend = lambda children:queue.extendleft(reversed(list(children)))
+
+    yield_terminal = dev.str_is(yield_paths, 'terminal')
 
     while queue:
-        parent, head = pop()
-        res = yield parent
+        parent, head, path, visited = pop()
+        if yield_paths:
+            if yield_terminal:
+                res = None
+            else:
+                res = yield (path, False)
+        else:
+            res = yield path
         if res is TreeSentinels.Skip:
             continue
         elif res is TreeSentinels.Stop:
             break
 
         if check_visited:
-            visited.add(head)
+            if per_path_visited or enable_disconnectivity:
+                visited = visited | {head}
+            else:
+                visited.add(head)
 
+        children = list(get_children(head))
         if check_visited:
-            extend(
-                [head, get_item(head, h)]
-                for h in get_children(head)
+            children = [
+                h for h in children
                 if h not in visited
-            )
-        else:
-            extend(
-                [head, get_item(head, h)]
-                for h in get_children(head)
-            )
+            ]
+        if yield_paths or enable_disconnectivity:
+            path = path + [head]
+        if len(children) > 0:
+            extend([head, get_item(head, h), path, visited] for h in children)
+        elif yield_paths or enable_disconnectivity:
+            if enable_disconnectivity:
+                # walk down the path from the start to find the first possible branch
+                # we skipped
+                for p in path:
+                    children = list(get_children(p))
+                    if check_visited:
+                        children = [
+                            h for h in children
+                            if h not in visited
+                        ]
+                    children = [
+                        h for h in children
+                        if h not in path
+                    ]
+                    if len(children) > 0:
+                        extend([p, get_item(p, h), path, visited] for h in children)
+                        break
+                else:
+                    yield (path, True)
+            else:
+                yield (path, True)
+
+def _get_graph_children_generator(graph):
+    def _get_graph_children(head):
+        return graph[head]
+    return _get_graph_children
+def _get_graph_item_generator(graph):
+    def _get_graph_item(head, item):
+        return item
+    return _get_graph_item
+def graph_iter(graph,
+               root=None,
+               get_item=None,
+               get_children=None,
+               visited: set = None,
+               traversal_ordering='bfs',
+               yield_paths=False,
+               enable_disconnectivity=False
+               ):
+    graph = {
+        k:list(v)
+        for k, v in graph.items()
+    }
+    if get_children is None and get_item is None:
+        get_children, get_item = _get_graph_children_generator(graph), _get_graph_item_generator(graph)
+    return tree_iter(
+        graph,
+        root=root,
+        get_item=get_item,
+        get_children=get_children,
+        visited=visited,
+        check_visited=True,
+        per_path_visited=True,
+        traversal_ordering=traversal_ordering,
+        yield_paths=yield_paths,
+        enable_disconnectivity=enable_disconnectivity
+    )
 
 class TreeWrapper:
     def __init__(self, tree):

@@ -1136,6 +1136,8 @@ class RDMolecule(ExternalMolecule):
         import rdkit.Geometry as Geom
         rdMolDraw2D = Chem.Draw.rdMolDraw2D
         # from rdkit.Chem.Draw import rdMolDraw2D
+        if nput.is_numeric(image_size):
+            image_size = [image_size, image_size]
         if no_free_type is not None:
             drawer = rdMolDraw2D.MolDraw2DSVG(*image_size, noFreetype=no_free_type)
         else:
@@ -2191,20 +2193,23 @@ class RDMolecule(ExternalMolecule):
                     radius_to_range_scaling = figure.scaling_factor
                 except AttributeError:
                     ...
-            if radius_to_range_scaling is None and plot_range is not None:
-                x_range, y_range = plot_range
-                x_span = x_range[1] - x_range[0]
-                y_span = y_range[1] - y_range[0]
-                ox_range, oy_range = [
-                    [
-                        np.min(coords[..., i]) - .1,
-                        np.max(coords[..., i]) + .1
+            if radius_to_range_scaling is None:
+                if plot_range is not None:
+                    x_range, y_range = plot_range
+                    x_span = x_range[1] - x_range[0]
+                    y_span = y_range[1] - y_range[0]
+                    ox_range, oy_range = [
+                        [
+                            np.min(coords[..., i]) - .1,
+                            np.max(coords[..., i]) + .1
+                        ]
+                        for i in range(2)
                     ]
-                    for i in range(2)
-                ]
-                ox_span = ox_range[1] - ox_range[0]
-                oy_span = oy_range[1] - oy_range[0]
-                radius_to_range_scaling = np.linalg.norm([ox_span, oy_span]) / np.linalg.norm([x_span, y_span])
+                    ox_span = ox_range[1] - ox_range[0]
+                    oy_span = oy_range[1] - oy_range[0]
+                    radius_to_range_scaling = np.linalg.norm([ox_span, oy_span]) / np.linalg.norm([x_span, y_span])
+                else:
+                    radius_to_range_scaling = 1
         else:
             radius_to_range_scaling = 1
 

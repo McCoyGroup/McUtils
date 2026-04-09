@@ -16,7 +16,7 @@ __all__ = [
 class EdgeGraph:
     map: dict[int, set[int]]
     __slots__ = ["labels", "edges", "graph", "map", "_rings", "_sp_data"]
-    def __init__(self, labels, edges, graph=None, edge_map=None):
+    def __init__(self, labels, edges, graph=None, edge_map=None, allow_self_loops=False):
         self.labels = labels
         self.edges = np.asanyarray(edges)
         if graph is None:
@@ -25,6 +25,9 @@ class EdgeGraph:
         if edge_map is None:
             edge_map = self.build_edge_map(self.edges)
         self.map = edge_map
+        if not allow_self_loops:
+            for i,m in self.map.items():
+                if i in m: raise ValueError(f"edge map contains self-loops between item {i} and itself")
         self._rings = None
         self._sp_data = None
 
