@@ -38,6 +38,7 @@ __all__ = [
     "dihedral_completion_paths",
     "dihedron_is_complete",
     "enumerate_dihedron_completions",
+    "dihedron_triangle",
     "dihedron_property_function",
     "arcsin_deriv",
     "arccos_deriv",

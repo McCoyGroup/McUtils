@@ -132,6 +132,7 @@ def tree_iter(tree,
         pop = queue.popleft
         extend = queue.extend
     else:
+        #TODO: control how I want the children to be added...FIFO or LIFO
         pop = queue.popleft
         extend = lambda children:queue.extendleft(reversed(list(children)))
 

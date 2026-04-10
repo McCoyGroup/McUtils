@@ -119,7 +119,7 @@ def vec_norms(vecs, axis=-1):
     #     raise NotImplementedError("Norm along not-the-last axis not there yet...")
     return np.linalg.norm(vecs, axis=axis)
 
-def points_from_distance_matrix(dist_mat, test_idx=0, target_dim=None, use_triu=False, zero_cutoff=1e-8):
+def points_from_distance_matrix(dist_mat, test_idx=None, target_dim=None, use_triu=False, zero_cutoff=1e-8):
     dist_mat = np.asanyarray(dist_mat)
     if use_triu:
         #TODO: make this into a func
@@ -130,7 +130,13 @@ def points_from_distance_matrix(dist_mat, test_idx=0, target_dim=None, use_triu=
         dm[..., col, row] = dist_mat
         dist_mat = dm
     d2 = dist_mat ** 2
-    dd = (d2[..., test_idx, :, np.newaxis] + d2[..., test_idx, np.newaxis, :] - d2[..., :, :])/2
+    if test_idx is not None:
+        dd = (d2[..., test_idx, :, np.newaxis] + d2[..., test_idx, np.newaxis, :] - d2[..., :, :])/2
+    else:
+        n = dist_mat.shape[-1]
+        base_shape = d2.shape[:-2]
+        c = identity_tensors(base_shape, n) - 1/n * np.ones(base_shape + (n, n))
+        dd = -1/2 * (c @ d2 @ c)
     s, u = np.linalg.eigh(dd)
     ndim = np.max(np.sum(s > zero_cutoff, axis=-1))
     vecs = u[..., :, -ndim:] * np.sqrt(s[..., np.newaxis, -ndim:])

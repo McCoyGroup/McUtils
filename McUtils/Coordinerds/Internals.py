@@ -356,7 +356,8 @@ class Orientation(BasicInternalType):
 
 class InternalSpec:
     def __init__(self, coords, canonicalize=True, bond_graph=None, triangulation=None, masses=None,
-                 ungraphed_internals=None
+                 ungraphed_internals=None,
+                 distance_conversions=None
                  ):
         self.coords:tuple[InternalCoordinateType] = tuple(
             InternalCoordinateType.resolve(c)
@@ -391,9 +392,11 @@ class InternalSpec:
         self._atom_lists = None
         self._atoms = None
         self._bond_graph = bond_graph
+        self._dist_convs = distance_conversions
         self._tri_di = triangulation
         self._rad_conv = None
         self._zm_conv = None
+        self._dm_conv = None
         self._carried_atoms = [None] * len(coords)
     @classmethod
     def from_zmatrix(cls, *zmats, additions=None, **opts):
@@ -420,34 +423,64 @@ class InternalSpec:
 
     def get_triangulation(self):
         if self._tri_di is None:
-            print(self.rad_set)
+            # print(self.rad_set)
             self._tri_di = get_internal_triangles_and_dihedrons(self.rad_set)
         return self._tri_di
     def get_bond_graph(self) -> EdgeGraph:
         if self._bond_graph is None:
             self._bond_graph = get_internal_bond_graph(self.rad_set, self.atoms,
-                                                       triangles_and_dihedrons=self.get_triangulation())
+                                                                         triangles_and_dihedrons=self.get_triangulation(),
+                                                                         return_conversions=False)
         return self._bond_graph
-    def get_rad_conversion(self):
-        if self._rad_conv is None:
-            tri = self.get_triangulation()
-            self._rad_conv = get_internal_distance_conversion(self.rad_set,
-                                                              allow_completion=True,
-                                                              missing_val=None,
-                                                              triangles_and_dihedrons=tri,
-                                                              return_conversions=True,
-                                                              include_shapes=True)
-
-        return self._rad_conv
+    def get_distance_conversions(self):
+        if self._dist_convs is None:
+            self._dist_convs = get_internal_bond_graph(self.rad_set, self.atoms,
+                                                       triangles_and_dihedrons=self.get_triangulation(),
+                                                       return_conversions=True,
+                                                       complete_graph=True)
+        return self._dist_convs
+    # def get_rad_conversion(self):
+    #     if self._rad_conv is None:
+    #         tri = self.get_triangulation()
+    #         self._rad_conv = get_internal_distance_conversion(self.rad_set,
+    #                                                           allow_completion=True,
+    #                                                           missing_val=None,
+    #                                                           triangles_and_dihedrons=tri,
+    #                                                           return_conversions=True,
+    #                                                           include_shapes=True)
+    #
+    #     return self._rad_conv
     def get_zmat_conv(self):
         if self._zm_conv is None:
             tri = self.get_triangulation()
-            for zm_conv in enumerate_zmatrices_from_internals(self.rad_set, tri):
+            for zm_conv in enumerate_zmatrices_from_internals(self.rad_set, tri,
+                                                              atoms=self.atoms):
                 self._zm_conv = zm_conv
                 break
             else:
                 raise ValueError("couldn't construct Z-matrix transformation")
         return self._zm_conv
+    def get_dmat_conv(self):
+        if self._dm_conv is None:
+            bg, dist_stuff = self.get_distance_conversions()
+            funs = dict(zip(*dist_stuff))
+            groups = bg.get_fragments(return_labels=True)
+            convs = []
+            for g in groups:
+                blocks = []
+                for i,j in itertools.combinations(g, 2):
+                    blocks.append(funs[(i,j)])
+                if any(b is None for b in blocks):
+                    return None, None
+                    #convs.append(None)
+                else:
+                    def prep(internals, blocks=blocks):
+                        return np.moveaxis([
+                            f(internals) for f in blocks
+                        ], 0, -1)
+                    convs.append(prep)
+            self._dm_conv = groups, convs
+        return self._dm_conv
 
     graph_split_method = 'dists'
     def get_dropped_internal_bond_graph(self, internals, method=None):
@@ -719,24 +752,39 @@ class InternalSpec:
                                 **deriv_opts):
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
         from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
+        use_zmat = True
         conv = self.get_zmat_conv()
         if conv[0] is None:
-            raise ValueError(f"specs {self.coords} insufficient to build even a fragment of a Z-matrix")
-        else:
-            unified = callable(conv[1])
-            if unified:
+            conv = self.get_dmat_conv()
+            use_zmat = False
+        if conv[0] is None:
+            raise ValueError(f"insufficient to build Z-matrix or distance matrix fragments: {self.coords}")
+
+
+        unified = callable(conv[1])
+        if unified:
+            if use_zmat:
                 (zmatrix, prep) = conv
                 flat_z = prep(coords)
                 zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
                 perm, zmatrix = canonicalize_zmatrix(zmatrix)
                 blocks = [[zmatrix_to_cartesian(zcoords, zmatrix), perm]]
             else:
-                blocks = []
+                (perm, prep) = conv
+                dists = prep(coords)
+                blocks = [[nput.points_from_distance_matrix(dists, use_triu=True), perm]]
+        else:
+            blocks = []
+            if use_zmat:
                 for zmatrix, prep in zip(*conv):
                     flat_z = prep(coords)
                     zcoords = zmatrix_from_values(flat_z, partial_embedding=True)
                     perm, zmatrix = canonicalize_zmatrix(zmatrix)
                     blocks.append([zmatrix_to_cartesian(zcoords, zmatrix), perm])
+            else:
+                for perm, prep in zip(*conv):
+                    dists = prep(coords)
+                    blocks.append([[nput.points_from_distance_matrix(dists, use_triu=True), perm]])
 
         if return_fragments:
             if order is not None: raise NotImplementedError("can't return derivatives of fragments alone")
@@ -1991,6 +2039,14 @@ def get_internal_triangles_and_dihedrons(internals,
                     for k, v in dihed_sets.items()
                     if nput.dihedron_is_complete(v)
                 }
+            if validate:
+                for k,v in dihed_sets.items():
+                    for i in range(4):
+                        t = nput.dihedron_triangle(v, i)
+                        if nput.triangle_is_complete(t):
+                            inds = np.unique(np.concatenate([x for x in [t.a, t.b, t.c] if x is not None]))
+                            if all(p not in tri_sets for p in itertools.permutations(inds)):
+                                raise ValueError(f"dihedron has triangle {inds}:{t} but triangulation didn't find it")
     return tri_sets, dihed_sets
 def get_triangulation_internals(
     triangulation:tuple[dict[Tuple[int],collections.namedtuple], dict[Tuple[int],collections.namedtuple]]
@@ -2443,8 +2499,40 @@ def _dihedron_completable(k, dihed_data, known_atom_graph, max_comps=5):
                 ):
                     return True
         return False
-def enumarate_zmatrix_roots_from_triangles(atoms, tris):
-    for p in itertools.combinations(atoms, 3):
+
+def _get_matching_dihedrals(a, dihedral_set, internals, *, check_complete=False, d_prop_cache=[None]):
+    dihed_choices = []
+    dihed_props = d_prop_cache[0]
+    if dihed_props is None:
+        idx_props = _get_dihedron_index_props()
+        dihed_props = [
+            (p, v) for p, v in idx_props.items()
+            if (
+                    len(v['coord']) == 4
+                # and d[v['index']] is not None
+            )
+        ]
+        d_prop_cache[0] = dihed_props
+    for k, d in dihedral_set.items():
+        if a in k:
+            for p, v in dihed_props:
+                if not check_complete or d[v['index']] is not None:
+                    if (a == k[p[0]] or a == k[p[-1]]):
+                        k = tuple(k[i] for i in p)
+                        if k not in internals:
+                            x, y, z, w = k
+                            k2 = (x, z, y, w)
+                            if k2 in internals:
+                                k = k2
+                        if a == k[-1]: k = tuple(reversed(k))
+                        dihed_choices.append(k)
+    return dihed_choices
+def enumarate_zmatrix_roots_from_triangles(atoms, tris, connectivity_graph):
+    combs = list(itertools.combinations(atoms, 3))
+    combs = combs[:1] + sorted(combs[1:],
+                               key=lambda x: np.max([len(connectivity_graph[k]) for k in x]),
+                               reverse=True)
+    for p in combs:
         proper_tri = None
         for pp in itertools.permutations(p):
             proper_tri = tris.get(pp)
@@ -2471,6 +2559,10 @@ def enumarate_zmatrix_roots_from_triangles(atoms, tris):
             ),
                 []
             )
+            groups = [
+                g for g in groups
+                if len(connectivity_graph[g[-1]]) > 4
+            ] # if only 4 we can't actually connect to anything else
             yield groups
 def construct_atom_connection_graph_from_triangulation(internals, tris, dihedrons):
     #TODO: support passing t2 and d2 directly
@@ -2545,21 +2637,105 @@ def construct_atom_connection_graph_from_triangulation(internals, tris, dihedron
                 raise ValueError(f"can't complete {k}")
 
     return known_atom_graph, complete_dihedrals
+def _grow_dihedral_trees(root, atoms, top_dihedral_choices, secondary_dihedral_choices, traversal='dfs'):
+    #TODO: consider caching these for a given root ordering...
+    visited = frozenset(root)
+    queue = collections.deque([
+        [visited, [], list(atoms)],
+    ])
+    if dev.str_is(traversal, 'bfs'):
+        raise NotImplementedError("bfs with counting is tricky")
+        pop = queue.popleft
+        extend = queue.extend
+    else:
+        # TODO: control how I want the children to be added...FIFO or LIFO
+        pop = queue.popleft
+        extend = lambda children: queue.extendleft(reversed(list(children)))
+    counts_cache = {}
+    subpaths_cache = {}
+    while queue:
+        visited, path, choices = pop()
+        if len(choices) == 0:
+            counts_cache[visited] = {
+                "children":[],
+                "count":1
+            }
+            yield path
+            continue
+        if visited not in counts_cache:
+            counts_cache[visited] = {
+                "children":[],
+                "count":None
+            }
+        elif counts_cache[visited]["count"] is None:
+            # we have processed all of the child trees so now we can add up their counts
+            counts_cache[visited]["count"] = sum(
+                counts_cache[c]["count"]
+                for c in counts_cache[visited]["children"]
+                if counts_cache[c]["count"] is not None
+            )
+
+        if (
+                counts_cache[visited]["count"] is None
+                or counts_cache[visited]["count"] > 0
+        ):
+            some_good_choice = False
+            for dihedral_choices in [
+                top_dihedral_choices,
+                secondary_dihedral_choices
+            ]:
+                for i,choice in enumerate(choices):
+                    diheds = dihedral_choices[choice]
+                    if (visited, choice) not in subpaths_cache:
+                        subpaths_cache[(visited, choice)] = [
+                            d for d in diheds
+                            if all(dd in visited for dd in d[1:])
+                        ]
+                    subpaths = subpaths_cache[(visited, choice)]
+                    if len(subpaths) > 0:
+                        some_good_choice = True
+                        subvisited = visited | {choice}
+                        counts_cache[visited]['children'].append(subvisited)
+                        extend([
+                            [
+                                visited | {choice},
+                                path + [subpaths],
+                                choices[:i] + choices[i+1:],
+                            ]
+                        ])
+                if some_good_choice:
+                    break
+        # # this will terminate on its own
+        # if not some_good_choice:
+        #     raise ValueError()
+        ...
+
+def get_fragments_from_internals(
+        internals,
+        triangles_and_dihedrons=None
+):
+    if triangles_and_dihedrons is None:
+        triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
+
+    td, dd = triangles_and_dihedrons
+    known_atom_graph, complete_dihedrals = construct_atom_connection_graph_from_triangulation(
+        internals, td, dd
+    )
+
+    comps = EdgeGraph.from_map(known_atom_graph)
+    sels = comps.get_fragments(return_labels=True)
+
+    return sels
 def enumerate_zmatrices_from_internals(internals,
                                        triangles_and_dihedrons=None,
                                        atoms=None,
                                        # roots=None,
                                        ordering=None,
                                        build_conversion=True,
-                                       order_fallback='graph',
                                        max_ordering_passes=1,
                                        **conversion_options
                                        ):
     from .ZMatrices import extract_zmatrix_internals
-
-    # create _framework_ from dihedral angles and associated
-    # completable dihedrons, fill in any gaps via inference
-    # use the longest possible dihedral chain first
 
     if triangles_and_dihedrons is None:
         triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
@@ -2576,34 +2752,11 @@ def enumerate_zmatrices_from_internals(internals,
     t2 = {k:t for k,t in td.items() if nput.triangle_is_complete(t)}
     d2 = {k:t for k,t in dd.items() if nput.dihedron_is_complete(t)}
 
-    # if atoms is None:
-    #     atoms = np.unique(np.concatenate(list(dd.keys()) + list(td.keys())))
-    # for i in internals: # checking the triangulation
-    #     if len(i) == 4 and all(p not in dd for p in itertools.permutations(i)):
-    #         raise ValueError(i)
-
-
-    # determine connected components
-    # from dihedral framework
-    # raise Exception(comps.get_fragments())
-
-    # if atoms is None:
-    #     atoms = np.unique(np.concatenate(internals))
-    # atom_mapping = {a:i for i,a in enumerate(atoms)}
-
     comps = EdgeGraph.from_map(known_atom_graph)
     zm_generators = []
     sels = comps.get_fragments(return_labels=True)
-    idx_props = _get_dihedron_index_props()
     ord, idx = np.unique(atoms, return_index=True)
     ord_map = dict(zip(ord, idx))
-    dihed_props = [
-        (p,v) for p, v in idx_props.items()
-        if (
-                len(v['coord']) == 4
-                # and d[v['index']] is not None
-        )
-    ]
     comp_filts = {} # caching for speed
     d2_filts = {}
     label_mapping = {l:i for i,l in enumerate(comps.labels)}
@@ -2616,134 +2769,183 @@ def enumerate_zmatrices_from_internals(internals,
         sublabel_mapping = {l:i for i,l in enumerate(subgraph.labels)}
         atom_ord = {a:i for i,a in enumerate(atoms)}
         sorted_atom_graph = {
-            k:sorted([x for x in v if x in atom_ord], key=lambda a:atom_ord[a])
-            for k,v in known_atom_graph.items()
+            k: sorted([x for x in v if x in atom_ord], key=lambda a: atom_ord[a])
+            for k, v in known_atom_graph.items()
             if k in atom_ord
         }
-        for root_groups in enumarate_zmatrix_roots_from_triangles(atoms, t2):
-            for i,j,k in root_groups:
-                d_blocks = [
+        if ordering is not None:
+            subordering = [o for o in ordering if o in atom_ord]
+            root_generators = [[subordering[:3]]]
+        else:
+            subordering = None
+            root_generators = enumarate_zmatrix_roots_from_triangles(atoms, t2, known_atom_graph)
+
+        for a in atoms:
+            if a not in comp_filts:
+                comp_filts[a] = _get_matching_dihedrals(a, complete_dihedrals, internals, check_complete=True)
+            if a not in d2_filts:
+                d2_filts[a] = _get_matching_dihedrals(a, d2, internals, check_complete=False)
+
+        def _filter(p, v):
+            p_set = {pp[0] for pp in p}
+            for i in v[1:]:
+                if i > 0 and i not in p_set:
+                    return False
+            return True
+
+        if any(len(x) < 3 for x in sorted_atom_graph.values()):
+            return None # don't even bother
+
+        # import pprint
+        # pprint.pprint(known_atom_graph)
+        checked_roots = set()
+        for root_groups in root_generators:
+            for i, j, k in root_groups:
+                root_key = tuple(sorted([i,j,k]))
+                if root_key in checked_roots: continue
+                root_blocks = [
                     [(i, -1, -2, -3)],
                     [(j, i, -1, -2)],
                     [
                         (k, j, i, -1)
-                            if (k,j) in internals or (j, k) in internals else
+                            if (k, j) in internals or (j, k) in internals else
                         (k, i, j, -1)
-                    ],
+                    ]
                 ]
-                root = [i, j, k]
-                nreq = len(atoms) - 2
-                for rem_generators in [
-                    [[a for a in atoms if a not in {i, j, k}]],
-                    order_fallback
-                ]:
-                    (i, j, k) = root
-                    if dev.str_is(rem_generators, 'segment'):
-                        rem_map:EdgeGraph = subgraph.take([sublabel_mapping[a] for a in atoms if a not in {i,j}])
-                        sublabels = rem_map.labels
-                        segments = rem_map.segment_by_chains(root=sublabels.index(k))
-                        rem_generators = [[sublabels[i] for i in itut.flatten(segments)][1:]]
-                    elif dev.str_is(rem_generators, 'graph'):
-                        git = graph_iter(sorted_atom_graph,
-                                         root=k,
-                                         visited={i, j},
-                                         traversal_ordering='dfs',
-                                         yield_paths='terminal',
-                                         enable_disconnectivity=True)
-                        rem_generators = (
-                            tree[1:]
-                            for tree, terminal in git
-                            if len(tree) == nreq
+                if subordering is not None:
+                    rem_choices = [[
+                        comp_filts.get(a, d2_filts.get(a, []))
+                        for a in subordering[3:]
+                    ]]
+                else:
+                    rem_choices = _grow_dihedral_trees(
+                            (i, j, k),
+                            [a for a in atoms if a not in {i, j, k}],
+                            comp_filts,
+                            d2_filts
                         )
-                    for passes, rem in enumerate(rem_generators):
-                        for a in rem:
-                            d_choices = comp_filts.get(a)
-                            if d_choices is None:
-                                d_choices = []
-                                for dihedral_set in [
-                                    complete_dihedrals,
-                                    # d2
-                                ]:
-                                    for k,d in dihedral_set.items():
-                                        if a in k:
-                                            for p,v in dihed_props:
-                                                if d[v['index']] is not None:
-                                                    if (a == k[p[0]] or a == k[p[-1]]):
-                                                        k = tuple(k[i] for i in p)
-                                                        if k not in internals:
-                                                            x, y, z, w = k
-                                                            k2 = (x, z, y, w)
-                                                            if k2 in internals:
-                                                                k = k2
-                                                        if a == k[-1]: k = tuple(reversed(k))
-                                                        d_choices.append(k)
-                                comp_filts[a] = d_choices
-
-                            if len(d_choices) == 0:
-                                d_choices = d2_filts.get(a)
-                                if d_choices is None:
-                                    d_choices = []
-                                    for dihedral_set in [
-                                        d2
-                                    ]:
-                                        for k, d in dihedral_set.items():
-                                            if a in k:
-                                                for p, v in dihed_props:
-                                                    if (a == k[p[0]] or a == k[p[-1]]):
-                                                        k = tuple(k[i] for i in p)
-                                                        if k not in internals:
-                                                            x, y, z, w = k
-                                                            k2 = (x, z, y, w)
-                                                            if k2 in internals:
-                                                                k = k2
-                                                        if a == k[-1]: k = tuple(reversed(k))
-                                                        d_choices.append(k)
-                                    d2_filts[a] = d_choices
-                            if len(d_choices) == 0:
-                                # import pprint
-                                # pprint.pprint(d2)
-                                raise ValueError(f"can't find dihedral choices for {a}")
-                            d_blocks.append(d_choices)
-                        # raise Exception(d_blocks)
-
-                        # for b in d_blocks: print(b)
-                        def _filter(p, v):
-                            p_set = {pp[0] for pp in p}
-                            for i in v[1:]:
-                                if i > 0 and i not in p_set:
-                                    return False
-                            return True
-                        possible_mats = itut.unique_product(
+                for passes,follows in enumerate(rem_choices):
+                    d_blocks = root_blocks + follows
+                    possible_mats = itut.unique_product(
+                        *d_blocks,
+                        filter=_filter
+                    )
+                    try:
+                        non_zero = next(possible_mats)
+                    except StopIteration:
+                        if max_ordering_passes >= 0 and passes + 1 >= max_ordering_passes:
+                            break
+                    else:
+                        generator = itut.unique_product(
                             *d_blocks,
                             filter=_filter
                         )
-                        try:
-                            non_zero = next(possible_mats)
-                        except StopIteration:
-                            # import pprint
-                            # print("failed...", *root)
-                            # pprint.pprint([np.array(d) for d in d_blocks])
-                            # if root == (6, 5, 4):
-                            #     raise ValueError(...)
-                            # print(rem)
-                            if max_ordering_passes >= 0 and passes+1 >= max_ordering_passes:
-                                break
-                        else:
-                            generator = itut.unique_product(
-                                *d_blocks,
-                                filter=_filter
-                            )
-                            break
-                    if generator is not None:
                         break
-                if generator is not None:
+                if generator is not None: #TODO: allow chaining for full enumeration
                     break
+                else:
+                    checked_roots.add(root_key) # if root perm doesn't work, the next ordering won't either
             if generator is not None:
                 zm_generators.append(generator)
                 break
-        else:
-            atoms = np.array(atoms)
-            raise ValueError(f"can't find three atoms to serve as root that will generate a Z-matrix for {atoms}")
+        # for root_groups in root_generators:
+        #     for i,j,k in root_groups:
+        #         d_blocks = [
+        #             [(i, -1, -2, -3)],
+        #             [(j, i, -1, -2)],
+        #             [
+        #                 (k, j, i, -1)
+        #                     if (k,j) in internals or (j, k) in internals else
+        #                 (k, i, j, -1)
+        #             ],
+        #         ]
+        #         root = [i, j, k]
+        #         nreq = len(atoms) - 2
+        #         if subordering is not None:
+        #             rem_choices = [
+        #                 [subordering[3:]]
+        #             ]
+        #         else:
+        #             rem_choices = [
+        #                 [[a for a in atoms if a not in {i, j, k}]],
+        #                 order_fallback
+        #             ]
+        #         for rem_generators in rem_choices:
+        #             (i, j, k) = root
+        #             if dev.str_is(rem_generators, 'segment'):
+        #                 rem_map:EdgeGraph = subgraph.take([sublabel_mapping[a] for a in atoms if a not in {i,j}])
+        #                 sublabels = rem_map.labels
+        #                 segments = rem_map.segment_by_chains(root=sublabels.index(k))
+        #                 rem_generators = [[sublabels[i] for i in itut.flatten(segments)][1:]]
+        #             elif dev.str_is(rem_generators, 'graph'):
+        #                 git = graph_iter(sorted_atom_graph,
+        #                                  root=k,
+        #                                  visited={i, j},
+        #                                  traversal_ordering='dfs',
+        #                                  yield_paths='terminal',
+        #                                  enable_disconnectivity=True)
+        #                 rem_generators = (
+        #                     tree[1:]
+        #                     for tree, terminal in git
+        #                     if len(tree) == nreq
+        #                 )
+        #             for passes, rem in enumerate(rem_generators):
+        #                 for a in rem:
+        #                     d_choices = comp_filts.get(a)
+        #                     if d_choices is None:
+        #                         d_choices = _get_matching_dihedrals(a, complete_dihedrals, internals,
+        #                                                                 check_complete=True)
+        #                         comp_filts[a] = d_choices
+        #
+        #                     if len(d_choices) == 0:
+        #                         d_choices = d2_filts.get(a)
+        #                         if d_choices is None:
+        #                             d_choices = _get_matching_dihedrals(a, d2, internals, check_complete=False)
+        #                             d2_filts[a] = d_choices
+        #
+        #                     if len(d_choices) == 0:
+        #                         # import pprint
+        #                         # pprint.pprint(d2)
+        #                         raise ValueError(f"can't find dihedral choices for {a}")
+        #                     d_blocks.append(d_choices)
+        #
+        #                 def _filter(p, v):
+        #                     p_set = {pp[0] for pp in p}
+        #                     for i in v[1:]:
+        #                         if i > 0 and i not in p_set:
+        #                             return False
+        #                     return True
+        #                 possible_mats = itut.unique_product(
+        #                     *d_blocks,
+        #                     filter=_filter
+        #                 )
+        #                 try:
+        #                     non_zero = next(possible_mats)
+        #                 except StopIteration:
+        #                     # import pprint
+        #                     # print("failed...", *root)
+        #                     # pprint.pprint([np.array(d) for d in d_blocks])
+        #                     # if root == (6, 5, 4):
+        #                     #     raise ValueError(...)
+        #                     # print(rem)
+        #                     if max_ordering_passes >= 0 and passes+1 >= max_ordering_passes:
+        #                         break
+        #                 else:
+        #                     generator = itut.unique_product(
+        #                         *d_blocks,
+        #                         filter=_filter
+        #                     )
+        #                     break
+        #             if generator is not None:
+        #                 break
+        #         if generator is not None:
+        #             break
+        #     if generator is not None:
+        #         zm_generators.append(generator)
+        #         break
+        # else:
+        #     atoms = np.array(atoms)
+        #     raise ValueError(f"can't find three atoms to serve as root that will generate a Z-matrix for {atoms}")
 
     if len(zm_generators) == 0:
         if build_conversion:
@@ -2854,9 +3056,18 @@ def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure
                 return False, (k,t)
     return True, None
 
-def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None, dist_set=None):
+def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None,
+                            dist_set=None,
+                            return_conversions=False,
+                            complete_graph=False):
+    if complete_graph:
+        if dist_set is None:
+            if atoms is None:
+                atoms, idx = np.unique(np.concatenate(internals), return_index=True)
+                atoms = atoms[np.argsort(idx)]
+            dist_set = list(itertools.combinations(atoms, 2))
     dist_set, funs = get_internal_distance_conversion(internals,
-                                                      allow_completion=False,
+                                                      allow_completion=complete_graph,
                                                       missing_val=None,
                                                       triangles_and_dihedrons=triangles_and_dihedrons,
                                                       return_conversions=True,
@@ -2868,5 +3079,9 @@ def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None,
     mapping = {a:i for i,a in enumerate(atoms)}
     edges = [(mapping[i], mapping[j]) for i,j in edges]
 
-    return EdgeGraph(atoms, edges)
+    graph = EdgeGraph(atoms, edges)
+    if return_conversions:
+        return graph, (dist_set, funs)
+    else:
+        return graph
 
