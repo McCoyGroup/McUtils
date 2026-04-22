@@ -229,25 +229,26 @@ def resolve_key_collision(a, b, k, merge_iterables=True):
             return b[k]
             # raise ValueError(f"can't resolve key collision on key {k} between {a[k]} and {b[k]}")
         return merge_dicts(a[k], b[k], resolve_key_collision, merge_iterables=merge_iterables)
-    elif merge_iterables and isinstance(a[k], set):
-        if not isinstance(b[k], set):
-            return b[k]
-        a = set(a[k])
-        a.update(b)
-        return a
-    elif merge_iterables and is_list_like(a[k]):
-        if not is_list_like(b[k]):
-            return type(a[k])(
-                itertools.chain(a[k], b[k])
+    elif merge_iterables:
+        if isinstance(a[k], set):
+            if not isinstance(b[k], set):
+                return b[k]
+            a = set(a[k])
+            a.update(b)
+            return a
+        elif is_list_like(a[k]):
+            if not is_list_like(b[k]):
+                return type(a[k])(
+                    itertools.chain(a[k], [b[k]])
+                )
+            else:
+                return type(a[k])(
+                    itertools.chain(a[k], b[k])
+                )
+        elif is_list_like(b[k]):
+            return type(b[k])(
+                itertools.chain([a[k]], b[k])
             )
-        else:
-            return type(a[k])(
-                itertools.chain(a[k], [b[k]])
-            )
-    elif merge_iterables and is_list_like(b[k]):
-        return type(b[k])(
-            itertools.chain([a[k]], b[k])
-        )
     else:
         return b[k]
 

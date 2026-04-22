@@ -23,6 +23,7 @@ __all__ = [
     "triangle_convert",
     "triangle_converter",
     "triangle_area",
+    "TriangleData",
     "make_triangle",
     "make_symbolic_triangle",
     "triangle_property_specifiers",
@@ -31,6 +32,7 @@ __all__ = [
     "enumerate_triangle_completions",
     "triangle_is_complete",
     "triangle_property_function",
+    "DihedralTetrahedronData",
     "make_dihedron",
     "make_symbolic_dihedron",
     "dihedron_property_specifiers",
@@ -38,6 +40,7 @@ __all__ = [
     "dihedral_completion_paths",
     "dihedron_is_complete",
     "enumerate_dihedron_completions",
+    "sorted_dihedron_completions",
     "dihedron_triangle",
     "dihedron_property_function",
     "arcsin_deriv",
@@ -3792,6 +3795,8 @@ def enumerate_dihedron_completions(dd, priortize_dihedrals=True):
         for i,j in pair_scoring:
             if not comps[i] and comp_lists[i] is None:
                 comp_lists[i] = list(enumerate_triangle_completions(tris[i]))
+            if not comps[j] and comp_lists[j] is None:
+                comp_lists[j] = list(enumerate_triangle_completions(tris[j]))
             subenums = [
                 comp_lists[i]
                     if not comps[i] else
@@ -3811,12 +3816,44 @@ def enumerate_dihedron_completions(dd, priortize_dihedrals=True):
                         + tuple(tri_map_2[y] for y in c_j)
                         + p
                 )
-
+def sorted_dihedron_completions(sample_dihed:DihedralTetrahedronData, field_name:str, *,
+                                conversion_specs=None, trie_expansions=None,
+                                cache=None):
+    possible_conversions = {}
+    if cache is None: cache = {}
+    key = (sample_dihed, field_name)
+    if conversion_specs is None:
+        if key not in cache:
+            _, (complete, conversion_specs) = dihedral_completion_paths(
+                sample_dihed,
+                field_name,
+                return_trie=True,
+                return_args=True
+            )
+            cache[key] = (conversion_specs, None)
+        conversion_specs, trie_expansions = cache[key]
+    if trie_expansions is None:
+        if key not in cache or cache[key][1] is None:
+            trie_expansions = [_expand_trie(trie) for _, trie in conversion_specs]
+            cache[key] = (conversion_specs, trie_expansions)
+        conversion_specs, trie_expansions = cache[key]
+    sub_dict = sample_dihed._asdict()
+    for (base_args, trie), trie_expansion in zip(conversion_specs, trie_expansions):
+        for l, f in trie_expansion.items():
+            props = [sub_dict[ll] is not None for ll in l]
+            rem_inds = [i for i, j in enumerate(props) if not j]
+            base_inds = [i for i, j in enumerate(props) if j]
+            rem_list = tuple(sorted(l[i] for i in rem_inds))
+            base_args = tuple(sorted(base_args, key=lambda x: l.index(x)))
+            possible_conversions[rem_list] = (l, base_args, rem_inds, base_inds, f)
+    pref_keys = list(sorted(possible_conversions.keys(), key=len))
+    return pref_keys, possible_conversions
 def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name,
                                disallowed_conversions=None,
                                allow_completion=True,
                                raise_on_missing=True,
                                return_depth=False,
+                               completion_handler=None,
                                cache=None):
     field_props = dihedron_property_specifiers(field_name)
     field_name = field_props['name']
@@ -3831,6 +3868,35 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
         else:
             return convert
     else:
+        # check for triangle completability first...
+        if len(field_props['coord']) < 4:
+            for tri_num, tri_fields in enumerate(dihedron_triangle_fields):
+                try:
+                    tri_field_idx = tri_fields.index(field_name)
+                except ValueError:
+                    ...
+                else:
+                    tri = dihedron_triangle(sample_dihed, tri_num)
+                    tri_field_name = ['a', 'b', 'c', 'A', 'B', 'C'][tri_field_idx]
+                    tri_conv = triangle_property_function(
+                        tri,
+                        tri_field_name,
+                        raise_on_missing=False
+                    )
+                    if tri_conv is not None:
+                        def convert(dihedron_data,
+                                    sign=field_props['sign'],
+                                    tri_conv=tri_conv,
+                                    tri_num=tri_num,
+                                    **kwargs):
+                            tri = dihedron_triangle(dihedron_data, tri_num)
+                            return sign * tri_conv(tri, **kwargs)
+                        convert.__name__ = 'convert_' + field_props['name']
+                        if return_depth:
+                            return 0, convert
+                        else:
+                            return convert
+
         sub_dict = sample_dihed._asdict()
         og_dihed = sample_dihed
         sample_dihed = DihedralTetrahedronData(**{k:(k if v is not None else v) for k,v in sub_dict.items()})
@@ -3857,7 +3923,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
         else:
             if allow_completion:
                 possible_conversions = {}
-                convertable_keys = {}
+                convertable_keys = cache.setdefault('convertable_keys', {}).setdefault(sample_dihed, {})
                 if 'trie_expansions' not in cache:
                     cache['trie_expansions'] = {}
                 if sample_dihed not in cache['trie_expansions']:
@@ -3872,27 +3938,34 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                         rem_list = tuple(sorted(l[i] for i in rem_inds))
                         base_args = tuple(sorted(base_args, key=lambda x:l.index(x)))
                         possible_conversions[rem_list] = (l, base_args, rem_inds, base_inds, f)
-                # print(field_name, possible_conversions)
                 pref_keys = list(sorted(possible_conversions.keys(), key=len))
                 if disallowed_conversions is None:
-                    disallowed_conversions = {field_name}
-                else:
-                    disallowed_conversions.add(field_name)
+                    disallowed_conversions = cache.setdefault('disallowed_conversions', {}).setdefault(sample_dihed, set())
+                disallowed_conversions.add(field_name)
                 complete_convs = []
                 for kl in pref_keys:
+                    if any(k in disallowed_conversions for k in kl): continue
                     for k in kl:
                         if k not in convertable_keys:
                             if k in disallowed_conversions: break
+                            disallowed_conversions.add(k)
                             d2 = dihedron_property_function(og_dihed, k,
                                                             disallowed_conversions=disallowed_conversions,
                                                             allow_completion=True,
                                                             raise_on_missing=False,
                                                             return_depth=True,
                                                             cache=cache)
+                            if d2 is None and completion_handler is not None:
+                                d2 = completion_handler(og_dihed, k,
+                                                        disallowed_conversions=disallowed_conversions,
+                                                        allow_completion=True,
+                                                        raise_on_missing=False,
+                                                        return_depth=True,
+                                                        cache=cache)
                             if d2 is None:
-                                disallowed_conversions.add(k)
                                 break
                             else:
+                                disallowed_conversions.remove(k)
                                 convertable_keys[k] = d2
                     else:
                         # print(field_name, kl,
@@ -3900,6 +3973,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                         #       {c: possible_conversions.get(c, None) for c in kl}
                         #       )
                         complete_convs.append([sum(convertable_keys[k][0] for k in kl), kl])
+                        break
                 if len(complete_convs) > 0:
                     depth, kl = sorted(complete_convs, key=lambda c:c[0])[0]
                     full_args, base_args, rem_inds, base_inds, func = possible_conversions[kl]

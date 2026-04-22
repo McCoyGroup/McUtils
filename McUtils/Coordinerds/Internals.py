@@ -10,7 +10,7 @@ import numpy as np
 from .. import Devutils as dev
 from .. import Numputils as nput
 from .. import Iterators as itut
-from ..Graphs import EdgeGraph, graph_iter
+from ..Graphs import EdgeGraph, pebble_rigidity, statistically_rigid, uniquely_rigid
 
 __all__ = [
     "canonicalize_internal",
@@ -29,7 +29,8 @@ __all__ = [
     "validate_internals",
     # "RADInternalCoordinateSet"
     'InternalCoordinateType',
-    'InternalSpec'
+    'InternalSpec',
+    "InternalCoordinateGraph"
 ]
 
 class InternalCoordinateType(metaclass=abc.ABCMeta):
@@ -397,6 +398,8 @@ class InternalSpec:
         self._rad_conv = None
         self._zm_conv = None
         self._dm_conv = None
+        self._pruned_rads = None
+        self._pruned_tri_di = None
         self._carried_atoms = [None] * len(coords)
     @classmethod
     def from_zmatrix(cls, *zmats, additions=None, **opts):
@@ -426,6 +429,15 @@ class InternalSpec:
             # print(self.rad_set)
             self._tri_di = get_internal_triangles_and_dihedrons(self.rad_set)
         return self._tri_di
+    def get_pruned_rads(self):
+        if self._pruned_rads is None:
+            self._pruned_rads = self.non_redundant_rads()
+        return self._pruned_rads
+    def get_pruned_triangulation(self):
+        if self._pruned_tri_di is None:
+            # print(self.rad_set)
+            self._pruned_tri_di = get_internal_triangles_and_dihedrons(self.get_pruned_rads()[0])
+        return self._pruned_tri_di
     def get_bond_graph(self) -> EdgeGraph:
         if self._bond_graph is None:
             self._bond_graph = get_internal_bond_graph(self.rad_set, self.atoms,
@@ -450,15 +462,23 @@ class InternalSpec:
     #                                                           include_shapes=True)
     #
     #     return self._rad_conv
-    def get_zmat_conv(self):
+    def get_zmat_conv(self, raise_on_incomplete=True):
         if self._zm_conv is None:
+            # pruned_rads, indices = self.get_pruned_rads()
+            # tri = self.get_pruned_triangulation()
+            pruned_rads = self.rad_set
+            indices = None
             tri = self.get_triangulation()
-            for zm_conv in enumerate_zmatrices_from_internals(self.rad_set, tri,
-                                                              atoms=self.atoms):
+            for zm_conv in enumerate_zmatrices_from_internals(pruned_rads, tri,
+                                                              atoms=self.atoms,
+                                                              indices=indices):
                 self._zm_conv = zm_conv
                 break
             else:
-                raise ValueError("couldn't construct Z-matrix transformation")
+                if raise_on_incomplete:
+                    raise ValueError("couldn't construct Z-matrix transformation")
+                else:
+                    self._zm_conv = (None, None)
         return self._zm_conv
     def get_dmat_conv(self):
         if self._dm_conv is None:
@@ -543,7 +563,7 @@ class InternalSpec:
             if len(target_bonds) == 0:
                 return bg
 
-            _, (shapes, funs) = get_internal_distance_conversion(internals,
+            _, (funs, shapes) = get_internal_distance_conversion(internals,
                                                                  allow_completion=False,
                                                                  missing_val=None,
                                                                  triangles_and_dihedrons=sub_triangulation,
@@ -749,18 +769,33 @@ class InternalSpec:
                                 reference_cartesians=None,
                                 return_fragments=False,
                                 return_inverse=True,
+                                transformations=None,
+                                reference_internals=None,
                                 **deriv_opts):
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
         from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
         use_zmat = True
-        conv = self.get_zmat_conv()
+        conv = self.get_zmat_conv(raise_on_incomplete=False)
         if conv[0] is None:
             conv = self.get_dmat_conv()
             use_zmat = False
         if conv[0] is None:
             raise ValueError(f"insufficient to build Z-matrix or distance matrix fragments: {self.coords}")
 
-
+        if transformations is not None:
+            base_shape = coords.shape[:-1]
+            tfs = [
+                nput.broadcast_constant(t, base_shape, pad_base=True)
+                for t in transformations[1]
+            ]
+            coords = nput.tensor_reexpand(tfs, [coords], axes=[-1, -1])[0]
+            if reference_internals is None:
+                if reference_cartesians is not None:
+                    reference_internals = self.cartesians_to_internals(reference_cartesians)
+            if reference_internals is not None:
+                reference_internals = np.asanyarray(reference_internals)
+                reference_internals = nput.broadcast_constant(reference_internals, base_shape, pad_base=True)
+                coords = coords + reference_internals
         unified = callable(conv[1])
         if unified:
             if use_zmat:
@@ -832,6 +867,135 @@ class InternalSpec:
                     **deriv_opts
                 )
                 return carts, expansion
+
+    def _novel_distance(self, rad, tris, diheds):
+        if len(rad) == 2:
+            return rad
+        elif len(rad) == 3:
+            idx = nput.triangle_property_specifiers()
+            for p in itertools.permutations(rad):
+                if p in tris:
+                    t = tris[p]
+                    a, b, c = [
+                        tuple(p[i] for i in idx[j]['coord'])
+                        for j in ['a', 'b', 'c']
+                    ]
+                    if t.a is not None:
+                        if t.b is not None:
+                            return c
+                        elif t.c is not None:
+                            return b
+                        else:
+                            return c
+                    elif t.b is not None:
+                        if t.c is not None:
+                            return a
+                        else:
+                            return c
+                    else:
+                        return a
+            else:
+                raise ValueError(f"failed to find a matching triangle to {rad}")
+        else:
+            idx = nput.dihedron_property_specifiers ()
+            for p in itertools.permutations(rad):
+                if p in diheds:
+                    dd = diheds[p]
+                    a, b, c, x, y, z = [
+                        tuple(p[i] for i in idx[j]['coord'])
+                        for j in ['a', 'b', 'c', 'x', 'y', 'z']
+                    ]
+                    tris = [
+                        nput.dihedron_triangle(dd, i)
+                        for i in range(4)
+                    ]
+                    completions = [ nput.triangle_is_complete(t) for t in tris ]
+
+                    checks = [ # from dihedron_triangle_pair_dihedrals
+                        (0, 1, (dd.z, z)),
+                        (0, 2, (dd.c, c)),
+                        (0, 3, (dd.y, y)),
+                        (1, 2, (dd.x, x)),
+                        (1, 3, (dd.a, a)),
+                        (2, 3, (dd.b, b)),
+                    ]
+                    for i,j,(z,v) in checks:
+                        if completions[i] and completions[j]:
+                            if z is None:
+                                return v
+                            else:
+                                raise NotImplementedError("ugh")
+                    else:
+                        for i,j,(z,v) in checks:
+                            if completions[i] or completions[j]:
+                                if z is None:
+                                    return v
+                                else:
+                                    raise NotImplementedError("ugh")
+            else:
+                raise ValueError(f"failed to find a matching dihedral to {rad}")
+    def get_triangulation_novel_internals(self, rads=None, triangulation=None):
+        if triangulation is None:
+            triangulation = self.get_triangulation()
+        if rads is None:
+            rads = self.rad_set
+        tris, diheds = triangulation
+        tris = {k: v for k, v in tris.items() if nput.triangle_is_complete(v)}
+        diheds = {k: v for k, v in diheds.items() if nput.dihedron_is_complete(v)}
+        return [
+            self._novel_distance(r, tris, diheds)
+            for r in rads
+        ]
+    def _tri_dists(self, rad, tris, diheds):
+        if len(rad) == 2:
+            return [rad]
+        elif len(rad) == 3:
+            for p in itertools.permutations(rad):
+                if p in tris:
+                    return list(itertools.combinations(rad, 2))
+            else:
+                raise ValueError(f"failed to find a matching triangle to {rad}")
+        else:
+            for p in itertools.permutations(rad):
+                if p in diheds:
+                    return list(itertools.combinations(rad, 2))
+            else:
+                raise ValueError(f"failed to find a matching dihedron to {rad}")
+    def get_triangulation_distances(self, rads=None, triangulation=None):
+        if triangulation is None:
+            triangulation = self.get_triangulation()
+        if rads is None:
+            rads = self.rad_set
+        tris, diheds = triangulation
+        tris = {k: v for k, v in tris.items() if nput.triangle_is_complete(v)}
+        diheds = {k: v for k, v in diheds.items() if nput.dihedron_is_complete(v)}
+        return [
+            self._tri_dists(r, tris, diheds)
+            for r in rads
+        ]
+    def check_redundancy(self):
+        return pebble_rigidity(
+            # self.get_triangulation_distances(),
+            self.get_triangulation_novel_internals(),
+            3
+        )
+    def non_redundant_rads(self):
+        print(len(self.rad_set))
+        (internals, dropped_coordinates), triangles_and_dihedrons = get_non_redundant_internals(
+            self.rad_set,
+            triangles_and_dihedrons=self.get_triangulation(),
+            return_indices=True
+        )
+        dropped_coordinates, dropped_inds = dropped_coordinates
+        map = np.setdiff1d(np.arange(len(self.rad_set)), dropped_inds)
+        return internals, map
+
+        # (internals, dropped_coordinates), triangles_and_dihedrons
+        # raise Exception(uuuh)
+        distance_map = get_internal_shape_map()
+        prunes = self.check_redundancy()
+        map = np.where(prunes)[0]
+        return [self.rad_set[i] for i in map], map
 
 def canonicalize_internal(coord, return_sign=False):
     sign = 1
@@ -1030,7 +1194,7 @@ def get_canonical_internal_list(coords):
     else:
         return [canonicalize_internal(c) for c in coords]
 
-def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False):
+def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False, indices=None):
     if canonicalize:
         coord = canonicalize_internal(coord)
     if isinstance(coords, RADInternalCoordinateSet):
@@ -1053,6 +1217,8 @@ def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, a
                 raise ValueError("{} not in coordinate set".format(coord))
             else:
                 idx = missing_val
+        elif indices is not None:
+            idx = indices[idx]
         if allow_negation:
             return idx, sign
         else:
@@ -1527,6 +1693,7 @@ _tri_perms = [
         (0, 2, 1),
         (1, 0, 2)
     ]
+_tri_perm_inv = _tri_perms
 def _get_tri_bond_key_name(mod_sets, a,b,c, i, j):
     base = (a, b, c)
     for perm in _tri_perms:
@@ -1564,6 +1731,20 @@ _dihedron_perms = [
         (2, 0, 1, 3),
         (2, 1, 0, 3)
     ]
+_dihedron_perm_inv = [
+    (0, 1, 2, 3),
+    (0, 2, 1, 3),
+    (0, 3, 1, 2),
+    (0, 3, 2, 1),
+    (0, 1, 3, 2),
+    (0, 2, 3, 1),
+    (1, 0, 2, 3),
+    (2, 0, 1, 3),
+    (1, 0, 3, 2),
+    (2, 0, 3, 1),
+    (1, 2, 0, 3),
+    (2, 1, 0, 3)
+]
 def _get_dihedron_bond_key_name(mod_sets, a,b,c,d, i, j):
     base = (a, b, c, d)
     for perm in _dihedron_perms:
@@ -1642,9 +1823,12 @@ def get_internal_triangles_and_dihedrons(internals,
                                          canonicalize=True,
                                          construct_shapes=True,
                                          prune_incomplete=True,
-                                         validate=True,
+                                         validate=False,
                                          allow_partially_defined=True,
-                                         create_dihedra=True):
+                                         create_dihedra=True) -> tuple[
+    dict[tuple[int, int, int], nput.TriangleData],
+    dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]
+]:
     tri_sets:dict[tuple[int],set] = {}
     dihed_sets:dict[tuple[int],set] = {}
     for coord in internals:
@@ -1736,7 +1920,12 @@ def get_internal_triangles_and_dihedrons(internals,
                             mod_sets[key] = mod_sets.get(key, set()) | v | {z}
                             if validate: _validate_dihed_triangulation(mod_sets, key, internals)
                     elif i == m:
-                        if j == l:
+                        if j == k:
+                            #TODO: double check this doesn't duplicate somehow
+                            key = (k,l,m,n)
+                            mod_sets[key].add("a")
+                            if validate: _validate_dihed_triangulation(mod_sets, key, internals)
+                        elif j == l:
                             key = (k,l,m,n)
                             mod_sets[key].add("b")
                             if validate: _validate_dihed_triangulation(mod_sets, key, internals)
@@ -2003,6 +2192,24 @@ def get_internal_triangles_and_dihedrons(internals,
         #     if m is None and n is not None:
         #         raise ValueError(coord)
 
+    if validate:
+        for k in tri_sets:
+            if not all(nput.is_int(i) or i is None for i in k):
+                raise ValueError(f"triangle {k} malformed")
+            if None not in k:
+                for p in itertools.permutations(k):
+                    if p != k and p in tri_sets:
+                        raise ValueError(f"triangle {k} duped by {p}")
+        for k in dihed_sets:
+            if not all(nput.is_int(i) or i is None for i in k):
+                raise ValueError(f"dihedron {k} malformed")
+            if None not in k:
+                for p in itertools.permutations(k):
+                    if p != k and p in dihed_sets:
+                        raise ValueError(f"dihedron {k} duped by {p}")
+
+
+
     if prune_incomplete:
         tri_sets, dihed_sets = (
                 {k:v for k,v in tri_sets.items() if None not in k},
@@ -2049,23 +2256,102 @@ def get_internal_triangles_and_dihedrons(internals,
                                 raise ValueError(f"dihedron has triangle {inds}:{t} but triangulation didn't find it")
     return tri_sets, dihed_sets
 def get_triangulation_internals(
-    triangulation:tuple[dict[Tuple[int],collections.namedtuple], dict[Tuple[int],collections.namedtuple]]
+    triangulation:tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]]
 ):
     tri_sets, dihed_sets = triangulation
-    return list(
-        itut.delete_duplicates(
+    return itut.delete_duplicates(
             v
             for tv in [tri_sets, dihed_sets]
             for t in tv.values()
             for v in t if v is not None
         )
+
+def _merge_shapes(new_shapes, old_shapes, perms, perm_invs, prop_func,
+                  in_place=False,
+                  merge_strategy='both'):
+    if not in_place:
+        new_shapes = new_shapes.copy()
+        old_shapes = old_shapes.copy()
+    use_new = dev.str_in(merge_strategy, 'new')
+    use_old = dev.str_in(merge_strategy, 'old')
+    merge_inds_old = []
+    merge_inds_new = []
+    for k, t in new_shapes.items():
+        for p, pi in zip(perms, perm_invs):
+            k2 = tuple(k[i] for i in p)
+            if k2 not in old_shapes:
+                k2 = tuple(reversed(k2))
+            if k2 in old_shapes:
+                if use_new:
+                    merge_inds_old.append(k2)
+                    break
+                elif use_old:
+                    merge_inds_new.append(k)
+                    break
+                else:
+                    uv = old_shapes[k2]
+                    if k == k2:
+                        d2 = t._asdict()
+                    else:
+                        d2 = {}
+                        t_dict = {k: v for k, v in t._asdict().items() if v is not None}
+                        for term, val in t_dict.items():
+                            x = prop_func(term)["coord"]
+                            y = canonicalize_internal([pi[i] for i in x])
+                            d2[prop_func(y)["name"]] = val
+                    uv_dict = uv._asdict()
+                    requires_merge = False
+                    for name,val in d2.items():
+                        val2 = uv_dict[name]
+                        if val != val2:
+                            if not (
+                                isinstance(val, tuple) and isinstance(val2, tuple)
+                                and canonicalize_internal(val) == canonicalize_internal(val2)
+                            ):
+                                requires_merge = True
+                                break
+                    if requires_merge:
+                        d2 = dev.merge_dicts(uv_dict, d2, merge_iterables=False)
+                        new_shapes[k] = uv._replace(**d2)
+                        merge_inds_old.append(k2)
+                    else:
+                        merge_inds_new.append(k)
+                break
+    for k in merge_inds_new: del new_shapes[k]
+    for k in merge_inds_old: del old_shapes[k]
+    return new_shapes, old_shapes
+def merge_dihedral_sets(sub_diheds, unmodified_diheds,
+                        in_place=False,
+                        merge_strategy='both'):
+    return _merge_shapes(
+        sub_diheds,
+        unmodified_diheds,
+        _dihedron_perms,
+        _dihedron_perm_inv,
+        nput.dihedron_property_specifiers,
+        in_place=in_place,
+        merge_strategy=merge_strategy
     )
+def merge_triangle_sets(sub_tris, unmodified_tris,
+                        in_place=False,
+                        merge_strategy='both'):
+    return _merge_shapes(
+        sub_tris,
+        unmodified_tris,
+        _tri_perms,
+        _tri_perm_inv,
+        nput.triangle_property_specifiers,
+        in_place=in_place,
+        merge_strategy=merge_strategy
+    )
+
 def update_triangulation(
-        triangulation: tuple[dict[Tuple[int], collections.namedtuple], dict[Tuple[int], collections.namedtuple]],
+        triangulation: tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]],
         added_internals,
         removed_internals,
         triangulation_internals=None,
-        return_split=False
+        return_split=False,
+        validate=False
 ):
     if triangulation_internals is None:
         triangulation_internals = [canonicalize_internal(c) for c in get_triangulation_internals(triangulation)]
@@ -2075,57 +2361,233 @@ def update_triangulation(
     removed_internals = [r for r in removed_internals if r in triangulation_internals and r not in added_internals]
 
     mod_internals = added_internals + removed_internals
+    test_internals = triangulation_internals + added_internals
 
-    test_internals = [
-        i for i in triangulation_internals
-        if i not in removed_internals
-    ] + added_internals
+    # test_dists = [i for i in test_internals if len(i) == 2]
+    # test_angles = [i for i in test_internals if len(i) == 3]
+    # test_dihedrals = [i for i in test_internals if len(i) == 4]
 
-    test_dists = [i for i in test_internals if len(i) == 2]
-    test_angles = [i for i in test_internals if len(i) == 3]
-    test_dihedrals = [i for i in test_internals if len(i) == 4]
-
-    core_internals = []
-    core_atoms = set()
-    for d in test_dihedrals:
-        # test intersection with any modified coordinates, has to intersect fully
-        # to me included
-        for n,t in enumerate(mod_internals):
-            if all(i in d for i in t):
-                core_internals.append(d)
-                core_atoms.update(d)
-                break
-
-    for d in test_angles:
-        # test intersection with any modified coordinates, has to intersect with
-        # n-1 atoms to be included
-        for n,t in enumerate(mod_internals):
-            if len([i in d for i in t]) == len(t) - 1:
-                core_internals.append(d)
-                core_atoms.update(d)
-                core_atoms.update(t)
-                break
-
-    for d in test_dists:
-        # test intersection with any modified coordinates, has to intersect with
-        # any atom to be included
-        for n,t in enumerate(mod_internals):
-            if any(i in t for i in d):
-                core_internals.append(d)
-                core_atoms.update(d)
-                core_atoms.update(t)
-                break
-
-    for d in test_internals:
-        # a special case for 5 distances in a dihedron where 2 bonds
-        # can be related without an intersection via triangle properties
-        if all(i in core_atoms for i in d) and d not in core_internals:
-            core_internals.append(d)
+    # core_internals = []
+    # core_atoms = set()
+    # n_added = len(added_internals)
+    # for d in test_dihedrals:
+    #     # test intersection with any modified coordinates, has to intersect fully
+    #     # to me included
+    #     for n,t in enumerate(mod_internals):
+    #         if all(i in d for i in t):
+    #             if n < n_added:
+    #                 core_internals.append(d)
+    #             core_atoms.update(d)
+    #             break
+    #
+    # for d in test_angles:
+    #     # test intersection with any modified coordinates, has to intersect with
+    #     # n-1 atoms to be included
+    #     for n,t in enumerate(mod_internals):
+    #         if len([i in d for i in t]) == len(t) - 1:
+    #             if n < n_added: core_internals.append(d)
+    #             core_atoms.update(d)
+    #             core_atoms.update(t)
+    #             break
+    #
+    # for d in test_dists:
+    #     # test intersection with any modified coordinates, has to intersect with
+    #     # any atom to be included
+    #     for n,t in enumerate(mod_internals):
+    #         if any(i in t for i in d):
+    #             if n < n_added: core_internals.append(d)
+    #             core_atoms.update(d)
+    #             core_atoms.update(t)
+    #             break
+    #
 
     tri_set, dihed_set = triangulation
+
+    mod_dists = {i:frozenset(i) for i in mod_internals if len(i) == 2}
+    mod_angles = {i:frozenset(i) for i in mod_internals if len(i) == 3}
+    mod_dihedrals = {i:frozenset(i) for i in mod_internals if len(i) == 4}
+    core_atoms = {a for d in mod_internals for a in d}
+
+    unmodified_tris = {}
+    unmodified_diheds = {}
+    check_internals = set()
+    for k,v in tri_set.items():
+        core_intersection = core_atoms & set(k)
+        # we check if there is a complete intersection with
+        # any of the "mod_internals"
+        checks = []
+        if len(core_intersection) >= 2:
+            if len(mod_dists) > 0: checks.append([2, mod_dists])
+        if len(core_intersection) >= 3:
+            if len(mod_angles) > 0: checks.append([3, mod_angles])
+        added = True
+        for n,block in checks:
+            for d,s in block.items():
+                if len(s & core_intersection) == n:
+                    # this triangle needs an update
+                    # we store the internal for later checks
+                    check_internals.add(d)
+                    added = False
+        if added:
+            unmodified_tris[k] = v
+    for k,v in dihed_set.items():
+        core_intersection = core_atoms & set(k)
+        checks = []
+        if len(core_intersection) >= 2:
+            if len(mod_dists) > 0: checks.append([2, mod_dists])
+        if len(core_intersection) >= 3:
+            if len(mod_angles) > 0: checks.append([3, mod_angles])
+        if len(core_intersection) == 4:
+            if len(mod_dihedrals) > 0: checks.append([4, mod_dihedrals])
+        added = True
+        for n,block in checks:
+            for d, s in block.items():
+                if len(s & core_intersection) == n:
+                    # this triangle needs an update
+                    # we store the internal for later checks
+                    check_internals.add(d)
+                    for e in v:
+                        if isinstance(e, tuple): check_internals.add(e)
+                    added = False
+        if added:
+            unmodified_diheds[k] = v
+
+    removed_internals = set(removed_internals)
+    check_internals = check_internals - removed_internals
+    core_internals = []
+    test_internals_map = {i:frozenset(i) for i in test_internals}
+    for t,s in test_internals_map.items():
+        if (
+            t in check_internals
+            or (
+                len(core_atoms & s) >= len(s) - 1
+                and t not in removed_internals
+        )):
+            core_internals.append(t)
+
+    second_shell_atoms = {a for d in core_internals for a in d}
+    for t,s in test_internals_map.items():
+        if (
+            len(second_shell_atoms & s) >= len(s) - 1
+            and t not in removed_internals
+            and t not in core_internals
+        ):
+            core_internals.append(t)
+
     sub_tris, sub_diheds = get_internal_triangles_and_dihedrons(core_internals)
-    unmodified_tris = {k:v for k,v in tri_set.items() if any(i not in core_atoms for i in k)}
-    unmodified_diheds = {k:v for k,v in dihed_set.items() if any(i not in core_atoms for i in k)}
+    # for each of these terms, we now need to add in anything
+    # that would have been in there but didn't survive the pruning step
+    tri_keys_map = {k:frozenset(k) for k in sub_tris.keys()}
+    for k,s1 in tri_keys_map.items():
+        mods = {}
+        for t,s2 in test_internals_map.items():
+            if len(s1 & s2) == len(s2):
+                # included, just need to figure out which key
+                key = tuple(k.index(i) for i in t)
+                if key[-1] < key[0]:
+                    key = tuple(reversed(key))
+                name = nput.triangle_property_specifiers(key)['name']
+                mods[name] = t
+        if len(mods) > 0:
+            sub_tris[k] = sub_tris[k]._replace(**mods)
+    dihed_keys_map = {k:frozenset(k) for k in sub_diheds.keys()}
+    for k,s1 in dihed_keys_map.items():
+        mods = {}
+        for t,s2 in test_internals_map.items():
+            if len(s1 & s2) == len(s2):
+                # included, just need to figure out which key
+                key = tuple(k.index(i) for i in t)
+                if key[-1] < key[0]:
+                    key = tuple(reversed(key))
+                name = nput.dihedron_property_specifiers(key)['name']
+                mods[name] = t
+        if len(mods) > 0:
+            sub_diheds[k] = sub_diheds[k]._replace(**mods)
+
+    # print(len(sub_tris), len(unmodified_tris), len([x for x in unmodified_tris.values() if nput.triangle_is_complete(x)]))
+    merge_triangle_sets(sub_tris, unmodified_tris, in_place=True, merge_strategy='old')
+    merge_dihedral_sets(sub_diheds, unmodified_diheds, in_place=True, merge_strategy='old')
+    # print(len(sub_tris), len(unmodified_tris), len([x for x in unmodified_tris.values() if nput.triangle_is_complete(x)]))
+
+    if validate:
+        test_internals = [t for t in test_internals if t not in removed_internals]
+        missing = [c for c in core_internals if c not in test_internals]
+        if len(missing) > 0:
+            raise ValueError("???", missing)
+
+        for (sub, unmod) in [
+            [sub_tris, unmodified_tris],
+            [sub_diheds, unmodified_diheds],
+        ]:
+            for k,t in sub.items():
+                if k in unmod:
+                    raise ValueError(f"duplicated {k}")
+                for n,k2 in enumerate(itertools.permutations(k)):
+                    if n > 0:
+                        if k2 in sub:
+                            raise ValueError(f"duplicated in retriangulation {k}, {k2}")
+                        elif k2 in unmod:
+                            raise ValueError(f"duplicated in leftovers {k}, {k2}")
+
+        test_tris, test_diheds = get_internal_triangles_and_dihedrons(test_internals)
+        tri_set = {
+            k: v
+            for ts in [sub_tris, unmodified_tris]
+            for k, v in ts.items()
+        }
+        dihed_set = {
+            k: v
+            for ts in [sub_diheds, unmodified_diheds]
+            for k, v in ts.items()
+        }
+        for t1,v1 in test_tris.items():
+            if all(p not in tri_set for p in itertools.permutations(t1)):
+                print("=1=>", t1)
+                import pprint
+                print(v1)
+                pprint.pprint(test_internals)
+                pprint.pprint(core_internals)
+                pprint.pprint(mod_internals)
+                pprint.pprint(core_atoms)
+                raise ValueError(f"{t1} from default triangles not in retriangulation")
+        for d1,v1 in test_diheds.items():
+            if all(p not in dihed_set for p in itertools.permutations(d1)):
+                print("=1=>", d1)
+                import pprint
+                print(v1)
+                pprint.pprint(test_internals)
+                pprint.pprint(core_internals)
+                pprint.pprint(mod_internals)
+                pprint.pprint(core_atoms)
+                raise ValueError(f"{d1} from default dihedrals not in retriangulation")
+        for t1,v1 in tri_set.items():
+            if all(p not in test_tris for p in itertools.permutations(t1)):
+                print("=2=>", t1)
+                import pprint
+                import pprint
+                print(v1)
+                pprint.pprint(test_internals)
+                pprint.pprint(core_internals)
+                pprint.pprint(mod_internals)
+                pprint.pprint(core_atoms)
+                if t1 in sub_tris:
+                    raise ValueError(f"{t1} from retriangulation not in default triangles")
+                else:
+                    raise ValueError(f"{t1} from leftovers not in default triangles")
+        for d1,v1 in dihed_set.items():
+            if all(p not in test_diheds for p in itertools.permutations(d1)):
+                print("=2=>", d1)
+                import pprint
+                print(v1)
+                pprint.pprint(test_internals)
+                pprint.pprint(core_internals)
+                pprint.pprint(mod_internals)
+                pprint.pprint(core_atoms)
+                if d1 in sub_tris:
+                    raise ValueError(f"{d1} from retriangulation not in default dihedrals")
+                else:
+                    raise ValueError(f"{d1} from leftovers not in default dihedrals")
+
 
     if return_split:
         return core_atoms, (sub_tris, sub_diheds), (unmodified_tris, unmodified_diheds)
@@ -2299,7 +2761,8 @@ def _triangle_conversion_function(inds, tri, coord):
     b = canonicalize_internal(idx)
     target = nput.triangle_property_specifiers(b)
     return nput.triangle_property_function(tri, target['name'], raise_on_missing=False)
-def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cache=None):
+def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cache=None, completion_handler=None,
+                                  disallowed_conversions=None):
     idx = []
     for i in coord:
         try:
@@ -2312,6 +2775,8 @@ def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cac
     return nput.dihedron_property_function(dihed, b,
                                            allow_completion=allow_completion,
                                            raise_on_missing=False,
+                                           completion_handler=completion_handler,
+                                           disallowed_conversions=disallowed_conversions,
                                            cache=cache)
 
 int_conv_data = collections.namedtuple("int_conv_data",
@@ -2324,7 +2789,13 @@ def find_internal_conversion(internals, targets,
                              return_conversions=False,
                              prep_conversions=True,
                              include_shapes=False,
+                             indices=None,
                              cache=None,
+                             disallowed_conversions=None,
+                             update_triangles_and_dihedrons=False,
+                             return_completions=False,
+                             allow_recursive_completions=None,
+                             verbose=False,
                              missing_val='raise'):
     smol = nput.is_int(targets[0])
     if smol: targets = [targets]
@@ -2341,16 +2812,25 @@ def find_internal_conversion(internals, targets,
     shapes = []
     if cache is None:
         cache = {}
+    idx_data = nput.dihedron_property_specifiers()
+    convertable = True
+    conversion_mapping = {}
+    extra_coordinates = {}
+    if allow_recursive_completions is None:
+        allow_recursive_completions = allow_completion
+    # completable_dihedrons = {}
     for target_coord in targets:
-
+        if verbose: print("======>", target_coord)
         if canonicalize:
             target_coord = canonicalize_internal(target_coord)
-        idx = find_internal(internals, target_coord, missing_val=None, canonicalize=False)
+        idx = find_internal(internals, target_coord, missing_val=None, canonicalize=False, indices=indices)
+        if verbose: print("  idx:", idx)
         if idx is not None:
             def convert(internal_list, idx=idx):
                 internal_list = np.asanyarray(internal_list)
                 return internal_list[..., idx]
             conversions.append(convert)
+            if include_shapes: shapes.append(idx)
             continue
 
         conv = None
@@ -2359,7 +2839,7 @@ def find_internal_conversion(internals, targets,
         n = len(target_coord)
         if n < 2 or n > 4:
             raise ValueError(f"can't understand coordinate {target_coord}")
-        if len(target_coord) in {2, 3}:
+        if n in {2, 3}:
             for a, v in triangles.items():
                 tri = v
                 conv = _triangle_conversion_function(a, v, target_coord)
@@ -2367,29 +2847,85 @@ def find_internal_conversion(internals, targets,
                     break
                 else:
                     tri = None
-        if conv is None and len(target_coord) in {2, 3, 4}:
+
+        if verbose: print("  tri:", tri)
+
+        if conv is None and n in {2, 3, 4}:
             for a, v in dihedrals.items():
                 dihed = v
+                completion_handler = None
+                if (
+                        allow_recursive_completions
+                        and all(t in a for t in target_coord)
+                ):
+                    dihedrals = dihedrals.copy()
+                    triangles = triangles.copy()
+                    def completion_handler(
+                            og_dihed, k,
+                            *,
+                            disallowed_conversions,
+                            allow_completion,
+                            raise_on_missing,
+                            return_depth,
+                            cache,
+                            depth=0,
+                            key=a,
+                            base=v
+                    ):
+                        if allow_completion is True:
+                            allow_completion = 2
+                        oc = tuple(key[x] for x in idx_data[k]['coord'])
+                        # print("=="*100)
+                        # print(">", oc, k)
+                        conv, (t2, d2) = find_internal_conversion(
+                            internals, [oc],
+                            triangles_and_dihedrons=triangles_and_dihedrons,
+                            # prior_coords=None,
+                            canonicalize=True,
+                            allow_completion=allow_completion,
+                            return_conversions=True,
+                            prep_conversions=prep_conversions,
+                            include_shapes=False,
+                            indices=indices,
+                            cache=cache,
+                            missing_val=None,
+                            disallowed_conversions=disallowed_conversions,
+                            update_triangles_and_dihedrons=True
+                        )
+                        conv = conv[0]
+                        if conv is None: return None
+                        triangles.update(t2)
+                        dihedrals.update(d2)
+                        dihedrals[key] = base._replace(**{idx_data[k]['name']:conv})
+                        extra_coordinates[key] = conv
+                        if return_depth:
+                            return depth + 1, conv
+                        else:
+                            return conv
                 conv = _dihedral_conversion_function(a, v, target_coord, allow_completion=allow_completion,
-                                                     cache=cache
-                                                     )
+                                                     cache=cache, completion_handler=completion_handler,
+                                                     disallowed_conversions=disallowed_conversions)
                 if conv is not None:
                     break
                 else:
                     dihed = None
+
+            if verbose: print("dihed:", dihed)
+
+        if verbose: print(" conv:", conv)
         if conv is None:
             if dev.str_is(missing_val, "raise"):
-                raise ValueError(f"can't find conversion for {target_coord}")
+                raise ValueError(f"can't find conversion for {target_coord} from {internals}")
             else:
+                convertable = False
                 conversions.append(missing_val)
                 if include_shapes: shapes.append(None)
         else:
-
             # prep conversion based on internal indices
             if tri is not None:
                 if prep_conversions:
                     args = {
-                        k: find_internal(internals, v, missing_val=missing_val)
+                        k: find_internal(internals, v, missing_val=missing_val, indices=indices)
                             for k, v in tri._asdict().items()
                         if v is not None
                     }
@@ -2406,7 +2942,11 @@ def find_internal_conversion(internals, targets,
             else:
                 if prep_conversions:
                     args = {
-                        k:find_internal(internals, v, allow_negation=True, missing_val=missing_val)
+                        k:(
+                            find_internal(internals, v, allow_negation=True, missing_val=missing_val, indices=indices)
+                                if not callable(v) else
+                            v #TODO: make this work properly
+                        )
                             for k,v in dihed._asdict().items()
                         if v is not None
                     }
@@ -2421,12 +2961,24 @@ def find_internal_conversion(internals, targets,
                 if include_shapes: shapes.append(dihed)
             conversions.append(convert)
 
+            if update_triangles_and_dihedrons:
+                conversion_mapping[target_coord] = convert
+                triangles, dihedrals = get_internal_triangles_and_dihedrons(
+                    internals + [target_coord]
+                )
+                # tris, diheds = update_triangulation(
+                #     triangles_and_dihedrons,
+                #     [target_coord],
+                #     [],
+                #     triangulation_internals=internals
+                # )
+
     if smol:
         convert = conversions[0]
         if include_shapes:
             shapes = shapes[0]
     else:
-        if return_conversions:
+        if return_conversions or not convertable:
             convert = conversions
         else:
             def convert(internal_spec, order=None, conversions=conversions, **kwargs):
@@ -2442,10 +2994,16 @@ def find_internal_conversion(internals, targets,
                         for i in range(order + 1)
                     ]
 
+    res = (convert,)
     if include_shapes:
-        return shapes, convert
-    else:
-        return convert
+        res = res + (shapes,)
+    if update_triangles_and_dihedrons:
+        res = res + ((triangles, dihedrals),)
+    if return_completions:
+        res = res + (extra_coordinates,)
+    if len(res) == 1:
+        res = res[0]
+    return res
 def _enumerate_dists(internals):
     for coord in internals:
         for c in itertools.combinations(coord, 2):
@@ -2637,7 +3195,32 @@ def construct_atom_connection_graph_from_triangulation(internals, tris, dihedron
                 raise ValueError(f"can't complete {k}")
 
     return known_atom_graph, complete_dihedrals
-def _grow_dihedral_trees(root, atoms, top_dihedral_choices, secondary_dihedral_choices, traversal='dfs'):
+def _check_populated_dihedral_complete(k, dihed_data, known_atoms, choice, *, cached_data=[None]):
+    idx_data = cached_data[0]
+    if idx_data is None:
+        idx_data = nput.dihedron_property_specifiers()
+        cached_data[0] = idx_data
+    cache = {}
+    # print(k, dihed_data)
+    # print(choice, known_atoms)
+    # print(list(itut.delete_duplicates(tuple(sorted(x)) for x in nput.enumerate_dihedron_completions(dihed_data))))
+    for comp in nput.enumerate_dihedron_completions(dihed_data):
+        for a in comp:
+            if a not in cache:
+                # print(a, [k[v] for v in idx_data[a]['coord']])
+                cache[a] = all(k[v] in known_atoms for v in idx_data[a]['coord'])
+            if not cache[a]:
+                break
+        else:
+            # possible to complete this term
+            return True
+    return False
+def _grow_dihedral_trees(root, atoms,
+                         top_dihedral_choices,
+                         secondary_dihedral_choices,
+                         incomplete_dihedrals=None,
+                         internals=None,
+                         *, traversal='dfs'):
     #TODO: consider caching these for a given root ordering...
     visited = frozenset(root)
     queue = collections.deque([
@@ -2653,6 +3236,13 @@ def _grow_dihedral_trees(root, atoms, top_dihedral_choices, secondary_dihedral_c
         extend = lambda children: queue.extendleft(reversed(list(children)))
     counts_cache = {}
     subpaths_cache = {}
+    fallbacks = {}
+    dihed_list = [
+        top_dihedral_choices,
+        secondary_dihedral_choices
+    ]
+    if incomplete_dihedrals is not None:
+        dihed_list.append(None)
     while queue:
         visited, path, choices = pop()
         if len(choices) == 0:
@@ -2680,18 +3270,36 @@ def _grow_dihedral_trees(root, atoms, top_dihedral_choices, secondary_dihedral_c
                 or counts_cache[visited]["count"] > 0
         ):
             some_good_choice = False
-            for dihedral_choices in [
-                top_dihedral_choices,
-                secondary_dihedral_choices
-            ]:
+            for n,dihedral_choices in enumerate(dihed_list):
                 for i,choice in enumerate(choices):
-                    diheds = dihedral_choices[choice]
-                    if (visited, choice) not in subpaths_cache:
-                        subpaths_cache[(visited, choice)] = [
+                    if dihedral_choices is None:
+                        if incomplete_dihedrals is not None:
+                            # really this is a fallback but it
+                            # was easier to write it this way given what I had
+                            if (visited, choice) not in fallbacks:
+                                fallbacks[(visited, choice)] = _get_matching_dihedrals(
+                                    choice,
+                                    {
+                                        k: v
+                                        for k, v in incomplete_dihedrals.items()
+                                        if (choice in k) and all(
+                                            x == choice or x
+                                            in visited for x in k
+                                        ) and _check_populated_dihedral_complete(k, v, visited, choice)
+                                    },
+                                    internals=internals
+                                )
+                            diheds = fallbacks[(visited, choice)]
+                        else:
+                            continue
+                    else:
+                        diheds = dihedral_choices[choice]
+                    if (visited, choice, n) not in subpaths_cache:
+                        subpaths_cache[(visited, choice, n)] = [
                             d for d in diheds
                             if all(dd in visited for dd in d[1:])
                         ]
-                    subpaths = subpaths_cache[(visited, choice)]
+                    subpaths = subpaths_cache[(visited, choice, n)]
                     if len(subpaths) > 0:
                         some_good_choice = True
                         subvisited = visited | {choice}
@@ -2751,6 +3359,7 @@ def enumerate_zmatrices_from_internals(internals,
 
     t2 = {k:t for k,t in td.items() if nput.triangle_is_complete(t)}
     d2 = {k:t for k,t in dd.items() if nput.dihedron_is_complete(t)}
+    d3 = {k:t for k,t in dd.items() if k not in d2 and len([tt for tt in t if tt is not None]) > 3}
 
     comps = EdgeGraph.from_map(known_atom_graph)
     zm_generators = []
@@ -2759,14 +3368,15 @@ def enumerate_zmatrices_from_internals(internals,
     ord_map = dict(zip(ord, idx))
     comp_filts = {} # caching for speed
     d2_filts = {}
+    d3_filts = {}
     label_mapping = {l:i for i,l in enumerate(comps.labels)}
     for atoms in sels:
         # if roots is None:
         atoms = sorted(atoms, key=lambda a:ord_map[a])
         #TODO: add canonicalization to cut down on comps
         generator = None
-        subgraph = comps.take([label_mapping[a] for a in atoms])
-        sublabel_mapping = {l:i for i,l in enumerate(subgraph.labels)}
+        # subgraph = comps.take([label_mapping[a] for a in atoms])
+        # sublabel_mapping = {l:i for i,l in enumerate(subgraph.labels)}
         atom_ord = {a:i for i,a in enumerate(atoms)}
         sorted_atom_graph = {
             k: sorted([x for x in v if x in atom_ord], key=lambda a: atom_ord[a])
@@ -2785,6 +3395,8 @@ def enumerate_zmatrices_from_internals(internals,
                 comp_filts[a] = _get_matching_dihedrals(a, complete_dihedrals, internals, check_complete=True)
             if a not in d2_filts:
                 d2_filts[a] = _get_matching_dihedrals(a, d2, internals, check_complete=False)
+            # if a not in d3_filts:
+            #     d3_filts[a] = _get_matching_dihedrals(a, d3, internals, check_complete=False)
 
         def _filter(p, v):
             p_set = {pp[0] for pp in p}
@@ -2796,8 +3408,6 @@ def enumerate_zmatrices_from_internals(internals,
         if any(len(x) < 3 for x in sorted_atom_graph.values()):
             return None # don't even bother
 
-        # import pprint
-        # pprint.pprint(known_atom_graph)
         checked_roots = set()
         for root_groups in root_generators:
             for i, j, k in root_groups:
@@ -2819,11 +3429,13 @@ def enumerate_zmatrices_from_internals(internals,
                     ]]
                 else:
                     rem_choices = _grow_dihedral_trees(
-                            (i, j, k),
-                            [a for a in atoms if a not in {i, j, k}],
-                            comp_filts,
-                            d2_filts
-                        )
+                        (i, j, k),
+                        [a for a in atoms if a not in {i, j, k}],
+                        comp_filts,
+                        d2_filts,
+                        incomplete_dihedrals=d3,
+                        internals=internals,
+                    )
                 for passes,follows in enumerate(rem_choices):
                     d_blocks = root_blocks + follows
                     possible_mats = itut.unique_product(
@@ -2957,6 +3569,7 @@ def enumerate_zmatrices_from_internals(internals,
         for zm in possible_mats:
             if build_conversion:
                 targets = extract_zmatrix_internals(zm)
+                print(np.array(zm))
                 yield zm, find_internal_conversion(internals, targets,
                                                     triangles_and_dihedrons=triangles_and_dihedrons,
                                                     **conversion_options)
@@ -2987,6 +3600,7 @@ def get_internal_distance_conversion(
         missing_val='raise',
         include_shapes=False,
         return_conversions=False,
+        prep_conversions=True,
         cache=None
 ):
     if dist_set is None:
@@ -2998,6 +3612,7 @@ def get_internal_distance_conversion(
                                               missing_val=missing_val,
                                               allow_completion=allow_completion,
                                               return_conversions=return_conversions,
+                                              prep_conversions=prep_conversions,
                                               include_shapes=include_shapes,
                                               cache=cache
                                               )
@@ -3085,3 +3700,862 @@ def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None,
     else:
         return graph
 
+def _update_cache_based_on_dists(extra_dists, cache, inverse_triangulation):
+    # invalidate cache information for `dihedron_property_function`
+    # from `find_internal_conversion`
+    conversion_cache = cache.setdefault('disallowed_conversions', {})
+    _, shape_index_map = inverse_triangulation
+    for dihed in conversion_cache.keys():
+        inds = shape_index_map[dihed]
+        if any(all(d) in inds for d in extra_dists):
+            conversion_cache[dihed] = set()
+    return
+def get_non_redundant_internals(internals, triangles_and_dihedrons=None,
+                                check_distances=True, check_angles=True, check_dihedrals=True,
+                                return_indices=False, natoms=None, validate=False):
+
+    all_dists = []
+    dist_pos = [n for n,i in enumerate(internals) if len(i) == 2]
+    coords = [internals[n] for n in dist_pos]
+    triangulation = get_internal_triangles_and_dihedrons(coords)
+    inverse_triangulation = tuple({v:k for k,v in shapes.items()} for shapes in triangulation)
+    rem_pos = [n for n,i in enumerate(internals) if len(i) > 2]
+    rem = [internals[n] for n in rem_pos]
+
+    dist_set = list(sorted(set(_enumerate_dists(internals))))
+
+    graph = InternalCoordinateGraph(coords, triangles_and_dihedrons=triangulation)
+    conversions = graph.find_conversions(dist_set)
+
+    # dist_set, (conversions, shapes) = get_internal_distance_conversion(
+    #     coords,
+    #     triangles_and_dihedrons=triangulation,
+    #     include_shapes=True,
+    #     return_conversions=True,
+    #     dist_set=dist_set,
+    #     missing_val=None
+    # )
+
+    for d,c in zip(dist_set, conversions):
+        if c is not None:
+            if d not in all_dists:
+                all_dists.append(d)
+
+    natoms = max(max(i) for i in internals) + 1
+    rigid, (_, local_rank), stress = uniquely_rigid(all_dists, 3, natoms=natoms, return_components=True)
+    if rigid:
+        return coords
+
+    if stress is None:
+        stress_rank = None
+    else:
+        _, stress_rank = stress
+
+    added_coords = []
+    incl_coords = []
+    for n,c in enumerate(rem):
+        with graph.checkpoint() as checkpoint:
+            print(c)
+            # print("???", len(graph._unreachable))
+            new_coords = graph.add_internals([c])
+            print("  >", len(graph._conversions), len(graph._unreachable), len(new_coords))
+            print("  >", len(graph.internals))
+
+            checks = graph.find_conversions(dist_set)
+            added_dists = [i for i,c in zip(dist_set, checks) if c is not None and i not in all_dists]
+            print("  =", len(added_dists))
+            print(all_dists + added_dists)
+
+            if len(added_dists) > 0:
+                test_dists = all_dists + added_dists
+                rigid, (_, test_rank), stress = uniquely_rigid(test_dists, 3, natoms=natoms, return_components=True)
+
+                extend = True
+                if rigid:
+                    # coords = test
+                    break
+                elif stress is not None:
+                    _, test_rank = stress
+                    extend = stress_rank is None or test_rank > stress_rank
+                    if extend:
+                        stress_rank = test_rank
+                else:
+                    extend = test_rank > local_rank
+                    if extend:
+                        local_rank = test_rank
+                if extend:
+                    print(added_dists)
+                    print(">>>", stress_rank, local_rank)
+                    checkpoint.reset = False
+                    added_coords.append(c)
+                    all_dists = test_dists
+                    incl_coords.append(n)
+
+    # print(rigid)
+    coords = graph.internals
+    # import pprint
+    # pprint.pprint(coords)
+    # raise Exception(len(coords), len(added_coords))
+
+    all_pos = dist_pos + [rem_pos[i] for i in incl_coords]
+    dropped_pos = np.setdiff1d(np.arange(len(internals)), all_pos)
+    rem_diff = np.setdiff1d(np.arange(len(rem)), rem_pos)
+    dropped_coords = [rem[i] for i in rem_diff]
+    return (coords, (dropped_coords, dropped_pos)), triangles_and_dihedrons
+
+
+def get_non_redundant_internals_old_incremental(internals, triangles_and_dihedrons=None,
+                                check_distances=True, check_angles=True, check_dihedrals=True,
+                                return_indices=False, natoms=None, validate=False):
+
+    all_dists = []
+    dist_pos = [n for n,i in enumerate(internals) if len(i) == 2]
+    coords = [internals[n] for n in dist_pos]
+    triangulation = get_internal_triangles_and_dihedrons(coords)
+    inverse_triangulation = tuple({v:k for k,v in shapes.items()} for shapes in triangulation)
+    rem_pos = [n for n,i in enumerate(internals) if len(i) > 2]
+    rem = [internals[n] for n in rem_pos]
+
+    dist_set = list(sorted(set(_enumerate_dists(internals))))
+
+    # graph = InternalCoordinateGraph(coords, triangles_and_dihedrons=triangulation)
+    # conversions = graph.find_conversions(dist_set)
+
+    dist_set, (conversions, shapes) = get_internal_distance_conversion(
+        coords,
+        triangles_and_dihedrons=triangulation,
+        include_shapes=True,
+        return_conversions=True,
+        dist_set=dist_set,
+        missing_val=None
+    )
+
+    for d,c in zip(dist_set, conversions):
+        if c is not None:
+            if d not in all_dists:
+                all_dists.append(d)
+
+    natoms = max(max(i) for i in internals) + 1
+    rigid, (_, local_rank), stress = uniquely_rigid(all_dists, 3, natoms=natoms, return_components=True)
+    if rigid:
+        return coords
+
+    if stress is None:
+        stress_rank = None
+    else:
+        _, stress_rank = stress
+
+
+    distance_map = {
+        d:s
+        for d,s,c in zip(dist_set, shapes, conversions)
+        if c is None
+    }
+    extra_dists = []
+    cache = {}
+    for c in rem:
+        test = coords + [c]
+        added_dists, new_map, new_triangulation = get_distance_addition_edits(coords,
+                                                                              distance_map,
+                                                                              [c],
+                                                                              triangulation,
+                                                                              cache=cache)
+        added_dists = [i for i in added_dists if i not in all_dists]
+
+        if len(added_dists) > 0:
+            test_dists = all_dists + added_dists
+            rigid, (_, test_rank), stress = uniquely_rigid(test_dists, 3, natoms=natoms, return_components=True)
+
+            extend = True
+            if rigid:
+                # coords = test
+                break
+            elif stress is not None:
+                _, test_rank = stress
+                extend = stress_rank is None or test_rank > stress_rank
+                if extend:
+                    stress_rank = test_rank
+            else:
+                extend = test_rank > local_rank
+                if extend:
+                    local_rank = test_rank
+            if extend:
+                print(">>>", stress_rank, local_rank)
+                triangulation = new_triangulation
+                distance_map = new_map
+                coords = test
+                new_additions = [i for i in added_dists if i not in coords]
+                extra_dists = extra_dists + new_additions
+                all_dists = test_dists
+                # inverse_triangulation = tuple({v:k for k,v in shapes.items()} for shapes in triangulation)
+                # _update_cache_based_on_dists(new_additions, cache, inverse_triangulation)
+                for d in added_dists:
+                    del distance_map[d]
+
+    print(rigid)
+    import pprint
+    pprint.pprint(coords)
+    raise Exception(len(coords))
+
+def get_non_redundant_internals_pruned(internals, triangles_and_dihedrons=None,
+                                check_distances=True, check_angles=True, check_dihedrals=True,
+                                return_indices=False, natoms=None, validate=False):
+    #TODO: supply multiple rigidity methods
+    if triangles_and_dihedrons is None:
+        triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
+    for thing in triangles_and_dihedrons:
+        for d,v in thing.items():
+            for vv in v:
+                if vv is not None and not isinstance(vv, tuple) and all(nput.is_int(vvv) for vvv in vv):
+                    raise ValueError(d, v)
+
+    dist_set, (conversions, shapes) = get_internal_distance_conversion(
+        internals,
+        triangles_and_dihedrons=triangles_and_dihedrons,
+        include_shapes=True,
+        return_conversions=True,
+        missing_val=None
+    )
+    distance_map = {
+        d:s
+        for d,s,c in zip(dist_set, shapes, conversions)
+        if c is not None
+    }
+    dropped_coordinates = []
+    dropped_indices = []
+    internals = list(internals)
+    pops = 0
+    m = len(internals)
+    skip_dists = not check_distances
+    skip_angles = not check_angles
+    skip_dihedrals = not check_dihedrals
+    rem_edges = list(dist_set)
+    if natoms is None:
+        natoms = np.max(dist_set) + 1
+    for i,c in enumerate(list(reversed(internals))):
+        n = len(c)
+        if skip_dists and n == 2: continue
+        if skip_angles and n == 3: continue
+        if skip_dihedrals and n == 4: continue
+        if i - pops == 0:
+            subinternals = internals[:-1]
+        else:
+            subinternals = internals[:-(i-pops+1)] + internals[-(i-pops):]
+        removed_distances, new_map, new_triangulation = get_distance_prune_edits(internals,
+                                                                                 distance_map,
+                                                                                 c,
+                                                                                 triangles_and_dihedrons)
+        likely_rigid = len(removed_distances) == 0
+        test_edges = list(rem_edges)
+        for d in removed_distances:
+            try:
+                test_edges.remove(d)
+            except ValueError:
+                ...
+        if not likely_rigid:
+            # we'll do a statistical rigidity check
+            likely_rigid = uniquely_rigid(
+                rem_edges,
+                3,
+                natoms=natoms
+            )
+        print(f"{i!s:>3} {c!s:<16} {likely_rigid!s:<5}")
+        if likely_rigid:
+            rem_edges = test_edges
+            pops += 1
+            dropped_coordinates.append(c)
+            if return_indices:
+                dropped_indices.append(m - i - 1)
+            triangles_and_dihedrons = new_triangulation
+            internals = subinternals
+            if validate:
+                dists1 = get_internal_distance_conversion(internals, triangles_and_dihedrons=triangles_and_dihedrons, return_conversions=True, missing_val=None)
+                dists2 = get_internal_distance_conversion(internals, return_conversions=True, missing_val=None)
+                c1 = any(d is None for d in dists1)
+                c2 = any(d is None for d in dists2)
+                if c1 or c2:
+                    raise ValueError(c1, c2)
+            distance_map = new_map
+
+    raise Exception(m, len(internals), len(dropped_coordinates))
+    if return_indices:
+        dropped_coordinates = (dropped_coordinates, dropped_indices)
+
+    return (internals, dropped_coordinates), triangles_and_dihedrons
+
+def get_distance_prune_edits(internals,
+                             distance_map: dict[tuple[int, int], nput.TriangleData | nput.DihedralTetrahedronData],
+                             target_internals,
+                             triangles_and_dihedrons,
+                             inverse_triangulation=None,
+                             only_subchecks=False,
+                             full_retriangulation=True,
+                             verbose=False,
+                             validate=False):
+    if nput.is_int(target_internals[0]):
+        target_internals = [target_internals]
+
+    if inverse_triangulation is None:
+        inverse_triangulation = [
+            {v:k for k,v in tri.items()}
+            for tri in triangles_and_dihedrons
+        ]
+
+    # for t,v in triangles_and_dihedrons[0].items():
+    #     if any(vv is not None and not isinstance(vv, tuple) for vv in v):
+    #         raise ValueError(t, v)
+    if verbose:
+        print("pruned:", target_internals)
+    if full_retriangulation:
+        pruned_internals = [i for i in internals if i not in target_internals]
+        tri_set, dihed_set = get_internal_triangles_and_dihedrons(pruned_internals)
+        check_distances = list(distance_map.keys())
+    else:
+        core_atoms, (mod_tri, mod_di), (rem_tri, rem_di) = update_triangulation(
+            triangles_and_dihedrons,
+            [],
+            target_internals,
+            return_split=True,
+            triangulation_internals=internals
+        )
+
+        if only_subchecks:
+            check_distances = []
+            for (i,j), shape in distance_map.items():
+                if nput.is_int(shape):
+                    if (len(internals) <= shape or internals[shape] != (i,j)):
+                        print(">>>", (i,j), shape, internals[shape])
+                        check_distances.append((i, j))
+                else:
+                    block, target, perms, perm_invs, prop_func = (
+                        (inverse_triangulation[0], rem_tri, _tri_perms, _tri_perm_inv, nput.triangle_property_specifiers)
+                            if isinstance(shape, nput.TriangleData) else
+                        (inverse_triangulation[1], rem_di, _dihedron_perms, _dihedron_perm_inv, nput.dihedron_property_specifiers)
+                    )
+                    key = block[shape]
+                    for p, pi in zip(perms, perm_invs):
+                        k2 = tuple(key[i] for i in p)
+                        test_shape = target.get(k2)
+                        if test_shape is not None:
+                            if shape is test_shape:
+                                break
+                            elif key == k2:
+                                test_keys = {k:v for k,v in test_shape._asdict().items() if v is not None}
+                                t_dict = {k: v for k, v in shape._asdict().items() if v is not None}
+                                if set(t_dict.keys()) == set(test_keys.keys()):
+                                    break
+                            else:
+                                # check if they're equivalent under the perm
+                                test_keys = {k:v for k,v in test_shape._asdict().items() if v is not None}
+                                t_dict = {k: v for k, v in shape._asdict().items() if v is not None}
+                                d2 = {}
+                                if len(t_dict) == len(test_keys):
+                                    for term, val in t_dict.items():
+                                        x = prop_func(term)["coord"]
+                                        y = canonicalize_internal([pi[i] for i in x])
+                                        d2[prop_func(y)["name"]] = val
+                                    if set(d2.keys()) == set(test_keys.keys()):
+                                        break
+                    else:
+                        check_distances.append((i, j))
+        else:
+            check_distances = list(distance_map.keys())
+
+        tri_set = {
+            k: v
+            for ts in merge_triangle_sets(mod_tri, rem_tri, merge_strategy='old')
+            for k, v in ts.items()
+        }
+        dihed_set = {
+            k: v
+            for ts in merge_triangle_sets(mod_di, rem_di, merge_strategy='old')
+            for k, v in ts.items()
+        }
+
+        if verbose:
+            ts1, ds1 = triangles_and_dihedrons
+            import hashlib
+            print("initial:", len(ts1),
+                  len([t for t in ts1.values() if nput.triangle_is_complete(t)]),
+                  len(ds1),
+                  len([t for t in ds1.values() if nput.dihedron_is_complete(t)]),
+                  hashlib.sha256(str({k:ts1[k] for k in sorted(ts1.keys())}).encode()).hexdigest(),
+                  hashlib.sha256(str({k:ds1[k] for k in sorted(ds1.keys())}).encode()).hexdigest()
+                  )
+            print("final:", len(tri_set),
+                  len([t for t in tri_set.values() if nput.triangle_is_complete(t)]),
+                  len(dihed_set),
+                  len([t for t in dihed_set.values() if nput.dihedron_is_complete(t)]),
+                  hashlib.sha256(str({k:tri_set[k] for k in sorted(tri_set.keys())}).encode()).hexdigest(),
+                  hashlib.sha256(str({k:dihed_set[k] for k in sorted(dihed_set.keys())}).encode()).hexdigest())
+        if validate:
+            ts1, ds1 = triangles_and_dihedrons
+            initial_tri = len([t for t in ts1.values() if nput.triangle_is_complete(t)])
+            initial_di = len([t for t in ds1.values() if nput.dihedron_is_complete(t)])
+            final_tri = len([t for t in tri_set.values() if nput.triangle_is_complete(t)])
+            final_di = len([t for t in dihed_set.values() if nput.dihedron_is_complete(t)])
+            if initial_tri < final_tri or initial_di < final_di:
+                for k, t in tri_set.items():
+                    v1 = ts1.get(k)
+                    if (
+                            v1 is not None
+                            and (not nput.triangle_is_complete(t))
+                            and nput.triangle_is_complete(v1)
+                    ):
+                        print(v1)
+                        print(t)
+                for k, t in dihed_set.items():
+                    v1 = ds1.get(k)
+                    if v1 is not None:
+                        if (
+                                (not nput.dihedron_is_complete(t))
+                                and nput.dihedron_is_complete(v1)
+                        ):
+                            print(v1)
+                            print(t)
+                    elif nput.dihedron_is_complete(t):
+                        for k2 in itertools.permutations(k):
+                            if k2 in ds1 and k2 in dihed_set:
+                                raise ValueError(f"duplicated: {k} and {k2}")
+                        print(k)
+                        print(t)
+
+
+                raise ValueError(initial_tri, initial_di, final_tri, final_di)
+
+    new_triangulation = (tri_set, dihed_set)
+    if verbose:
+        print("checks:", check_distances)
+    if len(check_distances) > 0:
+        pruned_internals = [i for i in internals if i not in target_internals]
+        new_map = distance_map.copy()
+        # (shapes, conversions1) = find_internal_conversion(internals, check_distances,
+        #                                                  triangles_and_dihedrons=triangles_and_dihedrons,
+        #                                                  missing_val=None,
+        #                                                  allow_completion=False,
+        #                                                  return_conversions=True,
+        #                                                  include_shapes=True,
+        #                                                  verbose=True)
+        if verbose:
+            import hashlib
+            print(hashlib.sha256(str(sorted(pruned_internals)).encode()).hexdigest())
+        (conversions, shapes) = find_internal_conversion(pruned_internals, check_distances,
+                                                         triangles_and_dihedrons=new_triangulation,
+                                                         missing_val=None,
+                                                         allow_completion=False,
+                                                         return_conversions=True,
+                                                         prep_conversions=False,
+                                                         include_shapes=True,
+                                                         verbose=False)
+        dead_dists = []
+        for d,s,c in zip(check_distances, shapes, conversions):
+            if c is None:
+                dead_dists.append(d)
+            else:
+                new_map[d] = s
+        # dead_old = []
+        # for d,s,c in zip(check_distances, shapes, conversions1):
+        #     if c is None:
+        #         dead_old.append(d)
+        if verbose:
+            print("incomplete:", dead_dists, [c.__name__ if c is not None else c for c in conversions])
+
+        # if target_internals[0] == (1, 9, 8, 21):
+        #     raise Exception(...)
+        return dead_dists, new_map, new_triangulation
+    else:
+        # if target_internals[0] == (1, 9, 8, 21):
+        #     raise Exception(...)
+        return [], distance_map, new_triangulation
+
+def get_distance_addition_edits(internals,
+                                distance_map: dict[tuple[int, int], nput.TriangleData | nput.DihedralTetrahedronData],
+                                target_internals,
+                                triangles_and_dihedrons,
+                                inverse_triangulation=None,
+                                only_subchecks=False,
+                                full_retriangulation=True,
+                                verbose=False,
+                                cache=None,
+                                validate=False):
+    #TODO: currently a direct copy, clean this up
+    if nput.is_int(target_internals[0]):
+        target_internals = [target_internals]
+
+    if inverse_triangulation is None:
+        inverse_triangulation = [
+            {v:k for k,v in tri.items()}
+            for tri in triangles_and_dihedrons
+        ]
+
+    # for t,v in triangles_and_dihedrons[0].items():
+    #     if any(vv is not None and not isinstance(vv, tuple) for vv in v):
+    #         raise ValueError(t, v)
+    if verbose:
+        print("added:", target_internals)
+    if full_retriangulation:
+        extended_internals = internals + target_internals
+        tri_set, dihed_set = get_internal_triangles_and_dihedrons(extended_internals)
+        check_distances = list(distance_map.keys())
+    else:
+        core_atoms, (mod_tri, mod_di), (rem_tri, rem_di) = update_triangulation(
+            triangles_and_dihedrons,
+            target_internals,
+            [],
+            return_split=True,
+            triangulation_internals=internals
+        )
+
+        if only_subchecks:
+            check_distances = []
+            for (i,j), shape in distance_map.items():
+                if nput.is_int(shape):
+                    if (len(internals) <= shape or internals[shape] != (i,j)):
+                        check_distances.append((i, j))
+                else:
+                    block, target, perms, perm_invs, prop_func = (
+                        (inverse_triangulation[0], rem_tri, _tri_perms, _tri_perm_inv, nput.triangle_property_specifiers)
+                            if isinstance(shape, nput.TriangleData) else
+                        (inverse_triangulation[1], rem_di, _dihedron_perms, _dihedron_perm_inv, nput.dihedron_property_specifiers)
+                    )
+                    key = block[shape]
+                    for p, pi in zip(perms, perm_invs):
+                        k2 = tuple(key[i] for i in p)
+                        test_shape = target.get(k2)
+                        if test_shape is not None:
+                            if shape is test_shape:
+                                break
+                            elif key == k2:
+                                test_keys = {k:v for k,v in test_shape._asdict().items() if v is not None}
+                                t_dict = {k: v for k, v in shape._asdict().items() if v is not None}
+                                if set(t_dict.keys()) == set(test_keys.keys()):
+                                    break
+                            else:
+                                # check if they're equivalent under the perm
+                                test_keys = {k:v for k,v in test_shape._asdict().items() if v is not None}
+                                t_dict = {k: v for k, v in shape._asdict().items() if v is not None}
+                                d2 = {}
+                                if len(t_dict) == len(test_keys):
+                                    for term, val in t_dict.items():
+                                        x = prop_func(term)["coord"]
+                                        y = canonicalize_internal([pi[i] for i in x])
+                                        d2[prop_func(y)["name"]] = val
+                                    if set(d2.keys()) == set(test_keys.keys()):
+                                        break
+                    else:
+                        check_distances.append((i, j))
+        else:
+            check_distances = list(distance_map.keys())
+
+        tri_set = {
+            k: v
+            for ts in merge_triangle_sets(mod_tri, rem_tri, merge_strategy='old')
+            for k, v in ts.items()
+        }
+        dihed_set = {
+            k: v
+            for ts in merge_triangle_sets(mod_di, rem_di, merge_strategy='old')
+            for k, v in ts.items()
+        }
+
+        if verbose:
+            ts1, ds1 = triangles_and_dihedrons
+            import hashlib
+            print("initial:", len(ts1),
+                  len([t for t in ts1.values() if nput.triangle_is_complete(t)]),
+                  len(ds1),
+                  len([t for t in ds1.values() if nput.dihedron_is_complete(t)]),
+                  hashlib.sha256(str({k:ts1[k] for k in sorted(ts1.keys())}).encode()).hexdigest(),
+                  hashlib.sha256(str({k:ds1[k] for k in sorted(ds1.keys())}).encode()).hexdigest()
+                  )
+            print("final:", len(tri_set),
+                  len([t for t in tri_set.values() if nput.triangle_is_complete(t)]),
+                  len(dihed_set),
+                  len([t for t in dihed_set.values() if nput.dihedron_is_complete(t)]),
+                  hashlib.sha256(str({k:tri_set[k] for k in sorted(tri_set.keys())}).encode()).hexdigest(),
+                  hashlib.sha256(str({k:dihed_set[k] for k in sorted(dihed_set.keys())}).encode()).hexdigest())
+        if validate:
+            ts1, ds1 = triangles_and_dihedrons
+            initial_tri = len([t for t in ts1.values() if nput.triangle_is_complete(t)])
+            initial_di = len([t for t in ds1.values() if nput.dihedron_is_complete(t)])
+            final_tri = len([t for t in tri_set.values() if nput.triangle_is_complete(t)])
+            final_di = len([t for t in dihed_set.values() if nput.dihedron_is_complete(t)])
+            if initial_tri < final_tri or initial_di < final_di:
+                for k, t in tri_set.items():
+                    v1 = ts1.get(k)
+                    if (
+                            v1 is not None
+                            and (not nput.triangle_is_complete(t))
+                            and nput.triangle_is_complete(v1)
+                    ):
+                        print(v1)
+                        print(t)
+                for k, t in dihed_set.items():
+                    v1 = ds1.get(k)
+                    if v1 is not None:
+                        if (
+                                (not nput.dihedron_is_complete(t))
+                                and nput.dihedron_is_complete(v1)
+                        ):
+                            print(v1)
+                            print(t)
+                    elif nput.dihedron_is_complete(t):
+                        for k2 in itertools.permutations(k):
+                            if k2 in ds1 and k2 in dihed_set:
+                                raise ValueError(f"duplicated: {k} and {k2}")
+                        print(k)
+                        print(t)
+
+
+                raise ValueError(initial_tri, initial_di, final_tri, final_di)
+
+    new_triangulation = (tri_set, dihed_set)
+    if verbose:
+        print("checks:", check_distances)
+    if len(check_distances) > 0:
+        extended_internals = internals + target_internals
+        new_map = distance_map.copy()
+        # (shapes, conversions1) = find_internal_conversion(internals, check_distances,
+        #                                                  triangles_and_dihedrons=triangles_and_dihedrons,
+        #                                                  missing_val=None,
+        #                                                  allow_completion=False,
+        #                                                  return_conversions=True,
+        #                                                  include_shapes=True,
+        #                                                  verbose=True)
+        conversions, shapes, completions = find_internal_conversion(extended_internals, check_distances,
+                                                                    triangles_and_dihedrons=new_triangulation,
+                                                                    missing_val=None,
+                                                                    allow_completion=True,
+                                                                    return_conversions=True,
+                                                                    prep_conversions=False,
+                                                                    include_shapes=True,
+                                                                    update_triangles_and_dihedrons=False,
+                                                                    return_completions=True,
+                                                                    # cache=cache,
+                                                                    verbose=False)
+        print(completions)
+        live_dists = []
+        for d,s,c in zip(check_distances, shapes, conversions):
+            if c is not None:
+                live_dists.append(d)
+            else:
+                new_map[d] = s
+        # dead_old = []
+        # for d,s,c in zip(check_distances, shapes, conversions1):
+        #     if c is None:
+        #         dead_old.append(d)
+        if verbose:
+            print("complete:", live_dists, [c.__name__ if c is not None else c for c in conversions])
+
+        # if target_internals[0] == (1, 9, 8, 21):
+        #     raise Exception(...)
+        return live_dists, new_map, new_triangulation
+    else:
+        # if target_internals[0] == (1, 9, 8, 21):
+        #     raise Exception(...)
+        return [], distance_map, new_triangulation
+
+class InternalCoordinateGraph:
+    """
+    A graph mapping out the connections between a set of atoms based on the given set of internals
+    """
+    __slots__ = ['internals', 'atoms', 'triangulation', '_completion_cache', '_conversions', '_unreachable']
+    def __init__(self, internals, atoms=None, triangles_and_dihedrons=None):
+        self.internals = internals
+        if atoms is None:
+            atoms = max(max(i) for i in internals) + 1
+        self.atoms = atoms
+        if triangles_and_dihedrons is None:
+            triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
+        self.triangulation = triangles_and_dihedrons
+        self._completion_cache = {}
+        self._conversions = {}
+        self._unreachable = {}
+        # we map the unreachable set to the possible completions that _could_ have completed it
+        # this way when we add an internal, we can check to see if there are any previously unreachable
+        # coordinates that need an update, and then if those need an upd
+
+    def enumerate_matching_dihedrons(self, target_coord):
+        for i,d in self.triangulation[1].items():
+            pos = []
+            for x in target_coord:
+                try:
+                    xx = i.index(x)
+                except ValueError:
+                    break
+                else:
+                    pos.append(xx)
+            else:
+                if pos[-1] < pos[0]: pos = reversed(pos)
+                yield tuple(pos), i, d
+    def find_conversions(self,
+                         target_internals,
+                         unconvertable_atoms=None,
+                         allow_recursive_completions=False,
+                         verbose=False,
+                         **etc):
+        initial_set = target_internals
+
+        target_internals = [
+            i for i in target_internals
+            if i not in self._conversions
+               and i not in self._unreachable
+        ]
+        # if verbose:
+        #     print("..."*30)
+        #     print(target_internals)
+        #     print(self.internals)
+        #     print(self.triangulation[0])
+        if len(target_internals) > 0:
+            expanded_internals = list(itut.delete_duplicates(
+                canonicalize_internal(k) for k in (
+                list(self.internals)
+                + list(self._conversions.keys())
+            )))
+            conversions, shapes = find_internal_conversion(expanded_internals,
+                                                           target_internals,
+                                                           # triangles_and_dihedrons=self.triangulation,
+                                                           include_shapes=True,
+                                                           allow_completion=True,
+                                                           return_conversions=True,
+                                                           allow_recursive_completions=allow_recursive_completions,
+                                                           missing_val=None,
+                                                           cache=self._completion_cache,
+                                                           **etc)
+
+            # this gives us the basic completeable set of coordinates
+            self._conversions.update({i:c for i,c in zip(target_internals, conversions) if c is not None})
+
+            # if a coordinate _wasn't_ possible to complete, we want to
+            # walk through the possible completions by going through
+            # the current triangulation and finding the coordinates we are missing
+            incomplete = [i for i,c in zip(target_internals, conversions) if c is None]
+            cache = self._completion_cache.setdefault('trie_expansions', {})
+            spec_data = nput.dihedron_property_specifiers()
+            if unconvertable_atoms is None:
+                unconvertable_atoms = set()
+            if not allow_recursive_completions:
+                for target in incomplete:
+                    # print("???", target)
+                    if target in self._conversions: continue # this can be completed within the loop
+                    if target not in self._unreachable: self._unreachable[target] = []
+                    for x,d,s in self.enumerate_matching_dihedrons(target):
+                        name = nput.dihedron_property_specifiers(x)['name']
+                        pref_keys, possible_conversions = nput.sorted_dihedron_completions(s, name, cache=cache)
+                        key_map = {}
+
+                        # this gives us a set of coordinates to complete the dihedron
+                        # we check to see if we have determined if any of them are reachable or not
+                        # if they have been checked we short circuit
+                        # otherwise we traverse depth first
+                        pref_coords = []
+                        for kl in pref_keys:
+                            coord_keys = []
+                            for k in kl:
+                                if k not in key_map:
+                                    key_map[k] = canonicalize_internal([d[i] for i in spec_data[k]['coord']])
+                                coord_keys.append(key_map[k])
+                            pref_coords.append(coord_keys)
+                        self._unreachable[target] = sorted({tuple(t) for t in itertools.chain(self._unreachable[target], pref_coords)}, key=len)
+                        for coord_keys in pref_coords:
+                            if any(k in self._unreachable for k in coord_keys): continue
+                            if any(len(set(k) & unconvertable_atoms) == len(k) for k in coord_keys): continue
+                            unconverted_k = [k for k in coord_keys if k not in self._conversions]
+                            if len(unconverted_k) > 0:
+                                #TODO: expand the graph _before_ applying this search
+                                #      to speed up retrieval? -> already cached in `_conversions`
+                                #TODO: try a BFS? would give the minimal conversion at the cost of more code
+                                subs = self.find_conversions(unconverted_k, unconvertable_atoms=unconvertable_atoms, **etc)
+                                for s,k in zip(subs, unconverted_k):
+                                    if s is not None and k in self._unreachable: # can be removed inside the loop
+                                        del self._unreachable[k]
+                                if all(s is not None for s in subs):
+                                    self._conversions[target] = (coord_keys, kl, possible_conversions[kl])
+                                    break
+                        unconvertable_atoms.update(d)
+        return [self._conversions.get(i) for i in initial_set]
+
+    class GraphCheckpoint:
+        def __init__(self, g, reset=True):
+            self.graph = g
+            self.reset = reset
+            self._internals = None
+            self._triangulation = None
+            self._conversions = None
+            self._unreachable = None
+        def __enter__(self):
+            self._internals = self.graph.internals.copy()
+            self._triangulation = tuple(t.copy() for t in self.graph.triangulation)
+            self._conversions = self.graph._conversions.copy()
+            self._unreachable = self.graph._unreachable.copy()
+            return self
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if self.reset:
+                self.graph.internals = self._internals
+                self.graph.triangulation = self._triangulation
+                self.graph._conversions = self._conversions
+                self.graph._unreachable = self._unreachable
+
+    def checkpoint(self):
+        return self.GraphCheckpoint(self)
+
+    def add_internals(self, internals):
+        # update triangulation
+        # determine which distances could have been impacted by this change
+        # check if any of those are completable
+        if nput.is_int(internals[0]):
+            internals = [internals]
+        internals = [i for i in internals if i not in self.internals]
+        self.internals = list(self.internals) + list(internals)
+        #TODO: use a proper update
+        self.triangulation = get_internal_triangles_and_dihedrons(self.internals)
+
+        # all unreachable coordinates now need to be checked to see if they are potentially
+        # reachable now
+        newly_reachable = {canonicalize_internal(i) for i in internals}
+        old_newly_reachable = -1
+        check_opts = {
+            canonicalize_internal(c):[
+                [canonicalize_internal(s) for s in subopt if s not in self._conversions]
+                for subopt in subopts
+            ]
+            for c,subopts in self._unreachable.items()
+        }
+
+        mod_atoms = {a for i in newly_reachable for a in i}
+        for i in newly_reachable:
+            if i in check_opts:
+                del check_opts[i]
+        # ml = 15
+        while len(newly_reachable) > old_newly_reachable:
+            # if old_newly_reachable > ml: raise Exception(...)
+            old_newly_reachable = len(newly_reachable)
+            prunes = []
+            for coord, subopts in check_opts.items():
+                if len(mod_atoms & set(coord)) < 2: continue # not enough has changed
+                if any(
+                    all(s in newly_reachable for s in subopt)
+                    for subopt in subopts
+                ):
+                    mod_atoms.update(coord)
+                    newly_reachable.add(coord)
+                    prunes.append(coord)
+                    break
+            for i in prunes:
+                if i in check_opts:
+                    del check_opts[i]
+
+
+        for i in newly_reachable:
+            for j in [i, tuple(reversed(i))]:
+                if j in self._unreachable:
+                    del self._unreachable[j]
+                    break
+
+        # self._unreachable = {}
+        # self._conversions = {}
+
+        return newly_reachable
+
+    def remove_internals(self, internals):
+        raise NotImplementedError("need to cache more information to remove an element")
