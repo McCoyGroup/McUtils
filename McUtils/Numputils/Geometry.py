@@ -43,6 +43,7 @@ __all__ = [
     "sorted_dihedron_completions",
     "dihedron_triangle",
     "dihedron_property_function",
+    "dihedron_pair_dihedral_angle_function",
     "arcsin_deriv",
     "arccos_deriv",
     "arctan_deriv",
@@ -2579,15 +2580,30 @@ def dihedral_from_XZC(X, Z, C, use_cos=False):
     else:
         return np.arccos(cost)
 def dihedral_Z_from_XtC(X, t, C, use_cos=False):
-    cA, cC = [np.cos(x) for x in [X, C]]
-    sA, sC = [np.sin(x) for x in [X, C]]
+    # `Z` is the angle between two of the vectors
+    # that close together under the action
+    # of the dihedral `t`
+    # `X` and `C` are the angles between these vectors
+    # and the rotation axis
+    cX, cC = [np.cos(x) for x in [X, C]]
+    sX, sC = [np.sin(x) for x in [X, C]]
     if use_cos:
         cost = t
     else:
         cost = np.cos(t)
-    cost = cost * np.sign(np.sin(X) * np.sin(C))
-    cB = cost * (sA * sC) + cA * cC
-    return np.arccos(cB)
+    sXC = sX * sC
+    cost = cost * np.sign(sXC)
+    cZ = cost * sXC + cX * cC
+    return np.arccos(cZ)
+
+def dihedral_Ta_from_abcXYt(a, b, c, X, Y, t):
+    "ArcTan[b Sin[X]-c (Cos[Y] Sin[X]+Cos[Tb] Cos[X] Sin[Y]),-c Sin[Tb] Sin[Y]]"
+    sX, sY = [np.sin(x) for x in [X, Y]]
+    cX, cY = [np.cos(x) for x in [X, Y]]
+
+    cos_Ta = b - c * (cY * sX + np.cos(t) * cX * sY)
+    sin_Ta = -c * np.sin(t) * sY
+    return np.arctan2(sin_Ta, cos_Ta)
 
 def dihedral_z_from_ayXCt(a, y, X, C, t, use_cos=False, return_square=False):
     if use_cos:
@@ -2616,6 +2632,17 @@ def dihedral_from_bAXYCz(b, A, X, Y, C, z, use_cos=False):
     a = law_of_sines_dist(b, X+A, A)
     y = law_of_sines_dist(b, Y+C, Y)
     return dihedral_from_ayXCz(a, y, X, C, z, use_cos=use_cos)
+
+def composed_dihedral(d_ijka, d_ijkb): # gives d_ajkb
+    d_ijka = np.asanyarray(d_ijka)
+    d_ijkb = np.asanyarray(d_ijkb)
+    diffs = d_ijkb - d_ijka
+    mod_pos = np.where(np.abs(diffs) > np.pi)[0]
+    if len(mod_pos) > 0:
+        gz_pos = diffs[..., mod_pos] > 0
+        diffs[..., mod_pos[gz_pos]] -= 2*np.pi
+        diffs[..., mod_pos[~gz_pos]] += 2*np.pi
+    return diffs
 
 class DihedralSpecifierType(enum.Enum):
     SSSAAT = "sssaat"
@@ -3516,7 +3543,12 @@ def dihedron_property(ddata:DihedralTetrahedronData, field_name, allow_completio
             raise ValueError(f"bad property name {field_name}")
     else:
         return _dihed_prop(ddata, field_name)
-def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2, cache=None):
+def dihedral_Tb_completions_trie(b,
+                                 a, x, y, c, A, X, Y, C,
+                                 z, Z, Z2,
+                                 A3, Y3, Ta, Tx,
+                                 C4, X4, Tc, Ty,
+                                 cache=None):
     """
         elif field_name == dd.Tb:
         args = [dd.b, dd.a, dd.x, dd.y, dd.c, dd.A, dd.X, dd.Y, dd.C, dd.z, dd.Z, dd.Z2]
@@ -3525,6 +3557,7 @@ def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2, cache=None
         args = [dd.a, dd.b, dd.x, dd.y, dd.z, dd.B1, dd.X, dd.Y3, dd.Z, dd.c, dd.C, dd.C4]
         completion_type = DihedronCoordinateType.Dihedral
     """
+    # need to add in
     if cache is None: raise Exception(...)
     return _permutation_trie(
         (
@@ -3532,6 +3565,13 @@ def dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2, cache=None
             ((A, Z2, Y), dihedral_from_XZC),
             ((a, y, X, C, z), dihedral_from_ayXCz),
             ((x, c, A, Y, z), dihedral_from_ayXCz),
+
+            # any dihedral path that _starts_ with b
+            ((b, a, z, X, Y3, Ta), dihedral_Ta_from_abcXYt),
+            ((b, x, z, A, C4, Tx), dihedral_Ta_from_abcXYt),
+            ((b, c, z, Y, X4, Tc), dihedral_Ta_from_abcXYt),
+            ((b, y, z, C, A3, Ty), dihedral_Ta_from_abcXYt),
+
             ((a, b, c, x, y, z), dihedral_from_abcxyz),
             ((a, b, c, x, Y, z), dihedral_from_abcxYz),
             ((c, b, a, y, X, z), dihedral_from_abcxYz),
@@ -3659,22 +3699,34 @@ def dihedral_completions_trie(dd, field_name, return_args=True, cache=None):
         args = [dd.A3, dd.X4, dd.Tz, dd.b, dd.y, dd.c, dd.Y, dd.C]
         completion_type = DihedronCoordinateType.Angle
     elif field_name == dd.Tb:
-        args = [dd.b, dd.a, dd.x, dd.y, dd.c, dd.A, dd.X, dd.Y, dd.C, dd.z, dd.Z, dd.Z2]
+        args = [dd.b, dd.a, dd.x, dd.y, dd.c, dd.A, dd.X, dd.Y, dd.C, dd.z, dd.Z, dd.Z2,
+                dd.A3, dd.Y3, dd.Ta, dd.Tx,
+                dd.C4, dd.X4, dd.Tc, dd.Ty]
         completion_type = DihedronCoordinateType.Dihedral
     elif field_name == dd.Ta:
-        args = [dd.a, dd.b, dd.x, dd.y, dd.z, dd.B1, dd.X, dd.Y3, dd.Z, dd.c, dd.C, dd.C4]
+        # b<-> a, c<->z
+        args = [dd.a, dd.b, dd.x, dd.y, dd.z, dd.B1, dd.X, dd.Y3, dd.Z, dd.c, dd.C, dd.C4,
+                dd.B2, dd.Y, dd.Tb, dd.Tx,
+                dd.Z2, dd.X4, dd.Tz, dd.Ty]
         completion_type = DihedronCoordinateType.Dihedral
     elif field_name == dd.Tc:
-        args = [dd.c, dd.y, dd.b, dd.x, dd.z, dd.Y, dd.B2, dd.X4, dd.Z2, dd.a, dd.A3, dd.A]
+        # (0, 1, 2, 3) -> (1, 2, 3, 0)
+        args = [dd.c, dd.b, dd.y, dd.x, dd.z, dd.B2, dd.Y, dd.X4, dd.Z2, dd.a, dd.A, dd.A3,
+                dd.B1, dd.X, dd.Tb, dd.Ty, dd.Z, dd.Y3, dd.Tz, dd.Tx]
         completion_type = DihedronCoordinateType.Dihedral
     elif field_name == dd.Tx:
-        args = [dd.x, dd.a, dd.b, dd.z, dd.c, dd.A, dd.B1, dd.Z2, dd.C4, dd.y, dd.Y3, dd.Y]
+        # (0, 1, 2, 3) -> (1, 2, 0, 3)
+        args = [dd.x, dd.b, dd.a, dd.c, dd.z, dd.B1, dd.A, dd.C4, dd.Z2, dd.y, dd.Y, dd.Y3,
+                dd.B2, dd.C, dd.Tb, dd.Ta, dd.Z, dd.A3, dd.Tz, dd.Tc]
         completion_type = DihedronCoordinateType.Dihedral
     elif field_name == dd.Ty:
-        args = [dd.y, dd.b, dd.c, dd.a, dd.z, dd.B2, dd.C, dd.A3, dd.Z, dd.x, dd.X, dd.X4]
+        # (0, 1, 2, 3) -> (1, 0, 3, 2)
+        args = [dd.y, dd.a, dd.z, dd.b, dd.c, dd.A3, dd.Z, dd.B2, dd.C, dd.x, dd.X, dd.X4,
+                dd.A, dd.B1, dd.Ta, dd.Tz, dd.C4, dd.Z2, dd.Tc, dd.Tb]
         completion_type = DihedronCoordinateType.Dihedral
     elif field_name == dd.Tz:
-        args = [dd.z, dd.a, dd.y, dd.x, dd.c, dd.A3, dd.Y3, dd.X4, dd.C4, dd.b, dd.B1, dd.B2]
+        args = [dd.z, dd.a, dd.y, dd.x, dd.c, dd.A3, dd.Y3, dd.X4, dd.C4, dd.b, dd.B1, dd.B2,
+                dd.A, dd.X, dd.Ta, dd.Ty, dd.C, dd.Y, dd.Tc, dd.Tx]
         completion_type = DihedronCoordinateType.Dihedral
     else:
         raise ValueError(f"can't interepret field name {field_name}")
@@ -3854,6 +3906,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                                raise_on_missing=True,
                                return_depth=False,
                                completion_handler=None,
+                               depth=0,
                                cache=None):
     field_props = dihedron_property_specifiers(field_name)
     field_name = field_props['name']
@@ -3864,10 +3917,12 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
             return sign*tdata[ind]
         convert.__name__ = 'convert_' + dihedron_property_specifiers(ind)['name']
         if return_depth:
-            return 0, convert
+            return depth, convert
         else:
             return convert
     else:
+        if cache is None:
+            cache = {}
         # check for triangle completability first...
         if len(field_props['coord']) < 4:
             for tri_num, tri_fields in enumerate(dihedron_triangle_fields):
@@ -3893,7 +3948,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                             return sign * tri_conv(tri, **kwargs)
                         convert.__name__ = 'convert_' + field_props['name']
                         if return_depth:
-                            return 0, convert
+                            return depth, convert
                         else:
                             return convert
 
@@ -3917,7 +3972,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                 return field_props['sign']*func(*(s['sign']*tdata[s['index']] for s in specs))
             convert.__name__ = f'convert_{field_props["name"]}_{func.__name__}'
             if return_depth:
-                return 1, convert
+                return depth + 1, convert
             else:
                 return convert
         else:
@@ -3938,13 +3993,31 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                         rem_list = tuple(sorted(l[i] for i in rem_inds))
                         base_args = tuple(sorted(base_args, key=lambda x:l.index(x)))
                         possible_conversions[rem_list] = (l, base_args, rem_inds, base_inds, f)
-                pref_keys = list(sorted(possible_conversions.keys(), key=len))
+
+                complete_tris = [triangle_is_complete(dihedron_triangle(sample_dihed, i)) for i in range(4)]
+                coord_scores = {
+                    a:0 if complete_tris[i] else 1
+                    for i, tri_field_names  in enumerate(dihedron_triangle_fields)
+                    for a in tri_field_names
+                }
+                radix = len(_dihedron_point_map)
+                score_keys = lambda l: (
+                    radix*len(l) + sum(coord_scores.get(i, 2) for i in l)
+                )
+                pref_keys = list(sorted(possible_conversions.keys(), key=score_keys))
                 if disallowed_conversions is None:
                     disallowed_conversions = cache.setdefault('disallowed_conversions', {}).setdefault(sample_dihed, set())
                 disallowed_conversions.add(field_name)
                 complete_convs = []
+                # print(depth*" " + "=="*10, field_name, "=="*10)
+                # print(depth*" ", sample_dihed, sep="")
+                # print(depth*" ", disallowed_conversions, sep="")
+                # print(depth*" ", len(pref_keys), sep="")
                 for kl in pref_keys:
+                    # print(depth*" ", kl, sep="")
                     if any(k in disallowed_conversions for k in kl): continue
+                    # print(depth*" " + "~~"*15)
+                    # print(depth*" " + field_name, kl)
                     for k in kl:
                         if k not in convertable_keys:
                             if k in disallowed_conversions: break
@@ -3954,6 +4027,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                                                             allow_completion=True,
                                                             raise_on_missing=False,
                                                             return_depth=True,
+                                                            depth=depth+1,
                                                             cache=cache)
                             if d2 is None and completion_handler is not None:
                                 d2 = completion_handler(og_dihed, k,
@@ -4007,11 +4081,58 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                         return depth + 1, convert
                     else:
                         return convert
+
             if raise_on_missing:
-                raise ValueError(f"can't get property '{field_name}' from {sample_dihed}")
+                if dihedron_is_complete(sample_dihed):
+                    raise ValueError(f"missing completion code for '{field_name}' from {sample_dihed}")
+                else:
+                    raise ValueError(f"can't get property '{field_name}' from {sample_dihed}")
             else:
                 return None
             # try to find conversions for subterms
+def dihedron_pair_dihedral_angle_function(
+        inds1, dihed1,
+        inds2, dihed2,
+        raise_on_missing=True,
+        cache=None,
+        allow_completion=False
+):
+    i, j, k = inds1 # implied 4th coordinate for the dihedral
+    a, b, c = inds2 # same as i,j,k but ordered for dihed2
+    x = [z for z in range(4) if z not in {i, j, k}][0]
+    y = [z for z in range(4) if z not in {a, b, c}][0]
+    # we compose this as
+    # ijk_x - abc_y
+    if x < i:
+        i, j, k, x = x, k, j, i
+    if y < a:
+        a, b, c, y = y, c, b, a
+    f1 = dihedron_property_function(dihed1, (i, j, k, x),
+                                    raise_on_missing=False,
+                                    allow_completion=allow_completion,
+                                    cache=cache)
+    if f1 is None:
+        if raise_on_missing:
+            raise ValueError(f"can't get dihedral ({i}, {j}, {k}, {x}) from {dihed1}")
+        else:
+            return None
+    f2 = dihedron_property_function(dihed2, (a, b, c, y),
+                                    raise_on_missing=False,
+                                    allow_completion=allow_completion,
+                                    cache=cache)
+    if f1 is None:
+        if raise_on_missing:
+            raise ValueError(f"can't get dihedral ({a}, {b}, {c}, {y}) from {dihed2}")
+        else:
+            return None
+    def pair_dihedral_function(dihed1, dihed2):
+        return composed_dihedral(f1(dihed1), f2(dihed2))
+    return pair_dihedral_function
+
+# nput.dihedron_pair_dihedral_angle_function(
+#         idx1, dihed1,
+#         idx2, dihed2
+#     )
 
 def _rot_gen2(axis, moments_of_inertia=None):
     axis = np.asanyarray(axis)

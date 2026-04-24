@@ -1477,6 +1477,7 @@ class GraphSearcher:
             self._rank[node] = 0
             if self.track_components:
                 self._components[node] = {node}
+        return self.find(node)
 
     def find(self, node):
         """Find root with path-halving compression."""
@@ -1509,8 +1510,8 @@ class GraphSearcher:
         return self._components[self.find(node)]
 
 class GraphComponentTracker:
-    def __init__(self, k, l):
-        self._graph_searcher = GraphSearcher(track_components=False)
+    def __init__(self, k, l, track_components=False):
+        self._graph_searcher = GraphSearcher(track_components=track_components)
         self._group_constraints = {}
         self._group_sizes = {}
         self._edge_list = set()
@@ -1525,22 +1526,25 @@ class GraphComponentTracker:
         """
         key = frozenset({u,v})
         if key in self._edge_list: return None
-        self._graph_searcher.add(u)
+        u = self._graph_searcher.add(u)
+        v = self._graph_searcher.add(v)
         self._group_constraints.setdefault(u, 0)
         self._group_sizes.setdefault(u, 1)
-        self._graph_searcher.add(v)
         self._group_constraints.setdefault(v, 0)
         self._group_sizes.setdefault(v, 1)
 
-        if not self._graph_searcher.same_component(u, v):
+        if u != v: #not self._graph_searcher.same_component(u, v):
             left, right = self._graph_searcher.union(u, v)
             self._group_constraints[left] += self._group_constraints[right] + 1
             self._group_sizes[left] += self._group_sizes[right]
             del self._group_constraints[right]
             del self._group_sizes[right]
+            if v != right:
+                del self._group_constraints[v]
+                del self._group_sizes[v]
             return True
 
-        comp = self._graph_searcher.find(u)
+        comp = u#self._graph_searcher.find(u)
         threshold = self.k * self._group_sizes[comp] - self.l
         if self._group_constraints[comp] >= threshold:
             return False
@@ -1567,6 +1571,19 @@ class GraphComponentTracker:
             self._edge_list = el_cache
         return status
 
+    def rigid_components(self):
+        # if not self._graph_searcher.track_components:
+        #     raise ValueError('`track_components` must be `True` to get rigid components')
+        const_checks = {
+            comp:const >= self.k * self._group_sizes[comp] - self.l
+            for comp, const in self._group_constraints.items()
+        }
+        if self._graph_searcher.track_components:
+            const_checks = {
+                comp:(const, self._graph_searcher.component(comp))
+                for comp, const in const_checks.items()
+            }
+        return const_checks
 def pebble_rigidity(edge_sets, k, l=None):
     if l is None:
         l = math.comb(k+1, 2) # k translations and binom(k, 2) rotations
@@ -1633,7 +1650,9 @@ def statistically_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None, 
         return rigid, (R, rank)
     else:
         return rigid
-def uniquely_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None, return_components=False):
+def uniquely_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None,
+                   return_components=False,
+                   return_rigid_subgraphs=False):
     edges = np.asanyarray(edges)
     if natoms is None:
         natoms = np.max(edges) + 1
@@ -1643,6 +1662,16 @@ def uniquely_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None, retur
         l = math.comb(ndim+1, 2)
 
     base_rigidity, (R, rank) = statistically_rigid(edges, ndim, l=l, points=points, return_rigidity_matrix=True)
+    if return_rigid_subgraphs:
+        # use the pebble game to identify rigid subgraphs and check their unique rigidty
+        # tracker = GraphComponentTracker(ndim, l, track_components=True)
+        # included = tracker.add_edges(edges)
+        # rigid_components = tracker.rigid_components()
+        # import pprint
+        # pprint.pprint(list(zip(edges, included)))
+        # raise Exception(rigid_components)
+        ...
+
     if not base_rigidity:
         if return_components:
             return False, (R, rank), None
