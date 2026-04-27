@@ -29,52 +29,10 @@ class UniqueInternalCoordinatePruner(InternalCoordinatePruner):
         return coords
 
 class EquivalentInternalCoordinatePruner(InternalCoordinatePruner):
-    @classmethod
-    def get_equivalent_stretch_coordinates(cls, i, j):
-        return []
-
-    @classmethod
-    def get_equivalent_angle_coordinates(cls, i, j, k):
-        return [
-            [
-                (i, k, j),
-                (k, i, j)
-            ]
-        ]
-
-    @classmethod
-    def get_equivalent_dihedral_coordinates(cls, i, j, k, l):
-        return [
-            [
-                (i, k, j, l)
-            ]
-        ]
-
-    def get_equivalent_coordinates(self, coord):
-        if len(coord) == 2:
-            return self.get_equivalent_stretch_coordinates(*coord)
-        elif len(coord) == 3:
-            return self.get_equivalent_angle_coordinates(*coord)
-        elif len(coord) == 4:
-            return self.get_equivalent_dihedral_coordinates(*coord)
-
     def prune_coordinates(self, coord_set, canonicalized=False):
-        if not canonicalized:
-            coord_set = [canonicalize_internal(c) for c in coord_set]
-            coord_set = [c for c in coord_set if c is not None]
-        dupe_set = set()
-        coords = []
-        for coord in coord_set:
-            if coord in dupe_set: continue
-            dupe_set.add(coord)
-            dupe_sets = self.get_equivalent_coordinates(coord)
-            if any(
-                    all(canonicalize_internal(c) in dupe_set for c in dupes)
-                    for dupes in dupe_sets
-            ): continue
-            coords.append(coord)
-
-        return coords
+        from .Internals import InternalSpec
+        inds = InternalSpec(coord_set).get_pruned_rads()[1]
+        return [coord_set[i] for i in inds]
 
 class GeometricInternalCoordinatePruner(InternalCoordinatePruner):
 
@@ -128,7 +86,7 @@ class GeometricInternalCoordinatePruner(InternalCoordinatePruner):
 pruner_dispatch = dev.OptionsMethodDispatch(
     {
         'unique':InternalCoordinatePruner,
-        'equivalent':EquivalentInternalCoordinatePruner,
+        'graph':EquivalentInternalCoordinatePruner,
         'b_matrix':GeometricInternalCoordinatePruner
     }
 )

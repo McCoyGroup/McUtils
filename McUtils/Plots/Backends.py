@@ -747,12 +747,40 @@ class MPLAxes(GraphicsAxes):
             import matplotlib.ticker as ticks
             self._Locator = ticks.Locator
             self._FixedLocator = ticks.FixedLocator
+            self._AutoLocator = ticks.AutoLocator
+            self._AutoMinorLocator = ticks.AutoMinorLocator
+            self._MultipleLocator = ticks.MultipleLocator
+            self._StrMethodFormatter = ticks.StrMethodFormatter
+            self._NullFormatter = ticks.NullFormatter
+            self._FixedFormatter = ticks.FixedFormatter
+            self._ScalarFormatter = ticks.ScalarFormatter
         @property
         def Locator(self):
             return self._Locator
         @property
         def FixedLocator(self):
             return self._FixedLocator
+        @property
+        def AutoLocator(self):
+            return self._AutoLocator
+        @property
+        def AutoMinorLocator(self):
+            return self._AutoMinorLocator
+        @property
+        def MultipleLocator(self):
+            return self._MultipleLocator
+        @property
+        def StrMethodFormatter(self):
+            return self._StrMethodFormatter
+        @property
+        def NullFormatter(self):
+            return self._NullFormatter
+        @property
+        def FixedFormatter(self):
+            return self._FixedFormatter
+        @property
+        def ScalarFormatter(self):
+            return self._ScalarFormatter
 
     def clear(self, *, backend=None):
         ax = self.obj

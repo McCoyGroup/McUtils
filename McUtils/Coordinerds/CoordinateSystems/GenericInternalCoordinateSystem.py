@@ -127,6 +127,12 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
                 raise NotImplementedError("angle_ordering not supported")
             if internal_spec is None:
                 internal_spec = InternalSpec(specs)
+            # checks = internal_spec.check_redundancy()
+            # print(checks)
+            # print(sum(1 if x else 0 for x in checks))
+            # print(len(checks))
+            # print(len(internal_spec.atoms) * 3 - 6)
+            # raise Exception(...)
             internals = internal_spec.cartesians_to_internals(coords,
                                                               order=return_derivs,
                                                               # masses=masses,
@@ -139,7 +145,7 @@ class CartesianToGICSystemConverter(CoordinateSystemConverter):
         else:
             internals = nput.internal_coordinate_tensors(coords, specs, order=return_derivs, **kw)
             internals, derivs = internals[0], internals[1:]
-            opts['derivs'] = derivs,
+            opts['derivs'] = derivs
         return internals, opts
 
     def convert(self, coords, *, specs, order=0, **kw):
@@ -162,6 +168,7 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                      return_derivs=None,
                      internal_spec=None,
                      method='direct',
+                     transformations=None,
                      **kw):
         """
         We'll implement this by having the ordering arg wrap around in coords?
@@ -178,6 +185,10 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
             'remove_translation_rotation': remove_translation_rotation
         }
         if method == 'iterative':
+            if transformations is not None:
+                base_transformation = transformations[1]
+            else:
+                base_transformation = None
             if return_derivs == 0: return_derivs = 1
             (expansions, errors), _ = nput.inverse_coordinate_solve(specs, coords, reference_coordinates,
                                                                     order=return_derivs,
@@ -185,6 +196,7 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                                                                     return_internals=True,
                                                                     masses=masses,
                                                                     remove_translation_rotation=remove_translation_rotation,
+                                                                    base_transformation=base_transformation,
                                                                     **kw
                                                                     )
             carts, derivs = expansions[0], expansions[1:]
@@ -199,7 +211,9 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                                                           order=return_derivs,
                                                           masses=masses,
                                                           remove_translation_rotations=remove_translation_rotation,
+                                                          transformations=transformations,
                                                           **kw)
+
             if return_derivs is not None:
                 carts, expansions = carts
                 if return_derivs > 0:

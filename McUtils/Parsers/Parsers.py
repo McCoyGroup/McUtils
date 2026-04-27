@@ -6,7 +6,7 @@ from .StringParser import *
 from .RegexPatterns import *
 
 __all__= [
-    "XYZParser",
+    # "XYZParser",
     "XYZBlock"
 ]
 

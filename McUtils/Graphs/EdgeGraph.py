@@ -3,14 +3,20 @@ import itertools, collections
 import typing
 
 import scipy
+import math
 import scipy.sparse as sparse, numpy as np
+from .. import Devutils as dev
 from .. import Numputils as nput
 from .. import Iterators as itut
 from . import Trees as tree
 
 __all__ = [
     "EdgeGraph",
-    "MoleculeEdgeGraph"
+    "MoleculeEdgeGraph",
+    "GraphSearcher",
+    "pebble_rigidity",
+    "statistically_rigid",
+    "uniquely_rigid"
 ]
 
 class EdgeGraph:
@@ -902,7 +908,6 @@ class EdgeGraph:
         return self.take(perm)
 
 
-
 class MoleculeEdgeGraph(EdgeGraph):
 
     def get_rings(self):
@@ -1331,3 +1336,378 @@ class MoleculeEdgeGraph(EdgeGraph):
             )
         else:
             return super().segment_by_chains(root=root, validate=validate)
+
+class PebbleGameBoard:
+    def __init__(self, n_vertices: int, k, l, min_pebbles=None):
+        self.k = k
+        self.l = l
+        self.n = n_vertices
+        self.pebbles = [k] * n_vertices
+        self.parent = [None] * n_vertices
+        self.edges = []
+        if min_pebbles is None:
+            min_pebbles = self.l
+        self.min_pebbles = min_pebbles
+        self._components = [
+            {i}
+            for i in range(n_vertices)
+        ]
+
+    def _free_pebble(self, v: int, visited: set=None) -> bool:
+        """
+        Try to move a pebble to vertex v by reversing edge orientations
+        (DFS over the directed graph). Returns True if successful.
+        """
+        if self.pebbles[v] > 0:
+            return True
+        if visited is None:
+            visited = set()
+        if v in visited:
+            return False
+        visited.add(v)
+        # Try to free a pebble from v's parent (reverse edge v -> parent)
+        p = self.parent[v]
+        if p is not None and self._free_pebble(p, visited):
+            # Reverse the edge: p -> v becomes v -> p
+            self.pebbles[p] -= 1
+            self.pebbles[v] += 1
+            self.parent[v] = None
+            self.parent[p] = v
+            return True
+        return False
+
+    def _connected_nodes(self, src, visited=None):
+        if visited is None:
+            visited = set()
+        stack = collections.deque([src])
+        while stack:
+            node = stack.pop()
+            if node in visited:
+                continue
+            visited.add(node)
+            if self.parent[node] is not None:
+                stack.append(self.parent[node])
+        return visited
+
+    def _count_pebbles(self, u: int, v: int) -> int:
+        """
+        Count free pebbles reachable from u and v combined
+        (union of their directed components).
+        """
+
+        combined = self._components[u] | self._components[v]
+        return sum(self.pebbles[w] for w in combined)
+
+    def add_edge(self, u: int, v: int) -> bool:
+        """
+        Attempt to add edge (u, v).
+        Returns True if edge is independent (added to the graph),
+        False if it would violate sparsity (redundant/over-constrained).
+        """
+        # Need at least l+1 pebbles in the combined component
+        if self._count_pebbles(u, v) <= self.min_pebbles:
+            return False  # Redundant edge
+
+        # Try to gather l free pebbles at u and v combined
+        pebbles_gathered = 0
+
+        for _ in range(self.l):
+            freed = False
+            for src in (u, v):
+                if self._free_pebble(src):
+                    pebbles_gathered += 1
+                    freed = True
+                    break
+            if not freed:
+                break
+
+        # Ensure u has a free pebble (to orient edge u -> v)
+        if not self._free_pebble(u):
+            self._free_pebble(v)
+            # Swap: move a pebble to u by reversing if needed
+            if self.pebbles[u] == 0:
+                return False
+
+        # Orient edge: u -> v, consuming one pebble from u
+        self.pebbles[u] -= 1
+        self.parent[v] = u
+        self.edges.append((u, v))
+        # combine connected graphs of u and v (and anything they connect to)
+        new_graph = self._components[u] | self._components[v]
+        for x in new_graph:
+            self._components[x]  = new_graph
+        return True
+
+    def components(self) -> dict[int, list[int]]:
+        """Return rigid components (vertices sharing a pebble component)."""
+        comp = {}
+        for v in range(self.n):
+            root = v
+            visited = set()
+            while self.parent[root] is not None and root not in visited:
+                visited.add(root)
+                root = self.parent[root]
+            #TODO: flatten root node
+            comp.setdefault(root, []).append(v)
+        return comp
+
+class GraphSearcher:
+    # A union-find implementation
+    def __init__(self, data=None, track_components=True):
+        if data is None:
+            data = {}, {}, {}
+        self._parent, self._rank, self._components = data
+        self.track_components = track_components
+
+    def copy(self):
+        return type(self)(
+            [
+                self._parent.copy(),
+                self._rank.copy(),
+                {k:v.copy() for k,v in self._components.items()}
+                    if self.track_components else
+                {}
+            ],
+            track_components=self.track_components
+        )
+
+    def add(self, node) -> None:
+        if node not in self._parent:
+            self._parent[node] = node
+            self._rank[node] = 0
+            if self.track_components:
+                self._components[node] = {node}
+        return self.find(node)
+
+    def find(self, node):
+        """Find root with path-halving compression."""
+        while self._parent[node] != node:
+            parent = self._parent[node]
+            self._parent[node] = self._parent[parent]
+            node = self._parent[node]
+        return node
+
+    def same_component(self, u, v) -> bool:
+        return self.find(u) == self.find(v)
+
+    def union(self, u, v):
+        """Merge the two components (union by rank)."""
+        ru, rv = self.find(u), self.find(v)
+        if ru == rv:
+            return None
+        if self._rank[ru] < self._rank[rv]:
+            ru, rv = rv, ru
+        self._parent[rv] = ru
+        if self._rank[ru] == self._rank[rv]:
+            self._rank[ru] += 1
+        if self.track_components:
+            self._components[ru] |= self._components[rv]
+            del self._components[rv]
+        return ru, rv
+
+    def component(self, node):
+        if not self.track_components: return None
+        return self._components[self.find(node)]
+
+class GraphComponentTracker:
+    def __init__(self, k, l, track_components=False):
+        self._graph_searcher = GraphSearcher(track_components=track_components)
+        self._group_constraints = {}
+        self._group_sizes = {}
+        self._edge_list = set()
+        self.k = k
+        self.l = l
+
+    def add_edge(self, u, v) -> bool | None:
+        """
+        Attempt to add constraint (u, v).
+
+        Returns True if independent (accepted), False if redundant (rejected).
+        """
+        key = frozenset({u,v})
+        if key in self._edge_list: return None
+        u = self._graph_searcher.add(u)
+        v = self._graph_searcher.add(v)
+        self._group_constraints.setdefault(u, 0)
+        self._group_sizes.setdefault(u, 1)
+        self._group_constraints.setdefault(v, 0)
+        self._group_sizes.setdefault(v, 1)
+
+        if u != v: #not self._graph_searcher.same_component(u, v):
+            left, right = self._graph_searcher.union(u, v)
+            self._group_constraints[left] += self._group_constraints[right] + 1
+            self._group_sizes[left] += self._group_sizes[right]
+            del self._group_constraints[right]
+            del self._group_sizes[right]
+            if v != right:
+                del self._group_constraints[v]
+                del self._group_sizes[v]
+            return True
+
+        comp = u#self._graph_searcher.find(u)
+        threshold = self.k * self._group_sizes[comp] - self.l
+        if self._group_constraints[comp] >= threshold:
+            return False
+
+        # Same component, still has internal DOF to absorb: independent.
+        self._group_constraints[comp] += 1
+        self._edge_list.add(key)
+        return True
+
+    def add_edges(self, edges, revert_on_failure=True) -> list[bool|None]:
+        if revert_on_failure:
+            constraints = self._group_constraints.copy()
+            sizes = self._group_sizes.copy()
+            graph = self._graph_searcher.copy()
+            el_cache = self._edge_list.copy()
+        status = [
+            self.add_edge(u, v)
+            for u,v in edges
+        ]
+        if revert_on_failure and any(s is False for s in status):
+            self._group_constraints = constraints
+            self._group_sizes = sizes
+            self._graph_searcher = graph
+            self._edge_list = el_cache
+        return status
+
+    def rigid_components(self):
+        # if not self._graph_searcher.track_components:
+        #     raise ValueError('`track_components` must be `True` to get rigid components')
+        const_checks = {
+            comp:const >= self.k * self._group_sizes[comp] - self.l
+            for comp, const in self._group_constraints.items()
+        }
+        if self._graph_searcher.track_components:
+            const_checks = {
+                comp:(const, self._graph_searcher.component(comp))
+                for comp, const in const_checks.items()
+            }
+        return const_checks
+def pebble_rigidity(edge_sets, k, l=None):
+    if l is None:
+        l = math.comb(k+1, 2) # k translations and binom(k, 2) rotations
+
+    idx_map = {}
+    _ = []
+    for edges in edge_sets:
+        if len(edges) == 2 and not dev.is_list_like(edges[0]):
+            edges = [edges]
+        subsets = []
+        for e in edges:
+            e2 = []
+            for v in e:
+                if v not in idx_map: idx_map[v] = len(idx_map)
+                e2.append(idx_map[v])
+            subsets.append(e2)
+        _.append(subsets)
+    edge_sets = _
+    n_vertices = len(idx_map)
+
+    if k == 2:
+        gameboard = PebbleGameBoard(n_vertices, k, l)
+    else:
+        gameboard = GraphComponentTracker(k, l)
+
+    edge_results = [
+        [e for e in gameboard.add_edges(edges) if e is not None]  # acts like a heap, grow as you add
+        for edges in edge_sets
+    ]
+
+    return [len(x) > 0 and all(x) for x in edge_results]
+
+def rigidity_matrix(points, edges):
+    points = np.asanyarray(points)
+    base_shape = points.shape[:-2]
+    n, d = points.shape[-2:]
+    R = np.zeros(base_shape + (len(edges), n * d))
+    for row, (i, j) in enumerate(edges):
+        diff = points[..., i, :] - points[..., j, :]
+        R[..., row, i*d: (i+1)*d] = diff
+        R[..., row, j*d: (j+1)*d] = -diff
+
+    return R
+def statistically_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None, return_rigidity_matrix=False):
+    edges = np.asanyarray(edges)
+    if natoms is None:
+        if points is None:
+            natoms = np.max(edges) + 1
+        else:
+            points = np.asanyarray(points)
+            natoms = points.shape[-2]
+    if points is None:
+        points = np.random.rand(ntest, natoms, ndim)
+    R = rigidity_matrix(points, edges)
+    rank = np.linalg.matrix_rank(R)
+    if not nput.is_numeric(rank):
+        n = rank.shape[0]
+        rank = np.sort(rank)[n//2]
+
+    if l is None:
+        l = math.comb(ndim+1, 2)
+    rigid = rank >= ndim * natoms - l
+    if return_rigidity_matrix:
+        return rigid, (R, rank)
+    else:
+        return rigid
+def uniquely_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None,
+                   return_components=False,
+                   return_rigid_subgraphs=False):
+    edges = np.asanyarray(edges)
+    if natoms is None:
+        natoms = np.max(edges) + 1
+    if points is None:
+        points = np.random.rand(ntest, natoms, ndim)
+    if l is None:
+        l = math.comb(ndim+1, 2)
+
+    base_rigidity, (R, rank) = statistically_rigid(edges, ndim, l=l, points=points, return_rigidity_matrix=True)
+    if return_rigid_subgraphs:
+        # use the pebble game to identify rigid subgraphs and check their unique rigidty
+        # tracker = GraphComponentTracker(ndim, l, track_components=True)
+        # included = tracker.add_edges(edges)
+        # rigid_components = tracker.rigid_components()
+        # import pprint
+        # pprint.pprint(list(zip(edges, included)))
+        # raise Exception(rigid_components)
+        ...
+
+    if not base_rigidity:
+        if return_components:
+            return False, (R, rank), None
+        else:
+            return False
+
+    # for i in range(len(edges)):
+    #     subrigidity = statistically_rigid(np.delete(edges, i), ndim, l=l, points=points)
+    #     if not subrigidity: return False
+
+    U, S, Vt = np.linalg.svd(R)
+    # Left nullspace of R = stresses
+    U = U[..., :, rank:]  # shape (|E|, num_stresses)
+
+    base_shape = U.shape[:-2]
+    targ_shape = base_shape + (U.shape[-1], 1)
+    stress_vectors = np.reshape(
+        U @ nput.vec_normalize(np.random.normal(size=targ_shape)),  # random direction vectors
+        base_shape + (U.shape[-2],)
+    )
+
+    n = R.shape[-1] // ndim
+    stress_tensors = np.zeros(base_shape + (n, n))
+    for k, (i, j) in enumerate(edges):
+        stress_tensors[..., i, j] = -stress_vectors[..., k]
+        stress_tensors[..., j, i] = -stress_vectors[..., k]
+        stress_tensors[..., i, i] += stress_vectors[..., k]
+        stress_tensors[..., j, j] += stress_vectors[..., k]
+
+    stress_rank = np.linalg.matrix_rank(stress_tensors)
+    if not nput.is_numeric(stress_rank):
+        m = stress_rank.shape[0]
+        stress_rank = np.sort(stress_rank)[m//2]
+
+    globally_rigid = stress_rank >= n - ndim - 1
+    if return_components:
+        return globally_rigid, (R, rank), (stress_tensors, stress_rank)
+    else:
+        return globally_rigid
