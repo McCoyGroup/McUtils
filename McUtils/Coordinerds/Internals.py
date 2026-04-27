@@ -490,6 +490,14 @@ class InternalSpec:
                 blocks = []
                 for i,j in itertools.combinations(g, 2):
                     blocks.append(funs[(i,j)])
+                edges = []
+                for i,j in itertools.combinations(g, 2):
+                    if funs[(i,j)] is not None:
+                        edges.append((i,j))
+                print(len(edges))
+                r = uniquely_rigid(edges, 3, natoms=len(g), return_components=True)
+                raise Exception(r)
+
                 if any(b is None for b in blocks):
                     return None, None
                     #convs.append(None)
@@ -3815,6 +3823,104 @@ def _update_cache_based_on_dists(extra_dists, cache, inverse_triangulation):
         if any(all(d) in inds for d in extra_dists):
             conversion_cache[dihed] = set()
     return
+
+class NonredundantInternalsChecker:
+    def __init__(self, base_internals, natoms, dist_set=None):
+        self.graph = InternalCoordinateGraph(base_internals)
+        self.natoms = natoms
+        if dist_set is None:
+            dist_set = list(itertools.combinations(natoms, 2))
+        self.dist_set = dist_set
+        self._all_dists = None
+        self._stress_rank = None
+        self._local_rank = None
+
+    @property
+    def dists(self):
+        if self._all_dists is None:
+            checks = self.graph.find_conversions(self.dist_set, find_unreachable=False)
+            self._all_dists = tuple(d for d,c in zip(self.dist_set, checks) if c is not None)
+        return self._all_dists
+    def check_rigidty(self, dists):
+        rigid, (_, local_rank), stress = uniquely_rigid(
+            dists, 3, natoms=self.natoms,
+            return_components=True,
+            return_rigid_subgraphs=True
+        )
+        return rigid, local_rank, stress
+
+    @classmethod
+    def from_initial_internals(cls, internals):
+        dist_pos = [n for n, i in enumerate(internals) if len(i) == 2]
+        coords = [internals[n] for n in dist_pos]
+
+        natoms = max(max(i) for i in internals) + 1
+        # check rigidity
+        rigid, (_, local_rank), stress = uniquely_rigid(
+            coords, 3, natoms=natoms,
+            return_components=True,
+            return_rigid_subgraphs=True
+        )
+
+        if rigid:
+            #TODO: prune overcomplete distance sets
+            return coords, None
+
+        rem_pos = [n for n, i in enumerate(internals) if len(i) > 2]
+        rem = [internals[n] for n in rem_pos]
+
+        return cls(coords), rem
+
+    def add_internal(self, c):
+        if self._local_rank is None:
+            rigid, local_rank, stress_rank = self.check_rigidty(self.dists)
+
+
+        graph = self.graph
+        with graph.checkpoint() as checkpoint:
+            # print(c)
+            # print("???", len(graph._unreachable))
+            new_coords = graph.add_internals([c])
+            # print("  >", len(graph._conversions), len(graph._unreachable), len(new_coords))
+            # print("  >", len(graph.internals))
+
+            checks = graph.find_conversions(self.dist_set, find_unreachable=True)
+            added_dists = tuple(
+                i for i,c in zip(self.dist_set, checks)
+                if c is not None and i not in self._all_dists
+            )
+            # print("  =", len(added_dists))
+            # print(all_dists + added_dists)
+
+            if len(added_dists) > 0:
+                test_dists = self._all_dists + added_dists
+                rigid, local_rank, stress_rank = self.check_rigidty(test_dists)
+
+                extend = True
+                if rigid:
+                    # coords = test
+                    ...
+                elif stress_rank is not None:
+                    _, test_rank = stress_rank
+                    extend = self._stress_rank is None or test_rank > self._stress_rank
+                    if extend:
+                        self._stress_rank = test_rank
+                else:
+                    extend = local_rank > self._local_rank
+                    if extend:
+                        local_rank = self._local_rank
+                if extend:
+                    # print(added_dists)
+                    # print(">>>", stress_rank, local_rank)
+                    checkpoint.reset = False
+                    # added_coords.append(c)
+                    self._all_dists = test_dists
+                    # incl_coords.append(n)
+                rigidity_data = rigid, local_rank, stress_rank
+            else:
+                rigidity_data = None
+        return extend, (rigid, local_rank, stress_rank)
+        graph.find_conversions(dist_set, find_unreachable=False)
 def get_non_redundant_internals(internals, triangles_and_dihedrons=None,
                                 check_distances=True, check_angles=True, check_dihedrals=True,
                                 return_indices=False, natoms=None, validate=False):

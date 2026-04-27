@@ -132,7 +132,7 @@ class JupyterSessionManager:
         if 'argv' not in new_opts:
             exec = new_args.pop('exec', None)
             if exec is None:
-                exec = sys.exec_prefix
+                exec = os.path.join(sys.exec_prefix, "/bin/python")
             new_args['argv'] = [
                 exec,
                 "-m",

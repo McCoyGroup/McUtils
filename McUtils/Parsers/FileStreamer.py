@@ -193,7 +193,8 @@ class FileSearchStream(SearchStream):
         else:
             self._wasopen = True
             self._fstream = self._file
-        self._stream = mmap(self._fstream.fileno(), 0)
+        handle = self._fstream.fileno()
+        self._stream = mmap(handle, 0)
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._stream.close()
@@ -423,7 +424,7 @@ class SearchStreamReader:
                 (cur_test, p_test) = self._next_tag_pos[0].get(t, (cur + 1, -1))
                 if (
                         (p_test < 0 or p_test >= cur_test)
-                        and cur_test <= cur and p_test >= cur
+                        and cur_test <= cur and p_test > cur
                 ):
                     if p_test > 0:
                         tag_positions[p_test] = t
@@ -432,7 +433,7 @@ class SearchStreamReader:
                 (cur_test, p_test) = self._next_tag_pos[1].get(t, (cur-1, -1))
                 if (
                         (p_test < 0 or p_test <= cur_test)
-                        and cur_test >= cur and p_test <= cur
+                        and cur_test >= cur and p_test < cur
                 ):
                     if p_test >= 0:
                         tag_positions[p_test] = t
@@ -460,19 +461,23 @@ class SearchStreamReader:
 
             follow_ups = tags.skips
             if follow_ups is not None:
+                prev_tag = tag
                 for tag in follow_ups:
-                    if not skip_tag:
-                        if forward:
-                            self.stream.seek(pos+1)
-                        else:
-                            self.stream.seek(pos-1)
+                    prev_size = self.stream.tag_size(prev_tag)
+                    if forward:
+                        self.stream.seek(pos+prev_size)
                     else:
-                        self.stream.seek(pos)
-                    p = self.find_tag(tag, seek=False, direction=direction)
-                    if allow_terminal or p > -1:
+                        self.stream.seek(pos-prev_size)
+                    p = self._find_tag(tag, seek=False, direction=direction)
+                    if p > -1:
                         pos = p
-                if not seek:
-                    self.seek()
+                    elif allow_terminal:
+                        pos = p
+                        break
+                    prev_tag = tag
+
+                # if not seek:
+                #     self.seek(pre_follows)
                 if validator is not None:
                     block_size = abs(pos - og_pos + ts)
                     if forward:
@@ -588,7 +593,7 @@ class SearchStreamReader:
         if (start < 0 or end < 0):
             if allow_terminal:
                 block = self.stream.read()
-                if not validator(block):
+                if validator is not None and not validator(block):
                     block = None
             else:
                 block = self.TagSentinels.EOF
@@ -598,7 +603,9 @@ class SearchStreamReader:
             else:
                 block = self.stream.rread(end - start)
 
+
             if expand_until_valid:
+                print("!", block)
                 with FileStreamCheckPoint(self) as chk:
                     if not validator(block):
                         if forward:
@@ -704,12 +711,13 @@ class SearchStreamReader:
                                                           validator, end_direction)
 
             if (
-                    not expand_until_valid
+                    not expand_until_valid # quick check, we already validated up above
                     and block is not None
                     and block is not self.TagSentinels.EOF
                     and (validator is not None and not validator(block))
             ):
-                block = None
+                # invalid block found, skip ahead
+                # protected by EOF check
                 if self._is_forward(start_direction):
                     self.seek(end_points[-1]+1)
                 else:

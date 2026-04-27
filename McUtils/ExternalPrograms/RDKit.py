@@ -113,6 +113,20 @@ class RDMolecule(ExternalMolecule):
         _ = Chem.GetSymmSSSR(rdkit_mol)
         Chem.SetHybridization(rdkit_mol)
     @classmethod
+    def guess_rdmol_bonds(cls, rdmol, charge=None, determine_orders=True, in_place=False):
+        Chem = cls.chem_api()
+        if not in_place:
+            rdmol = Chem.Mol(rdmol)
+        if charge is None:
+            charge = Chem.GetFormalCharge(rdmol)
+        rdDetermineBonds = RDKitInterface.submodule("Chem.rdDetermineBonds")
+        if determine_orders:
+            #TODO: allow a fallback to `DetermineConnectivity`
+            rdDetermineBonds.DetermineBonds(rdmol, charge=charge)
+        else:
+            rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
+        return rdmol
+    @classmethod
     def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True,
                    add_implicit_hydrogens=False,
                    sanitize_ops=None,
@@ -126,10 +140,7 @@ class RDMolecule(ExternalMolecule):
         if charge is None:
             charge = Chem.GetFormalCharge(rdmol)
         if guess_bonds:
-            rdDetermineBonds = RDKitInterface.submodule("Chem.rdDetermineBonds")
-            rdmol = Chem.Mol(rdmol)
-            rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
-            # return cls.from_rdmol(rdmol, conf_id=conf_id, guess_bonds=False, charge=charge)
+            rdmol = cls.guess_rdmol_bonds(rdmol, charge, determine_orders=True, in_place=True)
         if sanitize:
             rdmolops = RDKitInterface.submodule("Chem.rdmolops")
             if sanitize_ops is None:
