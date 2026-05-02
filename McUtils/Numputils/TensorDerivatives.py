@@ -1086,7 +1086,7 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
                        up_vector=None,
                        component_vectors=None,
                        unit_expansions=None,
-                       planar_threshold=1e-14):
+                       planar_threshold=None):
     if is_numeric(order):
         max_order = order
     else:
@@ -1095,6 +1095,8 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         A_expansion = vec_norm_unit_deriv(A_expansion, max_order)[1]
         B_expansion = vec_norm_unit_deriv(B_expansion, max_order)[1]
 
+    if planar_threshold is None:
+        planar_threshold = Options.zero_threshold
     if not planar:
         vec_cross = vec_cross_deriv(A_expansion, B_expansion, order=max_order)
         if planar is None:
@@ -1220,7 +1222,9 @@ def arctan_expansion_term(angle, order):
 def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
                     component_vectors=None,
                     unit_expansions=None,
-                    unitized=False):
+                    unitized=False,
+                    planar=None,
+                    planar_threshold=None):
     if not unitized:
         units_A, A_expansion = vec_norm_unit_deriv(A_expansion, order)
         units_B, B_expansion = vec_norm_unit_deriv(B_expansion, order)
@@ -1229,7 +1233,9 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
                                        up_vector=up_vector,
                                        component_vectors=component_vectors,
                                        unit_expansions=unit_expansions,
-                                       return_unit_vectors=False)
+                                       return_unit_vectors=False,
+                                       planar=planar,
+                                       planar_threshold=planar_threshold)
 
     # for i in range(3):
     #     for j in range(i+1, 3):
@@ -1295,7 +1301,7 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
     # print([h1.shape for h1 in huh_1])
 
 def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
-                    B_norms=None, planar=None, planar_threshold=1e-14):
+                    B_norms=None, planar=None, planar_threshold=None):
     # quick check
 
     if is_numeric(order):
@@ -1320,14 +1326,16 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
                                   # up_vector=None
                                   up_vector=B_expansion[0],
                                   unit_expansions=[B_norms, n1_norms, n2_norms],
-                                  component_vectors=[A_expansion, B_expansion, C_expansion]
+                                  component_vectors=[A_expansion, B_expansion, C_expansion],
+                                  planar=planar,
+                                  planar_threshold=planar_threshold
                                   )
     # add in the np.pi shift to account for imposed sign flip in standard imp. to match Gaussian
     base_derivs[0] = np.pi - base_derivs[0]
     return base_derivs
     # return [-x for x in base_derivs]
 
-def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=1e-14):
+def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=None):
     # quick check
 
     if is_numeric(order):
@@ -1339,6 +1347,8 @@ def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, or
     cxd_expansion = vec_cross_deriv(C_expansion, D_expansion, max_order)
 
     return vec_angle_deriv(axb_expansion, cxd_expansion, order, unitized=False,
+                           planar=planar,
+                           planar_threshold=planar_threshold
                            # planar_threshold=planar_threshold
                            )
 

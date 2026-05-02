@@ -786,10 +786,53 @@ def center_bound_zmatrix(n, center=-1):
 def attached_zmatrix_fragment(n, zm, fragment, attachment_points):
     _ = []
     order = [f[0] for f in zm]
+    main_ref = None
     for a in attachment_points:
         if a < 0:
-            if len(order) >= (-a):
-                a = order[a]
+            if main_ref is None:
+                if len(order) >= (-a):
+                    a = order[a]
+                    for m,z in enumerate(zm):
+                        if z[0] == a:
+                            _ = []
+                            for zz in z:
+                                if zz < 0:
+                                    clip_i = max([m + zz, 0])
+                                    if order[clip_i] not in _:
+                                        zz = order[clip_i]
+                                    if zz < 0:
+                                        clip_i = (m - zz) % len(order)
+                                        for j in range(clip_i, len(order)):
+                                            if order[j] not in _:
+                                                zz = order[j]
+                                                break
+                                        # else:
+                                        #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
+                                _.append(zz)
+                            main_ref = _
+                            break
+            else:
+                a = main_ref[(-a) - 1]
+        elif main_ref is None:
+            for m,z in enumerate(zm):
+                if z[0] == a:
+                    _ = []
+                    for zz in z:
+                        if zz < 0:
+                            clip_i = max([m + zz, 0])
+                            if order[clip_i] not in _:
+                                zz = order[clip_i]
+                            if zz < 0:
+                                clip_i = (m - zz) % len(order)
+                                for j in range(clip_i, len(order)):
+                                    if order[j] not in _:
+                                        zz = order[j]
+                                        break
+                                # else:
+                                #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
+                        _.append(zz)
+                    main_ref = _
+                    break
         _.append(a)
     attachment_points = _
     return [
@@ -1171,14 +1214,15 @@ def add_missing_zmatrix_bonds(
     if len(new_bonds) == 0:
         return base_zmat, new_bonds
     else:
-        mods = {}
+        mods = []
         for i,v in new_bonds.items():
             v = [vv for vv in v if vv not in reindexing]
             if len(v) > 0:
                 i_pos = np.where(atoms == i)[0][0]
                 reindexing.extend(v)
-                ix = _attachment_point(i_pos)
-                mods[ix] = center_bound_zmatrix(len(v))
+                # ix = _attachment_point(i_pos)
+                ix = (i_pos, -1, -2)
+                mods.append([ix, center_bound_zmatrix(len(v))])
 
         new_zm = functionalized_zmatrix(
                 zm,
@@ -1763,7 +1807,6 @@ def complex_zmatrix(
         reindex=True,
         validate_additions=True
 ):
-
     if fragment_inds is None:
         if fragment_zmats is not None:
             raise ValueError("can't supply just Z-mats, unclear which fragments they come from...")
@@ -1811,10 +1854,14 @@ def complex_zmatrix(
                 subgraph = graph.take(inds)
                 min_row = subgraph.get_centroid(check_fragments=False) #TODO: see if I need to add a row check to this...
             else:
-                distance_matrix = np.asanyarray(distance_matrix)
-                dm = distance_matrix[np.ix_(inds, inds_2)]
-                min_cols = np.argmin(dm, axis=1)
-                min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
+                # distance_matrix = np.asanyarray(distance_matrix)
+                dm_row = distance_matrix[zm_2[0][0]]
+                min_row = np.argmin(dm_row[inds,], axis=0)
+                # dm = distance_matrix[np.ix_(inds, inds_2)]
+                # min_cols = np.argmin(dm, axis=1)
+                # min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
+                # min_row = inds[min_row]
+                # min_cols = inds_2[min_cols[min_row]]
                 # min_row = np.where(inds == min_row)[0][0]
                 # root = zm[min_row][0]
         else:

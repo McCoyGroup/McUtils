@@ -1803,8 +1803,6 @@ class RDMolecule(ExternalMolecule):
         #         if atom.GetAtomMapNum():
         #             atomMapToReactantMap[atom.GetAtomMapNum()] = ri
 
-        print(smarts_tf.GetReactingAtoms())
-
         prods = []
         for p_group in perm_prods:
             perm = []
