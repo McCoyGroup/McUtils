@@ -1290,7 +1290,7 @@ class MoleculeEdgeGraph(EdgeGraph):
         if included_atoms is not None:
             inds = [i for i in inds if i not in inds] + inds
 
-        return self.take(inds)
+        return self.take(inds), inds
     def find_longest_chain(self,
                            rings=None,
                            root=None,
@@ -1300,19 +1300,26 @@ class MoleculeEdgeGraph(EdgeGraph):
                            ):
         if heavy_atoms or (light_atoms is not None):
             if heavy_atoms is True: heavy_atoms = None
-            graph = self.get_heavy_atom_framework_graph(
+            graph, inds = self.get_heavy_atom_framework_graph(
                 included_atoms=[root] if root is not None else None,
                 heavy_atoms=heavy_atoms,
                 light_atoms=light_atoms
             )
-            return graph.find_longest_chain(
+            chain = graph.find_longest_chain(
                 root=0 if root is not None else None,
                 heavy_atoms=False,
                 light_atoms=None
             )
+            return [inds[c] for c in chain]
         else:
             return super().find_longest_chain()
 
+    @classmethod
+    def _reindex_segments(cls, inds, segments):
+        if len(segments) == 1:
+            return [tuple(inds[s] for s in segments[0])]
+        else:
+            return [tuple(inds[s] for s in segments[0]), cls._reindex_segments(inds, segments[1])]
     def segment_by_chains(self,
                           root=None,
                           rings=None,
@@ -1323,17 +1330,18 @@ class MoleculeEdgeGraph(EdgeGraph):
                           ):
         if heavy_atoms or (light_atoms is not None):
             if heavy_atoms is True: heavy_atoms = None
-            graph = self.get_heavy_atom_framework_graph(
+            graph, inds = self.get_heavy_atom_framework_graph(
                 included_atoms=[root] if root is not None else None,
                 heavy_atoms=heavy_atoms,
                 light_atoms=light_atoms
             )
-            return graph.segment_by_chains(
+            segments = graph.segment_by_chains(
                 root=0 if root is not None else None,
                 heavy_atoms=False,
                 light_atoms=None,
                 validate=validate
             )
+            return self._reindex_segments(inds, segments)
         else:
             return super().segment_by_chains(root=root, validate=validate)
 
