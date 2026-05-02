@@ -1657,42 +1657,7 @@ def bond_graph_zmatrix(
                 raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
 
     if required_coordinates is not None:
-        print(np.array(fused))
-        # graph = make_zmatrix_tree(fused)
-        # we rearrange nodes in the tree
-        # appropriately
-        # new = zmatrix_from_tree(graph)
-        new = enforce_required_zmatrix_coordinates(fused, required_coordinates)
-        # new = zmatrix_from_tree(forced)
-        print(np.array(new))
-        raise Exception()
-        import pprint
-        pprint.pprint(graph)
-        raise Exception()
-        # figure out how fragments must be ordered
-        fragment_sorting_map = []
-        for c in required_coordinates:
-            submap = {}
-            for i in c:
-                for j, f in enumerate(fragments):
-                    try:
-                        x = f.index(i)
-                    except ValueError:
-                        continue
-                    else:
-                        submap[i] = (j, x)
-                        break
-            fragment_sorting_map.append(submap)
-        # then find a consistent sorting for the fragments included in the map
-        # each coordinate has multiple possible orderings so we first take all included
-        # fragments and then try to find a consistent ordering
-        all_frags = np.unique([
-            f[0]
-            for submap in fragment_sorting_map
-            for f in submap.values()
-        ])
-
-        raise Exception(all_frags)
+        fused = enforce_required_zmatrix_coordinates(fused, required_coordinates)
 
     return fused
 
