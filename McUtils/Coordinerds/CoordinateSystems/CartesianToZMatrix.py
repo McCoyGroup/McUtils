@@ -146,6 +146,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                     ix = np.array([0])
                     jx = None
                     kx = None
+                bad_terms = []
             else:
                 specs = [
                     p
@@ -154,6 +155,24 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                         [(i, j), (i, j, k), (i, j, k, l)]
                     )
                 ]
+                n_tot = len(ordering)
+                _ = []
+                bad_terms = []
+                for m,t in enumerate(specs):
+                    sub = [t[0]]
+                    for tt in t[1:]:
+                        if tt < 0:
+                            tt = n_tot + tt
+                        if tt in sub:
+                            bad_terms.append(m)
+                            break
+                        sub.append(tt)
+                    else:
+                        _.append(sub)
+                specs = _
+
+                if len(bad_terms) > 0:
+                    raise Exception("?")
                 ix = np.arange(0, len(specs), 3)
                 jx = np.arange(1, len(specs), 3)
                 kx = np.arange(2, len(specs), 3)
