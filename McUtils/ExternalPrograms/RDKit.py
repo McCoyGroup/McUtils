@@ -151,6 +151,7 @@ class RDMolecule(ExternalMolecule):
                         # ^rdmolops.SANITIZE_CLEANUP
                         ^rdmolops.SANITIZE_CLEANUP_ORGANOMETALLICS
                 )
+
             rdmol = Chem.Mol(rdmol)
             try:
                 Chem.SanitizeMol(rdmol, sanitize_ops)
@@ -159,7 +160,7 @@ class RDMolecule(ExternalMolecule):
 
         no_confs = False
         try:
-            conf_0 = rdmol.GetConformer(conf_id)
+            conf = rdmol.GetConformer(conf_id)
         except ValueError:
             no_confs = True
 
@@ -173,7 +174,7 @@ class RDMolecule(ExternalMolecule):
             else:
                 raise ValueError(f"{rdmol} has no conformers")
 
-        conf = rdmol.GetConformer(conf_id)
+            conf = rdmol.GetConformer(conf_id)
         return cls(conf, charge=charge)
 
     @classmethod
@@ -1017,12 +1018,16 @@ class RDMolecule(ExternalMolecule):
                   remove_stereo=False,
                   preserve_atom_order=False,
                   binary=False,
+                  coords=None,
+                  mol=None,
                   **opts):
         Chem = self.allchem_api()
-        mol = self.rdmol
+        if mol is None:
+            mol = self.rdmol
         if compute_stereo:
             mol = Chem.Mol(mol)
-            coords = self.coords
+            if coords is None:
+                coords = self.coords
             conf = Chem.Conformer(len(coords))
             conf.SetPositions(np.asanyarray(coords))
             conf.SetId(0)
@@ -1032,7 +1037,7 @@ class RDMolecule(ExternalMolecule):
             mol = Chem.Mol(mol)
             Chem.RemoveStereochemistry(mol)
         if preserve_atom_order:
-            og_atom_map = list(range(len(self.atoms)))
+            og_atom_map = list(range(mol.GetNumAtoms()))
             for atom in mol.GetAtoms():
                 atom.SetAtomMapNum(atom.GetIdx() + 1)
         else:
@@ -1053,7 +1058,8 @@ class RDMolecule(ExternalMolecule):
             self._camel_case(k):v for k,v in opts.items()
         }
         if include_tag:
-            coords = self.coords
+            if coords is None:
+                coords = self.coords
             if remove_hydrogens:
                 if not preserve_atom_order:
                     coords = [
@@ -1732,6 +1738,158 @@ class RDMolecule(ExternalMolecule):
         query = Chem.MolFromSmarts(query)
         return self.rdmol.GetSubstructMatches(query)
 
+    @classmethod
+    def apply_smarts_to_mol(cls, mol, pattern,
+                            remove_hydrogens=True,
+                            readd_hydrogens=True):#, remove_intermediate_hydrogens=True):
+        # import rdkit.Chem as Chem
+        Chem = cls.allchem_api()
+        if isinstance(pattern, str):
+            smarts_tf = Chem.ReactionFromSmarts(pattern)
+        else:
+            smarts_tf = pattern
+
+        cur_atom_map_indices = [
+            a.GetAtomMapNum()
+            for r in smarts_tf.GetReactants()
+            for a in r.GetAtoms()
+        ]
+        if 0 in cur_atom_map_indices:
+            raise ValueError(f"SMARTS pattern {pattern} must map all atoms")
+
+        # rem_atoms = list(reversed([
+        #     i
+        #     for i in range(1, len(cur_atom_map_indices)+1)
+        #     if i not in cur_atom_map_indices
+        # ]))
+        # for r in smarts_tf.GetReactants():
+        #     for a in r.GetAtoms():
+        #         if a.GetAtomMapNum() == 0:
+        #             i = rem_atoms.pop()
+        #             a.SetAtomMapNum(i)
+
+        mol = Chem.Mol(mol)
+        cur_map_no = [
+            a.GetAtomMapNum()
+            for a in mol.GetAtoms()
+        ]
+        for i,a in enumerate(mol.GetAtoms()):
+            a.SetIntProp('react_atom_idx', i)
+            a.SetAtomMapNum(i+1)
+        # map_ord = list(range(1, len(cur_map_no)+1))
+        # # we create an initial map of hydrogen positions and their bonds so we can add them back in
+        # # later and reorder consistently
+        # if remove_intermediate_hydrogens:
+        #     hydrogen_map = {
+        #
+        #     }
+
+        hydrogen_map = {}
+        for a in mol.GetAtoms():
+            if a.GetSymbol() in ['H', 'D', 'T']:
+                i = a.GetIdx()
+                key = tuple(sorted(b.GetIdx() for b in a.GetNeighbors()))
+                if key not in hydrogen_map: hydrogen_map[key] = []
+                hydrogen_map[key].append(i)
+
+        if remove_hydrogens:
+            mol = Chem.RemoveHs(mol)
+
+        perm_prods = smarts_tf.RunReactants((mol,))
+        # atomMapToReactantMap = {}
+        # for ri in range(smarts_tf.GetNumReactantTemplates()):
+        #     rt = smarts_tf.GetReactantTemplate(ri)
+        #     for atom in rt.GetAtoms():
+        #         if atom.GetAtomMapNum():
+        #             atomMapToReactantMap[atom.GetAtomMapNum()] = ri
+
+        prods = []
+        for p_group in perm_prods:
+            perm = []
+            add_h_p = []
+            h_map = {k:l.copy() for k,l in hydrogen_map.items()}
+            for p in p_group:
+                if readd_hydrogens:
+                    p = Chem.AddHs(p, explicitOnly=False)
+                    # RDKit will destroy hydrogens sometimes in "RunReactants"
+                    # we just need to ensure this doesn't reorder anything...
+                # for a in p.GetAtoms():
+                #     x = a.GetPropsAsDict().get('react_atom_idx', a.GetAtomMapNum())
+                #     print(x, a.GetSymbol(), a.GetPropsAsDict())
+                for a in p.GetAtoms():
+                    x = a.GetPropsAsDict().get('react_atom_idx', a.GetAtomMapNum())
+                    if x == 0 and a.GetSymbol() in ['H', 'D', 'T']:
+                        bond_atoms = []
+                        for b in a.GetNeighbors():
+                            bond_atoms.append(
+                                b.GetPropsAsDict().get('react_atom_idx', b.GetAtomMapNum())
+                            )
+                        key = tuple(sorted(bond_atoms))
+                        # print("!", key, [b.GetSymbol() for b in a.GetNeighbors()])
+                        x = h_map[key].pop()
+                    # a.SetAtomMapNum(x)
+                    perm.append(x)
+                add_h_p.append(p)
+            # print(perm)
+            # print(*[Chem.MolToSmiles(i) for i in p_group])
+
+            p = functools.reduce(Chem.CombineMols, add_h_p)
+            p = Chem.RenumberAtoms(p, np.argsort(perm, kind='merge').tolist())
+            for a,cn in zip(p.GetAtoms(), cur_map_no):
+                a.SetAtomMapNum(cn)
+            prods.append(p)
+
+        return prods
+
+    def apply_smarts(self, tf):
+        Chem = self.chem_api()
+        base_products = self.apply_smarts_to_mol(self.rdmol, tf)
+
+        conf_id = self.mol.GetId()
+        nats = self.coords.shape[0]
+
+        new_mols = []
+        for p in base_products:
+            p.RemoveAllConformers()
+            conf = Chem.Conformer(nats)
+            copy_coords = self.coords.copy()
+            conf.SetPositions(copy_coords)
+            conf.SetId(conf_id)
+            p.AddConformer(conf)
+            conf = p.GetConformer(conf_id)
+            new_mols.append(type(self)(conf, charge=self.charge))
+        return new_mols
+
+    def break_bonds(self,
+                    bonds,
+                    add_dummies=False,
+                    reguess_bonds=True):
+        Chem = self.chem_api()
+        from rdkit.Chem.rdmolops import FragmentOnBonds
+
+        nats = self.coords.shape[0]
+        conf_id = self.mol.GetId()
+        bond_indices = []
+        mol = self.rdmol
+        for i,j in bonds:
+            bond_indices.append(mol.GetBondBetweenAtoms(i,j).GetIdx())
+        broke_mol = FragmentOnBonds(mol, bond_indices,
+                                    addDummies=add_dummies)
+        Chem.AddHs(broke_mol, explicitOnly=True)
+        conf = Chem.Conformer(nats)
+        copy_coords = self.coords.copy()
+        conf.SetPositions(copy_coords)
+        conf.SetId(conf_id)
+        broke_mol.AddConformer(conf)
+        conf = broke_mol.GetConformer(conf_id)
+
+        if reguess_bonds:
+            import rdkit.Chem.rdDetermineBonds as rdDetermineBonds
+            rdDetermineBonds.DetermineBondOrders(broke_mol, charge=self.charge, embedChiral=False)
+
+        return type(self)(conf, charge=self.charge)
+
+
     def get_atom_neighbors(self, i, n=1, mol=None, graph=None):
         if graph is None:
             graph = self.get_edge_graph(mol=mol)
@@ -1950,7 +2108,7 @@ class RDMolecule(ExternalMolecule):
                 if not modified:
                     mol = Chem.Mol(mol)
                     modified = True
-                conf = mol.GetConformer()
+                # conf = mol.GetConformer()
                 if view_settings is not None:
                     view_settings = self._get_view_settings(**view_settings)
                 else:

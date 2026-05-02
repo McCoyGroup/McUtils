@@ -605,7 +605,6 @@ class SearchStreamReader:
 
 
             if expand_until_valid:
-                print("!", block)
                 with FileStreamCheckPoint(self) as chk:
                     if not validator(block):
                         if forward:
@@ -664,7 +663,7 @@ class SearchStreamReader:
     def get_tagged_block(self, tag_start, tag_end,
                          validator=None, tag_validator=None,
                          allow_terminal=False,
-                         expand_until_valid=False,
+                         expand_until_valid=None,
                          return_tag=False,
                          return_end_points=False,
                          direction='forward',
@@ -686,6 +685,8 @@ class SearchStreamReader:
 
         start_direction, end_direction = self._get_search_directions(direction)
         _eps = end_points
+        if expand_until_valid is None:
+            expand_until_valid = validator is not None
         while block is None:
             if tag_start is not None:
                 tag_str, start = self.find_tag(tag_start,

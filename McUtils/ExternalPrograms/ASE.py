@@ -1,7 +1,8 @@
 
 
 __all__ = [
-    "ASEMolecule"
+    "ASEMolecule",
+    "ASECalculator"
 ]
 
 import sys
@@ -249,3 +250,25 @@ class ASEMolecule(ExternalMolecule):
             self.mol.positions = cur_geom
 
         return opt, opt_coords, {}
+
+
+def ASECalculator(
+        energy_evaluator,
+        charge_evaluator=None,
+        dipole_evaluator=None,
+        analytic_derivative_order=None,
+        charge_derivative_order=None,
+        dipole_derivative_order=None,
+        **kwargs
+):
+    from .ASECalculator import ASETermCalculator
+
+    return ASETermCalculator(
+        energy_evaluator,
+        charge_evaluator=charge_evaluator,
+        dipole_evaluator=dipole_evaluator,
+        analytic_derivative_order=analytic_derivative_order,
+        charge_derivative_order=charge_derivative_order,
+        dipole_derivative_order=dipole_derivative_order,
+        **kwargs
+    )

@@ -15,7 +15,8 @@ __all__ = [
     "riffle",
     "flatten",
     "delete_duplicates",
-    "unique_product"
+    "unique_product",
+    "zigzag_product"
 ]
 
 def is_fixed_size(iterable):
@@ -266,3 +267,38 @@ def unique_product(*iterables, key=None, filter=None):
                                 queue.append((i+1, 0, p + (v,), k + (k2,)))
         else:
             yield p
+
+def zigzag_product(*iterables, iterator_lengths=None, return_index=False):
+    if iterator_lengths is None:
+        iterator_lengths = [
+            len(x) if is_fixed_size(x) else None
+            for x in iterables
+        ]
+
+    iterator_caches = [
+        list(itertools.islice(i, l))
+            if l is not None else
+        list(i)
+        for i,l in zip(iterables, iterator_lengths)
+    ]
+
+    flips = [False] * len(iterables)
+    for multi_index in itertools.product(*(range(len(x)) for x in iterator_caches)):
+        # if the previous term in the multi_index is positive we don't modify it
+        # otherwise we invert
+        if multi_index[-1] == 0:
+            # we check to see if we need to change the flip pattern
+            for i,prev in enumerate(multi_index[-2::-1]):
+                if prev != 0:
+                    for k in range(i+1):
+                        flips[-(k+1)] = not flips[-(k+1)]
+
+        new_index = tuple(
+            iterator_lengths[i] - (x+1) if flips[i] else x
+            for i,x in enumerate(multi_index)
+        )
+        res = tuple(iterator_caches[i][x] for i,x in enumerate(new_index))
+        if return_index:
+            yield res, new_index
+        else:
+            yield res

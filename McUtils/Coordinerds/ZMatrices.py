@@ -1,6 +1,7 @@
 import collections
 
 import numpy as np
+import scipy.sparse as spg
 import itertools
 from .. import Numputils as nput
 from .. import Iterators as itut
@@ -785,10 +786,53 @@ def center_bound_zmatrix(n, center=-1):
 def attached_zmatrix_fragment(n, zm, fragment, attachment_points):
     _ = []
     order = [f[0] for f in zm]
+    main_ref = None
     for a in attachment_points:
         if a < 0:
-            if len(order) >= (-a):
-                a = order[a]
+            if main_ref is None:
+                if len(order) >= (-a):
+                    a = order[a]
+                    for m,z in enumerate(zm):
+                        if z[0] == a:
+                            _ = []
+                            for zz in z:
+                                if zz < 0:
+                                    clip_i = max([m + zz, 0])
+                                    if order[clip_i] not in _:
+                                        zz = order[clip_i]
+                                    if zz < 0:
+                                        clip_i = (m - zz) % len(order)
+                                        for j in range(clip_i, len(order)):
+                                            if order[j] not in _:
+                                                zz = order[j]
+                                                break
+                                        # else:
+                                        #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
+                                _.append(zz)
+                            main_ref = _
+                            break
+            else:
+                a = main_ref[(-a) - 1]
+        elif main_ref is None:
+            for m,z in enumerate(zm):
+                if z[0] == a:
+                    _ = []
+                    for zz in z:
+                        if zz < 0:
+                            clip_i = max([m + zz, 0])
+                            if order[clip_i] not in _:
+                                zz = order[clip_i]
+                            if zz < 0:
+                                clip_i = (m - zz) % len(order)
+                                for j in range(clip_i, len(order)):
+                                    if order[j] not in _:
+                                        zz = order[j]
+                                        break
+                                # else:
+                                #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
+                        _.append(zz)
+                    main_ref = _
+                    break
         _.append(a)
     attachment_points = _
     return [
@@ -1170,14 +1214,15 @@ def add_missing_zmatrix_bonds(
     if len(new_bonds) == 0:
         return base_zmat, new_bonds
     else:
-        mods = {}
+        mods = []
         for i,v in new_bonds.items():
             v = [vv for vv in v if vv not in reindexing]
             if len(v) > 0:
                 i_pos = np.where(atoms == i)[0][0]
                 reindexing.extend(v)
-                ix = _attachment_point(i_pos)
-                mods[ix] = center_bound_zmatrix(len(v))
+                # ix = _attachment_point(i_pos)
+                ix = (i_pos, -1, -2)
+                mods.append([ix, center_bound_zmatrix(len(v))])
 
         new_zm = functionalized_zmatrix(
                 zm,
@@ -1203,13 +1248,323 @@ def add_missing_zmatrix_bonds(
 
         return new_zm, new_bonds
 
+def make_zmatrix_tree(zm):
+    graph = {}
+    for n,(i,j,k,l) in enumerate(zm):
+        parents = tuple(x for x in (j, k, l)[:n] if x >= 0)
+        if i not in graph:
+            graph[i] = {
+                # 'parents': [], # ordered
+                'children': set() # unordered
+            }
+        graph[i]['parents'] = parents
+        for x in parents:
+            if x >= 0:
+                graph[x]['children'].add(i)
+    return graph
+
+def zmatrix_adjacency_matrix(zm, child_type='multi'):
+    adj_mat = np.zeros((len(zm),len(zm)), dtype=bool)
+    if not isinstance(zm, dict):
+        zm = make_zmatrix_tree(zm)
+    zm_atoms = sorted(zm.keys(), key=lambda x: len(zm[x]['parents']))
+    ord = {a:i for i,a in enumerate(zm_atoms)}
+    for entry in zm_atoms:
+        i = ord[entry]
+        if child_type == 'single':
+            for c in zm[entry]['children']:
+                if zm[c]['parents'][0] == entry:
+                    j = ord[c]
+                    adj_mat[i][j] = True
+        else:
+            for c in zm[entry]['children']:
+                j = ord[c]
+                adj_mat[i][j] = True
+    return zm_atoms, adj_mat
+
+def zmatrix_from_tree(zm, check_cycles=True, chain_order=None, check_unique_root=True):
+    if check_unique_root:
+        zm_atoms = sorted(zm.keys(), key=lambda x: len(zm[x]['parents']))
+        if len(zm[zm_atoms[0]]['parents']) != 0:
+            raise ValueError(f"root atom has wrong number of parents in {zm_atoms}")
+        if len(zm) > 1 and len(zm[zm_atoms[1]]['parents']) != 1:
+            raise ValueError(f"first child atom has wrong number of parents in {zm_atoms}")
+        if len(zm) > 2 and len(zm[zm_atoms[2]]['parents']) != 2:
+            raise ValueError(f"second child atom has wrong number of parents in {zm_atoms}")
+
+    if chain_order is None:
+        if check_cycles:
+            zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='multi')
+            g = spg.csr_matrix(zm_adj_mat)
+            comps, groups = spg.csgraph.connected_components(g, connection='strong')
+            has_cycles = comps < len(zm_atoms)
+            if has_cycles:
+                # import pprint
+                # pprint.pprint(zm)
+                # print(groups)
+                # print(zm_atoms)
+                raise ValueError(f"Z-matrix tree invalid as it has cycles (groups: {groups} for atoms: {zm_atoms} in {zm})")
+
+        #TODO: ensure this is the longest chain
+        zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single')
+        g = spg.csr_matrix(zm_adj_mat)
+        chain_order, _ = spg.csgraph.depth_first_order(g, 0)
+        chain_order = [zm_atoms[c] for c in chain_order]
+
+    rows = []
+    for c in chain_order:
+        parents = zm[c]['parents']
+        if len(parents) == 0:
+            parents = [-1, -2, -3]
+        elif len(parents) == 1:
+            parents = parents + (-1, -2)
+        elif len(parents) == 2:
+            parents = parents + (-1,)
+        rows.append([c] + list(parents))
+
+    return rows
+
+def check_zmatrix_coordinate_constraint(zm, coord):
+    # if not isinstance(zm, dict): zm = make_zmatrix_tree(zm)
+    # coord = tuple(coord)
+
+    n = len(coord) - 1
+    p1 = zm[coord[0]]['parents']
+    if (coord[0],) + p1[:n] == coord:
+        return (coord[0], p1)
+
+    p2 = zm[coord[-1]]['parents']
+    p2 = tuple(reversed(p2)) #TODO: use direct indexing
+    if p2[:n] + (coord[-1],) == coord:
+        return (coord[-1], p2)
+
+    return False
+
+def _adjust_zm_parents(zm, i, new, constraint_map):
+    p1 = zm[i]['parents']
+    zm[i]['parents'] = new
+    if all(
+            check_zmatrix_coordinate_constraint(zm, c)
+            for c in constraint_map.keys()
+    ):
+        for o in p1:
+            zm[o]['children'].remove(i)
+        for o in new:
+            zm[o]['children'].add(i)
+
+        # determine how chain order has changed and re-parent
+        # anything that needs tweaks
+        zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single')
+        g = spg.csr_matrix(zm_adj_mat)
+        chain_order, _ = spg.csgraph.depth_first_order(g, 0)
+        chain_order: list[int] = [zm_atoms[c] for c in chain_order]
+        ord_map = {o: i for i, o in enumerate(chain_order)}
+        backup = {
+            o: {'parents':d['parents'], 'children':d['children'].copy()}
+            for o, d in zm.items()
+        }
+        # recompute parents for the modified Z-matrix
+        zm = {
+            o: {'parents':d['parents'], 'children':set()}
+            for o, d in zm.items()
+        }
+        for n, o in enumerate(chain_order):
+            zd = zm[o]
+            new_parents = [
+                p
+                for p in zd['parents']
+                if ord_map[p] < n
+            ]
+            if n == 1 and len(new_parents) == 0:
+                new_parents = [chain_order[0]]
+            elif n == 2:
+                if len(new_parents) == 0:
+                    new_parents = [chain_order[0], chain_order[1]]
+                elif len(new_parents) == 1:
+                    if chain_order[0] in new_parents:
+                        new_parents.append(chain_order[1])
+                    else:
+                        new_parents.append(chain_order[0])
+            elif n > 2 and len(new_parents) < 3:
+                # find previous chain entries that
+                # have one of the active parents as children
+                for p in tuple(new_parents):
+                    nd = zm[p]
+                    add_parents = [
+                        pp
+                        for pp in nd['parents']
+                        if ord_map[pp] < n
+                    ]
+                    new_parents.extend(add_parents)
+                    new_parents = new_parents[:3]
+                    if len(new_parents) == 3:
+                        break
+                else:
+                    new_parents.extend(chain_order[:n + 1])
+                    new_parents = new_parents[:3]
+            for p in new_parents:
+                zm[p]['children'].add(o)
+            zd['parents'] = tuple(new_parents)
+
+        if all(
+                check_zmatrix_coordinate_constraint(zm, c)
+                for c in constraint_map.keys()
+        ):
+            return True, zm
+        else:
+            for o, d in backup.items():
+                zm[o] = d
+            for o in p1:
+                zm[o]['children'].add(i)
+            for o in new:
+                zm[o]['children'].remove(i)
+            zm[i]['parents'] = p1
+    else:
+        zm[i]['parents'] = p1
+    return False, zm
+
+def enforce_required_zmatrix_coordinates(zm, coords):#, chain_order=None):
+    zm_og = zm
+    if not isinstance(zm, dict):
+        zm = make_zmatrix_tree(zm)
+    # else:
+    #     if chain_order is None:
+    #         zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm)
+    #         g = spg.csr_matrix(zm_adj_mat)
+    #         # TODO: ensure this is the longest chain
+    #         chain_order, _ = spg.csgraph.depth_first_order(g, zm_atoms[0])
+    #         chain_order = [zm_atoms[c] for c in chain_order]
+
+    constraint_map = {
+        c: check_zmatrix_coordinate_constraint(zm, c)
+        for c in coords
+    }
+    missing_constraints = [
+        c for c,v in constraint_map.items()
+        if not v
+    ]
+    if len(missing_constraints) == 0: return zm_og
+
+    constraint_map = {
+        c:v
+        for c, v in constraint_map.items()
+        if v
+    }
+    modified = False
+    for m in missing_constraints:
+        # handle cases differently
+        i, j = m[0], m[-1]
+        # we may have to shuffle one of these atoms, but we first check if the constraint
+        # is satisfiable by just permuting the referents
+        p1 = zm[i]['parents']
+        if (
+                all(x in p1 for x in m[1:])
+                and not any(
+                    # this might be the same as v? Need to check
+                    c == (i,) + p1[:len(c)-1]
+                    or c == tuple(reversed(p1))[:len(c)-1] + (i,)
+                    for c in constraint_map.keys()
+                )
+        ):
+            if not modified:
+                zm = zm.copy()
+                modified = True
+
+            x = [p1.index(y) for y in m[1:]]
+            rem = np.setdiff1d(np.arange(3), x)
+            p1 = tuple(p1[z] for z in np.concatenate([x, rem]))
+            zm[i]['parents'] = p1
+            constraint_map[m] = p1
+            continue
+        del p1
+
+        p2 = zm[j]['parents']
+        if (
+                all(x in p2 for x in m[:-1])
+                and not any(
+                    # this might be the same as v? Need to check
+                    c == (j,) + tuple(reversed(p2))[-len(c):]
+                    or c == p2[-len(c):] + (j,)
+                    for c in constraint_map.keys()
+                )
+        ):
+            # do minimal permutation
+            x = [p2.index(y) for y in reversed(m[:-1])]
+            rem = np.setdiff1d(np.arange(3), x)
+            p2 = tuple(p2[z] for z in np.concatenate([x, rem]))
+            zm[j]['parents'] = p2
+            constraint_map[m] = p2
+            continue
+        del p2
+
+        # check to see if modifying the parents of `i` or `j` would
+        # violate a different constraint
+        if not modified:
+            zm = zm.copy()
+            modified = True
+
+        if len(m) == 2:
+            refs = zm[j]['parents'][:2]
+            p1 = zm[i]['parents']
+            new = (j,) + refs
+            if len(new) < len(p1):
+                new = new + p1[:len(p1) - len(new)]
+            # check that we haven't broken any constraints
+            # TODO: write targeted loops
+            success, zm = _adjust_zm_parents(zm, i, new, constraint_map)
+            if success:
+                constraint_map[m] = new
+                continue
+            del p1
+
+            # if len(zm[j]['parents']) > 0:
+            refs = zm[i]['parents'][:2]
+            p2 = zm[j]['parents']
+            new = (j,) + refs
+            if len(new) < len(p2):
+                new = new + p2[:len(p2) - len(new)]
+            # check that we haven't broken any constraints
+            # TODO: write targeted loops
+            zm[j]['parents'] = new
+            if all(
+                    check_zmatrix_coordinate_constraint(zm, c)
+                    for c in constraint_map.keys()
+            ):
+                for o in p2:
+                    zm[o]['children'].remove(j)
+                for o in new:
+                    zm[o]['children'].add(j)
+                constraint_map[m] = new
+                continue
+            else:
+                zm[j]['parents'] = p2
+
+            raise ValueError(f"couldn't satisfy constraint {m} in {coords}")
+        elif len(m) == 3:
+            raise NotImplementedError(...)
+        else:
+            raise NotImplementedError(...)
+            p1 = ...
+            old = zm[i]['parents']
+
+
+
+
+        raise Exception("?")
+
+    if not isinstance(zm_og, dict):
+        zm = zmatrix_from_tree(zm)
+
+    return zm
+
 
 def bond_graph_zmatrix(
         bonds,
         fragments,
         edge_map=None,
         reindex=True,
-        validate_additions=True
+        validate_additions=True,
+        required_coordinates=None
 ):
     submats = []
     backbone = fragments[0]
@@ -1300,6 +1655,44 @@ def bond_graph_zmatrix(
             is_valid, reason = validate_zmatrix(fused, return_reason=True)
             if not is_valid:
                 raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
+
+    if required_coordinates is not None:
+        print(np.array(fused))
+        # graph = make_zmatrix_tree(fused)
+        # we rearrange nodes in the tree
+        # appropriately
+        # new = zmatrix_from_tree(graph)
+        new = enforce_required_zmatrix_coordinates(fused, required_coordinates)
+        # new = zmatrix_from_tree(forced)
+        print(np.array(new))
+        raise Exception()
+        import pprint
+        pprint.pprint(graph)
+        raise Exception()
+        # figure out how fragments must be ordered
+        fragment_sorting_map = []
+        for c in required_coordinates:
+            submap = {}
+            for i in c:
+                for j, f in enumerate(fragments):
+                    try:
+                        x = f.index(i)
+                    except ValueError:
+                        continue
+                    else:
+                        submap[i] = (j, x)
+                        break
+            fragment_sorting_map.append(submap)
+        # then find a consistent sorting for the fragments included in the map
+        # each coordinate has multiple possible orderings so we first take all included
+        # fragments and then try to find a consistent ordering
+        all_frags = np.unique([
+            f[0]
+            for submap in fragment_sorting_map
+            for f in submap.values()
+        ])
+
+        raise Exception(all_frags)
 
     return fused
 
@@ -1414,7 +1807,6 @@ def complex_zmatrix(
         reindex=True,
         validate_additions=True
 ):
-
     if fragment_inds is None:
         if fragment_zmats is not None:
             raise ValueError("can't supply just Z-mats, unclear which fragments they come from...")
@@ -1462,10 +1854,14 @@ def complex_zmatrix(
                 subgraph = graph.take(inds)
                 min_row = subgraph.get_centroid(check_fragments=False) #TODO: see if I need to add a row check to this...
             else:
-                distance_matrix = np.asanyarray(distance_matrix)
-                dm = distance_matrix[np.ix_(inds, inds_2)]
-                min_cols = np.argmin(dm, axis=1)
-                min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
+                # distance_matrix = np.asanyarray(distance_matrix)
+                dm_row = distance_matrix[zm_2[0][0]]
+                min_row = np.argmin(dm_row[inds,], axis=0)
+                # dm = distance_matrix[np.ix_(inds, inds_2)]
+                # min_cols = np.argmin(dm, axis=1)
+                # min_row = np.argmin(dm[np.arange(len(inds)), min_cols], axis=0)
+                # min_row = inds[min_row]
+                # min_cols = inds_2[min_cols[min_row]]
                 # min_row = np.where(inds == min_row)[0][0]
                 # root = zm[min_row][0]
         else:

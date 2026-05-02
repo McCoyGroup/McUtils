@@ -1355,7 +1355,7 @@ def dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expans
         proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j, k, l], fixed_atoms=fixed_atoms, expand=0 in expanded_vectors)
         _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
             cache,
-            coords, k, j, [i, j, k, l], #TODO: make sure nothing broke with this flip...
+            coords, j, k, [i, j, k, l], #TODO: patch explicit expansion flip, this convention necessary for opts
             order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
         )
         _, C_expansion = prep_disp_expansion(coords, l, k, [i, j, k, l], fixed_atoms=fixed_atoms, expand=2 in expanded_vectors)
@@ -2645,8 +2645,8 @@ def dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=No
     coords = np.asanyarray(coords)
     shift_coords = coords - coords[..., (k,), :]
     axis = shift_coords[..., j, :]
-    right_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle/2, axis_order=axis_order)
-    left_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle/2, axis_order=axis_order)
+    right_expansion = rotation_expansion_from_axis_angle(shift_coords, -axis, order=order, angle=angle/2, axis_order=axis_order)
+    left_expansion = rotation_expansion_from_axis_angle(shift_coords, axis, order=order, angle=angle/2, axis_order=axis_order)
     # left might not always be the negation...I think
     left_expansion[0] += coords[..., (k,), :] # shift back from origin
     right_expansion[0] += coords[..., (k,), :] # shift back from origin
