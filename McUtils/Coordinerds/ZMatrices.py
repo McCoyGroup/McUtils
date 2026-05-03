@@ -814,11 +814,10 @@ def attached_zmatrix_fragment(n, zm, fragment, attachment_points):
         if a < 0:
             if main_ref is None:
                 if len(order) >= (-a):
-                    main_ref = _get_clean_attachment_refs(fragment, zm, order, a)
-            else:
-                a = main_ref[(-a) - 1]
+                    main_ref = _get_clean_attachment_refs(attachment_points, zm, order, a)
+            a = main_ref[(-a) - 1]
         elif main_ref is None:
-            main_ref = _get_clean_attachment_refs(fragment, zm, order, a)
+            main_ref = _get_clean_attachment_refs(attachment_points, zm, order, a)
         new_aps.append(a)
     attachment_points = new_aps
     return [
