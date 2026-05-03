@@ -59,6 +59,10 @@ class X3DObject(metaclass=abc.ABCMeta):
 
     def resolve_prop_attr(self, prop_name):
         return prop_name
+    def prep_animation_values(self, prop_name, values):
+        if prop_name == 'transparency':
+            values = [v if v is not None else 0 for v in values]
+        return values
     def get_prop_node_id(self, prop_name):
         return self.id
 
@@ -1658,7 +1662,7 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
                 node = obj.get_prop_node_id(a)
                 at_list[prop] = {
                     'id':node,
-                    'values':v
+                    'values':obj.prep_animation_values(a, v)
                 }
             att_set.append(at_list)
 
