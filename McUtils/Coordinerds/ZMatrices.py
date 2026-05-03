@@ -1506,51 +1506,50 @@ def enforce_required_zmatrix_coordinates(zm, coords):#, chain_order=None):
         if len(m) == 2:
             refs = zm[j]['parents'][:2]
             p1 = zm[i]['parents']
-            new = (j,) + refs
-            if len(new) < len(p1):
-                new = new + p1[:len(p1) - len(new)]
-            # check that we haven't broken any constraints
-            # TODO: write targeted loops
-            success, zm = _adjust_zm_parents(zm, i, new, constraint_map)
-            if success:
-                constraint_map[m] = new
-                continue
-            del p1
+            new1 = (j,) + refs
+            if len(new1) < len(p1):
+                new1 = new1 + p1[:len(p1) - len(new1)]
 
-            # if len(zm[j]['parents']) > 0:
             refs = zm[i]['parents'][:2]
             p2 = zm[j]['parents']
-            new = (j,) + refs
-            if len(new) < len(p2):
-                new = new + p2[:len(p2) - len(new)]
-            # check that we haven't broken any constraints
-            # TODO: write targeted loops
-            zm[j]['parents'] = new
-            if all(
-                    check_zmatrix_coordinate_constraint(zm, c)
-                    for c in constraint_map.keys()
-            ):
-                for o in p2:
-                    zm[o]['children'].remove(j)
-                for o in new:
-                    zm[o]['children'].add(j)
-                constraint_map[m] = new
-                continue
-            else:
-                zm[j]['parents'] = p2
+            new2 = (j,) + refs
+            if len(new2) < len(p2):
+                new2 = new2 + p2[:len(p2) - len(new2)]
 
-            raise ValueError(f"couldn't satisfy constraint {m} in {coords}")
+            ref_choices = [new1, new2]
         elif len(m) == 3:
-            raise NotImplementedError(...)
+            parents = [x for x in zm[j]['parents'] if x not in m]
+            p1 = [p for p in zm[i]['parents'] if p not in m]
+            if len(parents) > 0:
+                new1 = list(m[1:]) + parents[-1:]
+            else:
+                new1 = list(m[1:]) + p1[:1]
+
+
+            parents = [x for x in zm[i]['parents'] if x not in m]
+            p2 = [p for p in zm[j]['parents'] if p not in m]
+            if len(parents) > 0:
+                new2 = parents[-1:] + list(reversed(m[:-1]))
+            else:
+                new2 = p2[:1] + list(reversed(m[:-1]))
+
+            ref_choices = [new1, new2]
         else:
-            raise NotImplementedError(...)
-            p1 = ...
-            old = zm[i]['parents']
+            ref_choices = [m[1:], tuple(reversed(m[:-1]))]
 
+        # check that we haven't broken any constraints
+        # TODO: write targeted loops
+        success, zm = _adjust_zm_parents(zm, i, ref_choices[0], constraint_map)
+        if success:
+            constraint_map[m] = ref_choices[0]
+            continue
 
+        success, zm = _adjust_zm_parents(zm, j, ref_choices[1], constraint_map)
+        if success:
+            constraint_map[m] = ref_choices[1]
+            continue
 
-
-        raise Exception("?")
+        raise ValueError(f"couldn't satisfy constraint {m} in {coords}")
 
     if not isinstance(zm_og, dict):
         zm = zmatrix_from_tree(zm)
