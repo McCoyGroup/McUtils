@@ -783,58 +783,44 @@ def center_bound_zmatrix(n, center=-1):
         for i in range(n)
     ]
 
+def _get_clean_attachment_refs(attachment_points, zm, order, a):
+    main_ref = []
+    for m, z in enumerate(zm):
+        if z[0] == a:
+            _ = []
+            for zz in z[1:]:
+                if zz < 0:
+                    clip_i = max([m + zz, 0])
+                    if (order[clip_i] not in _) and (order[clip_i] not in attachment_points):
+                        zz = order[clip_i]
+                    if zz < 0:
+                        clip_i = (m - zz) % len(order)
+                        for j in range(clip_i, len(order)):
+                            if order[j] not in _ and order[j] not in attachment_points:
+                                zz = order[j]
+                                break
+                        # else:
+                        #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
+                _.append(zz)
+            main_ref = _
+            break
+    return main_ref
+
 def attached_zmatrix_fragment(n, zm, fragment, attachment_points):
-    _ = []
+    new_aps = []
     order = [f[0] for f in zm]
     main_ref = None
     for a in attachment_points:
         if a < 0:
             if main_ref is None:
                 if len(order) >= (-a):
-                    a = order[a]
-                    for m,z in enumerate(zm):
-                        if z[0] == a:
-                            _ = []
-                            for zz in z:
-                                if zz < 0:
-                                    clip_i = max([m + zz, 0])
-                                    if order[clip_i] not in _:
-                                        zz = order[clip_i]
-                                    if zz < 0:
-                                        clip_i = (m - zz) % len(order)
-                                        for j in range(clip_i, len(order)):
-                                            if order[j] not in _:
-                                                zz = order[j]
-                                                break
-                                        # else:
-                                        #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
-                                _.append(zz)
-                            main_ref = _
-                            break
+                    main_ref = _get_clean_attachment_refs(fragment, zm, order, a)
             else:
                 a = main_ref[(-a) - 1]
         elif main_ref is None:
-            for m,z in enumerate(zm):
-                if z[0] == a:
-                    _ = []
-                    for zz in z:
-                        if zz < 0:
-                            clip_i = max([m + zz, 0])
-                            if order[clip_i] not in _:
-                                zz = order[clip_i]
-                            if zz < 0:
-                                clip_i = (m - zz) % len(order)
-                                for j in range(clip_i, len(order)):
-                                    if order[j] not in _:
-                                        zz = order[j]
-                                        break
-                                # else:
-                                #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
-                        _.append(zz)
-                    main_ref = _
-                    break
-        _.append(a)
-    attachment_points = _
+            main_ref = _get_clean_attachment_refs(fragment, zm, order, a)
+        new_aps.append(a)
+    attachment_points = new_aps
     return [
         [attachment_points[-r-1] if r < 0 else n+r for r in row]
         for row in fragment
@@ -894,12 +880,13 @@ def functionalized_zmatrix(
         ]
         if len(bad_attach) > 0:
             raise ValueError(f"error attaching at {attachment_points} with previous atoms {prev_atoms}")
-        zm = zm + attached_zmatrix_fragment(
+        frag = attached_zmatrix_fragment(
             len(zm),
             zm,
             fragment,
             attachment_points
         )
+        zm = zm + frag
         if validate:
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
             if not is_valid:
@@ -1197,7 +1184,15 @@ def add_missing_zmatrix_bonds(
         max_iterations=None,
         validate_additions=True
 ):
+    if validate_additions and not validate_zmatrix(base_zmat):
+        is_valid, reason = validate_zmatrix(base_zmat, return_reason=True)
+        if not is_valid:
+            raise ValueError(f"invalid initial zmat ({reason} in {base_zmat})")
     atoms, zm = canonicalize_zmatrix(base_zmat)
+    if validate_additions and not validate_zmatrix(zm):
+        is_valid, reason = validate_zmatrix(zm, return_reason=True)
+        if not is_valid:
+            raise ValueError(f"invalid after canonicalization zmat ({reason} in {zm})")
     new_bonds = {}
     reindexing = list(atoms)
     for bi, be in bonds:
@@ -1225,11 +1220,14 @@ def add_missing_zmatrix_bonds(
                 mods.append([ix, center_bound_zmatrix(len(v))])
 
         new_zm = functionalized_zmatrix(
-                zm,
-                mods
-            )
+            zm,
+            mods,
+            validate=validate_additions
+        )
         if validate_additions and not validate_zmatrix(new_zm):
-            raise ValueError(f"invalid zmatrix after functionalization, {new_zm}")
+            is_valid, reason = validate_zmatrix(new_zm, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"invalid zmatrix after functionalization ({reason}) in adding {mods} to {new_zm}")
         new_zm = reindex_zmatrix(new_zm, reindexing)
         if validate_additions:
             is_valid, reason = validate_zmatrix(new_zm, return_reason=True)
@@ -1393,7 +1391,7 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
                     add_parents = [
                         pp
                         for pp in nd['parents']
-                        if ord_map[pp] < n
+                        if ord_map[pp] < n and pp not in new_parents
                     ]
                     new_parents.extend(add_parents)
                     new_parents = new_parents[:3]
@@ -1423,7 +1421,7 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
         zm[i]['parents'] = p1
     return False, zm
 
-def enforce_required_zmatrix_coordinates(zm, coords):#, chain_order=None):
+def enforce_required_zmatrix_coordinates(zm, coords, validate=False):#, chain_order=None):
     zm_og = zm
     if not isinstance(zm, dict):
         zm = make_zmatrix_tree(zm)
@@ -1553,6 +1551,10 @@ def enforce_required_zmatrix_coordinates(zm, coords):#, chain_order=None):
 
     if not isinstance(zm_og, dict):
         zm = zmatrix_from_tree(zm)
+        if validate:
+            is_valid, reason = validate_zmatrix(zm, return_reason=True)
+            if not is_valid:
+                raise ValueError(f"after coordinate enforcement zmatrix invalid ({reason}) in {zm}")
 
     return zm
 
@@ -1656,8 +1658,9 @@ def bond_graph_zmatrix(
                 raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
 
     if required_coordinates is not None:
-        fused = enforce_required_zmatrix_coordinates(fused, required_coordinates)
-
+        fused = enforce_required_zmatrix_coordinates(fused,
+                                                     required_coordinates,
+                                                     validate=validate_additions)
     return fused
 
 def canonical_fragment_zmatrix(canonical_framents, validate_additions=False):
