@@ -28,12 +28,26 @@ class ASEMolecule(ExternalMolecule):
     @property
     def charges(self):
         return self.mol.charges
+    @property
+    def meta(self):
+        return self.mol.info
+
+    def copy(self):
+        mol = self.mol.copy()
+        return self.from_atoms(mol,
+                               calculator=self.mol.calc,
+                               charge=self.mol.info.get('charge'))
+
+    @classmethod
+    def from_atoms(cls, atoms, calculator=None, charge=None):
+        if calculator is not None:
+            atoms.calc = calculator
+            if charge is not None and hasattr(calculator, 'set_charge'):
+                calculator.set_charge(charge)
+        return cls(atoms)
 
     @classmethod
     def from_coords(cls, atoms, coords, charge=None, spin=None, info=None, calculator=None, **etc):
-        if calculator is not None and charge is not None:
-            if hasattr(calculator, 'set_charge'):
-                calculator.set_charge(charge)
 
         if info is None and charge is not None or spin is not None:
             info = {}
@@ -42,19 +56,21 @@ class ASEMolecule(ExternalMolecule):
         if spin is not None:
             info['spin'] = spin
 
-        return cls(
-            ASEInterface.Atoms(
-                atoms,
-                coords,
-                calculator=calculator,
-                info=info,
-                **etc
-            )
+        atoms = ASEInterface.Atoms(
+            atoms,
+            coords,
+            info=info,
+            **etc
         )
+
+        return cls.from_atoms(atoms, calculator=calculator, charge=charge)
 
     @classmethod
     def from_mol(cls, mol, coord_unit="Angstroms", calculator=None):
         from ..Data import UnitsData
+
+        if calculator is None and mol.energy_evaluator is not None:
+            calculator = mol.get_energy_evaluator().to_ase()
 
         return cls.from_coords(
             mol.atoms,
@@ -250,6 +266,101 @@ class ASEMolecule(ExternalMolecule):
             self.mol.positions = cur_geom
 
         return opt, opt_coords, {}
+
+    def prep_trajectory_images(self, geoms, calc=None):
+        info = self.mol.info
+        if calc is None:
+            calc = self.mol.calc
+        return [
+            self.from_atoms(g,
+                            calculator=calc if g.calc is None else None,
+                            charge=info.get('charge')
+                            )
+                if hasattr(g, 'calc') and not hasattr(g, 'coords') else
+            g
+                if hasattr(g, 'coords') else
+                    self.from_coords(
+                        self.atoms,
+                        g,
+                        calc=calc,
+                        **info
+                    )
+            for g in geoms
+        ]
+
+    default_mep = 'neb'
+    def resolve_trajectory_method(self, method, **opts):
+        if method is None:
+            method = self.default_optimizer
+
+        if isinstance(method, str):
+            import ase.mep as mep
+            # mep = ASEInterface.submodule('mep')
+            if method == 'neb':
+                method = mep.NEB
+            elif method == 'dimer':
+                method = mep.DimerControl
+            else:
+                method = getattr(mep, method)
+        return method
+
+    def prep_trajectory_type(self, geoms, method, calc=None, in_place=False, optimizer_method=None, **opts):
+        if isinstance(method, dict):
+            opts = method.copy() | opts
+            method = opts.pop('method')
+
+        if optimizer_method is not None:
+            opts['method'] = optimizer_method
+
+        method = self.resolve_trajectory_method(method)
+
+        images = self.prep_trajectory_images(geoms, calc=calc)
+        if not in_place:
+            images = [i.copy() for i in images]
+        images = [i.mol for i in images]
+
+        if calc is not None:
+            for i in images:
+                i.calc = calc
+
+        return method(images, **opts), images
+
+    def optimize_trajectory(self,
+                            geoms,
+                            method,
+                            calc=None,
+                            quiet=True,
+                            logfile=None,
+                            fmax=None,
+                            steps=None,
+                            optimizer=None,
+                            optimizer_method=None,
+                            in_place=False,
+                            return_coords=True,
+                            **opts):
+        optimizer = self.resolve_optimizer(optimizer)
+
+        traj, images = self.prep_trajectory_type(geoms, method, calc=calc,
+                                                 in_place=in_place,
+                                                 optimizer_method=optimizer_method)
+
+        if logfile is None:
+            if quiet:
+                logfile = io.StringIO()
+            else:
+                logfile = sys.stdout
+
+        opt_rea = optimizer(traj, logfile=logfile, **opts)
+        if fmax is None:
+            fmax = self.convergence_criterion
+        if steps is None:
+            steps = self.max_steps
+        opt = opt_rea.run(fmax=fmax, steps=steps)
+        images = self.prep_trajectory_images(images)
+        if return_coords:
+            images = [i.coords for i in images]
+
+        return opt, images, {}
 
 
 def ASECalculator(
