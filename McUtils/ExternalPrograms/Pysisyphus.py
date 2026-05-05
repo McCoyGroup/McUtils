@@ -1,7 +1,7 @@
 
 import os
 from .. import Devutils as dev
-from ...Parsers import XYZParser
+from ..Parsers import XYZParser
 
 __all__ = [
     "PysisCalculator",
