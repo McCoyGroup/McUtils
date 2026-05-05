@@ -161,7 +161,7 @@ class DefaultDirectory:
         self._opts = tempdir_opts
 
     def get_temp_dir(self):
-        return tf.TemporaryDirectory(**self._opts).__enter__()
+        return tf.TemporaryDirectory(**self._opts)
 
     @property
     def dirname(self):
@@ -175,16 +175,18 @@ class DefaultDirectory:
     def __enter__(self):
         if self._outdir is None:
             self._tmp = self.get_temp_dir()
+            self._tmp.__enter__()
         else:
             self._tmp = self._outdir
         if self.chdir:
             self._curdir = os.getcwd()
+            os.makedirs(self.dirname, exist_ok=True)
             os.chdir(self.dirname)
-        return self._tmp
+        return self.dirname
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.chdir:
             os.chdir(self._curdir)
         if self._outdir is None:
-            self._tmp.__exit__()
+            self._tmp.__exit__(exc_type, exc_val, exc_tb)
         self._tmp = None

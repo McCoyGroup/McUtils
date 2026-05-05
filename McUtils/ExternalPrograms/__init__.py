@@ -22,6 +22,8 @@ from .RDKit import *; from .RDKit import __all__ as exposed
 __all__ += exposed
 from .ASE import *; from .ASE import __all__ as exposed
 __all__ += exposed
+from .Pysisyphus import *; from .Pysisyphus import __all__ as exposed
+__all__ += exposed
 from .OpenBabel import *; from .OpenBabel import __all__ as exposed
 __all__ += exposed
 from .WebAPI import *; from .WebAPI import __all__ as exposed
