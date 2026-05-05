@@ -77,11 +77,18 @@ def resolve_chain_of_states(*, images, energy_evaluator=None, **opts):
         **opts
     )
 @register_method('freezing-string')
-def resolve_freezing_string(*, images, energy_evaluator=None, **opts):
+def resolve_freezing_string(*, images, calc_getter=None, energy_evaluator=None, **opts):
     from pysisyphus.cos.FreezingString import FreezingString
+    if calc_getter is None:
+        calc_getter = lambda **kwargs: PysisCalculator(energy_evaluator, **kwargs)
+    # if len(images) > 2:
+    #     opts['left_images'] = opts.get('left_images', len(images) // 2)
+    #     opts['right_images'] = opts.get('right_images', len(images) - (len(images) // 2))
+
     return resolve_cos_method(
         cos_class=FreezingString,
         images=images,
+        calc_getter=calc_getter,
         energy_evaluator=energy_evaluator,
         **opts
     )
@@ -98,7 +105,7 @@ def resolve_neb(*, images, energy_evaluator=None, **opts):
 method_aliases = {
     'gsm':'growing-string',
     'cos':'chain-of-states',
-    'fsm:':'freezing-string'
+    'fsm':'freezing-string'
 }
 def resolve_pysis_method(method_name, **opts):
     if isinstance(method_name, str):
