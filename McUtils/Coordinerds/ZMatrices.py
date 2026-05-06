@@ -791,17 +791,24 @@ def _get_clean_attachment_refs(attachment_points, zm, order, a):
             for zz in z[1:]:
                 if zz < 0:
                     clip_i = max([m + zz, 0])
-                    if (order[clip_i] not in _) and (order[clip_i] not in attachment_points):
+                    if (
+                            (order[clip_i] not in _)
+                            and (order[clip_i] not in attachment_points)
+                    ):
                         zz = order[clip_i]
                     if zz < 0:
                         clip_i = (m - zz) % len(order)
                         for j in range(clip_i, len(order)):
-                            if order[j] not in _ and order[j] not in attachment_points:
+                            if (
+                                    (order[j] not in _)
+                                    and (order[j] not in attachment_points)
+                            ):
                                 zz = order[j]
                                 break
                         # else:
                         #     raise ValueError(f"couldn't get attachment point for {attachment_points} in {zm}")
-                _.append(zz)
+                if zz not in attachment_points:
+                    _.append(zz)
             main_ref = _
             break
     return main_ref
