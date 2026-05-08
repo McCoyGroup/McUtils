@@ -8,7 +8,8 @@ import hashlib
 __all__ = [
     "SMILESSupplier",
     "consume_smiles_supplier",
-    "match_smiles_supplier"
+    "match_smiles_supplier",
+    "smarts_matcher"
 ]
 
 class SMILESSupplier:
@@ -311,6 +312,14 @@ def _disable_rdkit_log(blockage=[]):
     from rdkit.rdBase import BlockLogs
     bl = BlockLogs()
     blockage.append([bl,  bl.__enter__()])
+
+def smarts_matcher(pattern):
+    from .RDKit import RDKitInterface
+    AllChem = RDKitInterface.submodule("Chem.AllChem")
+    smarts_candidate = AllChem.MolFromSmarts(pattern)
+    matcher = functools.partial(_match_rdkit, smarts_candidate)
+    return matcher
+
 
 def match_smiles_supplier(supplier:SMILESSupplier, matcher, pool=None,
                           start_at=None, upto=None, quiet=True,
