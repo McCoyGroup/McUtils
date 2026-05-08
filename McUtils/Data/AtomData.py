@@ -32,11 +32,15 @@ class AtomDataHandler(DataHandler):
         # now update by max IsotopeFraction
         super().load()
         maxIsos = {}
+        case_aliases = {}
         for v in self._data.values():
             num = v["Number"]
             if num not in maxIsos or v["IsotopeFraction"] > maxIsos[num][0]:
                 maxIsos[num] = (v["IsotopeFraction"], v)
+            case_aliases[v["Symbol"].lower()] = v
+            case_aliases[v["Symbol"].upper()] = v
         self._data.update(((k, v[1]) for k, v in maxIsos.items()))
+        self._data.update(case_aliases)
 AtomData = AtomDataHandler()
 AtomData.__doc__ = """An instance of AtomDataHandler that can be used for looking up atom data"""
 AtomData.__name__ = "AtomData"
