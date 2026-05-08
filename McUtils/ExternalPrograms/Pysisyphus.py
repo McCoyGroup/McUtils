@@ -1,5 +1,9 @@
 
 import os
+import tempfile
+import logging
+from contextlib import contextmanager
+
 import numpy as np
 from .. import Devutils as dev
 from .. import Numputils as nput
@@ -12,12 +16,48 @@ __all__ = [
     "run_pysisyphus"
 ]
 
+
+@contextmanager
+def suppress_logging(level=logging.CRITICAL):
+    """Temporarily disables logging for a specific block of code."""
+    # Record the previous disabled level to restore it later
+    previous_level = logging.root.manager.disable
+
+    logging.disable(level)
+    try:
+        yield
+    finally:
+        # Restore the original disabling level
+        logging.disable(previous_level)
+
 def patch_pysis_logging():
     import pysisyphus
     pysisyphus.logger.removeHandler(pysisyphus.file_handler)
     pysisyphus.logger.removeHandler(pysisyphus.stdout_handler)
+
     with dev.OutputRedirect():
+        import pysisyphus.init_logging
+        pysisyphus.init_logging.LOGGERS.clear()
         import pysisyphus.config
+
+    def get_fh_logger(name, log_fn, base=pysisyphus.init_logging.get_fh_logger):
+        base(name, log_fn)
+        logger = logging.getLogger(name)
+        logger.handlers.clear()
+    pysisyphus.init_logging.get_fh_logger = get_fh_logger
+
+    import pysisyphus.optimizers.Optimizer
+    def configure_opt_logger(logger, prefix, base=pysisyphus.optimizers.Optimizer.configure_opt_logger):
+        base(logger=logger, prefix=prefix)
+        logger.handlers.clear()
+    pysisyphus.optimizers.Optimizer.configure_opt_logger = configure_opt_logger
+
+    import pysisyphus.calculators
+    pysisyphus.calculators.logger.handlers.clear()
+
+    if pysisyphus.config.OUT_DIR_DEFAULT == 'qm_calcs':
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pysisyphus.config.OUT_DIR_DEFAULT = tmpdir
 
 def PysisCalculator(
         energy_evaluator,
@@ -46,10 +86,16 @@ def register_method(name, method=None):
             return register_method(name, method)
         return register
 
-def resolve_cos_method(*, images, cos_class, energy_evaluator=None, **opts):
+def resolve_cos_method(*, images, cos_class, energy_evaluator=None,
+                       out_dir=None,
+                       logger=None,
+                       **opts):
+    import pathlib
     for i in images:
         if i.calculator is None:
             i.set_calculator(PysisCalculator(energy_evaluator))
+        if out_dir is not None:
+            i.calculator.out_dir = pathlib.Path(out_dir).resolve()
     return cos_class(
         images=images,
         **opts
@@ -171,6 +217,8 @@ def resolve_dimer(*, images, energy_evaluator=None,
                   min_nodes=3,
                   displacement_vector=None,
                   climb=True,
+                  logger=None,
+                  out_dir=None,
                   **opts):
     if not climb: raise NotImplementedError("dimer calcs only implemented for `climb=True`")
 
@@ -194,11 +242,15 @@ def resolve_dimer(*, images, energy_evaluator=None,
     if target_image.calculator is None:
         target_image.set_calculator(PysisCalculator(energy_evaluator))
 
-    dimer_calc = Dimer(
-        calculator=target_image.calculator,
-        N_raw=displacement_vector,  # optional: seed orientation from COS tangent
-        **opts
-    )
+    with dev.OutputRedirect():
+        dimer_calc = Dimer(
+            calculator=target_image.calculator,
+            N_raw=displacement_vector,  # optional: seed orientation from COS tangent
+            out_dir=out_dir,
+            **opts
+        )
+    if logger is not None:
+        dimer_calc.logger = logger
     target_image.set_calculator(dimer_calc)
 
     return target_image
@@ -210,11 +262,14 @@ method_aliases = {
     'zts':'zero-temperature-string',
     'string':'zero-temperature-string'
 }
-def resolve_pysis_method(method_name, **opts):
+def resolve_pysis_method(method_name, logger=None, **opts):
     if isinstance(method_name, str):
         method_name = method_aliases.get(method_name, method_name)
         method_name = method_resolvers[method_name]
-    return method_name(**opts)
+    generator = method_name(logger=logger, **opts)
+    if logger is not None:
+        generator.logger = logger
+    return generator
 
 optimizer_resolvers = {}
 def register_optimizer(name, method=None):
@@ -293,7 +348,7 @@ optimizer_method_map = {
     'neb':'lbfgs',
     'dimer':'lbfgs'
 }
-def resolve_pysis_optimizer(optimizer, method_name, generator, **opts):
+def resolve_pysis_optimizer(optimizer, method_name, generator, logger=None, **opts):
     if optimizer is None:
         method_name = method_aliases.get(method_name, method_name)
         optimizer = optimizer_method_map[method_name]
@@ -301,7 +356,13 @@ def resolve_pysis_optimizer(optimizer, method_name, generator, **opts):
         opt = optimizer_resolvers.get(optimizer)
         if opt is None: opt = resolve_generic_optimizer(optimizer)
         optimizer = opt
-    return optimizer(generator, **opts)
+
+    with suppress_logging():
+        optimizer = optimizer(generator, **opts)
+    if logger is not None:
+        optimizer.logger = logger
+        optimizer.table.logger = logger
+    return optimizer
 
 def parse_trj(file):
     with XYZParser(file) as xyz:
@@ -331,15 +392,21 @@ def run_pysisyphus(
     if max_step is not None:
         optimizer_settings['max_step'] = max_step
     logger = PysisyphusLogger(log_file)
-    generator = resolve_pysis_method(method, energy_evaluator=energy_evaluator, **kwargs)
-    generator.logger = logger
     with dev.DefaultDirectory(out_dir) as od:
-        optimizer = resolve_pysis_optimizer(optimizer, method, generator,
-                                            out_dir=od,
-                                            **optimizer_settings)
-        optimizer.logger = logger
-        optimizer.table.logger = logger
-        optimizer.run()
+        import pysisyphus.config
+        cur_od = pysisyphus.config.OUT_DIR_DEFAULT
+        try:
+            pysisyphus.config.OUT_DIR_DEFAULT = od
+            generator = resolve_pysis_method(method, energy_evaluator=energy_evaluator,
+                                             out_dir=od,
+                                             logger=logger, **kwargs)
+            optimizer = resolve_pysis_optimizer(optimizer, method, generator,
+                                                out_dir=od,
+                                                logger=logger,
+                                                **optimizer_settings)
+            optimizer.run()
+        finally:
+            pysisyphus.config.OUT_DIR_DEFAULT = cur_od
         if return_logs:
             logs = {
                 f:(
