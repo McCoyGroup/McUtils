@@ -11,7 +11,9 @@ __all__ = [
     "translation_rotation_invariant_transformation",
     "eckart_embedding",
     "rmsd_minimizing_transformation",
-    "eckart_permutation"
+    "eckart_permutation",
+    "eckart_rmsd",
+    "incremental_eckart_rmsd"
 ]
 
 import itertools, collections
@@ -574,9 +576,9 @@ def principle_axis_embedded_coords(coords, masses=None, sel=None):
     og_coords = coords
     if sel is not None:
         coords = coords[..., sel, :]
-        masses = masses[sel]
+        masses = masses[sel,]
 
-    real_pos = masses > 0
+    real_pos = np.where(masses > 0)[0]
     # print(real_pos)
     # og_coords = coords
     coords = coords[..., real_pos, :]
@@ -764,7 +766,16 @@ def _eckart_embedding(ref, coords,
         # now we rotate this back to the reference frame
         coords = coords @ np.swapaxes(ref_axes if ref_axes.ndim > 2 else ref_axes[np.newaxis], -2, -1)
         # and then shift so the COM doesn't change
-        coords = coords + (ref_com if ref_com.ndim > 1 else ref_com[np.newaxis, np.newaxis, :])
+        if (
+                ref_com.ndim == coords.ndim - 1
+                and ref_com.shape[:-1] == coords.shape[:-2]
+        ):
+            pad_ref = np.expand_dims(ref_com, -2)
+        elif ref_com.ndim == 1:
+            pad_ref = np.expand_dims(ref_com, list(range(coords.ndim - 1)))
+        else:
+            pad_ref = ref_com
+        coords = coords + pad_ref
     else:
         coords = None
 
@@ -902,3 +913,45 @@ def eckart_displacement_coords(coords, ref, masses=None, **embedding_parameters)
         base_embedding.coordinates.shape
     )
 
+def eckart_rmsd(coords, ref,
+                masses=None,
+                embed=True,
+                comparison_sel=None,
+                embedding_sel=None,
+                mass_weighted=False,
+                **embedding_parameters):
+    if embed:
+        ref = np.asanyarray(ref)
+        eckart_data:EckartData = eckart_embedding(
+            ref, coords,
+            masses=masses,
+            sel=embedding_sel,
+            **embedding_parameters
+        )
+        coords = eckart_data.coordinates
+
+    if masses is not None and mass_weighted:
+        masses = np.sqrt(np.asanyarray(masses) / np.sum(masses))
+        coords = coords * vec_ops.broadcast_constant(masses[:, np.newaxis], coords.shape[:-2], pad_base=True)
+        ref = ref * vec_ops.broadcast_constant(masses[:, np.newaxis], ref.shape[:-2], pad_base=True)
+
+    if comparison_sel is not None:
+        coords = coords[..., comparison_sel, :]
+        ref = ref[..., comparison_sel, :]
+
+    return vec_ops.unembedded_pts_rmsd(coords, ref)
+
+def incremental_eckart_rmsd(coords,
+                            refs=None,
+                            masses=None,
+                            mass_weighted=False,
+                            **embedding_parameters):
+    if refs is None:
+        coords, refs = coords[..., :-1, :, :], coords[..., 1:, :, :]
+
+    base_rmsd = eckart_rmsd(coords, refs, masses=masses, mass_weighted=mass_weighted, **embedding_parameters)
+    z = np.zeros(base_rmsd.shape[:-1] + (1,))
+    return np.cumsum(
+        np.concatenate([z, base_rmsd], axis=-1),
+        axis=-1
+    )

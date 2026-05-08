@@ -24,6 +24,7 @@ __all__ = [
     "block_array",
     "vec_tdot",
     "distance_matrix",
+    "unembedded_pts_rmsd",
     "points_from_distance_matrix",
     "identity_tensors",
     "block_broadcast_indices",
@@ -170,6 +171,23 @@ def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=
         dist_mats[..., cols, rows] = dists
         #TODO: handle transposition
         return dist_mats
+
+def unembedded_pts_rmsd(coords, ref, averaged=False):
+    coords = np.asanyarray(coords)
+    ref = np.asanyarray(ref)
+
+    base_shape = coords.shape[:-2]
+
+    ncoords = np.prod(ref.shape[-2:], dtype=int)
+
+    ref = ref.reshape((-1, ncoords))
+    coords = coords.reshape((-1, ncoords))
+
+    base_rmsd = np.linalg.norm(ref - coords, axis=-1).reshape(base_shape)
+    if averaged:
+        base_rmsd = base_rmsd / np.sqrt(ref.shape[-2])
+
+    return base_rmsd
 
 ################################################
 #
