@@ -40,3 +40,5 @@ from .ManagedJobQueues import *; from .ManagedJobQueues import __all__ as expose
 __all__ += exposed
 from .SMILES import *; from .SMILES import __all__ as exposed
 __all__ += exposed
+from .QM9 import *; from .QM9 import __all__ as exposed
+__all__ += exposed

@@ -137,7 +137,7 @@ class ExternalProgramsTest(TestCase):
 
     @staticmethod
     def _echo(arg): return arg
-    @debugTest
+    @validationTest
     def test_SMIVendor(self):
         samp = TestManager.test_data('a2bbb-substances.smi')
         vendor = SMILESSupplier(samp)
@@ -193,3 +193,10 @@ class ExternalProgramsTest(TestCase):
 
         print(sm1[:5])
         self.assertListEqual(sm1, sm2)
+
+    @debugTest
+    def test_QM9(self):
+        supplier = QM9(os.path.expanduser("~/Documents/Postdoc/datasets/qm9.npz"))
+        print(
+            supplier.load_data(0)
+        )

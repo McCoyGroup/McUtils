@@ -416,9 +416,10 @@ class RDMolecule(ExternalMolecule):
                     raise ValueError(f"failed to build conformers {conf_ids} for {smi} with settings {settings}")
                 return mols
         else:
-            mol = Chem.AddHs(mol, explicitOnly=True)
-            conf = Chem.Conformer(len(atoms))
-            conf.SetPositions(np.asanyarray(coords))
+            coords = np.asanyarray(coords)
+            mol = Chem.AddHs(mol, explicitOnly=(len(atoms) == len(coords)))
+            conf = Chem.Conformer(mol.GetNumAtoms())
+            conf.SetPositions(coords)
             conf.SetId(0)
             mol.AddConformer(conf)
             if add_implicit_hydrogens:
