@@ -60,6 +60,7 @@ class ASEDimerRunner:
             reactant = np.argmin(energies[ts:])
 
         offset_energies = (energies - energies[reactant])  / (energies[ts] - energies[reactant])
+
         # scan left and right from the TS until we have either gone below the offset or have reached our node cutoff
         left_points = []
         for i in range(ts-1): # scan in reverse

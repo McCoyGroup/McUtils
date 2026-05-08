@@ -1,6 +1,9 @@
 
 import os
+import numpy as np
 from .. import Devutils as dev
+from .. import Numputils as nput
+from ..Data import AtomData
 from ..Parsers import XYZParser
 
 __all__ = [
@@ -92,6 +95,15 @@ def resolve_freezing_string(*, images, calc_getter=None, energy_evaluator=None, 
         energy_evaluator=energy_evaluator,
         **opts
     )
+@register_method('zero-temperature-string')
+def resolve_chain_of_states(*, images, energy_evaluator=None, **opts):
+    from pysisyphus.cos.SimpleZTS import SimpleZTS
+    return resolve_cos_method(
+        cos_class=SimpleZTS,
+        images=images,
+        energy_evaluator=energy_evaluator,
+        **opts
+    )
 @register_method('neb')
 def resolve_neb(*, images, energy_evaluator=None, **opts):
     from pysisyphus.cos.NEB import NEB
@@ -102,10 +114,101 @@ def resolve_neb(*, images, energy_evaluator=None, **opts):
         **opts
     )
 
+def get_dimer_image_guess(base_images,
+                          energies=None,
+                          distance_metric=None,
+                          masses=None,
+                          *,
+                          fit_order=2,
+                          peak_cutoff,
+                          min_nodes=3
+                          ):
+    if energies is None:
+        for m in base_images:
+            m.calc_energy()
+        energies = [m.results['energy'] for m in base_images]
+    energies = np.array(energies)
+    product = np.argmin(energies)
+    ts = np.argmax(energies)
+    if product > ts:
+        reactant = np.argmin(energies[:ts])
+    else:
+        reactant = np.argmin(energies[ts:])
+
+    offset_energies = (energies - energies[reactant]) / (energies[ts] - energies[reactant])
+
+    if masses is None:
+        symbols = base_images[0].atoms
+        masses = [AtomData[a, "Mass"] for a in symbols]
+    geoms = np.array([b.coords.reshape(-1, 3) for b in base_images])
+    if distance_metric is None:
+        distance_metric = lambda *args, **kwargs: nput.incremental_eckart_rmsd(*args, mass_weighted=True, **kwargs)
+    distances = distance_metric(
+        geoms,
+        masses=masses,
+    )
+
+    distances = nput.vec_rescale(distances)
+
+    ts_pos_guess, _ = nput.peak_fit_maxiumum(distances, offset_energies,
+                                             peak_cutoff=peak_cutoff,
+                                             min_nodes=min_nodes,
+                                             fit_order=fit_order)
+
+    # find the two images nearest to this guessed value
+    insert_idx = np.searchsorted(distances, ts_pos_guess)
+
+    return insert_idx
+
+@register_method('dimer')
+def resolve_dimer(*, images, energy_evaluator=None,
+                  energies=None,
+                  image_guess=None,
+                  distance_metric=None,
+                  masses=None,
+                  fit_order=2,
+                  peak_cutoff=.5,
+                  min_nodes=3,
+                  displacement_vector=None,
+                  climb=True,
+                  **opts):
+    if not climb: raise NotImplementedError("dimer calcs only implemented for `climb=True`")
+
+    from pysisyphus.calculators.Dimer import Dimer
+    if image_guess is None:
+        for i in images:
+            if i.calculator is None:
+                i.set_calculator(PysisCalculator(energy_evaluator))
+        image_guess = get_dimer_image_guess(
+            base_images=images,
+            energies=energies,
+            distance_metric=distance_metric,
+            masses=masses,
+            fit_order=fit_order,
+            peak_cutoff=peak_cutoff,
+            min_nodes=min_nodes
+        )
+    if displacement_vector is None:
+        displacement_vector = images[image_guess + 1].coords - images[image_guess].coords
+    target_image = images[image_guess]
+    if target_image.calculator is None:
+        target_image.set_calculator(PysisCalculator(energy_evaluator))
+
+    dimer_calc = Dimer(
+        calculator=target_image.calculator,
+        N_raw=displacement_vector,  # optional: seed orientation from COS tangent
+        **opts
+    )
+    target_image.set_calculator(dimer_calc)
+
+    return target_image
+
 method_aliases = {
     'gsm':'growing-string',
     'cos':'chain-of-states',
-    'fsm':'freezing-string'
+    'fsm':'freezing-string',
+    'zts':'zero-temperature-string',
+    'string':'zero-temperature-string'
 }
 def resolve_pysis_method(method_name, **opts):
     if isinstance(method_name, str):
@@ -133,6 +236,11 @@ def resolve_generic_optimizer(name):
 @register_optimizer('string')
 def resolve_string_optimizer(traj, **opts):
     from pysisyphus.optimizers.StringOptimizer import StringOptimizer
+    if not hasattr(traj, 'string_size'):
+        traj.string_size = len(
+            traj.all_cart_coords
+        )
+        traj.fully_grown = True
     return StringOptimizer(
         traj,
         **opts
@@ -141,6 +249,27 @@ def resolve_string_optimizer(traj, **opts):
 def resolve_lbfgs_optimizer(traj, **opts):
     from pysisyphus.optimizers.LBFGS import LBFGS
     return LBFGS(
+        traj,
+        **opts
+    )
+@register_optimizer('plbfgs')
+def resolve_plbfgs_optimizer(traj, **opts):
+    from pysisyphus.optimizers.PreconLBFGS import PreconLBFGS
+    return PreconLBFGS(
+        traj,
+        **opts
+    )
+@register_optimizer('rsprfo')
+def resolve_rsprfo_optimizer(traj, **opts):
+    from pysisyphus.tsoptimizers.RSPRFOptimizer import RSPRFOptimizer
+    return RSPRFOptimizer(
+        traj,
+        **opts
+    )
+@register_optimizer('trim')
+def resolve_trim_optimizer(traj, **opts):
+    from pysisyphus.tsoptimizers import TRIM
+    return TRIM(
         traj,
         **opts
     )
@@ -159,8 +288,10 @@ class PysisyphusLogger:
 optimizer_method_map = {
     'growing-string':'string',
     'freezing-string':'string',
-    'chain-of-states':'lbfgs',
-    'neb':'lbfgs'
+    'zero-temperature-string':'string',
+    'chain-of-states':'string',
+    'neb':'lbfgs',
+    'dimer':'lbfgs'
 }
 def resolve_pysis_optimizer(optimizer, method_name, generator, **opts):
     if optimizer is None:

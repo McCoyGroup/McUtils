@@ -24,7 +24,11 @@ __all__ = [
     "LineSearchRotationGenerator",
     "GradientDescentRotationGenerator",
     "OperatorMatrixRotationGenerator",
-    "displacement_localizing_rotation_generator"
+    "displacement_localizing_rotation_generator",
+    "polyfit_maxima",
+    "polyfit_minima",
+    "polyfit_critical_points",
+    "peak_fit_maxiumum"
 ]
 default_jacobian_step_finder = 'conjugate-gradient'
 default_hessian_step_finder = 'newton'
@@ -2128,3 +2132,72 @@ def displacement_localizing_rotation_generator(mat, col_i, col_j):
     AB_norm = np.sqrt(A ** 2 + B ** 2)
 
     return A / AB_norm, B / AB_norm, A
+
+def polyfit_critical_points(x, y, fit_order=2, check_curvature=None, curvature_test=None):
+    coeffs = np.polyfit(x, y, fit_order)
+    target_poly = np.poly1d(coeffs)
+    pd = target_poly.deriv()
+    roots = pd.roots
+    if check_curvature is None:
+        check_curvature = curvature_test is not None
+    if check_curvature:
+        curvature = pd.deriv()(roots)
+        if curvature_test:
+            mask = curvature_test(curvature)
+            roots = roots[mask]
+            curvature = curvature[mask]
+        return roots, target_poly(roots), curvature
+    else:
+        return roots, target_poly(roots)
+
+def polyfit_maxima(x, y, fit_order=2):
+    return polyfit_critical_points(x, y, fit_order=fit_order, curvature_test=lambda c: c < 0)
+def polyfit_minima(x, y, fit_order=2):
+    return polyfit_critical_points(x, y, fit_order=fit_order, curvature_test=lambda c: c > 0)
+
+def get_peak_fitting_region(
+        energies,
+        *,
+        peak_energy_cutoff,
+        min_nodes  # at least 3 nodes for the quadratic fit
+):
+    energies = np.array(energies)
+    ts = np.argmax(energies)
+
+    # scan left and right from the TS until we have either gone below the offset or have reached our node cutoff
+    left_points = []
+    for i in range(ts-1): # scan in reverse
+        if energies[ts - i] > peak_energy_cutoff:
+            left_points.append(ts - i)
+    right_points = []
+    for i in range(ts+1, len(energies)):
+        if energies[i] > peak_energy_cutoff:
+            right_points.append(i)
+
+    all_points = list(reversed(left_points)) + [ts] + right_points
+    if len(all_points) < min_nodes:
+        pad = (len(all_points) - min_nodes) // 2
+        left_pad = min([pad + (len(all_points) - min_nodes) % 2, all_points[0]])
+        right_pad = min([pad, len(energies) - all_points[-1]])
+        all_points = (
+            list(range(all_points[0] - left_pad, all_points[0]))
+            + all_points
+            + list(range(all_points[-1] + 1, all_points[-1] + right_pad))
+        )
+
+    return all_points
+
+def peak_fit_maxiumum(x, y, *,
+                      fit_order=2,
+                      peak_cutoff,
+                      min_nodes=3  # at least 3 nodes for the quadratic fit
+                      ):
+    x = np.asanyarray(x)
+    y = np.asanyarray(y)
+    pos = get_peak_fitting_region(y, peak_energy_cutoff=peak_cutoff, min_nodes=min_nodes)
+
+    max_pos, max_fit, _ = polyfit_maxima(x[pos,], y[pos,], fit_order=fit_order)
+    root = np.argmax(max_fit)
+    return max_pos[root], max_fit[root]
+
+
