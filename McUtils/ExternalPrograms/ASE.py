@@ -7,12 +7,189 @@ __all__ = [
 
 import sys
 import tempfile
+import warnings
 
 import numpy as np, io, os
+import McUtils.Devutils as dev
 from .. import Numputils as nput
+from ..Data import AtomData
+# from ..Zachary import CoordinateInterpolator
 
 from .ExternalMolecule import ExternalMolecule
 from .ChemToolkits import ASEInterface
+
+
+class ASEDimerRunner:
+    default_optimizer = 'minmode'
+
+    def __init__(self,
+                 images,
+                 start_idx,
+                 displacement_vector,
+                 initial_eigenmode_method='displacement',
+                 displacement_method='vector',
+                 max_num_rot=10,
+                 reinterpolate=True,
+                 **control_options):
+
+        self.images = images
+        self.start_idx = start_idx
+        self.displacement_vector = displacement_vector
+        self.control_options = dict(
+            initial_eigenmode_method=initial_eigenmode_method,
+            displacement_method=displacement_method,
+            max_num_rot=max_num_rot,
+            **control_options
+        )
+        self.reinterpolate = reinterpolate
+
+    @classmethod
+    def get_ts_guess_points(cls,
+                            energies,
+                            *,
+                            ts_energy_cutoff,  # 50% of the height from the reactants to TS
+                            ts_min_nodes  # at least 3 nodes for the quadratic fit
+                            ):
+        energies = np.array(energies)
+
+        product = np.argmin(energies)
+        ts = np.argmax(energies)
+        if product > ts:
+            reactant = np.argmin(energies[:ts])
+        else:
+            reactant = np.argmin(energies[ts:])
+
+        offset_energies = (energies - energies[reactant])  / (energies[ts] - energies[reactant])
+        # scan left and right from the TS until we have either gone below the offset or have reached our node cutoff
+        left_points = []
+        for i in range(ts-1): # scan in reverse
+            if offset_energies[ts - i] > ts_energy_cutoff:
+                left_points.append(ts - i)
+        right_points = []
+        for i in range(ts+1, len(energies)):
+            if offset_energies[i] > ts_energy_cutoff:
+                right_points.append(i)
+
+        all_points = list(reversed(left_points)) + [ts] + right_points
+        if len(all_points) < ts_min_nodes:
+            pad = (len(all_points) - ts_min_nodes) // 2
+            left_pad = min([pad + (len(all_points) - ts_min_nodes) % 2, all_points[0]])
+            right_pad = min([pad, len(energies) - all_points[-1]])
+            all_points = (
+                list(range(all_points[0] - left_pad, all_points[0]))
+                + all_points
+                + list(range(all_points[-1] + 1, all_points[-1] + right_pad))
+            )
+
+        return all_points
+
+
+    @classmethod
+    def get_dimer_image_guess(cls,
+                              base_images,
+                              energies=None,
+                              distance_metric=None,
+                              masses=None,
+                              fit_order=2,
+                              **guess_options
+                              ):
+        if energies is None:
+            energies = [m.calculate_energy(order=None) for m in base_images]
+        energies = np.array(energies)
+
+        points = cls.get_ts_guess_points(energies, **guess_options)
+        geoms = np.array([b.coords for b in base_images])
+        if distance_metric is None:
+            distance_metric = lambda *args, **kwargs: nput.incremental_eckart_rmsd(*args, mass_weighted=True, **kwargs)
+        if masses is None:
+            symbols = base_images[0].atoms
+            masses = [AtomData[a, "Mass"] for a in symbols]
+        distances = distance_metric(
+            geoms,
+            masses=masses,
+        )
+
+        distances = nput.vec_rescale(distances)
+        coeffs = np.polyfit(distances[points,], energies[points,], fit_order)
+        target_poly = np.poly1d(coeffs)
+        pd = target_poly.deriv()
+        roots = pd.roots
+        vals = target_poly(roots)
+        ts_pos_guess = roots[np.argmax(vals)]
+
+        # find the two images nearest to this guessed value
+        insert_idx = np.searchsorted(distances, ts_pos_guess)
+
+        return insert_idx, insert_idx+1
+
+    @classmethod
+    def from_images(cls,
+                    geoms,
+                    mol,
+                    energies=None,
+                    dimer_images=None,
+                    calc=None,
+                    distance_metric=None,
+                    masses=None,
+                    fit_order=2,
+                    ts_energy_cutoff=.5,  # 50% of the height from the reactants to TS
+                    ts_min_nodes=3,
+                    **etc):
+
+        base_images = mol.prep_trajectory_images(geoms, calc=calc)
+        if dimer_images is None:
+            dimer_images = cls.get_dimer_image_guess(base_images,
+                                                     energies=energies,
+                                                     distance_metric=distance_metric,
+                                                     masses=masses,
+                                                     fit_order=fit_order,
+                                                     ts_energy_cutoff=ts_energy_cutoff,
+                                                     ts_min_nodes=ts_min_nodes)
+
+        return cls.from_image_pair(base_images, *dimer_images, **etc)
+
+    @classmethod
+    def from_image_pair(cls, base_images, start, end, **opts):
+        displacement_vector = base_images[end].coords - base_images[start].coords
+        displacement_vector /= np.linalg.norm(displacement_vector)
+        return cls(
+            base_images,
+            start,
+            displacement_vector,
+            **opts
+        )
+
+    def optimize(self, trajectory=None, optimizer=None, logfile=None, **options):
+        import ase.mep as mep
+        opts = self.control_options | {k:v for k,v in {'logfile': logfile}.items() if v is not None}
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', UserWarning)
+            with mep.DimerControl(
+                    mask=None,
+                **opts
+            ) as d_control: # idk why we are using this as a context manager
+                d_atoms = mep.MinModeAtoms(self.images[self.start_idx].mol, d_control)
+                d_atoms.displace(displacement_vector=self.displacement_vector)
+
+                if optimizer is None:
+                    optimizer = self.default_optimizer
+
+                if dev.str_is(optimizer, 'minmode'):
+                    optimizer = mep.MinModeTranslate
+                else:
+                    optimizer = ASEMolecule.lookup_optimizer_type(optimizer)
+                # Converge to a saddle point
+                dim_rlx = optimizer(d_atoms, logfile=logfile, trajectory=trajectory)
+                dim_rlx.run(**options)
+
+        # images = list(self.images)
+        # images = (
+        #         images[:self.start_idx]
+        #         + images[self.start_idx].prep_trajectory_images([d_atoms.atoms])
+        #         + images[self.start_idx+1:]
+        # )
+        return dim_rlx, self.images
 
 class ASEMolecule(ExternalMolecule):
     """
@@ -179,7 +356,10 @@ class ASEMolecule(ExternalMolecule):
             raise ValueError("ASE calculators don't support 3rd derivatives by default")
         res = self.calculate_props(props, geoms=geoms, calc=calc, extra_calcs=extra_calcs)
         if just_eng:
-            return res['energy']
+            if geoms is None:
+                return res['energy'].squeeze()
+            else:
+                return res['energy']
 
         base_ndim = 0 if geoms is None else np.asarray(geoms).ndim - 2
         ncoord = 3 * len(self.masses)
@@ -195,10 +375,8 @@ class ASEMolecule(ExternalMolecule):
             )
         return ret_tup
 
-    default_optimizer = 'bfgs'
-    def resolve_optimizer(self, method):
-        if method is None:
-            method = self.default_optimizer
+    @classmethod
+    def lookup_optimizer_type(cls, method):
         if isinstance(method, str):
             optimize = ASEInterface.submodule('optimize')
             if method == 'bfgs':
@@ -208,6 +386,12 @@ class ASEMolecule(ExternalMolecule):
             else:
                 method = getattr(optimize, method)
         return method
+
+    default_optimizer = 'bfgs'
+    def resolve_optimizer(self, method):
+        if method is None:
+            method = self.default_optimizer
+        return self.lookup_optimizer_type(method)
 
     convergence_criterion = 1e-4
     max_steps = 100
@@ -267,10 +451,12 @@ class ASEMolecule(ExternalMolecule):
 
         return opt, opt_coords, {}
 
-    def prep_trajectory_images(self, geoms, calc=None):
-        info = self.mol.info
+    def prep_trajectory_images(self, geoms, mol=None, calc=None):
+        if mol is None:
+            mol = self
+        info = mol.mol.info
         if calc is None:
-            calc = self.mol.calc
+            calc = mol.mol.calc
         return [
             self.from_atoms(g,
                             calculator=calc if g.calc is None else None,
@@ -280,7 +466,7 @@ class ASEMolecule(ExternalMolecule):
             g
                 if hasattr(g, 'coords') else
                     self.from_coords(
-                        self.atoms,
+                        mol.atoms,
                         g,
                         calc=calc,
                         **info
@@ -299,7 +485,7 @@ class ASEMolecule(ExternalMolecule):
             if method == 'neb':
                 method = mep.NEB
             elif method == 'dimer':
-                method = mep.DimerControl
+                method = ASEDimerRunner
             else:
                 method = getattr(mep, method)
         return method
@@ -314,16 +500,22 @@ class ASEMolecule(ExternalMolecule):
 
         method = self.resolve_trajectory_method(method)
 
-        images = self.prep_trajectory_images(geoms, calc=calc)
-        if not in_place:
-            images = [i.copy() for i in images]
-        images = [i.mol for i in images]
+        if hasattr(method, 'from_images'):
+            traj = method.from_images(geoms, mol=self, calc=calc, **opts)
+            images = None
+        else:
+            images = self.prep_trajectory_images(geoms, calc=calc)
+            if not in_place:
+                images = [i.copy() for i in images]
+            images = [i.mol for i in images]
 
-        if calc is not None:
-            for i in images:
-                i.calc = calc
+            if calc is not None:
+                for i in images:
+                    i.calc = calc
 
-        return method(images, **opts), images
+            traj = method(images, **opts)
+
+        return traj, images
 
     def optimize_trajectory(self,
                             geoms,
@@ -338,8 +530,6 @@ class ASEMolecule(ExternalMolecule):
                             in_place=False,
                             return_coords=True,
                             **opts):
-        optimizer = self.resolve_optimizer(optimizer)
-
         traj, images = self.prep_trajectory_type(geoms, method, calc=calc,
                                                  in_place=in_place,
                                                  optimizer_method=optimizer_method)
@@ -350,13 +540,17 @@ class ASEMolecule(ExternalMolecule):
             else:
                 logfile = sys.stdout
 
-        opt_rea = optimizer(traj, logfile=logfile, **opts)
-        if fmax is None:
-            fmax = self.convergence_criterion
-        if steps is None:
-            steps = self.max_steps
-        opt = opt_rea.run(fmax=fmax, steps=steps)
-        images = self.prep_trajectory_images(images)
+        if hasattr(traj, 'optimize'):
+            opt, images = traj.optimize(optimizer=optimizer, logfile=logfile, **opts)
+        else:
+            optimizer = self.resolve_optimizer(optimizer)
+            opt_rea = optimizer(traj, logfile=logfile, **opts)
+            if fmax is None:
+                fmax = self.convergence_criterion
+            if steps is None:
+                steps = self.max_steps
+            opt = opt_rea.run(fmax=fmax, steps=steps)
+            images = self.prep_trajectory_images(images)
         if return_coords:
             images = [i.coords for i in images]
 
