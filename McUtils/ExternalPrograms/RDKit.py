@@ -484,16 +484,32 @@ class RDMolecule(ExternalMolecule):
         return params
     @classmethod
     def parse_smiles(cls,
-                  smiles,
-                  sanitize=False,
-                  parse_name=True,
-                  allow_cxsmiles=True,
-                  strict_cxsmiles=True,
-                  remove_hydrogens=False,
-                  replacements=None,
-                  **opts
-                  ):
+                     smiles,
+                     sanitize=False,
+                     parse_name=True,
+                     allow_cxsmiles=True,
+                     strict_cxsmiles=True,
+                     remove_hydrogens=False,
+                     replacements=None,
+                     quiet=False,
+                     **opts
+                     ):
         Chem = cls.chem_api()
+        if quiet:
+            from rdkit.rdBase import BlockLogs
+            with BlockLogs():
+                return cls.parse_smiles(
+                    smiles,
+                    sanitize=sanitize,
+                    parse_name=parse_name,
+                    allow_cxsmiles=allow_cxsmiles,
+                    strict_cxsmiles=strict_cxsmiles,
+                    remove_hydrogens=remove_hydrogens,
+                    replacements=replacements,
+                    quiet=False,
+                    **opts
+                )
+
         params = Chem.SmilesParserParams()
         params.removeHs = remove_hydrogens
         params.sanitize = sanitize
@@ -506,6 +522,8 @@ class RDMolecule(ExternalMolecule):
             setattr(params, k, v)
 
         rdkit_mol = Chem.MolFromSmiles(smiles, params)
+        if rdkit_mol is None:
+            return None
         if not sanitize:
             try:
                 rdkit_mol.UpdatePropertyCache()

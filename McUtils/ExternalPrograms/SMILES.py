@@ -2,6 +2,7 @@ import functools
 import multiprocessing
 
 from .. import Devutils as dev
+from .RDKit import RDMolecule
 import numpy as np
 import hashlib
 
@@ -302,10 +303,9 @@ def consume_smiles_supplier(supplier:SMILESSupplier, consumer, pool=None, start_
 
         return sum(res, [])
 
-def _match_rdkit(matcher, smi):
-    from rdkit.Chem import AllChem
-    mol = AllChem.MolFromSmiles(smi)
-    if mol is None: return None
+def _match_rdkit(matcher, smi, error_value=None, **parser_options):
+    mol = RDMolecule.parse_smiles(smi, **parser_options)
+    if mol is None: return error_value
     if mol.GetSubstructMatch(matcher): return smi
 
 def _disable_rdkit_log(blockage=[]):
@@ -313,11 +313,13 @@ def _disable_rdkit_log(blockage=[]):
     bl = BlockLogs()
     blockage.append([bl,  bl.__enter__()])
 
-def smarts_matcher(pattern):
+def smarts_matcher(pattern, error_value=None, **parser_options):
     from .RDKit import RDKitInterface
     AllChem = RDKitInterface.submodule("Chem.AllChem")
     smarts_candidate = AllChem.MolFromSmarts(pattern)
-    matcher = functools.partial(_match_rdkit, smarts_candidate)
+    matcher = functools.partial(_match_rdkit, smarts_candidate,
+                                error_value=error_value,
+                                **parser_options)
     return matcher
 
 

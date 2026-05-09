@@ -1,0 +1,710 @@
+{
+  "H": {
+    "Position": [
+      1,
+      1
+    ]
+  },
+  "He": {
+    "Position": [
+      1,
+      18
+    ]
+  },
+  "Li": {
+    "Position": [
+      2,
+      1
+    ]
+  },
+  "Be": {
+    "Position": [
+      2,
+      2
+    ]
+  },
+  "B": {
+    "Position": [
+      2,
+      13
+    ]
+  },
+  "C": {
+    "Position": [
+      2,
+      14
+    ]
+  },
+  "N": {
+    "Position": [
+      2,
+      15
+    ]
+  },
+  "O": {
+    "Position": [
+      2,
+      16
+    ]
+  },
+  "F": {
+    "Position": [
+      2,
+      17
+    ]
+  },
+  "Ne": {
+    "Position": [
+      2,
+      18
+    ]
+  },
+  "Na": {
+    "Position": [
+      3,
+      1
+    ]
+  },
+  "Mg": {
+    "Position": [
+      3,
+      2
+    ]
+  },
+  "Al": {
+    "Position": [
+      3,
+      13
+    ]
+  },
+  "Si": {
+    "Position": [
+      3,
+      14
+    ]
+  },
+  "P": {
+    "Position": [
+      3,
+      15
+    ]
+  },
+  "S": {
+    "Position": [
+      3,
+      16
+    ]
+  },
+  "Cl": {
+    "Position": [
+      3,
+      17
+    ]
+  },
+  "Ar": {
+    "Position": [
+      3,
+      18
+    ]
+  },
+  "K": {
+    "Position": [
+      4,
+      1
+    ]
+  },
+  "Ca": {
+    "Position": [
+      4,
+      2
+    ]
+  },
+  "Sc": {
+    "Position": [
+      4,
+      3
+    ]
+  },
+  "Ti": {
+    "Position": [
+      4,
+      4
+    ]
+  },
+  "V": {
+    "Position": [
+      4,
+      5
+    ]
+  },
+  "Cr": {
+    "Position": [
+      4,
+      6
+    ]
+  },
+  "Mn": {
+    "Position": [
+      4,
+      7
+    ]
+  },
+  "Fe": {
+    "Position": [
+      4,
+      8
+    ]
+  },
+  "Co": {
+    "Position": [
+      4,
+      9
+    ]
+  },
+  "Ni": {
+    "Position": [
+      4,
+      10
+    ]
+  },
+  "Cu": {
+    "Position": [
+      4,
+      11
+    ]
+  },
+  "Zn": {
+    "Position": [
+      4,
+      12
+    ]
+  },
+  "Ga": {
+    "Position": [
+      4,
+      13
+    ]
+  },
+  "Ge": {
+    "Position": [
+      4,
+      14
+    ]
+  },
+  "As": {
+    "Position": [
+      4,
+      15
+    ]
+  },
+  "Se": {
+    "Position": [
+      4,
+      16
+    ]
+  },
+  "Br": {
+    "Position": [
+      4,
+      17
+    ]
+  },
+  "Kr": {
+    "Position": [
+      4,
+      18
+    ]
+  },
+  "Rb": {
+    "Position": [
+      5,
+      1
+    ]
+  },
+  "Sr": {
+    "Position": [
+      5,
+      2
+    ]
+  },
+  "Y": {
+    "Position": [
+      5,
+      3
+    ]
+  },
+  "Zr": {
+    "Position": [
+      5,
+      4
+    ]
+  },
+  "Nb": {
+    "Position": [
+      5,
+      5
+    ]
+  },
+  "Mo": {
+    "Position": [
+      5,
+      6
+    ]
+  },
+  "Tc": {
+    "Position": [
+      5,
+      7
+    ]
+  },
+  "Ru": {
+    "Position": [
+      5,
+      8
+    ]
+  },
+  "Rh": {
+    "Position": [
+      5,
+      9
+    ]
+  },
+  "Pd": {
+    "Position": [
+      5,
+      10
+    ]
+  },
+  "Ag": {
+    "Position": [
+      5,
+      11
+    ]
+  },
+  "Cd": {
+    "Position": [
+      5,
+      12
+    ]
+  },
+  "In": {
+    "Position": [
+      5,
+      13
+    ]
+  },
+  "Sn": {
+    "Position": [
+      5,
+      14
+    ]
+  },
+  "Sb": {
+    "Position": [
+      5,
+      15
+    ]
+  },
+  "Te": {
+    "Position": [
+      5,
+      16
+    ]
+  },
+  "I": {
+    "Position": [
+      5,
+      17
+    ]
+  },
+  "Xe": {
+    "Position": [
+      5,
+      18
+    ]
+  },
+  "Cs": {
+    "Position": [
+      6,
+      1
+    ]
+  },
+  "Ba": {
+    "Position": [
+      6,
+      2
+    ]
+  },
+  "La": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Ce": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Pr": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Nd": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Pm": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Sm": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Eu": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Gd": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Tb": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Dy": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Ho": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Er": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Tm": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Yb": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Lu": {
+    "Position": [
+      6,
+      3
+    ]
+  },
+  "Hf": {
+    "Position": [
+      6,
+      4
+    ]
+  },
+  "Ta": {
+    "Position": [
+      6,
+      5
+    ]
+  },
+  "W": {
+    "Position": [
+      6,
+      6
+    ]
+  },
+  "Re": {
+    "Position": [
+      6,
+      7
+    ]
+  },
+  "Os": {
+    "Position": [
+      6,
+      8
+    ]
+  },
+  "Ir": {
+    "Position": [
+      6,
+      9
+    ]
+  },
+  "Pt": {
+    "Position": [
+      6,
+      10
+    ]
+  },
+  "Au": {
+    "Position": [
+      6,
+      11
+    ]
+  },
+  "Hg": {
+    "Position": [
+      6,
+      12
+    ]
+  },
+  "Tl": {
+    "Position": [
+      6,
+      13
+    ]
+  },
+  "Pb": {
+    "Position": [
+      6,
+      14
+    ]
+  },
+  "Bi": {
+    "Position": [
+      6,
+      15
+    ]
+  },
+  "Po": {
+    "Position": [
+      6,
+      16
+    ]
+  },
+  "At": {
+    "Position": [
+      6,
+      17
+    ]
+  },
+  "Rn": {
+    "Position": [
+      6,
+      18
+    ]
+  },
+  "Fr": {
+    "Position": [
+      7,
+      1
+    ]
+  },
+  "Ra": {
+    "Position": [
+      7,
+      2
+    ]
+  },
+  "Ac": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Th": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Pa": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "U": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Np": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Pu": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Am": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Cm": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Bk": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Cf": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Es": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Fm": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Md": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "No": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Lr": {
+    "Position": [
+      7,
+      3
+    ]
+  },
+  "Rf": {
+    "Position": [
+      7,
+      4
+    ]
+  },
+  "Db": {
+    "Position": [
+      7,
+      5
+    ]
+  },
+  "Sg": {
+    "Position": [
+      7,
+      6
+    ]
+  },
+  "Bh": {
+    "Position": [
+      7,
+      7
+    ]
+  },
+  "Hs": {
+    "Position": [
+      7,
+      8
+    ]
+  },
+  "Mt": {
+    "Position": [
+      7,
+      9
+    ]
+  },
+  "Ds": {
+    "Position": [
+      7,
+      10
+    ]
+  },
+  "Rg": {
+    "Position": [
+      7,
+      11
+    ]
+  },
+  "Cn": {
+    "Position": [
+      7,
+      12
+    ]
+  },
+  "Nh": {
+    "Position": [
+      7,
+      13
+    ]
+  },
+  "Fl": {
+    "Position": [
+      7,
+      14
+    ]
+  },
+  "Mc": {
+    "Position": [
+      7,
+      15
+    ]
+  },
+  "Lv": {
+    "Position": [
+      7,
+      16
+    ]
+  },
+  "Ts": {
+    "Position": [
+      7,
+      17
+    ]
+  },
+  "Og": {
+    "Position": [
+      7,
+      18
+    ]
+  }
+}

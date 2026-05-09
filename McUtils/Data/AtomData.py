@@ -1,6 +1,8 @@
 """
 Provides a class for handling a compiled set of atomic data
 """
+import os
+from .. import Devutils as dev
 from .CommonData import DataHandler
 
 __all__ = [ "AtomData", "AtomDataHandler" ]
@@ -31,16 +33,26 @@ class AtomDataHandler(DataHandler):
     def load(self):
         # now update by max IsotopeFraction
         super().load()
+        supp = dev.read_json(os.path.join(self._dir, "TheRealMcCoy", "AtomDataSupplement.json"))
         maxIsos = {}
         case_aliases = {}
-        for v in self._data.values():
+        supp_updates = {}
+        for k,v in self._data.items():
             num = v["Number"]
             if num not in maxIsos or v["IsotopeFraction"] > maxIsos[num][0]:
                 maxIsos[num] = (v["IsotopeFraction"], v)
             case_aliases[v["Symbol"].lower()] = v
             case_aliases[v["Symbol"].upper()] = v
+            if v["Symbol"] in supp:
+                supp_updates[k] = supp[v["Symbol"]]
+            elif v["ElementSymbol"] in supp:
+                supp_updates[k] = supp[v["ElementSymbol"]]
+
         self._data.update(((k, v[1]) for k, v in maxIsos.items()))
         self._data.update(case_aliases)
+        for k, v in supp_updates.items():
+            self._data[k].update(v)
+
 AtomData = AtomDataHandler()
 AtomData.__doc__ = """An instance of AtomDataHandler that can be used for looking up atom data"""
 AtomData.__name__ = "AtomData"
