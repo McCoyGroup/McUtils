@@ -541,8 +541,12 @@ class ASEMolecule(ExternalMolecule):
             else:
                 logfile = sys.stdout
 
+        if fmax is None:
+            fmax = self.convergence_criterion
+        if steps is None:
+            steps = self.max_steps
         if hasattr(traj, 'optimize'):
-            opt, images = traj.optimize(optimizer=optimizer, logfile=logfile, **opts)
+            opt, images = traj.optimize(optimizer=optimizer, logfile=logfile, fmax=fmax, steps=steps, **opts)
         else:
             optimizer = self.resolve_optimizer(optimizer)
             opt_rea = optimizer(traj, logfile=logfile, **opts)

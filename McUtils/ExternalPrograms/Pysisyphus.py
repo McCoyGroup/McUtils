@@ -14,7 +14,8 @@ __all__ = [
     "PysisCalculator",
     "patch_pysis_logging",
     "run_pysisyphus",
-    "pysis_interpolate"
+    "pysis_interpolate",
+    "prep_pysis_images"
 ]
 
 
@@ -31,10 +32,13 @@ def suppress_logging(level=logging.CRITICAL):
         # Restore the original disabling level
         logging.disable(previous_level)
 
+def _remove_handlers(logger):
+    logger.handlers.clear()
+    if logger.parent:
+        _remove_handlers(logger.parent)
 def patch_pysis_logging():
     import pysisyphus
-    pysisyphus.logger.removeHandler(pysisyphus.file_handler)
-    pysisyphus.logger.removeHandler(pysisyphus.stdout_handler)
+    _remove_handlers(pysisyphus.logger)
 
     with dev.OutputRedirect():
         import pysisyphus.init_logging
@@ -44,17 +48,17 @@ def patch_pysis_logging():
     def get_fh_logger(name, log_fn, base=pysisyphus.init_logging.get_fh_logger):
         base(name, log_fn)
         logger = logging.getLogger(name)
-        logger.handlers.clear()
+        _remove_handlers(logger)
     pysisyphus.init_logging.get_fh_logger = get_fh_logger
 
     import pysisyphus.optimizers.Optimizer
     def configure_opt_logger(logger, prefix, base=pysisyphus.optimizers.Optimizer.configure_opt_logger):
         base(logger=logger, prefix=prefix)
-        logger.handlers.clear()
+        _remove_handlers(logger)
     pysisyphus.optimizers.Optimizer.configure_opt_logger = configure_opt_logger
 
     import pysisyphus.calculators
-    pysisyphus.calculators.logger.handlers.clear()
+    _remove_handlers(pysisyphus.calculators.logger)
 
     if pysisyphus.config.OUT_DIR_DEFAULT == 'qm_calcs':
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -231,7 +235,7 @@ def get_dimer_image_guess(base_images,
     if masses is None:
         symbols = base_images[0].atoms
         masses = [AtomData[a, "Mass"] for a in symbols]
-    geoms = np.array([b.coords.reshape(-1, 3) for b in base_images])
+    geoms = np.array([b.cart_coords.reshape(-1, 3) for b in base_images])
     if distance_metric is None:
         distance_metric = lambda *args, **kwargs: nput.incremental_eckart_rmsd(*args, mass_weighted=True, **kwargs)
     distances = distance_metric(
@@ -282,7 +286,7 @@ def resolve_dimer(*, images, energy_evaluator=None,
             min_nodes=min_nodes
         )
     if displacement_vector is None:
-        displacement_vector = images[image_guess + 1].coords - images[image_guess].coords
+        displacement_vector = images[image_guess + 1].cart_coords - images[image_guess].cart_coords
     target_image = images[image_guess]
     if target_image.calculator is None:
         target_image.set_calculator(PysisCalculator(energy_evaluator))
@@ -492,24 +496,57 @@ def resolve_pysis_interpolator(interpolator, traj, logger=None, **opts):
         interpolator = interpolator_resolvers[interpolator]
     return interpolator(traj, **opts)
 
-def prep_images(atoms,
-                geometry,
-                **opts):
+# # Use 'tric', if requested; otherwise always use 'redund'
+#         sp_coord_type = "tric" if coord_type == "tric" else "redund"
+#         geom_0 = geoms[0].copy(coord_type=sp_coord_type)
+#         geom_m1 = geoms[-1].copy(coord_type=sp_coord_type)
+#         typed_prims = form_coordinate_union(geom_0, geom_m1)
+#         geom_kwargs["coord_kwargs"]["typed_prims"] = typed_prims
+#
+#     return [
+#         Geometry(geom.atoms, geom.cart_coords, coord_type=coord_type, **geom_kwargs)
+#         for geom in geoms
+#     ]
+
+def prep_pysis_images(atoms,
+                      geometry,
+                      coord_type='cartesian',
+                      coord_kwargs=None,
+                      **opts):
     patch_pysis_logging()
 
     from pysisyphus.Geometry import Geometry
-    geoms = [
+    from pysisyphus.intcoords.helpers import form_coordinate_union
+
+    import pysisyphus.intcoords.logging_conf
+    _remove_handlers(pysisyphus.intcoords.logging_conf.logger)
+
+    pre_union = coord_type == "cartesian" or (coord_kwargs is not None and 'typed_prims' in coord_kwargs)
+    base_geoms = [
         Geometry(
             atoms,
             coords,
+            coord_kwargs=coord_kwargs,
+            coord_type=coord_type,
             **opts
         )
         for coords in geometry
     ]
+    if not pre_union:
+        start = base_geoms[0].copy(coord_type=coord_type)
+        end = base_geoms[-1].copy(coord_type=coord_type)
+        typed_prims = form_coordinate_union(start, end)
+        if coord_kwargs is None:
+            coord_kwargs = {}
+        coord_kwargs["typed_prims"] = typed_prims
+        base_geoms = [
+            Geometry(geom.atoms, geom.cart_coords, coord_type=coord_type, coord_kwargs=coord_kwargs, **opts)
+            for geom in base_geoms
+        ]
 
-    return geoms
+    return base_geoms
 
 def pysis_interpolate(geoms, interpolator, **opts):
     interpolator = resolve_pysis_interpolator(interpolator, geoms, **opts)
     all_geoms = interpolator.interpolate()
-    return [a.coords.reshape(-1, 3) for a in all_geoms]
+    return [a.cart_coords.reshape(-1, 3) for a in all_geoms]
