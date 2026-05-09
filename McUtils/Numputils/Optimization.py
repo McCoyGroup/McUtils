@@ -2167,8 +2167,8 @@ def get_peak_fitting_region(
     # scan left and right from the TS until we have either gone below the offset or have reached our node cutoff
     left_points = []
     for i in range(ts-1): # scan in reverse
-        if energies[ts - i] > peak_energy_cutoff:
-            left_points.append(ts - i)
+        if energies[ts - i - 1] > peak_energy_cutoff:
+            left_points.append(ts - i - 1)
     right_points = []
     for i in range(ts+1, len(energies)):
         if energies[i] > peak_energy_cutoff:
@@ -2197,7 +2197,11 @@ def peak_fit_maxiumum(x, y, *,
     pos = get_peak_fitting_region(y, peak_energy_cutoff=peak_cutoff, min_nodes=min_nodes)
 
     max_pos, max_fit, _ = polyfit_maxima(x[pos,], y[pos,], fit_order=fit_order)
-    root = np.argmax(max_fit)
-    return max_pos[root], max_fit[root]
+    if len(max_pos) == 0:
+        root = np.argmax(y)
+        return x[root], y[root]
+    else:
+        root = np.argmax(max_fit)
+        return max_pos[root], max_fit[root]
 
 
