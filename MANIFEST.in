@@ -34,6 +34,9 @@ recursive-include McUtils/ExternalPrograms/ *.gjf
 recursive-include McUtils/ExternalPrograms/ *.inp
 recursive-include McUtils/ExternalPrograms/ *.json
 
+# Data tempaltes
+recursive-include McUtils/Data/ *.json
+
 # Examples
 # graft examples
 
