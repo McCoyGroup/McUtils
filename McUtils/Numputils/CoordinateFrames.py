@@ -5,6 +5,7 @@ __all__ = [
     "moments_of_inertia",
     "moments_of_inertia_expansion",
     "inertial_frame_derivatives",
+    "frame_displacement_projector",
     "translation_rotation_eigenvectors",
     "translation_rotation_projector",
     "remove_translation_rotations",
@@ -481,12 +482,10 @@ def translation_rotation_eigenvectors(coords,
         res = res + (principle_axes,)
     return res
 
-def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False,
-                                   orthonormal=True
-                                   ):
-    if masses is None:
-        masses = np.ones(coords.shape[-2])
-    _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
+def frame_displacement_projector(tr_modes, masses,
+                                 mass_weighted=False,
+                                 orthonormal=True
+                                 ):
     if not mass_weighted:
         g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
         inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
@@ -498,6 +497,20 @@ def translation_rotation_projector(coords, masses=None, mass_weighted=False, ret
         shared = tr_modes.ndim - 2
         eye = vec_ops.identity_tensors(tr_modes.shape[:-2], tr_modes.shape[-2])
         projector = eye - vec_ops.vec_tensordot(tr_modes, inv, axes=[-1, -2], shared=shared)
+    return projector
+
+def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False,
+                                   orthonormal=True
+                                   ):
+    if masses is None:
+        masses = np.ones(coords.shape[-2])
+    _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
+
+    projector = frame_displacement_projector(
+        tr_modes, masses,
+        mass_weighted=mass_weighted,
+        orthonormal=orthonormal
+    )
 
     if return_modes:
         return projector, tr_modes
