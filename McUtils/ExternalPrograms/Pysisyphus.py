@@ -13,7 +13,8 @@ from ..Parsers import XYZParser
 __all__ = [
     "PysisCalculator",
     "patch_pysis_logging",
-    "run_pysisyphus"
+    "run_pysisyphus",
+    "pysis_interpolate"
 ]
 
 
@@ -91,31 +92,72 @@ def resolve_cos_method(*, images, cos_class, energy_evaluator=None,
                        logger=None,
                        **opts):
     import pathlib
+    base_calc = None
     for i in images:
         if i.calculator is None:
-            i.set_calculator(PysisCalculator(energy_evaluator))
+            if energy_evaluator is None:
+                if base_calc is None:
+                    for i in images:
+                        if i.calculator is not None:
+                            base_calc = i.calculator
+                            break
+                    else:
+                        raise ValueError("no image has a calculator")
+                i.set_calculator(base_calc.copy())
+            else:
+                i.set_calculator(PysisCalculator(energy_evaluator))
         if out_dir is not None:
             i.calculator.out_dir = pathlib.Path(out_dir).resolve()
+
+    if logger is None:
+        cos_class.logger = PysisyphusLogger()
+    else:
+        cos_class.logger = logger
     return cos_class(
         images=images,
         **opts
     )
 @register_method('growing-string')
-def resolve_gsm(*, images, calc_getter=None, energy_evaluator=None, **opts):
+def resolve_gsm(*, images, calc_getter=None, energy_evaluator=None,
+                max_nodes=None,
+                energies=None,
+                distance_metric=None,
+                masses=None,
+                fit_order=2,
+                peak_cutoff=.5,
+                min_nodes=3,
+                **opts):
     from pysisyphus.cos.GrowingString import GrowingString
     if calc_getter is None:
-        calc_getter = lambda **kwargs: PysisCalculator(energy_evaluator, **kwargs)
+        if energy_evaluator is None:
+            calc_getter = lambda **kwargs: images[0].calculator.copy()
+        else:
+            calc_getter = lambda **kwargs: PysisCalculator(energy_evaluator, **kwargs)
     if len(images) > 2:
-        opts['left_images'] = opts.get('left_images', len(images) // 2)
-        opts['right_images'] = opts.get('right_images', len(images) - (len(images) // 2))
-
-    return resolve_cos_method(
+        split_pos = opts.get('left_images')
+        if split_pos is None:
+            split_pos = get_dimer_image_guess(
+                images,
+                energies=energies,
+                distance_metric=distance_metric,
+                masses=masses,
+                fit_order=fit_order,
+                peak_cutoff=peak_cutoff,
+                min_nodes=min_nodes
+            )
+        opts['left_images'] = split_pos
+        opts['right_images'] = len(images) - split_pos
+    if max_nodes is None:
+        max_nodes = len(images)
+    gsm = resolve_cos_method(
         cos_class=GrowingString,
         images=images,
         calc_getter=calc_getter,
         energy_evaluator=energy_evaluator,
+        max_nodes=max_nodes,
         **opts
     )
+    return gsm
 @register_method('chain-of-states')
 def resolve_chain_of_states(*, images, energy_evaluator=None, **opts):
     from pysisyphus.cos.ChainOfStates import ChainOfStates
@@ -129,7 +171,10 @@ def resolve_chain_of_states(*, images, energy_evaluator=None, **opts):
 def resolve_freezing_string(*, images, calc_getter=None, energy_evaluator=None, **opts):
     from pysisyphus.cos.FreezingString import FreezingString
     if calc_getter is None:
-        calc_getter = lambda **kwargs: PysisCalculator(energy_evaluator, **kwargs)
+        if energy_evaluator is None:
+            calc_getter = lambda **kwargs: images[0].calculator.copy()
+        else:
+            calc_getter = lambda **kwargs: PysisCalculator(energy_evaluator, **kwargs)
     # if len(images) > 2:
     #     opts['left_images'] = opts.get('left_images', len(images) // 2)
     #     opts['right_images'] = opts.get('right_images', len(images) - (len(images) // 2))
@@ -142,7 +187,7 @@ def resolve_freezing_string(*, images, calc_getter=None, energy_evaluator=None, 
         **opts
     )
 @register_method('zero-temperature-string')
-def resolve_chain_of_states(*, images, energy_evaluator=None, **opts):
+def resolve_zta(*, images, energy_evaluator=None, **opts):
     from pysisyphus.cos.SimpleZTS import SimpleZTS
     return resolve_cos_method(
         cos_class=SimpleZTS,
@@ -419,3 +464,52 @@ def run_pysisyphus(
         else:
             logs = None
     return generator, optimizer, logs
+
+
+interpolator_resolvers = {}
+def register_interpolator(name, method=None):
+    if method is not None:
+        interpolator_resolvers[name] = method
+        return method
+    else:
+        def register(method, name=name):
+            return register_interpolator(name, method)
+        return register
+@register_interpolator('idpp')
+def resolve_idpp(geoms, **opts):
+    from pysisyphus.interpolate.IDPP import IDPP
+    return IDPP(geoms, **opts)
+@register_interpolator('linear')
+def resolve_linear(geoms, **opts):
+    from pysisyphus.interpolate.Interpolator import Interpolator
+    return Interpolator(geoms, **opts)
+@register_interpolator('redund')
+def resolve_redund(geoms, **opts):
+    from pysisyphus.interpolate.Redund import Redund
+    return Redund(geoms, **opts)
+def resolve_pysis_interpolator(interpolator, traj, logger=None, **opts):
+    if isinstance(interpolator, str):
+        interpolator = interpolator_resolvers[interpolator]
+    return interpolator(traj, **opts)
+
+def prep_images(atoms,
+                geometry,
+                **opts):
+    patch_pysis_logging()
+
+    from pysisyphus.Geometry import Geometry
+    geoms = [
+        Geometry(
+            atoms,
+            coords,
+            **opts
+        )
+        for coords in geometry
+    ]
+
+    return geoms
+
+def pysis_interpolate(geoms, interpolator, **opts):
+    interpolator = resolve_pysis_interpolator(interpolator, geoms, **opts)
+    all_geoms = interpolator.interpolate()
+    return [a.coords.reshape(-1, 3) for a in all_geoms]
