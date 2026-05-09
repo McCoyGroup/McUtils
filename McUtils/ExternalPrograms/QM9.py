@@ -3,6 +3,7 @@ import os
 from .. import Devutils as dev
 import io, numpy as np
 
+from .RDKit import RDMolecule
 from . import SMILES
 
 __all__ = [
@@ -80,18 +81,54 @@ class QM9:
         # just memmapped numpy loading
         return np.load(qm9_file, mmap_mode="r")
 
-    def smiles_query(self, pattern, start_at=0, upto=None):
+    def smiles_query(self, pattern, start_at=0, upto=None, track_failures=False, quiet=True, **parser_options):
+        if quiet:
+            from rdkit.rdBase import BlockLogs
+            with BlockLogs():
+                return self.smiles_query(pattern,
+                                         start_at=start_at, upto=upto,
+                                         track_failures=track_failures,
+                                         quiet=False,
+                                         **parser_options)
         smi_data = self.qm9_data['smiles']
-        matcher = SMILES.smarts_matcher(pattern)
-        hits = []
+        matcher = SMILES.smarts_matcher(pattern, error_value=False, **parser_options)
         if upto is None:
             upto = len(smi_data)
-        for i in range(start_at, upto):
-            if matcher(smi_data[i]):
-                hits.append(i)
-        return hits
+        if track_failures:
+            hits = []
+            failures = []
+            for i in range(start_at, upto):
+                m = matcher(smi_data[i])
+                if m is False:
+                    failures.append(i)
+                elif m:
+                    hits.append(i)
+            return hits, failures
+        else:
+            hits = []
+            for i in range(start_at, upto):
+                if matcher(smi_data[i]):
+                    hits.append(i)
+            return hits
 
     property_array_keys = ['A', 'B', 'C', 'mu', 'alpha', 'eps_HOMO', 'eps_LUMO', 'eps_gap', 'R2', 'zpve', 'U0', 'U', 'H', 'G', 'Cv']
+    def _load_from_offsets(self, index, offset, size, props):
+        results = {}
+        for key in props:
+            if key in ['atoms', 'coords']:
+                val = self.qm9_data[key][offset:offset + size]
+            elif key == 'freqs':
+                o = 3*offset - 6 * index
+                val = self.qm9_data[key][o:o + 3*size - 6]
+            elif key == 'property_array':
+                val = self.qm9_data["props"][index]
+                val = dict(zip(self.property_array_keys, val))
+            elif key == 'mol':
+                val = RDMolecule.parse_smiles(self.qm9_data["smiles"][index])
+            else:
+                val = self.qm9_data[key][index]
+            results[key] = val
+        return results
     def load_data(self, index, props=None):
         if props is None:
             props = [
@@ -104,17 +141,30 @@ class QM9:
         offset = self.qm9_data['offsets'][index]
         size = self.qm9_data['sizes'][index]
 
-        results = {}
-        for key in props:
-            if key in ['atoms', 'coords']:
-                val = self.qm9_data[key][offset:offset + size]
-            elif key == 'freqs':
-                o = 3*offset - 6 * index
-                val = self.qm9_data[key][o:o + 3*size - 6]
-            elif key == 'property_array':
-                val = self.qm9_data["props"][index]
-                val = dict(zip(self.property_array_keys, val))
+        return self._load_from_offsets(index, offset, size, props)
+    def data_iter(self, props=None, start_at=None, upto=None):
+        if props is None:
+            props = [
+                "smiles",
+                "atoms",
+                "coords",
+                "freqs",
+                "property_array"
+            ]
+        offset = self.qm9_data['offsets']
+        size = self.qm9_data['sizes']
+        if start_at is not None:
+            if upto is not None:
+                offset = offset[start_at:upto]
             else:
-                val = self.qm9_data[key][index]
-            results[key] = val
-        return results
+                offset = offset[start_at:]
+        elif upto is not None:
+            offset = offset[start_at:upto]
+
+        if start_at is None:
+            start_at = 0
+
+        for i,(o,s) in enumerate(zip(offset,size)):
+             i = start_at + i
+             yield self._load_from_offsets(i, o, s, props)
+

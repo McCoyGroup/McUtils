@@ -1,3 +1,6 @@
+
+from .. import Devutils as dev
+import os
 from .CommonData import DataHandler, DataError
 
 __all__ = [ "BondData", "BondDataHandler" ]
@@ -24,6 +27,13 @@ class BondDataHandler(DataHandler):
                         da[k] = {n:v}
                     else:
                         da[k][n] = v
+        # and update from the supplement
+        supp = dev.read_json(os.path.join(self._dir, "TheRealMcCoy", "BondDataSupplement.json"))
+        for k,v in supp.items():
+            for k2,v2 in v.items():
+                for t,db in v2.items():
+                    self._data[k][k2][t] = db
+                    self._data[k2][k][t] = db
     def get_distance(self, key, default=None):
         if isinstance(key, str):
             a1 = key
