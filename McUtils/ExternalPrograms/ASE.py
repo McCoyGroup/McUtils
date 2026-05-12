@@ -128,7 +128,7 @@ class ASEDimerRunner:
                     geoms,
                     mol,
                     energies=None,
-                    dimer_images=None,
+                    image_guess=None,
                     calc=None,
                     distance_metric=None,
                     masses=None,
@@ -138,16 +138,18 @@ class ASEDimerRunner:
                     **etc):
 
         base_images = mol.prep_trajectory_images(geoms, calc=calc)
-        if dimer_images is None:
-            dimer_images = cls.get_dimer_image_guess(base_images,
-                                                     energies=energies,
-                                                     distance_metric=distance_metric,
-                                                     masses=masses,
-                                                     fit_order=fit_order,
-                                                     ts_energy_cutoff=ts_energy_cutoff,
-                                                     ts_min_nodes=ts_min_nodes)
+        if image_guess is None:
+            image_guess = cls.get_dimer_image_guess(base_images,
+                                                    energies=energies,
+                                                    distance_metric=distance_metric,
+                                                    masses=masses,
+                                                    fit_order=fit_order,
+                                                    ts_energy_cutoff=ts_energy_cutoff,
+                                                    ts_min_nodes=ts_min_nodes)
+        if nput.is_int(image_guess):
+            image_guess = [image_guess, image_guess+1]
 
-        return cls.from_image_pair(base_images, *dimer_images, **etc)
+        return cls.from_image_pair(base_images, *image_guess, **etc)
 
     @classmethod
     def from_image_pair(cls, base_images, start, end, **opts):
@@ -244,11 +246,13 @@ class ASEMolecule(ExternalMolecule):
         return cls.from_atoms(atoms, calculator=calculator, charge=charge)
 
     @classmethod
-    def from_mol(cls, mol, coord_unit="Angstroms", calculator=None):
+    def from_mol(cls, mol, coord_unit="Angstroms", calculator=None, calculator_options=None):
         from ..Data import UnitsData
 
         if calculator is None and mol.energy_evaluator is not None:
-            calculator = mol.get_energy_evaluator().to_ase()
+            if calculator_options is None:
+                calculator_options = {}
+            calculator = mol.get_energy_evaluator().to_ase(**calculator_options)
 
         return cls.from_coords(
             mol.atoms,
