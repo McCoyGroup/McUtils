@@ -484,13 +484,20 @@ def translation_rotation_eigenvectors(coords,
 
 def frame_displacement_projector(tr_modes, masses,
                                  mass_weighted=False,
-                                 orthonormal=True
-                                 ):
+                                 orthonormal=True,
+                                 pre_weighted=False):
     if not mass_weighted:
-        g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
-        inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
+        if pre_weighted:
+            g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
+            inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
+        else:
+            inv = np.moveaxis(tr_modes, -2, -1)
     else:
-        inv = np.moveaxis(tr_modes, -2, -1)
+        if pre_weighted:
+            inv = np.moveaxis(tr_modes, -2, -1)
+        else:
+            g12 = np.diag(np.repeat(1/np.sqrt(masses), 3))
+            inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
     if orthonormal:
         projector = vec_ops.orthogonal_projection_matrix(tr_modes, inverse=inv, orthonormal=True)
     else:
@@ -509,7 +516,8 @@ def translation_rotation_projector(coords, masses=None, mass_weighted=False, ret
     projector = frame_displacement_projector(
         tr_modes, masses,
         mass_weighted=mass_weighted,
-        orthonormal=orthonormal
+        orthonormal=orthonormal,
+        pre_weighted=True
     )
 
     if return_modes:
@@ -959,6 +967,7 @@ def incremental_eckart_rmsd(coords,
                             masses=None,
                             mass_weighted=False,
                             **embedding_parameters):
+    coords = np.asanyarray(coords)
     if refs is None:
         coords, refs = coords[..., :-1, :, :], coords[..., 1:, :, :]
 
