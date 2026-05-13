@@ -511,7 +511,7 @@ def translation_rotation_projector(coords, masses=None, mass_weighted=False, ret
                                    ):
     if masses is None:
         masses = np.ones(coords.shape[-2])
-    _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=mass_weighted)
+    _, tr_modes = translation_rotation_eigenvectors(coords, masses, mass_weighted=True)
 
     projector = frame_displacement_projector(
         tr_modes, masses,

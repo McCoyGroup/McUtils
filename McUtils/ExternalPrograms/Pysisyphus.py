@@ -440,6 +440,7 @@ def run_pysisyphus(
         optimizer_settings=None,
         max_cycles=None,
         max_step=None,
+        max_displacement=None,
         log_file=None,
         out_dir=None,
         return_logs=True,
@@ -454,6 +455,8 @@ def run_pysisyphus(
         optimizer_settings = {}
     if max_cycles is not None:
         optimizer_settings['max_cycles'] = max_cycles
+    if max_step is None and max_step is not None:
+        max_step = max_displacement
     if max_step is not None:
         optimizer_settings['max_step'] = max_step
     if logger is None:
