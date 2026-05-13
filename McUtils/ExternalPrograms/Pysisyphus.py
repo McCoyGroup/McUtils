@@ -396,8 +396,8 @@ def resolve_trim_optimizer(traj, **opts):
 class PysisyphusLogger:
     def __init__(self, log_file=None):
         self.base_logger = dev.Logger.lookup(log_file)
-    def log(self, *args, **opts):
-        self.base_logger.log_print(*args, **opts)
+    def log(self, log_level, *args, **opts):
+        self.base_logger.log_print(*args, **opts, log_level=log_level)
     def debug(self, *args, **opts):
         self.base_logger.log_print(*args, log_level=self.base_logger.LogLevel.Debug, **opts)
     def error(self, *args, **opts):
@@ -444,6 +444,7 @@ def run_pysisyphus(
         out_dir=None,
         return_logs=True,
         patch_logging=True,
+        logger=None,
         **kwargs
 ):
     if patch_logging:
@@ -455,7 +456,10 @@ def run_pysisyphus(
         optimizer_settings['max_cycles'] = max_cycles
     if max_step is not None:
         optimizer_settings['max_step'] = max_step
-    logger = PysisyphusLogger(log_file)
+    if logger is None:
+        logger = PysisyphusLogger(log_file)
+    elif hasattr(logger, 'log_print'):
+        logger = PysisyphusLogger(logger)
     with dev.DefaultDirectory(out_dir) as od:
         import pysisyphus.config
         cur_od = pysisyphus.config.OUT_DIR_DEFAULT
