@@ -154,7 +154,6 @@ class ASEDimerRunner:
     @classmethod
     def from_image_pair(cls, base_images, start, end, **opts):
         displacement_vector = base_images[end].coords - base_images[start].coords
-        displacement_vector /= np.linalg.norm(displacement_vector)
         return cls(
             base_images,
             start,
@@ -170,7 +169,7 @@ class ASEDimerRunner:
             warnings.simplefilter('ignore', UserWarning)
             with mep.DimerControl(
                     mask=None,
-                **opts
+                    **opts
             ) as d_control: # idk why we are using this as a context manager
                 d_atoms = mep.MinModeAtoms(self.images[self.start_idx].mol, d_control)
                 d_atoms.displace(displacement_vector=self.displacement_vector)
@@ -185,6 +184,8 @@ class ASEDimerRunner:
                 # Converge to a saddle point
                 dim_rlx = optimizer(d_atoms, logfile=logfile, trajectory=trajectory)
                 dim_rlx.run(**options)
+
+        self.images[self.start_idx].mol = d_atoms.atoms
 
         # images = list(self.images)
         # images = (
