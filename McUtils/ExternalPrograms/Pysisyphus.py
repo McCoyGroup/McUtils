@@ -3,6 +3,7 @@ import os
 import tempfile
 import logging
 from contextlib import contextmanager
+import pathlib
 
 import numpy as np
 from .. import Devutils as dev
@@ -95,7 +96,6 @@ def resolve_cos_method(*, images, cos_class, energy_evaluator=None,
                        out_dir=None,
                        logger=None,
                        **opts):
-    import pathlib
     base_calc = None
     for i in images:
         if i.calculator is None:
@@ -208,6 +208,14 @@ def resolve_neb(*, images, energy_evaluator=None, **opts):
         energy_evaluator=energy_evaluator,
         **opts
     )
+
+@register_method('optimize')
+def resolve_optimize(*, geom, energy_evaluator=None, out_dir=None, **opts):
+    if geom.calculator is None:
+        geom.set_calculator(PysisCalculator(energy_evaluator))
+    if out_dir is not None:
+        geom.calculator.out_dir = pathlib.Path(out_dir).resolve()
+    return geom
 
 def get_dimer_image_guess(base_images,
                           energies=None,
@@ -353,6 +361,13 @@ def resolve_string_optimizer(traj, **opts):
 def resolve_lbfgs_optimizer(traj, **opts):
     from pysisyphus.optimizers.LBFGS import LBFGS
     return LBFGS(
+        traj,
+        **opts
+    )
+@register_optimizer('rfo')
+def resolve_lrfo_optimizer(traj, **opts):
+    from pysisyphus.optimizers.RFOptimizer import RFOptimizer
+    return RFOptimizer(
         traj,
         **opts
     )
@@ -522,6 +537,10 @@ def prep_pysis_images(atoms,
     _remove_handlers(pysisyphus.intcoords.logging_conf.logger)
 
     pre_union = coord_type == "cartesian" or (coord_kwargs is not None and 'typed_prims' in coord_kwargs)
+    geometry = np.asanyarray(geometry)
+    smol = geometry.ndim == 2
+    if smol:
+        geometry = [geometry]
     base_geoms = [
         Geometry(
             atoms,
@@ -544,6 +563,8 @@ def prep_pysis_images(atoms,
             for geom in base_geoms
         ]
 
+    if smol:
+        base_geoms = base_geoms[0]
     return base_geoms
 
 def pysis_interpolate(geoms, interpolator, **opts):

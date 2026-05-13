@@ -122,7 +122,10 @@ class RDMolecule(ExternalMolecule):
         rdDetermineBonds = RDKitInterface.submodule("Chem.rdDetermineBonds")
         if determine_orders:
             #TODO: allow a fallback to `DetermineConnectivity`
-            rdDetermineBonds.DetermineBonds(rdmol, charge=charge)
+            try:
+                rdDetermineBonds.DetermineBonds(rdmol, charge=charge)
+            except ValueError:
+                rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
         else:
             rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
         return rdmol
