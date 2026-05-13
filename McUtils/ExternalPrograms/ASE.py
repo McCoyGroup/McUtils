@@ -406,6 +406,7 @@ class ASEMolecule(ExternalMolecule):
                            calc=None,
                            quiet=True,
                            logfile=None,
+                           logger=None,
                            fmax=None,
                            steps=None,
                            method=None,
@@ -413,10 +414,13 @@ class ASEMolecule(ExternalMolecule):
         BFGS = self.resolve_optimizer(method)
 
         if logfile is None:
-            if quiet:
-                logfile = io.StringIO()
+            if logger is not None:
+                logfile = logger.log_file
             else:
-                logfile = sys.stdout
+                if quiet:
+                    logfile = io.StringIO()
+                else:
+                    logfile = sys.stdout
 
         if calc is None:
             calc = self.mol.calc
