@@ -4,7 +4,9 @@ Light-weight and unsophisticated, but that's what makes this useful..
 """
 
 import abc, numpy as np, json, io, pickle, os, base64, types, warnings
+import tempfile
 from collections import OrderedDict
+from .. import Devutils as dev
 
 __all__= [
     "PseudoPickler",
@@ -256,6 +258,26 @@ class BaseSerializer(metaclass=abc.ABCMeta):
     """
 
     default_extension="" # mostly useful later
+    binary = False
+
+    registry_name = None
+    registry = {}
+    @classmethod
+    def register(cls, name, serializer=None):
+        if serializer is not None:
+            cls.registry[name] = serializer
+            cls.registry_name = name
+            return serializer
+        else:
+            def register(serializer):
+                return cls.register(name, serializer)
+            return register
+    @classmethod
+    def construct(cls, serializer_type, **kwargs):
+        if isinstance(serializer_type, BaseSerializer): return serializer_type
+        if isinstance(serializer_type, str):
+            serializer_type = cls.registry[serializer_type]
+        return serializer_type(**kwargs)
 
     @abc.abstractmethod
     def convert(self, data):
@@ -289,6 +311,20 @@ class BaseSerializer(metaclass=abc.ABCMeta):
         :rtype:
         """
         raise NotImplementedError("BaseSerializer is an abstract class")
+    def dumps(self, data, **kwargs):
+        """
+        Write data to a string
+        :param data:
+        :param kwargs:
+        :return:
+        """
+        if self.binary:
+            mode = 'w+b'
+        else:
+            mode = 'w+'
+        with tempfile.TemporaryFile(mode=mode) as tmp:
+            self.serialize(tmp, data, **kwargs)
+
     @abc.abstractmethod
     def deserialize(self, file, **kwargs):
         """
@@ -299,7 +335,67 @@ class BaseSerializer(metaclass=abc.ABCMeta):
         :rtype:
         """
         raise NotImplementedError("BaseSerializer is an abstract class")
+    def loads(self, data, **kwargs):
+        """
+        Write data to a string
+        :param data:
+        :param kwargs:
+        :return:
+        """
+        if self.binary:
+            mode = 'w+b'
+        else:
+            mode = 'w+'
+        with tempfile.TemporaryFile(mode=mode) as tmp:
+            return self.deserialize(tmp, **kwargs)
 
+@BaseSerializer.register('pickle')
+class PicklingSerializer(BaseSerializer):
+    """
+    A serializer that makes dumping data to JSON simpler
+    """
+    default_extension = ".pkl"
+    binary = True
+
+    def __init__(self, allow_pickle=True, pseudopickler=None):
+        if pseudopickler is None:
+            pseudopickler = PseudoPickler(b64encode=True)
+        self.pickler = pseudopickler
+        self.allow_pickle = allow_pickle
+    def convert(self, data):
+        return ConvertedData(self.pickler.serialize(data), self)
+    def deconvert(self, data):
+        return self.pickler.deserialize(data)
+    def serialize(self, file, data, **kwargs):
+        if not isinstance(data, ConvertedData):
+            data = self.convert(data)
+        file.write(data.data)
+    def dumps(self, data, **kwargs):
+        if not isinstance(data, ConvertedData):
+            data = self.convert(data)
+        return data.data
+    def _deserialize_dict(self, dat, key=None):
+        dat = self.deconvert(dat)
+        if key is not None:
+            if '/' in key:
+                key = key.split("/")
+                for k in key:
+                    dat = dat[k]
+            else:
+                dat = dat[key]
+
+        if self.allow_pickle:
+            dat = self.pickler.deserialize(dat)
+        return dat
+    def loads(self, data, key=None, **kwargs):
+        dat = self.pickler.deserialize(data)
+        dat = self._deserialize_dict(dat, key)
+        return dat
+    def deserialize(self, file, key=None, **kwargs):
+        dat = dev.read_file(file, mode='rb')
+        return self.loads(dat, key=key, **kwargs)
+
+@BaseSerializer.register('json')
 class JSONSerializer(BaseSerializer):
     """
     A serializer that makes dumping data to JSON simpler
@@ -344,8 +440,11 @@ class JSONSerializer(BaseSerializer):
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         file.write(data.data)
-    def deserialize(self, file, key=None, **kwargs):
-        dat = json.load(file)
+    def dumps(self, data, **kwargs):
+        if not isinstance(data, ConvertedData):
+            data = self.convert(data)
+        return data.data
+    def _deserialize_dict(self, dat, key=None):
         dat = self.deconvert(dat)
         if key is not None:
             if '/' in key:
@@ -357,10 +456,17 @@ class JSONSerializer(BaseSerializer):
 
         if self.allow_pickle:
             dat = self.pseudopickler.deserialize(dat)
-
-
+        return dat
+    def loads(self, file, key=None, **kwargs):
+        dat = json.loads(file)
+        dat = self._deserialize_dict(dat, key)
+        return dat
+    def deserialize(self, file, key=None, **kwargs):
+        dat = json.load(file)
+        dat = self._deserialize_dict(dat, key)
         return dat
 
+@BaseSerializer.register('yaml')
 class YAMLSerializer(BaseSerializer):
     """
     A serializer that makes dumping data to YAML simpler.
@@ -665,6 +771,7 @@ class NDarrayMarshaller:
             allow_pickle = self.allow_pickle
         return self.convert(data, allow_pickle=allow_pickle)
 
+@BaseSerializer.register('hdf5')
 class HDF5Serializer(BaseSerializer):
     """
     Defines a serializer that can prep/dump python data to HDF5.
@@ -672,6 +779,7 @@ class HDF5Serializer(BaseSerializer):
     This restricts what we can serialize, but generally in insignificant ways.
     """
     default_extension = ".hdf5"
+    binary = True
     def __init__(self, allow_pickle=True, psuedopickler=None, converters=None):
         import h5py as api
         self.api = api
@@ -911,12 +1019,14 @@ class HDF5Serializer(BaseSerializer):
                 cache = self._extract_key(cache, key)
             return self.deconvert(cache)
 
+@BaseSerializer.register('npz')
 class NumPySerializer(BaseSerializer):
     """
     A serializer that implements NPZ dumps
     """
 
     default_extension = ".npz"
+    binary = True
 
     # we define a converter layer that will coerce everything to NumPy arrays
     atomic_types = (str, int, float)
@@ -1085,6 +1195,7 @@ class NumPySerializer(BaseSerializer):
         else:
             return dat
 
+@BaseSerializer.register('module')
 class ModuleSerializer(BaseSerializer):
     """
     A somewhat hacky serializer that supports module-based serialization.
@@ -1094,6 +1205,7 @@ class ModuleSerializer(BaseSerializer):
     """
 
     default_extension = ".py"
+    binary = False
 
     default_loader = None
     default_attr = "config"

@@ -1,10 +1,19 @@
 import abc
+import argparse
+import os.path
 import re
 import subprocess
 import enum
 import itertools
+import uuid
+
 import numpy as np
 import getpass
+import pickle
+import base64
+
+from ..Scaffolding import BaseSerializer
+from .. import Devutils as dev
 
 __all__ = [
     "ManagedJobQueueJobStatus",
@@ -13,7 +22,8 @@ __all__ = [
     "ManagedJobQueueHandler",
     "SLURMInformationHandler",
     "SLURMSubmissionHandler",
-    "SLURMHandler"
+    "SLURMHandler",
+    "prep_sbatch_python"
 ]
 
 class ManagedJobQueueJobStatus(enum.Enum):
@@ -227,3 +237,90 @@ class SLURMHandler(ManagedJobQueueHandler):
     def get_job_status(self, job_id):
         base_info = self.get_job_info()[job_id]
         return base_info['state']
+
+def sbatch_python_script(script, chdir=None, **sbatch_kwargs):
+    subprocess.call(["sbatch", script],
+                    **sbatch_kwargs)
+
+def prep_sbatch_python(func, *args, sbatch_kwargs=None,
+                       serializer='json', deserializer=None,
+                       serialization_mode=None,
+                       template='run_sbatch_python.py',
+                       path_modifications=None,
+                       script_file='run_{job_name}_{id}.py',
+                       id=None,
+                       state_string=None,
+                       post_processor="print",
+                       function_args=None,
+                       function_kwargs=None,
+                       **kwargs):
+    if sbatch_kwargs is None:
+        sbatch_kwargs = {}
+    if 'job_name' not in sbatch_kwargs:
+        sbatch_kwargs['job_name'] = func.__name__
+
+    if isinstance(serializer, str):
+        serializer = BaseSerializer.construct(serializer)
+
+    if hasattr(serializer, 'registry_name'):
+        if deserializer is None:
+            deserializer = serializer.registry_name
+        if serialization_mode is None:
+            serialization_mode = 'mcutils'
+    else:
+        if serialization_mode is None:
+            serialization_mode = 'function'
+    if serialization_mode == 'function':
+        if deserializer is None:
+            raise ValueError("explicit deserializer function required")
+
+    if state_string is None:
+        if function_kwargs is None:
+            function_kwargs = {}
+        function_kwargs = kwargs | function_kwargs
+        if function_args is None:
+            function_args = args
+
+        arg_dict = {
+            'args': function_args,
+            'kwargs': function_kwargs
+        }
+
+        if hasattr(serializer, 'dumps'):
+            state_string = serializer.dumps(arg_dict)
+        else:
+            state_string = serializer(arg_dict)
+
+    if path_modifications is None:
+        path_modifications = []
+
+    func = base64.b64encode(pickle.dumps(func)).decode()
+    if not isinstance(post_processor, str):
+        post_processor = base64.b64encode(pickle.dumps(post_processor)).decode()
+    replacements = {
+        'path_modifications':repr(path_modifications),
+        'serialization_mode':serialization_mode,
+        'state':state_string,
+        'deserializer':deserializer,
+        'func':func,
+        "post_processor":post_processor
+    }
+
+    if os.path.isfile(template):
+        template = dev.read_file(template)
+    else:
+        test_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", template)
+        if os.path.isfile(test_file):
+            template = dev.read_file(test_file)
+
+    for k, v in replacements.items():
+        template = template.replace(f'`{k}`', v)
+
+    if id is None:
+        id = str(uuid.uuid4())[:8]
+    script_file = script_file.format(
+        job_name=sbatch_kwargs.get('job_name'),
+        id=id
+    )
+    dev.write_file(script_file, template)
+    return script_file
