@@ -319,7 +319,7 @@ def serialize_python_job(func, *args,
         template = template.replace(f'`{k}`', v)
 
     if id is None:
-        id = dev.string_hash(json.dumps(replacements), bits=None, base=85)
+        id = dev.string_hash(json.dumps(replacements), bits=None, base=None)
     script_file = script_file.format(
         job_name=job_name,
         id=id
