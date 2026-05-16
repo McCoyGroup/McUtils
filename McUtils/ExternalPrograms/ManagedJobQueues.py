@@ -387,4 +387,4 @@ def sbatch_python_job(
     script = script.format(python_file=script_file.name)
     return SBatchJob(precall=precall, steps=script,
                      environment=environment,
-                     **sbatch_kwargs)
+                     **sbatch_kwargs), script_file

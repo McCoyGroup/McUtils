@@ -41,7 +41,7 @@ class SBatchJob:
                  description=None,
                  job_name=None, account=None, partition=None,
                  mem=None,  nodes=None, ntasks_per_node=None,
-                 chdir='%script-dir',
+                 chdir='#script-dir',
                  output=None,
                  steps=(),
                  precall=None,
@@ -141,7 +141,7 @@ class SBatchJob:
             steps = (steps,)
         chdir = self.opts.pop("chdir", None)
         if isinstance(chdir, str):
-            if chdir == '%script-dir':
+            if chdir == '#script-dir':
                steps = (
                    '$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
                    'cd "$SCRIPT_DIR"'

@@ -33,6 +33,7 @@ recursive-include McUtils/ExternalPrograms/ *.sh
 recursive-include McUtils/ExternalPrograms/ *.gjf
 recursive-include McUtils/ExternalPrograms/ *.inp
 recursive-include McUtils/ExternalPrograms/ *.json
+recursive-include McUtils/ExternalPrograms/ *.py
 
 # Data tempaltes
 recursive-include McUtils/Data/ *.json
