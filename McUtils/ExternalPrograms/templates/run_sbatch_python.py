@@ -31,7 +31,7 @@ if parser.deserializer is not None:
     deserializer = parser.deserializer
 func = """`func`"""
 if parser.callable is not None:
-    callable = parser.callable
+    func = parser.callable
 function_post_processor = """`post_processor`"""
 if parser.post is not None:
     function_post_processor = parser.post
