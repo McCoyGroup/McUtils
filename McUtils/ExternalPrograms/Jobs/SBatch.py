@@ -140,17 +140,8 @@ class SBatchJob:
         if isinstance(steps, str):
             steps = (steps,)
         chdir = self.opts.pop("chdir", None)
-        if isinstance(chdir, str):
-            if chdir == '#script-dir':
-               steps = (
-                   '$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
-                   'cd "$SCRIPT_DIR"'
-               ) + steps
-            else:
-                self.opts['chdir'] = chdir
 
         call = "\n".join(steps)
-
         if self.environment is not None:
             env = "\n".join(
                 "export {}={}".format(k, v)
@@ -159,6 +150,16 @@ class SBatchJob:
             )
         else:
             env = ""
+
+
+        if isinstance(chdir, str):
+            if chdir == '#script-dir':
+               env += "\n".join([
+                   'SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
+                   'cd "$SCRIPT_DIR"'
+               ])
+            else:
+                self.opts['chdir'] = chdir
 
         return self.sbatch_template.format(
             opts=opts,
