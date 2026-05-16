@@ -266,7 +266,7 @@ class BaseSerializer(metaclass=abc.ABCMeta):
     def register(cls, name, serializer=None):
         if serializer is not None:
             cls.registry[name] = serializer
-            cls.registry_name = name
+            serializer.registry_name = name
             return serializer
         else:
             def register(serializer):
