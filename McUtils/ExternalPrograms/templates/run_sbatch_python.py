@@ -56,8 +56,8 @@ else:
 func = pickle.loads(base64.b64decode(func))
 
 res = func(*state["args"], **state["kwargs"])
-if function_post_processor == 'print' and res is not None:
-    print(res)
+if function_post_processor == 'print':
+    if res is not None: print(res)
 elif function_post_processor == 'none':
     ...
 else:
