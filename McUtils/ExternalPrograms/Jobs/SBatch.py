@@ -154,7 +154,7 @@ class SBatchJob:
 
         if isinstance(chdir, str):
             if chdir == '#script-dir':
-               env += "\n".join([
+               env += "\n" + "\n".join([
                    'SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
                    'cd "$SCRIPT_DIR"'
                ])
