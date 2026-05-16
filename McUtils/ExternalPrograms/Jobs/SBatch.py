@@ -8,6 +8,9 @@ import subprocess
 
 __all__ = ["SBatchJob"]
 
+import uuid
+
+
 class SBatchJob:
     """
     Provides a simple interface to formatting SLURM
@@ -193,11 +196,14 @@ class SBatchJob:
         else:
             return file
 
-    def run(self, file='_sbatch.sh', output_dir=None, sbatch_function='sbatch',
+    def run(self, file=None, output_dir=None, sbatch_function='sbatch',
             delete=True,
             text=True,
             capture_output=True,
             *args, **kwargs):
+        if file is None:
+            id = str(uuid.uuid4())
+            file = f"sbatch_{id}"
         file = self.write(file, output_dir, *args, **kwargs)
         kwargs = [
             (
