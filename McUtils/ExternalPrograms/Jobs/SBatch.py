@@ -41,7 +41,7 @@ class SBatchJob:
                  description=None,
                  job_name=None, account=None, partition=None,
                  mem=None,  nodes=None, ntasks_per_node=None,
-                 chdir='#script-dir',
+                 chdir=None,
                  output=None,
                  steps=(),
                  precall=None,
@@ -139,7 +139,6 @@ class SBatchJob:
         steps = self.steps
         if isinstance(steps, str):
             steps = (steps,)
-        chdir = self.opts.pop("chdir", None)
 
         call = "\n".join(steps)
         if self.environment is not None:
@@ -152,14 +151,15 @@ class SBatchJob:
             env = ""
 
 
-        if isinstance(chdir, str):
-            if chdir == '#script-dir':
-               env += "\n" + "\n".join([
-                   'SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
-                   'cd "$SCRIPT_DIR"'
-               ])
-            else:
-                self.opts['chdir'] = chdir
+        # chdir = self.opts.pop("chdir", None)
+        # if isinstance(chdir, str):
+        #     if chdir == '#script-dir':
+        #        env += "\n" + "\n".join([
+        #            'SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
+        #            'cd "$SCRIPT_DIR"'
+        #        ])
+        #     else:
+        #         self.opts['chdir'] = chdir
 
         return self.sbatch_template.format(
             opts=opts,
