@@ -205,6 +205,7 @@ class ExternalProgramsTest(TestCase):
     def test_SBatchFromPython(self):
         import os
         os.chdir("/Users/Mark/Desktop")
-        woof = sbatch_python_job(print, 1, 2, 3)
+        woof, script_file = sbatch_python_job(print, 1, 2, 3)
 
         print(woof.format())
+        print(script_file.resolve_buffer())
