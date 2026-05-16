@@ -161,9 +161,12 @@ class ASEDimerRunner:
             **opts
         )
 
-    def optimize(self, trajectory=None, optimizer=None, logfile=None, **options):
+    def optimize(self, trajectory=None, optimizer=None, logfile=None, maxstep=None, **options):
         import ase.mep as mep
-        opts = self.control_options | {k:v for k,v in {'logfile': logfile}.items() if v is not None}
+        opts = self.control_options | {k:v for k,v in {
+            'logfile': logfile,
+            'maximum_translation': maxstep
+        }.items() if v is not None}
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', UserWarning)

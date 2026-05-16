@@ -1407,7 +1407,7 @@ class RDMolecule(ExternalMolecule):
                               **opts
                               ):
         Draw = RDKitInterface.submodule("Chem.Draw")
-        rdMolDraw2D = Draw.rdMolDraw2D
+        import rdkit.Chem.Draw.rdMolDraw2D as rdMolDraw2D
 
         splits = None
         split_start = None
@@ -1463,7 +1463,7 @@ class RDMolecule(ExternalMolecule):
         if splits is not None:
             split_start = len(drawer.GetDrawingText())
         if "highlightBondRadii" in opts:
-            mol = rdMolDraw2D.PrepareMolForDrawing(mol)
+            mol = rdMolDraw2D.PrepareMolForDrawing(mol, kekulize=False, addChiralHs=False)
             conf = mol.GetConformer()
             conf.SetPositions(_coords)
             opts['confId'] = conf.GetId()
@@ -1475,7 +1475,7 @@ class RDMolecule(ExternalMolecule):
                                               opts.get("highlightBondRadii", {}),
                                               )
         else:
-            mol = rdMolDraw2D.PrepareMolForDrawing(mol)
+            mol = rdMolDraw2D.PrepareMolForDrawing(mol, kekulize=False, addChiralHs=False)
             conf = mol.GetConformer()
             conf.SetPositions(_coords)
             opts['confId'] = conf.GetId()

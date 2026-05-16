@@ -3,8 +3,6 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 """
 
 __all__ = []
-from .SBatchHelper import *; from .SBatchHelper import __all__ as exposed
-__all__ += exposed
 from .NumbaTools import *; from .NumbaTools import __all__ as exposed
 __all__ += exposed
 from .DebugTools import *; from .DebugTools import __all__ as exposed

@@ -3,6 +3,8 @@ Provides minimal utilities for making slurm stuff nicer
 """
 
 import inspect
+import os
+import subprocess
 
 __all__ = ["SBatchJob"]
 
@@ -33,18 +35,23 @@ class SBatchJob:
         "verbose", "version", "wait", "wait-all-nodes", "wckey", "wrap"
     ]
     default_opts = {
-        'chdir': "."
+        'output': '%x-%j.out'
     }
     def __init__(self,
                  description=None,
                  job_name=None, account=None, partition=None,
                  mem=None,  nodes=None, ntasks_per_node=None,
-                 chdir=None, output=None,
+                 chdir='%script-dir',
+                 output=None,
                  steps=(),
+                 precall=None,
+                 environment=None,
                  **opts
                  ):
-        self.description=description
-        self.steps=steps
+        self.description = description
+        self.steps = steps
+        self.precall = precall
+        self.environment = environment
 
         base_opts = dict(
             job_name=job_name, account=account, partition=partition,
@@ -54,7 +61,7 @@ class SBatchJob:
         base_opts = self.clean_opts(base_opts)
         base_opts = dict(self.default_opts, **base_opts)
 
-        opts = dict(opts, **base_opts)
+        opts = opts | base_opts
         self.opts = self.clean_opts(opts)
 
     def clean_opts(self, opts):
@@ -87,16 +94,23 @@ class SBatchJob:
             self.sbatch_opt_template.format(name=k, value=v) for k,v in self.opts.items() if v is not None
         )
 
-    sbatch_template="#!/bin/bash\n{opts}\n\n{enter}\n{call}\n{exit}"
-    sbatch_enter_command="\n".join([
+    sbatch_template = "\n".join([
+        "#!/bin/bash",
+        "{opts}",
+        "{env}",
+        "{enter}",
+        "{call}",
+        "{exit}"
+    ])
+    sbatch_enter_command = "\n".join([
         'echo "Starting Job $SLURM_JOB_NAME"',
         'START=$(date +%s.%N)',
         'echo "  START: $(date)"',
         'echo "    PWD: $PWD"',
         'echo "  NODES: $SLURM_JOB_NUM_NODES"',
         'echo "  PART.: $SLURM_JOB_PARTITION"',
-        'echo "{sep}"'.format(sep="="*50)
-        ])
+        'echo "{sep}"'.format(sep="=" * 50)
+    ])
     sbatch_exit_command = "\n".join([
         'echo "{sep}"'.format(sep="=" * 50),
         'END=$(date +%s.%N)',
@@ -122,11 +136,86 @@ class SBatchJob:
             )
         exit = self.sbatch_exit_command
 
-        call = "\n".join(self.steps)
+        steps = self.steps
+        if isinstance(steps, str):
+            steps = (steps,)
+        chdir = self.opts.pop("chdir", None)
+        if isinstance(chdir, str):
+            if chdir == '%script-dir':
+               steps = (
+                   '$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)',
+                   'cd "$SCRIPT_DIR"'
+               ) + steps
+            else:
+                self.opts['chdir'] = chdir
+
+        call = "\n".join(steps)
+
+        if self.environment is not None:
+            env = "\n".join(
+                "export {}={}".format(k, v)
+                for k, v in sorted(self.environment.items())
+                if v is not None
+            )
+        else:
+            env = ""
 
         return self.sbatch_template.format(
             opts=opts,
+            env=env,
             call=call,
             enter=enter,
             exit=exit
         )
+
+    def write(self, file, output_dir=None, mode='w+', **kwargs):
+        if isinstance(file, str):
+            if output_dir is None:
+                output_dir, file = os.path.split(file)
+        if len(output_dir) == 0:
+            output_dir = None
+        curdir = os.getcwd()
+        try:
+            if output_dir is not None:
+                os.chdir(output_dir)
+            if self.precall is not None:
+                self.precall()
+            if hasattr(file, 'write'):
+                file.write(self.format())
+            else:
+                with open(file, mode, **kwargs) as stream:
+                    stream.write(self.format())
+        finally:
+            os.chdir(curdir)
+        if output_dir is not None:
+            return os.path.join(output_dir, file)
+        else:
+            return file
+
+    def run(self, file='_sbatch.sh', output_dir=None, sbatch_function='sbatch',
+            delete=True,
+            text=True,
+            capture_output=True,
+            *args, **kwargs):
+        file = self.write(file, output_dir, *args, **kwargs)
+        kwargs = [
+            (
+                f"--{k}"
+                    if v is True else
+                f"--{k}={v}"
+            ) if len(k) > 0 else (
+                f"-{k}"
+                    if v is True else
+                None
+            )
+            for k,v in kwargs.items()
+        ]
+        kwargs = [k for k in kwargs if k is not None]
+        res = subprocess.run([sbatch_function, file, *args, *kwargs],
+                             text=text, capture_output=capture_output)
+        if delete:
+            try:
+                os.remove(file)
+            except FileNotFoundError:
+                ...
+        return res

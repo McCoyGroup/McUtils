@@ -1,11 +1,14 @@
 from __future__ import annotations
+from typing import *
 
 import io
 import os
 import pathlib
 import json
+import shutil
+import hashlib
 import tempfile
-import tempfile as tf
+import base64
 
 from . import Options as opts_handler
 
@@ -18,6 +21,16 @@ __all__ = [
     "write_json",
     "split_path",
     "drop_directory_prefix",
+    "filename",
+    "bytestream_hash",
+    "string_hash",
+    "file_hash",
+    "files_hash",
+    "directory_hash",
+    "compress_dir",
+    "compressed_dir_bytes",
+    "decompress_dir",
+    "unpack_gzip_bytes",
     "FileBackedIO",
     "StreamInterface",
 ]
@@ -119,15 +132,151 @@ def drop_directory_prefix(prefix, path):
         subpath = pathlib.Path(subpath)
     return subpath
 
+def filename(path, check_dir=True):
+    split = os.path.splitext(os.path.basename(path))
+    if check_dir and len(split[1]) == 0:
+        return None
+    else:
+        return split[0]
+
+HASH_TYPE = hashlib.md5
+def _update_fs_hash(fs, sha, buff):
+    mv = memoryview(buff)
+    while n := fs.readinto(mv):
+        sha.update(mv[:n])
+
+def _digest_hash(sha, base, bits=None, id_generator=None):
+    digest = sha.digest()
+    if bits is not None:
+        digest = digest[:bits]
+    if (
+            id_generator is None
+            or id_generator is str
+            or (isinstance(id_generator, str) and id_generator == 'str')
+    ):
+        if base == 85:
+            hash = base64.b85encode(digest).decode()
+        elif base == 64:
+            hash = base64.b64encode(digest).decode()
+        else:# base == 16:
+            hash = base64.b16encode(digest).decode()
+        hash = hash.replace("/", '-')
+    elif (
+            id_generator is int
+            or (isinstance(id_generator, str) and id_generator == 'int')
+    ):
+        hash = int.from_bytes(digest, byteorder='little')
+    else:
+        hash = id_generator(digest)
+    # else:
+    #     hash = sha.hexdigest()
+    return hash
+
+def string_hash(string, base=None, bits=None, id_generator=None):
+    with io.BytesIO(string.encode('utf-8')) as buf:
+        return bytestream_hash(buf, base, bits=bits, id_generator=id_generator)
+
+HASH_ENCODING_BASE = 64
+def bytestream_hash(filestream, base=None, bits=None, id_generator=None):
+    """
+    https://stackoverflow.com/questions/22058048/hashing-a-file-in-python
+    """
+    h = HASH_TYPE()
+    b = bytearray(128 * 1024)
+    _update_fs_hash(filestream, h, b)
+    if base is None:
+        base = HASH_ENCODING_BASE
+    return _digest_hash(h, base, bits=bits, id_generator=id_generator)
+
+def file_hash(filename, base=None, bits=None, id_generator=None):
+    with open(filename, 'rb', buffering=0) as fs:
+        return bytestream_hash(fs, base=base, bits=bits, id_generator=id_generator)
+
+def files_hash(files, base=None, bits=None, id_generator=None):
+    h = HASH_TYPE()
+    b = bytearray(128 * 1024)
+    for filename in files:
+        with open(filename, 'rb', buffering=0) as fs:
+            _update_fs_hash(fs, h, b)
+    if base is None:
+        base = HASH_ENCODING_BASE
+    return _digest_hash(h, base, bits=bits, id_generator=id_generator)
+def directory_hash(directory, files=None, base=None, bits=None, id_generator=None):
+    if files is None:
+        files = os.listdir(directory)
+    files = [
+        os.path.join(directory, fn)
+        for fn in files
+    ]
+    return files_hash(files, base=base, bits=bits, id_generator=id_generator)
+
+def compress_dir(config_dir, cache_dir=None, name=None, files=None):
+    if files is None:
+        files = os.listdir(config_dir)
+    if name is None:
+        name = os.path.basename(config_dir)
+    if cache_dir is None:
+        cache_dir = os.path.dirname(config_dir)
+    curdir = os.getcwd()
+    try:
+        os.chdir(cache_dir)
+        with tempfile.TemporaryDirectory() as td:
+            os.makedirs(os.path.join(td, name))
+            for f in files:
+                shutil.copy(
+                    os.path.join(config_dir, f),
+                    os.path.join(td, name, f)
+                )
+            return shutil.make_archive(
+                name,
+                format='gztar',
+                root_dir=td,
+                base_dir=name
+            )
+    finally:
+        os.chdir(curdir)
+
+def compressed_dir_bytes(config_dir, name=None, files=None):
+    with tempfile.TemporaryDirectory() as td:
+        gzip = compress_dir(config_dir, cache_dir=td, name=name, files=files)
+        return read_file(gzip)
+
+def decompress_dir(target_dir, config_gzip):
+    shutil.unpack_archive(config_gzip, target_dir)
+
+def unpack_gzip_bytes(build_dir, gzip:bytes):
+    with tempfile.NamedTemporaryFile(mode='w+b', delete=False) as tf:
+        tf.write(gzip)
+    try:
+        shutil.unpack_archive(tf.name, build_dir, format="gztar")
+    finally:
+        if os.path.exists(tf.name):
+            os.remove(tf.name)
+
+
 class FileBackedIO:
-    def __init__(self, buffer:str|bytes, mode='w+', delete=True, **tempfile_opts):
+    def __init__(self, buffer:str|bytes|Callable[[], str|bytes], mode='w+', file=None, delete=True, **tempfile_opts):
         self.mode = mode
         self.opts = tempfile_opts
         self.buf = buffer
-        self._file = None
+        self._file = file
         self._stream = None
         self.delete = delete
 
+    def resolve_buffer(self):
+        b = self.buf
+        if not isinstance(b, (str, bytes)):
+            b: str | bytes = b()
+        return b
+    @property
+    def name(self):
+        if self._file is not None:
+            if isinstance(self._file, str):
+                return self._file
+            else:
+                return self._file.name
+        else:
+            return None
     @property
     def file(self):
         if self._file is None:
@@ -137,22 +286,31 @@ class FileBackedIO:
                 submode = 'w+'
             with tempfile.NamedTemporaryFile(mode=submode, delete=False, **self.opts) as base:
                 if 'w' not in self.mode:
-                    base.write(self.buf)
+                    base.write(self.resolve_buffer())
             self._file = base.name
         return self._file
+
+    def write(self, file=None, mode=None):
+        if mode is None:
+            mode = self.mode
+        if 'w' not in mode and 'a' not in mode:
+            mode = mode.replace('r', 'w')
+        if file is None: file = self.file
+        with open(file, mode) as stream:
+            stream.write(self.resolve_buffer())
+        return file
 
     def __enter__(self):
         if self._stream is None:
             self._stream = open(self.file, self.mode).__enter__()
             if 'w' in self.mode:
-                self._stream.write(self.buf)
+                self._stream.write(self.resolve_buffer())
                 self._stream.seek(0)
         return self._stream
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._stream.__exit__(exc_type, exc_val, exc_tb)
         if self.delete:
             os.remove(self._file)
-
 
 class StreamInterface:
     def __init__(self, stream, file_backed=False, **file_opts):

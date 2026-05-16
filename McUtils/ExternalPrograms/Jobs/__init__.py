@@ -13,3 +13,5 @@ from .Orca import *; from .Orca import __all__ as exposed
 __all__ += exposed
 from .CREST import *; from .CREST import __all__ as exposed
 __all__ += exposed
+from .SBatch import *; from .SBatch import __all__ as exposed
+__all__ += exposed

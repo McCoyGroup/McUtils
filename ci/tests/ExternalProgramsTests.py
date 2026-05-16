@@ -194,9 +194,17 @@ class ExternalProgramsTest(TestCase):
         print(sm1[:5])
         self.assertListEqual(sm1, sm2)
 
-    @debugTest
+    @validationTest
     def test_QM9(self):
         supplier = QM9(os.path.expanduser("~/Documents/Postdoc/datasets/qm9.npz"))
         print(
             supplier.load_data(0)
         )
+
+    @debugTest
+    def test_SBatchFromPython(self):
+        import os
+        os.chdir("/Users/Mark/Desktop")
+        woof = sbatch_python_job(print, 1, 2, 3)
+
+        print(woof.format())

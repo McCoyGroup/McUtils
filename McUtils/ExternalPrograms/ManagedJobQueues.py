@@ -1,10 +1,21 @@
 import abc
+import argparse
+import json
+import os.path
 import re
 import subprocess
 import enum
 import itertools
+import uuid
+
 import numpy as np
 import getpass
+import pickle
+import base64
+
+from ..Scaffolding import BaseSerializer
+from .. import Devutils as dev
+from .Jobs import SBatchJob
 
 __all__ = [
     "ManagedJobQueueJobStatus",
@@ -13,7 +24,9 @@ __all__ = [
     "ManagedJobQueueHandler",
     "SLURMInformationHandler",
     "SLURMSubmissionHandler",
-    "SLURMHandler"
+    "SLURMHandler",
+    "serialize_python_job",
+    "sbatch_python_job"
 ]
 
 class ManagedJobQueueJobStatus(enum.Enum):
@@ -227,3 +240,151 @@ class SLURMHandler(ManagedJobQueueHandler):
     def get_job_status(self, job_id):
         base_info = self.get_job_info()[job_id]
         return base_info['state']
+
+def sbatch_python_script(script, chdir=None, **sbatch_kwargs):
+    subprocess.call(["sbatch", script],
+                    **sbatch_kwargs)
+
+def serialize_python_job(func, *args,
+                         serializer='json', deserializer=None,
+                         serialization_mode=None,
+                         template='run_sbatch_python.py',
+                         path_modifications=None,
+                         script_file='run_{job_name}_{id}.py',
+                         job_name=None,
+                         id=None,
+                         state_string=None,
+                         post_processor="print",
+                         function_args=None,
+                         function_kwargs=None,
+                         **kwargs):
+    if job_name is None:
+        job_name = func.__name__
+
+    if isinstance(serializer, str):
+        serializer = BaseSerializer.construct(serializer)
+
+    if hasattr(serializer, 'registry_name'):
+        if deserializer is None:
+            deserializer = serializer.registry_name
+        if serialization_mode is None:
+            serialization_mode = 'mcutils'
+    else:
+        if serialization_mode is None:
+            serialization_mode = 'function'
+    if serialization_mode == 'function':
+        if deserializer is None:
+            raise ValueError("explicit deserializer function required")
+
+    if state_string is None:
+        if function_kwargs is None:
+            function_kwargs = {}
+        function_kwargs = kwargs | function_kwargs
+        if function_args is None:
+            function_args = args
+
+        arg_dict = {
+            'args': function_args,
+            'kwargs': function_kwargs
+        }
+
+        if hasattr(serializer, 'dumps'):
+            state_string = serializer.dumps(arg_dict)
+        else:
+            state_string = serializer(arg_dict)
+
+    if path_modifications is None:
+        path_modifications = []
+
+    func = base64.b64encode(pickle.dumps(func)).decode()
+    if not isinstance(post_processor, str):
+        post_processor = base64.b64encode(pickle.dumps(post_processor)).decode()
+    replacements = {
+        'path_modifications':",".join(path_modifications),
+        'serialization_mode':serialization_mode,
+        'state':state_string,
+        'deserializer':deserializer,
+        'func':func,
+        "post_processor":post_processor
+    }
+
+    if os.path.isfile(template):
+        template = dev.read_file(template)
+    else:
+        test_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", template)
+        if os.path.isfile(test_file):
+            template = dev.read_file(test_file)
+
+    for k, v in replacements.items():
+        template = template.replace(f'`{k}`', v)
+
+    if id is None:
+        id = dev.string_hash(json.dumps(replacements), bits=None, base=85)
+    script_file = script_file.format(
+        job_name=job_name,
+        id=id
+    )
+    return dev.FileBackedIO(template, file=script_file)
+
+python_sbatch_template = """
+INPUT_FILE="${{SLURM_JOB_NAME%.*}}.py"
+
+. ~/.bashrc
+if [ -n "$CONDA_ENVIRONMENT" ]; then
+  conda activate $CONDA_ENVIRONMENT
+fi
+if [ -n "$VENV_PATH" ]; then
+  source $VENV_PATH/bin/activate
+fi
+python -u $INPUT_FILE $@
+"""
+def get_active_environment():
+    if conda := os.environ.get("CONDA_DEFAULT_ENV"):
+        return "CONDA_ENVIRONMENT", conda
+    elif venv := os.environ.get("VIRTUAL_ENV"):
+        return "VENV_PATH", venv
+    else:
+        return None, None
+def sbatch_python_job(
+        func,
+        *args,
+        sbatch_kwargs=None,
+        job_name=None,
+        id=None,
+        script=None,
+        environment=None,
+        **kwargs
+):
+    if sbatch_kwargs is None:
+        sbatch_kwargs = {}
+        for k in SBatchJob.slurm_keys:
+            val = kwargs.pop(k.replace("-", "_"), None)
+            if val is not None:
+                sbatch_kwargs[k] = val
+
+    script_file = serialize_python_job(
+        func,
+        job_name=job_name,
+        id=id,
+        function_args=args,
+        function_kwargs=kwargs
+    )
+
+    sbatch_kwargs['job_name'] = dev.filename(script_file.name)
+
+    env_type, env_name = get_active_environment()
+    if env_type is not None:
+        if environment is None:
+            environment = {}
+        if env_type not in environment:
+            environment[env_type] = env_name
+
+    def precall():
+        script_file.write()
+
+    if script is None:
+        script = python_sbatch_template
+    script = script.format(python_file=script_file.name)
+    return SBatchJob(precall=precall, steps=script,
+                     environment=environment,
+                     **sbatch_kwargs)
