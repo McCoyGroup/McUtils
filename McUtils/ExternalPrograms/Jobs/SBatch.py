@@ -114,9 +114,9 @@ class SBatchJob:
     sbatch_exit_command = "\n".join([
         'echo "{sep}"'.format(sep="=" * 50),
         'END=$(date +%s.%N)',
-        'DIFF=$(echo "$END - $START" | bc)',
+        'DIFF=$(awk "BEGIN {print $END - $START}")',
         'echo "   END: $(date)"',
-        'echo "  TIME: $DIFF"'
+        'echo "  TIME: $DIFF"',
     ])
     def format(self):
         """
