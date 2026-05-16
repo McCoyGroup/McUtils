@@ -7,7 +7,7 @@ import base64
 import argparse
 
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("state", required=False, help="state", type=str, default=None)
+arg_parser.add_argument("state", nargs="?", help="state", type=str, default=None)
 arg_parser.add_argument("--paths", help="path modfications", type=str, default=None)
 arg_parser.add_argument("--mode", help="serialization mode", type=str, default=None)
 arg_parser.add_argument("--deserializer", type=str, default=None)
