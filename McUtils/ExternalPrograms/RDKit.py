@@ -493,6 +493,7 @@ class RDMolecule(ExternalMolecule):
                      allow_cxsmiles=True,
                      strict_cxsmiles=True,
                      remove_hydrogens=False,
+                     add_implicit_hydrogens=None,
                      replacements=None,
                      quiet=False,
                      **opts
@@ -534,6 +535,14 @@ class RDMolecule(ExternalMolecule):
                 rdkit_mol.UpdatePropertyCache(strict=False)
                 _ = Chem.GetSymmSSSR(rdkit_mol)
                 Chem.SetHybridization(rdkit_mol)
+        if add_implicit_hydrogens is not None:
+            if dev.str_is(add_implicit_hydrogens, 'full'):
+                add_implicit_hydrogens = True
+                for atom in rdkit_mol.GetAtoms():
+                    if atom.GetAtomMapNum() != 0:  # only fix mapped atoms
+                        atom.SetNoImplicit(False)  # allow implicit Hs again
+                        atom.SetNumExplicitHs(0)  # clear any explicit H count
+            rdkit_mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
 
         return rdkit_mol
     @classmethod
