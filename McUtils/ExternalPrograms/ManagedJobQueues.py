@@ -255,6 +255,7 @@ def serialize_python_job(func, *args,
                          id=None,
                          state_string=None,
                          post_processor="print",
+                         cleanup=False,
                          function_args=None,
                          function_kwargs=None,
                          **kwargs):
@@ -305,7 +306,8 @@ def serialize_python_job(func, *args,
         'state':state_string,
         'deserializer':deserializer,
         'func':func,
-        "post_processor":post_processor
+        "post_processor":post_processor,
+        "cleanup":str(cleanup)
     }
 
     if os.path.isfile(template):
@@ -359,6 +361,7 @@ def sbatch_python_job(
         id=None,
         script=None,
         environment=None,
+        cleanup=False,
         **kwargs
 ):
     if sbatch_kwargs is None:
@@ -374,6 +377,7 @@ def sbatch_python_job(
         func,
         job_name=job_name,
         id=id,
+        cleanup=cleanup,
         function_args=args,
         function_kwargs=kwargs
     )
