@@ -54,8 +54,9 @@ def patch_pysis_logging():
 
     import pysisyphus.optimizers.Optimizer
     def configure_opt_logger(logger, prefix, base=pysisyphus.optimizers.Optimizer.configure_opt_logger):
-        base(logger=logger, prefix=prefix)
         _remove_handlers(logger)
+        # base(logger=logger, prefix=prefix)
+        # _remove_handlers(logger)
     pysisyphus.optimizers.Optimizer.configure_opt_logger = configure_opt_logger
 
     import pysisyphus.calculators
