@@ -412,7 +412,8 @@ optimizer_method_map = {
     'neb':'lbfgs',
     'dimer':'lbfgs'
 }
-def resolve_pysis_optimizer(optimizer, method_name, generator, logger=None, **opts):
+def resolve_pysis_optimizer(optimizer, method_name, generator, logger=None,
+                            **opts):
     if optimizer is None:
         method_name = method_aliases.get(method_name, method_name)
         optimizer = optimizer_method_map[method_name]
@@ -422,6 +423,9 @@ def resolve_pysis_optimizer(optimizer, method_name, generator, logger=None, **op
         optimizer = opt
 
     with suppress_logging():
+        # if tol is not None:
+        #     if opt is not None:
+        #     opts['max_rms']
         optimizer = optimizer(generator, **opts)
     if logger is not None:
         optimizer.logger = logger
@@ -441,6 +445,9 @@ def run_pysisyphus(
         max_cycles=None,
         max_step=None,
         max_displacement=None,
+        thresh=None,
+        tol=None,
+        use_max_for_error=True,
         log_file=None,
         out_dir=None,
         return_logs=True,
@@ -459,6 +466,18 @@ def run_pysisyphus(
         max_step = max_displacement
     if max_step is not None:
         optimizer_settings['max_step'] = max_step
+    if thresh is None:
+        if tol is not None:
+            optimizer_settings['rms_force'] = tol
+        if use_max_for_error:
+            optimizer_settings['max_force_only'] = True
+            # if use_max_for_error:
+            #     optimizer_settings['max_force'] = tol
+            # elif use_max_for_error is False:
+            #     optimizer_settings['rms_force'] = tol
+            # else:
+            #     optimizer_settings['max_force'] = tol
+            #     optimizer_settings['rms_force'] = tol
     if logger is None:
         logger = PysisyphusLogger(log_file)
     elif hasattr(logger, 'log_print'):
