@@ -345,6 +345,12 @@ def get_active_environment():
         return "VENV_PATH", venv
     else:
         return None, None
+python_sbatch_defaults = {
+    'ntasks':1,
+    'ntasks_per_node':1,
+    'mem':'5G',
+    'time':'8:00:00'
+}
 def sbatch_python_job(
         func,
         *args,
@@ -361,6 +367,8 @@ def sbatch_python_job(
             val = kwargs.pop(k.replace("-", "_"), None)
             if val is not None:
                 sbatch_kwargs[k] = val
+
+    sbatch_kwargs = python_sbatch_defaults | sbatch_kwargs
 
     script_file = serialize_python_job(
         func,
