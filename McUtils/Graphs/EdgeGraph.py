@@ -601,7 +601,8 @@ class EdgeGraph:
                           rings=None,
                           root=None,
                           use_highest_valencies=True,
-                          validate=True
+                          validate=True,
+                          backbone=None
                           ):
         if len(self.map) < 2:
             return ((0,),)
@@ -613,7 +614,8 @@ class EdgeGraph:
                 rings=self.rings,
                 use_highest_valencies=use_highest_valencies,
                 shortest_path_data=self.shortest_path_data,
-                validate=validate
+                validate=validate,
+                backbone=backbone
             )
 
     def get_canonical_fragments(self, ordering=None, validate=False):
@@ -748,7 +750,8 @@ class EdgeGraph:
                                 root=None,
                                 use_highest_valencies=True,
                                 shortest_path_data=None,
-                                validate=True
+                                validate=True,
+                                backbone=None
                                 ):
 
         if len(map) == 1:
@@ -759,14 +762,17 @@ class EdgeGraph:
 
         segments = []
 
-        backbone = cls.find_longest_chain_from_breakpoints(
-            map,
-            graph=graph,
-            rings=rings,
-            root=root,
-            use_highest_valencies=use_highest_valencies,
-            shortest_path_data=shortest_path_data
-        )
+        if backbone is None:
+            backbone = cls.find_longest_chain_from_breakpoints(
+                map,
+                graph=graph,
+                rings=rings,
+                root=root,
+                use_highest_valencies=use_highest_valencies,
+                shortest_path_data=shortest_path_data
+            )
+        else:
+            backbone = tuple(backbone)
 
         segment_sets = set()
         if validate:
@@ -1319,13 +1325,14 @@ class MoleculeEdgeGraph(EdgeGraph):
         if len(segments) == 1:
             return [tuple(inds[s] for s in segments[0])]
         else:
-            return [tuple(inds[s] for s in segments[0]), cls._reindex_segments(inds, segments[1])]
+            return [tuple(inds[s] for s in segments[0])] + [cls._reindex_segments(inds, s) for s in segments[1:]]
     def segment_by_chains(self,
                           root=None,
                           rings=None,
                           use_highest_valencies=True,
                           heavy_atoms=True,
                           light_atoms=None,
+                          backbone=None,
                           validate=True
                           ):
         if heavy_atoms or (light_atoms is not None):
@@ -1339,11 +1346,12 @@ class MoleculeEdgeGraph(EdgeGraph):
                 root=0 if root is not None else None,
                 heavy_atoms=False,
                 light_atoms=None,
-                validate=validate
+                validate=validate,
+                backbone=backbone
             )
             return self._reindex_segments(inds, segments)
         else:
-            return super().segment_by_chains(root=root, validate=validate)
+            return super().segment_by_chains(root=root, validate=validate, backbone=backbone)
 
 class PebbleGameBoard:
     def __init__(self, n_vertices: int, k, l, min_pebbles=None):

@@ -1286,7 +1286,7 @@ def zmatrix_adjacency_matrix(zm, child_type='multi'):
                 adj_mat[i][j] = True
     return zm_atoms, adj_mat
 
-def zmatrix_from_tree(zm, check_cycles=True, chain_order=None, check_unique_root=True):
+def zmatrix_from_tree(zm, check_cycles=True, chain_order=None, check_unique_root=True, base_order=None):
     if check_unique_root:
         zm_atoms = sorted(zm.keys(), key=lambda x: len(zm[x]['parents']))
         if len(zm[zm_atoms[0]]['parents']) != 0:
@@ -1309,11 +1309,45 @@ def zmatrix_from_tree(zm, check_cycles=True, chain_order=None, check_unique_root
                 # print(zm_atoms)
                 raise ValueError(f"Z-matrix tree invalid as it has cycles (groups: {groups} for atoms: {zm_atoms} in {zm})")
 
-        #TODO: ensure this is the longest chain
-        zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single')
-        g = spg.csr_matrix(zm_adj_mat)
-        chain_order, _ = spg.csgraph.depth_first_order(g, 0)
-        chain_order = [zm_atoms[c] for c in chain_order]
+        if base_order is None:
+            #TODO: try to ensure this is the longest chain
+            zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single')
+            g = spg.csr_matrix(zm_adj_mat)
+            chain_order, _ = spg.csgraph.depth_first_order(g, 0)
+            chain_order:list[int] = [zm_atoms[c] for c in chain_order]
+            scores = {a:2 for a in chain_order}
+            scores[chain_order[0]] = -3
+            if len(zm_atoms) > 1:
+                g = g[1:, 1:]
+                chain_order1, _ = spg.csgraph.depth_first_order(g, 0)
+                chain_order1 = [zm_atoms[c + 1] for c in chain_order1]
+                for a in chain_order1:
+                    scores[a] = 1
+                scores[chain_order1[0]] = -2
+
+                if len(zm_atoms) > 2:
+                    g = g[1:, 1:]
+                    chain_order2, _ = spg.csgraph.depth_first_order(g, 0)
+                    chain_order2 = [zm_atoms[c + 2] for c in chain_order2]
+                    for a in chain_order2:
+                        scores[a] = 0
+                    scores[chain_order2[0]] = -1
+            chain_order = sorted(chain_order, key=lambda x: scores[x])
+
+        else:
+            zm_atoms0 = sorted(zm.keys(), key=lambda x: len(zm[x]['parents']))
+            chain_order = [zm_atoms0[0]]
+            rem = list(base_order)
+            rem.remove(chain_order[0])
+            while rem:
+                for i,a in enumerate(rem):
+                    p = zm[a]['parents']
+                    if all(pp in chain_order for pp in p):
+                        break
+                else:
+                    raise ValueError("couldn't add any atoms to tree based on base order?")
+                chain_order.append(a)
+                rem.pop(i)
 
     rows = []
     for c in chain_order:
@@ -1337,10 +1371,9 @@ def check_zmatrix_coordinate_constraint(zm, coord):
     if (coord[0],) + p1[:n] == coord:
         return (coord[0], p1)
 
-    p2 = zm[coord[-1]]['parents']
-    p2 = tuple(reversed(p2)) #TODO: use direct indexing
-    if p2[:n] + (coord[-1],) == coord:
-        return (coord[-1], p2)
+    p1 = zm[coord[-1]]['parents']
+    if (coord[-1],) + p1[:n] == coord:
+        return (coord[-1], p1)
 
     return False
 
@@ -1475,7 +1508,7 @@ def enforce_required_zmatrix_coordinates(zm, coords, validate=False):#, chain_or
                 modified = True
 
             x = [p1.index(y) for y in m[1:]]
-            rem = np.setdiff1d(np.arange(3), x)
+            rem = np.setdiff1d(np.arange(len(p1)), x)
             p1 = tuple(p1[z] for z in np.concatenate([x, rem]))
             zm[i]['parents'] = p1
             constraint_map[m] = p1
@@ -1494,7 +1527,7 @@ def enforce_required_zmatrix_coordinates(zm, coords, validate=False):#, chain_or
         ):
             # do minimal permutation
             x = [p2.index(y) for y in reversed(m[:-1])]
-            rem = np.setdiff1d(np.arange(3), x)
+            rem = np.setdiff1d(np.arange(len(p2)), x)
             p2 = tuple(p2[z] for z in np.concatenate([x, rem]))
             zm[j]['parents'] = p2
             constraint_map[m] = p2
@@ -1556,11 +1589,16 @@ def enforce_required_zmatrix_coordinates(zm, coords, validate=False):#, chain_or
         raise ValueError(f"couldn't satisfy constraint {m} in {coords}")
 
     if not isinstance(zm_og, dict):
-        zm = zmatrix_from_tree(zm)
+        base_order = [z[0] for z in zm_og]
+        zm = zmatrix_from_tree(zm, base_order=base_order)
         if validate:
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
             if not is_valid:
                 raise ValueError(f"after coordinate enforcement zmatrix invalid ({reason}) in {zm}")
+
+            zmatrix_indices(
+                zm, coords
+            )
 
     return zm
 
@@ -1778,6 +1816,7 @@ def complex_zmatrix(
         check_attachment_points=True,
         graph=None,
         reindex=True,
+        required_coordinates=None,
         validate_additions=True
 ):
     if fragment_inds is None:
@@ -1864,6 +1903,11 @@ def complex_zmatrix(
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
             if not is_valid:
                 raise ValueError(f"new zmatrix after reindexing invalid ({reason}) in {zm}")
+
+    if required_coordinates is not None:
+        zm = enforce_required_zmatrix_coordinates(zm,
+                                                  required_coordinates,
+                                                  validate=validate_additions)
 
     return zm
 
