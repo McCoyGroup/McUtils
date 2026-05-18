@@ -14,6 +14,7 @@ from . import SetOps as set_ops
 __all__ = [
     "iterative_step_minimize",
     "iterative_chain_minimize",
+    "scipy_minimize",
     "GradientDescentStepFinder",
     "NewtonStepFinder",
     "QuasiNewtonStepFinder",
@@ -358,6 +359,183 @@ def iterative_step_minimize(
     else:
         return res
 
+scipy_no_hessian_methods = {'cg', 'bfgs'}
+scipy_no_grad_methods = {'nelder-mead'}
+use_scipy_linesearch = False
+def scipy_minimize(
+        coords,
+        function,
+        jacobian=None,
+        hessian=None,
+        optimizer_settings=None,
+        unitary=True,
+        orthogonal_projector=None,
+        orthogonal_projection_generator=None,
+        line_search=None,
+        return_trajectory=False,
+        method='bfgs',
+        max_iterations=None,
+        tol=1e-8,
+        line_search_step=None,
+        max_displacement=.01,
+        region_constraints=None,
+        logger=None
+):
+    from scipy.optimize import minimize, _optimize, _minimize
+
+    if optimizer_settings is None:
+        optimizer_settings = {}
+
+    if not line_search:
+        optimizer_settings = {'c1': 0.00001, 'c2': 0.999} | optimizer_settings
+
+    callback = optimizer_settings.pop('callback', None)
+    if return_trajectory:
+        traj = []
+        if callback is None:
+            def callback(x):
+                traj.append(x)
+        else:
+            def append_callback(intermediate_result, cb):
+                traj.append(intermediate_result)
+                return cb(intermediate_result)
+
+            callback = functools.partial(append_callback, cb=callback)
+    if logger is not None:
+        if logger.active:
+            prev_re = [coords.flatten().view(np.ndarray)]
+            if callback is None:
+                def log_callback(intermediate_result, prev_re):
+                    logger.log_print(
+                        [
+                            "Struct: {intermediate_result}",
+                            "Step: {intermediate_step}"
+                        ],
+                        intermediate_result=intermediate_result,
+                        intermediate_step=intermediate_result - prev_re[-1]
+                    ),
+                    prev_re.append(intermediate_result)
+
+                callback = functools.partial(log_callback, prev_re=prev_re)
+            else:
+                def log_callback(intermediate_result, cb, prev_re):
+                    logger.log_print(
+                        [
+                            "Struct: {intermediate_result}",
+                            "Step: {intermediate_step}"
+                        ],
+                        intermediate_result=intermediate_result,
+                        intermediate_step=intermediate_result - prev_re[-1]
+                    ),
+                    prev_re.append(intermediate_result)
+                    return cb(intermediate_result)
+
+                callback = functools.partial(log_callback, cb=callback, prev_re=prev_re)
+
+    min_ops = {}
+    if max_iterations is not None:
+        min_ops['maxiter'] = max_iterations
+    method = 'bfgs' if method == 'quasi-newton' else method
+    if method in scipy_no_hessian_methods or method in scipy_no_grad_methods:
+        hessian = None
+    if method in scipy_no_grad_methods:
+        jacobian = None
+
+    if region_constraints is not None:
+        cons = region_constraints
+
+        # TODO: decide if I want to apply the region bounds as an offset or not...
+        min_ops['bounds'] = [
+            (
+                (c + cons[i][0] if b1 is None else b1)
+                (c + cons[i][1] if b1 is None else b2)
+            )
+            if i in cons else
+            (b1, b2)
+            for i, (c, (b1, b2)) in enumerate(zip(
+                coords.flatten(),
+                min_ops.get('bonds', [None] * len(coords))
+            ))
+        ]
+
+    if (
+            unitary
+            or orthogonal_projector is not None
+            or orthogonal_projection_generator is not None
+    ):
+        def jacobian(guess, _jacobian=jacobian):
+            if unitary:
+                projector = vec_ops.orthogonal_projection_matrix(guess[..., np.newaxis])
+                if orthogonal_projector is not None:
+                    projector = projector @ orthogonal_projector[np.newaxis]
+                if orthogonal_projection_generator is not None:
+                    projector = projector @ orthogonal_projection_generator(guess)
+            elif orthogonal_projector is not None:
+                projector = orthogonal_projector[np.newaxis]
+                if orthogonal_projection_generator is not None:
+                    projector = projector @ orthogonal_projection_generator(guess)
+            elif orthogonal_projection_generator is not None:
+                projector = orthogonal_projection_generator(guess)
+            else:
+                projector = None
+
+            base = _jacobian(guess)
+            if projector is not None:
+                base = (projector @ base[:, np.newaxis]).reshape(base.shape)
+            return base
+
+    scipy_meth = 'bfgs' if method == 'quasi-newton' else method
+    if scipy_meth not in scipy_no_grad_methods:
+        min_ops['gtol'] = tol
+        # min_ops['ftol'] = 0
+        # min_ops['xtol'] = 0
+    min_ops = dict(
+        min_ops,
+        **optimizer_settings
+    )
+    bounds = min_ops.pop('bounds', None)
+    constraints = min_ops.pop('constraints', ())
+    try:
+        if not line_search:
+            old_wolfe = _optimize.line_search_wolfe1
+
+            def _find_max_displacement_step(
+                    f, fprime, xk, pk, gfk=None,
+                    old_fval=None, old_old_fval=None,
+                    args=(), c1=1e-4, c2=0.9, amax=50, amin=1e-8,
+                    xtol=1e-14
+            ):
+                if line_search_step is not None:
+                    return line_search_step
+                else:
+                    max_pk = np.max(np.abs(pk))
+                    if max_pk < 1e-6:
+                        return max_displacement, None, None, old_fval, old_old_fval, None
+                    else:
+                        return max_displacement / max_pk, None, None, old_fval, old_old_fval, None
+
+            _optimize.line_search_wolfe1 = _find_max_displacement_step
+        min = minimize(function,
+                       coords.flatten(),
+                       method=scipy_meth,
+                       tol=tol,
+                       jac=jacobian,
+                       hess=hessian,
+                       callback=callback,
+                       bounds=bounds,
+                       constraints=constraints,
+                       options=min_ops)
+    finally:
+        if not line_search:
+            _optimize.line_search_wolfe1 = old_wolfe
+    if return_trajectory:
+        return min.success, (
+            min.x.reshape(coords.shape),
+            [t.reshape(coords.shape) for t in traj],
+        ), min
+    else:
+        return min.success, min.x.reshape(coords.shape), min
+
 default_chain_step_finder='neb'
 def iterative_chain_minimize(
         chain_guesses, step_predictors,
@@ -377,7 +555,8 @@ def iterative_chain_minimize(
         reparametrizer=None,
         max_displacement=None,
         max_displacement_norm=None,
-        tol=1e-8, max_iterations=100,
+        tol=1e-8,
+        max_iterations=100,
         use_max_for_error=True,
         periodic=False,
         reembed=None,
