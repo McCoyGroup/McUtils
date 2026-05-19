@@ -200,7 +200,7 @@ class Plot(Graphics):
         "transform", "url", "visible", "zorder"
     }
 
-    opt_keys = Graphics.opt_keys | {"plot_style"}
+    opt_keys = Graphics.opt_keys | {"plot_style", "display_format"}
 
     default_plot_style = {}
     style_mapping = {"format":"fmt"}
@@ -211,6 +211,7 @@ class Plot(Graphics):
                  method=None,
                  figure=None, axes=None, subplot_kw=None,
                  plot_style=None, theme=None,
+                 display_format=None,
                  **opts
                  ):
         """
@@ -253,6 +254,7 @@ class Plot(Graphics):
         self.plot_opts = opts
         self._initialized = False
         self._data = None
+        self.display_format = display_format
 
         super().__init__(figure=figure, axes=axes, theme=theme, subplot_kw=subplot_kw, **opts)
         self._init_opts['plot_style'] = plot_style
@@ -308,6 +310,8 @@ class Plot(Graphics):
         self.graphics = self._plot_data(*params, **plot_style)
         if not self._initialized:
             self._initialize()
+            if self.display_format is not None:
+                self.figure.figure.default_display_format = self.display_format
         return self.graphics
     @property
     def artists(self):
