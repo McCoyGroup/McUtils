@@ -462,6 +462,7 @@ def run_pysisyphus(
 
     if optimizer_settings is None:
         optimizer_settings = {}
+    optimizer_settings = optimizer_settings.copy()
     if max_cycles is not None:
         optimizer_settings['max_cycles'] = max_cycles
     if max_step is None and max_step is not None:
