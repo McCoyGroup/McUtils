@@ -59,11 +59,15 @@ def zmatrix_unit_convert(zmat, distance_conversion, angle_conversion=None, rad2d
     return zm2
 
 def zmatrix_indices(zmat, coords, strip_embedding=True):
+    smol = nput.is_int(coords[0])
+    if smol: coords = [coords]
     base_coords = [canonicalize_internal(c) for c in extract_zmatrix_internals(zmat, strip_embedding=strip_embedding)]
-    return [
+    res = [
         base_coords.index(canonicalize_internal(c))
         for c in coords
     ]
+    if smol: res = res[0]
+    return res
 
 emb_pos_map = [
     (0,1),

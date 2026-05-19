@@ -33,10 +33,11 @@ def suppress_logging(level=logging.CRITICAL):
         # Restore the original disabling level
         logging.disable(previous_level)
 
-def _remove_handlers(logger):
+def _remove_handlers(logger, max_depth=8):
     logger.handlers.clear()
-    if logger.parent:
-        _remove_handlers(logger.parent)
+    if max_depth > 0:
+        if logger.parent and (logger.parent is not logger):
+            _remove_handlers(logger.parent, max_depth=max_depth-1)
 def patch_pysis_logging():
     import pysisyphus
     _remove_handlers(pysisyphus.logger)
