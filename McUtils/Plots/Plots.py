@@ -270,6 +270,7 @@ class Plot(Graphics):
     known_keys = Graphics.known_keys | {
         'method',
         'plot_style',
+        'display_format',
         'insert_default_styles'
     }
     @classmethod
