@@ -226,7 +226,8 @@ def get_dimer_image_guess(base_images,
                           *,
                           fit_order=2,
                           peak_cutoff,
-                          min_nodes=3
+                          min_nodes=3,
+                          use_max_for_guess=False
                           ):
     if energies is None:
         for m in base_images:
@@ -235,6 +236,9 @@ def get_dimer_image_guess(base_images,
     energies = np.array(energies)
     product = np.argmin(energies)
     ts = np.argmax(energies)
+    if use_max_for_guess:
+        return ts
+
     if product > ts:
         reactant = np.argmin(energies[:ts])
     else:
@@ -278,6 +282,7 @@ def resolve_dimer(*, images, energy_evaluator=None,
                   climb=True,
                   logger=None,
                   out_dir=None,
+                  use_max_for_guess=False,
                   **opts):
     if not climb: raise NotImplementedError("dimer calcs only implemented for `climb=True`")
 
@@ -293,7 +298,8 @@ def resolve_dimer(*, images, energy_evaluator=None,
             masses=masses,
             fit_order=fit_order,
             peak_cutoff=peak_cutoff,
-            min_nodes=min_nodes
+            min_nodes=min_nodes,
+            use_max_for_guess=use_max_for_guess
         )
     if displacement_vector is None:
         displacement_vector = images[image_guess + 1].cart_coords - images[image_guess].cart_coords
@@ -311,6 +317,7 @@ def resolve_dimer(*, images, energy_evaluator=None,
     if logger is not None:
         dimer_calc.logger = logger
     target_image.set_calculator(dimer_calc)
+    target_image.eliminated_nodes = [image_guess + 1]
 
     return target_image
 

@@ -92,11 +92,14 @@ class ASEDimerRunner:
                               distance_metric=None,
                               masses=None,
                               fit_order=2,
+                              use_max_for_guess=False,
                               **guess_options
                               ):
         if energies is None:
             energies = [m.calculate_energy(order=None) for m in base_images]
         energies = np.array(energies)
+        if use_max_for_guess:
+            return np.argmax(energies)
 
         points = cls.get_ts_guess_points(energies, **guess_options)
         geoms = np.array([b.coords for b in base_images])
@@ -189,7 +192,7 @@ class ASEDimerRunner:
                 dim_rlx.run(**options)
 
         self.images[self.start_idx].mol = d_atoms.atoms
-
+        self.images = self.images[:self.start_idx] + self.images[self.start_idx+1:]
         # images = list(self.images)
         # images = (
         #         images[:self.start_idx]
