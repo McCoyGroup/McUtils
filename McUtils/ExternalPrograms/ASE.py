@@ -542,6 +542,7 @@ class ASEMolecule(ExternalMolecule):
                             optimizer_method=None,
                             in_place=False,
                             return_coords=True,
+                            optimizer_settings=None,
                             **opts):
         traj, images = self.prep_trajectory_type(geoms, method, calc=calc,
                                                  in_place=in_place,
@@ -557,11 +558,14 @@ class ASEMolecule(ExternalMolecule):
             fmax = self.convergence_criterion
         if steps is None:
             steps = self.max_steps
+        if optimizer_settings is None:
+            optimizer_settings = {}
         if hasattr(traj, 'optimize'):
-            opt, images = traj.optimize(optimizer=optimizer, logfile=logfile, fmax=fmax, steps=steps, **opts)
+            opt, images = traj.optimize(optimizer=optimizer, logfile=logfile, fmax=fmax, steps=steps,
+                                        **(optimizer_settings | opts))
         else:
             optimizer = self.resolve_optimizer(optimizer)
-            opt_rea = optimizer(traj, logfile=logfile, **opts)
+            opt_rea = optimizer(traj, logfile=logfile, **(optimizer_settings | opts))
             if fmax is None:
                 fmax = self.convergence_criterion
             if steps is None:
