@@ -519,7 +519,7 @@ def run_pysisyphus(
         max_step = max_displacement
     if max_step is not None:
         optimizer_settings['max_step'] = max_step
-        optimizer_settings['trust_max'] = max_step
+        # optimizer_settings['trust_max'] = max_step
     if thresh is None:
         if tol is not None:
             optimizer_settings['rms_force'] = tol
