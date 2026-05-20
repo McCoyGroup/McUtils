@@ -94,7 +94,7 @@ class ASEDimerRunner:
                               distance_metric=None,
                               masses=None,
                               fit_order=2,
-                              use_max_for_guess=False,
+                              use_max_for_guess=True,
                               **guess_options
                               ):
         if energies is None:
@@ -147,7 +147,7 @@ class ASEDimerRunner:
                     fit_order=2,
                     ts_energy_cutoff=.5,  # 50% of the height from the reactants to TS
                     ts_min_nodes=3,
-                    use_max_for_guess=use_max_for_guess,
+                    use_max_for_guess=True,
                     **etc):
 
         base_images = mol.prep_trajectory_images(geoms, calc=calc)

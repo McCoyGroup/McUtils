@@ -288,7 +288,7 @@ def resolve_dimer(*, images, energy_evaluator=None,
                   climb=True,
                   logger=None,
                   out_dir=None,
-                  use_max_for_guess=False,
+                  use_max_for_guess=True,
                   eliminate_guess_nodes=True,
                   **opts):
     if not climb: raise NotImplementedError("dimer calcs only implemented for `climb=True`")
