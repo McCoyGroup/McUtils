@@ -29,6 +29,7 @@ class ASEDimerRunner:
                  initial_eigenmode_method='displacement',
                  displacement_method='vector',
                  max_num_rot=10,
+                 eliminate_guess_nodes=True,
                  reinterpolate=True,
                  **control_options):
 
@@ -42,6 +43,7 @@ class ASEDimerRunner:
             **control_options
         )
         self.reinterpolate = reinterpolate
+        self.eliminate_guess_nodes = eliminate_guess_nodes
 
     @classmethod
     def get_ts_guess_points(cls,
@@ -99,7 +101,14 @@ class ASEDimerRunner:
             energies = [m.calculate_energy(order=None) for m in base_images]
         energies = np.array(energies)
         if use_max_for_guess:
-            return np.argmax(energies)
+            ts = np.argmax(energies)
+            if ts > 0:
+                if ts < len(energies) - 1:
+                    if energies[ts + 1] < energies[ts - 1]:
+                        ts = ts - 1
+                else:
+                    ts = len(energies) - 2
+            return ts
 
         points = cls.get_ts_guess_points(energies, **guess_options)
         geoms = np.array([b.coords for b in base_images])
@@ -138,6 +147,7 @@ class ASEDimerRunner:
                     fit_order=2,
                     ts_energy_cutoff=.5,  # 50% of the height from the reactants to TS
                     ts_min_nodes=3,
+                    use_max_for_guess=use_max_for_guess,
                     **etc):
 
         base_images = mol.prep_trajectory_images(geoms, calc=calc)
@@ -148,7 +158,8 @@ class ASEDimerRunner:
                                                     masses=masses,
                                                     fit_order=fit_order,
                                                     ts_energy_cutoff=ts_energy_cutoff,
-                                                    ts_min_nodes=ts_min_nodes)
+                                                    ts_min_nodes=ts_min_nodes,
+                                                    use_max_for_guess=use_max_for_guess)
         if nput.is_int(image_guess):
             image_guess = [image_guess, image_guess+1]
 
@@ -192,14 +203,17 @@ class ASEDimerRunner:
                 dim_rlx.run(**options)
 
         self.images[self.start_idx].mol = d_atoms.atoms
-        self.images = self.images[:self.start_idx] + self.images[self.start_idx+1:]
+        if self.eliminate_guess_nodes:
+            images = self.images[:self.start_idx+1] + self.images[self.start_idx+2:]
+        else:
+            images = self.images[self.start_idx:]
         # images = list(self.images)
         # images = (
         #         images[:self.start_idx]
         #         + images[self.start_idx].prep_trajectory_images([d_atoms.atoms])
         #         + images[self.start_idx+1:]
         # )
-        return dim_rlx, self.images
+        return dim_rlx, images
 
 class ASEMolecule(ExternalMolecule):
     """
