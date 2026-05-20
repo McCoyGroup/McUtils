@@ -567,7 +567,6 @@ def run_pysisyphus(
         logger=None,
         **kwargs
 ):
-    raise Exception("?")
     if patch_logging:
         patch_pysis_logging()
 
