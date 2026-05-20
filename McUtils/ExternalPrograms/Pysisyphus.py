@@ -395,6 +395,13 @@ def resolve_plbfgs_optimizer(traj, **opts):
         traj,
         **opts
     )
+@register_optimizer('bfgs')
+def resolve_bfgs_optimizer(traj, **opts):
+    from pysisyphus.optimizers.BFGS import BFGS
+    return BFGS(
+        traj,
+        **opts
+    )
 @register_optimizer('rsprfo')
 def resolve_rsprfo_optimizer(traj, **opts):
     from pysisyphus.tsoptimizers.RSPRFOptimizer import RSPRFOptimizer
@@ -406,6 +413,34 @@ def resolve_rsprfo_optimizer(traj, **opts):
 def resolve_trim_optimizer(traj, **opts):
     from pysisyphus.tsoptimizers import TRIM
     return TRIM(
+        traj,
+        **opts
+    )
+@register_optimizer('fire')
+def resolve_fire_optimizer(traj, **opts):
+    from pysisyphus.optimizers.FIRE import FIRE
+    return FIRE(
+        traj,
+        **opts
+    )
+@register_optimizer('cubic-newton')
+def resolve_cubic_newton_optimizer(traj, **opts):
+    from pysisyphus.optimizers.CubicNewton import CubicNewton
+    return CubicNewton(
+        traj,
+        **opts
+    )
+@register_optimizer('conjugate-gradient')
+def resolve_cubic_newton_optimizer(traj, **opts):
+    from pysisyphus.optimizers.ConjugateGradient import ConjugateGradient
+    return ConjugateGradient(
+        traj,
+        **opts
+    )
+@register_optimizer('gradient-descent')
+def resolve_cubic_newton_optimizer(traj, **opts):
+    from pysisyphus.optimizers.SteepestDescent import SteepestDescent
+    return SteepestDescent(
         traj,
         **opts
     )
@@ -484,6 +519,7 @@ def run_pysisyphus(
         max_step = max_displacement
     if max_step is not None:
         optimizer_settings['max_step'] = max_step
+        optimizer_settings['trust_max'] = max_step
     if thresh is None:
         if tol is not None:
             optimizer_settings['rms_force'] = tol
