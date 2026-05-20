@@ -86,7 +86,8 @@ def iterative_step_minimize_step(step_predictor,
                                  guess, mask, tol,
                                  orthogonal_projector, orthogonal_projection_generator,
                                  region_constraints, unitary, max_displacement, max_displacement_norm,
-                                 generate_rotation, prev_steps, max_gradient_error, termination_function
+                                 generate_rotation, prev_steps, max_gradient_error, termination_function,
+                                 is_climbing
                                  ):
     if unitary:
         projector = vec_ops.orthogonal_projection_matrix(guess.T)
@@ -102,7 +103,10 @@ def iterative_step_minimize_step(step_predictor,
         projector = orthogonal_projection_generator(guess)
     else:
         projector = None
-    step, grad = step_predictor(guess, mask, projector=projector)
+    if is_climbing is None:
+        step, grad = step_predictor(guess, mask, projector=projector)
+    else:
+        step, grad = step_predictor(guess, mask, projector=projector, is_climbing=is_climbing)
     if projector is not None:
         # just in case, will usually lead to non-convergence
         step = (step[..., np.newaxis, :] @ projector).reshape(step.shape)
@@ -272,7 +276,8 @@ def iterative_step_minimize(
                 mask, tol,
                 orthogonal_directions, orthogonal_projection_generator,
                 region_constraints, unitary, max_displacement, max_displacement_norm,
-                generate_rotation, prev_step, use_max_for_error, termination_function
+                generate_rotation, prev_step, use_max_for_error, termination_function,
+                is_climbing=None
             )
             fvals = None
             if best is not None:
@@ -536,6 +541,12 @@ def scipy_minimize(
     else:
         return min.success, min.x.reshape(coords.shape), min
 
+def _find_peak(v):
+    return np.argmax(v)
+# def _find_second_valley(error):
+#     # find the point where curvature swaps
+#     a1 = np.diff(e)
+
 default_chain_step_finder='neb'
 def iterative_chain_minimize(
         chain_guesses, step_predictors,
@@ -544,6 +555,10 @@ def iterative_chain_minimize(
         *,
         method=None,
         unitary=False,
+        function=None,
+        climb=None,
+        climbing_nodes=None,
+        climbing_node_identifier=None,
         generate_rotation=False,
         dtype='float64',
         orthogonal_directions=None,
@@ -562,11 +577,17 @@ def iterative_chain_minimize(
         reembed=None,
         embedding_options=None,
         fixed_images=None,
-        logger=None
+        return_trajectory=False,
+        logger=None,
+        log_guess=False,
 ):
+    if unitary and generate_rotation:
+        raise NotImplementedError(...)
+
     guesses = np.array(chain_guesses, dtype=dtype)
     base_shape = guesses.shape[:-2]
     guesses = guesses.reshape((-1,) + guesses.shape[-2:])
+    vals = np.zeros(guesses.shape[:-1])
     if reembed is None:
         reembed = embedding_options is not None
     if embedding_options is None:
@@ -617,124 +638,191 @@ def iterative_chain_minimize(
     else:
         image_numbers = None
 
+    if return_trajectory:
+        traj = []
+
+    if climb is None:
+        climb = (
+                climbing_nodes is not None
+                or climbing_node_identifier is not None
+        )
+    if climb and function is not None:
+        vals = function(guesses, mask)
+        if dev.str_is(climbing_node_identifier, 'first'):
+            climbing_nodes = [
+                _find_peak(v)
+                for v in vals
+            ]
+        function = None
+
+    logger = dev.Logger.lookup(logger)
+
     converged = True
+    climbing_nodes_og = climbing_nodes
     for i in range(max_iterations):
-        # for each unoptimized chain, we only move image `j` if
-        # or it's neihbors weren't optimized at the last step, every time an image is moved
-        # it's neighbors are marked as moveable again
-        errs[mask,] = 0
-        for j in range(nimg):
-            submask = mask[submasks[mask,][:, j]]
-            prev_im = j-1
-            next_im = j+1
-            if j == 0:
-                if periodic:
-                    prev_im = n
-                else:
-                    prev_im = None
-            elif j == n:
-                if periodic:
-                    next_im = 0
-                else:
-                    next_im = None
+        with logger.block(tag=f"Iteration {i}"):
+            # for each unoptimized chain, we only move image `j` if
+            # or it's neihbors weren't optimized at the last step, every time an image is moved
+            # it's neighbors are marked as moveable again
 
-
-            step_predictor = step_predictors[j]
-            ps = prev_step[submask,][:, j] if prev_step is not None else prev_step
-            step, step_errs, new_mask, done = iterative_step_minimize_step(
-                step_predictor, guesses[submask],
-                (submask, (j, prev_im, next_im)), tol,
-                orthogonal_directions, orthogonal_projection_generator,
-                region_constraints, unitary, max_displacement, max_displacement_norm,
-                generate_rotation, ps,
-                use_max_for_error, termination_function
-            )
-            if prevent_oscillations:
-               prev_step[new_mask, j] = step
-
-            # set which chains are done or not
-            done = submask[done]
-            submasks[done, j] = False
-            if j not in fixed_images:
-                submasks[new_mask, j] = True
-            if j == 0:
-                if j + 1 not in fixed_images:
-                    submasks[new_mask, j+1] = True
-                if periodic and n not in fixed_images: #TODO: add O(1) check
-                    submasks[new_mask, n] = True
-            elif j == n:
-                if j-1 not in fixed_images:
-                    submasks[new_mask, j-1] = True
-                if periodic and 0 not in fixed_images:
-                    submasks[new_mask, 0] = True
+            errs[mask,] = 0
+            if climb:
+                if climbing_nodes is None:
+                    if climbing_node_identifier is None:
+                        if function is not None:
+                            climbing_nodes = [
+                                _find_peak(v)
+                                for v in vals
+                            ]
+                        else:
+                            climbing_nodes = [
+                                _find_second_valley(e)
+                                for e in errs
+                            ]
+                    else:
+                        climbing_nodes = climbing_node_identifier(vals, errs)
             else:
-                if j+1 not in fixed_images:
-                    submasks[new_mask, j+1] = True
-                if j-1 not in fixed_images:
-                    submasks[new_mask, j-1] = True
-
-            errs[mask,] += step_errs
-            guesses[submask, j] += step
-            if reembed: # implies Cartesian
-                from .CoordinateFrames import eckart_embedding
-
+                climbing_nodes = None
+            for j in range(nimg):
+                submask = mask[submasks[mask,][:, j]]
+                prev_im = j-1
+                next_im = j+1
                 if j == 0:
                     if periodic:
-                        ref = n
+                        prev_im = n
                     else:
-                        ref = 1
+                        prev_im = None
+                elif j == n:
+                    if periodic:
+                        next_im = 0
+                    else:
+                        next_im = None
+
+                # if log_guess:
+                logger.log_print("Moving node {j} from {submask}", j=j, submask=submask)
+
+                step_predictor = step_predictors[j]
+                ps = prev_step[submask,][:, j] if prev_step is not None else prev_step
+                g = guesses[submask]
+                if climbing_nodes is None:
+                    is_climbing = [False] * len(g)
                 else:
-                    ref = j-1
-                ref = guesses[submask, ref]
-                coords = guesses[submask, j]
-                emb = eckart_embedding(
-                    ref.reshape(ref.shape[0], -1, 3),
-                    coords.reshape(coords.shape[0], -1, 3),
-                    **embedding_options
-                )
-                guesses[submask, j] = emb.coordinates.reshape(coords.shape[0], -1)
+                    is_climbing = [
+                        c == j
+                        for c in climbing_nodes
+                    ]
 
-        if reparametrizer is not None:
-            # for methods that want to satisfy some density function on
-            # the number of images
-            new_chains, is_static, fixed_images = reparametrizer(guesses[mask,], fixed_images)
-            nimg_new = new_chains.shape[1]
-            if nimg_new != nimg:
-                guesses = np.pad(guesses,  [[0, 0], [0, nimg_new-nimg], [0, 0]])
-                submasks = np.pad(submasks, [[0, 0], [0, nimg_new-nimg]])
-                submasks[mask, :] = True
-                guesses[mask,] = new_chains
-                image_numbers[mask,] = nimg_new
+                if climb and any(is_climbing):
+                    logger.log_print("Climbing nodes: {is_climbing}", is_climbing=is_climbing)
+                step, step_errs, new_mask, done = iterative_step_minimize_step(
+                    step_predictor, g,
+                    (submask, (j, prev_im, next_im)), tol,
+                    orthogonal_directions, orthogonal_projection_generator,
+                    region_constraints, unitary, max_displacement, max_displacement_norm,
+                    generate_rotation, ps,
+                    use_max_for_error, termination_function, is_climbing
+                )
+                if isinstance(step, tuple) and len(step) == 2:
+                    step, subvals = step
+                    vals[new_mask,] = subvals
+                elif function is not None:
+                    subvals = function(g)
+                    vals[new_mask,] = subvals
+
+                if prevent_oscillations:
+                   prev_step[new_mask, j] = step
+
+                # set which chains are done or not
+                done = submask[done]
+                submasks[done, j] = False
+                if j not in fixed_images:
+                    submasks[new_mask, j] = True
+                if j == 0:
+                    if j + 1 not in fixed_images:
+                        submasks[new_mask, j+1] = True
+                    if periodic and n not in fixed_images: #TODO: add O(1) check
+                        submasks[new_mask, n] = True
+                elif j == n:
+                    if j-1 not in fixed_images:
+                        submasks[new_mask, j-1] = True
+                    if periodic and 0 not in fixed_images:
+                        submasks[new_mask, 0] = True
+                else:
+                    if j+1 not in fixed_images:
+                        submasks[new_mask, j+1] = True
+                    if j-1 not in fixed_images:
+                        submasks[new_mask, j-1] = True
+
+                errs[mask,] += step_errs
+                guesses[submask, j] += step
+                if reembed: # implies Cartesian
+                    from .CoordinateFrames import eckart_embedding
+
+                    if j == 0:
+                        if periodic:
+                            ref = n
+                        else:
+                            ref = 1
+                    else:
+                        ref = j-1
+                    ref = guesses[submask, ref]
+                    coords = guesses[submask, j]
+                    emb = eckart_embedding(
+                        ref.reshape(ref.shape[0], -1, 3),
+                        coords.reshape(coords.shape[0], -1, 3),
+                        **embedding_options
+                    )
+                    guesses[submask, j] = emb.coordinates.reshape(coords.shape[0], -1)
+
+            climbing_nodes = climbing_nodes_og
+            if reparametrizer is not None:
+                # for methods that want to satisfy some density function on
+                # the number of images
+                new_chains, is_static, fixed_images = reparametrizer(guesses[mask,], fixed_images)
+                nimg_new = new_chains.shape[1]
+                if nimg_new != nimg:
+                    guesses = np.pad(guesses,  [[0, 0], [0, nimg_new-nimg], [0, 0]])
+                    submasks = np.pad(submasks, [[0, 0], [0, nimg_new-nimg]])
+                    submasks[mask, :] = True
+                    guesses[mask,] = new_chains
+                    image_numbers[mask,] = nimg_new
+                else:
+                    submasks[mask, :] = np.logical_and(
+                        submasks[mask, :],
+                        is_static
+                    )
+
+                if prev_step is not None:
+                    prev_step = np.zeros_like(guesses)
+
+            done = np.where(
+                np.logical_not(np.any(submasks[mask,], axis=1))
+            )[0]
+            if len(done) > 0:  # easy check
+                mask = np.delete(mask, done)
+                if len(mask) == 0:
+                    break
+            its[mask,] += 1
+
+            if return_trajectory:
+                traj.append(guesses.copy())
             else:
-                submasks[mask, :] = np.logical_and(
-                    submasks[mask, :],
-                    is_static
-                )
-
-            if prev_step is not None:
-                prev_step = np.zeros_like(guesses)
-
-        done = np.where(
-            np.logical_not(np.any(submasks[mask,], axis=1))
-        )[0]
-        if len(done) > 0:  # easy check
-            mask = np.delete(mask, done)
-            if len(mask) == 0:
-                break
-        its[mask,] += 1
-    else:
-        converged = False
-        its[mask,] = max_iterations
+                converged = False
+                its[mask,] = max_iterations
 
     guesses = guesses.reshape(base_shape + guesses.shape[-2:])
     errs = errs.reshape(base_shape)
     its = its.reshape(base_shape)
+
+    if return_trajectory:
+        guesses = (guesses, [g.reshape(base_shape + g.shape[-2:]) for g in traj])
 
     if unitary and generate_rotation:
         raise NotImplementedError(...)
         res = (guess, rotations), converged, (errs, its)
     else:
         res = (guesses, image_numbers), converged, (errs, its)
+
 
     return res
 
@@ -1049,12 +1137,15 @@ class GradientDescentStepFinder:
         self.searcher = line_search
         self.logger = logger
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
+        if return_vals: raise NotImplementedError(...)
         if isinstance(mask, tuple):  # for chain minimizers
             mask, (j, _, _) = mask
             guess = guess[:, j]
 
         jacobian = self.jac(guess, mask)
+        if gradient_modifer is not None:
+            jacobian = gradient_modifer(jacobian, guess, mask)
 
         new_step_dir = -jacobian
         if projector is not None:
@@ -1108,7 +1199,7 @@ class NetwonDirectHessianGenerator:
 
         return hessian_inverse
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, projector=None):
 
         jacobian, hessian_inv = self.jacobian(guess, mask), self.hessian_inverse(guess, mask)
 
@@ -1147,11 +1238,12 @@ class NewtonStepFinder:
                     "Consider using Quasi-Newton if only the Jacobian is fast to compute.")
             return NetwonDirectHessianGenerator(func, jac, hess, **opts)
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, projector=None):
+        if return_vals: raise NotImplementedError(...)
         if isinstance(mask, tuple):  # for chain minimizers
             mask, (j, _, _) = mask
             guess = guess[:, j]
-        return self.generator(guess, mask, projector=projector)
+        return self.generator(guess, mask, return_vals=return_vals, projector=projector)
 
 class QuasiNewtonStepFinder:
     supports_hessian = False
@@ -1174,11 +1266,12 @@ class QuasiNewtonStepFinder:
     def hessian_approximations(self):
         return self.get_hessian_approximations()
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
+        if return_vals: raise NotImplementedError(...)
         if isinstance(mask, tuple):  # for chain minimizers
             mask, (j, _, _) = mask
             guess = guess[:, j]
-        return self.hess_appx(guess, mask, projector=projector)
+        return self.hess_appx(guess, mask, return_vals=return_vals, gradient_modifer=gradient_modifer, projector=projector)
 
 class QuasiNetwonHessianApproximator:
     orthogonal_dirs_cutoff = 1e-16#1e-8
@@ -1243,8 +1336,10 @@ class QuasiNetwonHessianApproximator:
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
         raise NotImplementedError("abstract")
 
-    def get_jacobian_updates(self, guess, mask):
+    def get_jacobian_updates(self, guess, mask, gradient_modifer=None):
         new_jacs = self.jac(guess, mask)
+        if gradient_modifer is not None:
+            new_jacs = gradient_modifer(new_jacs, guess, mask)
         if self.prev_jac is None:
             jac_diffs = new_jacs
         else:
@@ -1259,8 +1354,8 @@ class QuasiNetwonHessianApproximator:
         restart = np.any(prev_norm < self.restart_hessian_norm)
         return restart
 
-    def __call__(self, guess, mask, projector=None):
-        new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask)
+    def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
+        new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask, gradient_modifer=gradient_modifer)
         if self.prev_step is None or self.restart_hessian_approximation():
             new_hess = self.initialize_hessians(guess, mask)
         else:
@@ -1650,11 +1745,12 @@ class ConjugateGradientStepFinder:
             'polak-ribiere':PolakRibiereApproximator
         }
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
+        if return_vals: raise NotImplementedError(...)
         if isinstance(mask, tuple):  # for chain minimizers
             mask, (j, _, _) = mask
             guess = guess[:, j]
-        return self.step_appx(guess, mask, projector=projector)
+        return self.step_appx(guess, mask, return_vals=return_vals, gradient_modifer=gradient_modifer, projector=projector)
 
 class ConjugateGradientStepApproximator:
     line_search = ArmijoSearch
@@ -1695,8 +1791,11 @@ class ConjugateGradientStepApproximator:
                 self.restart_parameter * old_norm < new_norm
             )
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
         new_jacs = self.jac(guess, mask)
+
+        if gradient_modifer is not None:
+            new_jacs = gradient_modifer(new_jacs, guess, mask)
 
         if self.prev_jac is None or self.determine_restart(new_jacs, mask):
             new_step_dir = -new_jacs
@@ -1826,8 +1925,10 @@ class EigenvalueFollowingStepFinder:
 
         return shift
 
-    def get_jacobian_updates(self, guess, mask):
+    def get_jacobian_updates(self, guess, mask, gradient_modifer=None):
         new_jacs = self.jac(guess, mask)
+        if gradient_modifer is not None:
+            new_jacs = gradient_modifer(new_jacs, guess, mask)
         if self.prev_jac is None:
             jac_diffs = new_jacs
         else:
@@ -1841,12 +1942,13 @@ class EigenvalueFollowingStepFinder:
         )
         return restart
 
-    def __call__(self, guess, mask, projector=None):
+    def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
+        if return_vals: raise NotImplementedError(...)
         if isinstance(mask, tuple):  # for chain minimizers
             mask, (j, _, _) = mask
             guess = guess[:, j]
 
-        new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask)
+        new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask, gradient_modifer=gradient_modifer)
         if self.prev_step is None or self.restart_hessian_approximation():
             new_hess = self.initialize_hessians(guess, mask)
         else:
@@ -1965,9 +2067,33 @@ class ChainMinimizingStepFinder:
             ) + self.image_pairwise_contribution(guess, mask, j, prev, next, order=2)
         return wrapped_hess
 
-    def __call__(self, guess, mask, projector=None):
+    def climbing_node_step(self, guess, mask, gradient_modifer=None, projector=None):
+        raise NotImplementedError(f"climbing not implemented for {type(self).__name__}")
+
+    def __call__(self, guess, mask, projector=None, return_vals=False, gradient_modifer=None, is_climbing=None):
+        if return_vals: raise NotImplementedError(...)
+
         mask, self._mask_data = mask
-        return self.step_finder(guess, mask, projector=projector)
+
+        if is_climbing is not None and np.any(is_climbing):
+            if np.all(is_climbing):
+                return self.climbing_node_step(guess, mask, gradient_modifer=gradient_modifer, projector=projector)
+            else:
+                submask = [m for m,c in zip(mask, is_climbing) if c]
+                subguess = np.array([g for g,c in zip(guess, is_climbing) if c])
+                rem_mask = [m for m,c in zip(mask, is_climbing) if not c]
+                remguess = np.array([g for g,c in zip(guess, is_climbing) if not c])
+
+                ord = np.argsort(np.argsort(is_climbing, kind='mergesort'))
+                substep, subgrad = self.climbing_node_step(subguess, submask, gradient_modifer=gradient_modifer, projector=projector)
+                remstep, remgrad = self.step_finder(remguess, rem_mask, gradient_modifer=gradient_modifer, projector=projector)
+
+                return (
+                    np.concatenate([remstep, substep], axis=0)[ord,],
+                    np.concatenate([remgrad, subgrad], axis=0)[ord,]
+                )
+        else:
+            return self.step_finder(guess, mask, gradient_modifer=gradient_modifer, projector=projector)
 
 class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
     def __init__(self,
@@ -2016,9 +2142,23 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
 
     def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
         if prev is None or next is None: return jac
-        self._last_tangent = self.get_tangent(guess, mask, cur, prev, next)
+        if self._last_tangent is None:
+            self._last_tangent = self.get_tangent(guess, mask, cur, prev, next)
+        else:
+            self._last_tangent[mask,] = self.get_tangent(guess, mask, cur, prev, next)
 
-        return vec_ops.project_out(jac, self._last_tangent[:, :, np.newaxis], orthonormal=True)
+        return vec_ops.project_out(jac, self._last_tangent[mask,][:, :, np.newaxis], orthonormal=True)
+
+    def climbing_node_step(self, guess, mask, gradient_modifer=None, projector=None):
+        tangent = self._last_tangent[mask,]
+        def modify_gradient(subgrad, guess, mask):
+            if gradient_modifer is not None:
+                subgrad = gradient_modifer(subgrad, guess, mask)
+            sg = subgrad[..., np.newaxis, :]
+            tg = tangent[..., :, np.newaxis]
+            tangential_force = np.reshape(sg @ tg, tangent.shape[:-1] + (1,))
+            return subgrad - 2 * tangential_force * tangent
+        return self.step_finder(guess, mask, gradient_modifer=modify_gradient, projector=projector)
 
     def image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
         if order > 2: return 0
@@ -2041,7 +2181,7 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
         if order == 0:
             contribution = (const/2) * (dist**2)
         elif order == 1:
-            tangent = self._last_tangent
+            tangent = self._last_tangent[mask,]
             contribution = const * dist[..., np.newaxis] * tangent
         elif order == 2:
             contribution = const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
