@@ -419,6 +419,19 @@ class ASEMolecule(ExternalMolecule):
             method = self.default_optimizer
         return self.lookup_optimizer_type(method)
 
+    @staticmethod
+    def _prep_logger(logger, quiet):
+        if logger is not None:
+            logger = dev.Logger.lookup(logger)
+            logfile = logger.log_file
+            if logfile is None:
+                logfile = sys.stdout
+        else:
+            if quiet:
+                logfile = io.StringIO()
+            else:
+                logfile = sys.stdout
+        return logfile
     convergence_criterion = 1e-4
     max_steps = 100
     def optimize_structure(self,
@@ -434,13 +447,7 @@ class ASEMolecule(ExternalMolecule):
         BFGS = self.resolve_optimizer(method)
 
         if logfile is None:
-            if logger is not None:
-                logfile = logger.log_file
-            else:
-                if quiet:
-                    logfile = io.StringIO()
-                else:
-                    logfile = sys.stdout
+            logfile = self._prep_logger(logger, quiet)
 
         if calc is None:
             calc = self.mol.calc
@@ -553,6 +560,7 @@ class ASEMolecule(ExternalMolecule):
                             calc=None,
                             quiet=True,
                             logfile=None,
+                            logger=None,
                             fmax=None,
                             tol=None,
                             steps=None,
@@ -565,12 +573,8 @@ class ASEMolecule(ExternalMolecule):
         traj, images = self.prep_trajectory_type(geoms, method, calc=calc,
                                                  in_place=in_place,
                                                  optimizer_method=optimizer_method)
-
         if logfile is None:
-            if quiet:
-                logfile = io.StringIO()
-            else:
-                logfile = sys.stdout
+            logfile = self._prep_logger(logger, quiet)
 
         if fmax is None:
             if tol is not None:
@@ -585,12 +589,12 @@ class ASEMolecule(ExternalMolecule):
             opt, images = traj.optimize(optimizer=optimizer, logfile=logfile, fmax=fmax, steps=steps,
                                         **(optimizer_settings | opts))
         else:
-            optimizer = self.resolve_optimizer(optimizer)
-            opt_rea = optimizer(traj, logfile=logfile, **(optimizer_settings | opts))
             if fmax is None:
                 fmax = self.convergence_criterion
             if steps is None:
                 steps = self.max_steps
+            optimizer = self.resolve_optimizer(optimizer)
+            opt_rea = optimizer(traj, logfile=logfile, **(optimizer_settings | opts))
             opt = opt_rea.run(fmax=fmax, steps=steps)
             images = self.prep_trajectory_images(images)
         if return_coords:

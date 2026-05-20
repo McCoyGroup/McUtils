@@ -48,7 +48,7 @@ def patch_pysis_logging():
         import pysisyphus.config
 
     def get_fh_logger(name, log_fn, base=pysisyphus.init_logging.get_fh_logger):
-        base(name, log_fn)
+        # base(name, log_fn)
         logger = logging.getLogger(name)
         _remove_handlers(logger)
     pysisyphus.init_logging.get_fh_logger = get_fh_logger
@@ -62,6 +62,9 @@ def patch_pysis_logging():
 
     import pysisyphus.calculators
     _remove_handlers(pysisyphus.calculators.logger)
+
+    logger = logging.getLogger("calculator")
+    _remove_handlers(logger)
 
     if pysisyphus.config.OUT_DIR_DEFAULT == 'qm_calcs':
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -219,6 +222,48 @@ def resolve_optimize(*, geom, energy_evaluator=None, out_dir=None, **opts):
         geom.calculator.out_dir = pathlib.Path(out_dir).resolve()
     return geom
 
+@register_method('ts')
+def resolve_ts(*, images,
+               energy_evaluator=None,
+               energies=None,
+               image_guess=None,
+               distance_metric=None,
+               masses=None,
+               fit_order=2,
+               peak_cutoff=.5,
+               min_nodes=3,
+               climb=True,
+               logger=None,
+               out_dir=None,
+               use_max_for_guess=True,
+               eliminate_guess_nodes=True,
+               **opts):
+    if not climb: raise NotImplementedError("ts calcs only implemented for `climb=True`")
+
+    if image_guess is None:
+        for i in images:
+            if i.calculator is None:
+                i.set_calculator(PysisCalculator(energy_evaluator))
+            if out_dir is not None:
+                i.calculator.out_dir = pathlib.Path(out_dir).resolve()
+        image_guess = get_dimer_image_guess(
+            base_images=images,
+            energies=energies,
+            distance_metric=distance_metric,
+            masses=masses,
+            fit_order=fit_order,
+            peak_cutoff=peak_cutoff,
+            min_nodes=min_nodes,
+            use_max_for_guess=use_max_for_guess
+        )
+    target_image = images[image_guess]
+    if target_image.calculator is None:
+        target_image.set_calculator(PysisCalculator(energy_evaluator))
+    if out_dir is not None:
+        target_image.calculator.out_dir = pathlib.Path(out_dir).resolve()
+
+    return target_image
+
 def get_dimer_image_guess(base_images,
                           energies=None,
                           distance_metric=None,
@@ -298,6 +343,8 @@ def resolve_dimer(*, images, energy_evaluator=None,
         for i in images:
             if i.calculator is None:
                 i.set_calculator(PysisCalculator(energy_evaluator))
+            if out_dir is not None:
+                i.calculator.out_dir = pathlib.Path(out_dir).resolve()
         image_guess = get_dimer_image_guess(
             base_images=images,
             energies=energies,
@@ -313,6 +360,8 @@ def resolve_dimer(*, images, energy_evaluator=None,
     target_image = images[image_guess]
     if target_image.calculator is None:
         target_image.set_calculator(PysisCalculator(energy_evaluator))
+    if out_dir is not None:
+        target_image.calculator.out_dir = pathlib.Path(out_dir).resolve()
 
     with dev.OutputRedirect():
         dimer_calc = Dimer(
@@ -324,6 +373,8 @@ def resolve_dimer(*, images, energy_evaluator=None,
     if logger is not None:
         dimer_calc.logger = logger
     target_image.set_calculator(dimer_calc)
+    if out_dir is not None:
+        target_image.calculator.out_dir = pathlib.Path(out_dir).resolve()
     if eliminate_guess_nodes:
         target_image.eliminated_nodes = [image_guess + 1]
 
@@ -409,6 +460,13 @@ def resolve_rsprfo_optimizer(traj, **opts):
         traj,
         **opts
     )
+@register_optimizer('rsprfo')
+def resolve_rsprfo_optimizer(traj, **opts):
+    from pysisyphus.tsoptimizers.RSIRFOptimizer import RSIRFOptimizer
+    return RSIRFOptimizer(
+        traj,
+        **opts
+    )
 @register_optimizer('trim')
 def resolve_trim_optimizer(traj, **opts):
     from pysisyphus.tsoptimizers import TRIM
@@ -462,7 +520,9 @@ optimizer_method_map = {
     'zero-temperature-string':'string',
     'chain-of-states':'string',
     'neb':'lbfgs',
-    'dimer':'lbfgs'
+    'dimer':'lbfgs',
+    'optimize': 'lbfgs',
+    'ts':'trim'
 }
 def resolve_pysis_optimizer(optimizer, method_name, generator, logger=None,
                             **opts):
@@ -507,6 +567,7 @@ def run_pysisyphus(
         logger=None,
         **kwargs
 ):
+    raise Exception("?")
     if patch_logging:
         patch_pysis_logging()
 
@@ -534,7 +595,7 @@ def run_pysisyphus(
             #     optimizer_settings['rms_force'] = tol
     if logger is None:
         logger = PysisyphusLogger(log_file)
-    elif hasattr(logger, 'log_print'):
+    elif not hasattr(logger, 'log'):
         logger = PysisyphusLogger(logger)
     with dev.DefaultDirectory(out_dir) as od:
         import pysisyphus.config
