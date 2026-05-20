@@ -554,6 +554,7 @@ class ASEMolecule(ExternalMolecule):
                             quiet=True,
                             logfile=None,
                             fmax=None,
+                            tol=None,
                             steps=None,
                             optimizer=None,
                             optimizer_method=None,
@@ -572,7 +573,10 @@ class ASEMolecule(ExternalMolecule):
                 logfile = sys.stdout
 
         if fmax is None:
-            fmax = self.convergence_criterion
+            if tol is not None:
+                fmax = tol
+            else:
+                fmax = self.convergence_criterion
         if steps is None:
             steps = self.max_steps
         if optimizer_settings is None:
