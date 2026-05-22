@@ -69,6 +69,12 @@ class SphereUnionSurface:
     def sampling_points(self, pts):
         if pts is not None: pts = np.asanyarray(pts)
         self._sample_points = pts
+    @property
+    def atom_sampling_points(self):
+        if self._sample_data is None:
+            self._sample_data = self.generate_points(preserve_origins=True)
+            self._sample_points = np.concatenate(self._sample_data, axis=0)
+        return self._sample_data
 
     @classmethod
     def nearest_centers(cls, pts, centers, return_normals=False):
@@ -1392,7 +1398,7 @@ class SphereUnionSurfaceMesh:
                 centroids = np.average(tri_pts, axis=-2)
                 centroid_vectors = centroids - centers[tri_map]
                 normal_sign = np.sign(nput.vec_dots(normals, centroid_vectors))
-                all_tris[normal_sign > 0] = all_tris[normal_sign > 0][:, (0, 2, 1)]
+                all_tris[normal_sign < 0] = all_tris[normal_sign < 0][:, (0, 2, 1)]
                 # tri_pts = pts[all_tris]
                 # normals = nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1])
                 # normal_sign = np.sign(nput.vec_dots(normals, centroid_vectors))
@@ -1442,6 +1448,7 @@ class SphereUnionSurfaceMesh:
              *,
              function=None,
              vertex_values=None,
+             normals=False,
              distance_units='Angstroms',
              **etc
              ):
@@ -1454,10 +1461,14 @@ class SphereUnionSurfaceMesh:
         if vertex_values is not None:
             etc['color'] = etc.get('color', None)
 
+        if normals is True:
+            normals = self.normals
+
         return self.plot_triangle_mesh(
             self.verts * conv,
             self.inds,
             figure=figure,
+            normals=normals,
             vertex_values=vertex_values,
             **etc
         )
@@ -1478,6 +1489,11 @@ class SphereUnionSurfaceMesh:
                            vertex_values=None,
                            vertex_colormap='WarioColors',
                            rescale_color_values=True,
+                           normals=None,
+                           centroids=None,
+                           normal_color='black',
+                           normal_radius=.01,
+                           normal_scaling=.5,
                            **etc):
         from ... import Plots as plt
 
@@ -1512,6 +1528,15 @@ class SphereUnionSurfaceMesh:
             line_style['transparency'] = line_style.get('transparency', line_transparency)
             line_obj = plt.Line(verts, indices=indices, **line_style)
             objs.append(line_obj)
+
+        if normals is not None:
+            normals = np.asanyarray(normals) * normal_scaling
+            if centroids is None:
+                centroids = np.average(verts[indices], axis=-2)
+            for p,n in zip(centroids, normals):
+                objs.append(
+                    plt.Arrow(p, p+n, color=normal_color, radius=normal_radius)
+                )
 
         for o in objs:
             o.plot(figure)
