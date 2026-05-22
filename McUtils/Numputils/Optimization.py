@@ -709,7 +709,7 @@ def iterative_chain_minimize(
                 else:
                     is_climbing = [
                         c == j
-                        for c in climbing_nodes
+                        for c in [climbing_nodes[m] for m in submask]
                     ]
 
                 if climb and any(is_climbing):
