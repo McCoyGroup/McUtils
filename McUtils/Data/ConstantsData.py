@@ -245,6 +245,8 @@ class UnitsDataHandler(DataHandler):
 
         src_base, src_inv, src_scale, src_pow = src
         targ_base, targ_inv, targ_scale, targ_pow = targ
+        if src_pow != targ_pow:
+            raise ValueError(f"can't convert units with different powers ({src_pow} and {targ_pow})")
         # At this point we actually add the inverse flags back on to start
         src = src_base
         if src_inv:
@@ -268,7 +270,7 @@ class UnitsDataHandler(DataHandler):
                 pass
             else:
                 hooray_it_worked = True
-                conv = ( (src_scale / targ_scale) * conv["Value"] ) ** ( src_pow / targ_pow )
+                conv = ( (src_scale / targ_scale) * conv["Value"] ) ** ( src_pow )
 
         if not hooray_it_worked: # inverted / no power
             if src_inv:
@@ -285,7 +287,7 @@ class UnitsDataHandler(DataHandler):
                 pass
             else:
                 hooray_it_worked = True
-                conv = ( 1 / ((src_scale / targ_scale) * conv["Value"]) ) ** ( targ_pow / src_pow )
+                conv = ( 1 / ((src_scale / targ_scale) * conv["Value"]) ) ** ( targ_pow )
 
         if (src_pow > 1 or targ_pow > 1):
             if not hooray_it_worked: # not inverted / power
