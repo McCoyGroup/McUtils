@@ -100,6 +100,7 @@ def register_method(name, method=None):
 def resolve_cos_method(*, images, cos_class, energy_evaluator=None,
                        out_dir=None,
                        logger=None,
+                       fixed_images=None,
                        **opts):
     base_calc = None
     for i in images:
@@ -122,10 +123,22 @@ def resolve_cos_method(*, images, cos_class, energy_evaluator=None,
         cos_class.logger = PysisyphusLogger()
     else:
         cos_class.logger = logger
-    return cos_class(
+    base_cos = cos_class(
         images=images,
         **opts
     )
+    if fixed_images is not None:
+        fixed_images = list(fixed_images)
+        base_get_fixed = base_cos.get_fixed_indices
+        def get_fixed_indices(self, *args, **kwargs):
+            base = base_get_fixed(*args, **kwargs)
+            if base is None:
+                return fixed_images
+            else:
+                return sorted(list(base) + fixed_images)
+        base_cos.get_fixed_indices = get_fixed_indices
+    return base_cos
+
 @register_method('growing-string')
 def resolve_gsm(*, images, calc_getter=None, energy_evaluator=None,
                 max_nodes=None,
@@ -460,7 +473,7 @@ def resolve_rsprfo_optimizer(traj, **opts):
         traj,
         **opts
     )
-@register_optimizer('rsprfo')
+@register_optimizer('rsirfo')
 def resolve_rsprfo_optimizer(traj, **opts):
     from pysisyphus.tsoptimizers.RSIRFOptimizer import RSIRFOptimizer
     return RSIRFOptimizer(
@@ -522,7 +535,7 @@ optimizer_method_map = {
     'neb':'lbfgs',
     'dimer':'lbfgs',
     'optimize': 'lbfgs',
-    'ts':'trim'
+    'ts':'rsprfo'
 }
 def resolve_pysis_optimizer(optimizer, method_name, generator, logger=None,
                             **opts):
