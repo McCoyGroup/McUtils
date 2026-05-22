@@ -362,6 +362,7 @@ def sbatch_python_job(
         script=None,
         environment=None,
         cleanup=False,
+        post_processor='print',
         **kwargs
 ):
     if sbatch_kwargs is None:
@@ -379,7 +380,8 @@ def sbatch_python_job(
         id=id,
         cleanup=cleanup,
         function_args=args,
-        function_kwargs=kwargs
+        function_kwargs=kwargs,
+        post_processor=post_processor
     )
 
     sbatch_kwargs['job_name'] = dev.filename(script_file.name)
