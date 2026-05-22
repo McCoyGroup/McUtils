@@ -2,7 +2,8 @@ import collections
 import itertools
 
 import numpy as np
-# import scipy.spatial
+import scipy.spatial
+import scipy.spatial as spat
 from ... import Devutils as dev
 from ... import Numputils as nput
 from ...Data import AtomData, UnitsData
@@ -39,6 +40,7 @@ class SphereUnionSurface:
         self.tolerance = tolerance
         self.expansion = expansion
         self._sample_points = None
+        self._sample_data = None
 
     @classmethod
     def from_xyz(cls,
@@ -60,7 +62,8 @@ class SphereUnionSurface:
     @property
     def sampling_points(self):
         if self._sample_points is None:
-            self._sample_points = self.generate_points()
+            self._sample_data = self.generate_points(preserve_origins=True)
+            self._sample_points = np.concatenate(self._sample_data, axis=0)
         return self._sample_points
     @sampling_points.setter
     def sampling_points(self, pts):
@@ -326,7 +329,7 @@ class SphereUnionSurface:
         return pts
 
     @classmethod
-    def get_exterior_points(cls, points, centers, radii, tolerance=0):
+    def get_exterior_points(cls, points, centers, radii, tolerance:float=0):
         points = np.asanyarray(points)
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
@@ -347,7 +350,8 @@ class SphereUnionSurface:
                            scaling=1,
                            expansion=0,
                            preserve_origins=False,
-                           tolerance=0
+                           tolerance=0,
+                           prune=True
                            ):
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii) * scaling + expansion
@@ -357,20 +361,26 @@ class SphereUnionSurface:
             radii,
             samples
         )
-        if not preserve_origins:
-            base_points = base_points.reshape(-1, 3)
-            mask = cls.get_exterior_points(base_points, centers, radii, tolerance=tolerance)
+        if prune:
+            if not preserve_origins:
+                base_points = base_points.reshape(-1, 3)
+                mask = cls.get_exterior_points(base_points, centers, radii, tolerance=tolerance)
 
-            return base_points[mask,]
+                return base_points[mask,]
+            else:
+                subpoints = []
+                for bp in base_points:
+                    mask = cls.get_exterior_points(bp, centers, radii, tolerance=tolerance)
+                    subpoints.append(bp[mask,])
+
+                return subpoints
         else:
-            subpoints = []
-            for bp in base_points:
-                mask = cls.get_exterior_points(bp, centers, radii, tolerance=tolerance)
-                subpoints.append(bp[mask,])
+            if not preserve_origins:
+                return np.concatenate([base_points], axis=0)
+            else:
+                return base_points
 
-            return subpoints
-
-    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None):
+    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True):
         if samples is None: samples = self.samples
         if scaling is None: scaling = self.scaling
         if expansion is None: expansion = self.expansion
@@ -383,7 +393,8 @@ class SphereUnionSurface:
             expansion=expansion,
             samples=samples,
             preserve_origins=preserve_origins,
-            tolerance=tolerance
+            tolerance=tolerance,
+            prune=prune
         )
 
 
@@ -474,12 +485,13 @@ class SphereUnionSurface:
 
         return np.array([x, y, z]).T
 
-    # def get_triangulation(self, *delaunay_kwargs, **delaunay_opts):
-    #     return scipy.spatial.Delaunay(
-    #         self.sampling_points,
-    #         *delaunay_kwargs,
-    #         *delaunay_opts
-    #     )
+    def get_triangulation(self, **surface_opts):
+        return SphereUnionSurfaceMesh.from_subclouds(
+            self.generate_points(preserve_origins=True, prune=False),
+            centers=self.centers,
+            radii=self.radii,
+            **surface_opts
+        )
 
     @classmethod
     def sampling_point_surface_area(cls,
@@ -1011,7 +1023,7 @@ class SphereUnionSurface:
                     )
                     if overlaps is not None:
                         if len(overlaps) > 0:
-                            k = [i, j][overlaps[0]]
+                            k:int = [i, j][overlaps[0]]
                             # visible[k] = False
                             terms.pop((k,), None)
                     else:
@@ -1288,11 +1300,13 @@ class SphereUnionSurface:
             return figure
 
 class SphereUnionSurfaceMesh:
-    def __init__(self, verts, inds, surf=None, densities=None):
+    def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, normals=None):
         self.surf = surf
         self.verts = verts
         self.inds = inds
         self.densities = densities
+        self.tri_map = tri_map
+        self._normals = normals
 
     def surface_area(self, return_components=False):
         dm = nput.distance_matrix(self.verts)
@@ -1305,6 +1319,114 @@ class SphereUnionSurfaceMesh:
             return tris
         else:
             return np.sum(tris)
+
+    @property
+    def normals(self):
+        if self._normals is None:
+            self._normals = self.get_normals()
+        return self._normals
+    def get_normals(self, normalize=True):
+        tri_pts = self.verts[self.inds]
+        return nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1], normalize=normalize)
+
+    @classmethod
+    def from_submeshes(cls, pts, submeshes, *, centers, radii,
+                       occlusion_type='complete',
+                       occlusion_tolerance=0.00001,
+                       check_normals=True,
+                       **etc):
+        pts = np.asanyarray(pts)
+        if occlusion_type is None:
+            tri_map = np.concatenate([
+                np.full(len(t), i)
+                for i, t in enumerate(submeshes)
+            ])
+            return cls(
+                pts,
+                np.concatenate(submeshes, axis=0),
+                tri_map=tri_map,
+                **etc
+            )
+        elif dev.str_in(occlusion_type, ['complete', 'partial', 'centroid']):
+            tri_map = np.concatenate([
+                np.full(len(t), i)
+                for i, t in enumerate(submeshes)
+            ])
+            all_tris = np.concatenate(submeshes, axis=0)
+            if occlusion_type in ['complete', 'centroid']:
+                centroids = np.average(pts[all_tris], axis=-2)
+                centroid_mask = SphereUnionSurface.get_exterior_points(
+                    centroids,
+                    centers,
+                    radii,
+                    tolerance=occlusion_tolerance
+                )
+                all_tris = all_tris[centroid_mask]
+                tri_map = tri_map[centroid_mask]
+            points_mask = SphereUnionSurface.get_exterior_points(
+                pts,
+                centers,
+                radii,
+                tolerance=occlusion_tolerance
+            )
+            occlusion_count = 3 - np.sum(points_mask[all_tris], axis=-1)
+            if occlusion_type == 'complete':
+                submask = occlusion_count == 0
+                all_tris = all_tris[submask]
+                tri_map = tri_map[submask]
+            elif occlusion_type == 'partial':
+                submask = occlusion_count < 2
+                all_tris = all_tris[submask]
+                tri_map = tri_map[submask]
+
+            point_indexing = np.unique(all_tris.flatten())
+
+            pts = pts[point_indexing,]
+            remapping = np.full(len(points_mask), -1, dtype=int)
+            remapping[point_indexing] = np.arange(len(point_indexing))
+            all_tris = remapping[all_tris]
+
+            if check_normals: # determine if the triangle normal points in or out from its radius, rotate if needed
+                tri_pts = pts[all_tris]
+                normals = nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1])
+                centroids = np.average(tri_pts, axis=-2)
+                centroid_vectors = centroids - centers[tri_map]
+                normal_sign = np.sign(nput.vec_dots(normals, centroid_vectors))
+                all_tris[normal_sign > 0] = all_tris[normal_sign > 0][:, (0, 2, 1)]
+                # tri_pts = pts[all_tris]
+                # normals = nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1])
+                # normal_sign = np.sign(nput.vec_dots(normals, centroid_vectors))
+
+            return cls(
+                pts,
+                all_tris,
+                tri_map=tri_map,
+                **etc
+            )
+        else:
+            raise NotImplementedError(f"`occlusion_type` {occlusion_type} not supported")
+
+
+    @classmethod
+    def from_subclouds(cls, point_clouds, *, centers, radii, mesh_type='convex', occlusion_type='partial', **mesh_kwargs):
+        if dev.str_is(mesh_type, 'convex'):
+            mesh_type = spat.ConvexHull
+        all_tris = []
+        all_points = np.concatenate(point_clouds, axis=0)
+        offset = 0
+        for t in point_clouds:
+            if len(t) > 3:
+                hull = mesh_type(t, **mesh_kwargs)
+                all_tris.append(hull.simplices + offset)
+            offset += len(t)
+        return cls.from_submeshes(
+            all_points,
+            all_tris,
+            centers=centers,
+            radii=radii,
+            occlusion_type=occlusion_type
+        )
+
 
     @classmethod
     def from_o3d(cls, mesh, densities=None, surf=None):
