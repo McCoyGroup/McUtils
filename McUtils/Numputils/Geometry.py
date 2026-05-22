@@ -18,6 +18,7 @@ from .VectorOps import *
 from . import TensorDerivatives as td
 from . import Misc as misc
 from . import TransformationMatrices as tmats
+from .Options import Options
 
 __all__ = [
     "triangle_convert",
@@ -68,7 +69,12 @@ __all__ = [
     "parametric_curvature",
     "parametric_path_points",
     "parameteric_spline_interpolate",
-    "parameteric_interpolation_curvature"
+    "parameteric_interpolation_curvature",
+    "check_triangle_intersection",
+    "check_bbox_intersections",
+    "check_interval_overlaps",
+    "check_line_intersection",
+    "check_segment_intersection"
 ]
 
 
@@ -4789,6 +4795,35 @@ def winding_sign(u, v, axis1=0, axis2=1, return_component=False, zero_threshold=
         z = np.sign(z)
     return z
 
+def winding_number(points, polygon, axis1=0, axis2=1, zero_threshold=None):
+    pts   = np.asanyarray(points)
+    verts = np.asanyarray(polygon)
+    v1 = verts
+    v2 = np.roll(verts, -1, axis=-2)
+
+    x,  y  = pts[..., axis1],  pts[..., axis2]
+    y1, y2 = v1[..., axis2],  v2[..., axis2]
+    upward = (y1[..., np.newaxis, :] <= y[..., :, np.newaxis]) & (y2[..., np.newaxis, :] >  y[..., :, np.newaxis])
+    downward = (y1[..., np.newaxis, :] >  y[..., :, np.newaxis]) & (y2[..., np.newaxis, :] <= y[..., :, np.newaxis])
+
+
+    x1, x2 = v1[..., axis1], v2[..., axis1]
+    cross = (
+        (x2 - x1)[..., np.newaxis, :] * (y[..., :, np.newaxis] - y1[..., np.newaxis, :]) -
+        (x[..., :, np.newaxis] - x1[..., np.newaxis, :]) * (y2 - y1)[..., np.newaxis, :]
+    )
+
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+    w = np.sum(
+        upward & (cross > zero_threshold),
+         axis=-1
+    ) - np.sum(
+        downward & (cross < -zero_threshold),
+         axis=-1
+    )
+    return w
+
 def point_in_triangle(p, a, b, c, diffs=None, windings=None, **winding_args):
     #TODO: handle coincident lines
     if windings is not None:
@@ -5226,3 +5261,530 @@ def parametric_path_points(path_elements, return_segments=False):
         return point_lists
     else:
         return np.concatenate(point_lists, axis=0)
+
+
+
+def tri_tri_intersect(t1: np.ndarray, t2: np.ndarray, eps: float = 1e-9) -> bool:
+    """
+    Test whether two triangles in 3D intersect.
+    t1, t2 : (3, 3) arrays of vertex positions.
+    Returns True if they share any point (including edge/vertex touches).
+    """
+    def plane_of(tv):
+        n = np.cross(tv[1] - tv[0], tv[2] - tv[0])
+        ln = np.linalg.norm(n)
+        if ln < eps:
+            return None, None          # degenerate triangle
+        n = n / ln
+        return n, -np.dot(n, tv[0])   # (normal, offset d)  →  n·x + d = 0
+
+    # ── Step 1: plane rejection ───────────────────────────────────────────────
+    n2, d2 = plane_of(t2)
+    if n2 is None:
+        return False
+
+    sd1 = t1 @ n2 + d2                # signed dists of T1 verts to plane(T2)
+    if np.all(sd1 >  eps) or np.all(sd1 < -eps):
+        return False                  # T1 strictly on one side of plane(T2)
+
+    n1, d1 = plane_of(t1)
+    if n1 is None:
+        return False
+
+    sd2 = t2 @ n1 + d1                # signed dists of T2 verts to plane(T1)
+    if np.all(sd2 >  eps) or np.all(sd2 < -eps):
+        return False                  # T2 strictly on one side of plane(T1)
+
+    # ── Step 2: coplanar case ────────────────────────────────────────────────
+    L = np.cross(n1, n2)
+    if np.linalg.norm(L) < eps:
+        return _coplanar_tri_tri(t1, t2, n1, eps)
+
+    # ── Step 3: compute overlap intervals on L ───────────────────────────────
+    # Project vertices onto L (use largest-magnitude axis for numerical stability)
+    ax = np.argmax(np.abs(L))
+
+    def interval(tv, sd):
+        """Scalar interval [lo, hi] of tv's intersection with L."""
+        p = tv[:, ax]
+        pts = []
+        for i in range(3):
+            j = (i + 1) % 3
+            si, sj = sd[i], sd[j]
+            if abs(si - sj) < eps:
+                continue
+            if si * sj <= 0:          # edge crosses or touches the other plane
+                t = si / (si - sj)
+                pts.append(p[i] + t * (p[j] - p[i]))
+        # Verts that lie exactly on the plane also count
+        pts += [p[i] for i in range(3) if abs(sd[i]) <= eps]
+        if len(pts) < 2:
+            return None, None
+        return min(pts), max(pts)
+
+    lo1, hi1 = interval(t1, sd1)
+    lo2, hi2 = interval(t2, sd2)
+
+    if lo1 is None or lo2 is None:
+        return False
+
+    return hi1 >= lo2 - eps and hi2 >= lo1 - eps   # intervals overlap?
+
+
+# ── Coplanar fallback: 2D edge–edge + containment ────────────────────────────
+
+def _project_2d(tri, normal):
+    """Drop the axis most aligned with the normal → 2D projection."""
+    ax = np.argmax(np.abs(normal))
+    keep = [i for i in range(3) if i != ax]
+    return tri[:, keep]
+
+def _segments_intersect_2d(p1, p2, p3, p4, eps=1e-9) -> bool:
+    """Do line segments p1–p2 and p3–p4 intersect?"""
+    d1, d2 = p2 - p1, p4 - p3
+    cross = d1[0]*d2[1] - d1[1]*d2[0]
+    diff  = p3 - p1
+    if abs(cross) < eps:           # parallel
+        return False
+    t = (diff[0]*d2[1] - diff[1]*d2[0]) / cross
+    u = (diff[0]*d1[1] - diff[1]*d1[0]) / cross
+    return -eps <= t <= 1+eps and -eps <= u <= 1+eps
+
+def _point_in_tri_2d(p, tri2d, eps=1e-9) -> bool:
+    """Is point p inside triangle tri2d (2D)?"""
+
+    def sign(a, b, c):
+        return (a[0]-c[0])*(b[1]-c[1]) - (b[0]-c[0])*(a[1]-c[1])
+    d1 = sign(p, tri2d[0], tri2d[1])
+    d2 = sign(p, tri2d[1], tri2d[2])
+    d3 = sign(p, tri2d[2], tri2d[0])
+    has_neg = (d1 < -eps) or (d2 < -eps) or (d3 < -eps)
+    has_pos = (d1 >  eps) or (d2 >  eps) or (d3 >  eps)
+    return not (has_neg and has_pos)
+
+def _coplanar_tri_tri(t1, t2, normal, eps=1e-9) -> bool:
+    a, b = _project_2d(t1, normal), _project_2d(t2, normal)
+    # Edge–edge intersections
+    for i in range(3):
+        for j in range(3):
+            if _segments_intersect_2d(a[i], a[(i+1)%3],
+                                       b[j], b[(j+1)%3], eps):
+                return True
+    # One triangle fully inside the other?
+    if _point_in_tri_2d(a[0], b, eps):
+        return True
+    if _point_in_tri_2d(b[0], a, eps):
+        return True
+    return False
+
+def triangle_plane_embedding(tris, zero_threshold=None):
+    tris = np.asanyarray(tris)
+    crosses = vec_crosses(tris[..., 0, :] - tris[..., 1, :], tris[..., 2, :] - tris[..., 1, :])
+    crosses, norms = vec_normalize(crosses, return_norms=True)
+    if zero_threshold is None:
+        zero_threshold = Options
+    dead_points = norms < zero_threshold
+    shift = -vec_dots(crosses, tris[1])
+    return (crosses, shift), dead_points
+
+def check_triangle_plane_offsets(t1, t2, embeddings=None, zero_threshold=None, return_distances=False):
+    if embeddings is None:
+        embeddings = triangle_plane_embedding(t1)[0], triangle_plane_embedding(t2)[0]
+    (n1, d1), (n2, d2) = embeddings
+
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+
+    sd1 = np.reshape(t1 @ n2[..., :, np.newaxis] + d2[..., np.newaxis], d2.shape)
+    mask = np.all(sd1 > zero_threshold, axis=-1) | np.all(sd1 < -zero_threshold, axis=-1)
+
+    submask = np.where(mask)
+    n1 = n1[submask]
+    d1 = d1[submask]
+    t2 = t2[submask]
+
+    sd2 = np.reshape(t2 @ n1[..., :, np.newaxis] + d1[..., np.newaxis], d1.shape)
+    subsubmask = np.any(sd2 < zero_threshold, axis=-1) & np.any(sd2 > -zero_threshold, axis=-1) # note boolean flip
+    s2 = tuple(s[subsubmask] for s in submask)
+
+    if return_distances:
+        sd2_full = np.zeros_like(sd1)
+        sd2_full[submask] = sd2
+
+    mask[s2] = False
+    if return_distances:
+        return mask, (sd1, sd2_full)
+    else:
+        return mask
+
+def check_coplanar_triangle_intersection(t1, t2, embeddings=None, zero_threshold=None,
+                                         return_crosses=False):
+    if embeddings is None:
+        embeddings = triangle_plane_embedding(t1)[0], triangle_plane_embedding(t2)[0]
+    (n1, d1), (n2, d2) = embeddings
+
+    base_shape = t1.shape[:-2]
+    n1 = n1.reshape((-1,) + n1.shape[-1:])
+    t1 = t1.reshape((-1,) + t1.shape[-2:])
+    n2 = n2.reshape((-1,) + n2.shape[-1:])
+    t2 = t2.reshape((-1,) + t2.shape[-2:])
+
+    crosses = vec_crosses(n1, n2)
+    cross_norms = vec_norms(crosses)
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+
+    mask = cross_norms < zero_threshold # coplanar, need to check
+    check_inds = np.where(mask)
+
+    if len(check_inds[0]) > 0:
+        n1 = n1[mask]
+        t1 = t1[mask]
+        # n2 = n2[mask]
+        t2 = t2[mask]
+
+        # fast pseudo-2d projection for checks
+        i1 = np.argmax(np.abs(n1), axis=-1)
+        submask = np.full(t1.shape, True)
+        submask[np.arange(len(t1)), :, i1] = False
+        a = t1[submask].reshape(t1.shape[:-1] + (t1.shape[-1] - 1,))
+        b = t2[submask].reshape(t2.shape[:-1] + (t2.shape[-1] - 1,))
+
+        # if any segments intersect we can short circuit
+        for i in range(3): # 3 points in a triangle
+            for j in range(3):
+                seg_mask = check_segment_intersection_2d(
+                    a[..., i, :], a[..., (i + 1) % 3, :],
+                    b[..., j, :], b[..., (j + 1) % 3, :],
+                    zero_threshold=zero_threshold
+                )
+                nsm = ~seg_mask
+
+                a = a[nsm]
+                b = b[nsm]
+                check_inds = tuple(m[nsm] for m in check_inds)
+                if len(check_inds[0]) == 0:
+                    break
+            if len(check_inds[0]) == 0:
+                break
+
+        if len(check_inds[0]) > 0:
+            # One triangle fully inside the other?
+            contained_mask = point_in_triangle(a[..., 0, :], *np.moveaxis(b, -2, 0), zero_threshold)
+            ncm = ~contained_mask
+            a = a[ncm]
+            b = b[ncm]
+            check_inds = tuple(m[ncm] for m in check_inds)
+
+        if len(check_inds[0]) > 0:
+            contained_mask = point_in_triangle(b[..., 0, :], *np.moveaxis(a, -2, 0), zero_threshold)
+            ncm = ~contained_mask
+            check_inds = tuple(m[ncm] for m in check_inds)
+            mask[check_inds] = False
+
+    mask = mask.reshape(base_shape)
+    if return_crosses:
+        return mask, crosses
+    else:
+        return mask
+
+def get_bounding_boxes(polys, concatentate=False):
+    min_vals = np.min(polys, axis=-2)
+    max_vals = np.max(polys, axis=-2)
+
+    if concatentate:
+        return np.concatenate((min_vals[..., np.newaxis], max_vals[..., np.newaxis]), axis=-1)
+    else:
+        return min_vals, max_vals
+
+def check_interval_overlaps(bounds_1, bounds_2, include_endpoints=True, zero_threshold=None):
+    m1, M1 = bounds_1
+    m2, M2 = bounds_2
+    m1 = np.asanyarray(m1)
+    M1 = np.asanyarray(M1)
+    m2 = np.asanyarray(m2)
+    M2 = np.asanyarray(M2)
+
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+    M1 = M1 + zero_threshold
+    M2 = M2 + zero_threshold
+
+    if include_endpoints:
+        mask = (M2 >= m1) & (M1 >= m2)
+    else:
+        mask = (M2 > m1) & (M1 > m2)
+
+    return mask
+
+def check_bbox_intersections(polys1, polys2, zero_threshold=None):
+    polys1 = np.asanyarray(polys1)
+    polys2 = np.asanyarray(polys2)
+
+    m1, M1 = get_bounding_boxes(polys1)
+    m2, M2 = get_bounding_boxes(polys2)
+
+    base_shape = polys1.shape[:-2]
+    ndim = m1.shape[-1]
+    m1 = m1.reshape((-1, ndim))
+    M1 = M1.reshape((-1, ndim))
+    m2 = m2.reshape((-1, ndim))
+    M2 = M2.reshape((-1, ndim))
+    mask_inds = np.arange(len(m1))
+    for i in range(ndim):
+        submask = check_interval_overlaps((m1[..., i], M1[..., i]), (m2[..., i], M2[..., i]),
+                                          zero_threshold=zero_threshold)
+        nsm = ~submask
+        m1 = m1[nsm]
+        m2 = m2[nsm]
+        M1 = M1[nsm]
+        M2 = M2[nsm]
+        mask_inds = mask_inds[nsm]
+        if len(mask_inds) == 0: break
+
+    mask = np.full(len(m1), False)
+    mask[mask_inds,] = True
+
+    return mask.reshape(base_shape)
+
+def check_line_intersection(line_1, line_2, zero_threshold=None):
+    p1, d1 = line_1
+    p2, d2 = line_2
+    p1, d1, p2, d2 = np.asanyarray(p1), np.asanyarray(d1), np.asanyarray(p2), np.asanyarray(d2)
+    M = np.concatenate([d1[..., np.newaxis, :], -d2[..., np.newaxis, :]])
+    rhs = p2 - p1
+
+    (s, t), residuals, rank, _ = np.linalg.lstsq(M, rhs, rcond=None)
+
+    # Lines intersect iff the system is solved exactly
+    if len(residuals) == 0:
+        residual = np.linalg.norm(M @ np.array([s, t]) - rhs)
+    else:
+        residual = float(np.sqrt(residuals[0]))
+
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+    mask = residual < zero_threshold
+    s[~mask] = 0
+    t[~mask] = 0
+
+    return mask, s, t
+
+def check_segment_intersection(p1, p2, p3, p4, zero_threshold=None):
+    p1 = np.asanyarray(p1)
+    if p1.ndim == 2:
+        return check_segment_intersection_2d(p1, p2, p3, p4, zero_threshold=zero_threshold)
+    else:
+        p2 = np.asanyarray(p2)
+        p3 = np.asanyarray(p3)
+        p4 = np.asanyarray(p4)
+        line_1 = p1, (p2 - p1)
+        line_2 = p3, (p4 - p3)
+        mask, s, t = check_line_intersection(line_1, line_2, zero_threshold=zero_threshold)
+        d1 = vec_norms(line_1[1][mask])
+        d2 = vec_norms(line_2[1][mask])
+        mask[mask] = (-zero_threshold < s[mask]) & (s[mask] < d1) & (-zero_threshold < t[mask]) & (t[mask] < d2)
+        return mask
+
+def check_segment_intersection_2d(p1, p2, p3, p4, axis1=0, axis2=1, zero_threshold=None):
+        p1, p2, p3, p4 = np.asanyarray(p1), np.asanyarray(p2), np.asanyarray(p3), np.asanyarray(p4)
+
+        if zero_threshold is None:
+            zero_threshold = Options.zero_threshold
+        d1, d2 = p2 - p1, p4 - p3
+        cross = d1[..., axis1] * d2[..., axis2] - d1[..., axis2] * d2[..., axis1]
+        mask = np.abs(cross) > zero_threshold
+
+        mask_inds = np.where(mask)
+
+        diff = p3[mask] - p1[mask]
+        d1 = d1[mask]
+        d2 = d2[mask]
+        t = (diff[..., axis1] * d2[..., axis2] - diff[..., axis2] * d2[..., axis1])
+        u = (diff[..., axis1] * d1[..., axis2] - diff[..., axis2] * d1[..., axis1])
+
+        submask = (
+                (-zero_threshold < t ) &  (t < cross * (1 + zero_threshold))
+                & (-zero_threshold < u) & (u < cross * (1 + zero_threshold))
+        )
+        submask = ~submask # TODO: just invert the checks...
+        mask_inds = tuple(m[submask] for m in mask_inds)
+        mask[mask_inds] = False
+
+        return mask
+
+def _tri_overlap_intervals(p, sd, zero_threshold=None):
+    """Scalar intervals [lo, hi] for the triangle intersection points along the normal axis"""
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+
+    needs_bounds = np.full(p.shape[:-1], sd)
+    min_bounds = np.zeros(p.shape[:-1], dtype=p.dtype)
+    max_bounds = np.zeros(p.shape[:-1], dtype=p.dtype)
+    for i in range(3): # three points in a triangle
+        boundary_mask = np.where(np.abs(sd[..., i]) < zero_threshold)
+        if len(boundary_mask[0]) > 0:
+            new_mask = needs_bounds[boundary_mask]
+            rem_mask = ~new_mask
+            new_mask = tuple(bm[new_mask] for bm in boundary_mask)
+            min_bounds[new_mask] = p[..., i][boundary_mask]
+            max_bounds[new_mask] = p[..., i][boundary_mask]
+            if np.any(rem_mask):
+                rem_mask = tuple(bm[rem_mask] for bm in boundary_mask)
+                min_bounds[rem_mask] = np.min([min_bounds[rem_mask], p[..., i][rem_mask]], axis=0)
+                max_bounds[rem_mask] = np.min([max_bounds[rem_mask], p[..., i][rem_mask]], axis=0)
+            needs_bounds[boundary_mask] = False
+
+    for i in range(3):
+        j = (i + 1) % 3
+        si, sj = sd[..., i], sd[..., j]
+        ds = si - sj
+        edge_mask = (
+                np.abs(ds) > zero_threshold
+                & (si * sj) <= 0
+        )
+        edge_mask = np.where(np.abs(sd[..., i]) < zero_threshold)
+        if len(edge_mask[0]) > 0: # edge crosses or touches the other plane
+            t = si[edge_mask] / ds[edge_mask]
+            pi = p[..., i][edge_mask]
+            pj = p[..., j][edge_mask]
+            new_p = pi + t * (pj - pi)
+
+            new_mask = needs_bounds[edge_mask]
+            rem_mask = ~new_mask
+            new_new_p = new_p[new_mask]
+            rem_new_p = new_p[rem_mask]
+            new_mask = tuple(bm[new_mask] for bm in edge_mask)
+            min_bounds[new_mask] = new_new_p
+            max_bounds[new_mask] = new_new_p
+            if np.any(rem_mask):
+                rem_mask = tuple(bm[rem_mask] for bm in edge_mask)
+                min_bounds[rem_mask] = np.min([min_bounds[rem_mask], rem_new_p], axis=0)
+                max_bounds[rem_mask] = np.min([max_bounds[rem_mask], rem_new_p], axis=0)
+            needs_bounds[edge_mask] = False
+
+    return needs_bounds, min_bounds, max_bounds
+
+    # if len(pts) < 2:
+    #     return None, None
+    # return min(pts), max(pts)
+
+def check_triangle_intersection(tris1, tris2,
+                                embeddings=None,
+                                check_indices=None,
+                                check_direct_product=False,
+                                zero_threshold=None):
+    tris1 = np.asanyarray(tris1)
+    tris2 = np.asanyarray(tris2)
+    if embeddings is None:
+        embeddings = triangle_plane_embedding(tris1), triangle_plane_embedding(tris2)
+    ((e1, d1), mask1), ((e2, d2), mask2) = embeddings
+    if check_indices is None and check_direct_product:
+        check_indices = np.meshgrid(np.arange(len(tris1)), np.arange(len(tris2)))
+    if check_indices is not None:
+        i, j = check_indices
+        e1 = e1[..., i, :]
+        mask1 = mask1[..., i]
+        d1 = d1[..., i]
+        e2 = e2[..., j, :]
+        mask2 = mask2[..., j]
+        d2 = d2[..., j]
+
+    full_mask = mask1 & mask2
+    submask = np.where(full_mask)
+    tris1 = tris1[submask]
+    e1 = e1[submask]
+    d1 = d1[submask]
+    tris2 = tris2[submask]
+    e2 = e2[submask]
+    d2 = d2[submask]
+
+    if zero_threshold is None:
+        zero_threshold = Options.zero_threshold
+
+    ## duplicates later effort
+    # bbox_mask = check_bbox_intersections(tris1, tris2, zero_threshold=zero_threshold)
+    # s2 = tuple(s[bbox_mask] for s in submask)
+    # full_mask[s2] = False
+    #
+    # nbm = ~bbox_mask
+    # submask = tuple(s[nbm] for s in submask)
+    # tris1 = tris1[submask]
+    # e1 = e1[submask]
+    # d1 = d1[submask]
+    # tris2 = tris2[submask]
+    # e2 = e2[submask]
+    # d2 = d2[submask]
+
+    if len(submask[0]) > 0:
+        plane_mask, dists = check_triangle_plane_offsets(tris1, tris2,
+                                                         embeddings=((e1, d1), (e2, d2)),
+                                                         zero_threshold=zero_threshold,
+                                                         return_distances=True)
+        s2 = tuple(s[plane_mask] for s in submask)
+        full_mask[s2] = False
+
+        npm = ~plane_mask
+        submask = tuple(s[npm] for s in submask)
+        tris1 = tris1[submask]
+        e1 = e1[submask]
+        d1 = d1[submask]
+        tris2 = tris2[submask]
+        e2 = e2[submask]
+        d2 = d2[submask]
+
+        dists = (dists[0][submask], dists[1][submask])
+
+    if len(submask[0]) > 0:
+        coplanar_mask, crosses = check_coplanar_triangle_intersection(tris1, tris2,
+                                                                      embeddings=((e1, d1), (e2, d2)),
+                                                                      zero_threshold=zero_threshold,
+                                                                      return_crosses=True)
+        s2 = tuple(s[coplanar_mask] for s in submask)
+        full_mask[s2] = False
+
+        npm = ~coplanar_mask
+        submask = tuple(s[npm] for s in submask)
+        tris1 = tris1[submask]
+        # e1 = e1[submask]
+        # d1 = d1[submask]
+        tris2 = tris2[submask]
+        # e2 = e2[submask]
+        # d2 = d2[submask]
+
+        crosses = crosses[submask]
+        dists = (dists[0][submask], dists[1][submask])
+
+    if len(submask[0]) > 0:
+        ax = np.argmax(np.abs(crosses), axis=-1)
+        a = np.take_along_axis(tris1, ax, axis=-1)
+        b = np.take_along_axis(tris2, ax, axis=-1)
+
+        missing1, lo1, hi1 = _tri_overlap_intervals(a, dists[0])
+        missing2, lo2, hi2 = _tri_overlap_intervals(b, dists[1])
+
+        done_mask = missing1 | missing2
+        s2 = tuple(s[done_mask] for s in submask)
+        full_mask[s2] = False
+
+        rem_mask = ~done_mask
+        submask = tuple(s[rem_mask] for s in submask)
+        no_intersection = ~check_interval_overlaps(
+            (lo1[rem_mask], hi1[rem_mask]),
+            (lo2[rem_mask], hi2[rem_mask]),
+        )
+        submask = tuple(s[no_intersection] for s in submask)
+        full_mask[submask] = False
+
+    return full_mask
+
+
+
+
+
+
+
+
+
+
+
