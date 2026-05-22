@@ -714,6 +714,7 @@ def iterative_chain_minimize(
 
                 if climb and any(is_climbing):
                     logger.log_print("Climbing nodes: {is_climbing}", is_climbing=is_climbing)
+                if len(submask) == 0: continue
                 step, step_errs, new_mask, done = iterative_step_minimize_step(
                     step_predictor, g,
                     (submask, (j, prev_im, next_im)), tol,
