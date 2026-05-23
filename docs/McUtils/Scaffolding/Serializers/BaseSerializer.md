@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.BaseSerializer">BaseSerializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L253)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L253?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L255?message=Update%20Docs)]
 </div>
 
 Serializer base class to define the interface
@@ -20,14 +20,39 @@ Serializer base class to define the interface
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
 default_extension: str
+binary: bool
+registry_name: NoneType
+registry: dict
 ```
+<a id="McUtils.Scaffolding.Serializers.BaseSerializer.register" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+register(cls, name, serializer=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L265?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Scaffolding.Serializers.BaseSerializer.construct" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+construct(cls, serializer_type, **kwargs): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L275)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L275?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Scaffolding.Serializers.BaseSerializer.convert" class="docs-object-method">&nbsp;</a> 
 ```python
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L260)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L260?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L282?message=Update%20Docs)]
 </div>
 Converts data into a serializable format
   - `data`: `Any`
@@ -41,8 +66,8 @@ Converts data into a serializable format
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L270)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L270?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L292?message=Update%20Docs)]
 </div>
 Converts data from a serialized format into a python format
   - `data`: `Any`
@@ -56,8 +81,8 @@ Converts data from a serialized format into a python format
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L280)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L280?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L302)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L302?message=Update%20Docs)]
 </div>
 Writes the data
   - `file`: `Any`
@@ -68,16 +93,50 @@ Writes the data
     >
 
 
+<a id="McUtils.Scaffolding.Serializers.BaseSerializer.dumps" class="docs-object-method">&nbsp;</a> 
+```python
+dumps(self, data, **kwargs): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L314)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L314?message=Update%20Docs)]
+</div>
+Write data to a string
+  - `data`: `Any`
+    > 
+  - `kwargs`: `Any`
+    > 
+  - `:returns`: `_`
+    >
+
+
 <a id="McUtils.Scaffolding.Serializers.BaseSerializer.deserialize" class="docs-object-method">&nbsp;</a> 
 ```python
 deserialize(self, file, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L292)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L292?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L328)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L328?message=Update%20Docs)]
 </div>
 Loads data from a file
   - `file`: `Any`
+    > 
+  - `:returns`: `_`
+    >
+
+
+<a id="McUtils.Scaffolding.Serializers.BaseSerializer.loads" class="docs-object-method">&nbsp;</a> 
+```python
+loads(self, data, **kwargs): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L338)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/BaseSerializer.py#L338?message=Update%20Docs)]
+</div>
+Write data to a string
+  - `data`: `Any`
+    > 
+  - `kwargs`: `Any`
     > 
   - `:returns`: `_`
     >
@@ -134,7 +193,7 @@ Loads data from a file
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/BaseSerializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/BaseSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L253?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L255?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

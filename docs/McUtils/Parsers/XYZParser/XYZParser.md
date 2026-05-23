@@ -21,7 +21,7 @@
  
 <a id="McUtils.Parsers.XYZParser.XYZParser.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, file, has_comments=True, **kw): 
+__init__(self, *args, **kwds): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser.py#L12)/
@@ -29,33 +29,33 @@ __init__(self, file, has_comments=True, **kw):
 </div>
 
 
-<a id="McUtils.Parsers.XYZParser.XYZParser.find_block" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Parsers.XYZParser.XYZParser.check_tag" class="docs-object-method">&nbsp;</a> 
 ```python
-find_block(self): 
+check_tag(self, line: str, depth: int = 0, active_tag=None, label: str = None, history: list[str] = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L14)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L14?message=Update%20Docs)]
 </div>
 
 
-<a id="McUtils.Parsers.XYZParser.XYZParser.parse_xyz_block" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Parsers.XYZParser.XYZParser.handle_block" class="docs-object-method">&nbsp;</a> 
 ```python
-parse_xyz_block(self, block, include_comment=True): 
+handle_block(self, label: 'str|None', block_data, join=True, depth=0, number_pattern=None, label_pattern=None, simple_format=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L37?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Parsers.XYZParser.XYZParser.parse" class="docs-object-method">&nbsp;</a> 
 ```python
-parse(self, max_blocks=None, include_comment=True): 
+parse(self, max_blocks=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/XYZParser/XYZParser.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/XYZParser/XYZParser.py#L84?message=Update%20Docs)]
 </div>
  </div>
 </div>

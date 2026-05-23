@@ -32,21 +32,21 @@ Provides access to the JHTML interface for building quality Jupyter interfaces
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[SVG](JHTML/HTML/SVG.md)   
+</div>
+   <div class="col" markdown="1">
 [Bootstrap5](JHTML/Bootstrap/Bootstrap5.md)   
 </div>
    <div class="col" markdown="1">
 [HTMLWidgets](JHTML/HTMLWidgets/HTMLWidgets.md)   
 </div>
-   <div class="col" markdown="1">
-[ActiveHTMLWrapper](JHTML/HTMLWidgets/ActiveHTMLWrapper.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Bootstrap5Widgets](JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
+[ActiveHTMLWrapper](JHTML/HTMLWidgets/ActiveHTMLWrapper.md)   
 </div>
    <div class="col" markdown="1">
-   
+[Bootstrap5Widgets](JHTML/BootstrapWidgets/Bootstrap5Widgets.md)   
 </div>
    <div class="col" markdown="1">
    

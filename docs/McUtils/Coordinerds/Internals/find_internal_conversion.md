@@ -1,11 +1,11 @@
 # <a id="McUtils.Coordinerds.Internals.find_internal_conversion">find_internal_conversion</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L2153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L2817)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2817?message=Update%20Docs)]
 </div>
 
 ```python
-find_internal_conversion(internals, targets, triangles_and_dihedrons=None, canonicalize=True, allow_completion=True, return_conversions=False, prep_conversions=True, include_shapes=False, cache=None, missing_val='raise'): 
+find_internal_conversion(internals, targets, triangles_and_dihedrons=None, canonicalize=True, allow_completion=True, return_conversions=False, prep_conversions=True, include_shapes=False, indices=None, cache=None, disallowed_conversions=None, update_triangles_and_dihedrons=False, return_completions=False, allow_recursive_completions=None, dihedral_intersections=None, verbose=False, missing_val='raise'): 
 ```
 
 
@@ -59,7 +59,7 @@ find_internal_conversion(internals, targets, triangles_and_dihedrons=None, canon
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/find_internal_conversion.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/find_internal_conversion.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2153?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2817?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

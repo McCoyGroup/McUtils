@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ManagedJobQueues.SLURMInformationHandler">SLURMInformationHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L170)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L170?message=Update%20Docs)]
 </div>
 
 
@@ -31,8 +31,8 @@ SACCT_CMD: list
 prep_job_kwargs(cls, *, sbatch_script, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L180)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L180?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L193?message=Update%20Docs)]
 </div>
 
 
@@ -42,8 +42,8 @@ prep_job_kwargs(cls, *, sbatch_script, **kwargs):
 get_job_info_command(cls, sacct_error=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L197?message=Update%20Docs)]
 </div>
 
 
@@ -53,8 +53,8 @@ get_job_info_command(cls, sacct_error=False):
 parse_raw_job_info(cls, stdout) -> 'list[dict]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L205)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L205?message=Update%20Docs)]
 </div>
 
 
@@ -64,8 +64,8 @@ parse_raw_job_info(cls, stdout) -> 'list[dict]':
 run_job_info_cmd(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L220)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L220?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -120,7 +120,7 @@ run_job_info_cmd(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ManagedJobQueues/SLURMInformationHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ManagedJobQueues/SLURMInformationHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L157?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L170?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

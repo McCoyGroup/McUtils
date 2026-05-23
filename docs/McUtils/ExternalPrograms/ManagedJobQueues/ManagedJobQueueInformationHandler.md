@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueInformationHandler">ManagedJobQueueInformationHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L85?message=Update%20Docs)]
 </div>
 
 
@@ -25,8 +25,8 @@
 get_job_info_command(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L75)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L75?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L88)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L88?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ get_job_info_command(cls):
 run_job_info_cmd(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L92)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L92?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ run_job_info_cmd(self):
 parse_raw_job_info(cls, stdout) -> 'list[dict]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L100?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ parse_raw_job_info(cls, stdout) -> 'list[dict]':
 parse_job_info(cls, stdout) -> 'list[dict]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L119?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ parse_job_info(cls, stdout) -> 'list[dict]':
 get_all_job_info(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L130?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -125,7 +125,7 @@ get_all_job_info(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueInformationHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueInformationHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L72?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L85?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

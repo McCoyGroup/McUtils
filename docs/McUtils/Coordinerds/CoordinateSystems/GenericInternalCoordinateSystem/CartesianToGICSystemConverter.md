@@ -32,7 +32,7 @@ types(self):
 
 <a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.CartesianToGICSystemConverter.convert_many" class="docs-object-method">&nbsp;</a> 
 ```python
-convert_many(self, coords, *, specs, order=0, masses=None, remove_translation_rotation=True, reference_coordinates=None, return_derivs=None, derivs=None, gradient_function=None, gradient_scaling=None, **kw): 
+convert_many(self, coords, *, specs, order=0, masses=None, remove_translation_rotation=True, reference_coordinates=None, return_derivs=None, derivs=None, gradient_function=None, gradient_scaling=None, method='direct', internal_spec=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.py#L99)/
@@ -46,8 +46,8 @@ We'll implement this by having the ordering arg wrap around in coords?
 convert(self, coords, *, specs, order=0, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.py#L151)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/CartesianToGICSystemConverter.py#L151?message=Update%20Docs)]
 </div>
  </div>
 </div>

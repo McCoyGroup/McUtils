@@ -59,8 +59,8 @@ canonicalize_widget(cls, x):
 clean_props(cls, props, to_str=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L260)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L260?message=Update%20Docs)]
 </div>
 
 
@@ -70,8 +70,8 @@ clean_props(cls, props, to_str=False):
 from_HTML(cls, x: McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_handlers=None, debug_pane=None, **props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L281)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L281?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L285)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L285?message=Update%20Docs)]
 </div>
 
 
@@ -81,8 +81,8 @@ from_HTML(cls, x: McUtils.Jupyter.JHTML.HTML.HTML.XMLElement, event_handlers=Non
 load_HTMLElement(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L314)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L314?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L318)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L318?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +92,8 @@ load_HTMLElement(cls):
 convert_child(cls, c): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L318)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L318?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L322)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L322?message=Update%20Docs)]
 </div>
 
 
@@ -102,8 +102,8 @@ convert_child(cls, c):
 to_html(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L364)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L364?message=Update%20Docs)]
 </div>
 
 
@@ -112,8 +112,8 @@ to_html(self):
 find(self, path, find_mirror=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L389)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L389?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L393)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L393?message=Update%20Docs)]
 </div>
 
 
@@ -122,8 +122,8 @@ find(self, path, find_mirror=True):
 findall(self, path, find_mirror=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L394)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L394?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L398)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L398?message=Update%20Docs)]
 </div>
 
 
@@ -132,8 +132,8 @@ findall(self, path, find_mirror=True):
 iterfind(self, path, find_mirror=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L399)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L399?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L403?message=Update%20Docs)]
 </div>
 
 
@@ -142,8 +142,8 @@ iterfind(self, path, find_mirror=True):
 find_by_id(self, id, mode='first', parent=None, find_mirror=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L405)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L405?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L409)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L409?message=Update%20Docs)]
 </div>
 
 
@@ -152,8 +152,8 @@ find_by_id(self, id, mode='first', parent=None, find_mirror=True):
 to_widget(self, parent=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L430)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L430?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L434)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L434?message=Update%20Docs)]
 </div>
 
 
@@ -162,8 +162,8 @@ to_widget(self, parent=None):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L432)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L432?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L436)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L436?message=Update%20Docs)]
 </div>
 
 
@@ -172,8 +172,8 @@ __repr__(self):
 display(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L447)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L447?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L451)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L451?message=Update%20Docs)]
 </div>
 
 
@@ -182,8 +182,8 @@ display(self):
 get_mime_bundle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L452)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L452?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L456)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L456?message=Update%20Docs)]
 </div>
 
 
@@ -192,8 +192,8 @@ get_mime_bundle(self):
 handle_event(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L481)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L481?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L485)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L485?message=Update%20Docs)]
 </div>
 
 
@@ -202,8 +202,8 @@ handle_event(self, e):
 link(self, elem): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L485)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L485?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L489)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L489?message=Update%20Docs)]
 </div>
 
 
@@ -213,8 +213,8 @@ link(self, elem):
 tag(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L494)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L494?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L498)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L498?message=Update%20Docs)]
 </div>
 
 
@@ -224,8 +224,8 @@ tag(self):
 id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L497)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L497?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L501)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L501?message=Update%20Docs)]
 </div>
 
 
@@ -235,8 +235,8 @@ id(self):
 text(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L506)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L506?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L510)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L510?message=Update%20Docs)]
 </div>
 
 
@@ -246,8 +246,8 @@ text(self):
 value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L516)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L516?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L520)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L520?message=Update%20Docs)]
 </div>
 
 
@@ -257,8 +257,8 @@ value(self):
 attrs(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L525)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L525?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L529)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L529?message=Update%20Docs)]
 </div>
 
 
@@ -267,8 +267,8 @@ attrs(self):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L550)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L550?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L554)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L554?message=Update%20Docs)]
 </div>
 
 
@@ -277,8 +277,8 @@ __getitem__(self, item):
 __setitem__(self, item, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L555)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L555?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L559)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L559?message=Update%20Docs)]
 </div>
 
 
@@ -287,8 +287,8 @@ __setitem__(self, item, value):
 __delitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L560)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L560?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L564)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L564?message=Update%20Docs)]
 </div>
 
 
@@ -297,8 +297,8 @@ __delitem__(self, item):
 get_attribute(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L565)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L565?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L569)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L569?message=Update%20Docs)]
 </div>
 
 
@@ -307,8 +307,8 @@ get_attribute(self, key):
 set_attribute(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L586)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L586?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L590)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L590?message=Update%20Docs)]
 </div>
 
 
@@ -317,8 +317,8 @@ set_attribute(self, key, value):
 del_attribute(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L612)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L612?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L616)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L616?message=Update%20Docs)]
 </div>
 
 
@@ -327,8 +327,8 @@ del_attribute(self, key):
 get_child(self, position, wrapper=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L637)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L637?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L641)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L641?message=Update%20Docs)]
 </div>
 
 
@@ -337,8 +337,8 @@ get_child(self, position, wrapper=False):
 set_child(self, position, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L650)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L650?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L654)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L654?message=Update%20Docs)]
 </div>
 
 
@@ -347,8 +347,8 @@ set_child(self, position, value):
 insert(self, where, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L662)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L662?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L666)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L666?message=Update%20Docs)]
 </div>
 
 
@@ -357,8 +357,8 @@ insert(self, where, child):
 append(self, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L681)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L681?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L685)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L685?message=Update%20Docs)]
 </div>
 
 
@@ -367,8 +367,8 @@ append(self, child):
 del_child(self, position): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L683)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L683?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L687)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L687?message=Update%20Docs)]
 </div>
 
 
@@ -377,8 +377,8 @@ del_child(self, position):
 activate_body(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L695)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L695?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L699)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L699?message=Update%20Docs)]
 </div>
 
 
@@ -388,8 +388,8 @@ activate_body(self):
 elements(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L699)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L699?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L703)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L703?message=Update%20Docs)]
 </div>
 
 
@@ -399,8 +399,8 @@ elements(self):
 children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L709)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L709?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L713)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L713?message=Update%20Docs)]
 </div>
 
 
@@ -410,8 +410,8 @@ children(self):
 html_string(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L716)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L716?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L720)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L720?message=Update%20Docs)]
 </div>
 
 
@@ -421,8 +421,8 @@ html_string(self):
 html(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L726)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L726?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L730)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L730?message=Update%20Docs)]
 </div>
 
 
@@ -431,8 +431,8 @@ html(self):
 load_HTML(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L740)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L740?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L744)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L744?message=Update%20Docs)]
 </div>
 
 
@@ -442,8 +442,8 @@ load_HTML(self):
 javascript_handles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L747)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L747?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L751)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L751?message=Update%20Docs)]
 </div>
 
 
@@ -453,8 +453,8 @@ javascript_handles(self):
 class_list(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L770)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L770?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L774)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L774?message=Update%20Docs)]
 </div>
 
 
@@ -463,8 +463,8 @@ class_list(self):
 add_class(self, *cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L777)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L777?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L781)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L781?message=Update%20Docs)]
 </div>
 
 
@@ -473,8 +473,8 @@ add_class(self, *cls):
 remove_class(self, *cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L790)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L790?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L794)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L794?message=Update%20Docs)]
 </div>
 
 
@@ -484,8 +484,8 @@ remove_class(self, *cls):
 style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L804)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L804?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L808)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L808?message=Update%20Docs)]
 </div>
 
 
@@ -494,8 +494,8 @@ style(self):
 add_styles(self, **sty): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L811)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L811?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L815)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L815?message=Update%20Docs)]
 </div>
 
 
@@ -504,8 +504,8 @@ add_styles(self, **sty):
 remove_styles(self, *sty): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L817)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L817?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L821)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L821?message=Update%20Docs)]
 </div>
 
 
@@ -515,8 +515,8 @@ remove_styles(self, *sty):
 data(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L825)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L825?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L829)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L829?message=Update%20Docs)]
 </div>
 
 
@@ -526,8 +526,8 @@ data(self):
 event_handlers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L832)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L832?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L836)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L836?message=Update%20Docs)]
 </div>
 
 
@@ -536,8 +536,8 @@ event_handlers(self):
 update_events(self, events): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L841)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L841?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L845)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L845?message=Update%20Docs)]
 </div>
 
 
@@ -546,8 +546,8 @@ update_events(self, events):
 add_event(self, send=True, **events): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L844)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L844?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L848)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L848?message=Update%20Docs)]
 </div>
 
 
@@ -556,8 +556,8 @@ add_event(self, send=True, **events):
 remove_event(self, *events, send=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L872)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L872?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L876)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L876?message=Update%20Docs)]
 </div>
 
 
@@ -566,8 +566,8 @@ remove_event(self, *events, send=True):
 wait_for_message(self, msg, callback, suppress_others=False, timeout=1, poll_interval=0.05): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L900)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L900?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L904)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L904?message=Update%20Docs)]
 </div>
 
 
@@ -576,8 +576,8 @@ wait_for_message(self, msg, callback, suppress_others=False, timeout=1, poll_int
 call(self, method, buffers=None, return_message=None, callback=None, timeout=1, poll_interval=0.05, suppress_others=False, **content): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L927)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L927?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L931)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L931?message=Update%20Docs)]
 </div>
 
 
@@ -586,8 +586,8 @@ call(self, method, buffers=None, return_message=None, callback=None, timeout=1, 
 add_javascript(self, **methods): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L979)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L979?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L983)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L983?message=Update%20Docs)]
 </div>
 
 
@@ -596,8 +596,8 @@ add_javascript(self, **methods):
 remove_javascript(self, *methods): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L987)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L987?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L991)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L991?message=Update%20Docs)]
 </div>
 
 
@@ -606,8 +606,8 @@ remove_javascript(self, *methods):
 trigger(self, method, buffers=None, **content): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L998)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L998?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1002)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1002?message=Update%20Docs)]
 </div>
 
 
@@ -617,8 +617,8 @@ trigger(self, method, buffers=None, **content):
 onevents(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1000)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1000?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1004)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1004?message=Update%20Docs)]
 </div>
 
 
@@ -627,8 +627,8 @@ onevents(self):
 update_onevents(self, events): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1009)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1009?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1013)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1013?message=Update%20Docs)]
 </div>
 
 
@@ -637,8 +637,8 @@ update_onevents(self, events):
 on(self, send=True, **events): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1012)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1012?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1016)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1016?message=Update%20Docs)]
 </div>
 
 
@@ -647,8 +647,8 @@ on(self, send=True, **events):
 off(self, *events, send=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1040)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1040?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1044)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1044?message=Update%20Docs)]
 </div>
 
 
@@ -658,8 +658,8 @@ off(self, *events, send=True):
 track_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1053)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1053?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1057)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1057?message=Update%20Docs)]
 </div>
 
 
@@ -669,8 +669,8 @@ track_value(self):
 continuous_update(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1059)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1059?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1063)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTMLWidgets/ActiveHTMLWrapper.py#L1063?message=Update%20Docs)]
 </div>
 
 
@@ -680,8 +680,8 @@ continuous_update(self):
 loader(cls, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1076)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1076?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1080)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1080?message=Update%20Docs)]
 </div>
  </div>
 </div>

@@ -308,117 +308,128 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [GraphicsPrimitive](Plots/Primitives/GraphicsPrimitive.md)   
 </div>
    <div class="col" markdown="1">
-[Sphere](Plots/Primitives/Sphere.md)   
+[Cube](Plots/Primitives/Cube.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[Sphere](Plots/Primitives/Sphere.md)   
+</div>
    <div class="col" markdown="1">
 [Cylinder](Plots/Primitives/Cylinder.md)   
 </div>
    <div class="col" markdown="1">
 [Disk](Plots/Primitives/Disk.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Line](Plots/Primitives/Line.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Text](Plots/Primitives/Text.md)   
 </div>
    <div class="col" markdown="1">
 [Arrow](Plots/Primitives/Arrow.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Inset](Plots/Primitives/Inset.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Point](Plots/Primitives/Point.md)   
 </div>
    <div class="col" markdown="1">
 [Triangle](Plots/Primitives/Triangle.md)   
 </div>
-   <div class="col" markdown="1">
-[Polygon](Plots/Primitives/Polygon.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[Polygon](Plots/Primitives/Polygon.md)   
+</div>
+   <div class="col" markdown="1">
 [Rectangle](Plots/Primitives/Rectangle.md)   
 </div>
+   <div class="col" markdown="1">
+[Path](Plots/Primitives/Path.md)   
+</div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [EventHandler](Plots/Interactive/EventHandler.md)   
 </div>
    <div class="col" markdown="1">
 [Animator](Plots/Interactive/Animator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Styled](Plots/Styling/Styled.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ThemeManager](Plots/Styling/ThemeManager.md)   
 </div>
    <div class="col" markdown="1">
 [PlotLegend](Plots/Styling/PlotLegend.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Image](Plots/Image/Image.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GraphicsPropertyManager](Plots/Properties/GraphicsPropertyManager.md)   
 </div>
    <div class="col" markdown="1">
 [GraphicsPropertyManager3D](Plots/Properties/GraphicsPropertyManager3D.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SceneJSON](Plots/SceneJSON/SceneJSON.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3D](Plots/X3DInterface/X3D.md)   
 </div>
    <div class="col" markdown="1">
 [X3DPrimitive](Plots/X3DInterface/X3DPrimitive.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DGeometryObject](Plots/X3DInterface/X3DGeometryObject.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DGeometryGroup](Plots/X3DInterface/X3DGeometryGroup.md)   
 </div>
    <div class="col" markdown="1">
 [X3DGroup](Plots/X3DInterface/X3DGroup.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DScene](Plots/X3DInterface/X3DScene.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DBackground](Plots/X3DInterface/X3DBackground.md)   
 </div>
    <div class="col" markdown="1">
 [X3DMaterial](Plots/X3DInterface/X3DMaterial.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [X3DLine](Plots/X3DInterface/X3DLine.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [X3DSphere](Plots/X3DInterface/X3DSphere.md)   
 </div>
    <div class="col" markdown="1">
 [X3DCone](Plots/X3DInterface/X3DCone.md)   
+</div>
+   <div class="col" markdown="1">
+[X3DBox](Plots/X3DInterface/X3DBox.md)   
 </div>
 </div>
   <div class="row">
@@ -481,6 +492,17 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 [prep_color](Plots/Colors/prep_color.md)   
 </div>
    <div class="col" markdown="1">
+[SVGFigure](Plots/SVG/SVGFigure.md)   
+</div>
+   <div class="col" markdown="1">
+[SVGFigure3D](Plots/SVG/SVGFigure3D.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
    
 </div>
    <div class="col" markdown="1">
@@ -509,9 +531,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-52783e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-52783e"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-e49243" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e49243"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-52783e" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e49243" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -529,12 +551,19 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 - [PropertySetting](#PropertySetting)
 - [PlotDelayed](#PlotDelayed)
 - [Plot3DDelayed](#Plot3DDelayed)
+- [PlotlyBackend](#PlotlyBackend)
+- [X3DMathText](#X3DMathText)
+- [Plotly3D](#Plotly3D)
+- [BaseSVG](#BaseSVG)
+- [SVGBackend2D](#SVGBackend2D)
+- [SVGBackend3D](#SVGBackend3D)
+- [MPLPath](#MPLPath)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-04dc91" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-04dc91"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-be66b0" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-be66b0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-04dc91" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-be66b0" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -913,6 +942,149 @@ class PlotsTests(TestCase):
 
         p.savefig(self.result_file("test_Plot3DDelayed.gif"))
         p.close()
+```
+
+#### <a name="PlotlyBackend">PlotlyBackend</a>
+```python
+    def test_PlotlyBackend(self):
+        g = np.linspace(0, 2*np.pi, 25)
+        Plot(g, np.sin(g),
+             backend='plotly',
+             # ticks=[[0, 1, 2], [0, 1, 2]],
+             # plot_range=[[0, 2], [0, 2]],
+             frame=True,
+             aspect_ratio=1/1.16
+             ).show()
+```
+
+#### <a name="X3DMathText">X3DMathText</a>
+```python
+    def test_X3DMathText(self):
+        fig = Graphics3D(backend='x3d', view_settings={'view_distance':5})
+        # Cube([0, 0, 0], [(1 - 1 + 0) / np.sqrt(6), (1 + 1 + 0)/ np.sqrt(6), (0 + 0 + np.sqrt(2)) / np.sqrt(6)],
+        #      normal=[1, 1, 0],
+        #      # rotation=[1, 1, 0, 1],
+        #      color='gray').plot(fig)
+        Text("$\\sqrt{5}$", [1, 0, 0], color='red', billboard=False).plot(fig)
+        # Text("$\\int_{x=10}^{100} \\sqrt{20} e^{(-x^2)}$", [-1, 0, 0], color='blue', font_size=20, billboard=False).plot(fig)
+        # Text("s5", [-1, 0, 0], color='black', billboard=False, solid=False).plot(fig)
+        # print(fig.to_widget().tostring(prettify=True))
+        # fig.to_widget().write("/Users/Mark/Desktop/new_text2.html")
+        fig.show()
+```
+
+#### <a name="Plotly3D">Plotly3D</a>
+```python
+    def test_Plotly3D(self):
+        fig = Graphics3D(backend='plotly3D', frame=False, subplot_kw={'include_save_buttons':True})
+        Sphere([1, 0, 0], .1, color='red').plot(fig)
+        # print(fig.to_widget().tostring(prettify=True))
+        fig.show()
+```
+
+#### <a name="BaseSVG">BaseSVG</a>
+```python
+    def test_BaseSVG(self):
+        fig = SVGFigure(height=800)#, view_box=[[0, 100], [0, 100]])
+        # fig.add_rect(x=0, y=0, width=100, height=100, fill='red',
+        #              transform=[
+        #                  ['rotate', [30]]
+        #              ])
+        # fig.add_rect(x=100, y=100, width=100, height=100, fill='blue')
+        fig.add_path(d=[
+            ["M", [0, 0]],
+            ["L", [100, 100]],
+            ["Q", [100, 0, 0, 0]],
+            ["l", [100, 0, 0, 100]],
+        ], stroke='green', fill='none')
+        print(
+            fig.to_svg().tostring(prettify=True)
+        )
+        fig.to_svg().display()
+```
+
+#### <a name="SVGBackend2D">SVGBackend2D</a>
+```python
+    def test_SVGBackend2D(self):
+        fig = Graphics(backend='svg')
+        Rectangle(
+            [[0, 0], [100, 100]],
+            fill='red',
+            transform=[
+                ['rotate', [30]]
+            ]
+        ).plot(fig)
+        Rectangle(
+            [[100, 100], [200, 200]],
+            fill='blue',
+            # transform=[
+            #     ['rotate', [30]]
+            # ]
+        ).plot(fig)
+        # Path(
+        #     [[100, 100], [200, 200]],
+        #     fill='blue',
+        #     # transform=[
+        #     #     ['rotate', [30]]
+        #     # ]
+        # ).plot(fig)
+        # print(
+        #     fig.to_widget().tostring(prettify=True)
+        # )
+        fig.show()
+```
+
+#### <a name="SVGBackend3D">SVGBackend3D</a>
+```python
+    def test_SVGBackend3D(self):
+
+        fig = Graphics3D(backend='svg3D',
+                         image_size=[500, 500],
+                         padding=0,
+                         plot_range=[[-100, 100], [-100, 100], [-100, 100]],
+                         background='gray',
+                         view_settings={
+                             "view_vector":[0, 0, 1],
+                             "up_vector":[0, 1, 0],
+                             # "view_position":[0, 0, 1]
+                         })
+        # Rectangle(
+        #     [[0, 0, 0], [100, 100, 0]],
+        #     fill='red',
+        #     # rotation=np.pi/6
+        # ).plot(fig)
+        # Rectangle(
+        #     [[-100, -100, 0], [0, 0, 50]],
+        #     fill='pink',
+        #     # rotation=np.pi/6
+        # ).plot(fig)
+        Path([
+            ["M", [0, 0]],
+            ["L", [100, 100]],
+            ["Q", [100, 0, 0, 0]],
+            ["l", [100, 0, 0, 100]],
+        ], stroke='green', fill='none', rotation=np.pi/6, normal=[0, 1, 1]).plot(fig)
+        fig.show()
+```
+
+#### <a name="MPLPath">MPLPath</a>
+```python
+    def test_MPLPath(self):
+        fig = Graphics(backend='svg')
+        # Path([
+        #     ["M", [0, 0]],
+        #     ["L", [100, 100]],
+        #     ["Q", [100, 0, 0, 0]],
+        #     ["l", [100, 0, 0, 100]],
+        # ], stroke='pink').plot(fig)
+
+        Path([
+            ["M", [0, 0]],
+            ["L", [100, 100]],
+            ["Q", [100, 0, 0, 0]],
+            ["l", [100, 0, 0, 100]],
+        ], stroke='pink', use_polyline=True).plot(fig)
+        fig.show()
 ```
 
  </div>

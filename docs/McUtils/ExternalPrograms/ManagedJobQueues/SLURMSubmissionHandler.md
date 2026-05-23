@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ManagedJobQueues.SLURMSubmissionHandler">SLURMSubmissionHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L158)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L158?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ START_JOB_COMMAND: list
 prep_job_kwargs(cls, *, sbatch_file, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L161)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L161?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ prep_job_kwargs(cls, *, sbatch_file, **etc):
 parse_job_id(self, res: str): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L166?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -94,7 +94,7 @@ parse_job_id(self, res: str):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L145?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L158?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

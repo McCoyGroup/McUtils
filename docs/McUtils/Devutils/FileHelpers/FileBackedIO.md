@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.FileHelpers.FileBackedIO">FileBackedIO</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L257)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L257?message=Update%20Docs)]
 </div>
 
 
@@ -21,11 +21,32 @@
  
 <a id="McUtils.Devutils.FileHelpers.FileBackedIO.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, buffer: 'str | bytes', mode='w+', delete=True, **tempfile_opts): 
+__init__(self, buffer: 'str | bytes | Callable[[], str | bytes]', mode='w+', file=None, delete=True, **tempfile_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L123)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L123?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L258)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L258?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Devutils.FileHelpers.FileBackedIO.resolve_buffer" class="docs-object-method">&nbsp;</a> 
+```python
+resolve_buffer(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L266?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Devutils.FileHelpers.FileBackedIO.name" class="docs-object-method">&nbsp;</a> 
+```python
+@property
+name(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L271?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +56,18 @@ __init__(self, buffer: 'str | bytes', mode='w+', delete=True, **tempfile_opts):
 file(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L280)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L280?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Devutils.FileHelpers.FileBackedIO.write" class="docs-object-method">&nbsp;</a> 
+```python
+write(self, file=None, mode=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L293?message=Update%20Docs)]
 </div>
 
 
@@ -45,8 +76,8 @@ file(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L144)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L144?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L303)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L303?message=Update%20Docs)]
 </div>
 
 
@@ -55,8 +86,8 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L310)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/FileBackedIO.py#L310?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -111,7 +142,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/FileBackedIO.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/FileBackedIO.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L122?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L257?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

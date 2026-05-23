@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.GradientDescentStepFinder">GradientDescentStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L848)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L848?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1120?message=Update%20Docs)]
 </div>
 
 
@@ -27,18 +27,18 @@ line_search: ArmijoSearch
 __init__(self, func, jacobian, damping_parameter=None, damping_exponent=None, line_search=True, restart_interval=10, logger=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L852)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L852?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1124)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1124?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Numputils.Optimization.GradientDescentStepFinder.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
-__call__(self, guess, mask, projector=None): 
+__call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L869)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L869?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L1141)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L1141?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -93,7 +93,7 @@ __call__(self, guess, mask, projector=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/GradientDescentStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/GradientDescentStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L848?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1120?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

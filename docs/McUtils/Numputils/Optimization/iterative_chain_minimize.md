@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.Optimization.iterative_chain_minimize">iterative_chain_minimize</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L358)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L358?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L551)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L551?message=Update%20Docs)]
 </div>
 
 ```python
-iterative_chain_minimize(chain_guesses, step_predictors, jacobian=None, hessian=None, *, method=None, unitary=False, generate_rotation=False, dtype='float64', orthogonal_directions=None, orthogonal_projection_generator=None, prevent_oscillations=None, region_constraints=None, convergence_metric=None, termination_function=None, reparametrizer=None, max_displacement=None, max_displacement_norm=None, tol=1e-08, max_iterations=100, use_max_for_error=True, periodic=False, reembed=None, embedding_options=None, fixed_images=None, logger=None): 
+iterative_chain_minimize(chain_guesses, step_predictors, jacobian=None, hessian=None, *, method=None, unitary=False, function=None, climb=None, climbing_nodes=None, climbing_node_identifier=None, generate_rotation=False, dtype='float64', orthogonal_directions=None, orthogonal_projection_generator=None, prevent_oscillations=None, region_constraints=None, convergence_metric=None, termination_function=None, reparametrizer=None, max_displacement=None, max_displacement_norm=None, tol=1e-08, max_iterations=100, use_max_for_error=True, periodic=False, reembed=None, embedding_options=None, fixed_images=None, return_trajectory=False, logger=None, log_guess=False): 
 ```
 
 
@@ -59,7 +59,7 @@ iterative_chain_minimize(chain_guesses, step_predictors, jacobian=None, hessian=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/iterative_chain_minimize.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/iterative_chain_minimize.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L358?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L551?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

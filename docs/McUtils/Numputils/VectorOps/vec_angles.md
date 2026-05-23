@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.VectorOps.vec_angles">vec_angles</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L382)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L382?message=Update%20Docs)]
 </div>
 
 ```python
-vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None, axis=-1, return_norms=False, return_crosses=True, check_zeros=True): 
+vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None, axis=-1, return_norms=False, return_crosses=True, return_cross_norms=False, check_zeros=True): 
 ```
 Gets the angles and normals between two vectors
   - `vectors1`: `np.ndarray`
@@ -103,7 +103,7 @@ s
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/vec_angles.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/vec_angles.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L357?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L382?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

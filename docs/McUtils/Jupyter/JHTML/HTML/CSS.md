@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTML.CSS">CSS</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L522?message=Update%20Docs)]
 </div>
 
 Defines a holder for CSS properties
@@ -20,25 +20,26 @@ Defines a holder for CSS properties
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
 known_properties: set
+validators: dict
 ```
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, *selectors, **props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L526)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L526?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.construct" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-construct(cls, *selectors, background=None, background_attachment=None, background_color=None, background_image=None, background_position=None, background_repeat=None, border=None, border_bottom=None, border_bottom_color=None, border_bottom_style=None, border_bottom_width=None, border_color=None, border_left=None, border_left_color=None, border_left_style=None, border_left_width=None, border_right=None, border_right_color=None, border_right_style=None, border_right_width=None, border_style=None, border_top=None, border_top_color=None, border_top_style=None, border_top_width=None, border_width=None, clear=None, clip=None, color=None, cursor=None, display=None, filter=None, float=None, font=None, font_family=None, font_size=None, font_variant=None, font_weight=None, height=None, left=None, letter_spacing=None, line_height=None, list_style=None, list_style_image=None, list_style_position=None, list_style_type=None, margin=None, margin_bottom=None, margin_left=None, margin_right=None, margin_top=None, overflow=None, padding=None, padding_bottom=None, padding_left=None, padding_right=None, padding_top=None, page_break_after=None, page_break_before=None, position=None, text_align=None, text_decoration=None, text_indent=None, text_transform=None, top=None, vertical_align=None, visibility=None, width=None, z_index=None, **props): 
+construct(cls, *selectors, aspect_ratio=None, background=None, background_attachment=None, background_color=None, background_image=None, background_position=None, background_repeat=None, border=None, border_bottom=None, border_bottom_color=None, border_bottom_style=None, border_bottom_width=None, border_color=None, border_left=None, border_left_color=None, border_left_style=None, border_left_width=None, border_right=None, border_right_color=None, border_right_style=None, border_right_width=None, border_style=None, border_top=None, border_top_color=None, border_top_style=None, border_top_width=None, border_width=None, clear=None, clip=None, color=None, cursor=None, display=None, filter=None, float=None, font=None, font_family=None, font_size=None, font_variant=None, font_weight=None, height=None, left=None, letter_spacing=None, line_height=None, list_style=None, list_style_image=None, list_style_position=None, list_style_type=None, margin=None, margin_bottom=None, margin_left=None, margin_right=None, margin_top=None, overflow=None, padding=None, padding_bottom=None, padding_left=None, padding_right=None, padding_top=None, page_break_after=None, page_break_before=None, position=None, text_align=None, text_decoration=None, text_indent=None, text_transform=None, top=None, vertical_align=None, visibility=None, width=None, z_index=None, **props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L530)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L530?message=Update%20Docs)]
 </div>
 Provides a convenience constructor for systems with autocompletions
   - `selectors`: `Any`
@@ -193,8 +194,8 @@ Provides a convenience constructor for systems with autocompletions
 canonicalize_props(cls, props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L322)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L322?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L829)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L829?message=Update%20Docs)]
 </div>
 
 
@@ -204,8 +205,8 @@ canonicalize_props(cls, props):
 parse(cls, sty): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L325)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L325?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L832)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L832?message=Update%20Docs)]
 </div>
 
 
@@ -214,8 +215,18 @@ parse(cls, sty):
 tostring(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L344)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L344?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L851)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L851?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Jupyter.JHTML.HTML.CSS.validate" class="docs-object-method">&nbsp;</a> 
+```python
+validate(self, **kwargs): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L861)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L861?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -270,7 +281,7 @@ tostring(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/CSS.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/CSS.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L522?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

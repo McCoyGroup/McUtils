@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordinateFrames.eckart_embedding">eckart_embedding</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L788)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L788?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L820)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L820?message=Update%20Docs)]
 </div>
 
 ```python
-eckart_embedding(ref, coords, masses=None, sel=None, in_paf=False, planar_ref_tolerance=1e-06, proper_rotation=False, permutable_groups=None, transform_coordinates=True): 
+eckart_embedding(ref, coords, masses=None, sel=None, in_paf=False, planar_ref_tolerance=1e-06, proper_rotation=False, permutable_groups=None, transform_coordinates=True) -> McUtils.Numputils.CoordinateFrames.EckartData: 
 ```
 
 
@@ -59,7 +59,7 @@ eckart_embedding(ref, coords, masses=None, sel=None, in_paf=False, planar_ref_to
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/eckart_embedding.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/eckart_embedding.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L788?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L820?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

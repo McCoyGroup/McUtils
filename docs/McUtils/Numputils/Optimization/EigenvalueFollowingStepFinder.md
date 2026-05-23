@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.EigenvalueFollowingStepFinder">EigenvalueFollowingStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1568)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1568?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1851)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1851?message=Update%20Docs)]
 </div>
 
 
@@ -29,8 +29,8 @@ mode_tracking_overlap_cutoff: float
 __init__(self, func, jacobian, hessian, initial_beta=1, damping_parameter=None, damping_exponent=None, line_search=False, restart_interval=1, restart_hessian_norm=1e-05, hessian_approximator='bofill', approximation_mode='direct', target_mode=None, logger=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1571)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1571?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1854)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1854?message=Update%20Docs)]
 </div>
 
 
@@ -39,8 +39,8 @@ __init__(self, func, jacobian, hessian, initial_beta=1, damping_parameter=None, 
 identities(self, guess, mask): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1610)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1610?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1893)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1893?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ identities(self, guess, mask):
 initialize_hessians(self, guess, mask): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1617)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1617?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1900)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1900?message=Update%20Docs)]
 </div>
 
 
@@ -59,8 +59,8 @@ initialize_hessians(self, guess, mask):
 get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1620)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1620?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1903)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1903?message=Update%20Docs)]
 </div>
 
 
@@ -69,18 +69,18 @@ get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
 get_shift(self, evals, tf_new, target_mode): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1626)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1626?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1909)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1909?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Numputils.Optimization.EigenvalueFollowingStepFinder.get_jacobian_updates" class="docs-object-method">&nbsp;</a> 
 ```python
-get_jacobian_updates(self, guess, mask): 
+get_jacobian_updates(self, guess, mask, gradient_modifer=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1929)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1929?message=Update%20Docs)]
 </div>
 
 
@@ -89,18 +89,18 @@ get_jacobian_updates(self, guess, mask):
 restart_hessian_approximation(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1655)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1655?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1940)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1940?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Numputils.Optimization.EigenvalueFollowingStepFinder.__call__" class="docs-object-method">&nbsp;</a> 
 ```python
-__call__(self, guess, mask, projector=None): 
+__call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1661)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1661?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1946)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.py#L1946?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -155,7 +155,7 @@ __call__(self, guess, mask, projector=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/EigenvalueFollowingStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1568?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1851?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

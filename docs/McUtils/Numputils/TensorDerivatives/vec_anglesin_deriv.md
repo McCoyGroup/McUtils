@@ -5,7 +5,7 @@
 </div>
 
 ```python
-vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None, up_vector=None, component_vectors=None, unit_expansions=None, planar_threshold=1e-14): 
+vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None, up_vector=None, component_vectors=None, unit_expansions=None, planar_threshold=None): 
 ```
 
 

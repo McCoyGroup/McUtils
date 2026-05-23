@@ -134,51 +134,84 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 [drop_directory_prefix](Devutils/FileHelpers/drop_directory_prefix.md)   
 </div>
    <div class="col" markdown="1">
-[FileBackedIO](Devutils/FileHelpers/FileBackedIO.md)   
+[filename](Devutils/FileHelpers/filename.md)   
 </div>
    <div class="col" markdown="1">
-[StreamInterface](Devutils/FileHelpers/StreamInterface.md)   
+[bytestream_hash](Devutils/FileHelpers/bytestream_hash.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[string_hash](Devutils/FileHelpers/string_hash.md)   
+</div>
+   <div class="col" markdown="1">
+[file_hash](Devutils/FileHelpers/file_hash.md)   
+</div>
+   <div class="col" markdown="1">
+[files_hash](Devutils/FileHelpers/files_hash.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[directory_hash](Devutils/FileHelpers/directory_hash.md)   
+</div>
+   <div class="col" markdown="1">
+[compress_dir](Devutils/FileHelpers/compress_dir.md)   
+</div>
+   <div class="col" markdown="1">
+[compressed_dir_bytes](Devutils/FileHelpers/compressed_dir_bytes.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[decompress_dir](Devutils/FileHelpers/decompress_dir.md)   
+</div>
+   <div class="col" markdown="1">
+[unpack_gzip_bytes](Devutils/FileHelpers/unpack_gzip_bytes.md)   
+</div>
+   <div class="col" markdown="1">
+[FileBackedIO](Devutils/FileHelpers/FileBackedIO.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[StreamInterface](Devutils/FileHelpers/StreamInterface.md)   
+</div>
    <div class="col" markdown="1">
 [Logger](Devutils/Loggers/Logger.md)   
 </div>
    <div class="col" markdown="1">
 [NullLogger](Devutils/Loggers/NullLogger.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [LogLevel](Devutils/Loggers/LogLevel.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [LoggingBlock](Devutils/Loggers/LoggingBlock.md)   
 </div>
    <div class="col" markdown="1">
 [OptionsSet](Devutils/Options/OptionsSet.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OptionsMethodDispatch](Devutils/Options/OptionsMethodDispatch.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [StreamRedirect](Devutils/Redirects/StreamRedirect.md)   
 </div>
    <div class="col" markdown="1">
 [OutputRedirect](Devutils/Redirects/OutputRedirect.md)   
 </div>
-   <div class="col" markdown="1">
-[DefaultDirectory](Devutils/Redirects/DefaultDirectory.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Schema](Devutils/Schema/Schema.md)   
+[DefaultDirectory](Devutils/Redirects/DefaultDirectory.md)   
 </div>
    <div class="col" markdown="1">
-   
+[Schema](Devutils/Schema/Schema.md)   
 </div>
    <div class="col" markdown="1">
    

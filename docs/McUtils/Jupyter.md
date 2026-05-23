@@ -383,19 +383,20 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-7ea944" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-7ea944"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-3eca89" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3eca89"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-7ea944" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3eca89" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
 - [WidgetInteractivity](#WidgetInteractivity)
+- [SVG](#SVG)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-cfe539" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-cfe539"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-38ef75" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-38ef75"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-cfe539" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-38ef75" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -412,9 +413,9 @@ class JupyterTests(TestCase):
 #### <a name="HTML">HTML</a>
 ```python
     def test_HTML(self):
-        Div = HTML.Div
-        Bootstrap.Panel(
-            Bootstrap.Grid(np.random.rand(5, 5).round(3).tolist()),
+        Div = JHTML.HTML.Div
+        JHTML.Bootstrap.Panel(
+            JHTML.Bootstrap.Grid(np.random.rand(5, 5).round(3).tolist()),
             header='Test Panel',
             variant='primary'
         ).tostring()
@@ -423,7 +424,7 @@ class JupyterTests(TestCase):
 #### <a name="Styles">Styles</a>
 ```python
     def test_Styles(self):
-        CSS.parse("""
+        JHTML.CSS.parse("""
 a {
   text-variant:none;
 }
@@ -460,6 +461,17 @@ a {
                 p, p
             ], dynamic=False).to_jhtml()
         ))
+```
+
+#### <a name="SVG">SVG</a>
+```python
+    def test_SVG(self):
+        SVG = JHTML.SVGContext
+
+        uuh = SVG.Svg(
+                SVG.Rect(x=0, y=0, width=10, height=10),
+            )
+        uuh.display()
 ```
 
  </div>

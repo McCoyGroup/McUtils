@@ -23,7 +23,7 @@ theme: dict
 ```
 <a id="McUtils.Jupyter.Apps.Apps.Manipulator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, func, *controls, debounce=None, autoclear=True, **etc): 
+__init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L61)/
@@ -34,11 +34,11 @@ __init__(self, func, *controls, debounce=None, autoclear=True, **etc):
 <a id="McUtils.Jupyter.Apps.Apps.Manipulator.canonicalize_control" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-canonicalize_control(cls, settings): 
+canonicalize_control(cls, settings, namespace=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L78?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ canonicalize_control(cls, settings):
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L91)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L91?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L97?message=Update%20Docs)]
 </div>
  </div>
 </div>

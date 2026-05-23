@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTML.HTML">HTML</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L696)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L696?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L1245)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L1245?message=Update%20Docs)]
 </div>
 
 A namespace for holding various HTML attributes
@@ -19,9 +19,9 @@ A namespace for holding various HTML attributes
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
-RawHTML: RawHTML
 XMLElement: XMLElement
 base_element: XMLElement
+RawHTML: RawHTML
 Comment: Comment
 TagElement: TagElement
 Nav: Nav
@@ -97,6 +97,7 @@ Html: Html
 i: Italic
 Iframe: Iframe
 Img: Image
+Inline: Inline
 Input: Input
 Ins: Ins
 Kbd: Kbd
@@ -150,7 +151,15 @@ Var: Var
 Video: Video
 Wbr: Wbr
 ```
-
+<a id="McUtils.Jupyter.JHTML.HTML.HTML.image_from_string" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+image_from_string(cls, image_string: 'bytes | str', format='image/png', **styles): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2126?message=Update%20Docs)]
+</div>
  </div>
 </div>
 
@@ -204,7 +213,7 @@ Wbr: Wbr
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/HTML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/HTML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L696?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L1245?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
