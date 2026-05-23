@@ -91,6 +91,7 @@ class ColorPalette:
                    blending=None,
                    index=None,
                    lighten=None,
+                   saturate=None,
                    modifier=None,
                    shift=False,
                    absolute=False,
@@ -124,6 +125,14 @@ class ColorPalette:
         if smol: base = [base]
         final = []
         for b in base:
+            if saturate is not None:
+                b = cls.color_saturate(b, saturate,
+                                      color_space=color_space,
+                                      modification_space=modification_space,
+                                      shift=shift,
+                                      absolute=absolute,
+                                      clip=clip
+                                      )
             if lighten is not None:
                 b = cls.color_lighten(b, lighten,
                                       color_space=color_space,
@@ -388,6 +397,47 @@ class ColorPalette:
             raise ValueError(f"can't lighten color in modification_space `{modification_space}`")
 
         return cls.color_modify(color, conversion, color_space=color_space, modification_space=modification_space, clip=clip)
+    @classmethod
+    def color_saturate(cls, color, percentage,
+                      color_space='rgb',
+                      modification_space='hsv',
+                      shift=False,
+                      absolute=False, clip=True):
+        if modification_space in {'hsv', 'hsl'}:
+            if shift:
+                conversion = lambda h, s, l: [h, s + percentage, l]
+            elif absolute:
+                conversion = lambda h, s, l: [h, percentage, l]
+            else:
+                conversion = lambda h, s, l: [h, s * (1 + percentage), l]
+        elif modification_space == 'lab':
+            if shift:
+                percentage = 100*percentage
+                def conversion(l,a,b):
+                    z_mask = np.abs(b) < 1e-8
+                    r = b.copy()
+                    r[z_mask] = 1
+                    r = a / r
+                    r[z_mask] = 0
+                    b = b + percentage
+                    return [l, r * b, b]
+            elif absolute:
+                percentage = 100*percentage
+                def conversion(l,a,b):
+                    z_mask = np.abs(b) < 1e-8
+                    r = b.copy()
+                    r[z_mask] = 1
+                    r = a / r
+                    r[z_mask] = 0
+                    return [l, r * percentage, percentage]
+            else:
+                conversion = lambda l,a,b:[l, a*(1+percentage), b*(1+percentage)]
+        else:
+            raise ValueError(f"can't saturate color in modification_space `{modification_space}`")
+
+        return cls.color_modify(color, conversion, color_space=color_space,
+                                modification_space=modification_space,
+                                clip=clip)
 
     def __len__(self):
         return len(self.color_strings)
@@ -788,6 +838,7 @@ def prep_color(
         blending=None,
         index=None,
         lighten=None,
+        saturate=None,
         modifier=None,
         shift=False,
         absolute=False,
@@ -803,6 +854,7 @@ def prep_color(
         blending=blending,
         index=index,
         lighten=lighten,
+        saturate=saturate,
         modifier=modifier,
         shift=shift,
         absolute=absolute,
