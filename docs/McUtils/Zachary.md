@@ -313,9 +313,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-0a0a6f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0a0a6f"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-988bb3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-988bb3"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0a0a6f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-988bb3" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -368,9 +368,9 @@ gg2[1, 2] = ContourPlot(*mesh,
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-d33d20" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-d33d20"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ab1318" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ab1318"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-d33d20" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ab1318" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
