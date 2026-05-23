@@ -67,7 +67,7 @@ class CoordinateSystemConverter(metaclass=abc.ABCMeta):
         :rtype:
         """
         if where is None:
-            where = self.converters if not (self.converters, weakref.ref) else self.converters()
+            where = self.converters if not isinstance(self.converters, weakref.ref) else self.converters()
             if where is None:
                 type(self).converters = weakref.ref(CoordinateSystemConverters)
                 where = type(self).converters()
@@ -80,7 +80,7 @@ class CoordinateSystemConverter(metaclass=abc.ABCMeta):
         :rtype:
         """
         if where is None:
-            where = self.converters if not (self.converters, weakref.ref) else self.converters()
+            where = self.converters if not isinstance(self.converters, weakref.ref) else self.converters()
             if where is None:
                 type(self).converters = weakref.ref(CoordinateSystemConverters)
                 where = type(self).converters()
@@ -207,7 +207,7 @@ class CoordinateSystemConverters:
             converter = cls.converters[path[0]]
         else:
             conversions = [(cls.converters[p], p) for p in path]
-            return ChainedCoordinateSystemConverter([system1, system2], conversions)
+            return ChainedCoordinateSystemConverter((system1, system2), conversions)
 
         #
         # def _get_pathy_conversion(self, src, targ):
@@ -274,6 +274,12 @@ class CoordinateSystemConverters:
         """
         if cls.converters.get((system1, system2)) is converter:
             del cls.converters[(system1, system2)]
+            dead = []
+            for k,v in cls.converters.items():
+                if isinstance(v, ChainedCoordinateSystemConverter) and (system1, system2) in v.intermediates:
+                    dead.append(k)
+            for k in dead:
+                del cls.converters[k]
     @classmethod
     def _register(cls, system1, system2, converter, move_to_end=False):
         cls.converters[(system1, system2)] = converter
@@ -387,7 +393,18 @@ class ChainedCoordinateSystemConverter(CoordinateSystemConverter):
     def __init__(self, types, conversions, **opts):
         super().__init__(**opts)
         self._types = types
+        conversions = self.prep_conversions(conversions)
+        self.intermediates = {k[1] for k in conversions}
         self.conversions = conversions
+    @classmethod
+    def prep_conversions(cls, conv_list):
+        conversions = []
+        for f,p in conv_list:
+            if isinstance(f, ChainedCoordinateSystemConverter):
+                conversions.extend(f.conversions)
+            else:
+                conversions.append((f,p))
+        return conversions
     @property
     def types(self):
         return self._types
