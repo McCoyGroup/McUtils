@@ -74,9 +74,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-fb08f9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fb08f9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-f37d78" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f37d78"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fb08f9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f37d78" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
@@ -84,9 +84,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ba7f99" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ba7f99"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c9db54" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c9db54"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ba7f99" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c9db54" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
