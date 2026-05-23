@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 from .HTML import HTML, CSS, SVG, ContentXML, HTMLManager
 from .Bootstrap import Bootstrap
