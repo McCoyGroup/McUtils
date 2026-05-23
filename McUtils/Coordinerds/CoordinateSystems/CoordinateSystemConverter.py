@@ -72,6 +72,19 @@ class CoordinateSystemConverter(metaclass=abc.ABCMeta):
                 type(self).converters = weakref.ref(CoordinateSystemConverters)
                 where = type(self).converters()
         where.register_converter(*self.types, self, check=check)
+    def deregister(self, where=None, check=True):
+        """
+        Registers the CoordinateSystemConverter
+
+        :return:
+        :rtype:
+        """
+        if where is None:
+            where = self.converters if not (self.converters, weakref.ref) else self.converters()
+            if where is None:
+                type(self).converters = weakref.ref(CoordinateSystemConverters)
+                where = type(self).converters()
+        where.deregister_converter(*self.types, self, check=check)
 
     def __call__(self, coords, **kwargs):
         if coords.ndim > 2: #TODO: make this a more robust check for the future
@@ -246,6 +259,21 @@ class CoordinateSystemConverters:
                 ["{} <{}>".format(x, id(x)) for x in type(converter).__bases__]
             ))
         cls._register(system1, system2, converter)
+
+    @classmethod
+    def deregister_converter(cls, system1, system2, converter, check=True):
+        """
+        Registers a converter between two coordinate systems
+
+        :param system1:
+        :type system1: CoordinateSystem
+        :param system2:
+        :type system2: CoordinateSystem
+        :return:
+        :rtype:
+        """
+        if cls.converters.get((system1, system2)) is converter:
+            del cls.converters[(system1, system2)]
     @classmethod
     def _register(cls, system1, system2, converter, move_to_end=False):
         cls.converters[(system1, system2)] = converter
