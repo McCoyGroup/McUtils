@@ -348,8 +348,12 @@ def resolve_dimer(*, images, energy_evaluator=None,
                   out_dir=None,
                   use_max_for_guess=True,
                   eliminate_guess_nodes=True,
+                  fixed_images=None,
                   **opts):
     if not climb: raise NotImplementedError("dimer calcs only implemented for `climb=True`")
+
+    if fixed_images is not None:
+        raise ValueError("can't run dimer with fixed images")
 
     from pysisyphus.calculators.Dimer import Dimer
     if image_guess is None:
