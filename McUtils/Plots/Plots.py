@@ -2,10 +2,13 @@
 Provides various types of plots and plotting utilities
 """
 import collections
+from typing import Callable
 
 from .Graphics import Graphics, Graphics3D, GraphicsGrid
 from .Backends import GraphicsAxes, GraphicsFigure
 from .. import Devutils as dev
+from .. import Numputils as nput
+from . import Colors as colops
 import numpy as np
 import itertools
 # import matplotlib.figure
@@ -299,8 +302,57 @@ class Plot(Graphics):
     def _plot_data(self, *data, **plot_style):
         return self._method(*self._get_plot_data(*data), **plot_style)
 
-    def prep_styles(self, **styles):
-        return styles
+    def prep_styles(self, c=None, edgecolors=None, facecolors=None, cmap=None, prep_colors=False, color_value_rescaling=True, **styles):
+        if (
+                prep_colors
+                and cmap is not None
+                and (
+                    (c is not None and nput.is_numeric(c[0]))
+                    or (edgecolors is not None and nput.is_numeric(facecolors[0]))
+                    or (facecolors is not None and nput.is_numeric(edgecolors[0]))
+                )
+        ):
+            if not callable(cmap) and not isinstance(cmap, dict):
+                cmap = {'palette': cmap}
+            if isinstance(cmap, dict):
+                if c is not None and nput.is_numeric(c[0]):
+                    if color_value_rescaling:
+                        c = nput.vec_rescale(c)
+                    c = colops.prep_color(blending=c, **cmap)
+                if facecolors is not None and nput.is_numeric(facecolors[0]):
+                    if color_value_rescaling:
+                        facecolors = nput.vec_rescale(facecolors)
+                    facecolors = colops.prep_color(blending=facecolors, **cmap)
+                if edgecolors is not None and nput.is_numeric(edgecolors[0]):
+                    if color_value_rescaling:
+                        edgecolors = nput.vec_rescale(edgecolors)
+                    edgecolors = colops.prep_color(blending=edgecolors, **cmap)
+            else:
+                cmap: Callable
+                if c is not None and nput.is_numeric(c[0]):
+                    if color_value_rescaling:
+                        c = nput.vec_rescale(c)
+                    c = cmap(c)
+                if facecolors is not None and nput.is_numeric(facecolors[0]):
+                    if color_value_rescaling:
+                        facecolors = nput.vec_rescale(facecolors)
+                    facecolors = cmap(facecolors)
+                if edgecolors is not None and nput.is_numeric(edgecolors[0]):
+                    if color_value_rescaling:
+                        edgecolors = nput.vec_rescale(edgecolors)
+                    edgecolors = cmap(edgecolors)
+
+            cmap = None
+            # TODO: attach colorbars
+            # sm = cm.ScalarMappable(cmap='viridis', norm=norm)
+            # sm.set_array([])
+
+        new_opts = {
+            k:v for k,v in
+            {'c':c, 'facecolors':facecolors, 'edgecolors':edgecolors, 'cmap':cmap}.items()
+            if v is not None
+        } | styles
+        return new_opts
     def plot(self, *params, insert_default_styles=True, **plot_style):
         """
         Plots a set of data & stores the result
@@ -448,7 +500,7 @@ class ScatterPlot(Plot):
     style_mapping = {"color":"c", "marker_size":"s"}
     method = "scatter"
 
-    def prep_styles(self, c=None, facecolors=None, edgecolors=None, filled=None, **etc):
+    def prep_styles(self, c=None, facecolors=None, edgecolors=None, filled=None, prep_colors=False, **etc):
         if filled:
             if c is None and facecolors is None:
                 c = edgecolors
@@ -456,23 +508,21 @@ class ScatterPlot(Plot):
             if c is not None:
                 facecolors = 'none'
                 edgecolors = c
+                prep_colors = True
                 c = None
         else:
             if c is not None:
                 if facecolors is not None:
                     if edgecolors is None:
                         edgecolors = c
+                        prep_colors = True
                     c = None
                 elif edgecolors is not None:
                     facecolors = c
+                    prep_colors = True
                     c = None
-        new_opts = {
-            k:v for k,v in
-            {'c':c, 'facecolors':facecolors, 'edgecolors':edgecolors}.items()
-            if v is not None
-        }
 
-        return new_opts | etc
+        return super().prep_styles(prep_colors=prep_colors, c=c, facecolors=facecolors, edgecolors=edgecolors, **etc)
 
 class ListScatterPlot(ScatterPlot):
     """
