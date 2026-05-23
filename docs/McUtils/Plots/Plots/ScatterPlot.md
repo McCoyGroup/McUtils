@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.ScatterPlot">ScatterPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L435)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L435?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L438)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L438?message=Update%20Docs)]
 </div>
 
 Inherits from `Plot`.
@@ -24,7 +24,14 @@ known_styles: set
 style_mapping: dict
 method: str
 ```
-
+<a id="McUtils.Plots.Plots.ScatterPlot.prep_styles" class="docs-object-method">&nbsp;</a> 
+```python
+prep_styles(self, c=None, facecolors=None, edgecolors=None, filled=None, **etc): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/ScatterPlot.py#L449)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/ScatterPlot.py#L449?message=Update%20Docs)]
+</div>
  </div>
 </div>
 
@@ -78,7 +85,7 @@ method: str
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ScatterPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ScatterPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L435?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L438?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
