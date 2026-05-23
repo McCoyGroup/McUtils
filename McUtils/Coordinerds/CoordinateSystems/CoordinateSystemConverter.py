@@ -205,6 +205,7 @@ class CoordinateSystemConverters:
             )
         elif len(path) == 1:
             converter = cls.converters[path[0]]
+            return converter
         else:
             conversions = [(cls.converters[p], p) for p in path]
             return ChainedCoordinateSystemConverter((system1, system2), conversions)
