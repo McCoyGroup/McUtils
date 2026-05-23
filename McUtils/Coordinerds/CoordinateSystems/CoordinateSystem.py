@@ -28,6 +28,7 @@ class CoordinateSystem:
                  dimension=None, origin=None, coordinate_shape=None,
                  jacobian_prep=None,
                  converter_options=None,
+                 registered_converters=None,
                  **extra
                  ):
         """
@@ -77,6 +78,8 @@ class CoordinateSystem:
         self.jacobian_prep = jacobian_prep
         self.coordinate_shape = coordinate_shape
         self.converter_options = converter_options
+        self._preregistered = False
+        self.registered_converters = registered_converters
         self._validate()
 
     def to_state(self, serializer=None):
@@ -204,6 +207,18 @@ class CoordinateSystem:
     def get_inverse_converter(self, target):
         # useful for overrides when it's harder to add them to the overall registry
         ...
+    def preregister_converters(self):
+        if not self._preregistered:
+            self._preregistered = True
+            if self.registered_converters is not None:
+                for r in self.registered_converters:
+                    r.register()
+    def deregister_converters(self):
+        if self._preregistered:
+            self._preregistered = False
+            if self.registered_converters is not None:
+                for r in self.registered_converters:
+                    r.deregister()
     def converter(self, system):
         """
         Gets the converter from the current system to a new system
@@ -213,7 +228,8 @@ class CoordinateSystem:
         :return: converter object
         :rtype: CoordinateSystemConverter
         """
-
+        self.preregister_converters()
+        system.preregister_converters()
         return converters.get_converter(self, system)
 
     @staticmethod
@@ -331,10 +347,19 @@ class CoordinateSystem:
             return coords, convs
         else:
             # print("> okkkay", kw['return_derivs'] if 'return_derivs' in kw else 'nooooooo')
-            if converter is None:
+            no_conv = converter is None
+            no_preg = self._preregistered is None
+            no_other_preg = system._preregistered is None
+            if no_conv:
                 converter = self.converter(system)
+                if converter is None: raise ValueError("no converter found")
             fun = self._convert_caller(converter, kw.copy(), is_multiconfig(coords))
             new_coords = mc_safe_apply(fun, coords=coords)
+            if no_conv:
+                if no_preg:
+                    self.deregister_converters()
+                if no_other_preg:
+                    system.deregister_converters()
             # new_coords = fun(coords)
             # print("...wtf", kw['return_derivs'] if 'return_derivs' in kw else 'nooooooo')
             return new_coords
