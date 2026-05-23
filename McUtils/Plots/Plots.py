@@ -203,9 +203,10 @@ class Plot(Graphics):
         "transform", "url", "visible", "zorder"
     }
 
-    opt_keys = Graphics.opt_keys | {"plot_style", "display_format"}
+    opt_keys = Graphics.opt_keys | {"plot_style", "display_format", 'prep_colors', 'color_value_scaling'}
 
     default_plot_style = {}
+    default_colormap = 'viridis'
     style_mapping = {"format":"fmt"}
     known_styles = {"fmt"} | line_params
     method = "plot"
@@ -500,11 +501,14 @@ class ScatterPlot(Plot):
     style_mapping = {"color":"c", "marker_size":"s"}
     method = "scatter"
 
-    def prep_styles(self, c=None, facecolors=None, edgecolors=None, filled=None, prep_colors=False, **etc):
+    def prep_styles(self, cmap=None, c=None, facecolors=None, edgecolors=None, filled=None, prep_colors=False, **etc):
         if filled:
             if c is None and facecolors is None:
                 c = edgecolors
+                edgecolors = None
         elif filled is not None:
+            if cmap is None:
+                cmap = self.default_colormap
             if c is not None:
                 facecolors = 'none'
                 edgecolors = c
@@ -522,7 +526,7 @@ class ScatterPlot(Plot):
                     prep_colors = True
                     c = None
 
-        return super().prep_styles(prep_colors=prep_colors, c=c, facecolors=facecolors, edgecolors=edgecolors, **etc)
+        return super().prep_styles(prep_colors=prep_colors, cmap=cmap, c=c, facecolors=facecolors, edgecolors=edgecolors, **etc)
 
 class ListScatterPlot(ScatterPlot):
     """
