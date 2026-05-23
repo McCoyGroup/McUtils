@@ -299,6 +299,8 @@ class Plot(Graphics):
     def _plot_data(self, *data, **plot_style):
         return self._method(*self._get_plot_data(*data), **plot_style)
 
+    def prep_styles(self, styles):
+        return styles
     def plot(self, *params, insert_default_styles=True, **plot_style):
         """
         Plots a set of data & stores the result
@@ -308,6 +310,7 @@ class Plot(Graphics):
         if insert_default_styles:
             plot_style = dict(self.plot_style, **plot_style)
         self._data = (params, plot_style)
+        plot_style = self.prep_styles(**plot_style)
         self.graphics = self._plot_data(*params, **plot_style)
         if not self._initialized:
             self._initialize()
@@ -439,9 +442,35 @@ class ScatterPlot(Plot):
     Plots a bunch of x values against a bunch of y values using the `scatter` method.
     """
     known_styles = { "s", "c", "marker", "cmap", "norm", "vmin", "vmax",
-                     "linewidths", "edgecolors", "plotnonfinite", "data"} | Plot.patch_parms
+                     "linewidths", "edgecolors", "plotnonfinite", "data"} | Plot.patch_parms | {'filled'}
     style_mapping = {"color":"c", "marker_size":"s"}
     method = "scatter"
+
+    def prep_styles(self, c=None, facecolors=None, edgecolors=None, filled=None, **etc):
+        if filled:
+            if c is None and facecolors is None:
+                c = edgecolors
+        elif filled is not None:
+            if c is not None:
+                facecolors = 'none'
+                edgecolors = c
+                c = None
+        else:
+            if c is not None:
+                if facecolors is not None:
+                    if edgecolors is None:
+                        edgecolors = c
+                    c = None
+                elif edgecolors is not None:
+                    facecolors = c
+                    c = None
+        new_opts = {
+            k:v for k,v in
+            {'c':c, 'facecolors':facecolors, 'edgecolors':edgecolors}.items()
+            if v is not None
+        }
+
+        return new_opts | etc
 
 class ListScatterPlot(ScatterPlot):
     """
