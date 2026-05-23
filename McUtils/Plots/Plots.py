@@ -299,7 +299,7 @@ class Plot(Graphics):
     def _plot_data(self, *data, **plot_style):
         return self._method(*self._get_plot_data(*data), **plot_style)
 
-    def prep_styles(self, styles):
+    def prep_styles(self, **styles):
         return styles
     def plot(self, *params, insert_default_styles=True, **plot_style):
         """
@@ -442,7 +442,9 @@ class ScatterPlot(Plot):
     Plots a bunch of x values against a bunch of y values using the `scatter` method.
     """
     known_styles = { "s", "c", "marker", "cmap", "norm", "vmin", "vmax",
-                     "linewidths", "edgecolors", "plotnonfinite", "data"} | Plot.patch_parms | {'filled'}
+                     "linewidths", "edgecolors", 'facecolors', "plotnonfinite", "data"} | (
+            Plot.patch_parms - {'linewidth', 'edgecolor', 'facecolor'}
+    ) | {'filled'}
     style_mapping = {"color":"c", "marker_size":"s"}
     method = "scatter"
 
