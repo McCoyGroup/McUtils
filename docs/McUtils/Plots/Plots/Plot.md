@@ -73,7 +73,7 @@ filter_options(cls, opts, allowed=None):
 
 <a id="McUtils.Plots.Plots.Plot.prep_styles" class="docs-object-method">&nbsp;</a> 
 ```python
-prep_styles(self, styles): 
+prep_styles(self, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot.py#L302)/

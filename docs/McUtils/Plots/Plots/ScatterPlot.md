@@ -29,8 +29,8 @@ method: str
 prep_styles(self, c=None, facecolors=None, edgecolors=None, filled=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/ScatterPlot.py#L449)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/ScatterPlot.py#L449?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/ScatterPlot.py#L451)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/ScatterPlot.py#L451?message=Update%20Docs)]
 </div>
  </div>
 </div>
