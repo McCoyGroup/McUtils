@@ -330,8 +330,9 @@ def serialize_python_job(func, *args,
 
 python_sbatch_template = """
 INPUT_FILE="${{SLURM_JOB_NAME%.*}}.py"
-
+curdir="$PWD"
 . ~/.bashrc
+cd "$curdir"
 if [ -n "$CONDA_ENVIRONMENT" ]; then
   conda activate $CONDA_ENVIRONMENT
 fi
