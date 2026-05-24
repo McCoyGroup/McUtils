@@ -1,14 +1,9 @@
-# <a id="McUtils.Numputils.TensorDerivatives.vec_cross_deriv">vec_cross_deriv</a>
+### <a id="McUtils.Numputils.Options.Options">Options</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L977)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L977?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Options.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Options.py#L11?message=Update%20Docs)]
 </div>
-
-```python
-vec_cross_deriv(A_expansion, B_expansion, order): 
-```
-
-
+A singleton Options object that can be used to configure options for numerical stuff
 
 
 
@@ -53,16 +48,13 @@ vec_cross_deriv(A_expansion, B_expansion, order):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/TensorDerivatives/vec_cross_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/TensorDerivatives/vec_cross_deriv.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/Options/Options.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/Options/Options.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/vec_cross_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/vec_cross_deriv.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Options/Options.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Options/Options.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L977?message=Update%20Docs)   
-</div>
-   <div class="col" markdown="1">
-   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Options.py#L11?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
@@ -70,6 +62,10 @@ vec_cross_deriv(A_expansion, B_expansion, order):
    <div class="col" markdown="1">
    
 </div>
+   <div class="col" markdown="1">
+   
 </div>
 </div>
 </div>
+</div>
+

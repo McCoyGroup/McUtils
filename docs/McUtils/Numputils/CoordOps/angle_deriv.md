@@ -5,7 +5,7 @@
 </div>
 
 ```python
-angle_deriv(coords, i, j, k, /, order=1, method='expansion', cache=None, angle_ordering='jik', fixed_atoms=None, expanded_vectors=None, reproject=True, zero_thresh=None): 
+angle_deriv(coords, i, j, k, *, order=1, method='expansion', cache=None, up_vector=None, l=None, angle_ordering='jik', fixed_atoms=None, expanded_vectors=None, reproject=True, zero_thresh=None): 
 ```
 Gives the derivative of the angle between i, j, and k with respect to the Cartesians
   - `coords`: `np.ndarray`

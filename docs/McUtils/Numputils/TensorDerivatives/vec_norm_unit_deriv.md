@@ -5,7 +5,7 @@
 </div>
 
 ```python
-vec_norm_unit_deriv(vec_expansion, order, base_expansion=None): 
+vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=True): 
 ```
 
 

@@ -131,10 +131,10 @@ Defines a set of formatting utilities
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[format_radix_value](Formatters/Conveniences/format_radix_value.md)   
 </div>
    <div class="col" markdown="1">
-   
+[format_elapsed_time](Formatters/Conveniences/format_elapsed_time.md)   
 </div>
    <div class="col" markdown="1">
    
