@@ -17,6 +17,7 @@ __all__ = [
     "partial_sort",
     'argsort',
     'group_by',
+    'group_indices',
     'grouping_info',
     'take_where_groups',
     'split_by_regions',
@@ -507,6 +508,10 @@ def group_by(ar, keys, sorting=None, return_sizes=False, return_indices=False):
     ukeys = uncoerce_dtype(ukeys, orig_shape, orig_dtype, None)
     output = ((ukeys, groups),) + output[1:]
     return output
+
+def group_indices(keys, sorting=None, return_sizes=None, return_indices=None):
+    return group_by(np.arange(len(keys)), keys,
+                    sorting=sorting, return_sizes=return_sizes, return_indices=return_indices)
 
 def split_by_regions1d(ar, regions, sortings=None, return_indices=False):
     """
