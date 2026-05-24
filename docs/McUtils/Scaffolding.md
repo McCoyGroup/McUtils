@@ -160,9 +160,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-1e9e4a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-1e9e4a"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c444d0" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c444d0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-1e9e4a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c444d0" markdown="1">
  - [Schema](#Schema)
 - [Pseudopickle](#Pseudopickle)
 - [HDF5Serialization](#HDF5Serialization)
@@ -188,9 +188,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-f291fe" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f291fe"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a89f11" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a89f11"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f291fe" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a89f11" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
