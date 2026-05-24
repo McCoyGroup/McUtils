@@ -94,13 +94,13 @@ def write_json(file, data, writer=None, mode="w+", encoder=None, **opts):
     opts, js_opts = opts_handler.OptionsSet(opts).split(open_opts)
     if encoder is not None:
         if isinstance(encoder, type):
-            opts['cls'] = encoder
+            js_opts['cls'] = encoder
         else:
-            opts['default'] = encoder
+            js_opts['default'] = encoder
     with safe_open(file, mode=mode, **opts) as fs:
         if writer is None:
             writer = json.dump
-        return writer(data, fs)
+        return writer(data, fs, **js_opts)
 
 def write_orjson(file, data, writer=None, mode='w+b', **opts):
     import orjson
