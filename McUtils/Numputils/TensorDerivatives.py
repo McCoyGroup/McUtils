@@ -7,7 +7,7 @@ from .. import Devutils as dev
 from . import PermutationOps as perms, vec_tensordiag, identity_tensors
 from . import VectorOps as vec_ops
 from . import SetOps as set_ops
-from .Misc import is_numeric, is_zero
+from .Misc import is_numeric, is_zero, is_numeric_array_like
 from .Options import Options
 
 __all__ = [
@@ -853,13 +853,16 @@ def scalarpow_deriv(scalar_expansion, exp, order):
 
 def odd_fac(x):
     return np.prod([2*o+1 for o in range((x-1)//2)])
-def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None):
+def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=True):
     from ..Combinatorics import IntegerPartitioner
 
     a = vec_expansion[0]
     r = np.linalg.norm(a, axis=-1)
     if r < Options.zero_threshold:
-        raise ValueError("can't get derivatives of zero vector")
+        if raise_on_failure:
+            raise ValueError("can't get derivatives of zero vector")
+        else:
+            return None, None
     a_expansion = [a, vec_ops.identity_tensors(a.shape[:-1], a.shape[-1])]
 
     if not is_numeric(order):
@@ -990,11 +993,17 @@ def vec_cross_deriv(A_expansion, B_expansion, order):
     return res
 
 def vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *,
-                                  component_vectors,
+                                  component_vectors=None,
+                                  up_vector_expansion=None,
                                   unit_expansions=None
                                   ):
     base_shape = axb_expansion[0].shape[:-1]
     shared = len(base_shape)
+
+    if component_vectors is None:
+        if up_vector_expansion is None:
+            raise ValueError("an up vector expansion or component vectors must be provided")
+        component_vectors = [axb_expansion, up_vector_expansion, bxc_expansion]
 
     A_expansion, B_expansion, C_expansion = component_vectors
     if unit_expansions is None:
@@ -1021,10 +1030,10 @@ def vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *,
     # print("axb", [b.shape for b in axb_inv_expansion])
     # print("bxc", [b.shape for b in bxc_inv_expansion])
     scalar_term = scalarprod_deriv(
-            B_unit_expansion,
-            axb_inv_expansion,
-            order
-        )
+        B_unit_expansion,
+        axb_inv_expansion,
+        order
+    )
     scalar_term = scalarprod_deriv(
         scalar_term,
         bxc_inv_expansion,
@@ -1081,7 +1090,13 @@ def vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *,
     # ]
     #
     # return pseudonorm_expansion
-
+def is_expansion_like(expansion):
+    #TODO: make this check shapes too
+    return (
+        not isinstance(expansion, np.ndarray)
+        and not is_numeric(expansion[0])
+        and not is_numeric_array_like(expansion)
+    ) and all(is_numeric_array_like(a) for a in expansion)
 def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None,
                        up_vector=None,
                        component_vectors=None,
@@ -1104,13 +1119,30 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
     else:
         vec_cross = None
 
+    if up_vector is not None:
+        if not is_expansion_like(up_vector):
+            up_vector = [up_vector]
+        up_vector = [np.asanyarray(u) for u in up_vector]
+        up_vector = [
+            np.broadcast_to(
+                np.expand_dims(
+                    u,
+                    list(range(v.ndim - u.ndim))
+                ),
+                v.shape
+            )
+            for u,v in zip(up_vector, vec_cross)
+        ]
+
     if np.all(planar):
-        if component_vectors is None:
+        if component_vectors is not None or up_vector is not None:
+            expansion = vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order,
+                                                      component_vectors=component_vectors,
+                                                      up_vector_expansion=up_vector,
+                                                      unit_expansions=unit_expansions
+                                                      )
+        else:
             raise ValueError("parallel vector angle derivative only supported for dihedrals")
-        expansion = vec_parallel_cross_norm_deriv(A_expansion, B_expansion, order,
-                                                  component_vectors=component_vectors,
-                                                  unit_expansions=unit_expansions
-                                                  )
         norms = expansion
         units = A_expansion
     elif np.any(planar):
@@ -1121,11 +1153,14 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         nonplanar_pos = np.where(np.logical_not(planar))
         planar_A = [a[planar_pos] for a in A_expansion]
         planar_B = [b[planar_pos] for b in B_expansion]
+        parallel_uv = None
         if component_vectors is not None:
             component_vectors = [
                 [s[planar_pos] for s in S_expansion]
                 for S_expansion in component_vectors
             ]
+        elif up_vector is not None:
+            parallel_uv = [u[planar_pos] for u in up_vector]
         if unit_expansions is not None:
             unit_expansions = [
                 [s[planar_pos] for s in S_expansion]
@@ -1133,17 +1168,13 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
             ]
         expansion = vec_parallel_cross_norm_deriv(planar_A, planar_B, order,
                                                   component_vectors=component_vectors,
-                                                  unit_expansions=unit_expansions
-                                                  )
+                                                  unit_expansions=unit_expansions,
+                                                  up_vector_expansion=parallel_uv)
         planar_units = planar_A
         nonplanar_geoms = [v[nonplanar_pos] for v in vec_cross]
         norms, units = vec_norm_unit_deriv(nonplanar_geoms, order)
         if up_vector is not None:
-            up_vector = np.asanyarray(up_vector)
-            up_vector = np.expand_dims(
-                up_vector,
-                list(range((nonplanar_geoms[0].ndim - up_vector.ndim)))
-            )
+            up_vector = up_vector[0]
             signs = np.sign(
                 vec_ops.vec_tensordot(
                     nonplanar_geoms[0][..., np.newaxis, :],
@@ -1301,7 +1332,7 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
     # print([h1.shape for h1 in huh_1])
 
 def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
-                    B_norms=None, planar=None, planar_threshold=None):
+                    B_norms=None, planar=None, planar_threshold=None, up_vector=None):
     # quick check
 
     if is_numeric(order):
@@ -1319,8 +1350,33 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
     n2_expansion = vec_cross_deriv(B_expansion, C_expansion, max_order)
     # print("..."*10, "axb")
     # print(n1_expansion[0])
-    n1_norms, axb_expansion = vec_norm_unit_deriv(n1_expansion, order)
-    n2_norms, bxc_expansion = vec_norm_unit_deriv(n2_expansion, order)
+    n1_norms, axb_expansion = vec_norm_unit_deriv(n1_expansion, order, raise_on_failure=False)
+    n2_norms, bxc_expansion = vec_norm_unit_deriv(n2_expansion, order, raise_on_failure=False)
+    if n1_norms is None:
+        zt = Options.zero_threshold + 1e-12
+        if n2_norms is None:
+            # they're all parallel, we have not up vector
+            if up_vector is None:
+                raise ValueError("can't get a dihedral for four points in a line without an `up_vector`")
+            A_expansion[0] = A_expansion[0] + 2*zt * vec_ops.vec_crosses(up_vector, A_expansion[0], normalize=True)
+            n1_expansion = vec_cross_deriv(B_expansion, A_expansion, max_order)
+            n1_norms, axb_expansion = vec_norm_unit_deriv(n1_expansion, order)
+            C_expansion[0] = C_expansion[0] - 2*zt * vec_ops.vec_crosses(up_vector, A_expansion[0], normalize=True)
+            n2_expansion = vec_cross_deriv(B_expansion, C_expansion, max_order)
+            n2_norms, bxc_expansion = vec_norm_unit_deriv(n2_expansion, order)
+        else:
+            # A and B are parallel, we add just enough noise to break the colinearity
+            A_expansion[0] = A_expansion[0] + 2*zt * vec_ops.vec_normalize(C_expansion[0])
+            n1_expansion = vec_cross_deriv(B_expansion, A_expansion, max_order)
+            n1_norms, axb_expansion = vec_norm_unit_deriv(n1_expansion, order)
+    if n2_norms is None:
+        zt = Options.zero_threshold + 1e-12
+        # C and B are parallel, we add just enough noise to break the colinearity
+        C_expansion[0] = C_expansion[0] + 2 * zt * vec_ops.vec_normalize(A_expansion[0])
+        n2_expansion = vec_cross_deriv(B_expansion, C_expansion, max_order)
+        n2_norms, bxc_expansion = vec_norm_unit_deriv(n2_expansion, order)
+
+
     # B_norms, up_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
     base_derivs = vec_angle_deriv(axb_expansion, bxc_expansion, order, unitized=True,
                                   # up_vector=None

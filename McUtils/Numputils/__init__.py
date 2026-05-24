@@ -4,6 +4,8 @@ Any lowish-level numerical operations that need to be shared go here.
 """
 
 __all__ = []
+from .Options import *; from .Options import __all__ as _all
+__all__ += _all
 from .EulerSystem import *; from .EulerSystem import __all__ as _all
 __all__ += _all
 from .TransformationMatrices import *; from .TransformationMatrices import __all__ as _all

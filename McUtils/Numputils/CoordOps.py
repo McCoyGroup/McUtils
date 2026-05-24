@@ -39,9 +39,9 @@ __all__ = [
     "dist_expansion",
     "dihed_expansion",
     "angle_expansion",
-    'vec_norm_derivs',
-    'vec_sin_cos_derivs',
-    'vec_angle_derivs',
+    # 'vec_norm_derivs',
+    # 'vec_sin_cos_derivs',
+    # 'vec_angle_derivs',
     'rock_deriv',
     'rock_vec',
     'dist_vec',
@@ -1136,14 +1136,15 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None,
 
         return derivs
 
-def angle_deriv(coords, i, j, k, /, order=1, method='expansion',
+def angle_deriv(coords, i, j, k, *, order=1, method='expansion',
                 cache=None,
+                up_vector=None,
+                l=None,
                 angle_ordering='jik',
                 fixed_atoms=None,
                 expanded_vectors=None,
                 reproject=True,
-                zero_thresh=None
-                ):
+                zero_thresh=None):
     """
     Gives the derivative of the angle between i, j, and k with respect to the Cartesians
 
@@ -1185,11 +1186,20 @@ def angle_deriv(coords, i, j, k, /, order=1, method='expansion',
                 order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
             )
 
+        if up_vector is None and l is not None:
+            up_vector = vec_crosses(A_expansion[0], B_expansion[0])
+            up_vector, up_norms = vec_normalize(up_vector, return_norms=True)
+            bad_ups = up_norms <= Options.norm_zero_threshold
+            up_vector[bad_ups] = vec_crosses(
+                A_expansion[0][bad_ups], (coords[..., l, :] - coords[..., j, :]),
+                normalize=True
+            )
+
         # A_expansion = [A_expansion[0], np.concatenate([np.eye(3), np.zeros((3, 3))], axis=0)]
         # B_expansion = [B_expansion[0], np.concatenate([np.zeros((3, 3)), np.eye(3)], axis=0)]
         base_deriv = td.vec_angle_deriv(A_expansion, B_expansion,
-                                        order=order, unitized=True
-                                        )
+                                        order=order, unitized=True,
+                                        up_vector=up_vector)
         if proj is None: return base_deriv
         if reproject:
             base_deriv = [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
@@ -1978,7 +1988,8 @@ def dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject
         else:
             return _fill_derivs(coords, (i,j), derivs, method=method)
 
-def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='ijk',
+def angle_vec(coords, i, j, k, order=None, up_vector=None, l=None,
+              method='expansion', angle_ordering='ijk',
               cache=None, reproject=True, fixed_atoms=None):
     """
     Returns the full vectors that define the linearized version of an angle displacement
@@ -1988,13 +1999,15 @@ def angle_vec(coords, i, j, k, order=None, method='expansion', angle_ordering='i
     :param j:
     :return:
     """
+    coords = np.asanyarray(coords)
 
     if method != "expansion" and angle_ordering == 'ijk':
         i, j, k = j, i, k
         angle_ordering = 'jik'
     derivs = angle_deriv(coords, i, j, k, order=(1 if order is None else order), method=method,
-                         cache=cache,
+                         cache=cache, l=l,
                          reproject=reproject,
+                         up_vector=up_vector,
                          angle_ordering=angle_ordering,
                          fixed_atoms=fixed_atoms)
     if reproject and method == 'expansion':
