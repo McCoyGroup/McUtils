@@ -478,7 +478,7 @@ def resolve_rsprfo_optimizer(traj, **opts):
         **opts
     )
 @register_optimizer('rsirfo')
-def resolve_rsprfo_optimizer(traj, **opts):
+def resolve_rsirfo_optimizer(traj, **opts):
     from pysisyphus.tsoptimizers.RSIRFOptimizer import RSIRFOptimizer
     return RSIRFOptimizer(
         traj,
@@ -694,7 +694,7 @@ def prep_pysis_images(atoms,
     _remove_handlers(pysisyphus.intcoords.logging_conf.logger)
 
     pre_union = coord_type == "cartesian" or (coord_kwargs is not None and 'typed_prims' in coord_kwargs)
-    geometry = np.asanyarray(geometry)
+    geometry = np.array(geometry)
     smol = geometry.ndim == 2
     if smol:
         geometry = [geometry]
