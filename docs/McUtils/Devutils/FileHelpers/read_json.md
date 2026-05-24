@@ -5,7 +5,7 @@
 </div>
 
 ```python
-read_json(file, **opts): 
+read_json(file, loader=None, **opts): 
 ```
 
 
