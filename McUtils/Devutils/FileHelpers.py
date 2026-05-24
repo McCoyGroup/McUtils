@@ -84,6 +84,12 @@ def read_json(file, loader=None, **opts):
             loader = json.load
         return loader(fs, **js_opts)
 
+def read_orjson(file, loader=None, mode='rb', **opts):
+    import orjson
+    if loader is None:
+        loader = lambda fs: orjson.loads(fs.read())
+    return read_json(file, loader=loader, mode=mode, **opts)
+
 def write_json(file, data, writer=None, mode="w+", encoder=None, **opts):
     opts, js_opts = opts_handler.OptionsSet(opts).split(open_opts)
     if encoder is not None:
@@ -95,6 +101,12 @@ def write_json(file, data, writer=None, mode="w+", encoder=None, **opts):
         if writer is None:
             writer = json.dump
         return writer(data, fs)
+
+def write_orjson(file, data, writer=None, mode='w+b', **opts):
+    import orjson
+    if writer is None:
+        writer = lambda data, fs: fs.write(orjson.dumps(data))
+    return write_json(file, data, writer=writer, mode=mode, **opts)
 
 def split_path(path, nsteps=-1):
     if len(path) == 0:
