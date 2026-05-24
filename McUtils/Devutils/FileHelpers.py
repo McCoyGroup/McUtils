@@ -77,15 +77,24 @@ def read_file(file, **opts):
     with safe_open(file, **opts) as fs:
         return fs.read()
 
-def read_json(file, **opts):
+def read_json(file, loader=None, **opts):
     opts, js_opts = opts_handler.OptionsSet(opts).split(open_opts)
     with safe_open(file, **opts) as fs:
-        return json.load(fs, **js_opts)
+        if loader is None:
+            loader = json.load
+        return loader(fs, **js_opts)
 
-def write_json(file, data, mode="w+", **opts):
+def write_json(file, data, writer=None, mode="w+", encoder=None, **opts):
     opts, js_opts = opts_handler.OptionsSet(opts).split(open_opts)
+    if encoder is not None:
+        if isinstance(encoder, type):
+            opts['cls'] = encoder
+        else:
+            opts['default'] = encoder
     with safe_open(file, mode=mode, **opts) as fs:
-        return json.dump(data, fs)
+        if writer is None:
+            writer = json.dump
+        return writer(data, fs)
 
 def split_path(path, nsteps=-1):
     if len(path) == 0:
