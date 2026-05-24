@@ -1,5 +1,6 @@
 
 import numpy as np
+import string
 from .TableFormatters import TableFormatter
 
 __all__ = [
@@ -7,7 +8,9 @@ __all__ = [
     "format_symmetric_tensor_elements",
     "format_mode_labels",
     "format_zmatrix",
-    "format_state_vector_frequency_table"
+    "format_state_vector_frequency_table",
+    "format_radix_value",
+    "format_elapsed_time"
 ]
 
 def format_tensor_element_table(inds, vals,
@@ -199,3 +202,30 @@ def format_state_vector_frequency_table(state_list, freq_data,
             if not isinstance(state_list[0], str) else
         [[x] + v for x, v in zip(state_list, freq_data.tolist())]
     )
+
+def format_radix_value(duration, target_format, variable_map, format_variables=None):
+    if format_variables is None:
+        format_variables = [field
+                for _, field, _, _ in string.Formatter().parse(target_format)
+                if field is not None]
+    if not isinstance(format_variables, dict):
+        format_variables = {
+            k:variable_map[k]
+            for k in format_variables
+        }
+
+    opts = {}
+    for k,v in format_variables.items():
+        opts[k] = duration//v
+        duration = duration%v
+    opts['remainder'] = duration
+
+    return target_format.format(**opts)
+
+duration_time_map = {'years':31536000, 'days':86400, 'hours':3600, 'minutes':60, 'seconds':1}
+def format_elapsed_time(duration,
+                        target_format="{hours:d}:{minutes:02d}:{seconds:02d}",
+                        format_variables=None):
+    if hasattr(duration, 'total_seconds'):
+        duration = duration.total_seconds()
+    return format_radix_value(duration, target_format, duration_time_map, format_variables=format_variables)

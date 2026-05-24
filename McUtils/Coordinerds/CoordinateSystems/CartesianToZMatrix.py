@@ -127,7 +127,7 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                     p
                     for n,(i, j, k, l) in enumerate(ordering[1:])
                     for p in (
-                            [(i, j), (i, j, k), (i, j, k, l)]
+                            [(i, j), {'bend':(i, j, k), 'l':l}, (i, j, k, l)]
                                 if n > 1 else
                             [(i, j), (i, j, k)]
                                 if n > 0 else
@@ -152,13 +152,26 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                     p
                     for n, (i, j, k, l) in enumerate(ordering[1:])
                     for p in (
-                        [(i, j), (i, j, k), (i, j, k, l)]
+                        [{'dist':(i, j)}, {'bend':(i, j, k), 'l':l}, {'dihed':(i, j, k, l)}]
                     )
                 ]
                 n_tot = len(ordering)
                 _ = []
                 bad_terms = []
                 for m,t in enumerate(specs):
+                    if isinstance(t, dict):
+                        opts = t
+                        key = (
+                            'dist'
+                                if 'dist' in t else
+                            'bend'
+                                if 'bend' in t else
+                            'dihed'
+                        )
+                        t = opts.pop(key)
+                    else:
+                        opts = None
+                        key = None
                     sub = [t[0]]
                     for tt in t[1:]:
                         if tt < 0:
@@ -168,7 +181,11 @@ class CartesianToZMatrixConverter(CoordinateSystemConverter):
                             break
                         sub.append(tt)
                     else:
-                        _.append(sub)
+                        if opts is not None:
+                            opts[key] = sub
+                            _.append(opts)
+                        else:
+                            _.append(sub)
                 specs = _
 
                 if len(bad_terms) > 0:

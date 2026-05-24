@@ -584,8 +584,11 @@ class RDMolecule(ExternalMolecule):
             strict_cxsmiles=strict_cxsmiles,
             remove_hydrogens=remove_hydrogens,
             replacements=replacements,
+            add_implicit_hydrogens=add_implicit_hydrogens,
             **opts
         )
+
+        import pysisyphus.intcoords.LinearBend
 
         if reorder_from_atom_map:
             base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
