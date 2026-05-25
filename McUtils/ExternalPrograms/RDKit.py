@@ -588,8 +588,6 @@ class RDMolecule(ExternalMolecule):
             **opts
         )
 
-        import pysisyphus.intcoords.LinearBend
-
         if reorder_from_atom_map:
             base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
             base_map = [len(base_map)+1 if a == 0 else a for a in base_map]
