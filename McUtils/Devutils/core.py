@@ -28,6 +28,8 @@ __all__ = [
     "str_comp",
     "str_is",
     "str_in",
+    "str_startswith",
+    "str_endswith",
     "str_elide",
     "resolve_key_collision",
     "merge_dicts",
@@ -208,12 +210,31 @@ def cached_eval(cache, key, generator, *,
 
     return val
 
-def str_comp(str_val, test, test_val):
-    return isinstance(str_val, str) and test(str_val, test_val)
-def str_is(str_val, test_val):
-    return isinstance(str_val, str) and str_val == test_val
-def str_in(str_val, test_vals):
-    return isinstance(str_val, str) and str_val in test_vals
+def _case_folded_iterable(test_val):
+    try:
+        x = type(test_val)(t.casefold() for t in test_val)
+    except TypeError:
+        return None
+    else:
+        return x
+def str_comp(str_val, test, test_val, ignore_case=False):
+    return isinstance(str_val, str) and (
+        test(str_val, test_val) if not ignore_case else (
+            test(str_val.casefold(), test_val.casefold())
+                if isinstance(test_val, str) else
+            test(str_val.casefold(), x)
+                if (x:=_case_folded_iterable(test_val)) is not None else
+            test(str_val.casefold(), test_val)
+        )
+    )
+def str_is(str_val, test_val, ignore_case=False):
+    return str_comp(str_val, lambda a,b: a == b, test_val, ignore_case=ignore_case)
+def str_in(str_val, test_vals, ignore_case=False):
+    return str_comp(str_val, lambda a,b: a in b, test_vals, ignore_case=ignore_case)
+def str_startswith(str_val, test_vals, ignore_case=False):
+    return str_comp(str_val, lambda a,b: a.startswith(b), test_vals, ignore_case=ignore_case)
+def str_endswith(str_val, test_vals, ignore_case=False):
+    return str_comp(str_val, lambda a,b: a.endswith(b), test_vals, ignore_case=ignore_case)
 def str_elide(long_str, width=80, placeholder='...'):
     l = len(long_str)
     if l > width:
