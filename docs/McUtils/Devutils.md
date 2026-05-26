@@ -87,131 +87,142 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[str_startswith](Devutils/core/str_startswith.md)   
+</div>
+   <div class="col" markdown="1">
+[str_endswith](Devutils/core/str_endswith.md)   
+</div>
+   <div class="col" markdown="1">
 [str_elide](Devutils/core/str_elide.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [resolve_key_collision](Devutils/core/resolve_key_collision.md)   
 </div>
    <div class="col" markdown="1">
 [context_wrap](Devutils/core/context_wrap.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [slice_dict](Devutils/core/slice_dict.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [dict_take](Devutils/core/dict_take.md)   
 </div>
    <div class="col" markdown="1">
 [is_filepath_like](Devutils/FileHelpers/is_filepath_like.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [safe_open](Devutils/FileHelpers/safe_open.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [write_file](Devutils/FileHelpers/write_file.md)   
 </div>
    <div class="col" markdown="1">
 [read_file](Devutils/FileHelpers/read_file.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [read_json](Devutils/FileHelpers/read_json.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [write_json](Devutils/FileHelpers/write_json.md)   
 </div>
    <div class="col" markdown="1">
 [split_path](Devutils/FileHelpers/split_path.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [drop_directory_prefix](Devutils/FileHelpers/drop_directory_prefix.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [filename](Devutils/FileHelpers/filename.md)   
 </div>
    <div class="col" markdown="1">
 [bytestream_hash](Devutils/FileHelpers/bytestream_hash.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [string_hash](Devutils/FileHelpers/string_hash.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [file_hash](Devutils/FileHelpers/file_hash.md)   
 </div>
    <div class="col" markdown="1">
 [files_hash](Devutils/FileHelpers/files_hash.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [directory_hash](Devutils/FileHelpers/directory_hash.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [compress_dir](Devutils/FileHelpers/compress_dir.md)   
 </div>
    <div class="col" markdown="1">
 [compressed_dir_bytes](Devutils/FileHelpers/compressed_dir_bytes.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [decompress_dir](Devutils/FileHelpers/decompress_dir.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [unpack_gzip_bytes](Devutils/FileHelpers/unpack_gzip_bytes.md)   
 </div>
    <div class="col" markdown="1">
 [FileBackedIO](Devutils/FileHelpers/FileBackedIO.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [StreamInterface](Devutils/FileHelpers/StreamInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Logger](Devutils/Loggers/Logger.md)   
 </div>
    <div class="col" markdown="1">
 [NullLogger](Devutils/Loggers/NullLogger.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [LogLevel](Devutils/Loggers/LogLevel.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [LoggingBlock](Devutils/Loggers/LoggingBlock.md)   
 </div>
    <div class="col" markdown="1">
 [OptionsSet](Devutils/Options/OptionsSet.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OptionsMethodDispatch](Devutils/Options/OptionsMethodDispatch.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [StreamRedirect](Devutils/Redirects/StreamRedirect.md)   
 </div>
    <div class="col" markdown="1">
 [OutputRedirect](Devutils/Redirects/OutputRedirect.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DefaultDirectory](Devutils/Redirects/DefaultDirectory.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Schema](Devutils/Schema/Schema.md)   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
