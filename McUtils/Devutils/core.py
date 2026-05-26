@@ -222,9 +222,11 @@ def str_comp(str_val, test, test_val, ignore_case=False):
         test(str_val, test_val) if not ignore_case else (
             test(str_val.casefold(), test_val.casefold())
                 if isinstance(test_val, str) else
-            test(str_val.casefold(), x)
-                if (x:=_case_folded_iterable(test_val)) is not None else
-            test(str_val.casefold(), test_val)
+            (
+                test(str_val.casefold(), x)
+                    if (x:=_case_folded_iterable(test_val)) is not None else
+                test(str_val.casefold(), test_val)
+            )
         )
     )
 def str_is(str_val, test_val, ignore_case=False):
