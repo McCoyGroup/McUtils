@@ -683,6 +683,7 @@ def _eckart_embedding(ref, coords,
                       planar_ref_tolerance=1e-6,
                       proper_rotation=False,
                       permutable_groups=None,
+                      reset_com=True,
                       transform_coordinates=True
                       ):
     """
@@ -787,16 +788,17 @@ def _eckart_embedding(ref, coords,
         # now we rotate this back to the reference frame
         coords = coords @ np.swapaxes(ref_axes if ref_axes.ndim > 2 else ref_axes[np.newaxis], -2, -1)
         # and then shift so the COM doesn't change
-        if (
-                ref_com.ndim == coords.ndim - 1
-                and ref_com.shape[:-1] == coords.shape[:-2]
-        ):
-            pad_ref = np.expand_dims(ref_com, -2)
-        elif ref_com.ndim == 1:
-            pad_ref = np.expand_dims(ref_com, list(range(coords.ndim - 1)))
-        else:
-            pad_ref = ref_com
-        coords = coords + pad_ref
+        if reset_com:
+            if (
+                    ref_com.ndim == coords.ndim - 1
+                    and ref_com.shape[:-1] == coords.shape[:-2]
+            ):
+                pad_ref = np.expand_dims(ref_com, -2)
+            elif ref_com.ndim == 1:
+                pad_ref = np.expand_dims(ref_com, list(range(coords.ndim - 1)))
+            else:
+                pad_ref = ref_com
+            coords = coords + pad_ref
     else:
         coords = None
 
@@ -824,6 +826,7 @@ def eckart_embedding(ref, coords,
                      planar_ref_tolerance=1e-6,
                      proper_rotation=False,
                      permutable_groups=None,
+                     reset_com=True,
                      transform_coordinates=True) -> EckartData:
     # if permutable_groups is None:
     return _eckart_embedding(
@@ -834,6 +837,7 @@ def eckart_embedding(ref, coords,
         planar_ref_tolerance=planar_ref_tolerance,
         proper_rotation=proper_rotation,
         permutable_groups=permutable_groups,
+        reset_com=reset_com,
         transform_coordinates=transform_coordinates
     )
 rmsd_minimizing_transformation = eckart_embedding
