@@ -404,11 +404,15 @@ class ASEMolecule(ExternalMolecule):
     @classmethod
     def lookup_optimizer_type(cls, method):
         if isinstance(method, str):
-            optimize = ASEInterface.submodule('optimize')
+            import ase.optimize as optimize
             if method == 'bfgs':
                 method = optimize.BFGS
+            elif method == 'lbfgs':
+                method = optimize.LBFGS
             elif method == 'bfgs-linesearch':
                 method = optimize.BFGSLineSearch
+            elif method == 'lbfgs-linesearch':
+                method = optimize.LBFGSLineSearch
             else:
                 method = getattr(optimize, method)
         return method
