@@ -335,7 +335,7 @@ class SphereUnionSurface:
         return pts
 
     @classmethod
-    def get_exterior_points(cls, points, centers, radii, tolerance:float=0):
+    def get_exterior_points(cls, points, centers, radii, tolerance:float=0, return_components=False):
         points = np.asanyarray(points)
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
@@ -345,8 +345,28 @@ class SphereUnionSurface:
             axis=-1
         )
 
-        mask = np.all(dvs * (1+tolerance) >= radii[np.newaxis], axis=1)
-        return mask
+        comps = dvs * (1+tolerance) >= radii[np.newaxis]
+        if return_components:
+            return comps
+        else:
+            return np.all(comps, axis=1)
+
+    @classmethod
+    def get_interior_points(cls, points, centers, radii, tolerance: float = 0, return_components=False):
+        points = np.asanyarray(points)
+        centers = np.asanyarray(centers)
+        radii = np.asanyarray(radii)
+
+        dvs = np.linalg.norm(
+            points[:, np.newaxis, :] - centers[np.newaxis, :, :],
+            axis=-1
+        )
+
+        comps = dvs * (1 - tolerance) <= radii[np.newaxis]
+        if return_components:
+            return comps
+        else:
+            return np.any(comps, axis=1)
 
     @classmethod
     def get_surface_points(cls,
@@ -442,7 +462,7 @@ class SphereUnionSurface:
         # return np.array(mesh.vertices), np.array(mesh.triangles)
 
     @classmethod
-    def sphere_points(cls, centers, radii, samples, generator=None):
+    def sphere_points(cls, centers, radii, samples, generator=None, shells=None):
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
 
@@ -475,8 +495,15 @@ class SphereUnionSurface:
                     for subsamp in samples
                 ])
 
-        sphere_points = centers[:, :, np.newaxis, :] + base_points * radii[:, :, np.newaxis, np.newaxis]
-
+        if shells is None:
+            sphere_points = centers[:, :, np.newaxis, :] + base_points * radii[:, :, np.newaxis, np.newaxis]
+        else:
+            if nput.is_int(shells):
+                shells = np.linspace(0, 1, shells+1)[1:] ** (1/3) # uniformly w/in distributed in volume
+            shells = np.asanyarray(shells)
+            all_rads = radii[:, :, np.newaxis] * shells[np.newaxis, np.newaxis, :]
+            sphere_points = centers[:, :, np.newaxis, np.newaxis, :] + base_points * all_rads[:, :, :, np.newaxis, np.newaxis]
+            sphere_points = sphere_points.reshape(sphere_points.shape[:2] + (-1,) + sphere_points.shape[-1:])
         return sphere_points.reshape(base_shape + sphere_points.shape[-3:])
 
     @classmethod
@@ -532,6 +559,97 @@ class SphereUnionSurface:
             a += ca * np.sum(mask).astype(int) / len(mask)
 
         return a
+
+    @classmethod
+    def _monte_carlo_volume(cls, points, centers, radii, interior_test=None, center_volumes=None, **test_args):
+        if interior_test is None:
+            interior_test = cls.get_interior_points
+
+        v = 0
+        if center_volumes is None:
+            center_volumes = 4/3 * np.pi * radii ** 3
+        for cv, points in zip(center_volumes, points):
+            mask = interior_test(points, centers, radii, return_components=True, **test_args)
+            mask_sums = np.sum(mask, axis=1)
+            perc_inc = np.average(1 / mask_sums)
+            v += perc_inc * cv
+        return v
+
+    @classmethod
+    def sampling_point_volume(cls,
+                              centers,
+                              radii,
+                              points=None,
+                              interior_test=None,
+                              point_generator=None,
+                              generator_args=None,
+                              center_volumes=None,
+                              shells=50,
+                              **test_args
+                              ):
+        if points is None:
+            if generator_args is None:
+                generator_args = {}
+            if point_generator is None:
+                point_generator = cls.sphere_points
+            points = point_generator(
+                centers,
+                radii,
+                shells=shells,
+                **generator_args
+            )
+        if interior_test is None:
+            interior_test = cls.get_interior_points
+
+        if center_volumes is None:
+            center_volumes = 4/3 * np.pi * radii ** 3
+
+        return cls._monte_carlo_volume(points, centers, radii,
+                                       interior_test=interior_test, center_volumes=center_volumes, **test_args)
+
+    @classmethod
+    def random_sphere_sampling(cls, center, radius, samples=500, seed=None, rng=None):
+        if rng is None:
+            if seed is not None:
+                rng = np.random.default_rng(seed)
+            else:
+                rng = np.random
+        subrads = (rng.uniform(0, 1, size=samples) ** (1/3)) * radius
+        vecs = nput.vec_normalize(rng.normal(size=(samples, 3)))
+        return vecs * subrads[:, np.newaxis] + center[np.newaxis, :]
+
+    @classmethod
+    def volume_union_mc(cls, centers, radii, n_samples=100000, seed=None):
+        centers = np.asanyarray(centers, dtype=float)
+        radii = np.asanyarray(radii, dtype=float)
+        if seed is not None:
+            rng = np.random.default_rng(seed)
+        else:
+            rng = None
+
+        points = [
+            cls.random_sphere_sampling(c, r, n_samples, rng=rng)
+            for c, r in zip(centers, radii)
+        ]
+        return cls._monte_carlo_volume(points, centers, radii)
+
+    @classmethod
+    def volume_voxel(cls, centers, radii, resolution=200):
+        lo = (centers - radii[:, None]).min(axis=0)
+        hi = (centers + radii[:, None]).max(axis=0)
+
+        # Build grid
+        axes = [np.linspace(lo[k], hi[k], resolution) for k in range(3)]
+        gx, gy, gz = np.meshgrid(*axes, indexing='ij')
+        grid = np.stack([gx, gy, gz], axis=-1)  # (R, R, R, 3)
+
+        inside = np.zeros(grid.shape[:3], dtype=bool)
+        for c, r in zip(centers, radii):
+            dist2 = ((grid - c) ** 2).sum(axis=-1)
+            inside |= dist2 <= r ** 2
+
+        voxel_vol = np.prod((hi - lo) / (resolution - 1))
+        return np.sum(inside) * voxel_vol
 
     @classmethod
     def _trip_q(self, a, b, c, alpha, beta, gamma, e):
@@ -1162,7 +1280,37 @@ class SphereUnionSurface:
                 **opts
             )
         elif method == 'mesh':
+            return self.get_triangulation().surface_area()
+        elif method == 'pcmesh':
             return self.generate_mesh().surface_area()
+        else:
+            raise ValueError(f"unknown surface area method '{method}'")
+
+    def volume(self, method='monte-carlo', **opts):
+        if method == 'union':
+            raise NotImplementedError("analytic sphere volume not yet implemented")
+        elif method == 'sampling':
+            expansion = opts.pop('expansion', self.expansion)
+            scaling = opts.pop('scaling', self.scaling)
+            generator_args = {
+                'samples': opts.pop('samples', self.samples),
+                'generator': opts.pop('sphere_point_generator', None)
+            }
+            opts['tolerance'] = opts.get('tolerance', self.tolerance)
+            return self.sampling_point_volume(
+                self.centers,
+                self.radii * scaling + expansion,
+                generator_args=generator_args,
+                **opts
+            )
+        elif method == 'voxel':
+            return self.volume_voxel(self.centers, self.radii, **opts)
+        elif method == 'monte-carlo':
+            return self.volume_union_mc(self.centers, self.radii, **opts)
+        elif method == 'mesh':
+            return self.get_triangulation().volume()
+        elif method == 'pcmesh':
+            return self.generate_mesh().volume()
         else:
             raise ValueError(f"unknown surface area method '{method}'")
 
@@ -1326,14 +1474,32 @@ class SphereUnionSurfaceMesh:
         else:
             return np.sum(tris)
 
+    def volume(self, return_components=False):
+        """
+        Exact volume of a closed mesh via the divergence theorem.
+        Assumes outward-pointing face normals and watertight mesh.
+        """
+        v1 = self.verts[self.inds[:, 0], :]
+        comps = np.sum((v1 * self.signed_volumes[:, np.newaxis] * self.normals), axis=-1) / 6
+        if return_components:
+            return comps
+        else:
+            return np.sum(np.abs(comps))
+
     @property
     def normals(self):
         if self._normals is None:
             self._normals = self.get_normals()
-        return self._normals
+        return self._normals[0]
+    @property
+    def signed_volumes(self):
+        if self._normals is None:
+            self._normals = self.get_normals()
+        return self._normals[1]
     def get_normals(self, normalize=True):
         tri_pts = self.verts[self.inds]
-        return nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1], normalize=normalize)
+        crosses = nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1])
+        return nput.vec_normalize(crosses, return_norms=True)
 
     @classmethod
     def from_submeshes(cls, pts, submeshes, *, centers, radii,
