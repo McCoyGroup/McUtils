@@ -25,8 +25,11 @@ __all__ = [
     'angle_basis',
     # 'dihed_bases',
     'internal_basis',
+    'prep_disp_expansion',
+    'prep_unit_vector_expansion_from_cache',
     'dist_deriv',
     'angle_deriv',
+    'normal_deriv',
     'dihed_deriv',
     'book_deriv',
     'oop_deriv',
@@ -1245,6 +1248,75 @@ def angle_deriv(coords, i, j, k, *, order=1, method='expansion',
             ]))
 
         return derivs
+
+def normal_deriv(coords, i, j, k, *, order=1, method='expansion',
+                 cache=None,
+                 up_vector=None,
+                 l=None,
+                 angle_ordering='jik',
+                 fixed_atoms=None,
+                 expanded_vectors=None,
+                 reproject=True,
+                 normalize=True):
+    """
+    Gives the derivative of the angle between i, j, and k with respect to the Cartesians
+
+    :param coords:
+    :type coords: np.ndarray
+    :param i: index of the central atom
+    :type i: int | Iterable[int]
+    :param j: index of one of the outside atoms
+    :type j: int | Iterable[int]
+    :param k: index of the other outside atom
+    :type k: int | Iterable[int]
+    :return: derivatives of the angle with respect to atoms i, j, and k
+    :rtype: np.ndarray
+    """
+
+    if method == 'expansion':
+        if expanded_vectors is None:
+            expanded_vectors = [0, 1]
+        if angle_ordering == 'ijk':
+            proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, i, j, [j, i, k],
+                order=order, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+            )
+            _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, k, j, [j, i, k],
+                order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            )
+        else:
+            proj, (A_norms, A_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, j, i, [i, j, k],
+                order=order, fixed_atoms=fixed_atoms, expand=0 in expanded_vectors
+            )
+            _, (B_norms, B_expansion) = prep_unit_vector_expansion_from_cache(
+                cache,
+                coords, k, i, [i, j, k],
+                order=order, fixed_atoms=fixed_atoms, expand=1 in expanded_vectors
+            )
+
+        if up_vector is None and l is not None:
+            up_vector = vec_crosses(A_expansion[0], B_expansion[0])
+            up_vector, up_norms = vec_normalize(up_vector, return_norms=True)
+            bad_ups = up_norms <= Options.norm_zero_threshold
+            up_vector[bad_ups] = vec_crosses(
+                A_expansion[0][bad_ups], (coords[..., l, :] - coords[..., j, :]),
+                normalize=True
+            )
+
+        # A_expansion = [A_expansion[0], np.concatenate([np.eye(3), np.zeros((3, 3))], axis=0)]
+        # B_expansion = [B_expansion[0], np.concatenate([np.zeros((3, 3)), np.eye(3)], axis=0)]
+        base_deriv = td.vec_normal_deriv(A_expansion, B_expansion, order=order, unitized=True, normalize=normalize)
+        if proj is None: return base_deriv
+        if reproject:
+            base_deriv = [base_deriv[0]] + td.tensor_reexpand([proj], base_deriv[1:])
+        return base_deriv
+    else:
+        raise NotImplementedError('too annoying')
 
 def rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='ijk',
                cache=None,
