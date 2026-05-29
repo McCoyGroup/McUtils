@@ -347,12 +347,23 @@ Any lowish-level numerical operations that need to be shared go here.
 [internal_basis](Numputils/CoordOps/internal_basis.md)   
 </div>
    <div class="col" markdown="1">
-[dist_deriv](Numputils/CoordOps/dist_deriv.md)   
+[prep_disp_expansion](Numputils/CoordOps/prep_disp_expansion.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[prep_unit_vector_expansion_from_cache](Numputils/CoordOps/prep_unit_vector_expansion_from_cache.md)   
+</div>
+   <div class="col" markdown="1">
+[dist_deriv](Numputils/CoordOps/dist_deriv.md)   
+</div>
+   <div class="col" markdown="1">
 [angle_deriv](Numputils/CoordOps/angle_deriv.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[normal_deriv](Numputils/CoordOps/normal_deriv.md)   
 </div>
    <div class="col" markdown="1">
 [dihed_deriv](Numputils/CoordOps/dihed_deriv.md)   
@@ -894,205 +905,216 @@ Any lowish-level numerical operations that need to be shared go here.
 [vec_anglesin_deriv](Numputils/TensorDerivatives/vec_anglesin_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[vec_dihed_deriv](Numputils/TensorDerivatives/vec_dihed_deriv.md)   
+[vec_normal_deriv](Numputils/TensorDerivatives/vec_normal_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[vec_plane_angle_deriv](Numputils/TensorDerivatives/vec_plane_angle_deriv.md)   
+[vec_dihed_deriv](Numputils/TensorDerivatives/vec_dihed_deriv.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[vec_plane_angle_deriv](Numputils/TensorDerivatives/vec_plane_angle_deriv.md)   
+</div>
    <div class="col" markdown="1">
 [shift_expansion](Numputils/TensorDerivatives/shift_expansion.md)   
 </div>
    <div class="col" markdown="1">
 [scale_expansion](Numputils/TensorDerivatives/scale_expansion.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [add_expansions](Numputils/TensorDerivatives/add_expansions.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [subtract_expansions](Numputils/TensorDerivatives/subtract_expansions.md)   
 </div>
    <div class="col" markdown="1">
 [concatenate_expansions](Numputils/TensorDerivatives/concatenate_expansions.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [renormalize_transformation](Numputils/TensorDerivatives/renormalize_transformation.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [orthogonalize_transformations](Numputils/TensorDerivatives/orthogonalize_transformations.md)   
 </div>
    <div class="col" markdown="1">
 [center_of_mass](Numputils/CoordinateFrames/center_of_mass.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [inertia_tensors](Numputils/CoordinateFrames/inertia_tensors.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [moments_of_inertia](Numputils/CoordinateFrames/moments_of_inertia.md)   
 </div>
    <div class="col" markdown="1">
 [moments_of_inertia_expansion](Numputils/CoordinateFrames/moments_of_inertia_expansion.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [inertial_frame_derivatives](Numputils/CoordinateFrames/inertial_frame_derivatives.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [frame_displacement_projector](Numputils/CoordinateFrames/frame_displacement_projector.md)   
 </div>
    <div class="col" markdown="1">
 [translation_rotation_eigenvectors](Numputils/CoordinateFrames/translation_rotation_eigenvectors.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [translation_rotation_projector](Numputils/CoordinateFrames/translation_rotation_projector.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [remove_translation_rotations](Numputils/CoordinateFrames/remove_translation_rotations.md)   
 </div>
    <div class="col" markdown="1">
 [translation_rotation_invariant_transformation](Numputils/CoordinateFrames/translation_rotation_invariant_transformation.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [eckart_embedding](Numputils/CoordinateFrames/eckart_embedding.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [eckart_permutation](Numputils/CoordinateFrames/eckart_permutation.md)   
 </div>
    <div class="col" markdown="1">
 [eckart_rmsd](Numputils/CoordinateFrames/eckart_rmsd.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [incremental_eckart_rmsd](Numputils/CoordinateFrames/incremental_eckart_rmsd.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [iterative_step_minimize](Numputils/Optimization/iterative_step_minimize.md)   
 </div>
    <div class="col" markdown="1">
 [iterative_chain_minimize](Numputils/Optimization/iterative_chain_minimize.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [scipy_minimize](Numputils/Optimization/scipy_minimize.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GradientDescentStepFinder](Numputils/Optimization/GradientDescentStepFinder.md)   
 </div>
    <div class="col" markdown="1">
 [NewtonStepFinder](Numputils/Optimization/NewtonStepFinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [QuasiNewtonStepFinder](Numputils/Optimization/QuasiNewtonStepFinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ConjugateGradientStepFinder](Numputils/Optimization/ConjugateGradientStepFinder.md)   
 </div>
    <div class="col" markdown="1">
 [EigenvalueFollowingStepFinder](Numputils/Optimization/EigenvalueFollowingStepFinder.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NudgedElasticBandStepFinder](Numputils/Optimization/NudgedElasticBandStepFinder.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [jacobi_maximize](Numputils/Optimization/jacobi_maximize.md)   
 </div>
    <div class="col" markdown="1">
 [LineSearchRotationGenerator](Numputils/Optimization/LineSearchRotationGenerator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GradientDescentRotationGenerator](Numputils/Optimization/GradientDescentRotationGenerator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OperatorMatrixRotationGenerator](Numputils/Optimization/OperatorMatrixRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
 [displacement_localizing_rotation_generator](Numputils/Optimization/displacement_localizing_rotation_generator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [polyfit_maxima](Numputils/Optimization/polyfit_maxima.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [polyfit_minima](Numputils/Optimization/polyfit_minima.md)   
 </div>
    <div class="col" markdown="1">
 [polyfit_critical_points](Numputils/Optimization/polyfit_critical_points.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [peak_fit_maxiumum](Numputils/Optimization/peak_fit_maxiumum.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GeometricTransformation](Numputils/GeometricTransformations/GeometricTransformation/GeometricTransformation.md)   
 </div>
    <div class="col" markdown="1">
 [TransformationFunction](Numputils/GeometricTransformations/TransformationFunction/TransformationFunction.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [AffineTransform](Numputils/GeometricTransformations/AffineTransform/AffineTransform.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [TranslationTransform](Numputils/GeometricTransformations/TranslationTransform/TranslationTransform.md)   
 </div>
    <div class="col" markdown="1">
 [RotationTransform](Numputils/GeometricTransformations/RotationTransform/RotationTransform.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [permutation_sign](Numputils/PermutationOps/permutation_sign.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [levi_cevita_maps](Numputils/PermutationOps/levi_cevita_maps.md)   
 </div>
    <div class="col" markdown="1">
 [levi_cevita_tensor](Numputils/PermutationOps/levi_cevita_tensor.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [levi_cevita_dot](Numputils/PermutationOps/levi_cevita_dot.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [normalize_commutators](Numputils/PermutationOps/normalize_commutators.md)   
 </div>
    <div class="col" markdown="1">
 [commutator_terms](Numputils/PermutationOps/commutator_terms.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [commutator_evaluate](Numputils/PermutationOps/commutator_evaluate.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [permutation_cycles](Numputils/PermutationOps/permutation_cycles.md)   
 </div>
    <div class="col" markdown="1">
 [enumerate_permutations](Numputils/PermutationOps/enumerate_permutations.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -1120,9 +1142,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-112c02" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-112c02"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-75ad9c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-75ad9c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-112c02" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-75ad9c" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -1172,9 +1194,9 @@ Any lowish-level numerical operations that need to be shared go here.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-51462a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-51462a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-1306d1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1306d1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-51462a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1306d1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
