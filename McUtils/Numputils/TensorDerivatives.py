@@ -30,6 +30,7 @@ __all__ = [
     "vec_cross_deriv",
     "vec_anglecos_deriv",
     "vec_anglesin_deriv",
+    "vec_normal_deriv",
     "vec_dihed_deriv",
     "vec_plane_angle_deriv",
     "shift_expansion",
@@ -1330,6 +1331,36 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
     #
     # print([h.shape for h in huh])
     # print([h1.shape for h1 in huh_1])
+
+def vec_normal_deriv(A_expansion, B_expansion, order, up_vector=None,
+                     component_vectors=None,
+                     unit_expansions=None,
+                     unitized=False,
+                     planar=None,
+                     planar_threshold=None,
+                     normalize=True):
+
+    if normalize:
+        _, units = vec_anglesin_deriv(A_expansion, B_expansion, order,
+                                      up_vector=up_vector,
+                                      component_vectors=component_vectors,
+                                      unit_expansions=unit_expansions,
+                                      unitized=unitized,
+                                      planar=planar,
+                                      planar_threshold=planar_threshold,
+                                      return_unit_vectors=True)
+        return units
+    else:
+        if is_numeric(order):
+            max_order = order
+        else:
+            max_order = max(order)
+        if not unitized:
+            A_expansion = vec_norm_unit_deriv(A_expansion, max_order)[1]
+            B_expansion = vec_norm_unit_deriv(B_expansion, max_order)[1]
+
+        vec_cross = vec_cross_deriv(A_expansion, B_expansion, order=max_order)
+        return vec_cross
 
 def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
                     B_norms=None, planar=None, planar_threshold=None, up_vector=None):

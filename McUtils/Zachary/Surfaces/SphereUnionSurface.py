@@ -1454,13 +1454,15 @@ class SphereUnionSurface:
             return figure
 
 class SphereUnionSurfaceMesh:
-    def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, normals=None):
+    def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None):
         self.surf = surf
         self.verts = verts
         self.inds = inds
         self.densities = densities
+        self.vert_map = vert_map
         self.tri_map = tri_map
         self._normals = normals
+        self._derivative_term_cache = {}
 
     def surface_area(self, return_components=False):
         dm = nput.distance_matrix(self.verts)
@@ -1486,6 +1488,112 @@ class SphereUnionSurfaceMesh:
         else:
             return np.sum(np.abs(comps))
 
+    def normal_derivatives(self, order=1):
+        i_list, j_list, k_list = self.inds.T
+        terms = [
+            nput.normal_deriv(self.verts, i, j, k, order=order,
+                              cache=self._derivative_term_cache) #TODO: handle the broadcasting properly in `normal_deriv`
+            for i, j, k in zip(i_list, j_list, k_list)
+        ]
+        return [np.array(e) for e in zip(*terms)]
+    def _dist_deriv(self, i_list, j_list, order):
+        terms = [
+            nput.dist_deriv(self.verts, i, j, order=order,
+                              cache=self._derivative_term_cache)
+            for i, j in zip(i_list, j_list)
+        ]
+        return [np.array(e) for e in zip(*terms)]
+
+    def area_derivatives(self, order=1, return_components=False):
+        i_list, j_list, k_list = self.inds.T
+        terms = []
+        for i, j, k in zip(i_list, j_list, k_list):
+            n_a = nput.dist_deriv(self.verts, i, j, order=order, cache=self._derivative_term_cache)
+            n_b = nput.dist_deriv(self.verts, j, k, order=order, cache=self._derivative_term_cache)
+            n_c = nput.dist_deriv(self.verts, k, i, order=order, cache=self._derivative_term_cache)
+            # no reason to handle a bunch of zeros
+            subterms = [np.zeros_like(a) for a in n_a]
+
+            # deriv contribs look like (n_verts*3, ...)
+            # reshape each term and subsample only relevant portions
+            indices = np.concatenate([np.arange(3) + 3*i, np.arange(3) + 3*j, np.arange(3) + 3*k], axis=0)
+            n_a = [n[np.ix_(*[indices] * m)] if m > 0 else n for m,n in enumerate(n_a)]
+            n_b = [n[np.ix_(*[indices] * m)] if m > 0 else n for m,n in enumerate(n_b)]
+            n_c = [n[np.ix_(*[indices] * m)] if m > 0 else n for m,n in enumerate(n_c)]
+
+            s = nput.scale_expansion(nput.add_expansions(n_a, n_b, n_c), 1/2)
+            da, db, dc = (
+                             nput.subtract_expansions(s, n_a),
+                             nput.subtract_expansions(s, n_b),
+                             nput.subtract_expansions(s, n_c)
+            )
+            tri_term = nput.scalarprod_deriv(
+                nput.scalarprod_deriv(
+                    nput.scalarprod_deriv(s, da, order),
+                    db, order
+                ),
+                dc, order
+            )
+            tris = nput.scalarpow_deriv(tri_term, -1/2, order)
+
+            subterms[0] = tris[0]
+            for m,(t,s) in enumerate(zip(subterms, tris)):
+                if m == 0:
+                    continue
+                else:
+                    t[np.ix_(*[indices] * m)] = s
+            terms.append(subterms)
+
+        tris = [np.array(e) for e in zip(*terms)]
+        if return_components:
+            return tris
+        else:
+            return [np.sum(t, axis=0) for t in tris]
+
+    def centroid_derivatives(self, order=1, return_components=False):
+        i, j, k = self.inds.T
+        # a scaled diagonal (3*n_verts, n_tris, 3)
+        centroids = np.average(self.verts[self.inds], axis=-2)
+        expansion = [centroids]
+        if order > 0:
+            dx = np.zeros((len(i), 3*len(self.verts), 3))
+            n = np.arange(len(i))
+            for a in range(3):
+                dx[n, i*3+a, a] = 1/3
+                dx[n, j*3+a, a] = 1/3
+                dx[n, k*3+a, a] = 1/3
+            expansion.append(dx)
+        for m in range(2, order+1):
+            dx = np.zeros((len(i), 3*len(self.verts),) + (3,) * m)
+            expansion.append(dx)
+        return expansion
+
+    def volume_derivatives(self, order=1, return_components=False,
+                           normal_order=None,
+                           area_order=None,
+                           centroid_order=None):
+        # from ...Profilers import Timer
+        # with Timer('normals'):
+        nd = self.normal_derivatives(order=order if normal_order is None else normal_order)
+        # with Timer('areas'):
+        ad = self.area_derivatives(order=order if area_order is None else area_order, return_components=True)
+        # with Timer('centroid'):
+        cd = self.centroid_derivatives(order=order if centroid_order is None else centroid_order)
+
+        # with Timer('mult'):
+        #TODO: subsample this so only relevant tris are manipulated at once
+        terms = nput.scale_expansion(
+            nput.scalarprod_deriv(ad,
+                                  nput.tensordot_deriv(cd, nd, order=order, axes=[-1, -1], shared=1),
+                                  order=order),
+            1/3
+        )
+
+        if return_components:
+            return terms
+        else:
+            return [np.sum(t, axis=0) for t in terms]
+
     @property
     def normals(self):
         if self._normals is None:
@@ -1506,6 +1614,7 @@ class SphereUnionSurfaceMesh:
                        occlusion_type='complete',
                        occlusion_tolerance=0.00001,
                        check_normals=True,
+                       vert_map=None,
                        **etc):
         pts = np.asanyarray(pts)
         if occlusion_type is None:
@@ -1554,6 +1663,8 @@ class SphereUnionSurfaceMesh:
             point_indexing = np.unique(all_tris.flatten())
 
             pts = pts[point_indexing,]
+            if vert_map is not None:
+                vert_map = vert_map[point_indexing,]
             remapping = np.full(len(points_mask), -1, dtype=int)
             remapping[point_indexing] = np.arange(len(point_indexing))
             all_tris = remapping[all_tris]
@@ -1573,6 +1684,7 @@ class SphereUnionSurfaceMesh:
                 pts,
                 all_tris,
                 tri_map=tri_map,
+                vert_map=vert_map,
                 **etc
             )
         else:
@@ -1580,12 +1692,19 @@ class SphereUnionSurfaceMesh:
 
 
     @classmethod
-    def from_subclouds(cls, point_clouds, *, centers, radii, mesh_type='convex', occlusion_type='partial', **mesh_kwargs):
+    def from_subclouds(cls, point_clouds, *, centers, radii, mesh_type='convex', occlusion_type='partial',
+                       vert_map=None,
+                       **mesh_kwargs):
         if dev.str_is(mesh_type, 'convex'):
             mesh_type = spat.ConvexHull
         all_tris = []
         all_points = np.concatenate(point_clouds, axis=0)
         offset = 0
+        if vert_map is None:
+            vert_map = np.concatenate([
+                    np.full(len(t), i)
+                    for i, t in enumerate(point_clouds)
+                ])
         for t in point_clouds:
             if len(t) > 3:
                 hull = mesh_type(t, **mesh_kwargs)
@@ -1596,7 +1715,8 @@ class SphereUnionSurfaceMesh:
             all_tris,
             centers=centers,
             radii=radii,
-            occlusion_type=occlusion_type
+            occlusion_type=occlusion_type,
+            vert_map=vert_map
         )
 
 
