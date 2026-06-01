@@ -2240,7 +2240,7 @@ def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, cont
         for n, (p_i, q_i) in enumerate(perms):
             A, B, delta = rotation_generator(mat, p_i, q_i)
 
-            if delta > 0:
+            if delta > contrib_tol:
                 total_delta += delta
 
                 new_pi = A * mat[:, p_i] + B * mat[:, q_i]
@@ -2401,7 +2401,7 @@ class OperatorMatrixRotationGenerator:
         cur_val = sum(self.one_e_func(f) for f in [f_i, f_j])
         a, b, c = self.mat_func(f_i, f_j)
 
-        test_mat = np.array([[a, b], [b, c]])
+        # test_mat = np.array([[a, b], [b, c]])
         # rot = np.linalg.eigh(test_mat)[1] # do this analytically...
         # print(rot)
         # cos_g = rot[0, 0]
