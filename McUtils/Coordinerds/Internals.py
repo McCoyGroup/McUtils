@@ -1856,6 +1856,7 @@ def _validate_dihed_triangulation(mod_sets, key, internals, adding=None):
 
 def get_internal_triangles_and_dihedrons(internals,
                                          canonicalize=True,
+                                         base=None,
                                          construct_shapes=True,
                                          prune_incomplete=True,
                                          validate=False,
@@ -1865,8 +1866,27 @@ def get_internal_triangles_and_dihedrons(internals,
     dict[tuple[int, int, int], nput.TriangleData],
     dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]
 ]:
-    tri_sets:dict[tuple[int],set] = {}
-    dihed_sets:dict[tuple[int],set] = {}
+    if base is None:
+        tri_sets:dict[tuple[int],set] = {}
+        dihed_sets:dict[tuple[int],set] = {}
+    else:
+        tri_sets, dihed_sets = base
+        tri_sets = {
+            k: (
+                {s for s, c in v._asdict().items() if v is not None}
+                    if hasattr(v, "_asdict") else
+                v
+            )
+            for k, v in tri_sets.items()
+        }
+        dihed_sets = {
+            k: (
+                {s for s, c in v._asdict().items() if v is not None}
+                    if hasattr(v, "_asdict") else
+                v
+            )
+            for k, v in dihed_sets.items()
+        }
     for coord in internals:
         if canonicalize:
             coord = canonicalize_internal(coord)
@@ -2346,13 +2366,29 @@ def get_triangulation_internals(
             for v in t if v is not None
         )
 
-def get_core_triangulation(internal_bag, targets, intersection='partial', **kwargs):
-    target_set = {a for t in targets for a in t}
+def get_core_triangulation(internal_bag, targets, intersection='partial', cache=None, **kwargs):
+    if cache is None:
+        cache = {}
+    target_set = frozenset(a for t in targets for a in t)
     if dev.str_in(intersection, 'partial'):
         subinternals = [i for i in internal_bag if any(ii in target_set for ii in i)]
     else:
         subinternals = [i for i in internal_bag if all(ii in target_set for ii in i)]
-    return get_internal_triangles_and_dihedrons(subinternals, **kwargs)
+    key = (intersection, target_set)
+    if key not in cache:
+        cache[key] = {}
+    subache = cache[key]
+    n = len(subinternals)
+    if n not in subache:
+        if len(subache) == 0:
+            tri = get_internal_triangles_and_dihedrons(subinternals, **kwargs)
+        else:
+            nearest = max(subache.keys())
+            extra = subinternals[-(n-nearest):]
+            cur = subache[nearest]
+            tri = get_internal_triangles_and_dihedrons(extra, base=cur, **kwargs)
+        subache[n] = tri
+    return subache[n]
 
 def _merge_shapes(new_shapes, old_shapes, perms, perm_invs, prop_func,
                   in_place=False,
@@ -3041,6 +3077,8 @@ def find_internal_conversion(internals, targets,
                     n in {2, 3}
                     or allow_ambiguous_completions
             ):
+                if allow_ambiguous_completions:
+                    raise ValueError("!")
                 for a, v in dihedrals.items():
                     dihed = v
                     completion_handler = None
@@ -4200,7 +4238,7 @@ class InternalCoordinateGraph:
     A graph mapping out the connections between a set of atoms based on the given set of internals
     """
     __slots__ = ['internals', 'atoms', 'triangulation',
-                 '_completion_cache', '_conversions', '_unreachable', '_expanded_internals']
+                 '_completion_cache', '_conversions', '_unreachable', '_expanded_internals', '_tri_cache']
     def __init__(self, internals, atoms=None, triangles_and_dihedrons=None):
         self.internals = internals
         if atoms is None:
@@ -4213,15 +4251,21 @@ class InternalCoordinateGraph:
         self._conversions = {}
         self._unreachable = {}
         self._expanded_internals = None
+        self._tri_cache = {}
         # we map the unreachable set to the possible completions that _could_ have completed it
         # this way when we add an internal, we can check to see if there are any previously unreachable
         # coordinates that need an update, and then if those need an upd
 
+    def get_target_triangulation(self, internals, target):
+        return get_core_triangulation(internals, target, cache=self._tri_cache)
     def enumerate_matching_dihedrons(self, target_coord):
         if self._expanded_internals is None:
             tri = self.triangulation
         else:
             tri = self._expanded_internals[1]
+        if tri is None:
+            ints, _, _ = self._get_expanded_internals(update_triangulation=False)
+            tri = self.get_target_triangulation(ints, [target_coord])
         for i,d in tri[1].items():
             pos = []
             for x in target_coord:
@@ -4319,14 +4363,14 @@ class InternalCoordinateGraph:
                and i not in self._unreachable
         ]
         if len(target_internals) > 0:
-            expanded_internals, expanded_triangulation, expanded_intersections = self._get_expanded_internals()
+            expanded_internals, expanded_triangulation, expanded_intersections = self._get_expanded_internals(update_triangulation=False)
             index_mapping = [self._make_conversion(self._conversions.get(i)) for i in expanded_internals]
             conversions = []
             shapes = []
             for t in target_internals:
                 c, s = find_internal_conversion(expanded_internals,
                                                 t,
-                                                triangles_and_dihedrons=get_core_triangulation,
+                                                triangles_and_dihedrons=self.get_target_triangulation,
                                                 include_shapes=True,
                                                 allow_completion=True,
                                                 return_conversions=True,
@@ -4344,7 +4388,7 @@ class InternalCoordinateGraph:
             # this gives us the basic completeable set of coordinates
             new_conv = {i:c for i,c in zip(target_internals, conversions) if c is not None}
             if len(new_conv) > 0:
-                self._update_conversions(new_conv)
+                self._update_conversions(new_conv, update_triangulation=False)
 
 
             # if a coordinate _wasn't_ possible to complete, we want to
@@ -4415,7 +4459,7 @@ class InternalCoordinateGraph:
                                         target:([key_map[x] for x in possible_conversions[kl][0]],
                                                 kl, unconverted_k,
                                                 possible_conversions[kl])
-                                    })
+                                    }, update_triangulation=False)
                                     break
                                 else:
                                     self._unreachable.update(unreachable_edits)
