@@ -1260,7 +1260,8 @@ def add_missing_zmatrix_bonds(
 def make_zmatrix_tree(zm):
     graph = {}
     for n,(i,j,k,l) in enumerate(zm):
-        parents = tuple(x for x in (j, k, l)[:n] if x >= 0)
+        i = int(i)
+        parents = tuple(int(x) for x in (j, k, l)[:n] if x >= 0)
         if i not in graph:
             graph[i] = {
                 # 'parents': [], # ordered
@@ -1272,11 +1273,12 @@ def make_zmatrix_tree(zm):
                 graph[x]['children'].add(i)
     return graph
 
-def zmatrix_adjacency_matrix(zm, child_type='multi'):
+def zmatrix_adjacency_matrix(zm, child_type='multi', penalty_atoms=None):
     adj_mat = np.zeros((len(zm),len(zm)), dtype=bool)
     if not isinstance(zm, dict):
         zm = make_zmatrix_tree(zm)
-    zm_atoms = sorted(zm.keys(), key=lambda x: len(zm[x]['parents']))
+    zm_atoms = sorted(zm.keys(),
+                      key=lambda x: len(zm[x]['parents']) if penalty_atoms is None or x not in penalty_atoms else 6)
     ord = {a:i for i,a in enumerate(zm_atoms)}
     for entry in zm_atoms:
         i = ord[entry]
@@ -1295,11 +1297,11 @@ def zmatrix_from_tree(zm, check_cycles=True, chain_order=None, check_unique_root
     if check_unique_root:
         zm_atoms = sorted(zm.keys(), key=lambda x: len(zm[x]['parents']))
         if len(zm[zm_atoms[0]]['parents']) != 0:
-            raise ValueError(f"root atom has wrong number of parents in {zm_atoms}")
+            raise ValueError(f"root atom ({zm_atoms[0]}) has wrong number of parents in {zm_atoms}, got {len(zm[zm_atoms[0]]['parents'])}")
         if len(zm) > 1 and len(zm[zm_atoms[1]]['parents']) != 1:
-            raise ValueError(f"first child atom has wrong number of parents in {zm_atoms}")
+            raise ValueError(f"first child atom ({zm_atoms[1]}) has wrong number of parents in {zm_atoms}, got {len(zm[zm_atoms[1]]['parents'])}")
         if len(zm) > 2 and len(zm[zm_atoms[2]]['parents']) != 2:
-            raise ValueError(f"second child atom has wrong number of parents in {zm_atoms}")
+            raise ValueError(f"second child atom ({zm_atoms[2]}) has wrong number of parents in {zm_atoms}, got {len(zm[zm_atoms[2]]['parents'])}")
 
     if chain_order is None:
         if check_cycles:
@@ -1350,6 +1352,10 @@ def zmatrix_from_tree(zm, check_cycles=True, chain_order=None, check_unique_root
                     if all(pp in chain_order for pp in p):
                         break
                 else:
+                    print(chain_order)
+                    print(
+                        {a:zm[a]['parents'] for a in rem}
+                    )
                     raise ValueError("couldn't add any atoms to tree based on base order?")
                 chain_order.append(a)
                 rem.pop(i)
@@ -1382,7 +1388,12 @@ def check_zmatrix_coordinate_constraint(zm, coord):
 
     return False
 
-def _adjust_zm_parents(zm, i, new, constraint_map):
+def _adjust_zm_parents(zm, i, new, constraint_map, validate=False):
+    backup = {
+        o: {'parents':d['parents'], 'children':d['children'].copy()}
+        for o, d in zm.items()
+    }
+
     p1 = zm[i]['parents']
     zm[i]['parents'] = new
     if all(
@@ -1390,7 +1401,10 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
             for c in constraint_map.keys()
     ):
         for o in p1:
-            zm[o]['children'].remove(i)
+            try:
+                zm[o]['children'].remove(i)
+            except KeyError:
+                ...
         for o in new:
             zm[o]['children'].add(i)
 
@@ -1401,10 +1415,8 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
         chain_order, _ = spg.csgraph.depth_first_order(g, 0)
         chain_order: list[int] = [zm_atoms[c] for c in chain_order]
         ord_map = {o: i for i, o in enumerate(chain_order)}
-        backup = {
-            o: {'parents':d['parents'], 'children':d['children'].copy()}
-            for o, d in zm.items()
-        }
+        for z in zm:
+            if z not in ord_map: ord_map[z] = len(ord_map)
         # recompute parents for the modified Z-matrix
         zm = {
             o: {'parents':d['parents'], 'children':set()}
@@ -1442,8 +1454,11 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
                     if len(new_parents) == 3:
                         break
                 else:
-                    new_parents.extend(chain_order[:n + 1])
+                    new_parents.extend(c for c in chain_order[:n + 1] if c not in new_parents)
                     new_parents = new_parents[:3]
+            if validate:
+                if len(np.unique(new_parents)) < len(new_parents):
+                    raise ValueError(o, new_parents)
             for p in new_parents:
                 zm[p]['children'].add(o)
             zd['parents'] = tuple(new_parents)
@@ -1452,6 +1467,13 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
                 check_zmatrix_coordinate_constraint(zm, c)
                 for c in constraint_map.keys()
         ):
+            for z,d in zm.items():
+                for p in d['parents']:
+                    zm[p]['children'].add(z)
+            if validate:
+                for z, d in zm.items():
+                    if len(np.unique(d['parents'])) < len(d['parents']):
+                        raise ValueError(z, d)
             return True, zm
         else:
             for o, d in backup.items():
@@ -1469,7 +1491,9 @@ def enforce_required_zmatrix_coordinates(zm,
                                          required_coordinates=None,
                                          root_coordinates=None,
                                          isolated_coordinates=None,
-                                         validate=False):#, chain_order=None):
+                                         reparent_isolated_coordinates=True,
+                                         reparent_root_coordinates=True,
+                                         validate=False):  # , chain_order=None):
     if (
             required_coordinates is None
             and root_coordinates is None
@@ -1487,13 +1511,10 @@ def enforce_required_zmatrix_coordinates(zm,
     zm_og = zm
     if not isinstance(zm, dict):
         zm = make_zmatrix_tree(zm)
-    # else:
-    #     if chain_order is None:
-    #         zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm)
-    #         g = spg.csr_matrix(zm_adj_mat)
-    #         # TODO: ensure this is the longest chain
-    #         chain_order, _ = spg.csgraph.depth_first_order(g, zm_atoms[0])
-    #         chain_order = [zm_atoms[c] for c in chain_order]
+    if validate:
+        for z,d in zm.items():
+            if len(np.unique(d['parents'])) < len(d['parents']):
+                raise ValueError(z, d)
 
     constraint_map = {
         c: check_zmatrix_coordinate_constraint(zm, c)
@@ -1510,6 +1531,128 @@ def enforce_required_zmatrix_coordinates(zm,
         for c, v in constraint_map.items()
         if v
     }
+
+    # for all isolated coordinates, we modify the base tree to remove them as parents
+    # whenever possible
+    if reparent_isolated_coordinates and isolated_coordinates is not None:
+        all_ij = set()
+        ref_coords = [
+            (c[0], c[-1])
+            for c in isolated_coordinates
+        ]
+        # sort isolated coordinates so they share `i` as often as possible
+        ref_counts = itut.counts(itertools.chain.from_iterable(ref_coords))
+        # we have to ensure that all interior refs are ordered properly
+        for n,c in enumerate(isolated_coordinates):
+            i, j = c[0], c[-1]
+            if ref_counts[i] < ref_counts[j]:
+                c = tuple(reversed(c))
+                i, j = c[0], c[-1]
+            follow_refs = set(sum(ref_coords[n+1:], ())) - {i, j}
+            print(i, j, follow_refs)
+            if i not in all_ij:
+                p1 = zm[i]['parents']
+                c1 = zm[i]['children']
+                all_ij.add(i)
+                for z, d in zm.items():
+                    if z in all_ij: continue
+                    pd = d['parents']
+                    try:
+                        x = pd.index(i)
+                    except ValueError:
+                        ...
+                    else:
+                        pp = tuple(
+                            p for p in p1 if p not in pd
+                        ) + tuple(
+                            p for p in c1
+                            if p not in pd and p != z
+                        )
+                        pd = pd[:x] + pp[:1] + pd[x+1:]
+                    success, zm = _adjust_zm_parents(zm, z, pd, constraint_map, validate=validate)
+                zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single', penalty_atoms=(i, j))
+                p1 = c[1:]
+                if len(p1) < 3:
+                    p1 = p1 + tuple(x for x in reversed(zm_atoms)
+                                    if x not in all_ij and x not in c and x not in follow_refs)[:(3 - len(p1))]
+                success, zm = _adjust_zm_parents(zm, i, p1, constraint_map, validate=validate)
+            if j not in all_ij:
+                p2 = zm[j]['parents']
+                c2 = zm[j]['children']
+                all_ij.add(j)
+                for z, d in zm.items():
+                    if z in all_ij: continue
+                    pd = d['parents']
+                    try:
+                        x = pd.index(i)
+                    except ValueError:
+                        ...
+                    else:
+                        pp = tuple(
+                            p for p in p2 if p not in pd
+                        ) + tuple(
+                            p for p in c2
+                            if p not in pd and p != z
+                        )
+                        pd = pd[:x] + pp[:1] + pd[x + 1:]
+                    success, zm = _adjust_zm_parents(zm, z, pd, constraint_map, validate=validate)
+                zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single', penalty_atoms=(i, j))
+                p2 = c[-2:0:-1]
+                if len(p2) < 3:
+                    p2 = p2 + tuple(x for x in reversed(zm_atoms)
+                                    if x not in all_ij and x not in c and x not in follow_refs)[:(3 - len(p2))]
+                success, zm = _adjust_zm_parents(zm, j, p2, constraint_map, validate=validate)
+
+        zm_atoms, zm_adj_mat = zmatrix_adjacency_matrix(zm, child_type='single', penalty_atoms=all_ij)
+        success, zm = _adjust_zm_parents(zm, zm_atoms[0], (), constraint_map, validate=validate)
+        success, zm = _adjust_zm_parents(zm, zm_atoms[1], (zm_atoms[0],), constraint_map, validate=validate)
+        success, zm = _adjust_zm_parents(zm, zm_atoms[2], (zm_atoms[0], zm_atoms[1]), constraint_map, validate=validate)
+
+        print(zm_atoms)
+        import pprint
+        pprint.pprint(zm)
+    if reparent_root_coordinates and root_coordinates is not None:
+        all_ij = set()
+        ref_coords = [
+            (c[0], c[-1])
+            for c in root_coordinates
+        ]
+        # sort coordinates so they share `i` as often as possible
+        ref_counts = itut.counts(itertools.chain.from_iterable(ref_coords))
+        # find the root ordering by incidence within this group
+        root_counts = itut.counts(itertools.chain.from_iterable(c[1:-1] for c in root_coordinates))
+        root_ord = sorted(root_counts.keys(), key=lambda x:root_counts[x], reverse=True)
+        for n,o in enumerate(root_ord):
+            ref_counts[o] = -100 + n
+
+        if len(root_ord) > 0:
+            success, zm = _adjust_zm_parents(zm, root_ord[0], (), constraint_map, validate=validate)
+        if len(root_ord) > 1:
+            success, zm = _adjust_zm_parents(zm, root_ord[1], (root_ord[0],), constraint_map, validate=validate)
+        if len(root_ord) > 2:
+            success, zm = _adjust_zm_parents(zm, root_ord[2], (root_ord[0], root_ord[1]), constraint_map, validate=validate)
+
+        for n,c in enumerate(root_coordinates):
+            i, j = c[0], c[-1]
+            if ref_counts[i] < ref_counts[j]:
+                c = tuple(reversed(c))
+                i, j = c[0], c[-1]
+            follow_refs = set(sum(ref_coords[n+1:], ())) - {i, j}
+            if i not in all_ij:
+                all_ij.add(i)
+                p1 = c[1:]
+                if len(p1) < 3:
+                    p1 = p1 + tuple(x for x in reversed(root_ord)
+                                    if x not in all_ij and x not in c and x not in follow_refs)[:(3 - len(p1))]
+                success, zm = _adjust_zm_parents(zm, i, p1, constraint_map, validate=validate)
+            if j not in all_ij:
+                all_ij.add(j)
+                p2 = c[-2:0:-1]
+                if len(p2) < 3:
+                    p2 = p2 + tuple(x for x in reversed(root_ord)
+                                    if x not in all_ij and x not in c and x not in follow_refs)[:(3 - len(p2))]
+                success, zm = _adjust_zm_parents(zm, j, p2, constraint_map, validate=validate)
+
     modified = False
     for m in missing_constraints:
         # handle cases differently
@@ -1534,6 +1677,7 @@ def enforce_required_zmatrix_coordinates(zm,
             rem = np.setdiff1d(np.arange(len(p1)), x)
             p1 = tuple(p1[z] for z in np.concatenate([x, rem]))
             zm[i]['parents'] = p1
+            if validate and len(np.unique(p1)) < len(p1): raise ValueError(p1)
             constraint_map[m] = p1
             continue
         del p1
@@ -1552,6 +1696,7 @@ def enforce_required_zmatrix_coordinates(zm,
             x = [p2.index(y) for y in reversed(m[:-1])]
             rem = np.setdiff1d(np.arange(len(p2)), x)
             p2 = tuple(p2[z] for z in np.concatenate([x, rem]))
+            if validate and len(np.unique(p2)) < len(p2): raise ValueError(p2)
             zm[j]['parents'] = p2
             constraint_map[m] = p2
             continue
@@ -1593,23 +1738,36 @@ def enforce_required_zmatrix_coordinates(zm,
             else:
                 new2 = p2[:1] + list(reversed(m[:-1]))
 
-            ref_choices = [new1, new2]
+            ref_choices = [tuple(new1), tuple(new2)]
         else:
             ref_choices = [m[1:], tuple(reversed(m[:-1]))]
 
         # check that we haven't broken any constraints
         # TODO: write targeted loops
-        success, zm = _adjust_zm_parents(zm, i, ref_choices[0], constraint_map)
+        success, zm = _adjust_zm_parents(zm, i, ref_choices[0], constraint_map, validate=validate)
         if success:
+            if validate:
+                d = zm[i]
+                if len(np.unique(d['parents'])) < len(d['parents']):
+                    raise ValueError(i, d)
             constraint_map[m] = ref_choices[0]
             continue
 
-        success, zm = _adjust_zm_parents(zm, j, ref_choices[1], constraint_map)
+        success, zm = _adjust_zm_parents(zm, j, ref_choices[1], constraint_map, validate=validate)
         if success:
+            if validate:
+                d = zm[j]
+                if len(np.unique(d['parents'])) < len(d['parents']):
+                    raise ValueError(j, d)
             constraint_map[m] = ref_choices[1]
             continue
 
         raise ValueError(f"couldn't satisfy constraint {m} in {coords}")
+
+    if validate:
+        for c, v in constraint_map.items():
+            if len(np.unique(v)) < len(v):
+                raise ValueError(c, v)
 
     if not isinstance(zm_og, dict):
         base_order = [z[0] for z in zm_og]
@@ -1631,10 +1789,15 @@ def enforce_required_zmatrix_coordinates(zm,
                     ):
                         scores[z] -= 1
         base_order = sorted(base_order, key=lambda x: scores[x])
+        if validate:
+            for z, d in zm.items():
+                if len(np.unique(d['parents'])) < len(d['parents']):
+                    raise ValueError(z, d)
         zm = zmatrix_from_tree(zm, base_order=base_order)
         if validate:
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
             if not is_valid:
+                zm = np.array(zm)
                 raise ValueError(f"after coordinate enforcement zmatrix invalid ({reason}) in {zm}")
 
             zmatrix_indices(
@@ -1652,7 +1815,8 @@ def bond_graph_zmatrix(
         validate_additions=True,
         required_coordinates=None,
         isolated_coordinates=None,
-        root_coordinates=None
+        root_coordinates=None,
+        enforce_requirements=True
 ):
     submats = []
     backbone = fragments[0]
@@ -1675,7 +1839,25 @@ def bond_graph_zmatrix(
 
     fragments = fragments[1:]
     fused = chain_zmatrix(len(backbone))
-    backbone = list(backbone)
+    fragment_scoring = {}
+    if isolated_coordinates is not None:
+        for c in isolated_coordinates:
+            i,j = c[0], c[-1]
+            fragment_scoring[i] = fragment_scoring.get(i, 0) + 1
+            fragment_scoring[j] = fragment_scoring.get(j, 0) + 1
+            for x in c[1:-1]:
+                fragment_scoring[x] = fragment_scoring.get(x, 0) + .1
+
+
+    if root_coordinates is not None:
+        for c in root_coordinates:
+            i,j = c[0], c[-1]
+            fragment_scoring[i] = fragment_scoring.get(i, 0) - 1
+            fragment_scoring[j] = fragment_scoring.get(j, 0) - 1
+            for x in c[1:-1]:
+                fragment_scoring[x] = fragment_scoring.get(x, 0) - .1
+
+    backbone = sorted(backbone, key=lambda x: fragment_scoring.get(x, 0))
     while len(fragments) > 0:
         attachment_points = {}
         missing_frags = []
@@ -1686,6 +1868,7 @@ def bond_graph_zmatrix(
             if not nput.is_int(frag[0]):
                 frag = frag[0]
 
+            frag = sorted(frag, key=lambda x: fragment_scoring.get(x, 0))
             for f in frag:
                 attach = None
                 submap = edge_map.get(f)
@@ -1745,9 +1928,10 @@ def bond_graph_zmatrix(
                 raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
 
     if (
-            required_coordinates is not None
-            or isolated_coordinates is not None
-            or root_coordinates is not None
+            enforce_requirements and
+            (required_coordinates is not None
+             or isolated_coordinates is not None
+             or root_coordinates is not None)
     ):
         fused = enforce_required_zmatrix_coordinates(fused,
                                                      required_coordinates,
