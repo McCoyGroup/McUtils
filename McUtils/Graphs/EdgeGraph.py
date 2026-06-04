@@ -1680,6 +1680,7 @@ def uniquely_rigid(edges, ndim, l=None, natoms=None, ntest=5, points=None,
 
     base_rigidity, (R, rank) = statistically_rigid(edges, ndim, l=l, points=points, return_rigidity_matrix=True)
     if return_rigid_subgraphs:
+        raise NotImplementedError("tbd")
         # use the pebble game to identify rigid subgraphs and check their unique rigidty
         # tracker = GraphComponentTracker(ndim, l, track_components=True)
         # included = tracker.add_edges(edges)
