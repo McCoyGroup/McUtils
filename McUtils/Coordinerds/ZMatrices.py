@@ -36,7 +36,8 @@ __all__ = [
     "sort_complex_attachment_points",
     "complex_zmatrix",
     "graph_backbone_zmatrix",
-    "segmented_complex_backbone_zmatrix"
+    "segmented_complex_backbone_zmatrix",
+    "enforce_required_zmatrix_coordinates"
 ]
 
 
@@ -1464,7 +1465,25 @@ def _adjust_zm_parents(zm, i, new, constraint_map):
         zm[i]['parents'] = p1
     return False, zm
 
-def enforce_required_zmatrix_coordinates(zm, coords, validate=False):#, chain_order=None):
+def enforce_required_zmatrix_coordinates(zm,
+                                         required_coordinates=None,
+                                         root_coordinates=None,
+                                         isolated_coordinates=None,
+                                         validate=False):#, chain_order=None):
+    if (
+            required_coordinates is None
+            and root_coordinates is None
+            and isolated_coordinates is None
+    ):
+        raise ValueError('at least one of `required_coordinates`, `root_coordinates`, and `isolated_coordinates` must not be None')
+
+    coords = []
+    if required_coordinates is not None:
+        coords.extend(required_coordinates)
+    if root_coordinates is not None:
+        coords.extend(root_coordinates)
+    if isolated_coordinates is not None:
+        coords.extend(isolated_coordinates)
     zm_og = zm
     if not isinstance(zm, dict):
         zm = make_zmatrix_tree(zm)
@@ -1594,6 +1613,24 @@ def enforce_required_zmatrix_coordinates(zm, coords, validate=False):#, chain_or
 
     if not isinstance(zm_og, dict):
         base_order = [z[0] for z in zm_og]
+        scores = {z:0 for z in base_order}
+        if isolated_coordinates is not None: # sort base order to isolate key terms
+            for c in isolated_coordinates:
+                for z,d in zm.items():
+                    if (
+                            (z == c[0] and all(cc in d['parents'] for cc in c[1:]))
+                            or (z == c[-1] and all(cc in d['parents'] for cc in c[:-1]))
+                    ):
+                        scores[z] += 1
+        if root_coordinates is not None: # sort base order to isolate key terms
+            for c in root_coordinates:
+                for z,d in zm.items():
+                    if (
+                            (z == c[0] and all(cc in d['parents'] for cc in c[1:]))
+                            or (z == c[-1] and all(cc in d['parents'] for cc in c[:-1]))
+                    ):
+                        scores[z] -= 1
+        base_order = sorted(base_order, key=lambda x: scores[x])
         zm = zmatrix_from_tree(zm, base_order=base_order)
         if validate:
             is_valid, reason = validate_zmatrix(zm, return_reason=True)
@@ -1613,7 +1650,9 @@ def bond_graph_zmatrix(
         edge_map=None,
         reindex=True,
         validate_additions=True,
-        required_coordinates=None
+        required_coordinates=None,
+        isolated_coordinates=None,
+        root_coordinates=None
 ):
     submats = []
     backbone = fragments[0]
@@ -1705,9 +1744,15 @@ def bond_graph_zmatrix(
             if not is_valid:
                 raise ValueError(f"after reindexing zmatrix invalid ({reason}) in {fused}")
 
-    if required_coordinates is not None:
+    if (
+            required_coordinates is not None
+            or isolated_coordinates is not None
+            or root_coordinates is not None
+    ):
         fused = enforce_required_zmatrix_coordinates(fused,
                                                      required_coordinates,
+                                                     isolated_coordinates=isolated_coordinates,
+                                                     root_coordinates=root_coordinates,
                                                      validate=validate_additions)
     return fused
 
@@ -1821,6 +1866,8 @@ def complex_zmatrix(
         graph=None,
         reindex=True,
         required_coordinates=None,
+        isolated_coordinates=None,
+        root_coordinates=None,
         validate_additions=True
 ):
     if fragment_inds is None:
@@ -1908,9 +1955,15 @@ def complex_zmatrix(
             if not is_valid:
                 raise ValueError(f"new zmatrix after reindexing invalid ({reason}) in {zm}")
 
-    if required_coordinates is not None:
+    if (
+            required_coordinates is not None
+            or isolated_coordinates is not None
+            or root_coordinates is not None
+    ):
         zm = enforce_required_zmatrix_coordinates(zm,
                                                   required_coordinates,
+                                                  isolated_coordinates=isolated_coordinates,
+                                                  root_coordinates=root_coordinates,
                                                   validate=validate_additions)
 
     return zm
