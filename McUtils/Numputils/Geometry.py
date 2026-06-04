@@ -2644,6 +2644,7 @@ def composed_dihedral(d_ijka, d_ijkb): # gives d_ajkb
     d_ijkb = np.asanyarray(d_ijkb)
     diffs = d_ijkb - d_ijka
     ad = np.asanyarray(np.abs(diffs))
+    print(diffs, d_ijkb,  d_ijka)
     if ad.ndim == 0:
         if ad > np.pi:
             if diffs > 0:
@@ -2746,37 +2747,44 @@ _dihedron_point_map = {
     'Tz':(1, 0, 3, 2),
     'Tz_inv':(1, 3, 0, 2)
 }
-def dihedron_property_specifiers(base_specifier=None):
-    if base_specifier is None:
-        return {
-            k:dihedron_property_specifiers(k)
-            for k in _ddata_name_map
-        }
+_dp_cache = {}
+def dihedron_property_specifiers(base_specifier=None, use_cache=True):
+    if use_cache is not False:
+        if use_cache is True: use_cache = _dp_cache
+        if base_specifier not in use_cache:
+            use_cache[base_specifier] = dihedron_property_specifiers(base_specifier, use_cache=False)
+        return use_cache[base_specifier].copy()
     else:
-        if isinstance(base_specifier, str):
-            if base_specifier.endswith("_inv"):
-                spec = dihedron_property_specifiers(base_specifier.split("_")[0])
-                spec['sign'] *= -1
-                return spec
-            else:
-                return {
-                    "name":base_specifier,
-                    "index":_ddata_name_map[base_specifier],
-                    "coord":_dihedron_point_map[base_specifier],
-                    "sign":1
-                }
-        elif misc.is_int(base_specifier):
-            for k,v in _ddata_name_map.items():
-                if v == base_specifier:
-                    return dihedron_property_specifiers(k)
-            else:
-                raise ValueError(f"can't interpret specifier {base_specifier}")
+        if base_specifier is None:
+            return {
+                k:dihedron_property_specifiers(k)
+                for k in _ddata_name_map
+            }
         else:
-            for k,v in _dihedron_point_map.items():
-                if v == base_specifier:
-                    return dihedron_property_specifiers(k)
+            if isinstance(base_specifier, str):
+                if base_specifier.endswith("_inv"):
+                    spec = dihedron_property_specifiers(base_specifier.split("_")[0])
+                    spec['sign'] *= -1
+                    return spec
+                else:
+                    return {
+                        "name":base_specifier,
+                        "index":_ddata_name_map[base_specifier],
+                        "coord":_dihedron_point_map[base_specifier],
+                        "sign":1
+                    }
+            elif misc.is_int(base_specifier):
+                for k,v in _ddata_name_map.items():
+                    if v == base_specifier:
+                        return dihedron_property_specifiers(k)
+                else:
+                    raise ValueError(f"can't interpret specifier {base_specifier}")
             else:
-                raise ValueError(f"can't interpret specifier {base_specifier}")
+                for k,v in _dihedron_point_map.items():
+                    if v == base_specifier:
+                        return dihedron_property_specifiers(k)
+                else:
+                    raise ValueError(f"can't interpret specifier {base_specifier}")
 def _check_dihedron_type(ddata, inds):
     return all(
         ddata[i if not isinstance(i, str) else _ddata_name_map[i]] is not None
@@ -3940,6 +3948,11 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
         else:
             return convert
     else:
+        if not allow_ambiguous_completions and len(field_props['coord']) == 4:
+            if return_depth:
+                return depth, None
+            else:
+                return None
         if cache is None:
             cache = {}
         # check for triangle completability first...
@@ -4140,7 +4153,7 @@ def dihedron_pair_dihedral_angle_function(
                                     raise_on_missing=False,
                                     allow_completion=allow_completion,
                                     cache=cache)
-    if f1 is None:
+    if f2 is None:
         if raise_on_missing:
             raise ValueError(f"can't get dihedral ({a}, {b}, {c}, {y}) from {dihed2}")
         else:
