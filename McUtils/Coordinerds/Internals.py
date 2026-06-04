@@ -3498,7 +3498,10 @@ def enumarate_zmatrix_roots_from_triangles(atoms, tris, connectivity_graph):
             )
             groups = [
                 g for g in groups
-                if len(connectivity_graph[g[-1]]) > 4
+                if (
+                        len(connectivity_graph[g[-1]]) > 4
+                        or len(connectivity_graph[g[-1]]) == len(atoms) - 1
+                )
             ] # if only 4 we can't actually connect to anything else
             yield groups
 def construct_atom_connection_graph_from_triangulation(internals, tris, dihedrons):
@@ -3958,14 +3961,19 @@ def enumerate_zmatrices_from_internals(internals,
                 #                              **conversion_options)
                 # raise Exception()
                 if graph is None:
-                    yield zm, find_internal_conversion(internals, targets,
-                                                        triangles_and_dihedrons=triangles_and_dihedrons,
-                                                        **conversion_options)
+                    conv = find_internal_conversion(internals, targets,
+                                                    triangles_and_dihedrons=triangles_and_dihedrons,
+                                                    missing_val=None,
+                                                    **conversion_options)
+                    if conv is not None:
+                        yield zm, conv
                 else:
-                    yield zm, graph.find_conversions(targets,
+                    conv = graph.find_conversions(targets,
                                                      create_single=True,
-                                                     missing_val='raise',
+                                                     missing_val=None,
                                                      **conversion_options)
+                    if conv is not None:
+                        yield zm, conv
             else:
                 yield zm
     else:
@@ -3982,11 +3990,12 @@ def enumerate_zmatrices_from_internals(internals,
                     convs = [
                         graph.find_conversions(internals, extract_zmatrix_internals(zm),
                                                create_single=True,
-                                               missing_val='raise',
+                                               # missing_val='raise',
                                                **conversion_options)
                         for zm in zm_list
                     ]
-                yield zm_list, convs
+                if all(c is not None for c in convs):
+                    yield zm_list, convs
             else:
                 yield zm_list
 
