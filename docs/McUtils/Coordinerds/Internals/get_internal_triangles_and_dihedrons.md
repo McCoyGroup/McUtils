@@ -1,11 +1,11 @@
 # <a id="McUtils.Coordinerds.Internals.get_internal_triangles_and_dihedrons">get_internal_triangles_and_dihedrons</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1857)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1857?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1892)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1892?message=Update%20Docs)]
 </div>
 
 ```python
-get_internal_triangles_and_dihedrons(internals, canonicalize=True, base=None, construct_shapes=True, prune_incomplete=True, validate=False, allow_partially_defined=True, create_compound_dihedra=True, create_dihedra=True) -> 'tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]]': 
+get_internal_triangles_and_dihedrons(internals, canonicalize=True, base=None, base_internals=None, construct_shapes=True, prune_incomplete=True, validate=False, allow_partially_defined=True, create_compound_dihedra=True, add_dihedron_triangles=False, create_dihedra=True) -> 'tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]]': 
 ```
 
 
@@ -59,7 +59,7 @@ get_internal_triangles_and_dihedrons(internals, canonicalize=True, base=None, co
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/get_internal_triangles_and_dihedrons.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/get_internal_triangles_and_dihedrons.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1857?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1892?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
