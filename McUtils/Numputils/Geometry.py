@@ -4086,6 +4086,11 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                     full_args, base_args, rem_inds, base_inds, func = possible_conversions[kl]
                     # print('!', field_name, kl, sample_dihed)#convertable_keys)
                     completions = [convertable_keys[k][1] for k in kl]
+                    if any(c is None for c in completions):
+                        if return_depth:
+                            return depth + 1, None
+                        else:
+                            return None
                     base_arg_inds = [
                         _ddata_name_map[a]
                             if isinstance(a, str) else
