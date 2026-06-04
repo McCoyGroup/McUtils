@@ -2633,7 +2633,7 @@ def dihedral_from_ayXCz(a, y, X, C, z, use_cos=False):
         t = cost
     else:
         t = np.arccos(cost)
-    return z
+    return t
 def dihedral_from_bAXYCz(b, A, X, Y, C, z, use_cos=False):
     a = law_of_sines_dist(b, X+A, A)
     y = law_of_sines_dist(b, Y+C, Y)
@@ -2643,11 +2643,19 @@ def composed_dihedral(d_ijka, d_ijkb): # gives d_ajkb
     d_ijka = np.asanyarray(d_ijka)
     d_ijkb = np.asanyarray(d_ijkb)
     diffs = d_ijkb - d_ijka
-    mod_pos = np.where(np.abs(diffs) > np.pi)[0]
-    if len(mod_pos) > 0:
-        gz_pos = diffs[..., mod_pos] > 0
-        diffs[..., mod_pos[gz_pos]] -= 2*np.pi
-        diffs[..., mod_pos[~gz_pos]] += 2*np.pi
+    ad = np.asanyarray(np.abs(diffs))
+    if ad.ndim == 0:
+        if ad > np.pi:
+            if diffs > 0:
+                diffs -= 2 * np.pi
+            else:
+                diffs += 2 * np.pi
+    else:
+        mod_pos = np.abs(diffs) > np.pi
+        if np.any(mod_pos):
+            gz_pos = diffs > 0
+            diffs[mod_pos & gz_pos] -= 2*np.pi
+            diffs[mod_pos & (~gz_pos)] += 2*np.pi
     return diffs
 
 class DihedralSpecifierType(enum.Enum):
@@ -3888,6 +3896,9 @@ def sorted_dihedron_completions(sample_dihed:DihedralTetrahedronData, field_name
                 return_trie=True,
                 return_args=True
             )
+            if complete:
+                args, comp = conversion_specs
+                conversion_specs = [(args, {():(args, comp)})]
             cache[key] = (conversion_specs, None)
         conversion_specs, trie_expansions = cache[key]
     if trie_expansions is None:
@@ -3912,7 +3923,9 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                                raise_on_missing=True,
                                return_depth=False,
                                completion_handler=None,
+                               allow_ambiguous_completions=False,
                                depth=0,
+                               verbose=False,
                                cache=None):
     field_props = dihedron_property_specifiers(field_name)
     field_name = field_props['name']
@@ -4022,6 +4035,7 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                 for kl in pref_keys:
                     # print(depth*" ", kl, sep="")
                     if any(k in disallowed_conversions for k in kl): continue
+                    if not allow_ambiguous_completions and any(len(k) == 4 for k in kl): continue
                     # print(depth*" " + "~~"*15)
                     # print(depth*" " + field_name, kl)
                     for k in kl:

@@ -401,6 +401,8 @@ class InternalSpec:
         self._pruned_rads = None
         self._pruned_tri_di = None
         self._carried_atoms = [None] * len(coords)
+        self._graph = None
+
     @classmethod
     def from_zmatrix(cls, *zmats, additions=None, **opts):
         from .ZMatrices import extract_zmatrix_internals
@@ -444,12 +446,18 @@ class InternalSpec:
                                                                          triangles_and_dihedrons=self.get_triangulation(),
                                                                          return_conversions=False)
         return self._bond_graph
+    @property
+    def graph(self):
+        if self._graph is None:
+            self._graph = InternalCoordinateGraph(self.rad_set, atoms=self.atoms)
+        return self._graph
     def get_distance_conversions(self):
         if self._dist_convs is None:
-            self._dist_convs = get_internal_bond_graph(self.rad_set, self.atoms,
-                                                       triangles_and_dihedrons=self.get_triangulation(),
-                                                       return_conversions=True,
-                                                       complete_graph=True)
+            self._dist_convs = self.graph.get_bond_graph()
+            # self._dist_convs = get_internal_bond_graph(self.rad_set, self.atoms,
+            #                                            triangles_and_dihedrons=self.get_triangulation(),
+            #                                            return_conversions=True,
+            #                                            complete_graph=True)
         return self._dist_convs
     # def get_rad_conversion(self):
     #     if self._rad_conv is None:
@@ -665,10 +673,6 @@ class InternalSpec:
             )
             expansion = [transrot_deriv[1:]] + expansion
             inverses = [transrot_inv[1:]] + inverses
-            # print([e.shape for e in nput.concatenate_expansions(expansion, concatenate_values=True)],
-            #       [i.shape for i in nput.concatenate_expansions(inverses, concatenate_values=False)])
-            # for f,r in zip(inverses, expansion):
-            #     print([ff.shape for ff in f], [rr.shape for rr in r])
             inverses, expansion = nput.orthogonalize_transformations(zip(inverses, expansion), concatenate=False)
             expansion = nput.concatenate_expansions(expansion, concatenate_values=True)
             inverses = nput.concatenate_expansions(inverses, concatenate_values=False)
@@ -780,10 +784,15 @@ class InternalSpec:
                                 **deriv_opts):
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
         from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
+        # if order is None:
+        #     use_zmat = False
+        #     conv = self.get_dmat_conv()
+        # else:
         use_zmat = True
         conv = self.get_zmat_conv(raise_on_incomplete=False)
+        dm = self.get_dmat_conv()
         if conv[0] is None:
-            conv = self.get_dmat_conv()
+            conv = dm
             use_zmat = False
         if conv[0] is None:
             raise ValueError(f"insufficient to build Z-matrix or distance matrix fragments: {self.coords}")
@@ -825,7 +834,9 @@ class InternalSpec:
             else:
                 for perm, prep in zip(*conv):
                     dists = prep(coords)
-                    blocks.append([[nput.points_from_distance_matrix(dists, use_triu=True), perm]])
+                    # print("~~~", dists)
+                    # raise Exception(...)
+                    blocks.append([nput.points_from_distance_matrix(dists, use_triu=True), perm])
 
         if return_fragments:
             if order is not None: raise NotImplementedError("can't return derivatives of fragments alone")
@@ -842,22 +853,48 @@ class InternalSpec:
                 base_shape = coord.shape[:-2]
                 if carts.ndim == 2:
                     carts = nput.broadcast_constant(carts, base_shape, pad_base=True).copy()
-            x, y, z = np.moveaxis(carts[..., perm[:3], :], -2, 0)
-            u = y - x
-            v = z - x
-            norms = nput.vec_norms([u, v])
-            mod_locs = np.all(norms > 1e-8, axis=0)
-            if np.any(mod_locs):
-                u, v = nput.vec_normalize([u[mod_locs, :], v[mod_locs, :]], norms=norms[:, mod_locs])
-                a = nput.broadcast_constant([1, 0, 0], u.shape)
-                b = nput.broadcast_constant([0, 0, 1], u.shape)
-                r1 = nput.rotation_matrix(a, u)
-                z = np.reshape(b[..., np.newaxis, :] @ r1, u.shape)
-                normal = np.cross(u, v)
-                ang, cross = nput.vec_angles(normal, z, return_crosses=True)
-                frame = r1 @ nput.rotation_matrix(cross, ang)
-                coord[mod_locs] = coord[mod_locs] @ frame
-            coord = coord + x[..., np.newaxis, :]
+            if len(perm) > 2:
+                x, y, z = np.moveaxis(carts[..., perm[:3], :], -2, 0)
+                u = y - x
+                v = z - x
+                norms = nput.vec_norms([u, v])
+                mod_locs = np.all(norms > 1e-8, axis=0)
+                coord = coord - coord[..., (0,), :]
+                if np.any(mod_locs):
+                    # set up a consistent coordinate frame by taking
+                    # the embedding matrix of the first 3 new coords and putting
+                    # it in the u,v frame
+                    u, v = nput.vec_normalize([u[mod_locs, :], v[mod_locs, :]], norms=norms[:, mod_locs])
+                    a = nput.vec_normalize(coord[mod_locs, 1, :] - coord[mod_locs, 0, :])
+                    b = nput.vec_crosses(
+                        a,
+                        nput.vec_normalize(coord[mod_locs, 2, :] - coord[mod_locs, 0, :]),
+                        normalize=True
+                    )
+                    r1 = nput.rotation_matrix(a, u)
+                    z = np.reshape(b[..., np.newaxis, :] @ r1, u.shape)
+                    normal = np.cross(u, v)
+                    ang, cross = nput.vec_angles(normal, z, return_crosses=True)
+                    frame = r1 @ nput.rotation_matrix(cross, ang)
+                    coord[mod_locs] = coord[mod_locs] @ frame
+                coord = coord + x[..., np.newaxis, :]
+            elif len(perm) == 2:
+                x, y = np.moveaxis(carts[..., perm[:2], :], -2, 0)
+                u = y - x
+                norms = nput.vec_norms(u)
+                mod_locs = norms > 1e-8
+                coords = coords - coords[..., (0,), :]
+                if np.any(mod_locs):
+                    u = nput.vec_normalize(u[mod_locs, :], norms=norms[mod_locs])
+                    a = nput.vec_normalize(coords[mod_locs, 1, :] - coords[mod_locs, 0, :])
+                    r1 = nput.rotation_matrix(a, u)
+                    coords[mod_locs] = coords @ r1
+                coord = coord + x[..., np.newaxis, :]
+            else:
+                x = np.moveaxis(carts[..., perm[:1], :], -2, 0)
+                coords = coords - coords[..., (0,), :]
+                coord = coord + x[..., np.newaxis, :]
+
             carts[..., perm, :] = coord
 
         if order is None:
@@ -985,23 +1022,6 @@ class InternalSpec:
             self.get_triangulation_novel_internals(),
             3
         )
-    def non_redundant_rads(self):
-        print(len(self.rad_set))
-        (internals, dropped_coordinates), triangles_and_dihedrons = get_non_redundant_internals(
-            self.rad_set,
-            triangles_and_dihedrons=self.get_triangulation(),
-            return_indices=True
-        )
-        dropped_coordinates, dropped_inds = dropped_coordinates
-        map = np.setdiff1d(np.arange(len(self.rad_set)), dropped_inds)
-        return internals, map
-
-        # (internals, dropped_coordinates), triangles_and_dihedrons
-        # raise Exception(uuuh)
-        distance_map = get_internal_shape_map()
-        prunes = self.check_redundancy()
-        map = np.where(prunes)[0]
-        return [self.rad_set[i] for i in map], map
 
 def canonicalize_internal(coord, return_sign=False, check_invalid=True):
     sign = 1
@@ -1840,6 +1860,7 @@ def get_internal_triangles_and_dihedrons(internals,
                                          prune_incomplete=True,
                                          validate=False,
                                          allow_partially_defined=True,
+                                         create_compound_dihedra=True,
                                          create_dihedra=True) -> tuple[
     dict[tuple[int, int, int], nput.TriangleData],
     dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]
@@ -2207,6 +2228,50 @@ def get_internal_triangles_and_dihedrons(internals,
         #     if m is None and n is not None:
         #         raise ValueError(coord)
 
+    if create_compound_dihedra:
+        dsets = {k:set(k) for k in dihed_sets.keys() if None not in k}
+        for k1,s1 in dsets.items():
+            for k2,s2 in dsets.items():
+                inter = s1 & s2
+                if len(inter) == 3:
+                    u1 = list(s1 - inter)[0]
+                    u2 = list(s2 - inter)[0]
+                    # take all pairs from the intersection and include
+                    # all apparent dihedrals
+                    for a,b in itertools.combinations(inter, 2):
+                        new = (u1,) + (a, b) + (u2,)
+                        if not any(p in dihed_sets for p in itertools.permutations(new)):
+                            # TODO: create composite dihedral elements by adding in coordinates
+                            #      for any shared faces
+                            d1 = dihed_sets[k1]
+                            c1 = {s:tuple(k1[i] for i in nput.dihedron_property_specifiers(s)['coord']) for s in d1}
+                            ds1 = {
+                                c
+                                for c in c1.values()
+                                if all(i in new for i in c)
+                            }
+                            d2 = dihed_sets[k2]
+                            c2 = {s: tuple(k2[i] for i in nput.dihedron_property_specifiers(s)['coord']) for s in d2}
+                            ds2 = {
+                                c
+                                for c in c2.values()
+                                if all(i in new for i in c)
+                            }
+                            ds = ds1 | ds2
+                            idx = {
+                                nput.dihedron_property_specifiers(
+                                    canonicalize_internal(tuple(new.index(i) for i in c), check_invalid=False)
+                                )['name']
+                                for c in ds
+                            }
+                            dihed_sets[new] = idx
+
+                            # print("!", new1)
+                            # dihed_sets[new1] = {
+                            #     c for c in dihed_sets[k1]
+                            #     if rm_pos not in nput.dihedron_property_specifiers(c)['coord']
+                            # }
+
     if validate:
         for k in tri_sets:
             if not all(nput.is_int(i) or i is None for i in k):
@@ -2280,6 +2345,14 @@ def get_triangulation_internals(
             for t in tv.values()
             for v in t if v is not None
         )
+
+def get_core_triangulation(internal_bag, targets, intersection='partial', **kwargs):
+    target_set = {a for t in targets for a in t}
+    if dev.str_in(intersection, 'partial'):
+        subinternals = [i for i in internal_bag if any(ii in target_set for ii in i)]
+    else:
+        subinternals = [i for i in internal_bag if all(ii in target_set for ii in i)]
+    return get_internal_triangles_and_dihedrons(subinternals, **kwargs)
 
 def _merge_shapes(new_shapes, old_shapes, perms, perm_invs, prop_func,
                   in_place=False,
@@ -2780,7 +2853,7 @@ def _triangle_conversion_function(inds, tri, coord):
     target = nput.triangle_property_specifiers(b)
     return nput.triangle_property_function(tri, target['name'], raise_on_missing=False)
 def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cache=None, completion_handler=None,
-                                  disallowed_conversions=None):
+                                  disallowed_conversions=None, allow_ambiguous_completions=False, verbose=False):
     idx = []
     for i in coord:
         try:
@@ -2792,35 +2865,89 @@ def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cac
     b = canonicalize_internal(idx)
     return nput.dihedron_property_function(dihed, b,
                                            allow_completion=allow_completion,
+                                           allow_ambiguous_completions=allow_ambiguous_completions,
                                            raise_on_missing=False,
                                            completion_handler=completion_handler,
                                            disallowed_conversions=disallowed_conversions,
-                                           cache=cache)
-def _pair_dihedral_conversion_function(inds1, dihed1, inds2, dihed2, coord, cache=None):
-    idx1 = []
-    for i in coord:
-        try:
-            ix = inds1.index(i)
-        except ValueError:
-            continue
+                                           cache=cache,
+                                           verbose=verbose)
+def _pair_dihedral_conversion_function(inds1, dihed1, inds2, dihed2, coord,
+                                       raise_on_invalid=True,
+                                       cache=None):
+    # to get (3, 1, 2, 4), given (0, 1, 2, 3) and (0, 1, 2, 4)
+    # I need (0, 1, 2, 3) - (0, 1, 2, 4)
+    # so I find the three overlap positions between `inds1` and `inds2` and then
+    # I find a pair of dihedrals in `dihed1` and `dihed2` over the shared face that
+    # can together give coord
+    shared, sorting, _, pos1, pos2 = nput.intersection(inds1, inds2, return_indices=True)
+    diff_pos = np.setdiff1d(coord, shared)
+    if (
+            (diff_pos[0], diff_pos[1]) != (coord[0], coord[3])
+            and (diff_pos[1], diff_pos[0]) != (coord[0], coord[3])
+    ):
+        if raise_on_invalid:
+            raise ValueError(f"can't build dihedral for {coord} from {inds1} and {inds2}")
         else:
-            idx1.append(ix)
-    idx2 = []
-    for i in coord:
-        try:
-            ix = inds2.index(i)
-        except ValueError:
-            continue
-        else:
-            idx2.append(ix)
-    idx1 = canonicalize_internal(idx1)
-    idx2 = canonicalize_internal(idx2)
-    return nput.dihedron_pair_dihedral_angle_function(
+            return None, None
+    # now sort `pos1` and `pos2` so the middle atoms are the bond
+    pos1 = sorted(pos1, key=lambda x:inds1[x] in coord)
+    if inds1[pos1[2]] == coord[1]:
+        pos1 = [pos1[0], pos1[2], pos1[1]]
+
+    pos2 = sorted(pos2, key=lambda x:inds2[x] in coord)
+    if inds2[pos2[2]] == coord[1]:
+        pos2 = [pos2[0], pos2[2], pos2[1]]
+
+    if coord[0] in inds2:
+        pos1, dihed1, pos2, dihed2 = pos2, dihed2, pos1, dihed1
+
+    idx1 = canonicalize_internal(pos1, check_invalid=False)
+    idx2 = canonicalize_internal(pos2, check_invalid=False)
+    # print(inds1, inds2)
+    # print(pos1, pos2)
+    # rem_pos = np.setdiff1d(pos1, 3)
+    # raise Exception('ooo')
+    # idx1 = []
+    # for i in coord:
+    #     try:
+    #         ix = inds1.index(i)
+    #     except ValueError:
+    #         continue
+    #     else:
+    #         idx1.append(ix)
+    # idx2 = []
+    # for i in coord:
+    #     try:
+    #         ix = inds2.index(i)
+    #     except ValueError:
+    #         continue
+    #     else:
+    #         idx2.append(ix)
+    # idx1 = canonicalize_internal(idx1)
+    # idx2 = canonicalize_internal(idx2)
+    # print("dd", coord, idx1, idx2, inds1, inds2)
+    return (dihed1, dihed2), nput.dihedron_pair_dihedral_angle_function(
         idx1, dihed1,
         idx2, dihed2,
         raise_on_missing=False,
         cache=cache
     )
+
+class InternalCoordinateConversion:
+    def __init__(self, caller, provenance, name=None):
+        self.caller = caller
+        if name is None:
+            name = self.caller.__name__
+        self.__name__ = name
+        self.provenance = provenance
+    def __call__(self, internals, **opts):
+        try:
+            return self.caller(internals, **opts)
+        except:
+            ints = np.asanyarray(internals)
+            raise ValueError(f"caller error in calling {self} on internals of shape {ints.shape}")
+    def __repr__(self):
+        return f"{type(self).__name__}<{self.__name__}>"
 
 int_conv_data = collections.namedtuple("int_conv_data",
                                       ['input_indices', 'pregen_indices', 'conversion'])
@@ -2838,7 +2965,9 @@ def find_internal_conversion(internals, targets,
                              update_triangles_and_dihedrons=False,
                              return_completions=False,
                              allow_recursive_completions=None,
+                             allow_ambiguous_completions=False,
                              dihedral_intersections=None,
+                             index_mapping=None,
                              verbose=False,
                              missing_val='raise'):
     smol = nput.is_int(targets[0])
@@ -2851,7 +2980,10 @@ def find_internal_conversion(internals, targets,
             if canonicalize:
                 internals = [canonicalize_internal(c) for c in internals]
             triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals, canonicalize=False)
-    triangles, dihedrals = triangles_and_dihedrons
+    if callable(triangles_and_dihedrons):
+        triangles, dihedrals = triangles_and_dihedrons(internals, targets)
+    else:
+        triangles, dihedrals = triangles_and_dihedrons
     conversions = []
     shapes = []
     if cache is None:
@@ -2905,10 +3037,93 @@ def find_internal_conversion(internals, targets,
 
             if verbose: print("  tri:", tri)
 
-            if conv is None and n in {2, 3, 4}:
+            if conv is None and (
+                    n in {2, 3}
+                    or allow_ambiguous_completions
+            ):
                 for a, v in dihedrals.items():
                     dihed = v
                     completion_handler = None
+                    conv = _dihedral_conversion_function(a, v, target_coord, allow_completion=allow_completion,
+                                                         cache=cache, completion_handler=completion_handler,
+                                                         allow_ambiguous_completions=allow_ambiguous_completions,
+                                                         disallowed_conversions=disallowed_conversions,
+                                                         verbose=verbose)
+                    if conv is not None:
+                        break
+                    else:
+                        dihed = None
+
+            if conv is None and n == 4:
+                # we search for a pair of dihedrals we can complete
+                # to get (i,j,k,l) we need (i,j,k,a) and (b,j,k,l)
+                for a, v in dihedrals.items():
+                    if len(dihedral_sets[a] & ts) == 3:
+                        for b, l2 in pruned_dihedral_intersections[a].items():
+                            if (
+                                    b in dihedral_sets
+                                    and len(dihedral_sets[b] & ts) == 3
+                                    and len((dihedral_sets[b] | dihedral_sets[a]) & ts) == 4
+                            ):
+                                v2 = dihedrals[b]
+                                s, conv = _pair_dihedral_conversion_function(a, v, b, v2, target_coord,
+                                                                             raise_on_invalid=False,
+                                                                             cache=cache)
+                                if conv is not None:
+                                    shape = s
+                                    break
+                        if conv is not None:
+                            break
+
+            if conv is None and allow_recursive_completions:
+                for a, v in dihedrals.items():
+                    dihed = v
+                    completion_handler = None
+                    if all(t in a for t in target_coord):
+                        dihedrals = dihedrals.copy()
+                        triangles = triangles.copy()
+                        def completion_handler(
+                                og_dihed, k,
+                                *,
+                                disallowed_conversions,
+                                allow_completion,
+                                raise_on_missing,
+                                return_depth,
+                                cache,
+                                depth=0,
+                                key=a,
+                                base=v
+                        ):
+                            if allow_completion is True:
+                                allow_completion = 2
+                            oc = tuple(key[x] for x in idx_data[k]['coord'])
+                            # print("=="*100)
+                            # print(">", oc, k)
+                            conv, (t2, d2) = find_internal_conversion(
+                                internals, [oc],
+                                triangles_and_dihedrons=triangles_and_dihedrons,
+                                # prior_coords=None,
+                                canonicalize=True,
+                                allow_completion=allow_completion,
+                                return_conversions=True,
+                                prep_conversions=prep_conversions,
+                                include_shapes=False,
+                                indices=indices,
+                                cache=cache,
+                                missing_val=None,
+                                disallowed_conversions=disallowed_conversions,
+                                update_triangles_and_dihedrons=True
+                            )
+                            conv = conv[0]
+                            if conv is None: return None
+                            triangles.update(t2)
+                            dihedrals.update(d2)
+                            dihedrals[key] = base._replace(**{idx_data[k]['name']:conv})
+                            extra_coordinates[key] = conv
+                            if return_depth:
+                                return depth + 1, conv
+                            else:
+                                return conv
                     conv = _dihedral_conversion_function(a, v, target_coord, allow_completion=allow_completion,
                                                          cache=cache, completion_handler=completion_handler,
                                                          disallowed_conversions=disallowed_conversions)
@@ -2917,83 +3132,11 @@ def find_internal_conversion(internals, targets,
                     else:
                         dihed = None
 
-                if conv is None and n == 4:
-                    # we search for a pair of dihedrals we can complete
-                    # to get (i,j,k,l) we need (i,j,k,a) and (b,j,k,l)
-                    for a, v in dihedrals.items():
-                        if len(dihedral_sets[a] & ts) == 3:
-                            for b, l2 in pruned_dihedral_intersections[a].items():
-                                if (
-                                        len(dihedral_sets[b] & ts) == 3 and
-                                        len((dihedral_sets[b] | dihedral_sets[a]) & ts) == 4
-                                ):
-                                    v2 = dihedrals[b]
-                                    conv = _pair_dihedral_conversion_function(a, v, b, v2, target_coord, cache=cache)
-                                    shape = (v, v2)
-                                    break
-
-                if conv is None and allow_recursive_completions:
-                    for a, v in dihedrals.items():
-                        dihed = v
-                        completion_handler = None
-                        if all(t in a for t in target_coord):
-                            dihedrals = dihedrals.copy()
-                            triangles = triangles.copy()
-                            def completion_handler(
-                                    og_dihed, k,
-                                    *,
-                                    disallowed_conversions,
-                                    allow_completion,
-                                    raise_on_missing,
-                                    return_depth,
-                                    cache,
-                                    depth=0,
-                                    key=a,
-                                    base=v
-                            ):
-                                if allow_completion is True:
-                                    allow_completion = 2
-                                oc = tuple(key[x] for x in idx_data[k]['coord'])
-                                # print("=="*100)
-                                # print(">", oc, k)
-                                conv, (t2, d2) = find_internal_conversion(
-                                    internals, [oc],
-                                    triangles_and_dihedrons=triangles_and_dihedrons,
-                                    # prior_coords=None,
-                                    canonicalize=True,
-                                    allow_completion=allow_completion,
-                                    return_conversions=True,
-                                    prep_conversions=prep_conversions,
-                                    include_shapes=False,
-                                    indices=indices,
-                                    cache=cache,
-                                    missing_val=None,
-                                    disallowed_conversions=disallowed_conversions,
-                                    update_triangles_and_dihedrons=True
-                                )
-                                conv = conv[0]
-                                if conv is None: return None
-                                triangles.update(t2)
-                                dihedrals.update(d2)
-                                dihedrals[key] = base._replace(**{idx_data[k]['name']:conv})
-                                extra_coordinates[key] = conv
-                                if return_depth:
-                                    return depth + 1, conv
-                                else:
-                                    return conv
-                        conv = _dihedral_conversion_function(a, v, target_coord, allow_completion=allow_completion,
-                                                             cache=cache, completion_handler=completion_handler,
-                                                             disallowed_conversions=disallowed_conversions)
-                        if conv is not None:
-                            break
-                        else:
-                            dihed = None
-
-                if verbose: print("dihed:", dihed)
+            if verbose: print("dihed:", dihed)
         else:
             conv = f'item_{idx}'
 
-        if verbose: print(" conv:", conv)
+        if verbose: print(" conv:", conv.__name__ if hasattr(conv, '__name__') else conv)
         if conv is None:
             if dev.str_is(missing_val, "raise"):
                 raise ValueError(f"can't find conversion for {target_coord} from {internals}")
@@ -3005,10 +3148,22 @@ def find_internal_conversion(internals, targets,
             # prep conversion based on internal indices
             if idx is not None:
                 if prep_conversions:
-                    def convert(internal_list, idx=idx):
+                    def select_internal_index(internal_list, idx=idx):
                         internal_list = np.asanyarray(internal_list)
-                        return internal_list[..., idx]
-                    convert.__name__ = conv
+                        if index_mapping is not None:
+                            subconv = index_mapping[idx]
+                        else:
+                            subconv = None
+                        if subconv is None:
+                            return internal_list[..., idx]
+                        else:
+                            return subconv(internal_list)
+                    convert = InternalCoordinateConversion(
+                        select_internal_index,
+                        idx,
+                        name=conv
+                    )
+                    # convert.__name__ = conv
                 else:
                     convert = True
                 if include_shapes: shapes.append(idx)
@@ -3019,13 +3174,28 @@ def find_internal_conversion(internals, targets,
                             for k, v in tri._asdict().items()
                         if v is not None
                     }
+                    args = {k:v for k,v in args.items() if v is not None}
                     def convert(internal_list, args=args, conv=conv,  **kwargs):
                         internal_list = np.asanyarray(internal_list)
-                        subtri = nput.make_triangle(
-                            **{k:internal_list[..., i] for k,i in args.items()}
-                        )
+                        subargs = {}
+                        for k, idx in args.items():
+                            if not nput.is_int(idx):
+                                idx = idx[0]
+                            if index_mapping is not None:
+                                subconv = index_mapping[idx]
+                            else:
+                                subconv = None
+                            if subconv is None:
+                                subargs[k] = internal_list[..., idx]
+                            else:
+                                subargs[k] = subconv(internal_list)
+                        subtri = nput.make_triangle(**subargs)
                         return conv(subtri)
-                    convert.__name__ = 'convert_' + conv.__name__
+                    convert = InternalCoordinateConversion(
+                        convert,
+                        tri,
+                        name='convert_' + conv.__name__
+                    )
                 else:
                     convert = True
                 if include_shapes: shapes.append(tri)
@@ -3042,10 +3212,23 @@ def find_internal_conversion(internals, targets,
                     }
                     def convert(internal_list, args=args, conv=conv, **kwargs):
                         internal_list = np.asanyarray(internal_list)
-                        subargs = {k:s*internal_list[..., i] for k,(i,s) in args.items()}
+                        subargs = {}
+                        for k,(idx,s) in args.items():
+                            if index_mapping is not None:
+                                subconv = index_mapping[idx]
+                            else:
+                                subconv = None
+                            if subconv is None:
+                                subargs[k] = internal_list[..., idx]
+                            else:
+                                subargs[k] = subconv(internal_list)
                         subdihed = nput.make_dihedron(**subargs)
                         return conv(subdihed)
-                    convert.__name__ = 'convert_' + conv.__name__
+                    convert = InternalCoordinateConversion(
+                        convert,
+                        dihed,
+                        name='convert_' + conv.__name__
+                    )
                 else:
                     convert = True
                 if include_shapes: shapes.append(dihed)
@@ -3075,12 +3258,34 @@ def find_internal_conversion(internals, targets,
                     }
                     def convert(internal_list, args1=args1, args2=args2, conv=conv, **kwargs):
                         internal_list = np.asanyarray(internal_list)
-                        subargs1 = {k: s * internal_list[..., i] for k, (i, s) in args1.items()}
+                        subargs1 = {}
+                        for k, (idx, s) in args1.items():
+                            if index_mapping is not None:
+                                subconv = index_mapping[idx]
+                            else:
+                                subconv = None
+                            if subconv is None:
+                                subargs1[k] = internal_list[..., idx]
+                            else:
+                                subargs1[k] = subconv(internal_list)
                         subdihed1 = nput.make_dihedron(**subargs1)
-                        subargs2 = {k: s * internal_list[..., i] for k, (i, s) in args2.items()}
+                        subargs2 = {}
+                        for k, (idx, s) in args2.items():
+                            if index_mapping is not None:
+                                subconv = index_mapping[idx]
+                            else:
+                                subconv = None
+                            if subconv is None:
+                                subargs2[k] = internal_list[..., idx]
+                            else:
+                                subargs2[k] = subconv(internal_list)
                         subdihed2 = nput.make_dihedron(**subargs2)
                         return conv(subdihed1, subdihed2)
-                    convert.__name__ = 'convert_' + conv.__name__
+                    convert = InternalCoordinateConversion(
+                        convert,
+                        shape,
+                        name='convert_' + conv.__name__
+                    )
                 else:
                     convert = True
                 if include_shapes: shapes.append(shape)
@@ -3150,7 +3355,7 @@ def _get_dihedron_checks():
 
 _dihedron_index_props = {}
 def _get_dihedron_index_props():
-    if len(_dihed_check_sets) == 0:
+    if len(_dihedron_index_props) == 0:
         for k,v in nput.dihedron_property_specifiers().items():
             _dihedron_index_props[v["coord"]] = v
     return _dihedron_index_props
@@ -3694,7 +3899,14 @@ def enumerate_zmatrices_from_internals(internals,
         for zm in possible_mats:
             if build_conversion:
                 targets = extract_zmatrix_internals(zm)
-                print(np.array(zm))
+                # print(np.array(zm))
+                # print(targets)
+                # import inspect
+                # conv = find_internal_conversion(internals, targets[-1:],
+                #                              triangles_and_dihedrons=triangles_and_dihedrons,
+                #                                 verbose=True,
+                #                              **conversion_options)
+                # raise Exception()
                 yield zm, find_internal_conversion(internals, targets,
                                                     triangles_and_dihedrons=triangles_and_dihedrons,
                                                     **conversion_options)
@@ -3892,9 +4104,13 @@ class NonredundantInternalsChecker:
         neighbors_j = set()
         for a,b in dists:
             if a == i:
-                if b == j:
-                    return True
+                if b == j: return True
                 neighbors_i.add(b)
+            elif a == j:
+                if b == i: return True
+                neighbors_j.add(b)
+            elif b == i:
+                neighbors_i.add(a)
             elif b == j:
                 neighbors_j.add(a)
         return len(neighbors_i & neighbors_j) >= 3
@@ -4002,7 +4218,11 @@ class InternalCoordinateGraph:
         # coordinates that need an update, and then if those need an upd
 
     def enumerate_matching_dihedrons(self, target_coord):
-        for i,d in self.triangulation[1].items():
+        if self._expanded_internals is None:
+            tri = self.triangulation
+        else:
+            tri = self._expanded_internals[1]
+        for i,d in tri[1].items():
             pos = []
             for x in target_coord:
                 try:
@@ -4014,31 +4234,35 @@ class InternalCoordinateGraph:
             else:
                 if pos[-1] < pos[0]: pos = reversed(pos)
                 yield tuple(pos), i, d
-    def _get_expanded_internals(self):
+    def _get_expanded_internals(self, update_triangulation=True):
         if self._expanded_internals is None:
             ints = list(itut.delete_duplicates(
                 canonicalize_internal(k) for k in (
                         list(self.internals)
                         + list(self._conversions.keys())
                 )))
-            tri = get_internal_triangles_and_dihedrons(ints)
-            dihedrals = tri[1]
-            dihedral_sets = {k: set(k) for k in dihedrals.keys()}
-            base_intersections = {
-                k: {
-                    b: len(dihedral_sets[k] & dihedral_sets[b])
-                    for b in dihedrals.keys()
+            if update_triangulation:
+                tri = get_internal_triangles_and_dihedrons(ints)
+                dihedrals = tri[1]
+                dihedral_sets = {k: set(k) for k in dihedrals.keys()}
+                base_intersections = {
+                    k: {
+                        b: len(dihedral_sets[k] & dihedral_sets[b])
+                        for b in dihedrals.keys()
+                    }
+                    for k in dihedrals.keys()
                 }
-                for k in dihedrals.keys()
-            }
-            pruned_intersections = {
-                k: {b: v for b, v in di.items() if v > 2}
-                for k, di in base_intersections.items()
-            }
-            dihedral_intersections = (base_intersections, pruned_intersections)
+                pruned_intersections = {
+                    k: {b: v for b, v in di.items() if v > 2}
+                    for k, di in base_intersections.items()
+                }
+                dihedral_intersections = (base_intersections, pruned_intersections)
+            else:
+                tri = None
+                dihedral_intersections = None
             self._expanded_internals = (ints, tri, dihedral_intersections)
         return self._expanded_internals
-    def _update_conversions(self, new):
+    def _update_conversions(self, new, update_triangulation=True):
         self._conversions.update(new)
         if self._expanded_internals is not None:
             old_ints, old_tri, cur_int = self._expanded_internals
@@ -4047,36 +4271,41 @@ class InternalCoordinateGraph:
                 if canonicalize_internal(i) not in old_ints
             ]
             ints = old_ints + new_internals
-            tri = update_triangulation(
-                old_tri,
-                new_internals,
-                [],
-                triangulation_internals=old_ints
-            )
-            # tri = get_internal_triangles_and_dihedrons(ints)
-            dihedrals = tri[1]
-            new_di = [k for k in dihedrals if k not in old_tri[1]]
-            dihedral_sets = {k: set(k) for k in dihedrals.keys()}
-            base_intersections = {
-                k: {
-                    b: len(dihedral_sets[k] & dihedral_sets[b])
-                    for b in dihedrals.keys()
+            if update_triangulation:
+                # tri = update_triangulation(
+                #     old_tri,
+                #     new_internals,
+                #     [],
+                #     triangulation_internals=old_ints
+                # )
+                tri = get_internal_triangles_and_dihedrons(ints)
+                dihedrals = tri[1]
+                new_di = [k for k in dihedrals if k not in old_tri[1]]
+                dihedral_sets = {k: set(k) for k in dihedrals.keys()}
+                base_intersections = {
+                    k: {
+                        b: len(dihedral_sets[k] & dihedral_sets[b])
+                        for b in dihedrals.keys()
+                    }
+                    for k in new_di
                 }
-                for k in new_di
-            }
-            pruned_intersections = {
-                k: {b: v for b, v in di.items() if v > 2}
-                for k, di in base_intersections.items()
-            }
-            dihedral_intersections = cur_int[0] | base_intersections
-            pruned_dihedral_intersections = cur_int[1] | pruned_intersections
-            dihedral_intersections = (dihedral_intersections, pruned_dihedral_intersections)
+                pruned_intersections = {
+                    k: {b: v for b, v in di.items() if v > 2}
+                    for k, di in base_intersections.items()
+                }
+                dihedral_intersections = cur_int[0] | base_intersections
+                pruned_dihedral_intersections = cur_int[1] | pruned_intersections
+                dihedral_intersections = (dihedral_intersections, pruned_dihedral_intersections)
+            else:
+                tri = None
+                dihedral_intersections = None
             self._expanded_internals = (ints, tri, dihedral_intersections)
 
     def find_conversions(self,
                          target_internals,
                          unconvertable_atoms=None,
                          allow_recursive_completions=False,
+                         allow_ambiguous_completions=False,
                          find_unreachable=True,
                          verbose=False,
                          depth=0,
@@ -4091,18 +4320,26 @@ class InternalCoordinateGraph:
         ]
         if len(target_internals) > 0:
             expanded_internals, expanded_triangulation, expanded_intersections = self._get_expanded_internals()
-            conversions, shapes = find_internal_conversion(expanded_internals,
-                                                           target_internals,
-                                                           # triangles_and_dihedrons=self.triangulation,
-                                                           include_shapes=True,
-                                                           allow_completion=True,
-                                                           return_conversions=True,
-                                                           allow_recursive_completions=allow_recursive_completions,
-                                                           dihedral_intersections=expanded_intersections,
-                                                           missing_val=None,
-                                                           cache=self._completion_cache,
-                                                           verbose=verbose,
-                                                           **etc)
+            index_mapping = [self._make_conversion(self._conversions.get(i)) for i in expanded_internals]
+            conversions = []
+            shapes = []
+            for t in target_internals:
+                c, s = find_internal_conversion(expanded_internals,
+                                                t,
+                                                triangles_and_dihedrons=get_core_triangulation,
+                                                include_shapes=True,
+                                                allow_completion=True,
+                                                return_conversions=True,
+                                                index_mapping=index_mapping,
+                                                allow_recursive_completions=allow_recursive_completions,
+                                                # dihedral_intersections=expanded_intersections,
+                                                allow_ambiguous_completions=allow_ambiguous_completions,
+                                                missing_val=None,
+                                                cache=self._completion_cache,
+                                                verbose=verbose,
+                                                **etc)
+                conversions.append(c)
+                shapes.append(s)
 
             # this gives us the basic completeable set of coordinates
             new_conv = {i:c for i,c in zip(target_internals, conversions) if c is not None}
@@ -4138,18 +4375,23 @@ class InternalCoordinateGraph:
                         pref_coords = []
                         for kl in pref_keys:
                             coord_keys = []
-                            for k in kl:
+                            full_args = possible_conversions[kl][0]
+                            for k in full_args:
                                 if k not in key_map:
-                                    key_map[k] = canonicalize_internal([d[i] for i in spec_data[k]['coord']])
+                                    key_map[k] = canonicalize_internal([d[i] for i in spec_data[k]['coord']], check_invalid=False)
                                 coord_keys.append(key_map[k])
                             pref_coords.append(coord_keys)
                         self._unreachable[target] = sorted(
-                            {tuple(t) for t in itertools.chain(self._unreachable[target], pref_coords)},
+                            {
+                                tuple(t)
+                                for t in itertools.chain(self._unreachable[target], pref_coords)
+                            },
                             key=len
                         )
                         if verbose:
                             print()
-                        for coord_keys in pref_coords:
+                        for kl,coord_keys in zip(pref_keys, pref_coords):
+                            # if not allow_ambiguous_completions and any(len(k) == 4 for k in coord_keys): continue
                             if any(k in self._unreachable for k in coord_keys): continue
                             if any(len(set(k) & unconvertable_atoms) == len(k) for k in coord_keys): continue
                             unconverted_k = [k for k in coord_keys if k not in self._conversions]
@@ -4170,14 +4412,79 @@ class InternalCoordinateGraph:
                                         unreachable_edits[k] = self._unreachable.pop(k)
                                 if all(s is not None for s in subs):
                                     self._update_conversions({
-                                        target:(coord_keys, kl, possible_conversions[kl])
+                                        target:([key_map[x] for x in possible_conversions[kl][0]],
+                                                kl, unconverted_k,
+                                                possible_conversions[kl])
                                     })
                                     break
                                 else:
                                     self._unreachable.update(unreachable_edits)
 
-                        unconvertable_atoms.update(d)
-        return [self._conversions.get(i) for i in initial_set]
+                        # unconvertable_atoms.update(d)
+        return [self._make_conversion(self._conversions.get(i)) for i in initial_set]
+
+    def _make_conversion(self, conv):
+        if isinstance(conv, InternalCoordinateConversion) or conv is None:
+            return conv
+        coord_keys, kl, unconverted_k, possible_convs = conv
+
+        full_args, base_args, rem_inds, base_inds, func = possible_convs
+        completions = [self._make_conversion(self._conversions.get(k)) for k in coord_keys]
+        if len(completions) < len(full_args):
+            raise ValueError(kl, coord_keys, full_args)
+
+        if any(isinstance(comp, tuple) for comp in completions):
+            raise Exception(completions)
+
+        def convert(internal_values, completions=completions):
+            base_args = [
+                f(internal_values) for f in completions
+            ]
+            # print(">>", conv[0])
+            # print(completions[-1])
+            # print("v:", base_args)
+            return func(*base_args)
+        return InternalCoordinateConversion(
+            convert,
+            conv,
+            name="convert_multi_" + func.__name__
+        )
+
+    def get_bond_graph(self,
+                       dist_set=None,
+                       return_conversions=True):
+            atoms = self.atoms
+            if nput.is_int(atoms):
+                atoms = np.arange(atoms)
+            if dist_set is None:
+                dist_set = list(itertools.combinations(atoms, 2))
+
+            # print(
+            #     self.find_conversions([(3, 4)], verbose=True, allow_recursive_completions=False)
+            # )
+            # raise Exception(...)
+
+            funs = self.find_conversions(dist_set)
+            edges = [d for d, f in zip(dist_set, funs) if f is not None]
+            #
+            # import pprint
+            # pprint.pprint(edges)
+
+            # print(res:=self.find_conversions(
+            #     [(3, 4)],
+            #     allow_recursive_completions=False,
+            #     verbose=True
+            # ))
+            # raise Exception(res)
+
+            mapping = {a: i for i, a in enumerate(atoms)}
+            edges = [(mapping[i], mapping[j]) for i, j in edges]
+
+            graph = EdgeGraph(self.atoms, edges)
+            if return_conversions:
+                return graph, (dist_set, funs)
+            else:
+                return graph
 
     class GraphCheckpoint:
         def __init__(self, g, reset=True):
