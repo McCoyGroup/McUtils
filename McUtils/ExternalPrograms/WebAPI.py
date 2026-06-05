@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import base64
 import time
@@ -375,7 +377,7 @@ class WebAPIConnection:
             fragment
         )
 
-    def get_subapi(self, extension):
+    def get_subapi(self, extension) -> WebSubAPIConnection:
         if extension not in self.subapi_instances:
             self.subapi_instances[extension] = WebSubAPIConnection(extension, self)
         return self.subapi_instances[extension]
