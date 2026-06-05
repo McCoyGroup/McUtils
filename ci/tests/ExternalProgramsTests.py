@@ -1,4 +1,3 @@
-
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.ExternalPrograms import *
@@ -201,7 +200,7 @@ class ExternalProgramsTest(TestCase):
             supplier.load_data(0)
         )
 
-    @debugTest
+    @validationTest
     def test_SBatchFromPython(self):
         import os
         os.chdir("/Users/Mark/Desktop")
@@ -209,3 +208,10 @@ class ExternalProgramsTest(TestCase):
 
         print(woof.format())
         print(script_file.resolve_buffer())
+
+    @debugTest
+    def test_PubChemAPI(self):
+        api = PubChemAPI()
+        print(
+            api.get_compounds_by_name('melatonin')
+        )
