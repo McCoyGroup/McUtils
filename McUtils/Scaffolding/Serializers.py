@@ -5,6 +5,8 @@ Light-weight and unsophisticated, but that's what makes this useful..
 
 import abc, numpy as np, json, io, pickle, os, base64, types, warnings
 import tempfile
+import collections
+import uuid
 from collections import OrderedDict
 from .. import Devutils as dev
 
@@ -16,7 +18,11 @@ __all__= [
     "NDarrayMarshaller",
     "HDF5Serializer",
     "YAMLSerializer",
-    "ModuleSerializer"
+    "ModuleSerializer",
+    "flatten_tree",
+    "unflatten_tree",
+    "write_flat_tree",
+    "read_flat_tree"
 ]
 
 
@@ -1260,3 +1266,309 @@ class ModuleSerializer(BaseSerializer):
                 return dat[key]
         else:
             return dat
+
+def dictify_lists(tree:dict):
+    tree = tree.copy()
+    for k,subtree in tree.items():
+        if isinstance(subtree, dict):
+            tree[k] = dictify_lists(subtree)
+        elif isinstance(subtree, (list, tuple)):
+            if all(isinstance(d, dict) for d in subtree):
+                tree[k] = {
+                    f'_list_item_{i}':dictify_lists(v)
+                    for i,v in enumerate(subtree)
+                }
+                tree[k]['_num_list_items'] = len(subtree)
+            elif (
+                    isinstance(subtree, (list, tuple))
+                    and dev.is_list_like(subtree[0])
+                    and len(np.unique([len(y) for y in subtree])) > 1
+            ):
+                tree[k] = {
+                    f'_list_item_{i}': v
+                    for i, v in enumerate(subtree)
+                }
+                tree[k]['_num_list_items'] = len(subtree)
+    return tree
+def disambiguate_tree(tree_obj, type_map=None, aliases=None):
+    if type_map is None:
+        type_map = {}
+    if aliases is None:
+        aliases = {}
+    new_tree = {}
+    for k,v in tree_obj.items():
+        if isinstance(v, dict):
+            o_type = object
+            v, _ = disambiguate_tree(v, type_map=type_map, aliases=aliases)
+        elif dev.is_atomic(v) or v is None:
+            o_type = type(v)
+        else:
+            v = np.asanyarray(v)
+            o_type = v.dtype
+        if k in type_map:
+            needs_alias = False
+            if isinstance(o_type, np.dtype):
+                if not isinstance(type_map[k], np.dtype) or not np.issubdtype(o_type, type_map[k]):
+                    needs_alias = True
+            elif isinstance(type_map[k], np.dtype):
+                needs_alias = True
+            elif not issubclass(o_type, type_map[k]):
+                needs_alias = True
+            if needs_alias:
+                for a,targ in aliases.items():
+                    if targ == k:
+                        type_match = True
+                        if isinstance(o_type, np.dtype):
+                            if not isinstance(type_map[a], np.dtype) or not np.issubdtype(o_type, type_map[a]):
+                                type_match = False
+                        elif isinstance(type_map[k], np.dtype):
+                            type_match = False
+                        elif not issubclass(o_type, type_map[k]):
+                            type_match = False
+                        if type_match:
+                            new_alias = a
+                            break
+                else:
+                    new_alias = k + "-" + str(uuid.uuid4())[:6]
+                    while new_alias in aliases:
+                        new_alias = k + "-" + str(uuid.uuid4())[:6]
+                    aliases[new_alias] = k
+                    type_map[new_alias] = o_type
+                k = new_alias
+        else:
+            type_map[k] = o_type
+        new_tree[k] = v
+    return new_tree, aliases
+
+def flatten_tree(tree_obj, top_level=True, prep_tree=True):
+    if prep_tree:
+        tree_obj = dictify_lists(tree_obj)
+        tree_obj, aliases = disambiguate_tree(tree_obj)
+    else:
+        aliases = {}
+
+    subtrees = {
+        'key_map': {},
+        'aliases':aliases
+    }
+    for k,(s,v) in enumerate(tree_obj.items()):
+        subtrees['key_map'][k] = s
+        if isinstance(v, dict):
+            subtrees[k] = flatten_tree(v, top_level=False, prep_tree=False)
+        elif dev.is_atomic(v):
+            subtrees[k] = ((0,-1), np.array([v]))
+        elif v is None:
+            subtrees[k] = ((0,-1), np.array([np.nan]))
+        else:
+            try:
+                v = np.asanyarray(v)
+            except ValueError:
+                print(k, s, v)
+                raise
+            if v.shape == ():
+                subtrees[k] = ((0,-1), np.array([v]))
+            else:
+                subtrees[k] = (v.shape + (-1,), v.flatten())
+
+    return merge_trees(subtrees, top_level=top_level)
+
+def merge_trees(subtrees, top_level=True):
+    key_lists = {
+        'visited_keys': subtrees.pop('visited_keys', []),
+        'key_map': subtrees.pop('key_map', {}),
+        'aliases': subtrees.pop('aliases', {})
+        # 'key_depths':[]
+    }
+    key_map = key_lists['key_map']
+    aliases = key_lists['aliases']
+    inv_map = {k:v for v,k in key_map.items()}
+
+    for k,s in subtrees.items():
+        key_lists['visited_keys'].append(k)
+        if isinstance(s, dict):
+            s_map = s.pop('key_map', {})
+            a_map = s.pop('aliases', {})
+            renaming = {}
+            for a,k in a_map.items():
+                if a in aliases:
+                    new_alias = a+"-"+str(uuid.uuid4())[:6]
+                    aliases[new_alias] = k
+                    renaming[a] = new_alias
+            s_map = {
+                renaming.get(vv, vv): sk
+                for vv,sk in s_map.items()
+            }
+            for vv,sk in s_map.items():
+                if sk not in inv_map:
+                    n = max(key_map.keys()) + 1
+                    key_map[n] = sk
+                    inv_map[sk] = n
+            for sk,v in s.items():
+                if sk == 'visited_keys':
+                    # if not bottom_level:
+                    #     key_lists['visited_keys'].append(-1)
+
+                    key_lists['visited_keys'].extend(
+                        inv_map[s_map[vv]]
+                            if vv >= 0 else
+                        vv
+                            for vv in v
+                    )
+                else:
+                    sk = inv_map[s_map[sk]]
+                    if sk not in key_lists: key_lists[sk] = []
+                    key_lists[sk].append(v)
+        else:
+            if k not in key_lists: key_lists[k] = []
+            key_lists[k].append(s)
+    if not top_level:
+        key_lists['visited_keys'].append(-1)
+
+    for key,value_list in key_lists.items():
+        if key in {'key_map', 'visited_keys', 'aliases'}:
+            key_lists[key] = value_list
+            continue
+        shapes = []
+        for v in value_list:
+            shapes.extend(v[0])
+        if len(value_list) > 0:
+            values = np.concatenate([v[1] for v in value_list])
+        else:
+            values = []
+        key_lists[key] = (shapes, values)
+
+    return key_lists
+
+def undictify_lists(tree:dict):
+    tree = tree.copy()
+    for k,subtree in tree.items():
+        if isinstance(subtree, dict):
+            if '_num_list_items' in subtree:
+                tree[k] = [
+                    subtree[f'_list_item_{i}']
+                    for i in range(subtree['_num_list_items'])
+                ]
+            else:
+                tree[k] = undictify_lists(subtree)
+    return tree
+def unflatten_tree(serial_tree, unprep_tree=True):
+    tree = {}
+    tree_stack = collections.deque()
+    key_map = serial_tree.pop('key_map')
+    block_pointers = {}
+    aliases = serial_tree['aliases']
+    for i,k in enumerate(serial_tree['visited_keys']):
+        if k >= 0:
+            s = key_map[k]
+            s = aliases.get(s, s)
+            data = serial_tree.get(k)
+            if data is not None:
+                if k not in block_pointers:
+                    block_pointers[k] = (0, 0)
+                shape_pointer, array_pointer = block_pointers[k]
+                shape_data, array_data = data
+                shape_offset = shape_pointer
+                for shape_offset in range(shape_pointer, len(shape_data)):
+                    if shape_data[shape_offset] < 0: break
+                shape = tuple(shape_data[shape_pointer:shape_offset])
+                if shape == (0,):
+                    block_size = 1
+                    shape = ()
+                else:
+                    block_size = np.prod(shape, dtype=int)
+                try:
+                    arr = array_data[array_pointer:array_pointer+block_size].reshape(shape)
+                except ValueError:
+                    print(k, s, block_size)
+                    raise
+                block_pointers[k] = (shape_offset+1, array_pointer + block_size)
+                if arr.ndim == 0:
+                    if np.issubdtype(arr.dtype, np.dtype(float)) and np.isnan(arr):
+                        arr = None
+                    else:
+                        arr = arr.tolist()
+                tree[s] = arr
+            else:
+                tree[s] = {}
+                tree_stack.append(tree)
+                tree = tree[s]
+        else:
+            if len(tree_stack) == 0:
+                prev = serial_tree[max(i-6, 0):i]
+                raise ValueError(f"exhausted tree stack, previous 6 tree entries: {prev}")
+            tree = tree_stack.pop()
+    if unprep_tree:
+        tree = undictify_lists(tree)
+    return tree
+
+def write_flat_tree(file, tree, flatten=None, writer=None, **writer_options):
+    if writer is None:
+        compress = writer_options.pop('compress', False)
+        if compress:
+            writer = np.savez_compressed
+        else:
+            writer = np.savez
+    if flatten is None:
+        flatten = (
+                'key_map' not in tree
+                or 'aliases' not in tree
+                or 'visited_keys' not in tree
+        )
+    if flatten:
+        tree = flatten_tree(tree)
+    key_names = list(tree['key_map'].values())
+    aliases = np.array(list(tree['aliases'].items()))
+    index_remapping = {k: i for i, k in enumerate(tree['key_map'].keys())}
+    visited_keys = [index_remapping[i] if i >= 0 else i for i in tree['visited_keys']]
+    arrays = {}
+    shapes = []
+    array_keys = []
+    for k in tree['key_map'].keys():
+        if k in tree:
+            shape_data, array_data = tree[k]
+            shapes.append(len(shape_data))
+            shapes.extend(shape_data)
+            i = index_remapping[k]
+            arrays[f'arr_{i}'] = array_data
+            array_keys.append(i)
+    return writer(
+        file,
+        shapes=shapes,
+        key_names=key_names,
+        aliases=aliases,
+        array_keys=array_keys,
+        visited_keys=visited_keys,
+        **arrays,
+        **writer_options
+    )
+
+def read_flat_tree(file, unflatten=True, reader=None, **reader_options):
+    if reader is None:
+        reader = np.load
+
+    zdata = reader(file, **reader_options)
+    key_names = zdata['key_names']
+    visited_keys = zdata['visited_keys']
+    shapes = zdata['shapes']
+    array_keys = zdata['array_keys']
+    aliases = dict(zdata['aliases'].tolist())
+    data = {
+        'visited_keys': visited_keys,
+        'key_map': {
+            i: k for i, k in enumerate(key_names)
+        },
+        'aliases':aliases
+    }
+
+    shape_pointer = 0
+    for k in array_keys:
+        ls = shapes[shape_pointer]
+        new_pointer = shape_pointer + 1 + ls
+        shape = shapes[shape_pointer + 1:new_pointer]
+        shape_pointer = new_pointer
+        array = zdata[f'arr_{k}']
+        data[k] = (shape, array)
+
+    if unflatten:
+        data = unflatten_tree(data)
+    return data

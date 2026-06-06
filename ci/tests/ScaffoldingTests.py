@@ -7,7 +7,7 @@ import numpy as np, io, os, sys, tempfile as tmpf
 
 class ScaffoldingTests(TestCase):
 
-    @debugTest
+    @validationTest
     def test_Schema(self):
         data = {
             'file': 'test.txt',
@@ -52,6 +52,29 @@ class ScaffoldingTests(TestCase):
             }
         }
         self.assertFalse(schema.validate(data, throw=False))
+
+    @debugTest
+    def test_TreeFlattening(self):
+        data = {
+            'file': 'test.txt',
+            'filesystem': {'file':[['a'], ['b', 'c']]},
+            'coords': 123,
+            'initial': {
+                'coords':np.random.rand(5, 3)
+            },
+            'final':{
+                'coords':np.random.rand(1, 2)
+            },
+        }
+        flat = flatten_tree(data)
+        print(flat)
+        rev = unflatten_tree(flat)
+        print(rev)
+        buf = io.BytesIO()
+        write_flat_tree(buf, data)
+        buf.seek(0)
+        rev2 = read_flat_tree(buf)
+        print(rev2)
 
     #region Checkpointing
     @validationTest
