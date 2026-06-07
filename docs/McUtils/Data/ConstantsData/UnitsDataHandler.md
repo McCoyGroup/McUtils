@@ -28,6 +28,9 @@ Angstroms: str
 BohrRadius: str
 ElectronMass: str
 AtomicMassUnits: str
+ElectronVolts: str
+KilocaloriesPerMole: str
+KilojoulesPerMole: str
 ```
 <a id="McUtils.Data.ConstantsData.UnitsDataHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
@@ -137,8 +140,8 @@ Converts base unit into target using the scraped NIST data
 hartrees_to_wavenumbers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L574)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L574?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L577)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L577?message=Update%20Docs)]
 </div>
 
 
@@ -148,8 +151,8 @@ hartrees_to_wavenumbers(self):
 bohr_to_angstroms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L577)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L577?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L580)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L580?message=Update%20Docs)]
 </div>
 
 
@@ -159,8 +162,8 @@ bohr_to_angstroms(self):
 amu_to_me(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L580)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L580?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L583)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L583?message=Update%20Docs)]
 </div>
 
 
@@ -170,8 +173,8 @@ amu_to_me(self):
 moles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L583)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L583?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L586)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Data/ConstantsData/UnitsDataHandler.py#L586?message=Update%20Docs)]
 </div>
  </div>
 </div>

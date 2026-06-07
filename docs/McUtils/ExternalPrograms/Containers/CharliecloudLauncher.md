@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Containers.CharliecloudLauncher">CharliecloudLauncher</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L335)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L335?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L337)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L337?message=Update%20Docs)]
 </div>
 
 
@@ -27,8 +27,8 @@ LIST_JOIN_DELIMITERS: dict
 __init__(self, container_spec, *args, cli_binary='ch-run', **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L346)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L346?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L348)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L348?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ __init__(self, container_spec, *args, cli_binary='ch-run', **kwargs):
 prep_binds(cls, binds: 'dict[str, str] | list[tuple[str, str] | list[str]]'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L349)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L349?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L351)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L351?message=Update%20Docs)]
 </div>
 
 
@@ -49,8 +49,8 @@ prep_binds(cls, binds: 'dict[str, str] | list[tuple[str, str] | list[str]]'):
 prep_envs(cls, envs: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L353)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L353?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L355)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L355?message=Update%20Docs)]
 </div>
 
 
@@ -59,8 +59,8 @@ prep_envs(cls, envs: 'dict'):
 prep_core_kwargs(self, kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L359)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L359?message=Update%20Docs)]
 </div>
 
 
@@ -69,8 +69,8 @@ prep_core_kwargs(self, kwargs):
 get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args, proc_kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L362)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L362?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L364)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.py#L364?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -125,7 +125,7 @@ get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args,
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Containers/CharliecloudLauncher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L335?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L337?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
