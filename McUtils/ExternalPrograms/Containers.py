@@ -1,7 +1,12 @@
+from __future__ import annotations
 
 import abc
 import subprocess
 import itertools
+import os
+import importlib.util
+import shutil
+import tempfile
 
 __all__ = [
     "SingularityLauncher",
@@ -11,8 +16,11 @@ __all__ = [
 ]
 
 class ContainerLauncher(metaclass=abc.ABCMeta):
-    def __init__(self, cli_binary, container_spec,
+    def __init__(self,
+                 cli_binary,
+                 container_spec,
                  *args,
+                 bind_sources=None,
                  container_process=None,
                  process_kwargs=None,
                  **kwargs):
@@ -23,6 +31,44 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
         self.mixed_kwargs = kwargs
         self.container_process = container_process
         self.managed = container_process is None
+        self.bind_sources = bind_sources
+        self._bind_dir = None
+
+    @classmethod
+    def setup_bind_sources(cls, targets:str|list[str], copy_source=True, resolve_module_names=True):
+        if isinstance(targets, str):
+            targets = [targets]
+        targets = [
+            os.path.abspath(t)
+                if (not resolve_module_names or os.path.exists(t)) else
+            importlib.util.find_spec(t).origin #TODO: make this more robust against odd module formats
+            for t in targets
+        ]
+        targets = [
+            os.path.dirname(t)
+                if os.path.isfile(t) else
+            t
+            for t in targets
+        ]
+
+        if copy_source:
+            tempdir = tempfile.mkdtemp()
+            for t in targets:
+                shutil.copytree(t, os.path.join(tempdir, os.path.basename(t)))
+            return [tempdir], True
+        else:
+            parents = {os.path.dirname(t) for t in targets}
+            return parents, False
+
+    @classmethod
+    @abc.abstractmethod
+    def prep_binds(cls, binds:dict[str, str]|list[tuple[str, str]|list[str]]):
+        ...
+
+    @classmethod
+    @abc.abstractmethod
+    def prep_envs(cls, envs:dict):
+        ...
 
     @classmethod
     def map_option_name(cls, key):
@@ -82,6 +128,49 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
     def get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args, proc_kwargs):
         ...
 
+    @classmethod
+    def _merge_binds(self, old, new):
+        if old is None:
+            return new
+        if isinstance(new, str):
+            new = [new]
+        if isinstance(old, str):
+            old = [old]
+        if isinstance(new, dict):
+            if not isinstance(old, dict):
+                new = [k+":"+v for k, v in new.items()]
+                new = new + list(old)
+            else:
+                new = old | new
+        else:
+            if isinstance(old, dict):
+                old = [k+":"+v for k, v in old.items()]
+            new = list(new) + list(old)
+        return new
+
+    @classmethod
+    def _merge_envs(self, old, new):
+        if old is None:
+            return new
+        if isinstance(new, str):
+            new = [new]
+        if isinstance(old, str):
+            old = [old]
+        if isinstance(new, dict):
+            if not isinstance(old, dict):
+                new = [k+"="+v for k, v in new.items()]
+                new = new + list(old)
+            else:
+                new = old | new
+                for k,v in old.items():
+                    if k in new:
+                        new[k] = new[k] + ":" + v
+        else:
+            if isinstance(old, dict):
+                old = [k+"="+v for k, v in old.items()]
+            new = list(new) + list(old)
+        return new
+
     def get_launch_command(self) -> list[str]:
         binary = self.cli_binary
         if isinstance(binary, str):
@@ -93,6 +182,25 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
             launch_kwargs, proc_kwargs = self.prep_core_kwargs(self.mixed_kwargs)
         else:
             launch_kwargs, proc_kwargs = self.mixed_kwargs, self.proc_kwargs
+
+        if self.bind_sources is not None:
+            bind_paths, managed = self.setup_bind_sources(self.bind_sources)
+            if managed:
+                self._bind_dir = bind_paths
+            bind_mods = {t:os.path.join('/tmp', 'bind', os.path.basename(t)) for t in bind_paths}
+            bm = self.prep_binds(bind_mods)
+            launch_kwargs = launch_kwargs.copy()
+            for k,v in bm.items():
+                if k in launch_kwargs:
+                    v = self._merge_binds(launch_kwargs[k], v)
+                launch_kwargs[k] = v
+            env_mods = {'PYTHONPATH':":".join(bind_mods.values()) + ":$PYTHONPATH"}
+            em = self.prep_envs(env_mods)
+            for k,v in em.items():
+                if k in launch_kwargs:
+                    v = self._merge_envs(launch_kwargs[k], v)
+                launch_kwargs[k] = v
+
         return self.get_launch_command_from_components(
             binary, spec,
             self.format_job_args(launch_kwargs),
@@ -115,8 +223,12 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
         return self.container_process
     def terminate(self):
         if self.managed:
-            self.container_process.kill()
-            self.container_process = None
+            if self.container_process is not None:
+                self.container_process.kill()
+                self.container_process = None
+        if self._bind_dir is not None:
+            shutil.rmtree(self._bind_dir)
+            self._bind_dir = None
     def run(self, **subprocess_kwargs):
         return subprocess.run(self.get_launch_command(), **subprocess_kwargs)
 
@@ -127,8 +239,7 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
 
     def __del__(self):
         try:
-            if not self.managed and self.container_process is not None:
-                self.container_process.kill()
+            self.terminate()
         except:
             ...
 
@@ -149,6 +260,14 @@ class DockerLauncher(ContainerLauncher):
     def __init__(self, container_spec, *args, cli_binary="docker", mode='run', **kwargs):
         super().__init__(cli_binary, container_spec, *args, **kwargs)
         self.mode = mode
+
+    @classmethod
+    def prep_binds(cls, binds:dict[str, str]|list[tuple[str, str]|list[str]]):
+        return {'volume':binds}
+
+    @classmethod
+    def prep_envs(cls, envs:dict):
+        return {'env':envs}
 
     def launch_option_names(self):
         return self.LAUNCH_OPTIONS
@@ -188,6 +307,22 @@ class SingularityLauncher(ContainerLauncher):
         super().__init__(cli_binary, container_spec, *args, **kwargs)
         self.mode = mode
 
+    @classmethod
+    def _merge_binds(cls, new, old):
+        if isinstance(new, str):
+            new = new.split(',')
+        if isinstance(old, str):
+            old = old.split(',')
+        return super()._merge_binds(new, old)
+
+    @classmethod
+    def prep_binds(cls, binds:dict[str, str]|list[tuple[str, str]|list[str]]):
+        return {'bind':binds}
+
+    @classmethod
+    def prep_envs(cls, envs:dict):
+        return {'env':envs}
+
     def prep_core_kwargs(self, kwargs):
         launch_kwargs = {k: v for k, v in kwargs.items() if k in self.LAUNCH_OPTIONS}
         proc_kwargs   = {k: v for k, v in kwargs.items() if k not in self.LAUNCH_OPTIONS}
@@ -210,6 +345,14 @@ class CharliecloudLauncher(ContainerLauncher):
 
     def __init__(self, container_spec, *args, cli_binary="ch-run", **kwargs):
         super().__init__(cli_binary, container_spec, *args, **kwargs)
+
+    @classmethod
+    def prep_binds(cls, binds:dict[str, str]|list[tuple[str, str]|list[str]]):
+        return {'mount':binds}
+
+    @classmethod
+    def prep_envs(cls, envs:dict):
+        return {'set_env':envs}
 
     def prep_core_kwargs(self, kwargs):
         launch_kwargs = {k: v for k, v in kwargs.items() if k in self.LAUNCH_OPTIONS}

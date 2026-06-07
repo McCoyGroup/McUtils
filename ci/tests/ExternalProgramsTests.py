@@ -233,12 +233,13 @@ class ExternalProgramsTest(TestCase):
                 "/home/me/project/libs": "/work/libs",
                 "/home/me/project/out": "/work/out",
             },
+            bind_sources=['Psience'],
             pwd="/work",
             cleanenv=True,  # start from a clean container env
         )
         print(shlex.join(sing.get_launch_command()))
 
-    @debugTest
+    @validationTest
     def test_DockerRun(self):
         import shlex
 
