@@ -110,12 +110,15 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
         if self.container_process is None:
             self.container_process = self.launch_container()
         return self.container_process
+    def terminate(self):
+        if self.managed:
+            self.container_process.kill()
+            self.container_process = None
 
     def __enter__(self):
         return self.launch_container()
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.managed:
-            self.container_process.kill()
+        self.terminate()
 
     def __del__(self):
         try:
