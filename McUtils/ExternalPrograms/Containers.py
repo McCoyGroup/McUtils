@@ -2,7 +2,6 @@
 import abc
 import subprocess
 import itertools
-import shlex
 
 __all__ = [
     "SingularityLauncher",
@@ -49,10 +48,10 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
             pairs = [f"{k}{delim}{v}" for k, v in value.items()]
             delim = cls.LIST_JOIN_DELIMITERS.get(key)
             if delim is not None:
-                joined = delim.join(shlex.quote(p) for p in pairs)
+                joined = delim.join(p for p in pairs)
                 return [f"{opt}={joined}"]
             return list(itertools.chain.from_iterable(
-                [f"{opt}={shlex.quote(p)}"] for p in pairs
+                [f"{opt}={p}"] for p in pairs
             ))
 
         # list/tuple: repeated flags unless this runtime joins them.
@@ -60,14 +59,14 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
             items = [str(v) for v in value]
             delim = cls.LIST_JOIN_DELIMITERS.get(key)
             if delim is not None:
-                joined = delim.join(shlex.quote(v) for v in items)
+                joined = delim.join(v for v in items)
                 return [f"{opt}={joined}"]
             return list(itertools.chain.from_iterable(
-                [f"{opt}={shlex.quote(v)}"] for v in items
+                [f"{opt}={v}"] for v in items
             ))
 
         # scalar
-        return [f"{opt}={shlex.quote(str(value))}"]
+        return [f"{opt}={value}"]
 
     @classmethod
     def format_job_args(cls, kwargs) -> 'list[str]':
@@ -101,19 +100,25 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
             self.format_job_args(proc_kwargs),
         )
 
-    def launch_container(self):
+    def launch_container(self, stdout=True, stderr=True, **subprocess_kwargs):
+        if stdout is True:
+            stdout = subprocess.PIPE
+        if stderr is True:
+            stderr = subprocess.STDOUT
         return subprocess.Popen(self.get_launch_command(),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
+                                stdout=stdout,
+                                stderr=stderr, **subprocess_kwargs)
 
-    def launch(self):
+    def launch(self, **subprocess_kwargs):
         if self.container_process is None:
-            self.container_process = self.launch_container()
+            self.container_process = self.launch_container(**subprocess_kwargs)
         return self.container_process
     def terminate(self):
         if self.managed:
             self.container_process.kill()
             self.container_process = None
+    def run(self, **subprocess_kwargs):
+        return subprocess.run(self.get_launch_command(), **subprocess_kwargs)
 
     def __enter__(self):
         return self.launch_container()
