@@ -828,7 +828,7 @@ class FunctionWriter(DocObjectTemplateHandler):
         f = self.obj  # type: types.FunctionType
         ident = self.identifier
         signature = self.get_signature()
-        mem_obj_pat = re.compile(" object at \w+>")
+        mem_obj_pat = re.compile(r" object at \w+>")
         signature = re.sub(mem_obj_pat, " instance>", signature)
         name = self.get_name()
         descr, param, fields = self.parse_doc(f.__doc__ if f.__doc__ is not None else '')

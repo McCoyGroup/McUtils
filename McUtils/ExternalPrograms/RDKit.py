@@ -3169,7 +3169,7 @@ class RDMolecule(ExternalMolecule):
                 return cls._inject_attr(tag, body, attr, value)
             return annotate
         default_annotation_pattern = None
-        default_annotation_exclude = 'mol-\w+'
+        default_annotation_exclude = r'mol-\w+'
         @classmethod
         def _prep_annotation_function(cls, attrs_dict):
             if dev.is_list_like(attrs_dict):

@@ -34,7 +34,7 @@ class ColorPalette:
     @classmethod
     def _color_code_like(cls, name):
         if len(name) % 3 == 0 or len(name) % 4 == 0:
-            return re.match("\w+", name)
+            return re.match(r"\w+", name)
         else:
             return False
     @classmethod

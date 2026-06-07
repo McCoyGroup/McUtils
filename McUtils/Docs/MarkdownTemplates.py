@@ -93,7 +93,7 @@ class MarkdownOps:
             header_fmt += "#"
             header = header[1:]
         if name is None:
-            name = re.sub("\W", "", header) + "-" + str(uuid.uuid4())[:6]
+            name = re.sub(r"\W", "", header) + "-" + str(uuid.uuid4())[:6]
         return self.collapse_template.format(
             header_fmt=header_fmt,
             header=header,

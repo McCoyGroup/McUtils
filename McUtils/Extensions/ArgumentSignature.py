@@ -395,7 +395,7 @@ class Argument:
         elif argstr in cls._typestrs:
             type = cls._typestrs[argstr]
         else:
-            ptr_pat = "\*({})".format( "|".join(cls._typestrs.keys()))
+            ptr_pat = r"\*({})".format( "|".join(cls._typestrs.keys()))
             match = re.match(ptr_pat, argstr)
             if match is not None:
                 typestr = match.group(0)

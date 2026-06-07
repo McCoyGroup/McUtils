@@ -1812,7 +1812,7 @@ def triangle_property_function(sample_tri: TriangleData, field_name,
             # try to find conversions for subterms
 
 def dihedral_z_from_abcXYt(a, b, c, X, Y, tau, use_cos=False):
-    """
+    r"""
     a^2 + b^2 + c^2 - 2 (
         a b Cos[\[Alpha]] + b c Cos[\[Beta]]
         + a c (Cos[\[Tau]] Sin[\[Alpha]] Sin[\[Beta]] - Cos[\[Alpha]] Cos[\[Beta]])

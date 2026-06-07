@@ -156,7 +156,7 @@ class BibItemParser(Parsers.FileStreamReader):
     @classmethod
     def is_valid_key_block(cls, block:str):
         # if block.startswith("{") or block.startswith(","): block = block[1:]
-        return re.fullmatch("\s*\w+\s*=", block)
+        return re.fullmatch(r"\s*\w+\s*=", block)
     def parse_header(self, return_end_points=False):
         header_block = self.parse_key_block(
             tag_start=Parsers.FileStreamerTag("@", skip_tag=True),
@@ -235,7 +235,7 @@ class BibTeXParser(Parsers.FileStreamReader):
     def is_valid_tex_block(cls, block:str):
         block = block.replace("\\{", "|").replace("\\}", "|")
         return block.count("{") == block.count("}") - 1
-    _bib_item_pattern = "\@\w+\{"
+    _bib_item_pattern = r"\@\w+\{"
     @classmethod
     def is_valid_stream_start(cls, tag_str):
         if isinstance(cls._bib_item_pattern, str):

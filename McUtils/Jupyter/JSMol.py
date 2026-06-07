@@ -211,7 +211,7 @@ class JSMol:
                                                   include_script_interface=include_script_interface)
 
             if self.dynamic_loading:
-                load_script = load_script.tostring().replace("`", "\`")
+                load_script = load_script.tostring().replace("`", r"\`")
                 loader = HTML.Image(
                         src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
                         id=kill_id,
