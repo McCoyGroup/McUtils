@@ -924,7 +924,7 @@ PatternClass.__doc__ = """
     Represents a pattern class, for wrapping other patterns
 """
 
-parened_p = lambda p, no_capture = False: r"\("+p+"\)"
+parened_p = lambda p, no_capture = False: r"\("+p+r"\)"
 Parenthesized = RegexPattern(parened_p, "Parenthesized")
 Parenthesized.__name__ = "Parenthesized"
 Parenthesized.__doc__ = """
@@ -946,7 +946,7 @@ Sign.__doc__ = """
     Represents a +/- sign
     """
 
-paren_p = r"\("+".*?"+"\)"
+paren_p = r"\("+".*?"+r"\)"
 
 num_p = opnb_p(sign_p)+r"\d*\.\d+" # real number
 Number = RegexPattern(num_p, "Number", dtype=float)
@@ -1005,13 +1005,13 @@ Whitespace.__doc__ = """
     Represents a block of whitespace
     """
 
-WordCharacter = RegexPattern("\w", "WordCharacter", dtype=str)
+WordCharacter = RegexPattern(r"\w", "WordCharacter", dtype=str)
 WordCharacter.__name__ = "WordCharacter"
 WordCharacter.__doc__ = """
     Represents a single number or letter (i.e. non-whitespace)
     """
 
-Word = RegexPattern("[^\W\d_]\w*", "Word", dtype=str)
+Word = RegexPattern(r"[^\W\d_]\w*", "Word", dtype=str)
 Word.__name__ = "Word"
 Word.__doc__ = """
     Represents a block of WordCharacters

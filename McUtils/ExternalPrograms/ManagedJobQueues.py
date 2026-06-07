@@ -165,7 +165,7 @@ class SLURMSubmissionHandler(ManagedJobQueueSubmissionHandler):
 
     @classmethod
     def parse_job_id(self, res: str):
-        return re.match('Submitted batch job (\d+)', res).group(1)
+        return re.match(r'Submitted batch job (\d+)', res).group(1)
 
 class SLURMInformationHandler(ManagedJobQueueInformationHandler):
     STATES_MAP = [

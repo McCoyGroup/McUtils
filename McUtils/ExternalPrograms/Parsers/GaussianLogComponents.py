@@ -43,7 +43,7 @@ HeaderPercentBlockParser = StringParser(
 )
 HeaderHashBlockLine = RegexPattern((
     Capturing(Optional((Word, "="), dtype=str)),
-    Capturing(Repeating(Alternatives((WordCharacter, "\(", "\)", "\/", "\-")), dtype=str))
+    Capturing(Repeating(Alternatives((WordCharacter, r"\(", r"\)", r"\/", r"\-")), dtype=str))
     ))
 HeaderHashBlockLineParser = StringParser(HeaderHashBlockLine)
 HeaderHashBlockParser = StringParser(
@@ -662,7 +662,7 @@ tag_end = FileStreamerTag(
 
 SCFEnergyPattern = StringParser(
     RegexPattern((
-        "SCF Done:  E\(", Repeating(Any), "\) =",
+        r"SCF Done:  E\(", Repeating(Any), r"\) =",
         Whitespace,
         Named(Number, "energy")
     ))

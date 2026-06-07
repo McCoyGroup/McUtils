@@ -571,6 +571,9 @@ class UnitsDataHandler(DataHandler):
     BohrRadius = "BohrRadius"
     ElectronMass = "ElectronMass"
     AtomicMassUnits = "AtomicMassUnits"
+    ElectronVolts = "ElectronVolts"
+    KilocaloriesPerMole = "Kilocalories/Mole"
+    KilojoulesPerMole = "Kilocalories/Mole"
     @property
     def hartrees_to_wavenumbers(self): # soooo common
         return self.convert("Hartrees", "Wavenumbers")

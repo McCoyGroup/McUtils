@@ -5985,7 +5985,7 @@ class X3DAxes(GraphicsAxes3D):
         lines = text.splitlines()
         w = resolution * max(len(t) for t in lines)
         vh = 20 + 10 * len(lines)
-        return re.sub("\s+", " ", f"""
+        return re.sub(r"\s+", " ", f"""
 <svg version="1.1" viewBox="0 0 100 {vh}" width="{w}" height="auto" id='{id}-svg' xmlns="http://www.w3.org/2000/svg">
   <style>{fs}</style>
   <text 
@@ -5999,11 +5999,11 @@ class X3DAxes(GraphicsAxes3D):
         fs = self.default_texture_font | font_style
         # fs = {self.font_style_remapping.get(k, k):v for k,v in fs.items()}
         fs = CSS(**fs).tostring()
-        return re.sub("\s+", " ", f"""(function() {{
+        return re.sub(r"\s+", " ", f"""(function() {{
     let textureNode = document.getElementById('{id}-appearance-texture');
     if (textureNode??null !== null) {{
-      MathJax_3.tex2svgPromise('""") + "\\\\text{" + text.replace("\\", "") + re.sub("\s+", " ", """}', {display: true}).then((textWrapper) => {
-          MathJax_3.tex2svgPromise('""") + text + re.sub("\s+", " ", f"""', {{display: true}})
+      MathJax_3.tex2svgPromise('""") + "\\\\text{" + text.replace("\\", "") + re.sub(r"\s+", " ", """}', {display: true}).then((textWrapper) => {
+          MathJax_3.tex2svgPromise('""") + text + re.sub(r"\s+", " ", f"""', {{display: true}})
             .then((svgWrapper) => {{
                 let textNode = textWrapper.getElementsByTagName('svg')[0];
                 let svgNode = svgWrapper.getElementsByTagName('svg')[0];
