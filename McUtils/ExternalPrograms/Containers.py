@@ -208,14 +208,16 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
             self.format_job_args(proc_kwargs),
         )
 
-    def launch_container(self, stdout=True, stderr=True, **subprocess_kwargs):
+    def launch_container(self, stdout=True, stderr=True, text=True, **subprocess_kwargs):
         if stdout is True:
             stdout = subprocess.PIPE
         if stderr is True:
             stderr = subprocess.STDOUT
         return subprocess.Popen(self.get_launch_command(),
                                 stdout=stdout,
-                                stderr=stderr, **subprocess_kwargs)
+                                stderr=stderr,
+                                text=text,
+                                **subprocess_kwargs)
 
     def launch(self, **subprocess_kwargs):
         if self.container_process is None:
@@ -229,8 +231,8 @@ class ContainerLauncher(metaclass=abc.ABCMeta):
         if self._bind_dir is not None:
             shutil.rmtree(self._bind_dir)
             self._bind_dir = None
-    def run(self, **subprocess_kwargs):
-        return subprocess.run(self.get_launch_command(), **subprocess_kwargs)
+    def run(self, text=True, **subprocess_kwargs):
+        return subprocess.run(self.get_launch_command(), text=text, **subprocess_kwargs)
 
     def __enter__(self):
         return self.launch_container()
