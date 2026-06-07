@@ -58,81 +58,103 @@ to file and allows for easy checkpoint loading
 [ModuleSerializer](Scaffolding/Serializers/ModuleSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[LogParser](Scaffolding/Logging/LogParser.md)   
+[flatten_tree](Scaffolding/Serializers/flatten_tree.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[unflatten_tree](Scaffolding/Serializers/unflatten_tree.md)   
+</div>
+   <div class="col" markdown="1">
+[write_flat_tree](Scaffolding/Serializers/write_flat_tree.md)   
+</div>
+   <div class="col" markdown="1">
+[read_flat_tree](Scaffolding/Serializers/read_flat_tree.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[LogParser](Scaffolding/Logging/LogParser.md)   
+</div>
    <div class="col" markdown="1">
 [Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
 [CheckpointerKeyError](Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DumpCheckpointer](Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [JSONCheckpointer](Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [NumPyCheckpointer](Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [HDF5Checkpointer](Scaffolding/Checkpointing/HDF5Checkpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DictCheckpointer](Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [NullCheckpointer](Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PersistenceLocation](Scaffolding/Persistence/PersistenceLocation.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PersistenceManager](Scaffolding/Persistence/PersistenceManager.md)   
 </div>
    <div class="col" markdown="1">
 [ResourceManager](Scaffolding/Persistence/ResourceManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [BaseObjectManager](Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [FileBackedObjectManager](Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
 [Config](Scaffolding/Configurations/Config.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ParameterManager](Scaffolding/Configurations/ParameterManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Job](Scaffolding/Jobs/Job.md)   
 </div>
    <div class="col" markdown="1">
 [JobManager](Scaffolding/Jobs/JobManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [CLI](Scaffolding/CLIs/CLI.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
 [Command](Scaffolding/CLIs/Command.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -160,10 +182,11 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-76e7d9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-76e7d9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-074d95" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-074d95"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-76e7d9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-074d95" markdown="1">
  - [Schema](#Schema)
+- [TreeFlattening](#TreeFlattening)
 - [Pseudopickle](#Pseudopickle)
 - [HDF5Serialization](#HDF5Serialization)
 - [JSONSerialization](#JSONSerialization)
@@ -188,9 +211,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-6cb987" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-6cb987"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4f6eb5" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4f6eb5"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-6cb987" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4f6eb5" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -258,6 +281,31 @@ class ScaffoldingTests(TestCase):
             }
         }
         self.assertFalse(schema.validate(data, throw=False))
+```
+
+#### <a name="TreeFlattening">TreeFlattening</a>
+```python
+    def test_TreeFlattening(self):
+        data = {
+            'file': 'test.txt',
+            'filesystem': {'file':[['a'], ['b', 'c']]},
+            'coords': 123,
+            'initial': {
+                'coords':np.random.rand(5, 3)
+            },
+            'final':{
+                'coords':np.random.rand(1, 2)
+            },
+        }
+        flat = flatten_tree(data)
+        print(flat)
+        rev = unflatten_tree(flat)
+        print(rev)
+        buf = io.BytesIO()
+        write_flat_tree(buf, data)
+        buf.seek(0)
+        rev2 = read_flat_tree(buf)
+        print(rev2)
 ```
 
 #### <a name="Pseudopickle">Pseudopickle</a>
