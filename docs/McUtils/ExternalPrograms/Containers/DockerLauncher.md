@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Containers.DockerLauncher">DockerLauncher</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L135?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,8 @@ VARIABLE_JOIN_DELIMITERS: dict
 __init__(self, container_spec, *args, cli_binary='docker', mode='run', **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L144)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L144?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L149)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L149?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +38,8 @@ __init__(self, container_spec, *args, cli_binary='docker', mode='run', **kwargs)
 launch_option_names(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L153)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L153?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +48,8 @@ launch_option_names(self):
 prep_core_kwargs(self, kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L156)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L156?message=Update%20Docs)]
 </div>
 
 
@@ -58,8 +58,8 @@ prep_core_kwargs(self, kwargs):
 get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args, proc_kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L156)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L156?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L161)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/DockerLauncher.py#L161?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -114,7 +114,7 @@ get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args,
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Containers/DockerLauncher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Containers/DockerLauncher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L130?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L135?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
