@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Containers.SingularityLauncher">SingularityLauncher</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L294)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L294?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,30 @@ VARIABLE_JOIN_DELIMITERS: dict
 __init__(self, container_spec, *args, mode='run', cli_binary='singularity', **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L187)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L187?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers.py#L306)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L306?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.Containers.SingularityLauncher.prep_binds" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+prep_binds(cls, binds: 'dict[str, str] | list[tuple[str, str] | list[str]]'): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L318)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L318?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.Containers.SingularityLauncher.prep_envs" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+prep_envs(cls, envs: 'dict'): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L322)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L322?message=Update%20Docs)]
 </div>
 
 
@@ -38,8 +60,8 @@ __init__(self, container_spec, *args, mode='run', cli_binary='singularity', **kw
 prep_core_kwargs(self, kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L326)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L326?message=Update%20Docs)]
 </div>
 
 
@@ -48,8 +70,8 @@ prep_core_kwargs(self, kwargs):
 get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args, proc_kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L196)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L196?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L331)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers/SingularityLauncher.py#L331?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -104,7 +126,7 @@ get_launch_command_from_components(self, binary, spec, launch_kwargs, proc_args,
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Containers/SingularityLauncher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Containers/SingularityLauncher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L175?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Containers.py#L294?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
