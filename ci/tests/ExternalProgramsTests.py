@@ -209,9 +209,52 @@ class ExternalProgramsTest(TestCase):
         print(woof.format())
         print(script_file.resolve_buffer())
 
-    @debugTest
+    @validationTest
     def test_PubChemAPI(self):
         api = PubChemAPI()
         print(
             api.get_compounds_by_name('melatonin')
         )
+
+    @debugTest
+    def test_SingularityRun(self):
+        import shlex
+
+        sing = SingularityLauncher(
+            "/scratch/images/myapp.sif",  # image
+            "python", "-m", "myapp",  # command + args
+            mode='exec',
+            env={
+                "PYTHONPATH": "/work/src:/work/libs",
+                "PYTHONUNBUFFERED": "1",
+            },
+            bind={
+                "/home/me/project/src": "/work/src",
+                "/home/me/project/libs": "/work/libs",
+                "/home/me/project/out": "/work/out",
+            },
+            pwd="/work",
+            cleanenv=True,  # start from a clean container env
+        )
+        print(shlex.join(sing.get_launch_command()))
+
+    @debugTest
+    def test_DockerRun(self):
+        import shlex
+
+        docker = DockerLauncher(
+            "python:3.12-slim",  # image
+            "python", "-m", "myapp",  # entrypoint command + args
+            rm=True,
+            env={
+                "PYTHONPATH": "/work/src:/work/libs",
+                "PYTHONUNBUFFERED": "1",
+            },
+            volume={
+                "/home/me/project/src":"/work/src:ro",  # local src, read-only
+                "/home/me/project/libs":"/work/libs:ro",  # local libs, read-only
+                "/home/me/project/out":"/work/out",  # writable output dir
+            },
+            workdir="/work",
+        )
+        print(shlex.join(docker.get_launch_command()))

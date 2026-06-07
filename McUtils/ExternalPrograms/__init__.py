@@ -42,3 +42,5 @@ from .SMILES import *; from .SMILES import __all__ as exposed
 __all__ += exposed
 from .QM9 import *; from .QM9 import __all__ as exposed
 __all__ += exposed
+from .Containers import *; from .Containers import __all__ as exposed
+__all__ += exposed

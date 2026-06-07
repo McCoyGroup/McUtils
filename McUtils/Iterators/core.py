@@ -14,6 +14,7 @@ __all__ = [
     "transpose",
     "riffle",
     "flatten",
+    "first",
     "delete_duplicates",
     "unique_product",
     "zigzag_product"
@@ -302,3 +303,9 @@ def zigzag_product(*iterables, iterator_lengths=None, return_index=False):
             yield res, new_index
         else:
             yield res
+
+def first(iterable, key=None, default=None):
+    for i in iterable:
+        if key is None or key(i):
+            return i
+    return default
