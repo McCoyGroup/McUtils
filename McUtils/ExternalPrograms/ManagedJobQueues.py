@@ -371,6 +371,8 @@ def get_active_environment():
         env["VIRTUAL_ENV"] = venv
     if container := os.environ.get("CONTAINER_PATH"):
         env["CONTAINER_PATH"] = container
+    if container := os.environ.get("CONTAINER_ARGS"):
+        env["CONTAINER_ARGS"] = container
     return env
 python_sbatch_defaults = {
     'ntasks':1,
