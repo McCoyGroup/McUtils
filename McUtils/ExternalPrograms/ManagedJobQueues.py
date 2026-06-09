@@ -330,24 +330,52 @@ def serialize_python_job(func, *args,
 
 python_sbatch_template = """
 INPUT_FILE="${{SLURM_JOB_NAME%.*}}.py"
-curdir="$PWD"
-. ~/.bashrc
-cd "$curdir"
-if [ -n "$CONDA_ENVIRONMENT" ]; then
-  conda activate $CONDA_ENVIRONMENT
+
+if [ -n "$ENVIRONMENT_SCRIPT_PATH" ]; then
+    source "$ENVIRONMENT_SCRIPT_PATH"
 fi
-if [ -n "$VENV_PATH" ]; then
-  source $VENV_PATH/bin/activate
+
+if [ -z "$SBATCH_SCRIPT_PATH" ]; 
+    then
+        if [ -z "$CONTAINER_PATH" ]; 
+            then
+                curdir="$PWD"
+                . ~/.bashrc
+                cd "$curdir"
+                if [ -n "$CONDA_ENVIRONMENT" ]; then
+                  conda activate $CONDA_ENVIRONMENT
+                fi
+                if [ -n "$VENV_PATH" ]; then
+                  source $VENV_PATH/bin/activate
+                fi
+                python -u $INPUT_FILE $@
+            else
+                env=none
+                if [ -n "$CONDA_ENVIRONMENT" ]; then
+                  env="$CONDA_ENVIRONMENT"
+                fi
+                if [ -n "$VENV_PATH" ]; then
+                  env="$VENV_PATH"
+                fi
+                singularity run $CONTAINER_ARGS "$CONTAINER_PATH" --env="$env" python -u $INPUT_FILE $@
+        fi
+    else
+        source "$SBATCH_SCRIPT_PATH"
 fi
-python -u $INPUT_FILE $@
 """
 def get_active_environment():
+    env = {}
     if conda := os.environ.get("CONDA_DEFAULT_ENV"):
-        return "CONDA_ENVIRONMENT", conda
-    elif venv := os.environ.get("VIRTUAL_ENV"):
-        return "VENV_PATH", venv
-    else:
-        return None, None
+        env["CONDA_ENVIRONMENT"] = conda
+    if venv := os.environ.get("VIRTUAL_ENV"):
+        env["VIRTUAL_ENV"] = venv
+    if container := os.environ.get("CONTAINER_PATH"):
+        env["CONTAINER_PATH"] = container
+    if args := os.environ.get("CONTAINER_ARGS"):
+        env["CONTAINER_ARGS"] = args
+    if envscript := os.environ.get("ENVIRONMENT_SCRIPT_PATH"):
+        env["ENVIRONMENT_SCRIPT_PATH"] = envscript
+    return env
 python_sbatch_defaults = {
     'ntasks':1,
     'ntasks_per_node':1,
@@ -387,12 +415,11 @@ def sbatch_python_job(
 
     sbatch_kwargs['job_name'] = dev.filename(script_file.name)
 
-    env_type, env_name = get_active_environment()
-    if env_type is not None:
+    env_vars = get_active_environment()
+    if len(env_vars) > 0:
         if environment is None:
             environment = {}
-        if env_type not in environment:
-            environment[env_type] = env_name
+        environment = env_vars | environment
 
     def precall():
         script_file.write()
