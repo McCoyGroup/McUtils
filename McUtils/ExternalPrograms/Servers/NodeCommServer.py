@@ -510,6 +510,14 @@ class NodeCommHandler(socketserver.StreamRequestHandler):
             name = cls.__name__
             f.write(f"from .{targ} import {name}")
 
+        with open(os.path.join(target, '__main__.py'), 'w+') as f:
+            targ = os.path.basename(sys.modules[cls.__module__].__file__)
+            name = cls.__name__
+            f.writelines([
+                f"from .{targ} import {name}",
+                f'if __name__ == "__main__": {name}.main()',
+            ])
+
         return target
 
     class MultiprocessingServerContext:
@@ -629,16 +637,20 @@ class ShellCommHandler(NodeCommHandler):
     def _wrap_subprocess_call(self, command):
         # dispatch_request calls handlers as `caller(args, kwargs)`, where
         # `args` is the list of CLI args and `kwargs` the keyword dict.
+        # kwargs are converted to CLI flags and placed before the positional
+        # args (matching sbatch/GNU convention: options precede operands).
         if isinstance(command, str):
             # a bare command name, e.g. "sbatch"
             def wrapped(args, kwargs, _cmd=command):
-                return self.subprocess_response(_cmd, args)
+                return self.subprocess_response(_cmd, [*self.kwargs_to_cli(kwargs), *args])
             return wrapped
         elif not callable(command):
             # a command given as a list/tuple of leading tokens,
             # e.g. ("git", "status") -> prepend them before the request args
             def wrapped(args, kwargs, _cmd=list(command)):
-                return self.subprocess_response(_cmd[0], [*_cmd[1:], *args])
+                return self.subprocess_response(
+                    _cmd[0], [*_cmd[1:], *self.kwargs_to_cli(kwargs), *args]
+                )
             return wrapped
         return command
 

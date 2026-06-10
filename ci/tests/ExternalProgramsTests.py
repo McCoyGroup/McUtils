@@ -262,4 +262,4 @@ class ExternalProgramsTest(TestCase):
 
     @debugTest
     def test_ServerPackage(self):
-        SLURMClient.create_server_package("/Users/Mark/Desktop")
+        SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
