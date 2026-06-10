@@ -1,10 +1,10 @@
 from .NodeCommServer import ShellCommHandler
 
 __all__ = [
-    "GitHandler"
+    "GitClient"
 ]
 
-class GitHandler(ShellCommHandler):
+class GitClient(ShellCommHandler):
 
     DEFAULT_CONNECTION = None
     DEFAULT_PORT_ENV_VAR = 'GIT_SOCKET_PORT'
