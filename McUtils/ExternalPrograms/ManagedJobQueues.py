@@ -369,7 +369,7 @@ def get_active_environment():
         env["CONDA_ENVIRONMENT"] = conda
     if venv := os.environ.get("VIRTUAL_ENV"):
         env["VIRTUAL_ENV"] = venv
-    if container := os.environ.get("CONTAINER_PATH"):
+    if container := os.environ.get("SINGULARITY_CONTAINER"):
         env["CONTAINER_PATH"] = container
     if args := os.environ.get("CONTAINER_ARGS"):
         env["CONTAINER_ARGS"] = args

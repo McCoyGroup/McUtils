@@ -216,7 +216,7 @@ class ExternalProgramsTest(TestCase):
             api.get_compounds_by_name('melatonin')
         )
 
-    @debugTest
+    @validationTest
     def test_SingularityRun(self):
         import shlex
 
@@ -259,3 +259,7 @@ class ExternalProgramsTest(TestCase):
             workdir="/work",
         )
         print(shlex.join(docker.get_launch_command()))
+
+    @debugTest
+    def test_ServerPackage(self):
+        SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
