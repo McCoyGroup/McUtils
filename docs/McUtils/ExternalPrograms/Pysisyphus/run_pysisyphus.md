@@ -5,7 +5,7 @@
 </div>
 
 ```python
-run_pysisyphus(energy_evaluator, method, optimizer=None, optimizer_settings=None, max_cycles=None, max_step=None, max_displacement=None, thresh=None, tol=None, use_max_for_error=True, log_file=None, out_dir=None, return_logs=True, patch_logging=True, logger=None, **kwargs): 
+run_pysisyphus(energy_evaluator, method, optimizer=None, optimizer_settings=None, max_cycles=None, max_step=None, max_displacement=None, thresh=None, tol=None, use_max_for_error=True, log_file=None, out_dir=None, return_logs=True, patch_logging=True, logger=None, ignore_zero_steps=True, **kwargs): 
 ```
 
 
