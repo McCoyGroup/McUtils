@@ -582,6 +582,7 @@ def run_pysisyphus(
         return_logs=True,
         patch_logging=True,
         logger=None,
+        ignore_zero_steps=True,
         **kwargs
 ):
     if patch_logging:
@@ -616,6 +617,7 @@ def run_pysisyphus(
     with dev.DefaultDirectory(out_dir) as od:
         import pysisyphus.config
         cur_od = pysisyphus.config.OUT_DIR_DEFAULT
+        import pysisyphus.optimizers.exceptions
         try:
             pysisyphus.config.OUT_DIR_DEFAULT = od
             generator = resolve_pysis_method(method, energy_evaluator=energy_evaluator,
@@ -625,7 +627,13 @@ def run_pysisyphus(
                                                 out_dir=od,
                                                 logger=logger,
                                                 **optimizer_settings)
-            optimizer.run()
+            if ignore_zero_steps:
+                try:
+                    optimizer.run()
+                except pysisyphus.optimizers.exceptions.ZeroStepLength:
+                    ...
+            else:
+                optimizer.run()
         finally:
             pysisyphus.config.OUT_DIR_DEFAULT = cur_od
         if return_logs:
