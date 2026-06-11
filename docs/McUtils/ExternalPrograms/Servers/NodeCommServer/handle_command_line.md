@@ -1,11 +1,11 @@
 # <a id="McUtils.ExternalPrograms.Servers.NodeCommServer.handle_command_line">handle_command_line</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L380)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L380?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L671)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L671?message=Update%20Docs)]
 </div>
 
 ```python
-handle_command_line(handler_class, client_class, connection=None, port=None, ppid=None, hostname=None): 
+handle_command_line(handler_class, client_class, connection=None, port=None, ppid=None, hostname=None, connection_file=None): 
 ```
 
 
@@ -59,7 +59,7 @@ handle_command_line(handler_class, client_class, connection=None, port=None, ppi
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Servers/NodeCommServer/handle_command_line.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Servers/NodeCommServer/handle_command_line.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L380?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Servers/NodeCommServer.py#L671?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

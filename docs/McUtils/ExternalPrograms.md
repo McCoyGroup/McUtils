@@ -234,103 +234,103 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [handle_command_line](ExternalPrograms/Servers/NodeCommServer/handle_command_line.md)   
 </div>
    <div class="col" markdown="1">
-[GitHandler](ExternalPrograms/Servers/GitServer/GitHandler.md)   
+[GitClient](ExternalPrograms/Servers/GitServer/GitClient.md)   
 </div>
    <div class="col" markdown="1">
-[EvaluationHandler](ExternalPrograms/Servers/EvaluationServer/EvaluationHandler.md)   
+[SLURMClient](ExternalPrograms/Servers/SLURMServer/SLURMClient.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[EvaluationHandler](ExternalPrograms/Servers/EvaluationServer/EvaluationHandler.md)   
+</div>
    <div class="col" markdown="1">
 [EvaluationClient](ExternalPrograms/Servers/EvaluationServer/EvaluationClient.md)   
 </div>
    <div class="col" markdown="1">
 [ExecutionStatus](ExternalPrograms/ExecutionEngine/ExecutionStatus.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ExecutionQueue](ExternalPrograms/ExecutionEngine/ExecutionQueue.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ExecutionEngine](ExternalPrograms/ExecutionEngine/ExecutionEngine.md)   
 </div>
    <div class="col" markdown="1">
 [ManagedJobQueueExecutionEngine](ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SLURMExecutionEngine](ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueJobStatus](ExternalPrograms/ManagedJobQueues/ManagedJobQueueJobStatus.md)   
 </div>
    <div class="col" markdown="1">
 [ManagedJobQueueSubmissionHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueSubmissionHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueInformationHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueInformationHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.md)   
 </div>
    <div class="col" markdown="1">
 [SLURMInformationHandler](ExternalPrograms/ManagedJobQueues/SLURMInformationHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SLURMSubmissionHandler](ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SLURMHandler](ExternalPrograms/ManagedJobQueues/SLURMHandler.md)   
 </div>
    <div class="col" markdown="1">
 [serialize_python_job](ExternalPrograms/ManagedJobQueues/serialize_python_job.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [sbatch_python_job](ExternalPrograms/ManagedJobQueues/sbatch_python_job.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SMILESSupplier](ExternalPrograms/SMILES/SMILESSupplier.md)   
 </div>
    <div class="col" markdown="1">
 [consume_smiles_supplier](ExternalPrograms/SMILES/consume_smiles_supplier.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [match_smiles_supplier](ExternalPrograms/SMILES/match_smiles_supplier.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [smarts_matcher](ExternalPrograms/SMILES/smarts_matcher.md)   
 </div>
    <div class="col" markdown="1">
 [QM9](ExternalPrograms/QM9/QM9.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SingularityLauncher](ExternalPrograms/Containers/SingularityLauncher.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DockerLauncher](ExternalPrograms/Containers/DockerLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [PodmanLauncher](ExternalPrograms/Containers/PodmanLauncher.md)   
 </div>
-   <div class="col" markdown="1">
-[CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -361,9 +361,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-c8a282" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c8a282"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-05cdcd" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-05cdcd"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c8a282" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-05cdcd" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -376,12 +376,13 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 - [PubChemAPI](#PubChemAPI)
 - [SingularityRun](#SingularityRun)
 - [DockerRun](#DockerRun)
+- [ServerPackage](#ServerPackage)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-353a05" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-353a05"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-b4303a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b4303a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-353a05" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b4303a" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -650,6 +651,12 @@ class ExternalProgramsTest(TestCase):
             workdir="/work",
         )
         print(shlex.join(docker.get_launch_command()))
+```
+
+#### <a name="ServerPackage">ServerPackage</a>
+```python
+    def test_ServerPackage(self):
+        SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
 ```
 
  </div>
