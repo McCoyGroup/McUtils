@@ -43,7 +43,7 @@ class PysisyphusTermCalculator(Calculator):
             energy, grad = res
         else:
             grad = res
-            energy = self.evaluator(res, 0, **self.kwargs)
+            energy = self.evaluator(coords, 0, **self.kwargs)
         return dict(energy=energy * energy_conv, forces=-grad * energy_conv / dist_conv)
 
     def get_hessian(self, atoms, coords):
@@ -60,8 +60,8 @@ class PysisyphusTermCalculator(Calculator):
             energy, grad, hess = res
         else:
             hess = res
-            grad = self.evaluator(res, 1, **self.kwargs)
-            energy = self.evaluator(res, 0, **self.kwargs)
+            grad = self.evaluator(coords, 1, **self.kwargs)
+            energy = self.evaluator(coords, 0, **self.kwargs)
         return dict(energy=energy * energy_conv,
                     forces=-grad * energy_conv / dist_conv,
                     hessian=hess * energy_conv / dist_conv**2)
