@@ -505,17 +505,15 @@ class NodeCommHandler(socketserver.StreamRequestHandler):
             new_f = os.path.join(target, os.path.basename(f))
             shutil.copy(f, new_f)
 
+        targ = os.path.splitext(os.path.basename(sys.modules[cls.__module__].__file__))[0]
+        name = cls.__name__
         with open(os.path.join(target, '__init__.py'), 'w+') as f:
-            targ = os.path.basename(sys.modules[cls.__module__].__file__)
-            name = cls.__name__
             f.write(f"from .{targ} import {name}")
 
         with open(os.path.join(target, '__main__.py'), 'w+') as f:
-            targ = os.path.basename(sys.modules[cls.__module__].__file__)
-            name = cls.__name__
             f.writelines([
-                f"from .{targ} import {name}",
-                f'if __name__ == "__main__": {name}.main()',
+                f"from .{targ} import {name}\n",
+                f'if __name__ == "__main__": {name}.main()'
             ])
 
         return target
