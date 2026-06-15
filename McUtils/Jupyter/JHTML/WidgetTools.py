@@ -22,16 +22,12 @@ class JupyterAPIs:
         except ImportError:
             shell = None
         try:
-            import IPython.core.display as display
+            import IPython.display as display
         except ImportError:
-            display = None
-        else:
             try:
-                from IPython.display import display as new_display
+                import IPython.core.display as display
             except ImportError:
-                ...
-            else:
-                display.display = new_display
+                display = None
         try:
             import ipywidgets as widgets
             widgets.Output
