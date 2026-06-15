@@ -1384,7 +1384,7 @@ def check_zmatrix_coordinate_constraint(zm, coord):
         return (coord[0], p1)
 
     p1 = zm[coord[-1]]['parents']
-    if (coord[-1],) + p1[:n] == coord:
+    if tuple(reversed(p1[:n])) + (coord[-1],) == coord:
         return (coord[-1], p1)
 
     return False
@@ -1482,7 +1482,7 @@ def _adjust_zm_parents(zm, i, new, constraint_map, validate=False):
             for o in p1:
                 zm[o]['children'].add(i)
             for o in new:
-                zm[o]['children'].remove(i)
+                zm[o]['children'].discard(i)
             zm[i]['parents'] = p1
     else:
         zm[i]['parents'] = p1
@@ -1718,7 +1718,7 @@ def enforce_required_zmatrix_coordinates(zm,
 
             refs = zm[i]['parents'][:2]
             p2 = zm[j]['parents']
-            new2 = (j,) + refs
+            new2 = (i,) + refs
             if len(new2) < len(p2):
                 new2 = new2 + p2[:len(p2) - len(new2)]
 
@@ -1751,6 +1751,7 @@ def enforce_required_zmatrix_coordinates(zm,
                 d = zm[i]
                 if len(np.unique(d['parents'])) < len(d['parents']):
                     raise ValueError(i, d)
+            if (i in ref_choices[0]): raise ValueError(i, ref_choices[0])
             constraint_map[m] = (i, ref_choices[0])
             continue
 
@@ -1760,6 +1761,7 @@ def enforce_required_zmatrix_coordinates(zm,
                 d = zm[j]
                 if len(np.unique(d['parents'])) < len(d['parents']):
                     raise ValueError(j, d)
+            if (j in ref_choices[1]): raise ValueError(j, ref_choices[1])
             constraint_map[m] = (j, ref_choices[1])
             continue
 
@@ -1802,9 +1804,7 @@ def enforce_required_zmatrix_coordinates(zm,
                 zm = np.array(zm)
                 raise ValueError(f"after coordinate enforcement zmatrix invalid ({reason}) in {zm}")
 
-            zmatrix_indices(
-                zm, coords
-            )
+            zcs = zmatrix_indices(zm, coords)
 
     return zm
 
