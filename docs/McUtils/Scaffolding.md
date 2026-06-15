@@ -182,9 +182,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-538452" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-538452"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-5622e6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-5622e6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-538452" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-5622e6" markdown="1">
  - [Schema](#Schema)
 - [TreeFlattening](#TreeFlattening)
 - [Pseudopickle](#Pseudopickle)
@@ -211,9 +211,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ebbdb7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ebbdb7"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c7bb98" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c7bb98"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ebbdb7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c7bb98" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
