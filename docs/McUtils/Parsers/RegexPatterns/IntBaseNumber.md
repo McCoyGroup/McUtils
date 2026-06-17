@@ -1,7 +1,7 @@
 ### <a id="McUtils.Parsers.RegexPatterns.IntBaseNumber">IntBaseNumber</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L50?message=Update%20Docs)]
 </div>
 Represents a real number with definite integer part, like -1.23434 or 0.; doesn't support "E" notation
 
@@ -54,7 +54,7 @@ Represents a real number with definite integer part, like -1.23434 or 0.; doesn'
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/RegexPatterns/IntBaseNumber.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/RegexPatterns/IntBaseNumber.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L48?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L50?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

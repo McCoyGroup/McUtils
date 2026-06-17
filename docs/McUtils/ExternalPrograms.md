@@ -83,254 +83,265 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [CIFConverter](ExternalPrograms/Parsers/CIFParser/CIFConverter.md)   
 </div>
    <div class="col" markdown="1">
-[CRESTParser](ExternalPrograms/Parsers/Crest/CRESTParser.md)   
+[CubeFileData](ExternalPrograms/Parsers/CubeParser/CubeFileData.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[CubeFileParser](ExternalPrograms/Parsers/CubeParser/CubeFileParser.md)   
+</div>
+   <div class="col" markdown="1">
+[CRESTParser](ExternalPrograms/Parsers/Crest/CRESTParser.md)   
+</div>
+   <div class="col" markdown="1">
 [MOLPROLogReader](ExternalPrograms/Parsers/MOLPRO/MOLPROLogReader.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ExternalProgramRunner](ExternalPrograms/Runner/ExternalProgramRunner.md)   
 </div>
    <div class="col" markdown="1">
 [OpenBabelInterface](ExternalPrograms/ChemToolkits/OpenBabelInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PybelInterface](ExternalPrograms/ChemToolkits/PybelInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [RDKitInterface](ExternalPrograms/ChemToolkits/RDKitInterface.md)   
 </div>
    <div class="col" markdown="1">
 [ASEInterface](ExternalPrograms/ChemToolkits/ASEInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OpenChemistryInterface](ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [CCLibInterface](ExternalPrograms/ChemToolkits/CCLibInterface.md)   
 </div>
    <div class="col" markdown="1">
 [PILInterface](ExternalPrograms/ImageKits/PILInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OpenCVInterface](ExternalPrograms/ImageKits/OpenCVInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Open3DInterface](ExternalPrograms/Toolkits3D/Open3DInterface.md)   
 </div>
    <div class="col" markdown="1">
 [VPythonInterface](ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [VTKInterface](ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [RDMolecule](ExternalPrograms/RDKit/RDMolecule.md)   
 </div>
    <div class="col" markdown="1">
 [ASEMolecule](ExternalPrograms/ASE/ASEMolecule.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ASECalculator](ExternalPrograms/ASE/ASECalculator.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PysisCalculator](ExternalPrograms/Pysisyphus/PysisCalculator.md)   
 </div>
    <div class="col" markdown="1">
 [patch_pysis_logging](ExternalPrograms/Pysisyphus/patch_pysis_logging.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [run_pysisyphus](ExternalPrograms/Pysisyphus/run_pysisyphus.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [pysis_interpolate](ExternalPrograms/Pysisyphus/pysis_interpolate.md)   
 </div>
    <div class="col" markdown="1">
 [prep_pysis_images](ExternalPrograms/Pysisyphus/prep_pysis_images.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [OBMolecule](ExternalPrograms/OpenBabel/OBMolecule.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [WebRequestHandler](ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
    <div class="col" markdown="1">
 [WebAPIConnection](ExternalPrograms/WebAPI/WebAPIConnection.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebSubAPIConnection](ExternalPrograms/WebAPI/WebSubAPIConnection.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [WebResourceManager](ExternalPrograms/WebAPI/WebResourceManager.md)   
 </div>
    <div class="col" markdown="1">
 [GitHubReleaseManager](ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ReleaseZIPManager](ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ChemSpiderAPI](ExternalPrograms/ChemicalResourceAPIs/ChemSpiderAPI.md)   
 </div>
    <div class="col" markdown="1">
 [PubChemAPI](ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [env_proc_call](ExternalPrograms/Subprocesses/env_proc_call.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [env_pip](ExternalPrograms/Subprocesses/env_pip.md)   
 </div>
    <div class="col" markdown="1">
 [NodeCommTCPServer](ExternalPrograms/Servers/NodeCommServer/NodeCommTCPServer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [NodeCommUnixServer](ExternalPrograms/Servers/NodeCommServer/NodeCommUnixServer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NodeCommHandler](ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.md)   
 </div>
    <div class="col" markdown="1">
 [NodeCommClient](ExternalPrograms/Servers/NodeCommServer/NodeCommClient.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ShellCommHandler](ExternalPrograms/Servers/NodeCommServer/ShellCommHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [setup_parent_terminated_listener](ExternalPrograms/Servers/NodeCommServer/setup_parent_terminated_listener.md)   
 </div>
    <div class="col" markdown="1">
 [setup_server](ExternalPrograms/Servers/NodeCommServer/setup_server.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [handle_command_line](ExternalPrograms/Servers/NodeCommServer/handle_command_line.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [GitClient](ExternalPrograms/Servers/GitServer/GitClient.md)   
 </div>
    <div class="col" markdown="1">
 [SLURMClient](ExternalPrograms/Servers/SLURMServer/SLURMClient.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [EvaluationHandler](ExternalPrograms/Servers/EvaluationServer/EvaluationHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [EvaluationClient](ExternalPrograms/Servers/EvaluationServer/EvaluationClient.md)   
 </div>
    <div class="col" markdown="1">
 [ExecutionStatus](ExternalPrograms/ExecutionEngine/ExecutionStatus.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ExecutionQueue](ExternalPrograms/ExecutionEngine/ExecutionQueue.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ExecutionEngine](ExternalPrograms/ExecutionEngine/ExecutionEngine.md)   
 </div>
    <div class="col" markdown="1">
 [ManagedJobQueueExecutionEngine](ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SLURMExecutionEngine](ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueJobStatus](ExternalPrograms/ManagedJobQueues/ManagedJobQueueJobStatus.md)   
 </div>
    <div class="col" markdown="1">
 [ManagedJobQueueSubmissionHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueSubmissionHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueInformationHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueInformationHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.md)   
 </div>
    <div class="col" markdown="1">
 [SLURMInformationHandler](ExternalPrograms/ManagedJobQueues/SLURMInformationHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SLURMSubmissionHandler](ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SLURMHandler](ExternalPrograms/ManagedJobQueues/SLURMHandler.md)   
 </div>
    <div class="col" markdown="1">
 [serialize_python_job](ExternalPrograms/ManagedJobQueues/serialize_python_job.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [sbatch_python_job](ExternalPrograms/ManagedJobQueues/sbatch_python_job.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SMILESSupplier](ExternalPrograms/SMILES/SMILESSupplier.md)   
 </div>
    <div class="col" markdown="1">
 [consume_smiles_supplier](ExternalPrograms/SMILES/consume_smiles_supplier.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [match_smiles_supplier](ExternalPrograms/SMILES/match_smiles_supplier.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [smarts_matcher](ExternalPrograms/SMILES/smarts_matcher.md)   
 </div>
    <div class="col" markdown="1">
 [QM9](ExternalPrograms/QM9/QM9.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SingularityLauncher](ExternalPrograms/Containers/SingularityLauncher.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DockerLauncher](ExternalPrograms/Containers/DockerLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [PodmanLauncher](ExternalPrograms/Containers/PodmanLauncher.md)   
 </div>
+   <div class="col" markdown="1">
+[CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
+</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
+[CubePropEvaluator](ExternalPrograms/CubeProp/CubePropEvaluator.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -361,9 +372,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e19930" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e19930"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-4fc59f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-4fc59f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e19930" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-4fc59f" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -377,12 +388,13 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 - [SingularityRun](#SingularityRun)
 - [DockerRun](#DockerRun)
 - [ServerPackage](#ServerPackage)
+- [CubeParser](#CubeParser)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-880977" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-880977"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-72d276" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-72d276"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-880977" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-72d276" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -657,6 +669,38 @@ class ExternalProgramsTest(TestCase):
 ```python
     def test_ServerPackage(self):
         SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
+```
+
+#### <a name="CubeParser">CubeParser</a>
+```python
+    def test_CubeParser(self):
+        from Psience.Molecools import Molecule
+        # with CubeFileParser(TestManager.test_data('samp.cube')) as parser:
+        #     pprint.pprint(parser.parse())
+
+        eval = CubePropEvaluator.from_file(TestManager.test_data('samp.cube'))
+        surf = eval.get_isosurface(0.2)
+        surf2 = eval.get_isosurface(-0.2)
+        mol = Molecule(eval.base_data.atoms.numbers,
+                       eval.base_data.atoms.positions)
+
+        fig = mol.plot(backend='x3d')
+        surf.plot(figure=fig, transparency=.4, line_color=None)
+        surf2.plot(figure=fig, color='yellow', transparency=.4, line_color=None)
+        fig.show()
+        return
+
+        eval = CubePropEvaluator.from_file('/Users/Mark/Downloads/h2o.mol2.cube')
+        mol = Molecule(eval.base_data.atoms.numbers,
+                       eval.base_data.atoms.positions)
+
+        fig = mol.plot(backend='x3d')
+        surf = mol.get_surface(samples=200)
+        tri = surf.get_triangulation()
+        tri.plot(solid=False, figure=fig,
+                 vertex_values=eval.evaluate(tri.verts),
+                 transparency=.5)
+        fig.show()
 ```
 
  </div>

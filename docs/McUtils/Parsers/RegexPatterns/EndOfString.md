@@ -1,12 +1,9 @@
-### <a id="McUtils.Parsers.RegexPatterns.IntXYZLine">IntXYZLine</a> 
+### <a id="McUtils.Parsers.RegexPatterns.EndOfString">EndOfString</a> 
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns.py#L50)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L50?message=Update%20Docs)]
 </div>
-Represents a line in an XYZ file that starts with an int, like
-```
-1   -1.232323 2.23212421 43.44343434
-```
+
 
 
 
@@ -51,10 +48,10 @@ Represents a line in an XYZ file that starts with an int, like
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Parsers/RegexPatterns/IntXYZLine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Parsers/RegexPatterns/IntXYZLine.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Parsers/RegexPatterns/EndOfString.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Parsers/RegexPatterns/EndOfString.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/RegexPatterns/IntXYZLine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/RegexPatterns/IntXYZLine.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/RegexPatterns/EndOfString.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/RegexPatterns/EndOfString.md)   
 </div>
    <div class="col" markdown="1">
 [Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns.py#L50?message=Update%20Docs)   
