@@ -27,7 +27,7 @@ IntersectionCircle: IntersectionCircle
 ```
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, centers, radii, scaling=None, expansion=None, samples=None, tolerance=None): 
+__init__(self, centers, radii, scaling=None, expansion=None, samples=None, tolerance=None, add_intersection_circles=False): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L27)/
@@ -41,8 +41,8 @@ __init__(self, centers, radii, scaling=None, expansion=None, samples=None, toler
 from_xyz(cls, atoms, positions, scaling=None, expansion=None, samples=None, tolerance=None, radius_property='IconRadius', distance_units='BohrRadius'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L47?message=Update%20Docs)]
 </div>
 
 
@@ -52,8 +52,8 @@ from_xyz(cls, atoms, positions, scaling=None, expansion=None, samples=None, tole
 sampling_points(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L62)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L62?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L64?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ sampling_points(self):
 atom_sampling_points(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L74?message=Update%20Docs)]
 </div>
 
 
@@ -74,8 +74,8 @@ atom_sampling_points(self):
 nearest_centers(cls, pts, centers, return_normals=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L79)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L79?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L81?message=Update%20Docs)]
 </div>
 
 
@@ -85,8 +85,8 @@ nearest_centers(cls, pts, centers, return_normals=False):
 sphere_project(cls, pts, centers, radii): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L92)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L92?message=Update%20Docs)]
 </div>
 
 
@@ -96,8 +96,8 @@ sphere_project(cls, pts, centers, radii):
 sphere_boundary_pruning(cls, pts, centers, min_component=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L104)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L104?message=Update%20Docs)]
 </div>
 
 
@@ -107,8 +107,8 @@ sphere_boundary_pruning(cls, pts, centers, min_component=None):
 point_cloud_repulsion(cls, pts, centers, radii, min_displacement_cutoff=0.001, stochastic_factor=0.0001, force_constant=0.001, power=-3, max_iterations=15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L145)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L145?message=Update%20Docs)]
 </div>
 
 
@@ -118,8 +118,8 @@ point_cloud_repulsion(cls, pts, centers, radii, min_displacement_cutoff=0.001, s
 adjust_point_cloud_density(self, pts, centers=None, radii=None, min_component=None, min_component_bins=30, min_component_scaling=0.7, same_point_cutoff=1e-06, max_iterations=15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L186?message=Update%20Docs)]
 </div>
 
 
@@ -129,8 +129,8 @@ adjust_point_cloud_density(self, pts, centers=None, radii=None, min_component=No
 get_exterior_points(cls, points, centers, radii, tolerance: float = 0, return_components=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L337)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L337?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L339)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L339?message=Update%20Docs)]
 </div>
 
 
@@ -140,29 +140,29 @@ get_exterior_points(cls, points, centers, radii, tolerance: float = 0, return_co
 get_interior_points(cls, points, centers, radii, tolerance: float = 0, return_components=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L354)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L354?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L356)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L356?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.get_surface_points" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-get_surface_points(cls, centers, radii, samples=50, scaling=1, expansion=0, preserve_origins=False, tolerance=0, prune=True): 
+get_surface_points(cls, centers, radii, samples=50, scaling=1, expansion=0, preserve_origins=False, circle_samples=None, circle_sample_density=0.5, add_intersection_circles=False, tolerance=0, prune=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L371)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L371?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L373)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L373?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.generate_points" class="docs-object-method">&nbsp;</a> 
 ```python
-generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True): 
+generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True, add_intersection_circles=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L409)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L409?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L436)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L436?message=Update%20Docs)]
 </div>
 
 
@@ -171,8 +171,8 @@ generate_points(self, scaling=None, expansion=None, samples=None, preserve_origi
 generate_mesh(self, points=None, normals=None, scaling=None, expansion=None, samples=None, method='poisson', depth=5, **reconstruction_settings): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L427)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L427?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L458)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L458?message=Update%20Docs)]
 </div>
 
 
@@ -182,8 +182,8 @@ generate_mesh(self, points=None, normals=None, scaling=None, expansion=None, sam
 sphere_points(cls, centers, radii, samples, generator=None, shells=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L464)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L464?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L495)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L495?message=Update%20Docs)]
 </div>
 
 
@@ -193,18 +193,18 @@ sphere_points(cls, centers, radii, samples, generator=None, shells=None):
 fibonacci_sphere(cls, samples): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L509)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L509?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L540)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L540?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.get_triangulation" class="docs-object-method">&nbsp;</a> 
 ```python
-get_triangulation(self, **surface_opts): 
+get_triangulation(self, add_intersection_circles=True, occlusion_type='auto', **surface_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L521)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L521?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L552)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L552?message=Update%20Docs)]
 </div>
 
 
@@ -214,8 +214,8 @@ get_triangulation(self, **surface_opts):
 sampling_point_surface_area(cls, centers, radii, points=None, exterior_test=None, point_generator=None, generator_args=None, center_surface_areas=None, **test_args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L529)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L529?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L563)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L563?message=Update%20Docs)]
 </div>
 
 
@@ -225,8 +225,8 @@ sampling_point_surface_area(cls, centers, radii, points=None, exterior_test=None
 sampling_point_volume(cls, centers, radii, points=None, interior_test=None, point_generator=None, generator_args=None, center_volumes=None, shells=50, **test_args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L578)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L578?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L612)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L612?message=Update%20Docs)]
 </div>
 
 
@@ -236,8 +236,8 @@ sampling_point_volume(cls, centers, radii, points=None, interior_test=None, poin
 random_sphere_sampling(cls, center, radius, samples=500, seed=None, rng=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L610)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L610?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L644)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L644?message=Update%20Docs)]
 </div>
 
 
@@ -247,8 +247,8 @@ random_sphere_sampling(cls, center, radius, samples=500, seed=None, rng=None):
 volume_union_mc(cls, centers, radii, n_samples=100000, seed=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L621)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L621?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L655?message=Update%20Docs)]
 </div>
 
 
@@ -258,8 +258,8 @@ volume_union_mc(cls, centers, radii, n_samples=100000, seed=None):
 volume_voxel(cls, centers, radii, resolution=200): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L636)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L636?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L670)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L670?message=Update%20Docs)]
 </div>
 
 
@@ -269,8 +269,8 @@ volume_voxel(cls, centers, radii, resolution=200):
 sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L720)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L720?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L754)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L754?message=Update%20Docs)]
 </div>
 
 
@@ -280,8 +280,8 @@ sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3):
 sphere_double_intersection_circle(cls, centers, radii, dist=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L780)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L780?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L814)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L814?message=Update%20Docs)]
 </div>
 
 
@@ -291,8 +291,8 @@ sphere_double_intersection_circle(cls, centers, radii, dist=None):
 sphere_triple_intersection_point(cls, centers, radii, dists=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L790)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L790?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L824)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L824?message=Update%20Docs)]
 </div>
 
 
@@ -302,8 +302,8 @@ sphere_triple_intersection_point(cls, centers, radii, dists=None):
 get_intersections(cls, centers, radii): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L822)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L822?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L856)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L856?message=Update%20Docs)]
 </div>
 
 
@@ -313,8 +313,8 @@ get_intersections(cls, centers, radii):
 sphere_double_intersection_area(cls, a, r1, r2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L856)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L856?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L890)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L890?message=Update%20Docs)]
 </div>
 
 
@@ -324,8 +324,8 @@ sphere_double_intersection_area(cls, a, r1, r2):
 triangle_area(cls, a, b, c): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L907)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L907?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L941)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L941?message=Update%20Docs)]
 </div>
 
 
@@ -335,8 +335,8 @@ triangle_area(cls, a, b, c):
 sphere_quadruple_intersection_area(cls, a, b, c, f, g, h, r1, r2, r3, r4, A123, A124, A134, A234, I4, I3, I2, I1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L912)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L912?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L946)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L946?message=Update%20Docs)]
 </div>
 
 
@@ -346,8 +346,8 @@ sphere_quadruple_intersection_area(cls, a, b, c, f, g, h, r1, r2, r3, r4, A123, 
 sphere_area(cls, radii, axis=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1144)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1144?message=Update%20Docs)]
 </div>
 
 
@@ -357,8 +357,8 @@ sphere_area(cls, radii, axis=None):
 sphere_union_surface_area(cls, centers, radii, include_doubles=True, include_triples=None, include_quadruples=None, return_terms=False, overlap_tolerance=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1148)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1148?message=Update%20Docs)]
 </div>
 
 
@@ -367,8 +367,8 @@ sphere_union_surface_area(cls, centers, radii, include_doubles=True, include_tri
 surface_area(self, method='union', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1265)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1265?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1299)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1299?message=Update%20Docs)]
 </div>
 
 
@@ -377,8 +377,8 @@ surface_area(self, method='union', **opts):
 volume(self, method='monte-carlo', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1289)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1289?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1323)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1323?message=Update%20Docs)]
 </div>
 
 
@@ -387,8 +387,8 @@ volume(self, method='monte-carlo', **opts):
 plot(self, figure=None, *, points=None, function=None, sphere_color='white', sphere_style=None, point_style=None, point_values=None, distance_units='Angstroms', plot_intersections=False, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1317)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1317?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1351)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1351?message=Update%20Docs)]
 </div>
 
 
@@ -398,8 +398,8 @@ plot(self, figure=None, *, points=None, function=None, sphere_color='white', sph
 plot_sphere_points(cls, points, centers, radii, figure=None, *, color='black', backend='x3d', return_objects=False, sphere_color='white', sphere_style=None, point_colors=None, point_values=None, vertex_colormap='WarioColors', rescale_color_values=True, plot_intersections=False, intersection_point_style=None, intersection_circle_style=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1355)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1355?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1389)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1389?message=Update%20Docs)]
 </div>
  </div>
 </div>
