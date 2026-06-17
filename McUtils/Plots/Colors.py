@@ -15,7 +15,9 @@ __all__ = [
 #TODO: add ColorSpaces enum for validation
 
 class ColorPalette:
-    def __init__(self, colors, blend_spacings=None, lab_colors=None, color_space='rgb', cycle=False):
+    def __init__(self, colors, blend_spacings=None, lab_colors=None, color_space='rgb', cycle=False,
+                 return_color_codes=True
+                 ):
         if isinstance(colors, str):
             colors = self.resolve_color_palette(colors)
         elif self.is_colormap_like(colors):
