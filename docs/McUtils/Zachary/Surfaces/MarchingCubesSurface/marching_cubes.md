@@ -9,8 +9,6 @@ marching_cubes(grid, isovalue, spacing=(1.0, 1.0, 1.0), origin=(0.0, 0.0, 0.0), 
 ```
 Extract an isosurface from a scalar voxel grid.
 
-Parameters
-----------
 grid : array_like, shape (nx, ny, nz)
 Scalar field values. Axis order is (x, y, z).
 isovalue : float
@@ -19,13 +17,6 @@ spacing : (sx, sy, sz)
 Physical step size along each axis. Defaults to unit voxels.
 origin : (ox, oy, oz)
 World-space coordinate of grid point (0, 0, 0).
-
-Returns
--------
-vertices : ndarray, shape (N, 3)
-Isosurface vertex positions in world space.
-triangles : ndarray, shape (M, 3), dtype int
-Vertex index triples; each row is one triangle.
 
 
 
