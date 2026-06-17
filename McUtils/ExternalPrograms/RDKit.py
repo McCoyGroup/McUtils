@@ -494,6 +494,7 @@ class RDMolecule(ExternalMolecule):
                      strict_cxsmiles=True,
                      remove_hydrogens=False,
                      add_implicit_hydrogens=None,
+                     reorder_from_atom_map=False,
                      replacements=None,
                      quiet=False,
                      **opts
@@ -544,6 +545,12 @@ class RDMolecule(ExternalMolecule):
                         atom.SetNumExplicitHs(0)  # clear any explicit H count
             rdkit_mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
 
+        if reorder_from_atom_map:
+            base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
+            base_map = [len(base_map)+1 if a == 0 else a for a in base_map]
+            # need to use a stable sort
+            rdkit_mol = Chem.RenumberAtoms(rdkit_mol, np.argsort(base_map, kind='merge').tolist())
+
         return rdkit_mol
     @classmethod
     def from_smiles(cls, smiles,
@@ -585,14 +592,9 @@ class RDMolecule(ExternalMolecule):
             remove_hydrogens=remove_hydrogens,
             replacements=replacements,
             add_implicit_hydrogens=add_implicit_hydrogens,
+            reorder_from_atom_map=reorder_from_atom_map,
             **opts
         )
-
-        if reorder_from_atom_map:
-            base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
-            base_map = [len(base_map)+1 if a == 0 else a for a in base_map]
-            # need to use a stable sort
-            rdkit_mol = Chem.RenumberAtoms(rdkit_mol, np.argsort(base_map, kind='merge').tolist())
 
         if coords is None and conf_tag is not None:
             #TODO: add precision support
@@ -1921,6 +1923,42 @@ class RDMolecule(ExternalMolecule):
 
         return type(self)(conf, charge=self.charge)
 
+    @classmethod
+    def fragment_rdmol(cls, mol, inds):
+        Chem = cls.allchem_api()
+        submol = Chem.EditableMol(Chem.Mol())
+        submol.BeginBatchEdit()
+        atom_list = list(mol.GetAtoms())
+        for i in inds:
+            submol.AddAtom(atom_list[i])
+        for i, j in itertools.combinations(range(len(inds)), 2):
+            b = mol.GetBondBetweenAtoms(inds[i], inds[j])
+            if b is not None:
+                submol.AddBond(i, j, b.GetBondType())
+        submol.CommitBatchEdit()
+        return submol.GetMol()
+
+    @classmethod
+    def fragment_rdmol_on_bonds(cls, mol, bonds, addDummies=True):
+        Chem = cls.allchem_api()
+        bond_indices = []
+        no_map = {a.GetAtomMapNum(): i for i, a in enumerate(mol.GetAtoms())}
+        no_map.pop(0, None)
+        for i, j in bonds:
+            i, j = no_map[i + 1], no_map[j + 1]
+            bond_indices.append(mol.GetBondBetweenAtoms(i, j).GetIdx())
+        broke_mol = Chem.FragmentOnBonds(mol, bond_indices, addDummies=addDummies)
+        for a in broke_mol.GetAtoms(): a.SetAtomMapNum(0)
+        Chem.AddHs(broke_mol, explicitOnly=True)
+        frags = Chem.GetMolFrags(broke_mol)
+        new_mols = {}
+        inv_map = {i: n for n, i in no_map.items()}
+        for f in frags:
+            submol = cls.fragment_rdmol(broke_mol, f)
+            for a, i in zip(submol.GetAtoms(), f):
+                a.SetAtomMapNum(inv_map.get(i, 0))
+            new_mols[f] = submol
+        return new_mols
 
     def get_atom_neighbors(self, i, n=1, mol=None, graph=None):
         if graph is None:

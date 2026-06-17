@@ -525,7 +525,7 @@ class X3DMaterial(X3DOptionsSet):
         "specularity": "specularColor"
     }
     def prep_attrs(self, attrs:dict):
-        if 'color' in attrs:
+        if attrs.get('color') is not None:
             new_attrs = attrs.copy()
             color, transparency = self.parse_color(attrs['color'])
             new_attrs['color'] = color

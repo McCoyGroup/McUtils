@@ -24,12 +24,14 @@ class SphereUnionSurface:
     default_scaling = 1
     default_expansion = 0
     default_tolerance = 1e-3
-    def __init__(self, centers, radii, scaling=None, expansion=None, samples=None, tolerance=None):
+    def __init__(self, centers, radii, scaling=None, expansion=None, samples=None, tolerance=None,
+                 add_intersection_circles=False):
         self.centers = np.asanyarray(centers)
         self.radii = np.asanyarray(radii)
         if samples is None:
             samples = self.default_samples
         self.samples = samples
+        self.add_intersection_circles = add_intersection_circles
         if scaling is None:
             scaling = self.default_scaling
         self.scaling = scaling
@@ -376,20 +378,45 @@ class SphereUnionSurface:
                            scaling=1,
                            expansion=0,
                            preserve_origins=False,
+                           circle_samples=None,
+                           circle_sample_density=.5,
+                           add_intersection_circles=False,
                            tolerance=0,
                            prune=True
                            ):
         centers = np.asanyarray(centers)
-        radii = np.asanyarray(radii) * scaling + expansion
+        radii:np.array[float] = np.asanyarray(radii) * scaling + expansion
 
         base_points = cls.sphere_points(
             centers,
             radii,
             samples
         )
+
+        if add_intersection_circles:
+            for i,j in itertools.combinations(range(len(centers)), 2):
+                r_ij = np.linalg.norm(centers[i] - centers[j])
+                if r_ij < (radii[i] + radii[j]):
+                    circ = cls.sphere_double_intersection_circle(
+                        [centers[i], centers[j]],
+                        np.array([radii[i], radii[j]]),
+                        dist=r_ij)
+                    if circle_samples is None:
+                        circle_samples = int(samples * circle_sample_density)
+                    thetas = np.linspace(0, 2*np.pi, circle_samples+1)[:-1]
+                    base_circ = np.moveaxis(
+                        np.array([np.cos(thetas), np.sin(thetas), np.zeros(thetas.shape)]),
+                        0, -1
+                    ) * circ.radius
+                    pts = base_circ @ nput.rotation_matrix([0, 0, 1], circ.normal) + circ.center[np.newaxis]
+                    if not isinstance(base_points, list):
+                        base_points = list(base_points)
+                    base_points[i] = np.concatenate([base_points[i], pts], axis=0)
+                    base_points[j] = np.concatenate([base_points[j], pts], axis=0)
+
         if prune:
             if not preserve_origins:
-                base_points = base_points.reshape(-1, 3)
+                base_points = np.concatenate(base_points, axis=0)
                 mask = cls.get_exterior_points(base_points, centers, radii, tolerance=tolerance)
 
                 return base_points[mask,]
@@ -406,11 +433,14 @@ class SphereUnionSurface:
             else:
                 return base_points
 
-    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True):
+    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True,
+                        add_intersection_circles=None
+                        ):
         if samples is None: samples = self.samples
         if scaling is None: scaling = self.scaling
         if expansion is None: expansion = self.expansion
         if tolerance is None: tolerance = self.tolerance
+        if add_intersection_circles is None: add_intersection_circles = self.add_intersection_circles
 
         return self.get_surface_points(
             self.centers,
@@ -419,6 +449,7 @@ class SphereUnionSurface:
             expansion=expansion,
             samples=samples,
             preserve_origins=preserve_origins,
+            add_intersection_circles=add_intersection_circles,
             tolerance=tolerance,
             prune=prune
         )
@@ -518,11 +549,14 @@ class SphereUnionSurface:
 
         return np.array([x, y, z]).T
 
-    def get_triangulation(self, **surface_opts):
+    def get_triangulation(self, add_intersection_circles=True, occlusion_type='auto', **surface_opts):
+        if dev.str_is(occlusion_type, 'auto'):
+            occlusion_type = 'partial' if not add_intersection_circles else 'complete'
         return SphereUnionSurfaceMesh.from_subclouds(
-            self.generate_points(preserve_origins=True, prune=False),
+            self.generate_points(preserve_origins=True, prune=False, add_intersection_circles=add_intersection_circles),
             centers=self.centers,
             radii=self.radii,
+            occlusion_type=occlusion_type,
             **surface_opts
         )
 
@@ -1612,7 +1646,7 @@ class SphereUnionSurfaceMesh:
     @classmethod
     def from_submeshes(cls, pts, submeshes, *, centers, radii,
                        occlusion_type='complete',
-                       occlusion_tolerance=0.00001,
+                       occlusion_tolerance=1e-3,
                        check_normals=True,
                        vert_map=None,
                        **etc):
@@ -1634,13 +1668,13 @@ class SphereUnionSurfaceMesh:
                 for i, t in enumerate(submeshes)
             ])
             all_tris = np.concatenate(submeshes, axis=0)
-            if occlusion_type in ['complete', 'centroid']:
+            if occlusion_type in ['entire', 'centroid']:
                 centroids = np.average(pts[all_tris], axis=-2)
                 centroid_mask = SphereUnionSurface.get_exterior_points(
                     centroids,
                     centers,
                     radii,
-                    tolerance=occlusion_tolerance
+                    tolerance=occlusion_tolerance * np.max(radii)
                 )
                 all_tris = all_tris[centroid_mask]
                 tri_map = tri_map[centroid_mask]
@@ -1648,10 +1682,10 @@ class SphereUnionSurfaceMesh:
                 pts,
                 centers,
                 radii,
-                tolerance=occlusion_tolerance
+                tolerance=occlusion_tolerance * np.max(radii)
             )
             occlusion_count = 3 - np.sum(points_mask[all_tris], axis=-1)
-            if occlusion_type == 'complete':
+            if occlusion_type in ['entire', 'complete']:
                 submask = occlusion_count == 0
                 all_tris = all_tris[submask]
                 tri_map = tri_map[submask]
@@ -1668,6 +1702,9 @@ class SphereUnionSurfaceMesh:
             remapping = np.full(len(points_mask), -1, dtype=int)
             remapping[point_indexing] = np.arange(len(point_indexing))
             all_tris = remapping[all_tris]
+
+            if len(all_tris) == 0:
+                raise ValueError("all triangles pruned")
 
             if check_normals: # determine if the triangle normal points in or out from its radius, rotate if needed
                 tri_pts = pts[all_tris]
@@ -1734,7 +1771,7 @@ class SphereUnionSurfaceMesh:
              *,
              function=None,
              vertex_values=None,
-             normals=False,
+             normals=None,
              distance_units='Angstroms',
              **etc
              ):
@@ -1819,6 +1856,7 @@ class SphereUnionSurfaceMesh:
             normals = np.asanyarray(normals) * normal_scaling
             if centroids is None:
                 centroids = np.average(verts[indices], axis=-2)
+            print(centroids, normals)
             for p,n in zip(centroids, normals):
                 objs.append(
                     plt.Arrow(p, p+n, color=normal_color, radius=normal_radius)
