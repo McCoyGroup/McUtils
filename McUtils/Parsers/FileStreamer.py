@@ -981,6 +981,7 @@ class LineByLineParser(metaclass=abc.ABCMeta):
         COMMENT = "comment"
         SKIP = "skip"
         VALUE = "value"
+        CONSUME_REST = 'consume'
     def read_stream_line(self, binary=None):
         if binary is None:
             binary = self.binary
@@ -1021,7 +1022,8 @@ class LineByLineParser(metaclass=abc.ABCMeta):
         active_tag = None
         label = None
         try:
-            for i,line in enumerate(self.stream_iter(binary=binary)):
+            sitter = self.stream_iter(binary=binary)
+            for i,line in enumerate(sitter):
                 if line is None: break
                 empty = False
                 next_tag = self.check_tag(line, depth, active_tag=active_tag, label=label, history=block_data)
@@ -1071,6 +1073,13 @@ class LineByLineParser(metaclass=abc.ABCMeta):
                         else:
                             break
                 elif next_tag is self.LineReaderTags.RESETTING_BLOCK_END:
+                    break
+                elif next_tag is self.LineReaderTags.CONSUME_REST:
+                    if active_tag is None:
+                        label = tag_label
+                        if tag_body is not None: block_data.append(tag_body)
+                    block_data.extend(list(sitter))
+                    stream_pos = None
                     break
                 elif active_tag is not None and next_tag is not None and next_tag != active_tag:
                     if depth == 0 or (max_nesting_depth > 0 and depth >= max_nesting_depth):

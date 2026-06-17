@@ -15,6 +15,8 @@ from .FChkDerivatives import *; from .FChkDerivatives import __all__ as exposed
 __all__ += exposed
 from .CIFParser import *; from .CIFParser import __all__ as exposed
 __all__ += exposed
+from .CubeParser import *; from .CubeParser import __all__ as exposed
+__all__ += exposed
 from .Crest import *; from .Crest import __all__ as exposed
 __all__ += exposed
 from .MOLPRO import *; from .MOLPRO import __all__ as exposed

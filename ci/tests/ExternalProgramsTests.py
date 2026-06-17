@@ -260,6 +260,36 @@ class ExternalProgramsTest(TestCase):
         )
         print(shlex.join(docker.get_launch_command()))
 
-    @debugTest
+    @validationTest
     def test_ServerPackage(self):
         SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
+
+    @debugTest
+    def test_CubeParser(self):
+        from Psience.Molecools import Molecule
+        # with CubeFileParser(TestManager.test_data('samp.cube')) as parser:
+        #     pprint.pprint(parser.parse())
+
+        eval = CubePropEvaluator.from_file(TestManager.test_data('samp.cube'))
+        surf = eval.get_isosurface(0.2)
+        surf2 = eval.get_isosurface(-0.2)
+        mol = Molecule(eval.base_data.atoms.numbers,
+                       eval.base_data.atoms.positions)
+
+        fig = mol.plot(backend='x3d')
+        surf.plot(figure=fig, transparency=.4, line_color=None)
+        surf2.plot(figure=fig, color='yellow', transparency=.4, line_color=None)
+        fig.show()
+        return
+
+        eval = CubePropEvaluator.from_file('/Users/Mark/Downloads/h2o.mol2.cube')
+        mol = Molecule(eval.base_data.atoms.numbers,
+                       eval.base_data.atoms.positions)
+
+        fig = mol.plot(backend='x3d')
+        surf = mol.get_surface(samples=200)
+        tri = surf.get_triangulation()
+        tri.plot(solid=False, figure=fig,
+                 vertex_values=eval.evaluate(tri.verts),
+                 transparency=.5)
+        fig.show()
