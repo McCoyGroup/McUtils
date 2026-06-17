@@ -20,6 +20,8 @@ __all__ = [
     "PatternClass",
     "Parenthesized",
     "Named",
+    "StartOfString",
+    "EndOfString",
     "Any",
     "Sign",
     "Number",
@@ -938,6 +940,16 @@ Any.__name__ = "Any"
 Any.__doc__ = """
     Represents any character
     """
+start_p = "^"
+StartOfString = RegexPattern(start_p, "StartOfString")
+StartOfString.__name__ = "StartOfString"
+StartOfString.__doc__ = """"""
+
+end_p = "$"
+EndOfString = RegexPattern(end_p, "EndOfString")
+EndOfString.__name__ = "EndOfString"
+EndOfString.__doc__ = """"""
+
 
 sign_p = r"[\+\-]"
 Sign = RegexPattern(sign_p, "Sign")

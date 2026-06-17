@@ -13,3 +13,5 @@ from .Surface import *; from .Surface import __all__ as exposed
 __all__ += exposed
 from .SphereUnionSurface import *; from .SphereUnionSurface import __all__ as exposed
 __all__ += exposed
+from .MarchingCubesSurface import *; from .MarchingCubesSurface import __all__ as exposed
+__all__ += exposed
