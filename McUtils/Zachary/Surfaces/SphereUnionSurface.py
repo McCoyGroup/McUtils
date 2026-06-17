@@ -1488,7 +1488,8 @@ class SphereUnionSurface:
             return figure
 
 class SphereUnionSurfaceMesh:
-    def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None):
+    def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None,
+                 vertex_normals=None):
         self.surf = surf
         self.verts = verts
         self.inds = inds
@@ -1496,6 +1497,7 @@ class SphereUnionSurfaceMesh:
         self.vert_map = vert_map
         self.tri_map = tri_map
         self._normals = normals
+        self.vertex_normals = vertex_normals
         self._derivative_term_cache = {}
 
     def surface_area(self, return_components=False):
@@ -1856,7 +1858,7 @@ class SphereUnionSurfaceMesh:
             normals = np.asanyarray(normals) * normal_scaling
             if centroids is None:
                 centroids = np.average(verts[indices], axis=-2)
-            print(centroids, normals)
+            # print(centroids, normals)
             for p,n in zip(centroids, normals):
                 objs.append(
                     plt.Arrow(p, p+n, color=normal_color, radius=normal_radius)

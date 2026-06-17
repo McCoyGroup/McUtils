@@ -389,8 +389,6 @@ def marching_cubes(
 ):
     """Extract an isosurface from a scalar voxel grid.
 
-    Parameters
-    ----------
     grid : array_like, shape (nx, ny, nz)
         Scalar field values. Axis order is (x, y, z).
     isovalue : float
@@ -399,13 +397,6 @@ def marching_cubes(
         Physical step size along each axis. Defaults to unit voxels.
     origin : (ox, oy, oz)
         World-space coordinate of grid point (0, 0, 0).
-
-    Returns
-    -------
-    vertices : ndarray, shape (N, 3)
-        Isosurface vertex positions in world space.
-    triangles : ndarray, shape (M, 3), dtype int
-        Vertex index triples; each row is one triangle.
     """
     grid = np.asarray(grid, dtype=np.float64)
     nx, ny, nz = grid.shape
@@ -458,6 +449,8 @@ def marching_cubes(
     if transformation is not None:
         vertices = transformation(vertices)
     triangles = np.array(tris,  dtype=np.int32)   if tris  else np.zeros((0, 3), dtype=np.int32)
+    if isovalue < 0:
+        triangles = triangles[:, (1, 0, 2)]
 
     if return_normals:
         normals = compute_normals(vertices, triangles, grid, spacing=spacing, origin=origin)
@@ -465,7 +458,7 @@ def marching_cubes(
         normals = None
 
     if return_surface:
-        return SphereUnionSurfaceMesh(vertices, triangles, normals=normals)
+        return SphereUnionSurfaceMesh(vertices, triangles, vertex_normals=normals)
     elif return_normals:
         return vertices, triangles, normals
     else:
