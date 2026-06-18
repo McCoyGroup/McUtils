@@ -132,9 +132,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-678655" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-678655"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-cda5ed" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cda5ed"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-678655" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cda5ed" markdown="1">
  - [AtomData](#AtomData)
 - [AtomMasses](#AtomMasses)
 - [Conversions](#Conversions)
@@ -143,9 +143,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-6d714a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-6d714a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-2b2e0b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2b2e0b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-6d714a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2b2e0b" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
