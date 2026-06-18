@@ -338,7 +338,11 @@ class SphereUnionSurface:
         return pts
 
     @classmethod
-    def get_exterior_points(cls, points, centers, radii, tolerance:float=0, vertex_map=None, return_components=False):
+    def get_exterior_points(cls, points, centers, radii, tolerance:float=0,
+                            vertex_map=None,
+                            intersection_point_mask=None,
+                            intersection_point_tolerance=None,
+                            return_components=False):
         points = np.asanyarray(points)
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
@@ -349,6 +353,9 @@ class SphereUnionSurface:
         )
 
         comps = dvs * (1+tolerance) >= radii[np.newaxis]
+        if intersection_point_mask is not None and intersection_point_tolerance is not None:
+            comps[intersection_point_mask,] = dvs[intersection_point_mask,] * (1 + intersection_point_tolerance) >= radii[np.newaxis]
+
         if vertex_map is not None:
             if vertex_map.ndim == 1:
                 comps[np.arange(len(vertex_map)), vertex_map] = True
@@ -386,10 +393,15 @@ class SphereUnionSurface:
                            expansion=0,
                            preserve_origins=False,
                            circle_samples=None,
-                           min_circle_samples=100,
+                           min_circle_samples=.1,
                            add_intersection_circles=False,
+                           intersection_radius_scaling=1,
+                           intersection_boundary_clipping_threshold='auto',
+                           return_intersection_point_mask=False,
+                           extend_intersection_points=True,
+                           intersection_point_tolerance=None,
                            clear_circle_neighbors=True,
-                           neighborhood_tolerance=0.1, # percentage of radius
+                           neighborhood_tolerance='auto', # percentage of radius
                            tolerance=0,
                            prune=True
                            ):
@@ -407,6 +419,12 @@ class SphereUnionSurface:
             for b in base_points
         ]
 
+        d_avgs = []
+        for b in base_points:
+            dms = nput.distance_matrix(b)
+            np.fill_diagonal(dms, np.max(dms))
+            d_avgs.append(np.average(np.min(dms, axis=0)))
+
         if add_intersection_circles:
             for i,j in itertools.combinations(range(len(centers)), 2):
                 r_ij = np.linalg.norm(centers[i] - centers[j])
@@ -415,67 +433,185 @@ class SphereUnionSurface:
                         [centers[i], centers[j]],
                         np.array([radii[i], radii[j]]),
                         dist=r_ij)
-                    samps = circle_samples
-                    if samps is None:
-                        # compute some randomly sampled interatomic distances
-                        if len(base_points[i]) <= 25:
-                            subpts = base_points[i]
-                        else:
-                            sidx = np.random.choice(len(base_points[i]), size=25, replace=False)
-                            subpts = base_points[i][sidx,]
-                        dtot = 2*np.pi*circ.radius
-                        davg = np.average(nput.distance_matrix(subpts, return_triu=True))
-                        targ = 1 + 2*(dtot // davg)
-                        samps = int(max([targ, min_circle_samples]))
-                    thetas = np.linspace(0, 2*np.pi, samps+1)[:-1]
-                    base_circ = np.moveaxis(
-                        np.array([np.cos(thetas), np.sin(thetas), np.zeros(thetas.shape)]),
-                        0, -1
-                    ) * circ.radius
-                    pts = base_circ @ nput.rotation_matrix([0, 0, 1], circ.normal) + circ.center[np.newaxis]
-                    if not isinstance(base_points, list):
-                        base_points = list(base_points)
-                    base_points[i] = np.concatenate([base_points[i], pts], axis=0)
-                    if clear_circle_neighbors:
-                        circ_dists = np.linalg.norm(base_points[i][:samples][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
-                        nt = neighborhood_tolerance * radii[i]
-                        base_point_masks[i] &= np.all(circ_dists >= nt, axis=-1)
 
-                        circ_dists = np.linalg.norm(base_points[j][:samples][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
-                        nt = neighborhood_tolerance * radii[j]
-                        base_point_masks[j] &= np.all(circ_dists >= nt, axis=-1)
-                    if preserve_origins:
-                        base_points[j] = np.concatenate([base_points[j], pts], axis=0)
+                    # project points onto the intersection circle, anything
+                    # close to the boundary gets pushed onto the boundary
+                    circ_pts = circ.center[np.newaxis] + circ.radius * nput.vec_normalize(
+                        nput.project_out(base_points[i][:samples] - circ.center[np.newaxis], circ.normal[:, np.newaxis])
+                    )
+                    circ_dists = nput.vec_norms(base_points[i][:samples] - circ_pts)
 
-        _ = []
-        for bm,pt in zip(base_point_masks,base_points):
-            if len(bm) < len(pt):
-                bm = np.concatenate([bm, np.full(len(pt) - len(bm), True)], axis=0)
-                pt = pt[bm]
+                    # any point within tolerance gets pushed onto the intersection
+                    thresh = intersection_boundary_clipping_threshold
+                    if thresh is None:
+                        thresh = neighborhood_tolerance
+                    if dev.str_is(thresh, 'auto'):
+                        thresh = np.clip(
+                            d_avgs[i] * (
+                                1 + .25*(1 - cls.get_exterior_points(base_points[i][:samples], centers, radii, tolerance=tolerance))
+                            ),
+                            0,
+                            radii[i] / 4
+                        )
+                    else:
+                        thresh = thresh * radii[i]
+                    mask = circ_dists < thresh
+                    # make sure points aren't now occluded
+                    mask[mask] &= cls.get_exterior_points(circ_pts[mask], centers, radii, tolerance=tolerance)
+                    idx = np.where(mask)
+                    if len(idx[0]) > 0:
+                        base_points[i][idx] = circ_pts[idx]
+
+                    circ_pts = circ.center[np.newaxis] + circ.radius * nput.vec_normalize(
+                        nput.project_out(base_points[j][:samples] - circ.center[np.newaxis], circ.normal[:, np.newaxis])
+                    )
+                    circ_dists = nput.vec_norms(base_points[j][:samples] - circ_pts)
+
+                    # any point within tolerance gets pushed onto the intersection
+                    thresh = intersection_boundary_clipping_threshold
+                    if thresh is None:
+                        thresh = neighborhood_tolerance
+                    if dev.str_is(thresh, 'auto'):
+                        thresh = np.clip(
+                            d_avgs[j] * (1 + .25*(1 - cls.get_exterior_points(base_points[j][:samples], centers, radii, tolerance=tolerance))),
+                            0,
+                            radii[j] / 4
+                        )
+                    else:
+                        thresh = thresh * radii[j]
+                    mask = circ_dists < thresh
+                    mask[mask] &= cls.get_exterior_points(circ_pts[mask], centers, radii, tolerance=tolerance)
+                    idx = np.where(mask)
+                    if len(idx[0]) > 0:
+                        base_points[j][idx] = circ_pts[idx]
+
+                    if extend_intersection_points:
+
+                        samps = circle_samples
+                        if samps is None:
+                            if min_circle_samples < 1:
+                                min_circle_samples = int(samples * min_circle_samples)
+                            dtot = 2 * np.pi * circ.radius
+                            davg = d_avgs[i]
+                            targ = 1 + 2 * (dtot // davg)
+                            samps = int(max([targ, min_circle_samples]))
+                        thetas = np.linspace(0, 2 * np.pi, samps + 1)[:-1]
+                        base_circ = np.moveaxis(
+                            np.array([np.cos(thetas), np.sin(thetas), np.zeros(thetas.shape)]),
+                            0, -1
+                        ) * circ.radius * intersection_radius_scaling
+
+                        pts = base_circ @ nput.rotation_matrix([0, 0, 1], circ.normal) + circ.center[np.newaxis]
+                        mask = cls.get_exterior_points(pts, centers, radii, tolerance=tolerance+1e-3)
+                        if not np.any(mask): continue
+                        pts = pts[mask,]
+                        # if clear_circle_neighbors:
+                        #     if len(base_points[i]) > samps:
+                        #         circ_dists = np.linalg.norm(pts[:, np.newaxis, :] - base_points[i][samps:][np.newaxis, :, :], axis=-1)
+                        #         nt = neighborhood_tolerance * radii[i]
+                        #         mask = np.all(circ_dists >= nt, axis=-1)
+                        #         pts = pts[mask,]
+                        #
+                        #     if len(base_points[j]) > samps:
+                        #         circ_dists = np.linalg.norm(pts[:, np.newaxis, :] - base_points[j][samps:][np.newaxis, :, :], axis=-1)
+                        #         nt = neighborhood_tolerance * radii[j]
+                        #         mask = np.all(circ_dists >= nt, axis=-1)
+                        #         pts = pts[mask,]
+
+                        if not isinstance(base_points, list):
+                            base_points = list(base_points)
+                        base_points[i] = np.concatenate([base_points[i], pts], axis=0)
+                        if clear_circle_neighbors:
+                            circ_dists = np.linalg.norm(base_points[i][:samples][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
+                            nt = neighborhood_tolerance
+                            if dev.str_is(nt, 'auto'):
+                                nt = d_avgs[i] / 4
+                            else:
+                                nt = nt * radii[i]
+                            base_point_masks[i] &= np.all(circ_dists >= nt, axis=-1)
+
+                            circ_dists = np.linalg.norm(base_points[j][:samples][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
+                            nt = neighborhood_tolerance
+                            if dev.str_is(nt, 'auto'):
+                                nt = d_avgs[j] / 4
+                            else:
+                                nt = nt * radii[j]
+                            base_point_masks[j] &= np.all(circ_dists >= nt, axis=-1)
+
+                        if preserve_origins:
+                            base_points[j] = np.concatenate([base_points[j], pts], axis=0)
+
+        if add_intersection_circles and extend_intersection_points:
+            intsection_point_masks = []
+            _ = []
+            for bm,pt in zip(base_point_masks,base_points):
+                ip_mask = np.full(len(bm), False)
+                if len(bm) < len(pt):
+                    submask = np.full(len(pt) - len(bm), True)
+                    ip_mask = np.concatenate([ip_mask, submask], axis=0)
+                    bm = np.concatenate([bm, submask], axis=0)
+                    pt = pt[bm]
+                    ip_mask = ip_mask[bm]
+                    intsection_point_masks.append(ip_mask)
+                else:
+                    pt = pt[bm]
                 _.append(pt)
-        base_points = _
+            base_points = _
+        else:
+            intsection_point_masks = None
 
         if prune:
             if not preserve_origins:
                 base_points = np.concatenate(base_points, axis=0)
-                mask = cls.get_exterior_points(base_points, centers, radii, tolerance=tolerance)
+                if intsection_point_masks is not None:
+                    intsection_point_masks = np.concatenate(intsection_point_masks, axis=0)
+                else:
+                    intsection_point_masks = None
+                mask = cls.get_exterior_points(base_points, centers, radii,
+                                               intersection_point_mask=intsection_point_masks,
+                                               intersection_point_tolerance=intersection_point_tolerance,
+                                               tolerance=tolerance)
 
-                return base_points[mask,]
+                if return_intersection_point_mask:
+                    return base_points[mask,], intsection_point_masks[mask,]
+                else:
+                    return base_points[mask,]
             else:
                 subpoints = []
-                for bp in base_points:
-                    mask = cls.get_exterior_points(bp, centers, radii, tolerance=tolerance)
+                ip_masks = []
+                if intsection_point_masks is None:
+                    intsection_point_masks = [None] * len(base_points)
+                for bp,ipm in zip(base_points, intsection_point_masks):
+                    mask = cls.get_exterior_points(bp, centers, radii,
+                                                   intersection_point_mask=ipm,
+                                                   intersection_point_tolerance=intersection_point_tolerance,
+                                                   tolerance=tolerance)
                     subpoints.append(bp[mask,])
+                    if ipm is not None:
+                        ip_masks.append(ipm[mask,])
+                if len(ip_masks) == 0:
+                    ip_masks = None
 
-                return subpoints
+                if return_intersection_point_mask:
+                    return subpoints, ip_masks
+                else:
+                    return subpoints
         else:
             if not preserve_origins:
-                return np.concatenate([base_points], axis=0)
+                if return_intersection_point_mask:
+                    if intsection_point_masks is not None:
+                        intsection_point_masks = np.concatenate(intsection_point_masks, axis=0)
+                    return np.concatenate(base_points, axis=0), intsection_point_masks
+                else:
+                    return np.concatenate(base_points, axis=0)
             else:
-                return base_points
+                if return_intersection_point_mask:
+                    return base_points, intsection_point_masks
+                else:
+                    return base_points
 
     def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True,
-                        add_intersection_circles=None
+                        add_intersection_circles=None, **etc
                         ):
         if samples is None: samples = self.samples
         if scaling is None: scaling = self.scaling
@@ -492,7 +628,8 @@ class SphereUnionSurface:
             preserve_origins=preserve_origins,
             add_intersection_circles=add_intersection_circles,
             tolerance=tolerance,
-            prune=prune
+            prune=prune,
+            **etc
         )
 
 
@@ -590,18 +727,30 @@ class SphereUnionSurface:
 
         return np.array([x, y, z]).T
 
-    def get_triangulation(self, add_intersection_circles=True, occlusion_type='auto', deduplicate_points=None, **surface_opts):
+    def get_triangulation(self,  occlusion_type='auto', deduplicate_points=None,
+                          point_gen_options=None,
+                          add_intersection_circles=True,
+                          extend_intersection_points=False,
+                          **surface_opts):
+        if point_gen_options is None:
+            point_gen_options = {'add_intersection_circles':add_intersection_circles}
+        add_intersection_circles = point_gen_options.get('add_intersection_circles', add_intersection_circles)
+        point_gen_options['add_intersection_circles'] = add_intersection_circles
         if dev.str_is(occlusion_type, 'auto'):
             occlusion_type = 'partial' if not add_intersection_circles else 'complete'
         if deduplicate_points is None:
             deduplicate_points = add_intersection_circles
+        pts, masks = self.generate_points(preserve_origins=True, prune=False,
+                                          return_intersection_point_mask=True,
+                                          extend_intersection_points=extend_intersection_points,
+                                          **point_gen_options)
         return SphereUnionSurfaceMesh.from_subclouds(
-            self.generate_points(preserve_origins=True, prune=False,
-                                 add_intersection_circles=add_intersection_circles),
+            pts,
             centers=self.centers,
             radii=self.radii,
             occlusion_type=occlusion_type,
             deduplicate_points=deduplicate_points,
+            intersection_point_mask=masks,
             **surface_opts
         )
 
@@ -1687,7 +1836,7 @@ class SphereUnionSurfaceMesh:
         return self._normals[1]
     def get_normals(self, normalize=True):
         tri_pts = self.verts[self.inds]
-        crosses = nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1])
+        crosses = nput.vec_crosses(tri_pts[:, 2] - tri_pts[:, 1], tri_pts[:, 0] - tri_pts[:, 1])
         return nput.vec_normalize(crosses, return_norms=True)
 
     @classmethod
@@ -1698,6 +1847,8 @@ class SphereUnionSurfaceMesh:
                        deduplicate_points=False,
                        duplicate_point_threshold=1e-14,
                        vert_map=None,
+                       intersection_point_mask=None,
+                       occlusion_intersection_tolerance=5e-2,
                        **etc):
         pts = np.asanyarray(pts)
         if deduplicate_points:
@@ -1724,6 +1875,8 @@ class SphereUnionSurfaceMesh:
                     for g in groups:
                         vert_map[g, :len(g)] = vert_map[g, 0]
                 vert_map = vert_map[u_map,]
+            if intersection_point_mask is not None:
+                intersection_point_mask = intersection_point_mask[u_map,]
         # dedupes
         if occlusion_type is None:
             tri_map = np.concatenate([
@@ -1757,6 +1910,8 @@ class SphereUnionSurfaceMesh:
                 centers,
                 radii,
                 vertex_map=vert_map,
+                intersection_point_mask=intersection_point_mask,
+                intersection_point_tolerance=occlusion_intersection_tolerance,
                 tolerance=occlusion_tolerance
             )
             occlusion_count = 3 - np.sum(points_mask[all_tris], axis=-1)
@@ -1787,16 +1942,21 @@ class SphereUnionSurfaceMesh:
                 centroids = np.average(tri_pts, axis=-2)
                 centroid_vectors = centroids - centers[tri_map]
                 normal_sign = np.sign(nput.vec_dots(normals, centroid_vectors))
-                all_tris[normal_sign < 0] = all_tris[normal_sign < 0][:, (0, 2, 1)]
+                all_tris[normal_sign > 0] = all_tris[normal_sign > 0][:, (0, 2, 1)]
+                normals[normal_sign < 0] *= -1
                 # tri_pts = pts[all_tris]
                 # normals = nput.vec_crosses(tri_pts[:, 0] - tri_pts[:, 1], tri_pts[:, 2] - tri_pts[:, 1])
                 # normal_sign = np.sign(nput.vec_dots(normals, centroid_vectors))
+            else:
+                normals = None
+
 
             return cls(
                 pts,
                 all_tris,
                 tri_map=tri_map,
                 vert_map=vert_map,
+                normals=normals,
                 **etc
             )
         else:
@@ -1807,7 +1967,9 @@ class SphereUnionSurfaceMesh:
     def from_subclouds(cls, point_clouds, *, centers, radii, mesh_type='convex', occlusion_type='partial',
                        vert_map=None,
                        deduplicate_points=False,
-                       **mesh_kwargs):
+                       mesh_kwargs=None,
+                       intersection_point_mask=None,
+                       **surface_options):
         if dev.str_is(mesh_type, 'convex'):
             mesh_type = spat.ConvexHull
         all_tris = []
@@ -1818,11 +1980,15 @@ class SphereUnionSurfaceMesh:
                     np.full(len(t), i)
                     for i, t in enumerate(point_clouds)
                 ])
+        if mesh_kwargs is None:
+            mesh_kwargs = {}
         for t in point_clouds:
             if len(t) > 3:
                 hull = mesh_type(t, **mesh_kwargs)
                 all_tris.append(hull.simplices + offset)
             offset += len(t)
+        if intersection_point_mask is not None and len(intersection_point_mask) != len(all_points):
+            intersection_point_mask = np.concatenate(intersection_point_mask, axis=0)
         return cls.from_submeshes(
             all_points,
             all_tris,
@@ -1830,7 +1996,9 @@ class SphereUnionSurfaceMesh:
             radii=radii,
             occlusion_type=occlusion_type,
             vert_map=vert_map,
-            deduplicate_points=deduplicate_points
+            deduplicate_points=deduplicate_points,
+            intersection_point_mask=intersection_point_mask,
+            **surface_options
         )
 
 
@@ -1849,6 +2017,7 @@ class SphereUnionSurfaceMesh:
              function=None,
              vertex_values=None,
              normals=None,
+             invert_mesh=False,
              distance_units='Angstroms',
              **etc
              ):
@@ -1864,9 +2033,13 @@ class SphereUnionSurfaceMesh:
         if normals is True:
             normals = self.normals
 
+        inds = self.inds
+        if invert_mesh:
+            inds = inds[:, (0, 2, 1)]
+
         return self.plot_triangle_mesh(
             self.verts * conv,
-            self.inds,
+            inds,
             figure=figure,
             normals=normals,
             vertex_values=vertex_values,
