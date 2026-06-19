@@ -25,13 +25,18 @@ class SphereUnionSurface:
     default_scaling = 1
     default_expansion = 0
     default_tolerance = 1e-3
-    def __init__(self, centers, radii, scaling=None, expansion=None, samples=None, tolerance=None,
-                 add_intersection_circles=False):
+    def __init__(self, centers, radii, scaling=None, expansion=None,
+                 samples=None,
+                 density=None,
+                 tolerance=None,
+                 add_intersection_circles=False,
+                 **generator_options):
         self.centers = np.asanyarray(centers)
         self.radii = np.asanyarray(radii)
         if samples is None:
             samples = self.default_samples
         self.samples = samples
+        self.density = density
         self.add_intersection_circles = add_intersection_circles
         if scaling is None:
             scaling = self.default_scaling
@@ -44,6 +49,7 @@ class SphereUnionSurface:
         self.expansion = expansion
         self._sample_points = None
         self._sample_data = None
+        self.generator_options = generator_options
 
     @classmethod
     def from_xyz(cls,
@@ -65,7 +71,7 @@ class SphereUnionSurface:
     @property
     def sampling_points(self):
         if self._sample_points is None:
-            self._sample_data = self.generate_points(preserve_origins=True)
+            self._sample_data = self.generate_points(preserve_origins=True, **self.generator_options)
             self._sample_points = np.concatenate(self._sample_data, axis=0)
         return self._sample_points
     @sampling_points.setter
@@ -75,7 +81,7 @@ class SphereUnionSurface:
     @property
     def atom_sampling_points(self):
         if self._sample_data is None:
-            self._sample_data = self.generate_points(preserve_origins=True)
+            self._sample_data = self.generate_points(preserve_origins=True, **self.generator_options)
             self._sample_points = np.concatenate(self._sample_data, axis=0)
         return self._sample_data
 
@@ -389,6 +395,7 @@ class SphereUnionSurface:
                            centers,
                            radii,
                            samples=50,
+                           density=None,
                            scaling=1,
                            expansion=0,
                            preserve_origins=False,
@@ -396,7 +403,7 @@ class SphereUnionSurface:
                            min_circle_samples=.1,
                            add_intersection_circles=False,
                            intersection_radius_scaling=1,
-                           intersection_boundary_clipping_threshold='auto',
+                           intersection_boundary_clipping_threshold=None,
                            return_intersection_point_mask=False,
                            extend_intersection_points=True,
                            intersection_point_tolerance=None,
@@ -408,11 +415,16 @@ class SphereUnionSurface:
         centers = np.asanyarray(centers)
         radii:np.array[float] = np.asanyarray(radii) * scaling + expansion
 
+        if density is not None:
+            areas = 4*np.pi*radii ** 2
+            samples = np.ceil(density * areas).astype(int)
         base_points = cls.sphere_points(
             centers,
             radii,
             samples
         )
+        if nput.is_int(samples):
+            samples = [samples] * centers.shape[-1]
 
         base_point_masks = [
             np.full(b.shape[:-1], True)
@@ -437,21 +449,30 @@ class SphereUnionSurface:
                     # project points onto the intersection circle, anything
                     # close to the boundary gets pushed onto the boundary
                     circ_pts = circ.center[np.newaxis] + circ.radius * nput.vec_normalize(
-                        nput.project_out(base_points[i][:samples] - circ.center[np.newaxis], circ.normal[:, np.newaxis])
+                        nput.project_out(base_points[i][:samples[i]] - circ.center[np.newaxis], circ.normal[:, np.newaxis])
                     )
-                    circ_dists = nput.vec_norms(base_points[i][:samples] - circ_pts)
+                    circ_dists = nput.vec_norms(base_points[i][:samples[i]] - circ_pts)
 
                     # any point within tolerance gets pushed onto the intersection
                     thresh = intersection_boundary_clipping_threshold
                     if thresh is None:
                         thresh = neighborhood_tolerance
                     if dev.str_is(thresh, 'auto'):
+                        thresh = {
+                            'distance_scaling':1,
+                            'radius_cutoff':.25,
+                            'interior_padding':.25
+                        }
+                    if isinstance(thresh, dict):
+                        sc = thresh.get('distance_scaling', 1)
+                        isc = thresh.get('interior_padding', .25)
+                        cutoff = thresh.get('radius_cutoff', .25)
                         thresh = np.clip(
-                            d_avgs[i] * (
-                                1 + .25*(1 - cls.get_exterior_points(base_points[i][:samples], centers, radii, tolerance=tolerance))
+                            d_avgs[i] * sc * (
+                                1 + isc*(1 - cls.get_exterior_points(base_points[i][:samples[i]], centers, radii, tolerance=tolerance))
                             ),
                             0,
-                            radii[i] / 4
+                            radii[i] * cutoff
                         )
                     else:
                         thresh = thresh * radii[i]
@@ -463,19 +484,31 @@ class SphereUnionSurface:
                         base_points[i][idx] = circ_pts[idx]
 
                     circ_pts = circ.center[np.newaxis] + circ.radius * nput.vec_normalize(
-                        nput.project_out(base_points[j][:samples] - circ.center[np.newaxis], circ.normal[:, np.newaxis])
+                        nput.project_out(base_points[j][:samples[j]] - circ.center[np.newaxis], circ.normal[:, np.newaxis])
                     )
-                    circ_dists = nput.vec_norms(base_points[j][:samples] - circ_pts)
+                    circ_dists = nput.vec_norms(base_points[j][:samples[j]] - circ_pts)
 
                     # any point within tolerance gets pushed onto the intersection
                     thresh = intersection_boundary_clipping_threshold
                     if thresh is None:
                         thresh = neighborhood_tolerance
                     if dev.str_is(thresh, 'auto'):
+                        thresh = {
+                            'distance_scaling': 1,
+                            'radius_cutoff': .25,
+                            'interior_padding': .25
+                        }
+                    if isinstance(thresh, dict):
+                        sc = thresh.get('distance_scaling', 1)
+                        isc = thresh.get('interior_padding', .25)
+                        cutoff = thresh.get('radius_cutoff', .25)
                         thresh = np.clip(
-                            d_avgs[j] * (1 + .25*(1 - cls.get_exterior_points(base_points[j][:samples], centers, radii, tolerance=tolerance))),
+                            d_avgs[j] * sc * (
+                                    1 + isc * (1 - cls.get_exterior_points(base_points[j][:samples[j]], centers, radii,
+                                                                           tolerance=tolerance))
+                            ),
                             0,
-                            radii[j] / 4
+                            radii[j] * cutoff
                         )
                     else:
                         thresh = thresh * radii[j]
@@ -522,18 +555,30 @@ class SphereUnionSurface:
                             base_points = list(base_points)
                         base_points[i] = np.concatenate([base_points[i], pts], axis=0)
                         if clear_circle_neighbors:
-                            circ_dists = np.linalg.norm(base_points[i][:samples][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
+                            circ_dists = np.linalg.norm(base_points[i][:samples[i]][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
                             nt = neighborhood_tolerance
                             if dev.str_is(nt, 'auto'):
-                                nt = d_avgs[i] / 4
+                                nt = {
+                                    'distance_scaling': 1,
+                                    'radius_cutoff': .25,
+                                    'interior_padding': .25
+                                }
+                            if isinstance(nt, dict):
+                                nt = d_avgs[i] * nt.get('radius_cutoff', .25)
                             else:
                                 nt = nt * radii[i]
                             base_point_masks[i] &= np.all(circ_dists >= nt, axis=-1)
 
-                            circ_dists = np.linalg.norm(base_points[j][:samples][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
+                            circ_dists = np.linalg.norm(base_points[j][:samples[j]][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
                             nt = neighborhood_tolerance
                             if dev.str_is(nt, 'auto'):
-                                nt = d_avgs[j] / 4
+                                nt = {
+                                    'distance_scaling': 1,
+                                    'radius_cutoff': .25,
+                                    'interior_padding': .25
+                                }
+                            if isinstance(nt, dict):
+                                nt = d_avgs[j] * nt.get('radius_cutoff', .25)
                             else:
                                 nt = nt * radii[j]
                             base_point_masks[j] &= np.all(circ_dists >= nt, axis=-1)
@@ -610,10 +655,14 @@ class SphereUnionSurface:
                 else:
                     return base_points
 
-    def generate_points(self, scaling=None, expansion=None, samples=None, preserve_origins=False, tolerance=None, prune=True,
+    def generate_points(self, scaling=None, expansion=None,
+                        samples=None,
+                        density=None,
+                        preserve_origins=False, tolerance=None, prune=True,
                         add_intersection_circles=None, **etc
                         ):
         if samples is None: samples = self.samples
+        if density is None: density = self.density
         if scaling is None: scaling = self.scaling
         if expansion is None: expansion = self.expansion
         if tolerance is None: tolerance = self.tolerance
@@ -625,6 +674,7 @@ class SphereUnionSurface:
             scaling=scaling,
             expansion=expansion,
             samples=samples,
+            density=density,
             preserve_origins=preserve_origins,
             add_intersection_circles=add_intersection_circles,
             tolerance=tolerance,
@@ -686,26 +736,35 @@ class SphereUnionSurface:
         else:
             samples = np.asanyarray(samples)
             if samples.ndim == 1:
-                base_points = np.array([
+                base_points = [
                     generator(n)
                     for n in samples
-                ])
+                ]
                 if len(samples) == centers.shape[-2]:
-                    base_points = base_points[np.newaxis, :, :, :]
+                    base_points = [base_points] * centers.shape[0]
                 else:
-                    base_points = base_points[:, np.newaxis, :, :]
+                    base_points = [bp[np.newaxis, :, :] for bp in base_points]
             else:
                 samples = samples.reshape(-1, centers.shape[-2])
-                base_points = np.array([
+                base_points = [
                     [
                         generator(n)
                         for n in subsamp
                     ]
                     for subsamp in samples
-                ])
+                ]
 
         if shells is None:
-            sphere_points = centers[:, :, np.newaxis, :] + base_points * radii[:, :, np.newaxis, np.newaxis]
+            if isinstance(base_points, np.ndarray):
+                sphere_points = centers[:, :, np.newaxis, :] + base_points * radii[:, :, np.newaxis, np.newaxis]
+            else:
+                sphere_points = []
+                for cc,rr,pp in zip(centers, radii, base_points):
+                    sp = [
+                        c[np.newaxis, :] + p * r
+                        for c,r,p in zip(cc, rr, pp)
+                    ]
+                    sphere_points.append(sp)
         else:
             if nput.is_int(shells):
                 shells = np.linspace(0, 1, shells+1)[1:] ** (1/3) # uniformly w/in distributed in volume
@@ -713,7 +772,14 @@ class SphereUnionSurface:
             all_rads = radii[:, :, np.newaxis] * shells[np.newaxis, np.newaxis, :]
             sphere_points = centers[:, :, np.newaxis, np.newaxis, :] + base_points * all_rads[:, :, :, np.newaxis, np.newaxis]
             sphere_points = sphere_points.reshape(sphere_points.shape[:2] + (-1,) + sphere_points.shape[-1:])
-        return sphere_points.reshape(base_shape + sphere_points.shape[-3:])
+        if isinstance(sphere_points, np.ndarray):
+            return sphere_points.reshape(base_shape + sphere_points.shape[-3:])
+        else:
+            subarrays = np.full((len(sphere_points),), None, dtype=object)
+            for i,s in enumerate(sphere_points):
+                subarrays[i] = s
+            subarrays = subarrays.reshape(base_shape)
+            return subarrays.tolist()
 
     @classmethod
     def fibonacci_sphere(cls, samples):
