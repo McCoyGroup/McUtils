@@ -9,7 +9,7 @@ import itertools
 import re
 import functools
 import uuid
-
+import tempfile as tf
 import numpy as np, io, os
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -3640,7 +3640,22 @@ class RDMolecule(ExternalMolecule):
                            binary=False,
                            **converter_opts):
         if filename is None:
-            return string_writer(self.rdmol, **converter_opts)
+            if string_writer is None:
+                if binary:
+                    mode = mode.replace('b', '')+"b"
+                with tf.NamedTemporaryFile(mode=mode) as file:
+                    res = self._to_file_or_string(file_writer, None,
+                                                  filename=file.name,
+                                                  mode=mode,
+                                                  binary=binary,
+                                                  **converter_opts)
+                    if binary:
+                        res = dev.read_file(file.name, mode='rb')
+                    else:
+                        res = dev.read_file(file.name, mode='r')
+                    return res
+            else:
+                return string_writer(self.rdmol, **converter_opts)
         else:
             if file_writer is None:
                 string = string_writer(self.rdmol, **converter_opts)
@@ -3711,6 +3726,37 @@ class RDMolecule(ExternalMolecule):
             **opts
         )
 
+    def _write_sdf(self,
+                   mol,
+                   file,
+                   base_writer=None,
+                   id_col=None,
+                   conf_ids=None
+                   ):
+        import rdkit.Chem.AllChem as Chem
+        if base_writer is None:
+            base_writer = Chem.SDWriter(file, idCol=id_col) if id_col is not None else Chem.SDWriter(file)
+            with base_writer as w:
+                if conf_ids is None:
+                    w.write(mol)
+                else:
+                    for c in conf_ids:
+                        w.write(mol, confId=c)
+        else:
+            if conf_ids is None:
+                base_writer.write(mol)
+            else:
+                for c in conf_ids:
+                    base_writer.write(mol, confId=c)
+        return file
+
+    def to_sdf(self, filename=None, **opts):
+        return self._to_file_or_string(
+            self._write_sdf,
+            None,
+            filename=filename,
+            **opts
+        )
 
     @classmethod
     def allchem_api(cls):
