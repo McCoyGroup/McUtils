@@ -77,6 +77,7 @@ EdgeEnhancementVolumeStyle: EdgeEnhancementVolumeStyle
 ElevationGrid: ElevationGrid
 Environment: Environment
 Extrusion: Extrusion
+Script: Script
 Field: Field
 FloatVertexAttribute: FloatVertexAttribute
 Fog: Fog

@@ -22,6 +22,7 @@ A namespace for holding various HTML attributes
 XMLElement: XMLElement
 base_element: XMLElement
 RawHTML: RawHTML
+CDATA: CDATA
 Comment: Comment
 TagElement: TagElement
 Nav: Nav
@@ -157,8 +158,8 @@ Wbr: Wbr
 image_from_string(cls, image_string: 'bytes | str', format='image/png', **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2130?message=Update%20Docs)]
 </div>
  </div>
 </div>

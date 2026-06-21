@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DInterpolatingAnimator">X3DInterpolatingAnimator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1643)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1643?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1843)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1843?message=Update%20Docs)]
 </div>
 
 
@@ -25,8 +25,8 @@
 get_animation_objects(cls, object_attr_sets: 'dict[X3DObject, dict]', id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1644)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1644?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1844)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1844?message=Update%20Docs)]
 </div>
 
 
@@ -36,8 +36,8 @@ get_animation_objects(cls, object_attr_sets: 'dict[X3DObject, dict]', id):
 frame_diffs(cls, ref: 'X3DObject | X3DHTML.X3DElement', test: 'X3DObject | X3DHTML.X3DElement', *rest: 'X3DObject | X3DHTML.X3DElement'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1671)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1671?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1871)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1871?message=Update%20Docs)]
 </div>
 
 
@@ -47,8 +47,8 @@ frame_diffs(cls, ref: 'X3DObject | X3DHTML.X3DElement', test: 'X3DObject | X3DHT
 from_frames(cls, frames: 'list[X3DObject | X3DHTML.X3DElement]', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1742)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1742?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1942)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1942?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -103,7 +103,7 @@ from_frames(cls, frames: 'list[X3DObject | X3DHTML.X3DElement]', **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DInterpolatingAnimator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DInterpolatingAnimator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1643?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1843?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

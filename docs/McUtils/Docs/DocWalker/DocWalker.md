@@ -112,9 +112,9 @@ visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Details-a7dfb8" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-a7dfb8"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Details-ff590d" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-ff590d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Details-a7dfb8" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Details-ff590d" markdown="1">
  A `DocWalker` object is a light subclass of a `TemplateWalker`, but specialized for documentation & with specialized handlers
  </div>
 </div>

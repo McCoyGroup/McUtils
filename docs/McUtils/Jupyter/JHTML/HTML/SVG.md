@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTML.SVG">SVG</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L2380)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L2380?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L2384)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L2384?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ Metadata: Metadata
 get_class_map(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2387)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2387?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2391)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2391?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -128,7 +128,7 @@ get_class_map(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/SVG.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/SVG.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L2380?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L2384?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
