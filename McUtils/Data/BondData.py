@@ -68,9 +68,11 @@ class BondDataHandler(DataHandler):
 
         if w is None:
             return d
-        if isinstance(w, int):
+        if dev.is_number(w):
             if w == 1:
                 w = "Single"
+            elif w == 1.5:
+                w = "Aromatic"
             elif w == 2:
                 w = "Double"
             elif w == 3:
