@@ -262,29 +262,41 @@ class EdgeGraph:
         return self.graph_match(self, other)
 
     @classmethod
-    def build_neighborhood_graph(cls, node, labels, edge_map, ignored=None, num=1):
-        edges = []
-        visited = set()
+    def get_neighborhood_iterator(cls, node, edge_map, ignored=None, num=1, visited=None):
+        if visited is None: visited = set()
         if ignored is None: ignored = []
         ignored = set(ignored)
+        ignored.add(node)
+        visited.add(node)
         queue = [node]
         for i in range(num):
             new_queue = []
             for node in queue:
                 visited.add(node)
                 new_nodes = set(edge_map[node]) - visited - ignored
-                edges.extend((node, e) for e in new_nodes)
+                yield from ((node, e) for e in new_nodes)
                 new_queue.extend(new_nodes)
             queue = new_queue
+
+    @classmethod
+    def build_neighborhood_graph(cls, node, labels, edge_map, ignored=None, num=1):
+        edges = list(cls.get_neighborhood_iterator(node, edge_map, ignored=ignored, num=num))
 
         edges = np.array(edges, dtype=int)
         if len(edges) == 0:
             edges = np.reshape(edges, (-1, 2))
-        labels, edges = cls._remap(labels, list(visited), edges[:, 0], edges[:, 1])
+        labels, edges = cls._remap(labels, np.unique(edges), edges[:, 0], edges[:, 1])
         return cls(labels, edges)
 
     def neighbor_graph(self, root, ignored=None, num=1):
         return self.build_neighborhood_graph(root, self.labels, self.map, ignored=ignored, num=num)
+
+    def neighbor_iterator(self, root, ignored=None, num=1, return_labels=False):
+        labs = self.labels
+        yield from (
+                labs[e] if return_labels else e
+                for (n, e) in self.get_neighborhood_iterator(root, self.map, ignored=ignored, num=num)
+        )
 
     @property
     def rings(self):
