@@ -119,6 +119,7 @@ class X3DHTML:
     class ElevationGrid(X3DElement): tag = "ElevationGrid"
     class Environment(X3DElement): tag = "Environment"
     class Extrusion(X3DElement): tag = "Extrusion"
+    class Script(X3DElement): tag = "Script"
     class Field(X3DElement): tag = "Field"
     class FloatVertexAttribute(X3DElement): tag = "FloatVertexAttribute"
     class Fog(X3DElement): tag = "Fog"
