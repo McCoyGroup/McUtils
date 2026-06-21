@@ -5,6 +5,7 @@ import collections
 import uuid
 import numpy as np
 import os
+import json
 
 from .. import Devutils as dev
 from ..Jupyter import JHTML, X3DHTML
@@ -935,22 +936,26 @@ class X3DBackground(X3DOptionsSet):
 
 class X3DCoordinate(X3DPrimitive):
     wrapper_class = X3DHTML.Coordinate
-    def __init__(self, points):
-        super().__init__(point=self.prep_points(points))
+    def __init__(self, points, id=None, **etc):
+        super().__init__(point=self.prep_points(points), id=id, **etc)
     @classmethod
     def prep_points(cls, points):
         return " ".join(np.asanyarray(np.round(points, 4)).flatten().astype(str))
 
 class X3DColor(X3DPrimitive):
     wrapper_class = X3DHTML.Color
-    def __init__(self, colors):
-        super().__init__(color_list=colors)
+    def __init__(self, colors, id=None, **etc):
+        super().__init__(color_list=colors, id=id, **etc)
     def split_opts(self, opts:dict):
         base_opts, appearance_opts = super().split_opts(opts)
         base_opts['color'] = self.prep_color(base_opts.pop('color_list'))
         return base_opts, appearance_opts
     @classmethod
     def prep_color(cls, points):
+        if isinstance(points, str):
+            points = X3DOptionsSet.parse_color(points)[0]
+        elif isinstance(points[0], str):
+            points = [X3DOptionsSet.parse_color(p)[0] for p in points]
         return " ".join(np.asanyarray(np.round(points, 4)).flatten().astype(str))
 
 class X3DGroup(X3DPrimitive):
@@ -1315,14 +1320,29 @@ class X3DTorus(X3DGeometryGroup):
 class X3DCoordinatesWrapper(X3DGeometryGroup):
     tag_class: X3DHTML.X3DElement
     def create_tag_object(self, *, point, color=None, **etc):
-        body = [X3DCoordinate(point).to_x3d()]
+        body = [X3DCoordinate(point, id=self.id+"-coord").to_x3d()]
         if color is not None:
-            body.append(X3DColor(color).to_x3d())
+            body.append(X3DColor(color, id=self.id+'-color').to_x3d())
         return self.tag_class(body, **etc)
     def prep_geometry_opts(self, point, **etc):
         return [
             dict({"translation":"0,0,0", "point":point}, **etc)
         ]
+
+class X3DVertexCoordinatesWrapper(X3DCoordinatesWrapper):
+    tag_class: X3DHTML.X3DElement
+    def prep_geometry_opts(self, point, vertex_colors=None, **etc):
+        base_dict = super().prep_geometry_opts(point, **etc)
+        if vertex_colors is not None:
+            if isinstance(vertex_colors[0], str) or nput.is_numeric(vertex_colors[0][0]):
+                for bd in base_dict:
+                    bd['colorPerVertex'] = bd.get('colorPerVertex', True)
+                    bd['color'] = vertex_colors
+            else:
+                for bd, cc in zip(base_dict, vertex_colors):
+                    bd['colorPerVertex'] = bd.get('colorPerVertex', True)
+                    bd['color'] = cc
+        return base_dict
 
 class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
     def prep_geometry_opts(self, point, indices, vertex_colors=None, **etc):
@@ -1459,7 +1479,7 @@ class X3DDisk2D(X3DGeometry2DGroup):
 class X3DPolyline2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Polyline2D
 
-class X3DPointSet(X3DCoordinatesWrapper):
+class X3DPointSet(X3DVertexCoordinatesWrapper):
     tag_class = X3DHTML.PointSet
 class X3DLine(X3DCoordinatesWrapper):
     tag_class = X3DHTML.LineSet
@@ -1513,7 +1533,7 @@ class X3DGenericAnimator(X3DGroup):
     @classmethod
     def build_animator_group(cls, attribute_sets, nframes, *, uuid, running=True, animation_duration=2):
         key_frames = np.linspace(0, 1, nframes+1)[:-1]
-        return [
+        base = [
             X3DHTML.TimeSensor(id=f'animation-clock-{uuid}', cycleInterval=animation_duration, loop=True,
                                enabled=running),
             X3DHTML.IntegerSequencer(id=f'animation-indexer-{uuid}',
@@ -1523,12 +1543,15 @@ class X3DGenericAnimator(X3DGroup):
                 fromField='fraction_changed', fromNode=f'animation-clock-{uuid}',
                 toField='set_fraction', toNode=f'animation-indexer-{uuid}'
             )
-        ] + sum((
+        ]
+        controls = sum((
             cls.create_animation_control(name, uuid=uuid, **opts)
             for attributes in attribute_sets
             for name,opts in attributes.items()),
             []
         )
+        controls = [c for c in controls if c is not None]
+        return base + controls
 
     @classmethod
     def resolve_control_type(cls, name, values):
@@ -1561,6 +1584,8 @@ class X3DGenericAnimator(X3DGroup):
                         nframes = len(values) // 4
                     else:
                         nframes = len(values)
+                # elif issubclass(interp_type, X3DHTML.CoordinateInterpolator):
+                #    ## Ill-defined if flattened
                 else:
                     nframes = len(values)
                 break
@@ -1583,6 +1608,183 @@ class X3DGenericAnimator(X3DGroup):
         return interp_type, nframes
 
     @classmethod
+    def _raf_get_color_array_interpolator(cls,
+                                          *,
+                                          key,
+                                          keyValue,
+                                          id,
+                                          clockId,
+                                          targetId):
+        key = np.asanyarray(key).tolist()
+        keyValue = np.asanyarray(keyValue).tolist()
+
+        key_js = json.dumps(key)
+        keyValue_js = json.dumps(keyValue)
+
+        return X3DHTML.Script(f'''
+  let keys = {key_js};
+  let keyValues = {keyValue_js};
+  let numPoints = keyValues[0].length;
+
+  function interpolateColors(f) {{
+    let i = 0;
+    while (i < keys.length - 2 && f >= keys[i + 1]) {{
+      i++;
+    }}
+    let k0 = keys[i], k1 = keys[i + 1];
+    let t = (k1 > k0) ? (f - k0) / (k1 - k0) : 0.0;
+    t = Math.max(0.0, Math.min(1.0, t));
+
+    let parts = [];
+    for (let p = 0; p < numPoints; p++) {{
+      let c0 = keyValues[i][p];
+      let c1 = keyValues[i + 1][p];
+      parts.push(
+        (c0[0] + t * (c1[0] - c0[0])).toFixed(4) + " " +
+        (c0[1] + t * (c1[1] - c0[1])).toFixed(4) + " " +
+        (c0[2] + t * (c1[2] - c0[2])).toFixed(4)
+      );
+    }}
+    return parts.join(" ");
+  }}
+
+  document.addEventListener("DOMContentLoaded", function () {{
+    const ts = document.getElementById("{clockId}");
+    const colorNode = document.getElementById("{targetId}");
+    // cycleInterval read directly off the clock (attribute is a string)
+    function getCycleInterval() {{
+      const raw = ts.getAttribute("cycleInterval");
+      const v = parseFloat(raw);
+      return v > 0 ? v : 1.0; // guard against 0/NaN -> avoids divide-by-zero
+    }}
+
+    let lastColorString = null;
+    let lastElapsed = null;
+
+    function getElapsed() {{
+        const node = ts._x3domNode;
+        // _vf holds the field values; elapsedTime is maintained there while running
+        if (node && node._vf && typeof node._vf.elapsedTime === "number") {{
+            return node._vf.elapsedTime;
+        }}
+        return null;
+    }}
+
+    function tick() {{
+      // ts.elapsedTime is exposed on the X3DOM node once the runtime is live.
+      // Before that it's undefined, so fall back to 0.
+      const elapsed = getElapsed()??0;
+      if (lastElapsed == elapsed) {{ requestAnimationFrame(tick); return }};
+      const cycle = getCycleInterval();
+
+      // fraction in [0,1), looping — matches loop="True"
+      const f = (elapsed % cycle) / cycle;
+
+      const colorString = interpolateColors(f);
+
+      // skip the setAttribute when nothing changed (cheap dedupe)
+      if (colorString !== lastColorString) {{
+        colorNode.setAttribute("color", colorString);
+        lastColorString = colorString;
+      }}
+
+      requestAnimationFrame(tick);
+    }}
+    requestAnimationFrame(tick);
+  }});
+    ''', id=id)
+
+    @classmethod
+    def get_color_array_interpolator(cls,
+                                     *,
+                                     key,
+                                     keyValue,
+                                     id,
+                                     clockId,
+                                     targetId):
+        color_driver_id = id
+        driver = X3DHTML.CoordinateInterpolator(key=key, keyValue=keyValue,
+                                                id=color_driver_id,
+                                                clockId=clockId,
+                                                targetId=id+'-update')
+        script = JHTML.Script(f"""
+const driver = document.getElementById("{id}");
+const colorNode = document.getElementById("{targetId}");
+
+function getInterpValue() {{
+  const node = driver._x3domNode;
+  if (node && node._vf && node._vf.value_changed) return node._vf.value_changed;
+  return null;
+}}
+
+let lastStr = null;
+function tick() {{
+  requestAnimationFrame(tick);          // always re-arm
+  const v = getInterpValue();
+  if (!v || v.length === 0) return;
+
+  // v is an array of x3dom SFVec3f objects (have .x/.y/.z) or arrays
+  let str;
+  if (typeof v[0] === "object" && "x" in v[0]) {{
+    str = v.map(c => `${{c.x}} ${{c.y}} ${{c.z}}`).join(" ");
+  }} else if (Array.isArray(v[0])) {{
+    str = v.map(c => `${{c[0]}} ${{c[1]}} ${{c[2]}}`).join(" ");
+  }} else {{
+    str = v.join(" ");
+  }}
+  if (str === lastStr) return;
+  colorNode.setAttribute("color", str);
+  lastStr = str;
+}}
+
+document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(tick));
+        """, id=id+"-update")
+        return [
+            driver,
+            script
+        ]
+
+
+
+
+
+    @classmethod
+    def prep_interpolator(cls, interpolator_type, name, values, nframes, id, clock_id):
+        target_id = id
+        convert_values = True
+        if interpolator_type == X3DHTML.ColorInterpolator:
+            if isinstance(values[0], str) or values[0] is None:
+                target_id = id + "-appearance-material"
+                values = [
+                    X3DOptionsSet.parse_color('black' if c is None else c)[0]
+                    for c in values
+                ]
+            else:
+                target_id = id + "-color"
+                name = None
+                interpolator_type = cls.get_color_array_interpolator
+                values = [
+                    [X3DOptionsSet.parse_color('black' if c is None else c)[0] for c in vl]
+                    for vl in values
+                ]
+                convert_values = True
+        elif interpolator_type == X3DHTML.CoordinateInterpolator:
+            target_id = id + "-coord"
+        if convert_values and nput.is_numeric_array_like(values):
+            values = " ".join(np.round(values, 4).flatten().astype(str))
+        key_frames = np.linspace(0, 1, nframes)
+
+        interp_obj = (
+            interpolator_type(key=key_frames, keyValue=values,
+                              id=id + "-interpolator-" + cls.get_new_id(),
+                              clockId=f'animation-clock-{clock_id}',
+                              targetId=target_id)
+                if not hasattr(interpolator_type, 'id') else
+            interpolator_type
+        )
+        return interp_obj, name, target_id
+
+    @classmethod
     def create_animation_control(cls, name, *, id, uuid, type=None, values=None, interpolator_type=None):
         if values is None:
             if type is None:
@@ -1595,34 +1797,32 @@ class X3DGenericAnimator(X3DGroup):
                 )
             ]
         else:
+            if all(v is None for v in values): return [None]
             # if type is None:
             #     type = self.resolve_control_type(name, values)
             interpolator_type, nframes = cls.resolve_interpolator_type(name, values)
-            if nput.is_numeric_array_like(values):
-                values = " ".join(np.round(values, 4).flatten().astype(str))
-            key_frames = np.linspace(0, 1, nframes)
-            interp_obj = (
-                interpolator_type(key=key_frames, keyValue=values, id=id+"-interpolator-"+cls.get_new_id())
-                    if issubclass(interpolator_type, X3DHTML.X3DElement) else
-                interpolator_type
-            )
-            if hasattr(interp_obj, 'id'):
-                interp_id = interp_obj.id
+            interp_obj, name, target_id = cls.prep_interpolator(interpolator_type, name, values, nframes, id, uuid)
+            if not isinstance(interp_obj, list):
+                interp_obj = [interp_obj]
+            if hasattr(interp_obj[0], 'id'):
+                interp_id = interp_obj[0].id
             else:
-                interp_id = interp_obj['id']
-            return [
-                interp_obj,
-                X3DHTML.Route(
-                    fromField='fraction_changed',
-                    fromNode=f'animation-clock-{uuid}',
-                    toField='set_fraction', toNode=interp_id
-                ),
-                X3DHTML.Route(
+                interp_id = interp_obj[0]['id']
+            if not isinstance(interp_obj, list):
+                interp_obj = [interp_obj]
+            objs = interp_obj + [
+                    X3DHTML.Route(
+                        fromField='fraction_changed',
+                        fromNode=f'animation-clock-{uuid}',
+                        toField='set_fraction', toNode=interp_id
+                    )]
+            if name is not None:
+                objs.append(X3DHTML.Route(
                     fromField='value_changed',
                     fromNode=interp_id,
-                    toField='set_'+name, toNode=id
-                )
-            ]
+                    toField='set_'+name, toNode=target_id
+                ))
+            return objs
 
 class X3DListAnimator(X3DGenericAnimator):
     @classmethod

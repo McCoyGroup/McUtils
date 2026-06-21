@@ -2094,6 +2094,10 @@ class HTML(XMLBase):
                 with open(file, 'w+') as dump:
                     dump.write(base_str)
 
+    class CDATA(RawHTML):
+        def __init__(self, text, id=None):
+            super().__init__(f"<![CDATA[{text}]]>", id)
+
     class Comment(XMLElement):
         def __init__(self, *elems, **attrs):
             super().__init__(ElementTree.Comment, *elems, **attrs)
