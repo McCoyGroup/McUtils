@@ -1707,7 +1707,7 @@ class X3DGenericAnimator(X3DGroup):
                                                 id=color_driver_id,
                                                 clockId=clockId,
                                                 targetId=id+'-update')
-        script = JHTML.Script(f"""
+        script = JHTML.Script(f"""(function() {{
 const driver = document.getElementById("{id}");
 const colorNode = document.getElementById("{targetId}");
 
@@ -1737,8 +1737,9 @@ function tick() {{
   lastStr = str;
 }}
 
-document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(tick));
-        """, id=id+"-update")
+requestAnimationFrame(tick)
+// document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(tick));
+        }})()""", id=id+"-update")
         return [
             driver,
             script
