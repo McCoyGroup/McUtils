@@ -888,7 +888,8 @@ class EdgeGraph:
         ))
 
         # permutable groups
-        sym_splits, _ = nput.group_by(np.arange(len(syms_1)), np.array([ord(s) for s in syms_1]))
+        sym_splits, _ = nput.group_by(np.arange(len(syms_1)),
+                                      np.array([ord(s) if isinstance(s, str) else ord(s[0]) for s in syms_1]))
         perm_blocks = []
         perm_atoms = []
         for _, atom_inds in zip(*sym_splits):
@@ -1298,12 +1299,12 @@ class MoleculeEdgeGraph(EdgeGraph):
                 light_atoms = self.light_atoms
 
             inds = [
-                i for i,l in enumerate(self.labels)
+                i for i,(l, _) in enumerate(self.labels)
                 if l not in light_atoms
             ]
         else:
             inds = [
-                i for i,l in enumerate(self.labels)
+                i for i,(l, _) in enumerate(self.labels)
                 if l in heavy_atoms
             ]
         if included_atoms is not None:
