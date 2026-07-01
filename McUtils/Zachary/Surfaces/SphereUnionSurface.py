@@ -793,32 +793,105 @@ class SphereUnionSurface:
 
         return np.array([x, y, z]).T
 
-    def get_triangulation(self,  occlusion_type='auto', deduplicate_points=None,
+    def get_bbox(self):
+        return np.array([
+            np.min(self.centers - self.radii[:, np.newaxis], axis=0),
+            np.max(self.centers + self.radii[:, np.newaxis], axis=0)
+            ])
+
+    def ses_scalar_field(self, grid_pts, atomic_centers, radii, probe_radius):
+        """
+        For each grid point, compute the SES scalar field:
+          f(x) = max_i( R_i - ||x - c_i|| ) + probe_radius
+        The SES isosurface is f(x) = probe_radius,
+        equivalently: max_i(radii_i - dist_i) = 0
+        """
+        inflated_R = radii + probe_radius
+        diff = grid_pts[:, None, :] - atomic_centers[None, :, :]  # (G, n, 3)
+        dist = np.linalg.norm(diff, axis=-1)  # (G, n)
+        return (inflated_R[None, :] - dist).max(axis=1)  # (G,)
+
+    def get_surface_function(self, probe_radius=None, distance_function=None):
+        centers = np.asanyarray(self.centers)
+        radii = np.asanyarray(self.radii)
+
+        if distance_function is None:
+            distance_function = lambda r: np.exp(-r)
+        if probe_radius is None:
+            probe_radius = 0
+        def surface(points, probe_radius=probe_radius):
+            points = np.asanyarray(points)
+            base_shape = points.shape[:-1]
+            points = points.reshape((-1,) + points.shape[-1:])
+            dvs = np.linalg.norm(
+                points[:, np.newaxis, :] - centers[np.newaxis, :, :],
+                axis=-1
+            ) - (radii[np.newaxis, :] + probe_radius)
+            dists = np.min(dvs, axis=-1)
+            return distance_function(dists).reshape(base_shape)
+        return surface
+
+    default_triangulation_method = 'hull-union'
+    def get_triangulation(self,
+                          occlusion_type='auto',
+                          deduplicate_points=None,
                           point_gen_options=None,
                           add_intersection_circles=True,
                           extend_intersection_points=False,
+                          method=None,
+                          bbox_scaling=1.2,
+                          grid_samples=20,
+                          probe_radius=None,
                           **surface_opts):
-        if point_gen_options is None:
-            point_gen_options = {'add_intersection_circles':add_intersection_circles}
-        add_intersection_circles = point_gen_options.get('add_intersection_circles', add_intersection_circles)
-        point_gen_options['add_intersection_circles'] = add_intersection_circles
-        if dev.str_is(occlusion_type, 'auto'):
-            occlusion_type = 'partial' if not add_intersection_circles else 'complete'
-        if deduplicate_points is None:
-            deduplicate_points = add_intersection_circles
-        pts, masks = self.generate_points(preserve_origins=True, prune=False,
-                                          return_intersection_point_mask=True,
-                                          extend_intersection_points=extend_intersection_points,
-                                          **point_gen_options)
-        return SphereUnionSurfaceMesh.from_subclouds(
-            pts,
-            centers=self.centers,
-            radii=self.radii,
-            occlusion_type=occlusion_type,
-            deduplicate_points=deduplicate_points,
-            intersection_point_mask=masks,
-            **surface_opts
-        )
+        if method is None:
+            method = self.default_triangulation_method
+        if method == 'hull-union':
+            if point_gen_options is None:
+                point_gen_options = {'add_intersection_circles':add_intersection_circles}
+            add_intersection_circles = point_gen_options.get('add_intersection_circles', add_intersection_circles)
+            point_gen_options['add_intersection_circles'] = add_intersection_circles
+            if dev.str_is(occlusion_type, 'auto'):
+                occlusion_type = 'partial' if not add_intersection_circles else 'complete'
+            if deduplicate_points is None:
+                deduplicate_points = add_intersection_circles
+            pts, masks = self.generate_points(preserve_origins=True, prune=False,
+                                              return_intersection_point_mask=True,
+                                              extend_intersection_points=extend_intersection_points,
+                                              **point_gen_options)
+            return SphereUnionSurfaceMesh.from_subclouds(
+                pts,
+                centers=self.centers,
+                radii=self.radii,
+                occlusion_type=occlusion_type,
+                deduplicate_points=deduplicate_points,
+                intersection_point_mask=masks,
+                **surface_opts
+            )
+        elif method == 'isosurface':
+            from .MarchingCubesSurface import marching_cubes
+            surface_function = self.get_surface_function(probe_radius=probe_radius)
+            bbox = self.get_bbox()
+            if probe_radius is not None:
+                bbox[0] -= probe_radius
+                bbox[1] += probe_radius
+            bbox = bbox * bbox_scaling
+            if nput.is_int(grid_samples):
+                grid_samples = [grid_samples] * 3
+            meshes = np.meshgrid(*[np.linspace(bm, bM, s) for bm,bM,s in zip(*bbox, grid_samples)], indexing='ij')
+            values = surface_function(np.moveaxis(meshes, 0, -1))
+            def unembed_points(points):
+                x,y,z = np.moveaxis(points, 0, -1)
+                return np.moveaxis([
+                                   nput.vec_rescale(x, [bbox[0][0], bbox[1][0]], [0, grid_samples[0]]),
+                                   nput.vec_rescale(y, [bbox[0][1], bbox[1][1]], [0, grid_samples[1]]),
+                                   nput.vec_rescale(z, [bbox[0][2], bbox[1][2]], [0, grid_samples[2]]),
+                    ], 0, -1)
+            return marching_cubes(values,
+                                  1,
+                                  transformation=unembed_points,
+                                  **surface_opts)
+        else:
+            raise ValueError(f"unknown method {method}")
 
     @classmethod
     def sampling_point_surface_area(cls,
