@@ -1894,10 +1894,61 @@ class RDMolecule(ExternalMolecule):
             new_mols.append(type(self)(conf, charge=self.charge))
         return new_mols
 
+    # @classmethod
+    # def break_mol_bonds_and_fragment(cls, mol, bonds):
+    #     Chem = cls.allchem_api()
+    #     if len(bonds) == 0:
+    #         return {tuple(i for i, a in enumerate(mol.GetAtoms())): mol}
+    #
+    #     bond_indices = []
+    #     no_map = {a.GetAtomMapNum(): i for i, a in enumerate(mol.GetAtoms())}
+    #     no_map.pop(0, None)
+    #     for i, j in bonds:
+    #         i, j = no_map[i + 1], no_map[j + 1]
+    #         bond_indices.append(mol.GetBondBetweenAtoms(i, j).GetIdx())
+    #     broke_mol = Chem.FragmentOnBonds(mol, bond_indices, addDummies=False)
+    #     for a in broke_mol.GetAtoms(): a.SetAtomMapNum(0)
+    #     frags = Chem.GetMolFrags(broke_mol)
+    #     new_mols = {}
+    #     inv_map = {i: n for n, i in no_map.items()}
+    #     for f in frags:
+    #         submol = cls.take_mol_fragment(broke_mol, f)
+    #         for a, i in zip(submol.GetAtoms(), f):
+    #             a.SetAtomMapNum(inv_map.get(i, 0))
+    #         new_mols[f] = submol
+    #     return new_mols
+
+    @classmethod
+    def take_mol_fragment(cls, mol, inds, conf_id=None):
+        Chem = cls.allchem_api()
+        submol = Chem.EditableMol(Chem.Mol())
+        if conf_id is not None:
+            coords = mol.GetConformer(conf_id).GetPositions()
+        else:
+            coords = None
+        submol.BeginBatchEdit()
+        atom_list = list(mol.GetAtoms())
+        for i in inds:
+            submol.AddAtom(atom_list[i])
+        for i, j in itertools.combinations(range(len(inds)), 2):
+            b = mol.GetBondBetweenAtoms(inds[i], inds[j])
+            if b is not None:
+                submol.AddBond(i, j, b.GetBondType())
+        submol.CommitBatchEdit()
+        mol = submol.GetMol()
+        if coords is not None:
+            conf = Chem.Conformer(len(inds))
+            copy_coords = coords[inds,].copy()
+            conf.SetPositions(copy_coords)
+            conf.SetId(conf_id)
+            mol.AddConformer(conf)
+        return mol
+
     def break_bonds(self,
                     bonds,
                     add_dummies=False,
-                    reguess_bonds=True):
+                    reguess_bonds=True,
+                    return_fragments=False):
         Chem = self.chem_api()
         from rdkit.Chem.rdmolops import FragmentOnBonds
 

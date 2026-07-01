@@ -303,22 +303,38 @@ def consume_smiles_supplier(supplier:SMILESSupplier, consumer, pool=None, start_
 
         return sum(res, [])
 
-def _match_rdkit(matcher, smi, error_value=None, **parser_options):
-    mol = RDMolecule.parse_smiles(smi, **parser_options)
+def _match_rdkit(matcher, smi, error_value=None, sanitize=False, **parser_options):
+    from .RDKit import RDKitInterface
+    AllChem = RDKitInterface.submodule("Chem.AllChem")
+
+    mol = RDMolecule.parse_smiles(smi, sanitize=sanitize, **parser_options)
     if mol is None: return error_value
-    if mol.GetSubstructMatch(matcher): return smi
+    if not sanitize:
+        try:
+            if mol.GetSubstructMatch(matcher): return smi
+        except RuntimeError:
+            AllChem.SanitizeMol(mol)
+            if mol.GetSubstructMatch(matcher): return smi
+    else:
+        if mol.GetSubstructMatch(matcher): return smi
+
 
 def _disable_rdkit_log(blockage=[]):
     from rdkit.rdBase import BlockLogs
     bl = BlockLogs()
     blockage.append([bl,  bl.__enter__()])
 
-def smarts_matcher(pattern, error_value=None, **parser_options):
+def smarts_matcher(pattern, error_value=None, sanitize=True, **parser_options):
     from .RDKit import RDKitInterface
     AllChem = RDKitInterface.submodule("Chem.AllChem")
     smarts_candidate = AllChem.MolFromSmarts(pattern)
+    if sanitize:
+        smarts_candidate.UpdatePropertyCache()
+        AllChem.SanitizeMol(smarts_candidate)
+        AllChem.GetSSSR(smarts_candidate)
     matcher = functools.partial(_match_rdkit, smarts_candidate,
                                 error_value=error_value,
+                                sanitize=sanitize,
                                 **parser_options)
     return matcher
 
