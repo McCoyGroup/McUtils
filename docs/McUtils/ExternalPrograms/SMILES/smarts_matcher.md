@@ -1,11 +1,11 @@
 # <a id="McUtils.ExternalPrograms.SMILES.smarts_matcher">smarts_matcher</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L316)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L316?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L327)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L327?message=Update%20Docs)]
 </div>
 
 ```python
-smarts_matcher(pattern, error_value=None, **parser_options): 
+smarts_matcher(pattern, error_value=None, sanitize=True, **parser_options): 
 ```
 
 
@@ -59,7 +59,7 @@ smarts_matcher(pattern, error_value=None, **parser_options):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/SMILES/smarts_matcher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/SMILES/smarts_matcher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L316?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L327?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
