@@ -108,9 +108,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-bf86aa" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-bf86aa"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-541700" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-541700"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-bf86aa" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-541700" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -120,9 +120,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-330232" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-330232"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a107f7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a107f7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-330232" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a107f7" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
