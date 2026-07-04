@@ -202,6 +202,9 @@ class EdgeGraph:
             else:
                 return groups
 
+    def get_label_strings(self):
+        return [a if isinstance(a, str) else a[0] for a in self.labels]
+
     @classmethod
     def _subgraph_match(cls,
                         root1, labels1, edge_map1,
@@ -242,8 +245,8 @@ class EdgeGraph:
     @classmethod
     def graph_match(cls, graph1:'EdgeGraph', graph2:'EdgeGraph'):
         # we do some quick prunes
-        atoms1 = graph1.labels
-        atoms2 = graph2.labels
+        atoms1 = graph1.get_label_strings()
+        atoms2 = graph2.get_label_strings()
         if (
                 len(atoms1) != len(atoms2)
                 or atoms1[0] != atoms2[0]
@@ -254,8 +257,8 @@ class EdgeGraph:
             return False
 
         return cls._subgraph_match(
-            0, graph1.labels, graph1.map,
-            0, graph2.labels, graph2.map
+            0, atoms1, graph1.map,
+            0, atoms2, graph2.map
         )
 
     def __eq__(self, other):
@@ -865,8 +868,8 @@ class EdgeGraph:
 
     @classmethod
     def get_maximum_overlap_permutation(cls, graph_1:'EdgeGraph', graph_2:'EdgeGraph'):
-        syms_1 = graph_1.labels
-        syms_2 = graph_2.labels
+        syms_1 = graph_1.get_label_strings()
+        syms_2 = graph_2.get_label_strings()
 
         if any(s_1 != s_2 for s_1, s_2 in zip(syms_1, syms_2)):
             if len(itut.dict_diff(itut.counts(syms_1), itut.counts(syms_2))) > 0:
@@ -981,15 +984,16 @@ class MoleculeEdgeGraph(EdgeGraph):
         if visited is None: visited = {root}
         nl = []
         ni = []
+        atoms = self.get_label_strings()
         for m in self.map.get(root, []):
             if m in visited: continue
             visited.add(m)
             if depth > 1:
                 sublist, subinds = self._collect_neighbor_list(m, depth=depth-1, visited=visited)
-                nl.append((self.labels[m], sublist))
+                nl.append((atoms[m], sublist))
                 ni.append((m, subinds))
             else:
-                nl.append(self.labels[m])
+                nl.append(atoms[m])
                 ni.append(m)
         return tuple(nl), tuple(ni)
 
@@ -1139,7 +1143,8 @@ class MoleculeEdgeGraph(EdgeGraph):
             # (("C", 3), ("N", 2)): self._check_pyrazole,
         }
     def categorize_ring(self, ring):
-        ring_atoms = [self.labels[n] for n in ring]
+        atoms = self.get_label_strings()
+        ring_atoms = [atoms[n] for n in ring]
         ring_neighbors = None
         for count_list, name in self.ring_type_dispatch.items():
             nat = len(ring_atoms)
@@ -1215,7 +1220,7 @@ class MoleculeEdgeGraph(EdgeGraph):
     def find_functional_groups(self):
         possible_fgs = {fg_root for (fg_root, counts), name in self.functional_groups.items()}
         fgs = []
-        for n,l in enumerate(self.labels):
+        for n,l in enumerate(self.get_label_strings()):
             if l in possible_fgs:
                 neighbor_list, neighbor_inds = self._collect_neighbor_list(n, depth=2)
                 match = self.match_functional_group(l, neighbor_list)
@@ -1242,6 +1247,7 @@ class MoleculeEdgeGraph(EdgeGraph):
         ring = None
         group = None
         atom = self.labels[n]
+        if not isinstance(atom, str): atom = atom[0]
         if rings is not None:
             for name,r in rings:
                 if n in r:
