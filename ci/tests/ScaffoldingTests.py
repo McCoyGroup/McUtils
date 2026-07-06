@@ -65,6 +65,9 @@ class ScaffoldingTests(TestCase):
             'final':{
                 'coords':np.random.rand(1, 2)
             },
+            'a':{'thing':{'b':1, 'c':2, "_type":"A", 'other':None}, 'other':None},
+            'c':{'thing':None, 'other':9.1},
+            'g':{"c":np.full(5, None)}
         }
         flat = flatten_tree(data)
         print(flat)
