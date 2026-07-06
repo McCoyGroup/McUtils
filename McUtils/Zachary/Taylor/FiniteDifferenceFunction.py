@@ -181,6 +181,7 @@ class FiniteDifferenceFunction:
                   end_point_accuracy=2,
                   axes=0,
                   contract=True,
+                  allow_irregular=False,
                   **kwargs
                   ):
         """
@@ -258,15 +259,19 @@ class FiniteDifferenceFunction:
                         **kwargs
                     )
                 elif m.mesh_type is MeshType.Structured:
-                    raise Exception(np.diff(g), np.unique(np.round(np.diff(g), 7)), np.unique(np.round(np.diff(subgrids[0]), 7)))
-                    diffs[i] = IrregularGridFiniteDifference(
-                        g,
-                        o,
-                        stencil=s,
-                        accuracy=a,
-                        end_point_accuracy=e,
-                        **kwargs
-                    )
+                    if allow_irregular:
+                        diffs[i] = IrregularGridFiniteDifference(
+                            g,
+                            o,
+                            stencil=s,
+                            accuracy=a,
+                            end_point_accuracy=e,
+                            **kwargs
+                        )
+                    else:
+                        raise ValueError(
+                            f"irregular structured grids require `allow_irregular=True` (got spacings {np.diff(g)})"
+                        )
                 else:
                     raise ValueError("don't know how to do FD on a Mesh with type {}".format(m.mesh_type))
         return cls(*diffs, contract=contract, axes=axes)
