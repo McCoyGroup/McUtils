@@ -1299,7 +1299,7 @@ def disambiguate_tree(tree_obj, type_map=None, aliases=None):
     new_tree = {}
     for k,v in tree_obj.items():
         if isinstance(v, dict):
-            o_type = object
+            o_type = dict
             v, _ = disambiguate_tree(v, type_map=type_map, aliases=aliases)
         elif dev.is_atomic(v) or v is None:
             o_type = type(v)
@@ -1341,7 +1341,7 @@ def disambiguate_tree(tree_obj, type_map=None, aliases=None):
         new_tree[k] = v
     return new_tree, aliases
 
-def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=True):
+def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
     if prep_tree:
         tree_obj = dictify_lists(tree_obj)
         tree_obj, aliases = disambiguate_tree(tree_obj)
@@ -1361,20 +1361,22 @@ def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=True):
         elif v is None:
             subtrees[k] = ((0,-1), np.array([np.nan]))
         else:
-            try:
-                v = np.asanyarray(v)
-            except ValueError:
-                print(k, s, v)
-                raise
+            # try:
+            v = np.asanyarray(v)
+            # except ValueError:
+            #     print(k, s, v)
+            #     raise
+            sentinel = -1
             if np.issubdtype(v.dtype, np.dtype('object')):
                 if all(u is None for u in v.flatten()):
                     v = np.full(v.shape, np.nan)
+                    sentinel = -2
                 elif not allow_pickle:
                     raise ValueError("mixed object arrays not supported")
             if v.shape == ():
-                subtrees[k] = ((0,-1), np.array([v]))
+                subtrees[k] = ((0,sentinel), np.array([v]))
             else:
-                subtrees[k] = (v.shape + (-1,), v.flatten())
+                subtrees[k] = (v.shape + (sentinel,), v.flatten())
 
     return merge_trees(subtrees, top_level=top_level)
 
@@ -1474,8 +1476,10 @@ def unflatten_tree(serial_tree, unprep_tree=True):
                 shape_pointer, array_pointer = block_pointers[k]
                 shape_data, array_data = data
                 shape_offset = shape_pointer
+                sentinel = None
                 for shape_offset in range(shape_pointer, len(shape_data)):
-                    if shape_data[shape_offset] < 0: break
+                    sentinel = shape_data[shape_offset]
+                    if sentinel < 0: break
                 shape = tuple(shape_data[shape_pointer:shape_offset])
                 if shape == (0,):
                     block_size = 1
@@ -1493,6 +1497,9 @@ def unflatten_tree(serial_tree, unprep_tree=True):
                         arr = None
                     else:
                         arr = arr.tolist()
+                elif sentinel is not None and sentinel == -2:
+                    if np.all(np.isnan(arr)):
+                        arr = np.full(arr.shape, None)
                 tree[s] = arr
             else:
                 tree[s] = {}
@@ -1500,8 +1507,12 @@ def unflatten_tree(serial_tree, unprep_tree=True):
                 tree = tree[s]
         else:
             if len(tree_stack) == 0:
-                prev = serial_tree[max(i-6, 0):i]
-                raise ValueError(f"exhausted tree stack, previous 6 tree entries: {prev}")
+                block = serial_tree['visited_keys'][max(i - 6, 0):i]
+                prev = [
+                    key_map[k] if k > 0 else "<reset>"
+                    for k in block
+                ]
+                raise ValueError(f"exhausted tree stack, previous tree entries (max 6): {prev}")
             tree = tree_stack.pop()
     if unprep_tree:
         tree = undictify_lists(tree)
