@@ -9,6 +9,7 @@ import collections
 import uuid
 from collections import OrderedDict
 from .. import Devutils as dev
+from .. import Iterators as itut
 
 __all__= [
     "PseudoPickler",
@@ -1366,8 +1367,7 @@ def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=True):
                 print(k, s, v)
                 raise
             if np.issubdtype(v.dtype, np.dtype('object')):
-                u = np.unique(v.flatten())
-                if len(u) == 1 and u[0] is None:
+                if all(u is None for u in v.flatten()):
                     v = np.full(v.shape, np.nan)
                 elif not allow_pickle:
                     raise ValueError("mixed object arrays not supported")
