@@ -319,7 +319,7 @@ Constructs a `FiniteDifferenceFunction` appropriate for a _regular grid_ with th
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.from_grid" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-from_grid(cls, grid, order, accuracy=2, stencil=None, end_point_accuracy=2, axes=0, contract=True, **kwargs): 
+from_grid(cls, grid, order, accuracy=2, stencil=None, end_point_accuracy=2, axes=0, contract=True, allow_irregular=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L176)/

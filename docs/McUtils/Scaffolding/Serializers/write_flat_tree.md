@@ -1,11 +1,11 @@
 # <a id="McUtils.Scaffolding.Serializers.write_flat_tree">write_flat_tree</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1504)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1504?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1510)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1510?message=Update%20Docs)]
 </div>
 
 ```python
-write_flat_tree(file, tree, flatten=None, writer=None, **writer_options): 
+write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, **writer_options): 
 ```
 
 
@@ -59,7 +59,7 @@ write_flat_tree(file, tree, flatten=None, writer=None, **writer_options):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/write_flat_tree.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/write_flat_tree.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1504?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1510?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -5,7 +5,7 @@
 </div>
 
 ```python
-flatten_tree(tree_obj, top_level=True, prep_tree=True): 
+flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=True): 
 ```
 
 
