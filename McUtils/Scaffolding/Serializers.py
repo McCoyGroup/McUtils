@@ -1340,7 +1340,7 @@ def disambiguate_tree(tree_obj, type_map=None, aliases=None):
         new_tree[k] = v
     return new_tree, aliases
 
-def flatten_tree(tree_obj, top_level=True, prep_tree=True):
+def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=True):
     if prep_tree:
         tree_obj = dictify_lists(tree_obj)
         tree_obj, aliases = disambiguate_tree(tree_obj)
@@ -1365,6 +1365,12 @@ def flatten_tree(tree_obj, top_level=True, prep_tree=True):
             except ValueError:
                 print(k, s, v)
                 raise
+            if np.issubdtype(v.dtype, np.dtype('object')):
+                u = np.unique(v.flatten())
+                if len(u) == 1 and u[0] is None:
+                    v = np.full(v.shape, np.nan)
+                elif not allow_pickle:
+                    raise ValueError("mixed object arrays not supported")
             if v.shape == ():
                 subtrees[k] = ((0,-1), np.array([v]))
             else:
@@ -1501,7 +1507,7 @@ def unflatten_tree(serial_tree, unprep_tree=True):
         tree = undictify_lists(tree)
     return tree
 
-def write_flat_tree(file, tree, flatten=None, writer=None, **writer_options):
+def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, **writer_options):
     if writer is None:
         compress = writer_options.pop('compress', False)
         if compress:
@@ -1515,7 +1521,7 @@ def write_flat_tree(file, tree, flatten=None, writer=None, **writer_options):
                 or 'visited_keys' not in tree
         )
     if flatten:
-        tree = flatten_tree(tree)
+        tree = flatten_tree(tree, allow_pickle=allow_pickle)
     key_names = list(tree['key_map'].values())
     aliases = np.array(list(tree['aliases'].items()))
     index_remapping = {k: i for i, k in enumerate(tree['key_map'].keys())}
@@ -1542,11 +1548,11 @@ def write_flat_tree(file, tree, flatten=None, writer=None, **writer_options):
         **writer_options
     )
 
-def read_flat_tree(file, unflatten=True, reader=None, **reader_options):
+def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, **reader_options):
     if reader is None:
         reader = np.load
 
-    zdata = reader(file, **reader_options)
+    zdata = reader(file, allow_pickle=allow_pickle, **reader_options)
     key_names = zdata['key_names']
     visited_keys = zdata['visited_keys']
     shapes = zdata['shapes']
