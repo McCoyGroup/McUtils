@@ -182,9 +182,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-2f373f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2f373f"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-6546c1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6546c1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2f373f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6546c1" markdown="1">
  - [Schema](#Schema)
 - [TreeFlattening](#TreeFlattening)
 - [Pseudopickle](#Pseudopickle)
@@ -211,9 +211,9 @@ to file and allows for easy checkpoint loading
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-5cbfc2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-5cbfc2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-b06ed1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b06ed1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-5cbfc2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b06ed1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -296,6 +296,9 @@ class ScaffoldingTests(TestCase):
             'final':{
                 'coords':np.random.rand(1, 2)
             },
+            'a':{'thing':{'b':1, 'c':2, "_type":"A", 'other':None}, 'other':None},
+            'c':{'thing':None, 'other':9.1},
+            'g':{"c":np.full(5, None)}
         }
         flat = flatten_tree(data)
         print(flat)
