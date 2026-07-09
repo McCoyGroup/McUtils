@@ -1,6 +1,7 @@
 
 import numpy as np
 from .CoordinateSystem import BaseCoordinateSystem
+from ... import Numputils as nput
 
 __all__ = [
     "CartesianCoordinateSystem",
@@ -317,7 +318,10 @@ class ZMatrixCoordinateSystem(InternalCoordinateSystem):
                 for i,s in enumerate(normalized_list):
                     if len(s) == 4:
                         normalized_list[i] = s + (0,)
-        return np.asanyarray(normalized_list, dtype=np.int8)
+        if not isinstance(normalized_list, np.ndarray):
+            normalized_list = np.asanyarray(normalized_list,
+                                            dtype=nput.infer_int_dtype(np.max(np.abs(normalized_list))))
+        return normalized_list
 
     @classmethod
     def tile_order_list(self, ol, ncoords):
