@@ -1,7 +1,7 @@
 # <a id="McUtils.ExternalPrograms.Pysisyphus.PysisCalculator">PysisCalculator</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L74?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ PysisCalculator(energy_evaluator, batched_orders=False, distance_units=None, ene
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Pysisyphus/PysisCalculator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Pysisyphus/PysisCalculator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L73?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L74?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

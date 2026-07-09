@@ -1,7 +1,7 @@
 # <a id="McUtils.ExternalPrograms.Pysisyphus.patch_pysis_logging">patch_pysis_logging</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L41)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L41?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L42)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L42?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ patch_pysis_logging():
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Pysisyphus/patch_pysis_logging.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Pysisyphus/patch_pysis_logging.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L41?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L42?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 # <a id="McUtils.ExternalPrograms.Pysisyphus.run_pysisyphus">run_pysisyphus</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L569)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L569?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L570)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L570?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ run_pysisyphus(energy_evaluator, method, optimizer=None, optimizer_settings=None
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Pysisyphus/run_pysisyphus.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Pysisyphus/run_pysisyphus.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L569?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L570?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
