@@ -4,6 +4,7 @@ import tempfile
 import logging
 from contextlib import contextmanager
 import pathlib
+import scipy
 
 import numpy as np
 from .. import Devutils as dev
@@ -627,13 +628,14 @@ def run_pysisyphus(
                                                 out_dir=od,
                                                 logger=logger,
                                                 **optimizer_settings)
-            if ignore_zero_steps:
-                try:
+            with _patched_eigh():
+                if ignore_zero_steps:
+                    try:
+                        optimizer.run()
+                    except pysisyphus.optimizers.exceptions.ZeroStepLength:
+                        ...
+                else:
                     optimizer.run()
-                except pysisyphus.optimizers.exceptions.ZeroStepLength:
-                    ...
-            else:
-                optimizer.run()
         finally:
             pysisyphus.config.OUT_DIR_DEFAULT = cur_od
         if return_logs:
@@ -687,6 +689,24 @@ def resolve_pysis_interpolator(interpolator, traj, logger=None, **opts):
 #         Geometry(geom.atoms, geom.cart_coords, coord_type=coord_type, **geom_kwargs)
 #         for geom in geoms
 #     ]
+@contextmanager
+def _patched_eigh():
+    if np.linalg.eigh.__module__ == 'numpy.linalg':
+        _np_eigh = np.linalg.eigh
+        def _safe_eigh(a, *args, **kwargs):
+            a = (a + a.T) / 2
+            try:
+                return _np_eigh(a, *args, **kwargs)
+            except np.linalg.LinAlgError:
+                return scipy.linalg.eigh(a)
+
+        try:
+            np.linalg.eigh = _safe_eigh
+            yield _safe_eigh
+        finally:
+            np.linalg.eigh = _np_eigh
+    else:
+        yield np.linalg.eigh
 
 def prep_pysis_images(atoms,
                       geometry,
