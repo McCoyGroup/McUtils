@@ -441,6 +441,7 @@ class FFIModule(FFISpec):
                  extra_compile_args=None,
                  extra_link_args=None,
                  linked_libs=None,
+                 debug_level=False,
                  **compile_kwargs
                  ):
         from .Loader import FFILoader
@@ -451,6 +452,7 @@ class FFIModule(FFISpec):
                          extra_compile_args=extra_compile_args,
                          extra_link_args=extra_link_args,
                          linked_libs=linked_libs,
+                         debug_level=debug_level,
                          **compile_kwargs
                          ).call_obj
 

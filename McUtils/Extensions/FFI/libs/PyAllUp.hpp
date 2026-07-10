@@ -755,8 +755,10 @@ namespace mcutils {
         struct numpy_type<npy_float32> { static NPY_TYPES value() {return NPY_FLOAT32;  } };
         template <>
         struct numpy_type<npy_float64> { static NPY_TYPES value() {return NPY_FLOAT64;  } };
+        #ifdef NPY_FLOAT128
         template <>
         struct numpy_type<npy_float128> { static NPY_TYPES value() {return NPY_FLOAT128;  } };
+        #endif
 //
 //        template <>
 //        NPY_TYPES numpy_type<pyobj>() { return NPY_OBJECT; }

@@ -395,7 +395,9 @@ namespace plzffi {
             ,FFITypePair<FFIType::NUMPY_Float16, npy_float16>
             ,FFITypePair<FFIType::NUMPY_Float32, npy_float32>
             ,FFITypePair<FFIType::NUMPY_Float64, npy_float64>
+            #ifdef NPY_FLOAT128
             ,FFITypePair<FFIType::NUMPY_Float128, npy_float128>
+            #endif
     >;
 
     template <typename T, FFIType...ffi_types>
@@ -414,7 +416,9 @@ namespace plzffi {
             ,FFIValidTypeset<npy_uint64, FFIType::NUMPY_UnsignedInt64, FFIType::UnsignedLong>
             ,FFIValidTypeset<npy_float32, FFIType::NUMPY_Float32, FFIType::Float>
             ,FFIValidTypeset<npy_float64, FFIType::NUMPY_Float64, FFIType::Double>
+            #ifdef NPY_FLOAT128
             ,FFIValidTypeset<npy_float128, FFIType::NUMPY_Float128>
+            #endif
             ,FFIValidTypeset<long long, FFIType::LongLong>
             ,FFIValidTypeset<unsigned long long, FFIType::UnsignedLongLong>
             ,FFIValidTypeset<bool, FFIType::Bool>
