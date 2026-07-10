@@ -1,2 +1,0 @@
-This directory contains the headers for ffi.h necessary to be able to link against the python runtime version
-of libffi. The Windows version is a stub since I have no way to test against Windows.

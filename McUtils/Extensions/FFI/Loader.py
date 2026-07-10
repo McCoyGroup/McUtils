@@ -4,6 +4,7 @@ Provides a Loader object to load a potential from a C++ extension
 
 import os, numpy as np
 import platform
+import shutil
 
 from .. import CLoader, ModuleLoader
 from .Module import FFIModule
@@ -11,6 +12,99 @@ from .Module import FFIModule
 __all__ = [
     "FFILoader"
 ]
+
+import os
+import platform
+import shutil
+import subprocess
+from pathlib import Path
+
+def brew_prefix_for_arch(pkg):
+    machine = platform.machine()  # 'arm64' or 'x86_64'
+    candidates = ["/opt/homebrew", "/usr/local"] if machine == "arm64" else ["/usr/local", "/opt/homebrew"]
+    for prefix in candidates:
+        brew_bin = f"{prefix}/bin/brew"
+        try:
+            out = subprocess.check_output([brew_bin, "--prefix", pkg], text=True).strip()
+            return out
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
+    return None
+
+def find_libffi():
+    """Return (include_dir, lib_dir) for a user-installed libffi, or None."""
+    system = platform.system()
+
+    # 1. pkg-config is the most reliable source on macOS/Linux if available
+    if system == "Linux" and shutil.which("pkg-config"):
+        try:
+            cflags = subprocess.check_output(
+                ["pkg-config", "--cflags-only-I", "libffi"], text=True
+            ).strip()
+            libs = subprocess.check_output(
+                ["pkg-config", "--libs-only-L", "libffi"], text=True
+            ).strip()
+            if cflags:
+                inc = cflags.replace("-I", "").split()[0]
+                lib = libs.replace("-L", "").split()[0] if libs else None
+                return inc, lib
+        except subprocess.CalledProcessError:
+            pass
+
+    # 2. conda environment (cross-platform, checked before OS-specific paths)
+    conda_prefix = os.environ.get("CONDA_PREFIX")
+    if conda_prefix:
+        if system == "Windows":
+            inc = Path(conda_prefix) / "Library" / "include"
+            lib = Path(conda_prefix) / "Library" / "lib"
+        else:
+            inc = Path(conda_prefix) / "include"
+            lib = Path(conda_prefix) / "lib"
+        if (inc / "ffi.h").exists():
+            return str(inc), str(lib)
+
+    # 3. platform-specific fallbacks
+    candidates = []
+    if system == "Darwin":
+        if shutil.which("brew"):
+
+            try:
+                prefix = brew_prefix_for_arch("libffi")
+                candidates.append((f"{prefix}/include", f"{prefix}/lib"))
+            except subprocess.CalledProcessError:
+                pass
+        candidates += [
+            ("/opt/homebrew/opt/libffi/include", "/opt/homebrew/opt/libffi/lib"),
+            ("/usr/local/opt/libffi/include", "/usr/local/opt/libffi/lib"),
+            ("/opt/local/include", "/opt/local/lib"),
+        ]
+    elif system == "Linux":
+        multiarch = subprocess.run(
+            ["dpkg-architecture", "-qDEB_HOST_MULTIARCH"],
+            capture_output=True, text=True
+        )
+        triplet = multiarch.stdout.strip() if multiarch.returncode == 0 else None
+        if triplet:
+            candidates.append((f"/usr/include/{triplet}", f"/usr/lib/{triplet}"))
+        candidates += [
+            ("/usr/include", "/usr/lib64"),
+            ("/usr/include", "/usr/lib"),
+            ("/usr/local/include", "/usr/local/lib"),
+        ]
+    elif system == "Windows":
+        vcpkg_root = os.environ.get("VCPKG_ROOT")
+        if vcpkg_root:
+            triplet = "x64-windows"  # adjust as needed, or detect via platform.machine()
+            base = Path(vcpkg_root) / "installed" / triplet
+            candidates.append((str(base / "include"), str(base / "lib")))
+        msys_root = os.environ.get("MSYSTEM_PREFIX", "C:/msys64/mingw64")
+        candidates.append((f"{msys_root}/include", f"{msys_root}/lib"))
+
+    for inc, lib in candidates:
+        if inc and (Path(inc) / "ffi.h").exists():
+            return inc, lib
+
+    return None
 
 class FFILoader:
     """
@@ -59,9 +153,12 @@ class FFILoader:
                  build_kwargs=None,
                  nodebug=False,
                  threaded=False,
+                 manage_threading_flags=True,
+                 manage_libffi_flags=True,
                  extra_compile_args=None,
                  extra_link_args=None,
-                 recompile=False
+                 recompile=False,
+                 debug_level=False
                  ):
         # if python_potential is False:
 
@@ -81,9 +178,46 @@ class FFILoader:
             macros = []
         if nodebug:
             macros = list(macros) + [('_NODEBUG', True)]
+
         threading_flags = (["-fopenmp"] if self.threaded else [])
-        # if platform.system() == "Darwin":
-        #     threading_flags = ['-Xprepocessor'] + threading_flags
+
+        if extra_compile_args is None:
+            extra_compile_args = []
+        else:
+            extra_compile_args = list(extra_compile_args)
+
+        if extra_link_args is None:
+            extra_link_args = []
+        else:
+            extra_link_args = list(extra_link_args)
+
+        if threaded and manage_threading_flags:
+            # # Apple clang needs -Xpreprocessor to accept -fopenmp,
+            # # since it doesn't ship libomp itself.
+            threading_flags = ["-Xpreprocessor"] + threading_flags
+            extra_link_args += ["-lomp"]
+
+            # Homebrew's libomp is keg-only, so it's not on default paths.
+            # Path differs between Apple Silicon and Intel Homebrew installs.
+            if platform.machine() == "arm64":
+                omp_prefix = "/opt/homebrew/opt/libomp"
+            else:
+                omp_prefix = "/usr/local/opt/libomp"
+
+            include_dirs += (f"{omp_prefix}/include",)
+
+            # extra_compile_args += [f"-I{omp_prefix}/include"]
+            extra_link_args += [f"-L{omp_prefix}/lib"]
+
+        if manage_libffi_flags:
+            ffi_incl, ffi_lib = find_libffi()
+            if ffi_incl is not None:
+                include_dirs += (ffi_incl,)
+                # extra_compile_args += [f"-I{ffi_incl}"]
+            if ffi_lib is not None:
+                extra_link_args += [f"-L{ffi_lib}"]
+
+        extra_compile_args = threading_flags + [self.cpp_std] + extra_compile_args
         self.c_loader = CLoader(
             name,
             src,
@@ -100,7 +234,7 @@ class FFILoader:
             requires_make=requires_make,
             out_dir=out_dir,
             cleanup_build=cleanup_build,
-            extra_compile_args=threading_flags + [self.cpp_std] + ([] if extra_compile_args is None else list(extra_compile_args)),
+            extra_compile_args=extra_compile_args,
             extra_link_args=[] if extra_link_args is None else list(extra_link_args),
             recompile=recompile,
             **({} if build_kwargs is None else build_kwargs)
@@ -113,6 +247,20 @@ class FFILoader:
 
         self._attr = pointer_name
         # self.function_name = pointer_name
+        self.debug_level = debug_level
+
+    @classmethod
+    def _check_install_lib_ffi(cls):
+        targ = os.path.join(cls.libs_folder, 'libffi')
+        if not os.path.exists(targ):
+            from ...ExternalPrograms import GitHubReleaseManager
+
+            manager = GitHubReleaseManager()
+            latest = manager.latest_release('libffi', 'libffi')
+            res = manager.release_manager.get_resource(latest[manager.resource_key], load_resource=False)
+            print(res)
+            shutil.copytree(res, targ)
+        return targ
 
     @property
     def lib(self):
@@ -134,4 +282,4 @@ class FFILoader:
         :return:
         :rtype:
         """
-        return FFIModule.from_module(self.lib)
+        return FFIModule.from_module(self.lib, debug=self.debug_level)

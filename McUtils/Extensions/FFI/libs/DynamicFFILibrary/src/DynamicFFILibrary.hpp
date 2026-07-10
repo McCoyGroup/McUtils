@@ -146,6 +146,9 @@ namespace DynamicFFILibrary {
             if (ffiobj::is_array_type(type, shape, ctype)) {
                 auto val = params.value<T*>(name);  // always store a pointer to the underlying data ... except when we don't want to ...
                 auto ptr = libffi_convert(val);
+                if (debug::debug_print(DebugLevel::Excessive)) {
+                    py_printf("extracted pointer %p\n", val);
+                }
                 // if constexpr (std::is_same_v<T, int>) {
                 //   printf("w1...\n");
                 //   printf("w1at %p -> %d\n", ptr.ptr, *(int*)ptr.ptr);
@@ -603,7 +606,14 @@ namespace DynamicFFILibrary {
             std::vector<size_t>& block_byte_offsets_sizes
         ) {
 
+        if (debug::debug_print(DebugLevel::Excessive)) {
+            py_printf("calling serial over %lu elements\n", nels);
+        }
+
         for (size_t w = 0; w < nels; w++) {
+            if (debug::debug_print(DebugLevel::Excessive)) {
+                 py_printf("...%lu\n", w);
+            }
             // py_printf("...%lu\n", w);
             call_threaded_inner(w, res_buffer, func, cif, values, thread_inds, block_byte_offsets_sizes);
         }
@@ -662,7 +672,10 @@ namespace DynamicFFILibrary {
         // a stub to demo how these modules work
         auto fdat = base_params.value<pyobj>("function_data");
         auto method = LibFFIMethod::from_python(fdat);
-        auto params = FFIParameters(base_params.value<pyobj>("parameters"));
+        if (debug::debug_print(DebugLevel::Excessive)) py_printf("Prepped FFI method from %s\n", fdat.repr().c_str());
+        auto pobj = base_params.value<pyobj>("parameters");
+        if (debug::debug_print(DebugLevel::Excessive)) py_printf("Prepped arguments from %s\n", pobj.repr().c_str());
+        auto params = FFIParameters(pobj);
         return LibFFIMethodCaller::call_method(method, params);
     }
 
@@ -671,7 +684,9 @@ namespace DynamicFFILibrary {
         // a stub to demo how these modules work
         auto fdat = base_params.value<pyobj>("function_data");
         auto method = LibFFIMethod::from_python(fdat);
+        if (debug::debug_print(DebugLevel::Excessive)) py_printf("Prepped FFI method from %s\n", fdat.repr().c_str());
         auto pobj = base_params.value<pyobj>("parameters");
+        if (debug::debug_print(DebugLevel::Excessive)) py_printf("Prepped arguments from %s\n", pobj.repr().c_str());
         auto params = FFIParameters(pobj);
         auto threaded_vars_obj = base_params.value<pyobj>("threading_vars");
         auto threaded_vars = threaded_vars_obj.convert<std::vector<std::string>>();
