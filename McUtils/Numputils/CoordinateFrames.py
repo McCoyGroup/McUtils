@@ -167,6 +167,9 @@ def moments_of_inertia(coords, masses=None, force_rotation=True, return_com=Fals
     """
 
     coords = np.asanyarray(coords)
+    if coords.shape[-1] != 3:
+        if coords.shape[-1] % 3 != 0: raise ValueError('coordinates are not valid for Cartesians')
+        coords = coords.reshape(coords.shape[:-1] + (coords.shape[-1]//3, 3))
 
     if coords.ndim == 1:
         raise ValueError("can't get moment of inertia for single point (?)")
