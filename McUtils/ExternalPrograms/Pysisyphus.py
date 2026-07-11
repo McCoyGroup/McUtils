@@ -694,7 +694,7 @@ def _patched_eigh():
     if np.linalg.eigh.__module__ == 'numpy.linalg':
         _np_eigh = np.linalg.eigh
         def _safe_eigh(a, *args, **kwargs):
-            a = (a + a.T) / 2
+            a = (a + np.moveaxis(a, -1, -2)) / 2
             try:
                 return _np_eigh(a, *args, **kwargs)
             except np.linalg.LinAlgError:
