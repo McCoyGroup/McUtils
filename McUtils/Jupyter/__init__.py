@@ -23,6 +23,8 @@ from .JSMol import *; from .JSMol import __all__ as exposed
 __all__ += exposed
 from .NotebookTools import *; from .NotebookTools import __all__ as exposed
 __all__ += exposed
+from .ImageTools import *; from .ImageTools import __all__ as exposed
+__all__ += exposed
 del exposed
 
 def _ipython_pinfo_():

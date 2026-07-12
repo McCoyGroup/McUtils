@@ -264,7 +264,7 @@ class ExternalProgramsTest(TestCase):
     def test_ServerPackage(self):
         SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
 
-    @debugTest
+    @validationTest
     def test_CubeParser(self):
         from Psience.Molecools import Molecule
         # with CubeFileParser(TestManager.test_data('samp.cube')) as parser:
@@ -293,3 +293,12 @@ class ExternalProgramsTest(TestCase):
                  vertex_values=eval.evaluate(tri.verts),
                  transparency=.5)
         fig.show()
+
+    @debugTest
+    def test_OBGen3D(self):
+        from Psience.Molecools import Molecule
+
+        mol = OBMolecule.from_string("CO[C]12C[C@@](C=C1)(c1ccc(F)cc1)CC2", "smi")#, conformer_generator='gen3d')
+        # print(mol.coords)
+        # Molecule.from_openbabel(mol).plot().show()
+        mol.draw(use_coords=True).show()
