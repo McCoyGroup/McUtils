@@ -172,7 +172,7 @@ def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=
         #TODO: handle transposition
         return dist_mats
 
-def unembedded_pts_rmsd(coords, ref, averaged=False):
+def unembedded_pts_rmsd(coords, ref, return_diffs=False, averaged=False, total=False):
     coords = np.asanyarray(coords)
     ref = np.asanyarray(ref)
 
@@ -180,14 +180,22 @@ def unembedded_pts_rmsd(coords, ref, averaged=False):
 
     ncoords = np.prod(ref.shape[-2:], dtype=int)
 
+    base_ref = ref.shape[-2:]
     ref = ref.reshape((-1, ncoords))
     coords = coords.reshape((-1, ncoords))
 
-    base_rmsd = np.linalg.norm(ref - coords, axis=-1).reshape(base_shape)
-    if averaged:
-        base_rmsd = base_rmsd / np.sqrt(ref.shape[-2])
+    diffs = ref - coords
+    base_rmsd = np.linalg.norm(diffs, axis=-1).reshape(base_shape)
+    if total:
+        if averaged:
+            base_rmsd = base_rmsd / np.sqrt(base_ref[-2])
+        else:
+            base_rmsd = base_rmsd / np.sqrt(np.prod(base_ref))
 
-    return base_rmsd
+    if return_diffs:
+        return base_rmsd, diffs.reshape(base_shape + base_ref)
+    else:
+        return base_rmsd
 
 ################################################
 #
