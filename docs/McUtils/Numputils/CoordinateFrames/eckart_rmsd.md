@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordinateFrames.eckart_rmsd">eckart_rmsd</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L944)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L944?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L947)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L947?message=Update%20Docs)]
 </div>
 
 ```python
-eckart_rmsd(coords, ref, masses=None, embed=True, comparison_sel=None, embedding_sel=None, mass_weighted=False, **embedding_parameters): 
+eckart_rmsd(coords, ref, masses=None, embed=True, comparison_sel=None, embedding_sel=None, mass_weighted=False, return_diffs=False, averaged=False, total=False, **embedding_parameters): 
 ```
 
 
@@ -59,7 +59,7 @@ eckart_rmsd(coords, ref, masses=None, embed=True, comparison_sel=None, embedding
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/eckart_rmsd.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/eckart_rmsd.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L944?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L947?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -5,7 +5,7 @@
 </div>
 
 ```python
-unembedded_pts_rmsd(coords, ref, averaged=False): 
+unembedded_pts_rmsd(coords, ref, return_diffs=False, averaged=False, total=False): 
 ```
 
 
