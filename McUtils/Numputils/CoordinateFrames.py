@@ -716,7 +716,10 @@ def _eckart_embedding(ref, coords,
     # needs to be updated for the multiple reference case?
     # TODO: make sure that we broadcast this correctly to check if all or
     #       none of the reference structures are planar
-    planar_ref = np.allclose(ref[0][:, 2], 0., atol=planar_ref_tolerance)
+    if planar_ref_tolerance is None or planar_ref_tolerance < 0:
+        planar_ref = False
+    else:
+        planar_ref = np.allclose(ref[0][:, 2], 0., atol=planar_ref_tolerance)
 
     if permutable_groups is not None:
         if sel is not None:
@@ -947,6 +950,9 @@ def eckart_rmsd(coords, ref,
                 comparison_sel=None,
                 embedding_sel=None,
                 mass_weighted=False,
+                return_diffs=False,
+                averaged=False,
+                total=False,
                 **embedding_parameters):
     if embed:
         ref = np.asanyarray(ref)
@@ -967,7 +973,10 @@ def eckart_rmsd(coords, ref,
         coords = coords[..., comparison_sel, :]
         ref = ref[..., comparison_sel, :]
 
-    return vec_ops.unembedded_pts_rmsd(coords, ref)
+    return vec_ops.unembedded_pts_rmsd(coords, ref,
+                                       return_diffs=return_diffs,
+                                       total=total,
+                                       averaged=averaged)
 
 def incremental_eckart_rmsd(coords,
                             refs=None,
