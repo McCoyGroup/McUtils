@@ -372,9 +372,9 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-f39b14" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f39b14"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-e440c8" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e440c8"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f39b14" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e440c8" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -389,12 +389,13 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 - [DockerRun](#DockerRun)
 - [ServerPackage](#ServerPackage)
 - [CubeParser](#CubeParser)
+- [OBGen3D](#OBGen3D)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-32b9ae" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-32b9ae"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-6824d9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-6824d9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-32b9ae" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-6824d9" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -701,6 +702,17 @@ class ExternalProgramsTest(TestCase):
                  vertex_values=eval.evaluate(tri.verts),
                  transparency=.5)
         fig.show()
+```
+
+#### <a name="OBGen3D">OBGen3D</a>
+```python
+    def test_OBGen3D(self):
+        from Psience.Molecools import Molecule
+
+        mol = OBMolecule.from_string("CO[C]12C[C@@](C=C1)(c1ccc(F)cc1)CC2", "smi")#, conformer_generator='gen3d')
+        # print(mol.coords)
+        # Molecule.from_openbabel(mol).plot().show()
+        mol.draw(use_coords=True).show()
 ```
 
  </div>
