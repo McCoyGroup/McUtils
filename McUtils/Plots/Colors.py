@@ -101,7 +101,8 @@ class ColorPalette:
                    color_space='rgb',
                    modification_space='lab',
                    return_color_code=True,
-                   cycle=None
+                   cycle=None,
+                   alpha=None
                    ):
         if base is None:
             if palette is None:
@@ -149,10 +150,39 @@ class ColorPalette:
                                       modification_space=modification_space,
                                       clip=clip
                                       )
+            if alpha is not None:
+                b = cls.set_alpha(b, alpha)
             final.append(b)
         if smol:
             final = final[0]
         return final
+
+    @classmethod
+    def set_alpha(cls, b, alpha):
+        if isinstance(b, str):
+            if b.startswith('#'):
+                _, padding = cls.parse_rgb_code(b, return_padding=True)
+                if alpha < 1:
+                    alpha = int(alpha*255)
+                b = b + f'{alpha:0>{padding}x}'
+            else:
+                b, padding = cls.parse_color_string(b, return_padding=True)
+                if len(b) < 4:
+                    b = np.concatenate([b, [alpha]], axis=0)
+                else:
+                    b = np.array(b)
+                    b[-1] = alpha
+                b = cls.rgb_code(b, padding)
+        elif cls.is_palette_list(b):
+            return [cls.set_alpha(bb, alpha) for bb in b]
+        else:
+            if len(b) < 4:
+                b = np.concatenate([b, [alpha]], axis=0)
+            else:
+                b = np.array(b)
+                b[-1] = alpha
+        return b
+
 
     @classmethod
     def resolve_color_palette(cls, cmap_name):
@@ -848,6 +878,7 @@ def prep_color(
         color_space='rgb',
         modification_space='lab',
         return_color_code=True,
+        alpha=None,
         cycle=None
 ):
     return ColorPalette.prep_color(
@@ -864,5 +895,6 @@ def prep_color(
         color_space=color_space,
         modification_space=modification_space,
         return_color_code=return_color_code,
-        cycle=cycle
+        cycle=cycle,
+        alpha=alpha
     )
