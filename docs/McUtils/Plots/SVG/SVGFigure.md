@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.SVG.SVGFigure">SVGFigure</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG.py#L723)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG.py#L723?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG.py#L731)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG.py#L731?message=Update%20Docs)]
 </div>
 
 
@@ -33,8 +33,8 @@ element_mapping: dict
 __init__(self, elements=None, defs=None, view_box=None, preserve_aspect_ratio=None, **svg_kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG.py#L739)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG.py#L739?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG.py#L747)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG.py#L747?message=Update%20Docs)]
 </div>
 
 
@@ -43,8 +43,8 @@ __init__(self, elements=None, defs=None, view_box=None, preserve_aspect_ratio=No
 create_element(self, element_type, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L759)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L759?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L767)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L767?message=Update%20Docs)]
 </div>
 
 
@@ -53,8 +53,8 @@ create_element(self, element_type, **kwargs):
 add_element(self, element_type, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L761)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L761?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L769)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L769?message=Update%20Docs)]
 </div>
 
 
@@ -63,8 +63,8 @@ add_element(self, element_type, **kwargs):
 add_rect(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L765)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L765?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L773)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L773?message=Update%20Docs)]
 </div>
 
 
@@ -73,8 +73,8 @@ add_rect(self, **kwargs):
 add_circle(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L767)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L767?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L775)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L775?message=Update%20Docs)]
 </div>
 
 
@@ -83,8 +83,8 @@ add_circle(self, **kwargs):
 add_ellipse(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L769)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L769?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L777)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L777?message=Update%20Docs)]
 </div>
 
 
@@ -93,8 +93,8 @@ add_ellipse(self, **kwargs):
 add_line(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L771)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L771?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L779)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L779?message=Update%20Docs)]
 </div>
 
 
@@ -103,8 +103,8 @@ add_line(self, **kwargs):
 add_polyline(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L773)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L773?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L781)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L781?message=Update%20Docs)]
 </div>
 
 
@@ -113,8 +113,8 @@ add_polyline(self, **kwargs):
 add_polygon(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L775)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L775?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L783)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L783?message=Update%20Docs)]
 </div>
 
 
@@ -123,8 +123,8 @@ add_polygon(self, **kwargs):
 add_path(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L777)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L777?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L785)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L785?message=Update%20Docs)]
 </div>
 
 
@@ -133,8 +133,8 @@ add_path(self, **kwargs):
 add_text(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L779)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L779?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L787)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L787?message=Update%20Docs)]
 </div>
 
 
@@ -143,8 +143,8 @@ add_text(self, **kwargs):
 compute_viewbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L782)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L782?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L790)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L790?message=Update%20Docs)]
 </div>
 
 
@@ -153,8 +153,8 @@ compute_viewbox(self):
 add_def(self, id, *, tag, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L799)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L799?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L807)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L807?message=Update%20Docs)]
 </div>
 
 
@@ -163,8 +163,8 @@ add_def(self, id, *, tag, **opts):
 create_def(self, *, id, tag='marker', body=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L801)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L801?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L809)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L809?message=Update%20Docs)]
 </div>
 
 
@@ -173,8 +173,8 @@ create_def(self, *, id, tag='marker', body=None, **opts):
 prep_element(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L811)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L811?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L819)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L819?message=Update%20Docs)]
 </div>
 
 
@@ -183,8 +183,8 @@ prep_element(self, e):
 prep_draw_els(self, bbox, compute_bbox=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L813)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L813?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L821)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L821?message=Update%20Docs)]
 </div>
 
 
@@ -193,8 +193,8 @@ prep_draw_els(self, bbox, compute_bbox=None):
 to_svg(self, compute_bbox=None, view_box=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L832)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L832?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/SVG/SVGFigure.py#L840)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG/SVGFigure.py#L840?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -249,7 +249,7 @@ to_svg(self, compute_bbox=None, view_box=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/SVG/SVGFigure.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/SVG/SVGFigure.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG.py#L723?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/SVG.py#L731?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

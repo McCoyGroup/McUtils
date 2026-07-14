@@ -5,7 +5,7 @@
 </div>
 
 ```python
-distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False): 
+distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False, return_diffs=False): 
 ```
 
 
