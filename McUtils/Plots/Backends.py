@@ -4374,8 +4374,13 @@ class SVGAxes(GraphicsAxes):
             self.style_mapping.get(k, k):v
             for k,v in styles.items()
         }
-    def draw_line(self, points, **styles):
-        styles = self.prep_styles(styles)
+    def draw_line(self, points, stroke=None, line_color=None, color=None, **styles):
+        if line_color is None:
+            line_color = color
+            color = None
+        styles = self.prep_styles(styles | {'line_color':line_color, 'color':color})
+        if stroke is not None:
+            styles['stroke'] = stroke
         points = np.asanyarray(points)
         if len(points) > 2:
             return self.figure.add_polyline(points=points, **styles)
