@@ -4388,7 +4388,7 @@ class SVGAxes(GraphicsAxes):
     def draw_disk(self, points, *, radius, **styles):
         styles = self.prep_styles(styles)
         x, y = np.asanyarray(points)
-        return self.figure.add_circle(x=x, y=y, r=radius, **styles)
+        return self.figure.add_circle(cx=x, cy=y, r=radius, **styles)
     def draw_rect(self, points, **styles):
         styles = self.prep_styles(styles)
         (x1, y1), (x2, y2) = np.asanyarray(points)
@@ -4442,18 +4442,72 @@ class SVGAxes(GraphicsAxes):
                 font_opts[k2] = v
         return font_opts, rem_opts
     @classmethod
-    def _text_to_path(cls, origin, text, **font_opts):
+    def _text_to_path(cls, origin, text, invert=False, size=None, plot_range=None,
+                      anchor=None,
+                      font_size_scaling=13, **font_opts):
         from matplotlib.textpath import TextPath
         from matplotlib.font_manager import FontProperties
-        fp = FontProperties(**font_opts)
-        return TextPath(origin, text, prop=fp)
-    def draw_text(self, points, vals, use_path=False, **styles):
+        from matplotlib.transforms import Affine2D
+        if nput.is_numeric(size):
+            scaling = size / font_size_scaling
+            size = None
+        else:
+            scaling = None
+        fp = FontProperties(size=size, **font_opts)
+        path = TextPath((0, 0), text, prop=fp)
+        if invert:
+            tf = (
+                Affine2D()
+                    # .translate(tx=-origin[0], ty=-origin[1])
+                    .scale(sx=1, sy=-1)
+                    # .translate(tx=origin[0], ty=origin[1])
+                  )
+            path = tf.transform_path(path)
+            origin = (origin[0], -origin[1])
+
+        if scaling is not None:
+            tf = Affine2D()
+            if plot_range is not None:
+                min_x = np.min(path.vertices[:, 0])
+                max_x = np.max(path.vertices[:, 0])
+                min_y = np.min(path.vertices[:, 1])
+                max_y = np.max(path.vertices[:, 1])
+                scaling = scaling / np.max([(max_y - min_y), (max_x - min_x)])
+                tf = (
+                    tf
+                    # .translate(tx=-origin[0], ty=-origin[1])
+                    .scale(sx=scaling, sy=scaling)
+                    # .translate(tx=origin[0], ty=origin[1])
+                )
+            else:
+                tf.scale(sx=scaling, sy=scaling)
+            path = tf.transform_path(path)
+        if anchor is not None:
+            min_x = np.min(path.vertices[:, 0])
+            max_x = np.max(path.vertices[:, 0])
+            min_y = np.min(path.vertices[:, 1])
+            max_y = np.max(path.vertices[:, 1])
+            offset = (max_x - min_x) * anchor[0], (max_y - min_y)* anchor[1]
+            origin = origin[0] + offset[0], origin[1] + offset[1]
+        path = Affine2D().translate(tx=origin[0], ty=origin[1]).transform_path(path)
+
+        return path
+    def draw_text(self, points, vals,
+                  use_path=False,
+                  invert=False,
+                  anchor=None,
+                  plot_range=None, font_size_scaling=13, **styles):
         styles = self.prep_styles(styles)
         if use_path:
             font_opts, styles = self.filter_font_options(styles)
-            mpl_path = self._text_to_path(points, vals, **font_opts)
+            mpl_path = self._text_to_path(points, vals,
+                                          plot_range=plot_range,
+                                          font_size_scaling=font_size_scaling,
+                                          invert=invert,
+                                          anchor=anchor,
+                                          **font_opts)
             commands = svg.SVGPath.from_mpl(mpl_path)
-            return self.figure.add_path(commands=commands, **styles)
+            return self.figure.add_path(d=commands, **styles)
         else:
             x, y = points
             return self.figure.add_text(x=x, y=y, text=vals, **styles)

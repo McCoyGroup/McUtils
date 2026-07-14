@@ -22,12 +22,13 @@ __all__ = [
 
 class EdgeGraph:
     map: dict[int, set[int]]
-    __slots__ = ["labels", "edges", "graph", "map", "_rings", "_sp_data"]
-    def __init__(self, labels, edges, graph=None, edge_map=None, allow_self_loops=False):
+    __slots__ = ["labels", "edges", "graph", "map", "weights", "_rings", "_sp_data"]
+    def __init__(self, labels, edges, graph=None, edge_map=None, weights=None, allow_self_loops=False):
         self.labels = labels
         self.edges = np.asanyarray(edges)
+        self.weights = weights
         if graph is None:
-            graph = self.adj_mat(len(labels), self.edges)
+            graph = self.adj_mat(len(labels), self.edges, weights)
         self.graph = graph
         if edge_map is None:
             edge_map = self.build_edge_map(self.edges)
@@ -81,6 +82,25 @@ class EdgeGraph:
             num_nodes = len(np.unique(spec.flatten()))
             return cls.adj_mat(num_nodes, spec)
 
+    def layout(self, method='default', **opts):
+        from .Layout import GraphLayout
+        return GraphLayout(self).compute(method, **opts)
+
+    def plot(self, method='default', **opts):
+        from .Layout import GraphPlotter
+
+        if dev.is_dict_like(method):
+            method_opts = dict(method)
+            method = method_opts.pop('method')
+        else:
+            method_opts = {}
+        coords = self.layout(method, **method_opts)
+        c = np.array(list(coords.values()))
+        i = np.argsort([c[1] for c in coords])
+        xy = c[i]
+
+        return GraphPlotter(self, xy).plot(**opts)
+
     @classmethod
     def get_edge_list(cls, spec):
         if isinstance(spec, dict):
@@ -105,12 +125,26 @@ class EdgeGraph:
             return cls.build_edge_map(spec)
 
     @classmethod
-    def adj_mat(cls, num_nodes, edges):
+    def adj_mat(cls, num_nodes, edges, weights=None):
+        if weights is not None:
+            edges = [
+                (e[0], e[1], weights.get((e[0], e[1]), weights.get((e[1], e[0]))))
+                    if len(e) == 2 else
+                e
+                for e in edges
+            ]
+        edges = [
+            (e[0], e[1], 1)
+                if len(e) == 2 else
+            e
+            for e in edges
+        ]
         adj = np.zeros((num_nodes, num_nodes), dtype=int)
+        edges = np.array(edges)
         if len(edges) > 0:
-            rows,cols = edges.T
-            adj[rows, cols] = 1
-            adj[cols, rows] = 1
+            rows, cols, ws = edges.T
+            adj[rows, cols] = ws
+            adj[cols, rows] = ws
 
         return sparse.csr_matrix(adj)
 
@@ -118,7 +152,7 @@ class EdgeGraph:
         return sparse.csgraph.shortest_path(
             self.graph,
             directed=False,
-            unweighted=True,
+            unweighted=self.weights is None,
             indices=indices
         )
 
