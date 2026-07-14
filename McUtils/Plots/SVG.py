@@ -432,12 +432,18 @@ class SVGPath(SVGPrimitive):
     def _prep_path(self, d):
         if not isinstance(d, str):
             bits = []
-            for cmd, args in d:
-                args = " ".join(
-                    f"{a:.3g}" if a not in {True, False} else str(int(a))
-                    for a in args
-                )
-                bits.append(f"{cmd} {args}")
+            for ca in d:
+                if isinstance(ca, str):
+                    bits.append(ca)
+                else:
+                    cmd, args = ca
+                    if nput.is_numeric_array_like(args):
+                        args = np.array(args).flatten().tolist()
+                    args = " ".join(
+                        f"{a:.3g}" if a not in [True, False] else str(int(a))
+                        for a in args
+                    )
+                    bits.append(f"{cmd} {args}")
             d = "\n".join(bits)
         return d
 
@@ -572,7 +578,7 @@ class SVGPath(SVGPrimitive):
 
             n = _VERT_COUNT[code]
             seg_verts = verts[i: i + n]
-            parts.append(np.asarray(seg_verts))
+            # parts.append(np.asarray(seg_verts))
             # coord_str = " ".join(f"{x:.6g},{y:.6g}" for x, y in seg_verts)
             parts.append([cmd, seg_verts])
             i += n
@@ -586,7 +592,9 @@ class SVGPath(SVGPrimitive):
         sx = sy = 0.0          # start of current subpath (for Z)
         last_ctrl: tuple[float,float] | None = None  # last control point for S/T
 
-        for cmd, args in self.d:
+        for ca in self.d:
+            if isinstance(ca, str): continue
+            cmd, args = ca
             rel = cmd.islower()
             ox, oy = (cx, cy) if rel else (0.0, 0.0)
 

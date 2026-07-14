@@ -149,7 +149,7 @@ def points_from_distance_matrix(dist_mat, test_idx=None, target_dim=None, use_tr
 
     return vecs
 
-def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False):
+def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False, return_diffs=False):
     pts = np.asanyarray(pts)
     if axis2 is None:
         axis2 = axis-1
@@ -159,18 +159,25 @@ def distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=
     vecs_r = np.take(pts, rows, axis=axis2)
     vecs_c = np.take(pts, cols, axis=axis2)
 
-    dists = vec_norms(vecs_r - vecs_c, axis=axis)
+    diffs = vecs_r - vecs_c
+    dists = vec_norms(diffs, axis=axis)
     if return_triu:
         if return_indices:
-            return dists, (rows, cols)
+            res = dists, (rows, cols)
         else:
-            return dists
+            res = (dists,)
     else:
         dist_mats = np.zeros(tuple(np.delete(pts.shape, [axis, axis2])) + (n, n), dtype=dists.dtype)
         dist_mats[..., rows, cols] = dists
         dist_mats[..., cols, rows] = dists
         #TODO: handle transposition
-        return dist_mats
+        res = (dist_mats,)
+    if return_diffs:
+        res = res + (diffs,)
+
+    if len(res) == 1:
+        res = res[0]
+    return res
 
 def unembedded_pts_rmsd(coords, ref, return_diffs=False, averaged=False, total=False):
     coords = np.asanyarray(coords)
