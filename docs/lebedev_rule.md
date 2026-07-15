@@ -1,14 +1,14 @@
-# <a id="McUtils.Numputils.Geometry.dihedron_triangle">dihedron_triangle</a>
+### <a id="lebedev_rule">lebedev_rule</a> 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L2891)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2891?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/lebedev_rule.py#L)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/lebedev_rule.py#L?message=Update%20Docs)]
 </div>
+Return (points, weights) for a Lebedev grid of the given order
+(order = number of grid points; any of the 31 tabulated orders from
+6 up to 5294 -- see sorted(_LEBEDEV_TABLE) for the full list).
 
-```python
-dihedron_triangle(dd: 'DihedralTetrahedronData', i): 
-```
-
-
+`points` is (order, 3), on the unit sphere.
+`weights` sums to 1.0 -- multiply by 4*pi*r**2 for a surface integral.
 
 
 
@@ -53,16 +53,13 @@ dihedron_triangle(dd: 'DihedralTetrahedronData', i):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/Geometry/dihedron_triangle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/Geometry/dihedron_triangle.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/lebedev_rule.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/lebedev_rule.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/dihedron_triangle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/dihedron_triangle.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/lebedev_rule.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/lebedev_rule.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2891?message=Update%20Docs)   
-</div>
-   <div class="col" markdown="1">
-   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/lebedev_rule.py#L?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
@@ -70,6 +67,10 @@ dihedron_triangle(dd: 'DihedralTetrahedronData', i):
    <div class="col" markdown="1">
    
 </div>
+   <div class="col" markdown="1">
+   
 </div>
 </div>
 </div>
+</div>
+

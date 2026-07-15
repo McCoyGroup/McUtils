@@ -1,13 +1,13 @@
-# <a id="McUtils.Numputils.Geometry.dihedron_triangle">dihedron_triangle</a>
+# <a id="McUtils.Numputils.Lebedev.lebedev_grid">lebedev_grid</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L2891)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2891?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Lebedev.py#L1591)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Lebedev.py#L1591?message=Update%20Docs)]
 </div>
 
 ```python
-dihedron_triangle(dd: 'DihedralTetrahedronData', i): 
+lebedev_grid(npts, use_degree=False, return_weights=False): 
 ```
-
+Lebedev grid placed on one sphere; weights are surface-area weights.
 
 
 
@@ -53,13 +53,13 @@ dihedron_triangle(dd: 'DihedralTetrahedronData', i):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/Geometry/dihedron_triangle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/Geometry/dihedron_triangle.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/Lebedev/lebedev_grid.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/Lebedev/lebedev_grid.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/dihedron_triangle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/dihedron_triangle.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Lebedev/lebedev_grid.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Lebedev/lebedev_grid.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L2891?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Lebedev.py#L1591?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

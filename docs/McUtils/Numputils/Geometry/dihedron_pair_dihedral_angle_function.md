@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.Geometry.dihedron_pair_dihedral_angle_function">dihedron_pair_dihedral_angle_function</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L4131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L4131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L4136)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L4136?message=Update%20Docs)]
 </div>
 
 ```python
@@ -59,7 +59,7 @@ dihedron_pair_dihedral_angle_function(inds1, dihed1, inds2, dihed2, raise_on_mis
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/dihedron_pair_dihedral_angle_function.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/dihedron_pair_dihedral_angle_function.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L4131?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L4136?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
