@@ -7,10 +7,12 @@ import scipy.spatial as spat
 import scipy.sparse
 from ... import Devutils as dev
 from ... import Numputils as nput
+from ... import Combinatorics as comb
 from ...Data import AtomData, UnitsData
 from ...ExternalPrograms import Open3DInterface as o3d
 
 __all__ = [
+    "sphere_points",
     "SphereUnionSurface",
     "SphereUnionSurfaceMesh"
 ]
@@ -18,6 +20,34 @@ __all__ = [
 # class TriangleMesh:
 #
 #     ...
+
+def halton_sphere(npts, **etc):
+    seq = comb.halton_sequence(npts, 2, **etc)
+    return nput.uv_mapping(seq)
+
+def sobol_sphere(npts, **etc):
+    seq = comb.sobol_sequence(npts, 2, **etc)
+    return nput.uv_mapping(seq)
+
+
+def sphere_points(npts, center=None, radius=None, method='fibonacci', **etc):
+    if isinstance(method, str):
+        if method == 'fibonacci':
+            method = nput.fibonacci_sphere
+        elif method == 'lebedev':
+            method = nput.lebedev_grid
+        elif method == 'halton':
+            method = halton_sphere
+        elif method == 'sobol':
+            method = sobol_sphere
+        else:
+            raise ValueError(f'unknown method: {method}')
+    base_pts = method(npts, **etc)
+    if radius is not None:
+        base_pts *= radius
+    if center is not None:
+        base_pts += center[np.newaxis, :]
+    return base_pts
 
 class SphereUnionSurface:
 
@@ -397,6 +427,7 @@ class SphereUnionSurface:
                            samples=50,
                            density=None,
                            scaling=1,
+                           point_generator=None,
                            expansion=0,
                            preserve_origins=False,
                            circle_samples=None,
@@ -407,7 +438,7 @@ class SphereUnionSurface:
                            return_intersection_point_mask=False,
                            extend_intersection_points=True,
                            intersection_point_tolerance=None,
-                           clear_circle_neighbors=True,
+                           clear_circle_neighbors=None,
                            neighborhood_tolerance='auto', # percentage of radius
                            tolerance=0,
                            prune=True
@@ -421,10 +452,12 @@ class SphereUnionSurface:
         base_points = cls.sphere_points(
             centers,
             radii,
-            samples
+            samples,
+            generator=point_generator
         )
-        if nput.is_int(samples):
-            samples = [samples] * centers.shape[-1]
+        # if nput.is_int(samples):
+        #     samples = [samples] * centers.shape[-1]
+        samples = [len(p) for p in base_points]
 
         base_point_masks = [
             np.full(b.shape[:-1], True)
@@ -438,6 +471,8 @@ class SphereUnionSurface:
             d_avgs.append(np.average(np.min(dms, axis=0)))
 
         if add_intersection_circles:
+            if clear_circle_neighbors is None:
+                clear_circle_neighbors = True
             for i,j in itertools.combinations(range(len(centers)), 2):
                 r_ij = np.linalg.norm(centers[i] - centers[j])
                 if r_ij < (radii[i] + radii[j]):
@@ -523,7 +558,7 @@ class SphereUnionSurface:
                         samps = circle_samples
                         if samps is None:
                             if min_circle_samples < 1:
-                                min_circle_samples = int(samples * min_circle_samples)
+                                min_circle_samples = int(np.min(np.asanyarray(samples)) * min_circle_samples)
                             dtot = 2 * np.pi * circ.radius
                             davg = d_avgs[i]
                             targ = 1 + 2 * (dtot // davg)
@@ -555,7 +590,10 @@ class SphereUnionSurface:
                             base_points = list(base_points)
                         base_points[i] = np.concatenate([base_points[i], pts], axis=0)
                         if clear_circle_neighbors:
-                            circ_dists = np.linalg.norm(base_points[i][:samples[i]][:, np.newaxis, :] - pts[np.newaxis, :, :], axis=-1)
+                            circ_dists = np.linalg.norm(
+                                base_points[i][:samples[i]][:, np.newaxis, :]
+                                - pts[np.newaxis, :, :],
+                                axis=-1)
                             nt = neighborhood_tolerance
                             if dev.str_is(nt, 'auto'):
                                 nt = {
@@ -720,6 +758,7 @@ class SphereUnionSurface:
         return SphereUnionSurfaceMesh.from_o3d(mesh, densities, surf=self)
         # return np.array(mesh.vertices), np.array(mesh.triangles)
 
+    default_point_generator = 'fibonacci'
     @classmethod
     def sphere_points(cls, centers, radii, samples, generator=None, shells=None):
         centers = np.asanyarray(centers)
@@ -730,7 +769,22 @@ class SphereUnionSurface:
         radii = radii.reshape(-1, radii.shape[-1])
 
         if generator is None:
-            generator = cls.fibonacci_sphere
+            generator = cls.default_point_generator
+        if isinstance(generator, str):
+            generator = {'method': generator}
+        if isinstance(generator, dict):
+            opts = generator.copy()
+            method = opts.pop('method')
+            if method == 'fibonacci':
+                generator = lambda n, opts=opts:nput.fibonacci_sphere(n, **opts)
+            elif method == 'lebedev':
+                generator = lambda n, opts=opts:nput.lebedev_grid(n, **opts)
+            elif method == 'halton':
+                generator = lambda n, opts=opts:halton_sphere(n, **opts)
+            elif method == 'sobol':
+                generator = lambda n, opts=opts:sobol_sphere(n, **opts)
+            else:
+                raise NotImplementedError(f"can't interpret generator {generator}")
         if nput.is_int(samples):
             base_points = generator(samples)[np.newaxis, np.newaxis]
         else:
@@ -1820,9 +1874,380 @@ class SphereUnionSurface:
         else:
             return figure
 
+class MeshCleaner:
+    def __init__(self, verts, inds, vert_map, centers=None, radii=None, max_pair_dist=None):
+        self.verts = verts
+        self.inds = inds
+        self.vert_map = vert_map
+        self.centers = centers
+        self.radii = radii
+        self.max_pair_dist = max_pair_dist
+        self._report = None
+        self._cleaned_mesh = None
+
+    @property
+    def report(self):
+        if self._report is None:
+            self._report = self.mesh_topology_report(self.verts, self.inds)
+        return self._report
+
+    def clean(self):
+        if self._cleaned_mesh is None:
+            self._cleaned_mesh = self._stitch_seams(
+                self.verts,
+                self.inds,
+                self.vert_map,
+                self.report,
+                centers=self.centers,
+                radii=self.radii,
+                max_pair_dist=self.max_pair_dist
+            )
+        return self._cleaned_mesh
+
+    @classmethod
+    def mesh_topology_report(cls, verts, faces):
+        """
+        Diagnose a triangle mesh (as produced by `union_of_spheres_mesh`) for
+        topological defects: open boundary edges (holes), non-manifold edges,
+        and non-manifold ("bowtie") vertices.
+
+        The core idea: in a closed, manifold triangle mesh every undirected
+        edge is shared by *exactly* two triangles. Count how many triangles
+        use each edge and:
+          - count == 1  -> a boundary edge; these are exactly the edges that
+                            border a hole (or, on a genuinely open surface,
+                            the outer rim)
+          - count == 2  -> a normal interior edge, fine
+          - count >= 3  -> non-manifold: three or more triangles meet at one
+                            edge. This usually means duplicate/overlapping
+                            triangles rather than a "hole" and should be
+                            cleaned up separately (it will also break the
+                            loop-walk below, since a manifold boundary loop
+                            assumes each boundary vertex touches exactly two
+                            boundary edges).
+
+        Parameters
+        ----------
+        verts : (V, 3) array
+        faces : (F, 3) int array of vertex indices
+
+        Returns
+        -------
+        report : dict with keys
+            'boundary_edges'       : (E, 2) int array, undirected edges used
+                                      by only one triangle
+            'boundary_loops'       : list of int arrays, each an ordered
+                                      vertex loop walked around one hole. If a
+                                      loop can't be closed cleanly (e.g. it
+                                      runs into a non-manifold vertex) it's
+                                      returned as an open path instead of a
+                                      closed ring -- check
+                                      `loop[0] == loop[-1]` to tell them apart.
+            'nonmanifold_edges'    : (K, 2) int array of edges shared by 3+
+                                      triangles
+            'nonmanifold_vertices' : int array of vertices where the boundary
+                                      touches itself more than once (bowties)
+            'euler_characteristic' : V - E + F. A closed, genus-0 mesh (i.e.
+                                      topologically a sphere, no holes, no
+                                      handles) has euler == 2; each hole you
+                                      leave unfilled lowers it by 1.
+            'n_holes'               : number of boundary loops found (only
+                                      meaningful if there are no non-manifold
+                                      edges/vertices confusing the count)
+            'is_watertight'         : True iff there are no boundary edges and
+                                      no non-manifold edges
+        """
+
+        #TODO: speed this up, currently just from Claude
+
+        edge_count = collections.defaultdict(int)
+        for f in faces:
+            for a, b in ((f[0], f[1]), (f[1], f[2]), (f[2], f[0])):
+                e = (a, b) if a < b else (b, a)
+                edge_count[e] += 1
+
+        boundary_edges = np.array(
+            [e for e, c in edge_count.items() if c == 1], dtype=int
+        ).reshape(-1, 2)
+        nonmanifold_edges = np.array(
+            [e for e, c in edge_count.items() if c > 2], dtype=int
+        ).reshape(-1, 2)
+
+        V, E, F = len(verts), len(edge_count), len(faces)
+        euler = V - E + F
+
+        adjacency = collections.defaultdict(list)
+        for a, b in boundary_edges:
+            adjacency[a].append(b)
+            adjacency[b].append(a)
+
+        nonmanifold_vertices = np.array(
+            [v for v, nbrs in adjacency.items() if len(nbrs) != 2], dtype=int
+        )
+
+        # walk boundary edges into ordered loops (one per hole)
+        visited = set()
+        loops = []
+        for a0, b0 in boundary_edges:
+            e0 = (a0, b0) if a0 < b0 else (b0, a0)
+            if e0 in visited:
+                continue
+            visited.add(e0)
+            loop = [a0, b0]
+            prev, cur = a0, b0
+            while True:
+                nxt = None
+                for cand in adjacency[cur]:
+                    e = (cur, cand) if cur < cand else (cand, cur)
+                    if e not in visited:
+                        nxt = cand
+                        break
+                if nxt is None:
+                    break
+                visited.add((cur, nxt) if cur < nxt else (nxt, cur))
+                loop.append(nxt)
+                prev, cur = cur, nxt
+                if cur == loop[0]:
+                    break
+            loops.append(np.array(loop))
+
+        return {
+            "boundary_edges": boundary_edges,
+            "boundary_loops": loops,
+            "nonmanifold_edges": nonmanifold_edges,
+            "nonmanifold_vertices": nonmanifold_vertices,
+            "euler_characteristic": euler,
+            "n_holes": len(loops),
+            "is_watertight": len(boundary_edges) == 0 and len(nonmanifold_edges) == 0,
+        }
+
+    @classmethod
+    def _align_and_orient(cls, verts, A, B):
+        """
+        Find the best starting offset and traversal direction for loop `B` so
+        that walking it lines up with walking loop `A`, using a short
+        lookahead to score both candidate directions. Two loops bounding the
+        same seam are typically traced in opposite directions (each patch's
+        boundary is oriented outward via its own triangles), so this often
+        picks the reversed direction -- that's expected, not a bug.
+        """
+        pa = verts[A]
+        best = None
+        for reverse in (False, True):
+            Bc = B[::-1] if reverse else B
+            pb = verts[Bc]
+            tree = scipy.spatial.cKDTree(pb)
+            _, idx0 = tree.query(pa[0])
+            look = min(5, len(A) - 1, len(Bc) - 1)
+            cost = 0.0
+            for k in range(1, look + 1):
+                cost += np.linalg.norm(pa[k % len(A)] - pb[(idx0 + k) % len(Bc)])
+            if best is None or cost < best[0]:
+                best = (cost, Bc, idx0)
+
+        _, Bc, idx0 = best
+        Bc = np.roll(Bc, -idx0)
+        return A, Bc
+
+    @classmethod
+    def _zipper_ring(cls, verts, A, B):
+        """
+        Bridge two aligned, closed vertex loops with a ring of nA + nB
+        triangles, at each step advancing whichever loop yields the shorter
+        connecting edge. Standard "loft between two curves" construction, used
+        here as a closed ring instead of an open strip.
+        """
+        nA, nB = len(A), len(B)
+        i = j = 0
+        tris = []
+        while i < nA or j < nB:
+            a_cur, a_next = A[i % nA], A[(i + 1) % nA]
+            b_cur, b_next = B[j % nB], B[(j + 1) % nB]
+            if j >= nB:
+                tris.append((a_cur, a_next, b_cur))
+                i += 1
+            elif i >= nA:
+                tris.append((a_cur, b_cur, b_next))
+                j += 1
+            else:
+                d1 = np.linalg.norm(verts[a_next] - verts[b_cur])
+                d2 = np.linalg.norm(verts[a_cur] - verts[b_next])
+                if d1 <= d2:
+                    tris.append((a_cur, a_next, b_cur))
+                    i += 1
+                else:
+                    tris.append((a_cur, b_cur, b_next))
+                    j += 1
+        return tris
+
+    @classmethod
+    def _stitch_pair(cls, verts, loopA, loopB):
+        A = np.asarray(loopA[:-1])
+        B = np.asarray(loopB[:-1])
+        A, B = cls._align_and_orient(verts, A, B)
+        return cls._zipper_ring(verts, A, B)
+
+    @classmethod
+    def _cap_loop(cls, verts, owner, loop, new_vertex_id):
+        """
+        Close a single, unpaired boundary loop with a triangle fan from its
+        centroid. Robust for the small, roughly-circular leftover holes this
+        is meant for; not guaranteed valid for highly non-convex loops (a full
+        ear-clipping triangulation would be needed there, but isolated holes
+        of that shape shouldn't arise from this grid construction).
+        """
+        ids = np.asarray(loop[:-1])
+        pts = verts[ids]
+        centroid = pts.mean(axis=0)
+        n = len(ids)
+        tris = [(int(ids[k]), int(ids[(k + 1) % n]), new_vertex_id) for k in range(n)]
+        cap_owner = int(owner[ids[0]]) if len(ids) else -1
+        return centroid, cap_owner, tris
+
+    @classmethod
+    def _fix_orientation(cls, verts, faces, centers, radii):
+        """
+        Flip any new triangle whose winding points inward relative to its
+        nearest sphere center. Cheap and reliable here because the surface is
+        always close to spherical locally, even right at a seam.
+        """
+        tree = scipy.spatial.cKDTree(centers)
+        tri_pts = verts[faces]
+        centroids = tri_pts.mean(axis=1)
+        normals = np.cross(tri_pts[:, 1] - tri_pts[:, 0], tri_pts[:, 2] - tri_pts[:, 0])
+        _, nearest = tree.query(centroids)
+        outward = centroids - centers[nearest]
+        flip = np.einsum("ij,ij->i", normals, outward) < 0
+        faces = faces.copy()
+        faces[flip] = faces[flip][:, [0, 2, 1]]
+        return faces
+
+    @classmethod
+    def _stitch_seams(cls, verts, faces, owner, report, centers=None, radii=None,
+                     max_pair_dist=None):
+        """
+        Use the boundary loops from `mesh_topology_report` to close a mesh's
+        remaining holes, distinguishing two different situations:
+
+          * Seam loops -- a "hole" that is really the same physical
+            intersection curve traced twice, once by each of two neighboring
+            spheres' patches, that fell just outside `weld_tol` and so wasn't
+            merged by `_weld_vertices`. These are matched up by proximity and
+            zipped together with a ring of new triangles connecting
+            corresponding points on the two loops. Capping either loop alone
+            would leave a double-layered sliver instead of one continuous
+            surface, so paired loops are always zipped, never capped.
+          * Isolated loops -- no nearby partner found (a true pinhole, or a
+            seam whose other side failed to form at all, e.g. from an
+            unusually coarse grid). These get a simple triangle-fan cap from
+            their centroid instead.
+
+        Parameters
+        ----------
+        verts, faces, w, owner : mesh arrays, as returned by
+            `union_of_spheres_mesh`.
+        report : dict, the output of `mesh_topology_report(verts, faces)` run
+            on those same arrays. Only cleanly-closed loops
+            (`loop[0] == loop[-1]`) are touched; a loop that didn't close
+            (it ran into a non-manifold vertex) is left alone -- resolve
+            `report["nonmanifold_vertices"]` first, then re-run the topology
+            report and this function.
+        centers, radii : optional sphere arrays. If given, every new triangle
+            is checked against the outward direction from its nearest sphere
+            center and flipped if it points inward.
+        max_pair_dist : float or None. Two loops are only considered a
+            candidate seam pair if their centroids are within this distance.
+            Defaults to 4x the longest existing boundary edge -- generous
+            enough to catch true seam partners without pairing unrelated holes
+            on opposite sides of the mesh.
+
+        Returns
+        -------
+        verts, faces, owner : updated arrays with stitching/cap triangles
+            (and, for isolated-loop caps, one new centroid vertex per capped
+            loop) appended. Run `mesh_topology_report` again on the result to
+            confirm `is_watertight` and check for any loops left unresolved.
+        """
+        loops = [np.asarray(l) for l in report["boundary_loops"] if len(l) > 1 and l[0] == l[-1]]
+        if not loops:
+            return verts, faces, owner
+
+        centroids = np.array([verts[l[:-1]].mean(axis=0) for l in loops])
+        n = len(loops)
+
+        if max_pair_dist is None:
+            be = report["boundary_edges"]
+            if len(be):
+                max_pair_dist = 4.0 * np.linalg.norm(
+                    verts[be[:, 0]] - verts[be[:, 1]], axis=1
+                ).max()
+            else:
+                max_pair_dist = np.inf
+
+        cand = []
+        for a in range(n):
+            for b in range(a + 1, n):
+                d = np.linalg.norm(centroids[a] - centroids[b])
+                if d <= max_pair_dist:
+                    cand.append((d, a, b))
+        cand.sort(key=lambda t: t[0])
+
+        paired = {}
+        used = set()
+        for d, a, b in cand:
+            if a in used or b in used:
+                continue
+            paired[a] = b
+            paired[b] = a
+            used.add(a)
+            used.add(b)
+
+        new_faces = []
+        new_verts = []
+        new_owner = []
+        offset = len(verts)
+        handled = set()
+
+        subown = owner[:, 0]
+
+        for a in range(n):
+            if a in handled:
+                continue
+            if a in paired:
+                b = paired[a]
+                handled.add(a)
+                handled.add(b)
+                new_faces.extend(cls._stitch_pair(verts, loops[a], loops[b]))
+            else:
+                handled.add(a)
+                centroid, cap_owner, tris = cls._cap_loop(verts, subown, loops[a], offset)
+                new_verts.append(centroid)
+                new_owner.append(cap_owner)
+                new_faces.extend(tris)
+                offset += 1
+
+        if new_verts:
+            verts = np.vstack([verts, np.array(new_verts)])
+            new_owner = np.array(new_owner, dtype=int)
+            new_owner = np.broadcast_to(
+                new_owner[..., np.newaxis],
+                (len(new_owner), owner.shape[-1])
+            )
+            owner = np.concatenate([owner, new_owner], axis=0)
+
+        new_faces = np.array(new_faces, dtype=int).reshape(-1, 3)
+
+        if centers is not None and radii is not None and len(new_faces):
+            new_faces = cls._fix_orientation(verts, new_faces, np.asarray(centers), np.asarray(radii))
+
+        faces = np.vstack([faces, new_faces]) if len(new_faces) else faces
+        return verts, faces, owner
+
+
+
 class SphereUnionSurfaceMesh:
     def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None,
-                 vertex_normals=None):
+                 vertex_normals=None, centers=None, radii=None):
         self.surf = surf
         self.verts = verts
         self.inds = inds
@@ -1831,6 +2256,8 @@ class SphereUnionSurfaceMesh:
         self.tri_map = tri_map
         self._normals = normals
         self.vertex_normals = vertex_normals
+        self.centers = centers
+        self.radii = radii
         self._derivative_term_cache = {}
 
     def surface_area(self, return_components=False):
@@ -1988,6 +2415,7 @@ class SphereUnionSurfaceMesh:
                        vert_map=None,
                        intersection_point_mask=None,
                        occlusion_intersection_tolerance=5e-2,
+                       stitch=True,
                        **etc):
         pts = np.asanyarray(pts)
         if deduplicate_points:
@@ -2096,10 +2524,29 @@ class SphereUnionSurfaceMesh:
                 tri_map=tri_map,
                 vert_map=vert_map,
                 normals=normals,
+                centers=centers,
+                radii=radii,
                 **etc
             )
         else:
             raise NotImplementedError(f"`occlusion_type` {occlusion_type} not supported")
+
+    def stitch(self):
+        cleaner = MeshCleaner(
+            self.verts,
+            self.inds,
+            vert_map=self.vert_map,
+            centers=self.centers,
+            radii=self.radii
+        )
+        verts, inds, vert_map = cleaner.clean()
+        return type(self)(
+            verts,
+            inds,
+            vert_map=vert_map,
+            centers=self.centers,
+            radii=self.radii
+        )
 
 
     @classmethod
