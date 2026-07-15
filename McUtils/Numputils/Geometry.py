@@ -19,6 +19,7 @@ from . import TensorDerivatives as td
 from . import Misc as misc
 from . import TransformationMatrices as tmats
 from .Options import Options
+from .Lebedev import lebedev_grid, lebedev_rule
 
 __all__ = [
     "triangle_convert",
@@ -74,7 +75,11 @@ __all__ = [
     "check_bbox_intersections",
     "check_interval_overlaps",
     "check_line_intersection",
-    "check_segment_intersection"
+    "check_segment_intersection",
+    "uv_mapping",
+    "fibonacci_sphere",
+    "lebedev_grid",
+    "lebedev_rule"
 ]
 
 
@@ -5810,13 +5815,50 @@ def check_triangle_intersection(tris1, tris2,
 
     return full_mask
 
+def fibonacci_sphere(samples):
+    phi = np.pi * (np.sqrt(5.) - 1.)  # golden angle in radians
+    samps = np.arange(samples)
+    y = 1 - (samps / float(samples - 1)) * 2  # y goes from 1 to -1
+    radius = np.sqrt(1 - y * y)  # radius at y
+    theta = phi * samps  # golden angle increment
+    x = np.cos(theta) * radius
+    z = np.sin(theta) * radius
+
+    return np.array([x, y, z]).T
 
 
+def uv_mapping(uv):
+    """
+    Map points on [0,1]^2 onto the unit sphere S^2 via the cylindrical
+    equal-area (Lambert / "hat-box") projection:
 
+        z   = 2v - 1
+        phi = 2*pi*u
+        x,y = sqrt(1-z^2)*cos(phi), sqrt(1-z^2)*sin(phi)
 
+    By Archimedes' hat-box theorem, orthogonal projection of the sphere
+    onto its circumscribing cylinder is area-preserving, so this map is
+    the inverse of that projection: it sends the *uniform* measure on the
+    square to the *uniform* (surface-area) measure on the sphere. That
+    means a low-discrepancy sequence on the square pushes forward to a
+    low-discrepancy-ish sample on the sphere -- no low-discrepancy
+    structure is invented in 3D, but no uniformity is lost in translation
+    either, since z is uniform in [-1,1] and phi uniform in [0,2*pi)
+    are exactly the two conditions that characterize the uniform
+    distribution on S^2.
 
+    Parameters
+    ----------
+    uv : (N,2) array, both columns in [0,1)
 
-
-
+    Returns
+    -------
+    (N,3) array of points on the unit sphere
+    """
+    u, v = uv[..., 0], uv[..., 1]
+    z = 2.0 * v - 1.0
+    phi = 2.0 * np.pi * u
+    r = np.sqrt(np.clip(1.0 - z * z, 0.0, None))
+    return np.moveaxis(np.array([r * np.cos(phi), r * np.sin(phi), z]), 0, -1)
 
 
