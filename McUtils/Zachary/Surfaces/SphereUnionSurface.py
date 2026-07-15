@@ -853,17 +853,26 @@ class SphereUnionSurface:
             np.max(self.centers + self.radii[:, np.newaxis], axis=0)
             ])
 
-    def ses_scalar_field(self, grid_pts, atomic_centers, radii, probe_radius):
+    def ses_scalar_field(self, grid_pts, centers, radii, probe_radius=None):
         """
         For each grid point, compute the SES scalar field:
           f(x) = max_i( R_i - ||x - c_i|| ) + probe_radius
         The SES isosurface is f(x) = probe_radius,
         equivalently: max_i(radii_i - dist_i) = 0
         """
+        if centers is None:
+            centers = self.centers
+        if radii is None:
+            radii = self.radii
+        if probe_radius is None:
+            probe_radius = 0
+        grid_pts = np.asanyarray(grid_pts)
+        base_shape = grid_pts.shape[:-1]
+        grid_pts = grid_pts.reshape((-1, 3))
         inflated_R = radii + probe_radius
-        diff = grid_pts[:, None, :] - atomic_centers[None, :, :]  # (G, n, 3)
+        diff = grid_pts[:, None, :] - centers[None, :, :]  # (G, n, 3)
         dist = np.linalg.norm(diff, axis=-1)  # (G, n)
-        return (inflated_R[None, :] - dist).max(axis=1)  # (G,)
+        return (inflated_R[None, :] - dist).max(axis=1).reshape(base_shape)  # (G,)
 
     def get_surface_function(self, probe_radius=None, distance_function=None):
         centers = np.asanyarray(self.centers)
@@ -929,16 +938,20 @@ class SphereUnionSurface:
                 bbox[0] -= probe_radius
                 bbox[1] += probe_radius
             bbox = bbox * bbox_scaling
+            (mx, my, mz), (MX, MY, MZ) = bbox
             if nput.is_int(grid_samples):
                 grid_samples = [grid_samples] * 3
             meshes = np.meshgrid(*[np.linspace(bm, bM, s) for bm,bM,s in zip(*bbox, grid_samples)], indexing='ij')
+            # values = self.ses_scalar_field(np.moveaxis(meshes, 0, -1))
             values = surface_function(np.moveaxis(meshes, 0, -1))
+
+            nx, ny, nz = np.array(grid_samples) - 1
             def unembed_points(points):
                 x,y,z = np.moveaxis(points, 0, -1)
                 return np.moveaxis([
-                                   nput.vec_rescale(x, [bbox[0][0], bbox[1][0]], [0, grid_samples[0]]),
-                                   nput.vec_rescale(y, [bbox[0][1], bbox[1][1]], [0, grid_samples[1]]),
-                                   nput.vec_rescale(z, [bbox[0][2], bbox[1][2]], [0, grid_samples[2]]),
+                                   nput.vec_rescale(x, [mx, MX], [0, nx]),
+                                   nput.vec_rescale(y, [my, MY], [0, ny]),
+                                   nput.vec_rescale(z, [mz, MZ], [0, nz]),
                     ], 0, -1)
             return marching_cubes(values,
                                   1,
