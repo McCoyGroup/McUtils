@@ -2212,7 +2212,7 @@ class HTML(XMLBase):
     class Head(TagElement): tag= "head"
     class Header(TagElement): tag= "header"
     class Hr(TagElement): tag= "hr"
-    class Html(TagElement): tag = "Html"
+    class Html(TagElement): tag = "html"
     i = Italic
     class Iframe(TagElement): tag= "iframe"
     Img = Image

@@ -4,7 +4,7 @@ etc.
 """
 from __future__ import annotations
 
-import itertools
+import string
 import numpy as np
 from .. import Devutils as dev
 
@@ -112,10 +112,18 @@ class TableFormatter:
             # ]
 
         return headers, data, header_spans
+    @staticmethod
+    def _has_template_variables(format_string: str):
+        return any(
+            field_name is not None
+            for _, field_name, _, _ in string.Formatter().parse(format_string)
+        )
     @classmethod
     def custom_formatter(cls, f):
         if isinstance(f, str):
-            return "{:" + f + "}" if not f.startswith("{") else f
+            if not cls._has_template_variables(f):
+                f = "{:" + f + "}"
+            return f
         elif hasattr(f, 'format'):
             return f
         elif isinstance(f, (list, tuple)):
@@ -154,7 +162,7 @@ class TableFormatter:
         else:
             try:
                 return fmt.format(data)
-            except ValueError:
+            except (IndexError, ValueError):
                 return str(data)
 
     @classmethod
@@ -271,7 +279,8 @@ class TableFormatter:
                separator=None,
                separator_lines=None,
                content_join=None,
-               row_padding=None
+               row_padding=None,
+               strict=False
                ):
         if len(table_data) == 0:
             headers = None
@@ -318,13 +327,13 @@ class TableFormatter:
             header_format = self.resolve_formatters(len(headers[0]), self.prep_formatters(header_format))
 
         if headers is not None:
-            header_columns = self.format_tablular_data_columns(headers, header_format)
+            header_columns = self.format_tablular_data_columns(headers, header_format, strict=strict)
         else:
             header_columns = None
 
         if row_padding is None: row_padding = self.row_padding
         if row_padding is None: row_padding = self.default_row_padding
-        data_columns = self.format_tablular_data_columns(table_data, column_formats, row_padding)
+        data_columns = self.format_tablular_data_columns(table_data, column_formats, row_padding, strict=strict)
 
         if column_join is None: column_join = self.column_join
         if column_join is None:

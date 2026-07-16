@@ -754,7 +754,10 @@ class SlurmInterface:
 
 def patch_pinfo():
     from IPython.core.oinspect import Inspector
-    from IPython.core.display import display
+    try:
+        from IPython.core.display import display
+    except ImportError:
+        from IPython.display import display
 
     if not hasattr(Inspector, '_og_pinfo'):
         Inspector._og_pinfo = Inspector.pinfo
