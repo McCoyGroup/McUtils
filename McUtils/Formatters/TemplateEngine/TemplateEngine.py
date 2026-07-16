@@ -890,22 +890,11 @@ class TemplateHandler(ObjectHandler):
         :return:
         :rtype:
         """
-        old_check = TemplateHandler.check_should_write
-
-        def _check_should_write(self):
-            base = self.identifier.split(".", 1)[0]
-            return base not in self.blacklist_packages
-
-        TemplateHandler.check_should_write = _check_should_write
         base = self.identifier.split(".", 1)[0]
         stdlib = base == 'builtins'
         if not stdlib:
-            try:
-                loc = sys.modules[base].__file__
-            except KeyError:
-                stdlib = False
-            else:
-                stdlib = loc.startswith(sys.prefix) and 'site-packages' not in loc
+            if hasattr(sys, "stdlib_module_names"):
+                stdlib = base in sys.stdlib_module_names
         return not stdlib and base not in self.blacklist_packages
 
 class TemplateResourceExtractor(ResourceLocator):
