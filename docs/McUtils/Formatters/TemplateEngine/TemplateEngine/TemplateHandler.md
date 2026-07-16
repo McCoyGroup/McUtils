@@ -143,14 +143,18 @@ Formats the documentation Markdown from the supplied template
     >
 
 
-<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler.check_should_write.<locals>._check_should_write" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler.check_should_write" class="docs-object-method">&nbsp;</a> 
 ```python
 check_should_write(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler/check_should_write/<locals>.py#L895)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler/check_should_write/<locals>.py#L895?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L886)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateHandler.py#L886?message=Update%20Docs)]
 </div>
+Determines whether the object really actually should be
+documented (quite permissive)
+  - `:returns`: `_`
+    >
  </div>
 </div>
 
