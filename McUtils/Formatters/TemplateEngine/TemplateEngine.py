@@ -854,7 +854,35 @@ class TemplateHandler(ObjectHandler):
             if not write:
                 return ""
 
-    blacklist_packages = {'numpy', 'scipy', 'matplotlib'} #TODO: more sophisticated blacklisting
+    blacklist_packages = {
+        'numpy', 'scipy', 'matplotlib',
+        # top 100 packages on PyPI
+        'aiobotocore', 'aiohappyeyeballs', 'aiohttp',
+        'aiosignal', 'annotated_doc', 'annotated_types', 'anyio',
+        'attr', 'attrs', 'boto3', 'botocore',
+        'bs4', 'certifi', 'cffi', 'charset_normalizer',
+        'click', 'colorama', 'cryptography', 'dateutil',
+        'dotenv', 'fastapi', 'filelock', 'frozenlist',
+        'fsspec', 'google', 'greenlet', 'grpc',
+        'grpc_status', 'h11', 'hatchling', 'httpcore',
+        'httpx', 'huggingface_hub', 'idna', 'importlib_metadata',
+        'iniconfig', 'jinja2', 'jmespath', 'jsonschema',
+        'jsonschema_specifications', 'jwt', 'litellm', 'markdown_it',
+        'markupsafe', 'mdurl', 'multidict',
+        'opentelemetry', 'packaging', 'pandas',
+        'pathspec', 'PIL', 'pip', 'platformdirs', 'pluggy',
+        'propcache', 'pyarrow', 'pyasn1', 'pyasn1_modules',
+        'pycparser', 'pydantic', 'pydantic_core', 'pygments',
+        'pyparsing', 'pytest', 'pytz', 'referencing',
+        'requests', 'rich', 'rpds', 's3fs',
+        's3transfer', 'scikit-image', 'scikit-image', 'setuptools',
+        'sglang', 'shellingham', 'six', 'sniffio',
+        'sqlalchemy', 'starlette', 'tenacity', 'tqdm',
+        'trove_classifiers', 'typer', 'typing_extensions', 'typing_inspection',
+        'tzdata', 'urllib3', 'uvicorn', 'virtualenv',
+        'websockets', 'wheel', 'wrapt', 'yaml',
+        'yarl', 'zipp'
+    } #TODO: more sophisticated blacklisting
     def check_should_write(self):
         """
         Determines whether the object really actually should be
@@ -862,6 +890,13 @@ class TemplateHandler(ObjectHandler):
         :return:
         :rtype:
         """
+        old_check = TemplateHandler.check_should_write
+
+        def _check_should_write(self):
+            base = self.identifier.split(".", 1)[0]
+            return base not in self.blacklist_packages
+
+        TemplateHandler.check_should_write = _check_should_write
         base = self.identifier.split(".", 1)[0]
         stdlib = base == 'builtins'
         if not stdlib:
