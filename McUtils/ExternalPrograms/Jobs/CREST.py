@@ -13,6 +13,14 @@ class CRESTOptionsBlock(OptionsBlock):
     _json = None
     @classmethod
     def load_json(cls):
+        """
+        **LLM Docstring**
+
+        Load (and cache) the CREST options specification from the bundled JSON file.
+
+        :return: the options specification
+        :rtype: dict
+        """
         if cls._json is None:
             with open(cls.job_params_json) as opts_json:
                 cls._json = json.load(opts_json)
@@ -20,12 +28,29 @@ class CRESTOptionsBlock(OptionsBlock):
 
     @classmethod
     def get_props(cls):
+        """
+        **LLM Docstring**
+
+        Return the accepted option names for this block, read from its section of the
+        options JSON.
+
+        :return: the accepted property names
+        :rtype: list
+        """
         return list(cls.load_json()[cls.opts_key])
 
 class CRESTProcessBlock(CRESTOptionsBlock):
     opts_key = "Process"
 
     def format_export(self):
+        """
+        **LLM Docstring**
+
+        Format the process/environment options as shell `export` lines.
+
+        :return: the formatted export commands, or `None` if there are none
+        :rtype: str | None
+        """
         if len(self.opts) == 0:
             return None
 
@@ -36,6 +61,15 @@ class CRESTProcessBlock(CRESTOptionsBlock):
         )
 
     def get_params(self):
+        """
+        **LLM Docstring**
+
+        Return the `command_line` parameter carrying the `export` commands (or an empty
+        dict).
+
+        :return: the process template parameters
+        :rtype: dict
+        """
         cmd = self.format_export()
         if cmd is None:
             return {}
@@ -50,10 +84,27 @@ class CRESTCommandLineBlock(CRESTOptionsBlock):
     __aliases__ = {'chrg':'charge'}
     @classmethod
     def get_props(cls):
+        """
+        **LLM Docstring**
+
+        Return the accepted command-line options, adding the `chrg` (charge) flag.
+
+        :return: the accepted property names
+        :rtype: list
+        """
         return ["chrg"] + super().get_props()
 
     argument_spacer = "\\ \n" + " " * 14
     def format_command_line(self):
+        """
+        **LLM Docstring**
+
+        Format the CREST command-line flags (`--flag` / `--flag value`), inlining a few
+        flags but line-wrapping longer argument lists.
+
+        :return: the formatted command-line arguments, or `None` if there are none
+        :rtype: str | None
+        """
         if len(self.opts) == 0:
             return None
         elif len(self.opts) < 3:
@@ -70,6 +121,15 @@ class CRESTCommandLineBlock(CRESTOptionsBlock):
             )
 
     def get_params(self):
+        """
+        **LLM Docstring**
+
+        Return the `command_line` parameter carrying the formatted CREST flags (or an
+        empty dict).
+
+        :return: the command-line template parameters
+        :rtype: dict
+        """
         cmd = self.format_command_line()
         if cmd is None:
             return {}
@@ -89,11 +149,29 @@ class CRESTSystemBlock(SystemBlock):
     fmt_key = ""
 
     def format_coordinate_block(self):
+        """
+        **LLM Docstring**
+
+        Format the molecule as an XYZ block (atom count, blank comment line, then the
+        Cartesian coordinates).
+
+        :return: the formatted XYZ block
+        :rtype: str
+        """
         atoms = self.opts.get("atoms")
         carts = self.opts.get("cartesians")
         return f"{len(atoms)}\n\n" + self.fmt_carts(atoms, carts)
 
     def get_params(self):
+        """
+        **LLM Docstring**
+
+        Return the molecule-specification template parameters (the XYZ coordinate
+        block).
+
+        :return: the system template parameters
+        :rtype: dict
+        """
         base_opts = {}
         if len(self.opts) > 0:
             base_opts[self.fmt_key + "system"] = self.format_coordinate_block()
@@ -109,6 +187,21 @@ class CRESTJob(ExternalProgramJob):
     ]
 
     def __init__(self, *strs, path='crest', input_file='geom.xyz', log_file='confgen.log', **opts):
+        """
+        **LLM Docstring**
+
+        Build a CREST job, treating bare string arguments as boolean command-line flags
+        and wiring up the CREST executable, input geometry, and log-file paths.
+
+        :param strs: bare command-line flags
+        :param path: path to the CREST executable
+        :type path: str
+        :param input_file: the input geometry file name
+        :type input_file: str
+        :param log_file: the log file name
+        :type log_file: str
+        :param opts: the job options
+        """
         # for o in strs:
         #     rt, o = OrcaKeywordsBlock.check_canon(o)
         #     if rt:
@@ -128,10 +221,26 @@ class CRESTJob(ExternalProgramJob):
 
     @classmethod
     def get_block_types(cls):
+        """
+        **LLM Docstring**
+
+        Return the ordered CREST block types.
+
+        :return: the block types
+        :rtype: list
+        """
         return cls.blocks
 
     @classmethod
     def load_template(cls):
+        """
+        **LLM Docstring**
+
+        Return the path to the CREST job (shell-script) template.
+
+        :return: the template path
+        :rtype: str
+        """
         return cls.job_template
 
     # non_blank_line_terminated = {'link0', 'level_of_theory'}

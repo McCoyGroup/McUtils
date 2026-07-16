@@ -51,6 +51,35 @@ class SBatchJob:
                  environment=None,
                  **opts
                  ):
+        """
+        **LLM Docstring**
+
+        Build a SLURM batch job from the common `#SBATCH` options plus any additional
+        ones, the job steps, and optional environment/precall hooks.
+
+        :param description: a human-readable description echoed into the script
+        :type description: str | None
+        :param job_name: the SLURM job name
+        :type job_name: str | None
+        :param account: the SLURM account
+        :type account: str | None
+        :param partition: the SLURM partition
+        :type partition: str | None
+        :param mem: the memory request
+        :param nodes: the node count
+        :param ntasks_per_node: tasks per node
+        :param chdir: the working directory
+        :type chdir: str | None
+        :param output: the output-file pattern
+        :type output: str | None
+        :param steps: the job steps (shell commands)
+        :type steps: tuple | str
+        :param precall: a callable run before writing the file
+        :type precall: Callable | None
+        :param environment: environment variables to export
+        :type environment: dict | None
+        :param opts: additional `#SBATCH` options
+        """
         self.description = description
         self.steps = steps
         self.precall = precall
@@ -173,6 +202,22 @@ class SBatchJob:
         )
 
     def write(self, file, output_dir=None, mode='w+', **kwargs):
+        """
+        **LLM Docstring**
+
+        Write the formatted SLURM script to a file, optionally within a working
+        directory (into which any `precall` hook is run).
+
+        :param file: an open stream or a file path
+        :type file: str | IO
+        :param output_dir: directory to write into (split from `file` if omitted)
+        :type output_dir: str | None
+        :param mode: the file mode when a path is given
+        :type mode: str
+        :param kwargs: extra arguments for `open`
+        :return: the path (or stream) written
+        :rtype: str | IO
+        """
         if isinstance(file, str):
             if output_dir is None:
                 output_dir, file = os.path.split(file)
@@ -201,6 +246,29 @@ class SBatchJob:
             text=True,
             capture_output=True,
             *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Write the SLURM script and submit it with `sbatch` (via `subprocess.run`),
+        optionally deleting the script afterward.
+
+        :param file: the script file name (a temporary name is generated if omitted)
+        :type file: str | None
+        :param output_dir: directory to write the script into
+        :type output_dir: str | None
+        :param sbatch_function: the submission command
+        :type sbatch_function: str
+        :param delete: remove the script file after submission
+        :type delete: bool
+        :param text: run the subprocess in text mode
+        :type text: bool
+        :param capture_output: capture the subprocess output
+        :type capture_output: bool
+        :param args: extra positional arguments passed to `sbatch`
+        :param kwargs: extra flags passed to `sbatch`
+        :return: the completed-process result
+        :rtype: subprocess.CompletedProcess
+        """
         if file is None:
             id = str(uuid.uuid4())
             file = f"sbatch_{id}"

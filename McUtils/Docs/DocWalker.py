@@ -1067,8 +1067,11 @@ class DocWalker(TemplateWalker):
             **kwargs
         )
 
-    def visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
-        print('documenting root package', o)
+    def visit_root(self, o, tests_directory=None, examples_directory=None, verbose=None, **kwargs):
+        if verbose is None:
+            verbose = self.verbose
+        if verbose:
+            print('documenting root package', o)
         if tests_directory is None and isinstance(o, dict):
             tests_directory = o.get('tests_root', None)
         old_tl = self.tests_loader
@@ -1091,7 +1094,7 @@ class DocWalker(TemplateWalker):
         return jdoc(cls)
 
 
-def jdoc(obj, max_depth=1, engine=None):
+def jdoc(obj, max_depth=1, engine=None, verbose=False, **etc):
     """
     provides documentation in a Jupyter-friendly environment
 
@@ -1131,5 +1134,7 @@ def jdoc(obj, max_depth=1, engine=None):
     """
     return DocWalker(
         description="",
-        engine=engine
+        engine=engine,
+        verbose=verbose,
+        **etc
     ).write([obj], max_depth=max_depth)
