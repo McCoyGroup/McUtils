@@ -1,14 +1,22 @@
 # <a id="McUtils.Numputils.TensorDerivatives.add_expansions">add_expansions</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L391)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L391?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L742)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L742?message=Update%20Docs)]
 </div>
 
 ```python
 add_expansions(*expansions, order=None): 
 ```
+**LLM Docstring**
 
-
+Add any number of expansions together term by term, zero-padding shorter
+expansions up to the requested order.
+  - `expansions`: `list`
+    > the expansions to add
+  - `order`: `int | None`
+    > the order to pad to (inferred from the longest input if omitted)
+  - `:returns`: `list`
+    > the summed expansion
 
 
 
@@ -59,7 +67,7 @@ add_expansions(*expansions, order=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/add_expansions.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/add_expansions.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L391?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L742?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

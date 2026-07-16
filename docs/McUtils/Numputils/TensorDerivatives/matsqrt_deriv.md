@@ -1,14 +1,25 @@
 # <a id="McUtils.Numputils.TensorDerivatives.matsqrt_deriv">matsqrt_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L650)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L650?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1182?message=Update%20Docs)]
 </div>
 
 ```python
 matsqrt_deriv(A_expansion, order): 
 ```
+**LLM Docstring**
 
+Compute the derivative expansion of the (symmetric) matrix square root.
 
+The leading term is the eigen-based square root of `A[0]`; each higher order is
+obtained by solving the Sylvester equation `B X + X B = dA` with `sylv_derivs`,
+reusing the cached Kronecker-sum/inverse expansions.
+  - `A_expansion`: `list`
+    > expansion of the matrix
+  - `order`: `int`
+    > the derivative order
+  - `:returns`: `list`
+    > the matrix-square-root expansion
 
 
 
@@ -59,7 +70,7 @@ matsqrt_deriv(A_expansion, order):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/matsqrt_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/matsqrt_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L650?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1182?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

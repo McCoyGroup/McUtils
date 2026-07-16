@@ -1,14 +1,23 @@
 # <a id="McUtils.Numputils.TensorDerivatives.scalarpow_deriv">scalarpow_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L847)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L847?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1521)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1521?message=Update%20Docs)]
 </div>
 
 ```python
 scalarpow_deriv(scalar_expansion, exp, order): 
 ```
+**LLM Docstring**
 
-
+Compute the derivative expansion of `scalar ** exp` for a scalar expansion.
+  - `scalar_expansion`: `list`
+    > expansion of the scalar
+  - `exp`: `float`
+    > the exponent
+  - `order`: `int | list[int]`
+    > the derivative order(s)
+  - `:returns`: `list`
+    > the power expansion
 
 
 
@@ -59,7 +68,7 @@ scalarpow_deriv(scalar_expansion, exp, order):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/scalarpow_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/scalarpow_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L847?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1521?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

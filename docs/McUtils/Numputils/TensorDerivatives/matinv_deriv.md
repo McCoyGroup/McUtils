@@ -1,14 +1,26 @@
 # <a id="McUtils.Numputils.TensorDerivatives.matinv_deriv">matinv_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L669)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L669?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1217)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1217?message=Update%20Docs)]
 </div>
 
 ```python
 matinv_deriv(A_expansion, order, base_expansion=None): 
 ```
+**LLM Docstring**
 
+Compute the derivative expansion of the matrix inverse.
 
+The leading term is `inv(A[0])`; each higher order follows from the identity
+`d(A⁻¹) = -A⁻¹ (dA) A⁻¹`, evaluated through `tensorops_deriv`.
+  - `A_expansion`: `list`
+    > expansion of the matrix
+  - `order`: `int`
+    > the derivative order
+  - `base_expansion`: `list | None`
+    > a precomputed inverse expansion to extend
+  - `:returns`: `list`
+    > the matrix-inverse expansion
 
 
 
@@ -59,7 +71,7 @@ matinv_deriv(A_expansion, order, base_expansion=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/matinv_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/matinv_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L669?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1217?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

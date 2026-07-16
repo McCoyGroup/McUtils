@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.QuasiNewtonStepFinder">QuasiNewtonStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1249)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1249?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2053)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2053?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,23 @@ supports_hessian: bool
 __init__(self, func, jacobian, approximation_type='bfgs', logger=None, **generator_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1252)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1252?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2056)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2056?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize a quasi-Newton step finder, selecting the Hessian-approximation
+scheme by name.
+  - `func`: `Callable`
+    > the objective function
+  - `jacobian`: `Callable`
+    > the gradient function
+  - `approximation_type`: `str`
+    > the approximator name (e.g. `'bfgs'`, `'sr1'`)
+  - `logger`: `object | None`
+    > optional logger
+  - `generator_opts`: `Any`
+    > extra options for the approximator
 
 
 <a id="McUtils.Numputils.Optimization.QuasiNewtonStepFinder.get_hessian_approximations" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +51,14 @@ __init__(self, func, jacobian, approximation_type='bfgs', logger=None, **generat
 get_hessian_approximations(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1254)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1254?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2074)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2074?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the mapping from approximation name to Hessian-approximator class.
+  - `:returns`: `dict`
+    > the name-to-class mapping
 
 
 <a id="McUtils.Numputils.Optimization.QuasiNewtonStepFinder.hessian_approximations" class="docs-object-method">&nbsp;</a> 
@@ -48,9 +67,14 @@ get_hessian_approximations(cls):
 hessian_approximations(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L1266)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L1266?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L2094)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L2094?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The mapping from approximation name to Hessian-approximator class.
+  - `:returns`: `dict`
+    > the name-to-class mapping
 
 
 <a id="McUtils.Numputils.Optimization.QuasiNewtonStepFinder.__call__" class="docs-object-method">&nbsp;</a> 
@@ -58,9 +82,24 @@ hessian_approximations(self):
 __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L1270)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L1270?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L2106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.py#L2106?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Produce a quasi-Newton step for the active members via the chosen approximator.
+  - `guess`: `np.ndarray`
+    > current parameters
+  - `mask`: `np.ndarray | tuple`
+    > active-member indices (or chain-minimizer tuple)
+  - `return_vals`: `bool`
+    > unsupported
+  - `gradient_modifer`: `Callable | None`
+    > optional gradient transformation
+  - `projector`: `np.ndarray | None`
+    > optional projector applied to the step
+  - `:returns`: `tuple`
+    > `(step, gradient)`
  </div>
 </div>
 
@@ -114,7 +153,7 @@ __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/QuasiNewtonStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1249?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2053?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

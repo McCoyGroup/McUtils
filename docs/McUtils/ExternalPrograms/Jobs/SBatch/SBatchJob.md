@@ -37,6 +37,36 @@ __init__(self, description=None, job_name=None, account=None, partition=None, me
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch.py#L43)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch.py#L43?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a SLURM batch job from the common `#SBATCH` options plus any additional
+ones, the job steps, and optional environment/precall hooks.
+  - `description`: `str | None`
+    > a human-readable description echoed into the script
+  - `job_name`: `str | None`
+    > the SLURM job name
+  - `account`: `str | None`
+    > the SLURM account
+  - `partition`: `str | None`
+    > the SLURM partition
+  - `mem`: `Any`
+    > the memory request
+  - `nodes`: `Any`
+    > the node count
+  - `ntasks_per_node`: `Any`
+    > tasks per node
+  - `chdir`: `str | None`
+    > the working directory
+  - `output`: `str | None`
+    > the output-file pattern
+  - `steps`: `tuple | str`
+    > the job steps (shell commands)
+  - `precall`: `Callable | None`
+    > a callable run before writing the file
+  - `environment`: `dict | None`
+    > environment variables to export
+  - `opts`: `Any`
+    > additional `#SBATCH` options
 
 
 <a id="McUtils.ExternalPrograms.Jobs.SBatch.SBatchJob.clean_opts" class="docs-object-method">&nbsp;</a> 
@@ -44,8 +74,8 @@ __init__(self, description=None, job_name=None, account=None, partition=None, me
 clean_opts(self, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L70)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L70?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L99?message=Update%20Docs)]
 </div>
 Makes sure opt names are clean.
 Does no validation of the values sent in.
@@ -60,8 +90,8 @@ Does no validation of the values sent in.
 format_opt_block(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L119?message=Update%20Docs)]
 </div>
 Formats block of options
   - `:returns`: `_`
@@ -73,8 +103,8 @@ Formats block of options
 format(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L153)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L153?message=Update%20Docs)]
 </div>
 Formats an SBATCH file from the held options
   - `call_steps`: `Any`
@@ -88,9 +118,23 @@ Formats an SBATCH file from the held options
 write(self, file, output_dir=None, mode='w+', **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L204?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Write the formatted SLURM script to a file, optionally within a working
+directory (into which any `precall` hook is run).
+  - `file`: `str | IO`
+    > an open stream or a file path
+  - `output_dir`: `str | None`
+    > directory to write into (split from `file` if omitted)
+  - `mode`: `str`
+    > the file mode when a path is given
+  - `kwargs`: `Any`
+    > extra arguments for `open`
+  - `:returns`: `str | IO`
+    > the path (or stream) written
 
 
 <a id="McUtils.ExternalPrograms.Jobs.SBatch.SBatchJob.run" class="docs-object-method">&nbsp;</a> 
@@ -98,9 +142,31 @@ write(self, file, output_dir=None, mode='w+', **kwargs):
 run(self, file=None, output_dir=None, sbatch_function='sbatch', delete=True, text=True, capture_output=True, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L199)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L199?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L244)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/SBatch/SBatchJob.py#L244?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Write the SLURM script and submit it with `sbatch` (via `subprocess.run`),
+optionally deleting the script afterward.
+  - `file`: `str | None`
+    > the script file name (a temporary name is generated if omitted)
+  - `output_dir`: `str | None`
+    > directory to write the script into
+  - `sbatch_function`: `str`
+    > the submission command
+  - `delete`: `bool`
+    > remove the script file after submission
+  - `text`: `bool`
+    > run the subprocess in text mode
+  - `capture_output`: `bool`
+    > capture the subprocess output
+  - `args`: `Any`
+    > extra positional arguments passed to `sbatch`
+  - `kwargs`: `Any`
+    > extra flags passed to `sbatch`
+  - `:returns`: `subprocess.CompletedProcess`
+    > the completed-process result
  </div>
 </div>
 

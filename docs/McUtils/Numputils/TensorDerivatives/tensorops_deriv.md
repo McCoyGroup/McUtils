@@ -1,14 +1,28 @@
 # <a id="McUtils.Numputils.TensorDerivatives.tensorops_deriv">tensorops_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1921)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1921?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L3212)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L3212?message=Update%20Docs)]
 </div>
 
 ```python
 tensorops_deriv(*expansion_op_pairs, order, shared=None): 
 ```
+**LLM Docstring**
 
+Compute the derivative expansion of an arbitrary chain of tensor operations
+applied to several expansions.
 
+Canonicalizes the alternating `(expansion, op, expansion, ...)` arguments,
+resolves any symbolic axis specifications, and sums the multi-operand Leibniz
+terms over all partitions at each requested order.
+  - `expansion_op_pairs`: `Sequence`
+    > alternating expansions and operation specs
+  - `order`: `int | list[int]`
+    > the derivative order(s)
+  - `shared`: `int | None`
+    > number of shared leading batch axes
+  - `:returns`: `list`
+    > the chained-operation derivative expansion
 
 
 
@@ -59,7 +73,7 @@ tensorops_deriv(*expansion_op_pairs, order, shared=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/tensorops_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/tensorops_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1921?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L3212?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

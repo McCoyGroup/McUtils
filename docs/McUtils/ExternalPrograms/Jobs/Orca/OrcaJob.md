@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.Orca.OrcaJob">OrcaJob</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L313)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L313?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,21 @@ blocks: list
 __init__(self, *strs, basis_set=None, level_of_theory=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L322)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L322?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an ORCA job, treating the basis set, level of theory, and any bare string
+arguments as simple keywords.
+  - `strs`: `Any`
+    > bare simple keywords
+  - `basis_set`: `str | None`
+    > the basis set keyword
+  - `level_of_theory`: `str | None`
+    > the method keyword
+  - `opts`: `Any`
+    > the job options
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Orca.OrcaJob.get_block_types" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +50,14 @@ __init__(self, *strs, basis_set=None, level_of_theory=None, **opts):
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L199)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L199?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L357)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L357?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the ordered ORCA block types.
+  - `:returns`: `list`
+    > the block types
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Orca.OrcaJob.load_template" class="docs-object-method">&nbsp;</a> 
@@ -49,9 +66,14 @@ get_block_types(cls):
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L203)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L203?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L369)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L369?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the path to the ORCA job template.
+  - `:returns`: `str`
+    > the template path
  </div>
 </div>
 
@@ -105,7 +127,7 @@ load_template(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Orca/OrcaJob.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Orca/OrcaJob.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L168?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L313?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

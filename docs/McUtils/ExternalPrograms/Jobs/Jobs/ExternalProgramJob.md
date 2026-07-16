@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob">ExternalProgramJob</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L312)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L312?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L523)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L523?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,15 @@
 __init__(self, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L315)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L315?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up the job: collect its block types and template, index which option names
+belong to which block, and sort the supplied options into per-block buckets.
+  - `opts`: `Any`
+    > the job options, distributed across the blocks
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.get_block_types" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +40,14 @@ __init__(self, **opts):
 get_block_types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L324)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L324?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L543)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L543?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: return the ordered list of `OptionsBlock` types making up this job.
+  - `:returns`: `list`
+    > the block types
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.load_template" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +55,14 @@ get_block_types(self):
 load_template(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L327)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L327?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L554)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L554?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: return the top-level job template.
+  - `:returns`: `str`
+    > the job template
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.populate_blocks" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +70,17 @@ load_template(self):
 populate_blocks(self, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L331)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L331?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L566)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L566?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Route each supplied option into the first block that recognizes it, raising if
+any option matches no block.
+  - `opts`: `dict`
+    > the job options
+  - `:returns`: `list[dict]`
+    > one option dict per block (in block order)
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.get_params" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +88,15 @@ populate_blocks(self, opts):
 get_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L349)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L349?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L596)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L596?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build every block's parameters and merge them into a single template-parameter
+mapping, raising on key collisions between blocks.
+  - `:returns`: `dict`
+    > the merged template parameters
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.format" class="docs-object-method">&nbsp;</a> 
@@ -74,9 +104,15 @@ get_params(self):
 format(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L362)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L362?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L619)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L619?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the full job input file by filling the job template with the merged block
+parameters.
+  - `:returns`: `str`
+    > the formatted job text
 
 
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.write" class="docs-object-method">&nbsp;</a> 
@@ -84,9 +120,18 @@ format(self):
 write(self, file, mode='w'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L366)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L366?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L632)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L632?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Write the formatted job to a file (path or open stream).
+  - `file`: `str | IO`
+    > an open stream or a file path
+  - `mode`: `str`
+    > the file mode when a path is given
+  - `:returns`: `str | IO`
+    > the file/stream that was written
  </div>
 </div>
 
@@ -140,7 +185,7 @@ write(self, file, mode='w'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L312?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L523?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

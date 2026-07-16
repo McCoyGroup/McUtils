@@ -1,14 +1,23 @@
 # <a id="McUtils.Numputils.TensorDerivatives.scale_expansion">scale_expansion</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L383)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L383?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L720)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L720?message=Update%20Docs)]
 </div>
 
 ```python
 scale_expansion(expansion, scalar): 
 ```
+**LLM Docstring**
 
+Multiply every term of an expansion by a scalar.
 
+The `-1` and `0` cases are handled specially for efficiency.
+  - `expansion`: `list`
+    > the expansion to scale
+  - `scalar`: `float`
+    > the scaling factor
+  - `:returns`: `list`
+    > the scaled expansion
 
 
 
@@ -59,7 +68,7 @@ scale_expansion(expansion, scalar):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/scale_expansion.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/scale_expansion.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L383?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L720?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

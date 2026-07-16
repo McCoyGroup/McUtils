@@ -1,14 +1,28 @@
 # <a id="McUtils.Numputils.Optimization.peak_fit_maxiumum">peak_fit_maxiumum</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2510)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2510?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4673)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4673?message=Update%20Docs)]
 </div>
 
 ```python
 peak_fit_maxiumum(x, y, *, fit_order=2, peak_cutoff, min_nodes=3): 
 ```
+**LLM Docstring**
 
-
+Estimate the location and height of a peak by fitting a polynomial to the points
+around it (falling back to the raw argmax if the fit has no maximum).
+  - `x`: `np.ndarray`
+    > the abscissae
+  - `y`: `np.ndarray`
+    > the values
+  - `fit_order`: `int`
+    > the polynomial degree
+  - `peak_cutoff`: `float`
+    > the cutoff for selecting the fit region
+  - `min_nodes`: `int`
+    > minimum number of points in the fit region
+  - `:returns`: `tuple`
+    > `(peak_x, peak_value)`
 
 
 
@@ -59,7 +73,7 @@ peak_fit_maxiumum(x, y, *, fit_order=2, peak_cutoff, min_nodes=3):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/peak_fit_maxiumum.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/peak_fit_maxiumum.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2510?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4673?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

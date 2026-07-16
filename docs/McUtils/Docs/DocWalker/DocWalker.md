@@ -99,7 +99,7 @@ get_handler(self, *args, examples_loader=None, tests_loader=None, **kwargs):
 
 <a id="McUtils.Docs.DocWalker.DocWalker.visit_root" class="docs-object-method">&nbsp;</a> 
 ```python
-visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs): 
+visit_root(self, o, tests_directory=None, examples_directory=None, verbose=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/DocWalker.py#L1070)/
@@ -112,9 +112,9 @@ visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Details-fa0051" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-fa0051"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Details-e7f5a0" markdown="1"> Details</a> <a class="float-right" data-toggle="collapse" href="#Details-e7f5a0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Details-fa0051" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Details-e7f5a0" markdown="1">
  A `DocWalker` object is a light subclass of a `TemplateWalker`, but specialized for documentation & with specialized handlers
  </div>
 </div>

@@ -1,14 +1,29 @@
 # <a id="McUtils.Numputils.Optimization.jacobi_maximize">jacobi_maximize</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2229)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2229?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4165)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4165?message=Update%20Docs)]
 </div>
 
 ```python
 jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-08): 
 ```
+**LLM Docstring**
 
-
+Maximize an objective over an orthogonal transformation by sweeping 2x2
+(Jacobi) rotations over all column pairs until the gain converges (the standard
+orbital/vector localization scheme).
+  - `initial_matrix`: `np.ndarray`
+    > the matrix whose columns are rotated
+  - `rotation_generator`: `Callable`
+    > callable giving the optimal `(cos, sin, gain)` per pair
+  - `max_iterations`: `int`
+    > maximum sweeps
+  - `contrib_tol`: `float`
+    > minimum per-pair gain to accept a rotation
+  - `tol`: `float`
+    > convergence tolerance on the total per-sweep gain
+  - `:returns`: `tuple`
+    > `(rotated_matrix, accumulated_rotation, (total_gain, iterations))`
 
 
 
@@ -59,7 +74,7 @@ jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/jacobi_maximize.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/jacobi_maximize.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2229?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4165?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

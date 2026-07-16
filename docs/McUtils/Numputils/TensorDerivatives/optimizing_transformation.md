@@ -1,14 +1,26 @@
 # <a id="McUtils.Numputils.TensorDerivatives.optimizing_transformation">optimizing_transformation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1741)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1741?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L2893)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L2893?message=Update%20Docs)]
 </div>
 
 ```python
 optimizing_transformation(expansion, order): 
 ```
+**LLM Docstring**
 
+Build, order by order, the transformation that brings an expansion to a
+normal (optimizing) form.
 
+Uses the leading gradient/Hessian to set the zeroth-order transform, then
+Newton-style recurrences that re-expand the remaining terms and cancel them at
+each order. Requires at least a gradient or Hessian.
+  - `expansion`: `list`
+    > the expansion to optimize
+  - `order`: `int`
+    > the derivative order
+  - `:returns`: `list`
+    > the optimizing transformation expansion
 
 
 
@@ -59,7 +71,7 @@ optimizing_transformation(expansion, order):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/optimizing_transformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/optimizing_transformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1741?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L2893?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

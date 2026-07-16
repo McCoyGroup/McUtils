@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.GradientDescentRotationGenerator">GradientDescentRotationGenerator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2346)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2346?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4366)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4366?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,27 @@
 __init__(self, column_function, gradient, tol=1e-16, max_iterations=10, damping_parameter=0.9, damping_exponent=1.1, restart_interval=3): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2347)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2347?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4367)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4367?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize a rotation generator that finds each optimal 2x2 rotation angle by
+damped gradient descent.
+  - `column_function`: `Callable`
+    > the per-column objective contribution
+  - `gradient`: `Callable`
+    > the per-column gradient of the objective
+  - `tol`: `float`
+    > convergence tolerance on the step
+  - `max_iterations`: `int`
+    > maximum iterations
+  - `damping_parameter`: `float`
+    > step-damping factor
+  - `damping_exponent`: `float`
+    > damping decay exponent
+  - `restart_interval`: `int`
+    > damping restart interval
 
 
 <a id="McUtils.Numputils.Optimization.GradientDescentRotationGenerator.__call__" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +52,21 @@ __init__(self, column_function, gradient, tol=1e-16, max_iterations=10, damping_
 __call__(self, mat, col_i, col_j): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L2362)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L2362?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L4403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.py#L4403?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Find the optimal 2x2 rotation for a pair of columns by damped gradient descent
+over the rotation angle.
+  - `mat`: `np.ndarray`
+    > the matrix being localized
+  - `col_i`: `int`
+    > the first column index
+  - `col_j`: `int`
+    > the second column index
+  - `:returns`: `tuple`
+    > `(cos, sin, gain)` for the optimal rotation
  </div>
 </div>
 
@@ -90,7 +120,7 @@ __call__(self, mat, col_i, col_j):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/GradientDescentRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2346?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4366?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

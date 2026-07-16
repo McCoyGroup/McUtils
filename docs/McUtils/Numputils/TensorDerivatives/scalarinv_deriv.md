@@ -1,14 +1,22 @@
 # <a id="McUtils.Numputils.TensorDerivatives.scalarinv_deriv">scalarinv_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L824)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L824?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1466)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1466?message=Update%20Docs)]
 </div>
 
 ```python
 scalarinv_deriv(scalar_expansion, order): 
 ```
+**LLM Docstring**
 
-
+Compute the derivative expansion of the reciprocal `1 / scalar` of a scalar
+expansion.
+  - `scalar_expansion`: `list`
+    > expansion of the scalar
+  - `order`: `int | list[int]`
+    > the derivative order(s)
+  - `:returns`: `list`
+    > the reciprocal expansion
 
 
 
@@ -59,7 +67,7 @@ scalarinv_deriv(scalar_expansion, order):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/scalarinv_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/scalarinv_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L824?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1466?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

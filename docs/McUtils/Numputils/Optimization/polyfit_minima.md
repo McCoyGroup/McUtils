@@ -1,14 +1,24 @@
 # <a id="McUtils.Numputils.Optimization.polyfit_minima">polyfit_minima</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2475)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2475?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4607)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4607?message=Update%20Docs)]
 </div>
 
 ```python
 polyfit_minima(x, y, fit_order=2): 
 ```
+**LLM Docstring**
 
-
+Fit a polynomial to `(x, y)` and return its minima (critical points with positive
+curvature).
+  - `x`: `np.ndarray`
+    > the sample abscissae
+  - `y`: `np.ndarray`
+    > the sample values
+  - `fit_order`: `int`
+    > the polynomial degree
+  - `:returns`: `tuple`
+    > `(minima_x, minima_values, curvature)`
 
 
 
@@ -59,7 +69,7 @@ polyfit_minima(x, y, fit_order=2):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/polyfit_minima.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/polyfit_minima.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2475?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4607?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,35 @@
 # <a id="McUtils.Numputils.TensorDerivatives.vec_plane_angle_deriv">vec_plane_angle_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L2364)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L2364?message=Update%20Docs)]
 </div>
 
 ```python
 vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=None): 
 ```
+**LLM Docstring**
 
+Compute the derivative expansion of the angle between two planes, each defined
+by a pair of vector expansions.
 
+Forms the two plane normals via cross products and takes the angle between them
+with `vec_angle_deriv`.
+  - `A_expansion`: `list`
+    > first vector of plane 1
+  - `B_expansion`: `list`
+    > second vector of plane 1
+  - `C_expansion`: `list`
+    > first vector of plane 2
+  - `D_expansion`: `list`
+    > second vector of plane 2
+  - `order`: `int | list[int]`
+    > the derivative order(s)
+  - `planar`: `bool | np.ndarray | None`
+    > force (or disable) the planar branch
+  - `planar_threshold`: `float | None`
+    > cross-norm threshold for detecting planarity
+  - `:returns`: `list`
+    > the plane-angle expansion
 
 
 
@@ -59,7 +80,7 @@ vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order,
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/vec_plane_angle_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/vec_plane_angle_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1425?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L2364?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

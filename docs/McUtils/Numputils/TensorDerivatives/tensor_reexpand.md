@@ -1,14 +1,31 @@
 # <a id="McUtils.Numputils.TensorDerivatives.tensor_reexpand">tensor_reexpand</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1700)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1700?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L2830)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L2830?message=Update%20Docs)]
 </div>
 
 ```python
 tensor_reexpand(derivs, vals, order=None, axes=None): 
 ```
+**LLM Docstring**
 
+Re-express one derivative expansion through another via the Faà di Bruno chain
+rule.
 
+Given the outer expansion `derivs` (derivatives with respect to an intermediate
+quantity) and the inner expansion `vals` (derivatives of that quantity with
+respect to the true variables), returns the expansion of the composition by
+summing the partition terms at each order.
+  - `derivs`: `list`
+    > the outer (to-be-re-expanded) expansion
+  - `vals`: `list`
+    > the inner expansion supplying the new variables
+  - `order`: `int | list[int] | None`
+    > the derivative order(s) (defaults to `len(vals)`)
+  - `axes`: `list | None`
+    > the contraction axes for the chain-rule products
+  - `:returns`: `list`
+    > the re-expanded expansion
 
 
 
@@ -59,7 +76,7 @@ tensor_reexpand(derivs, vals, order=None, axes=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/tensor_reexpand.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/tensor_reexpand.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1700?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L2830?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

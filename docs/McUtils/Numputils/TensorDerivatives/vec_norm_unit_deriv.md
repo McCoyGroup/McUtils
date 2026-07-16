@@ -1,14 +1,32 @@
 # <a id="McUtils.Numputils.TensorDerivatives.vec_norm_unit_deriv">vec_norm_unit_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L857)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L857?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TensorDerivatives.py#L1556)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1556?message=Update%20Docs)]
 </div>
 
 ```python
 vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=True): 
 ```
+**LLM Docstring**
 
+Compute the derivative expansions of both the norm and the unit vector of a
+vector expansion.
 
+Builds the norm-derivative series in closed form using integer partitions
+(restricted to first/second powers of the base vector) and then re-expands both
+the norm and the unit vector in terms of the original vector's derivatives. A
+zero-length vector raises (or returns `(None, None)` when `raise_on_failure` is
+off).
+  - `vec_expansion`: `list`
+    > expansion of the vector
+  - `order`: `int | list[int]`
+    > the derivative order(s)
+  - `base_expansion`: `list | None`
+    > unused placeholder (kept for signature parity)
+  - `raise_on_failure`: `bool`
+    > raise on a zero-length vector rather than returning None
+  - `:returns`: `tuple`
+    > `(norm_expansion, unit_vector_expansion)`
 
 
 
@@ -59,7 +77,7 @@ vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TensorDerivatives/vec_norm_unit_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TensorDerivatives/vec_norm_unit_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L857?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TensorDerivatives.py#L1556?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

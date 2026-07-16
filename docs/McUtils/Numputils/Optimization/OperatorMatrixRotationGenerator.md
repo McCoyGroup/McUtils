@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator">OperatorMatrixRotationGenerator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2395)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2395?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4451)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4451?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,17 @@
 __init__(self, one_e_func, matrix_func): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4452)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4452?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize a rotation generator that solves each optimal 2x2 rotation
+analytically from a supplied 2x2 operator matrix.
+  - `one_e_func`: `Callable`
+    > the per-column objective contribution
+  - `matrix_func`: `Callable`
+    > callable giving the `(a, b, c)` operator-matrix entries for a pair
 
 
 <a id="McUtils.Numputils.Optimization.OperatorMatrixRotationGenerator.__call__" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +42,21 @@ __init__(self, one_e_func, matrix_func):
 __call__(self, mat, col_i, col_j): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2399)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L2399?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L4466)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.py#L4466?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Find the optimal 2x2 rotation for a pair of columns by analytically diagonalizing
+the supplied 2x2 operator matrix (the closed-form Jacobi angle).
+  - `mat`: `np.ndarray`
+    > the matrix being localized
+  - `col_i`: `int`
+    > the first column index
+  - `col_j`: `int`
+    > the second column index
+  - `:returns`: `tuple`
+    > `(cos, sin, gain)` for the optimal rotation
  </div>
 </div>
 
@@ -90,7 +110,7 @@ __call__(self, mat, col_i, col_j):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/OperatorMatrixRotationGenerator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2395?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4451?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

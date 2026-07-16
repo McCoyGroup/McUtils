@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.CREST.CRESTJob">CRESTJob</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/CREST.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/CREST.py#L180)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L180?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,23 @@ blocks: list
 __init__(self, *strs, path='crest', input_file='geom.xyz', log_file='confgen.log', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/CREST.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/CREST.py#L189)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L189?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a CREST job, treating bare string arguments as boolean command-line flags
+and wiring up the CREST executable, input geometry, and log-file paths.
+  - `strs`: `Any`
+    > bare command-line flags
+  - `path`: `str`
+    > path to the CREST executable
+  - `input_file`: `str`
+    > the input geometry file name
+  - `log_file`: `str`
+    > the log file name
+  - `opts`: `Any`
+    > the job options
 
 
 <a id="McUtils.ExternalPrograms.Jobs.CREST.CRESTJob.get_block_types" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +52,14 @@ __init__(self, *strs, path='crest', input_file='geom.xyz', log_file='confgen.log
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L222)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L222?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the ordered CREST block types.
+  - `:returns`: `list`
+    > the block types
 
 
 <a id="McUtils.ExternalPrograms.Jobs.CREST.CRESTJob.load_template" class="docs-object-method">&nbsp;</a> 
@@ -49,9 +68,14 @@ get_block_types(cls):
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L234)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L234?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the path to the CREST job (shell-script) template.
+  - `:returns`: `str`
+    > the template path
  </div>
 </div>
 
@@ -105,7 +129,7 @@ load_template(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/CREST/CRESTJob.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/CREST/CRESTJob.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L102?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L180?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

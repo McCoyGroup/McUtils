@@ -1,14 +1,25 @@
 # <a id="McUtils.Numputils.Optimization.displacement_localizing_rotation_generator">displacement_localizing_rotation_generator</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L2433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L4515)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4515?message=Update%20Docs)]
 </div>
 
 ```python
 displacement_localizing_rotation_generator(mat, col_i, col_j): 
 ```
+**LLM Docstring**
 
-
+Compute the optimal 2x2 Foster-Boys localizing rotation for a pair of
+displacement columns (each a set of 3-vectors), returning the closed-form
+`(cos, sin, gain)`.
+  - `mat`: `np.ndarray`
+    > the matrix of displacement columns
+  - `col_i`: `int`
+    > the first column index
+  - `col_j`: `int`
+    > the second column index
+  - `:returns`: `tuple`
+    > `(cos, sin, gain)` for the localizing rotation
 
 
 
@@ -59,7 +70,7 @@ displacement_localizing_rotation_generator(mat, col_i, col_j):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/displacement_localizing_rotation_generator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/displacement_localizing_rotation_generator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L2433?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L4515?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

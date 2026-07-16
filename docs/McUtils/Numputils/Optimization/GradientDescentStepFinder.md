@@ -1,8 +1,8 @@
 ## <a id="McUtils.Numputils.Optimization.GradientDescentStepFinder">GradientDescentStepFinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1771)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1771?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,26 @@ line_search: ArmijoSearch
 __init__(self, func, jacobian, damping_parameter=None, damping_exponent=None, line_search=True, restart_interval=10, logger=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization.py#L1775)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1775?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize a gradient-descent step finder.
+  - `func`: `Callable`
+    > the objective function
+  - `jacobian`: `Callable`
+    > the gradient function
+  - `damping_parameter`: `float | None`
+    > base step-damping factor
+  - `damping_exponent`: `float | None`
+    > damping decay exponent
+  - `line_search`: `bool | Callable`
+    > `True` to use the default line search, `False`/`None` to disable
+  - `restart_interval`: `int`
+    > damping restart interval
+  - `logger`: `object | None`
+    > optional logger
 
 
 <a id="McUtils.Numputils.Optimization.GradientDescentStepFinder.__call__" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +54,25 @@ __init__(self, func, jacobian, damping_parameter=None, damping_exponent=None, li
 __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L1141)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L1141?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L1812)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization/GradientDescentStepFinder.py#L1812?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Produce a gradient-descent step (the negative gradient, optionally projected,
+line-searched, and damped) for the active members.
+  - `guess`: `np.ndarray`
+    > current parameters
+  - `mask`: `np.ndarray | tuple`
+    > active-member indices (or `(mask, chain_data)` for chain minimizers)
+  - `return_vals`: `bool`
+    > unsupported
+  - `gradient_modifer`: `Callable | None`
+    > optional gradient transformation
+  - `projector`: `np.ndarray | None`
+    > optional projector applied to the step
+  - `:returns`: `tuple`
+    > `(step, gradient)`
  </div>
 </div>
 
@@ -93,7 +126,7 @@ __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Optimization/GradientDescentStepFinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Optimization/GradientDescentStepFinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1120?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Optimization.py#L1771?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
