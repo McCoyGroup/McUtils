@@ -56,10 +56,26 @@ __new__(_cls, a, b, c, x, y, z, X, Y, A, B1, B2, C, Z, Z2, A3, Y3, C4, X4, Ta, T
 Create new instance of DihedralTetrahedronData(a, b, c, x, y, z, X, Y, A, B1, B2, C, Z, Z2, A3, Y3, C4, X4, Ta, Tb, Tc, Tx, Ty, Tz)
 
 
+<a id="collections.DihedralTetrahedronData.__repr__" class="docs-object-method">&nbsp;</a> 
+```python
+__repr__(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/collections/DihedralTetrahedronData.py#L456)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/collections/DihedralTetrahedronData.py#L456?message=Update%20Docs)]
+</div>
+Return a nicely formatted representation string
 
 
-
-
+<a id="collections.DihedralTetrahedronData.__getnewargs__" class="docs-object-method">&nbsp;</a> 
+```python
+__getnewargs__(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/collections/DihedralTetrahedronData.py#L464)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/collections/DihedralTetrahedronData.py#L464?message=Update%20Docs)]
+</div>
+Return self as a plain tuple.  Used by copy and pickle.
  </div>
 </div>
 

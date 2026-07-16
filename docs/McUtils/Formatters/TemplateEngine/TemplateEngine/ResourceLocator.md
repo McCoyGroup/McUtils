@@ -69,7 +69,14 @@ __repr__(self):
 </div>
 
 
-
+<a id="typing.Protocol.__init_subclass__.<locals>._proto_hook" class="docs-object-method">&nbsp;</a> 
+```python
+__subclasshook__(other): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/typing/Protocol/__init_subclass__/<locals>.py#L1200)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/typing/Protocol/__init_subclass__/<locals>.py#L1200?message=Update%20Docs)]
+</div>
  </div>
 </div>
 

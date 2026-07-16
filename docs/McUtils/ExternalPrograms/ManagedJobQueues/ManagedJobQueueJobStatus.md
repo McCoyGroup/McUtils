@@ -24,7 +24,14 @@ RUNNING: ManagedJobQueueJobStatus
 COMPLETED: ManagedJobQueueJobStatus
 ERROR: ManagedJobQueueJobStatus
 ```
-
+<a id="enum.Enum.__new__" class="docs-object-method">&nbsp;</a> 
+```python
+__new__(cls, value): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/enum/Enum.py#L670)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/enum/Enum.py#L670?message=Update%20Docs)]
+</div>
  </div>
 </div>
 

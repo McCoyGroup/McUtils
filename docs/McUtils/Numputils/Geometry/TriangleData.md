@@ -38,10 +38,26 @@ __new__(_cls, a, b, c, A, B, C):
 Create new instance of TriangleData(a, b, c, A, B, C)
 
 
+<a id="collections.TriangleData.__repr__" class="docs-object-method">&nbsp;</a> 
+```python
+__repr__(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/collections/TriangleData.py#L456)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/collections/TriangleData.py#L456?message=Update%20Docs)]
+</div>
+Return a nicely formatted representation string
 
 
-
-
+<a id="collections.TriangleData.__getnewargs__" class="docs-object-method">&nbsp;</a> 
+```python
+__getnewargs__(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/collections/TriangleData.py#L464)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/collections/TriangleData.py#L464?message=Update%20Docs)]
+</div>
+Return self as a plain tuple.  Used by copy and pickle.
  </div>
 </div>
 
