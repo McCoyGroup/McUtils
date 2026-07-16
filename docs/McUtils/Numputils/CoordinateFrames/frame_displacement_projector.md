@@ -28,34 +28,7 @@ explicit contraction.
   - `pre_weighted`: `bool`
     > whether the modes already carry the mass weighting
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-f
-r
-a
-m
-e
--
-r
-e
-m
-o
-v
-i
-n
-g
- 
-p
-r
-o
-j
-e
-c
-t
-o
-r
+    > the frame-removing projector
 
 
 

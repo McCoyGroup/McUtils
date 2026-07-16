@@ -26,51 +26,7 @@ input sequence.
   - `embedding_parameters`: `Any`
     > extra options forwarded to `eckart_rmsd`
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-u
-m
-u
-l
-a
-t
-i
-v
-e
- 
-E
-c
-k
-a
-r
-t
- 
-R
-M
-S
-D
- 
-a
-l
-o
-n
-g
- 
-t
-h
-e
- 
-s
-e
-q
-u
-e
-n
-c
-e
+    > the cumulative Eckart RMSD along the sequence
 
 
 

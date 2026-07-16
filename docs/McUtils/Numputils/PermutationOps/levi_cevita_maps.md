@@ -17,36 +17,7 @@ of that permutation.
   - `k`: `int`
     > the tensor rank
   - `:returns`: `tuple[np.ndarray, np.ndarray]`
-    > `
-(
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
-_
-i
-n
-d
-i
-c
-e
-s
-,
- 
-s
-i
-g
-n
-s
-)
-`
+    > `(permutation_indices, signs)`
 
 
 

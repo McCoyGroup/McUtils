@@ -17,50 +17,7 @@ Enumerate all length-`r` ordered permutations of `range(n)` as an index array.
   - `dtype`: `np.dtype`
     > index dtype
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-`
-(
-n
-!
-/
-(
-n
--
-r
-)
-!
-,
- 
-r
-)
-`
- 
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
--
-i
-n
-d
-e
-x
- 
-a
-r
-r
-a
-y
+    > the `(n!/(n-r)!, r)` permutation-index array
 
 
 

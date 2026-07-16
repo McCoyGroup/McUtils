@@ -17,48 +17,7 @@ Enumerate all length-`r` combinations of `range(n)` as an index array.
   - `dtype`: `np.dtype`
     > index dtype
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-`
-(
-C
-(
-n
-,
- 
-r
-)
-,
- 
-r
-)
-`
- 
-c
-o
-m
-b
-i
-n
-a
-t
-i
-o
-n
--
-i
-n
-d
-e
-x
- 
-a
-r
-r
-a
-y
+    > the `(C(n, r), r)` combination-index array
 
 
 

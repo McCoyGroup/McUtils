@@ -13,21 +13,7 @@ Converts Cartesians to Z-Matrix coords and returns the underlying arrays
   - `ordering`: `Any`
     > the Z-matrix ordering as a list of lists
   - `:returns`: `Iterable[np.ndarray | list]`
-    > Z
--
-m
-a
-t
-r
-i
-x
- 
-c
-o
-o
-r
-d
-s
+    > Z-matrix coords
 
 
 

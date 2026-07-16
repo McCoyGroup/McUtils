@@ -19,41 +19,7 @@ proper `0..n-1` permutation with a double `argsort`.
   - `check`: `bool`
     > normalize the input to a rank permutation first
   - `:returns`: `int`
-    > t
-h
-e
- 
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
- 
-s
-i
-g
-n
- 
-(
-`
-+
-1
-`
- 
-o
-r
- 
-`
--
-1
-`
-)
+    > the permutation sign (`+1` or `-1`)
 
 
 

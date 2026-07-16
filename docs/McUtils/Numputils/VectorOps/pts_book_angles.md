@@ -31,49 +31,7 @@ hinged on the shared edge.
   - `opts`: `Any`
     > extra options forwarded to `vec_dihedrals`
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-b
-o
-o
-k
- 
-a
-n
-g
-l
-e
-s
- 
-(
-p
-l
-u
-s
- 
-c
-r
-o
-s
-s
-e
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the book angles (plus crosses if requested)
 
 
 

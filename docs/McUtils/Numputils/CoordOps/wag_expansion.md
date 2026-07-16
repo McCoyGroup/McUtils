@@ -36,48 +36,7 @@ direction (relative to the vertex `j`); group ownership is resolved by
   - `axis_order`: `int`
     > differentiation order w.r.t. the axis
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-r
-o
-t
-a
-t
-i
-o
-n
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-c
-o
-o
-r
-d
-s
-,
- 
-d
-1
-,
- 
-.
-.
-.
-]
-`
+    > the rotation expansion `[coords, d1, ...]`
 
 
 

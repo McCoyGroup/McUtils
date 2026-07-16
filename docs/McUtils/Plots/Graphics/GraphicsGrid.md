@@ -55,18 +55,7 @@ Initializes the subplots for the Graphics object
   - `kw`: `Any`
     > 
   - `:returns`: `GraphicsBackend.Figure, GraphicsBackend.Figure.Axes`
-    > f
-i
-g
-u
-r
-e
-,
- 
-a
-x
-e
-s
+    > figure, axes
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.set_options" class="docs-object-method">&nbsp;</a> 

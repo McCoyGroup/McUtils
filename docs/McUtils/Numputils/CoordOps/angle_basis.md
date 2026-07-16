@@ -27,54 +27,7 @@ the fixed basis with `fixed_angle_basis`, and passes it through
   - `opts`: `Any`
     > options forwarded to `coordinate_projection_data`
   - `:returns`: `tuple`
-    > `
-(
-b
-a
-s
-i
-s
-,
- 
-c
-o
-m
-p
-l
-e
-m
-e
-n
-t
-a
-r
-y
-_
-b
-a
-s
-i
-s
-,
- 
-s
-e
-l
-e
-c
-t
-i
-o
-n
-_
-m
-a
-t
-r
-i
-x
-)
-`
+    > `(basis, complementary_basis, selection_matrix)`
 
 
 

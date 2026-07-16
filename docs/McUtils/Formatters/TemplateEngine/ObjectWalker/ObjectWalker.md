@@ -104,28 +104,7 @@ Provides type dispatching to a handler, basically.
   - `parent`: `ObjectHandler`
     > the handler that was called right before this
   - `:returns`: `Any`
-    > t
-h
-e
- 
-r
-e
-s
-u
-l
-t
- 
-o
-f
- 
-h
-a
-n
-d
-l
-i
-n
-g
+    > the result of handling
  </div>
 </div>
 

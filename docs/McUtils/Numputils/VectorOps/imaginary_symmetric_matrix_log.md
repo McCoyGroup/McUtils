@@ -20,29 +20,7 @@ generator is rebuilt in that eigenbasis.
   - `mats_imag`: `np.ndarray`
     > imaginary part of `exp(i A)`
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-s
-y
-m
-m
-e
-t
-r
-i
-c
- 
-g
-e
-n
-e
-r
-a
-t
-o
-r
+    > the symmetric generator
 
 
 

@@ -22,33 +22,7 @@ range) or an explicit set of offsets (in which case `block_size` is required).
   - `block_size`: `int | None`
     > stride between base positions (required if offsets given)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-f
-l
-a
-t
-t
-e
-n
-e
-d
- 
-b
-l
-o
-c
-k
- 
-i
-n
-d
-i
-c
-e
-s
+    > the flattened block indices
 
 
 

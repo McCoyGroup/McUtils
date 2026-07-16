@@ -27,53 +27,7 @@ returned alongside the projector.
   - `orthonormal`: `bool`
     > whether to build an orthonormal projector
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-p
-r
-o
-j
-e
-c
-t
-o
-r
- 
-(
-a
-n
-d
- 
-t
-h
-e
- 
-m
-o
-d
-e
-s
- 
-i
-f
- 
-`
-r
-e
-t
-u
-r
-n
-_
-m
-o
-d
-e
-s
-`
-)
+    > the projector (and the modes if `return_modes`)
 
 
 

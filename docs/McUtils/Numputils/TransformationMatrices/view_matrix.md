@@ -22,41 +22,7 @@ rotation.
   - `output_order`: `tuple`
     > axis output ordering (indices or `'x'`/`'y'`/`'z'`)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-v
-i
-e
-w
-i
-n
-g
- 
-f
-r
-a
-m
-e
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the viewing frame matrix (or stack)
 
 
 

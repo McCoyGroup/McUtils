@@ -26,36 +26,7 @@ block is returned; otherwise the coordinate values are prepended.
   - `base_transformation`: `list[np.ndarray] | None`
     > optional transformation to apply
   - `:returns`: `list`
-    > t
-h
-e
- 
-c
-o
-m
-b
-i
-n
-e
-d
- 
-i
-n
-v
-e
-r
-s
-e
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
+    > the combined inverse expansion
 
 
 

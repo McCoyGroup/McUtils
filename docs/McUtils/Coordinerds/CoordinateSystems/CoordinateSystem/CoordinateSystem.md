@@ -124,50 +124,7 @@ basis(self):
 </div>
 
   - `:returns`: `CoordinateSystem`
-    > T
-h
-e
- 
-b
-a
-s
-i
-s
- 
-f
-o
-r
- 
-t
-h
-e
- 
-r
-e
-p
-r
-e
-s
-e
-n
-t
-a
-t
-i
-o
-n
- 
-o
-f
- 
-`
-m
-a
-t
-r
-i
-x
-`
+    > The basis for the representation of `matrix`
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.origin" class="docs-object-method">&nbsp;</a> 
@@ -181,54 +138,7 @@ origin(self):
 </div>
 
   - `:returns`: `np.ndarray`
-    > T
-h
-e
- 
-o
-r
-i
-g
-i
-n
- 
-f
-o
-r
- 
-t
-h
-e
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-d
-e
-f
-i
-n
-e
-d
- 
-b
-y
- 
-`
-m
-a
-t
-r
-i
-x
-`
+    > The origin for the expansion defined by `matrix`
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.matrix" class="docs-object-method">&nbsp;</a> 
@@ -243,9 +153,7 @@ matrix(self):
 The matrix representation in the `CoordinateSystem.basis`
 `None` is shorthand for the identity matrix
   - `:returns`: `np.ndarray`
-    > m
-a
-t
+    > mat
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.inverse" class="docs-object-method">&nbsp;</a> 
@@ -260,9 +168,7 @@ inverse(self):
 The inverse of the representation in the `basis`.
 `None` is shorthand for the inverse or pseudoinverse of `matrix`.
   - `:returns`: `np.ndarray`
-    > i
-n
-v
+    > inv
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.dimension" class="docs-object-method">&nbsp;</a> 
@@ -277,9 +183,7 @@ dimension(self):
 The dimension of the coordinate system.
 `None` means unspecified dimension
   - `:returns`: `int or None`
-    > d
-i
-m
+    > dim
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.register_converter" class="docs-object-method">&nbsp;</a> 
@@ -344,22 +248,7 @@ Gets the converter from the current system to a new system
   - `system`: `CoordinateSystem`
     > the target CoordinateSystem
   - `:returns`: `CoordinateSystemConverter`
-    > c
-o
-n
-v
-e
-r
-t
-e
-r
- 
-o
-b
-j
-e
-c
-t
+    > converter object
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.convert_coords" class="docs-object-method">&nbsp;</a> 
@@ -378,31 +267,7 @@ Converts coordiantes from the current coordinate system to _system_
   - `kw`: `Any`
     > options to be passed through to the converter object
   - `:returns`: `tuple(np.ndarray, dict)`
-    > t
-h
-e
- 
-c
-o
-n
-v
-e
-r
-t
-e
-d
- 
-c
-o
-o
-r
-d
-i
-a
-n
-t
-e
-s
+    > the converted coordiantes
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.rescale" class="docs-object-method">&nbsp;</a> 
@@ -460,23 +325,7 @@ Basically a more flexible version of `jacobian`.
   - `finite_difference_options`: `Any`
     > 
   - `:returns`: `np.ndarray`
-    > d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-t
-e
-n
-s
-o
-r
+    > derivative tensor
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.jacobian" class="docs-object-method">&nbsp;</a> 
@@ -501,23 +350,7 @@ Computes the Jacobian between the current coordinate system and a target coordin
   - `fd_options`: `Any`
     > options to be passed straight through to FiniteDifferenceFunction
   - `:returns`: `np.ndarray`
-    > d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-t
-e
-n
-s
-o
-r
+    > derivative tensor
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem.__repr__" class="docs-object-method">&nbsp;</a> 

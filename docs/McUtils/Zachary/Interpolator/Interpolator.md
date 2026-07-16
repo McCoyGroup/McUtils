@@ -65,18 +65,7 @@ Returns a function that can be called on grid points to interpolate them
   - `opts`: `Any`
     > 
   - `:returns`: `function`
-    > i
-n
-t
-e
-r
-p
-o
-l
-a
-t
-o
-r
+    > interpolator
 
 
 <a id="McUtils.Zachary.Interpolator.Interpolator.get_extrapolator" class="docs-object-method">&nbsp;</a> 
@@ -94,18 +83,7 @@ Returns an Extrapolator that can be called on grid points to extrapolate them
   - `extrapolation_order`: `int`
     > 
   - `:returns`: `Extrapolator`
-    > e
-x
-t
-r
-a
-p
-o
-l
-a
-t
-o
-r
+    > extrapolator
 
 
 <a id="McUtils.Zachary.Interpolator.Interpolator.apply" class="docs-object-method">&nbsp;</a> 

@@ -16,34 +16,7 @@ zero-dimensional array wrapping one).
   - `types`: `tuple | None`
     > the atomic types to accept (defaults to numbers and `str`)
   - `:returns`: `bool`
-    > w
-h
-e
-t
-h
-e
-r
- 
-t
-h
-e
- 
-o
-b
-j
-e
-c
-t
- 
-i
-s
- 
-a
-t
-o
-m
-i
-c
+    > whether the object is atomic
 
 
 

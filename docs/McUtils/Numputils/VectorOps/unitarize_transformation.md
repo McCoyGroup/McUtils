@@ -14,40 +14,7 @@ SVD (`U V` with the singular values dropped).
   - `tf`: `np.ndarray`
     > the transformation matrix
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-l
-o
-s
-e
-s
-t
- 
-u
-n
-i
-t
-a
-r
-y
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-a
-t
-i
-o
-n
+    > the closest unitary transformation
 
 
 

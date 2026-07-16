@@ -28,55 +28,7 @@ re-express the coordinates and their derivatives in a new basis.
   - `reference_internals`: `np.ndarray | None`
     > reference values subtracted from the internals
   - `:returns`: `list`
-    > t
-h
-e
- 
-c
-o
-m
-b
-i
-n
-e
-d
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-i
-n
-t
-e
-r
-n
-a
-l
-s
-,
- 
-d
-1
-,
- 
-d
-2
-,
- 
-.
-.
-.
-]
-`
+    > the combined expansion `[internals, d1, d2, ...]`
 
 
 

@@ -42,53 +42,7 @@ back through the projection returned by the displacement setup.
   - `expanded_vectors`: `Iterable[int] | None`
     > which of the defining vectors to expand (defaults to all)
   - `:returns`: `list`
-    > t
-h
-e
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-v
-a
-l
-u
-e
-,
- 
-d
-1
-,
- 
-d
-2
-,
- 
-.
-.
-.
-]
-`
+    > the derivative expansion `[value, d1, d2, ...]`
 
 
 

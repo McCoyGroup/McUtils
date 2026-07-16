@@ -26,40 +26,7 @@ a per-atom value. The raw difference vectors can optionally be returned.
   - `total`: `bool`
     > whether to apply the per-atom normalization
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-R
-M
-S
-D
- 
-(
-p
-l
-u
-s
- 
-d
-i
-f
-f
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the RMSD (plus diffs if requested)
 
 
 

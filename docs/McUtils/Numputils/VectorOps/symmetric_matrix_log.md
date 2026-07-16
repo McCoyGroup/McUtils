@@ -14,26 +14,7 @@ eigenvalues.
   - `mats`: `np.ndarray`
     > the symmetric matrix (or stack)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-m
-a
-t
-r
-i
-x
- 
-l
-o
-g
-a
-r
-i
-t
-h
-m
+    > the matrix logarithm
 
 
 

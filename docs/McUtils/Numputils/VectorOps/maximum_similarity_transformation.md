@@ -21,55 +21,7 @@ rotation is returned, or applied to `basis` when `apply_transformation` is set.
   - `apply_transformation`: `bool`
     > return `basis @ tf` instead of `tf`
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-a
-l
-i
-g
-n
-e
-d
- 
-b
-a
-s
-i
-s
- 
-o
-r
- 
-t
-h
-e
- 
-a
-l
-i
-g
-n
-m
-e
-n
-t
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-a
-t
-i
-o
-n
+    > the aligned basis or the alignment transformation
 
 
 

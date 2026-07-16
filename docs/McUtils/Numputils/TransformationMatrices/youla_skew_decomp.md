@@ -17,49 +17,7 @@ Youla skew matrix together with the orthogonal transform.
   - `A`: `np.ndarray`
     > the skew-symmetric matrix
   - `:returns`: `tuple[np.ndarray, np.ndarray]`
-    > `
-(
-y
-o
-u
-l
-a
-_
-s
-k
-e
-w
-_
-m
-a
-t
-r
-i
-x
-,
- 
-o
-r
-t
-h
-o
-g
-o
-n
-a
-l
-_
-t
-r
-a
-n
-s
-f
-o
-r
-m
-)
-`
+    > `(youla_skew_matrix, orthogonal_transform)`
 
 
 

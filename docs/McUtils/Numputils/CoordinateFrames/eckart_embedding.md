@@ -37,31 +37,7 @@ to actually transform the coordinates).
   - `transform_coordinates`: `bool`
     > apply the rotation to the coordinates
   - `:returns`: `EckartData`
-    > t
-h
-e
- 
-E
-c
-k
-a
-r
-t
- 
-e
-m
-b
-e
-d
-d
-i
-n
-g
- 
-d
-a
-t
-a
+    > the Eckart embedding data
 
 
 

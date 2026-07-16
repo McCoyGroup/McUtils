@@ -27,53 +27,7 @@ diagonal of the resulting tensors.
   - `mass_weighted`: `bool`
     > whether the expansion is mass-weighted
   - `:returns`: `tuple[list, list]`
-    > `
-(
-e
-i
-g
-e
-n
-v
-a
-l
-u
-e
-_
-e
-x
-p
-a
-n
-s
-i
-o
-n
-,
- 
-e
-i
-g
-e
-n
-v
-e
-c
-t
-o
-r
-_
-e
-x
-p
-a
-n
-s
-i
-o
-n
-)
-`
+    > `(eigenvalue_expansion, eigenvector_expansion)`
 
 
 

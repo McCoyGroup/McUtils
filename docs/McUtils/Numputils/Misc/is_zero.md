@@ -15,42 +15,7 @@ Test whether an object is a numeric scalar equal to zero.
   - `numeric_types`: `tuple | None`
     > the numeric types to accept
   - `:returns`: `bool`
-    > w
-h
-e
-t
-h
-e
-r
- 
-t
-h
-e
- 
-o
-b
-j
-e
-c
-t
- 
-i
-s
- 
-a
- 
-n
-u
-m
-e
-r
-i
-c
- 
-z
-e
-r
-o
+    > whether the object is a numeric zero
 
 
 

@@ -14,28 +14,7 @@ eigenvalues.
   - `mats`: `np.ndarray`
     > the symmetric matrix (or stack)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-m
-a
-t
-r
-i
-x
- 
-e
-x
-p
-o
-n
-e
-n
-t
-i
-a
-l
+    > the matrix exponential
 
 
 

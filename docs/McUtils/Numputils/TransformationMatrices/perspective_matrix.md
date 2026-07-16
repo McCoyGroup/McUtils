@@ -25,50 +25,7 @@ standard perspective matrix.
   - `view_distance`: `float | None`
     > distance from camera to the view center
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-p
-e
-r
-s
-p
-e
-c
-t
-i
-v
-e
--
-p
-r
-o
-j
-e
-c
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the perspective-projection matrix (or stack)
 
 
 

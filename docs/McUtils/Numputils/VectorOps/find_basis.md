@@ -23,55 +23,7 @@ per-matrix bases is returned rather than a single stacked array.
   - `method`: `str`
     > `'svd'`, `'qr'`, `'right-svd'`, or `'right-unitary'`
   - `:returns`: `np.ndarray | list[np.ndarray]`
-    > t
-h
-e
- 
-b
-a
-s
-i
-s
- 
-(
-o
-r
- 
-a
- 
-l
-i
-s
-t
- 
-o
-f
- 
-b
-a
-s
-e
-s
- 
-f
-o
-r
- 
-r
-a
-g
-g
-e
-d
- 
-b
-a
-t
-c
-h
-e
-s
-)
+    > the basis (or a list of bases for ragged batches)
 
 
 

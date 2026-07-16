@@ -16,36 +16,7 @@ product ordering with its phase via `_setup_com_terms`.
   - `commutator_strings`: `Sequence`
     > the commutator specification
   - `:returns`: `tuple[np.ndarray, np.ndarray]`
-    > `
-(
-p
-h
-a
-s
-e
-s
-,
- 
-o
-p
-e
-r
-a
-t
-o
-r
-_
-o
-r
-d
-e
-r
-i
-n
-g
-s
-)
-`
+    > `(phases, operator_orderings)`
 
 
 

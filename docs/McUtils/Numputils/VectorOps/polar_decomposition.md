@@ -19,27 +19,7 @@ otherwise it is returned in rotate-then-scale order.
   - `order`: `str`
     > `'scale-first'` for `(P, Q)`, else `(Q, P)`
   - `:returns`: `tuple[np.ndarray, np.ndarray]`
-    > t
-h
-e
- 
-t
-w
-o
- 
-p
-o
-l
-a
-r
- 
-f
-a
-c
-t
-o
-r
-s
+    > the two polar factors
 
 
 

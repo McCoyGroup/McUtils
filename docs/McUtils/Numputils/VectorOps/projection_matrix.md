@@ -23,27 +23,7 @@ the basis is orthonormal (or after an internal QR), or to the pseudoinverse when
   - `allow_pinv`: `bool`
     > use the pseudoinverse instead of QR/transpose
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-p
-r
-o
-j
-e
-c
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
+    > the projection matrix
 
 
 

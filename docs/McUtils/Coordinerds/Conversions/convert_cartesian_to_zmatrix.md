@@ -26,21 +26,7 @@ The ordering should be specified like:
   - `kw`: `Any`
     > ignored key-word arguments
   - `:returns`: `np.ndarray`
-    > z
--
-m
-a
-t
-r
-i
-x
- 
-c
-o
-o
-r
-d
-s
+    > z-matrix coords
 
 
 

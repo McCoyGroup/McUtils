@@ -18,35 +18,7 @@ leading batch dimensions.
   - `inds`: `tuple | np.ndarray`
     > the positions to exclude
   - `:returns`: `tuple[np.ndarray, ...]`
-    > t
-h
-e
- 
-c
-o
-m
-p
-l
-e
-m
-e
-n
-t
-a
-r
-y
- 
-i
-n
-d
-e
-x
- 
-t
-u
-p
-l
-e
+    > the complementary index tuple
 
 
 

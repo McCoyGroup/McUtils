@@ -24,48 +24,7 @@ optionally be returned alongside.
   - `return_rows`: `bool`
     > also return the group row labels
   - `:returns`: `list | tuple`
-    > t
-h
-e
- 
-g
-r
-o
-u
-p
-e
-d
- 
-v
-a
-l
-u
-e
-s
- 
-(
-a
-n
-d
- 
-r
-o
-w
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the grouped values (and rows if requested)
 
 
 

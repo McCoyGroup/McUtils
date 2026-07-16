@@ -17,38 +17,7 @@ minimal dtype.
   - `ar`: `np.ndarray`
     > the array to sort
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-(
-d
-o
-w
-n
--
-c
-a
-s
-t
-)
- 
-s
-o
-r
-t
- 
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
+    > the (down-cast) sort permutation
 
 
 

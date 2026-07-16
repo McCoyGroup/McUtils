@@ -27,47 +27,7 @@ untransformed coordinates.
   - `relocalize`: `bool`
     > whether to relocalize onto the untransformed coordinates
   - `:returns`: `np.ndarray | list[np.ndarray]`
-    > t
-h
-e
- 
-d
-e
-l
-o
-c
-a
-l
-i
-z
-e
-d
- 
-c
-o
-o
-r
-d
-i
-n
-a
-t
-e
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-a
-t
-i
-o
-n
+    > the delocalized coordinate transformation
 
 
 

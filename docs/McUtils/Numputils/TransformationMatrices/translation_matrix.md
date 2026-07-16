@@ -13,51 +13,7 @@ Build a 4x4 homogeneous translation matrix (or a stack) for the given shift(s).
   - `shift`: `np.ndarray`
     > the translation vector(s)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-h
-o
-m
-o
-g
-e
-n
-e
-o
-u
-s
- 
-t
-r
-a
-n
-s
-l
-a
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the homogeneous translation matrix (or stack)
 
 
 

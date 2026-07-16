@@ -32,58 +32,7 @@ expanded via `TensorDerivatives.vec_norm_unit_deriv`.
   - `fixed_atoms`: `Iterable[int] | None`
     > atoms whose contributions should be zeroed
   - `:returns`: `list`
-    > t
-h
-e
- 
-n
-o
-r
-m
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-v
-a
-l
-u
-e
-,
- 
-d
-1
-,
- 
-d
-2
-,
- 
-.
-.
-.
-]
-`
+    > the norm derivative expansion `[value, d1, d2, ...]`
 
 
 

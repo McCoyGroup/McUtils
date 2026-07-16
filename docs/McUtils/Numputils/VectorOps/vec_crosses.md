@@ -27,48 +27,7 @@ NaNs.
   - `axis`: `int`
     > axis holding the vector components
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-(
-o
-p
-t
-i
-o
-n
-a
-l
-l
-y
- 
-n
-o
-r
-m
-a
-l
-i
-z
-e
-d
-)
- 
-c
-r
-o
-s
-s
- 
-p
-r
-o
-d
-u
-c
-t
-s
+    > the (optionally normalized) cross products
 
 
 

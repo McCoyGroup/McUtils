@@ -37,38 +37,7 @@ around the inversion. Constraints are re-applied with `prep_inverse_derivatives`
   - `fixed_cartesians`: `Iterable | None`
     > `(atom, component)` Cartesians to hold fixed
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-i
-n
-v
-e
-r
-s
-e
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
+    > the inverse derivative expansion
 
 
 

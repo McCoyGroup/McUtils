@@ -33,42 +33,7 @@ first-derivative term, otherwise the full expansion.
   - `return_rot`: `bool`
     > whether to include rotational modes
   - `:returns`: `np.ndarray | list`
-    > t
-h
-e
- 
-o
-r
-i
-e
-n
-t
-a
-t
-i
-o
-n
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-v
-e
-c
-t
-o
-r
-(
-s
-)
+    > the orientation derivative vector(s)
 
 
 

@@ -16,45 +16,7 @@ zero-dimensional integer array).
   - `types`: `tuple | None`
     > the integer types to accept
   - `:returns`: `bool`
-    > w
-h
-e
-t
-h
-e
-r
- 
-t
-h
-e
- 
-o
-b
-j
-e
-c
-t
- 
-i
-s
- 
-a
-n
- 
-i
-n
-t
-e
-g
-e
-r
- 
-s
-c
-a
-l
-a
-r
+    > whether the object is an integer scalar
 
 
 

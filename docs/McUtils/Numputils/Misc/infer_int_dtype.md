@@ -16,37 +16,7 @@ Uses `np.min_scalar_type` on `-(max_dim + 1)` to force a signed result.
   - `max_dim`: `int`
     > the largest dimension to represent
   - `:returns`: `np.dtype`
-    > t
-h
-e
- 
-m
-i
-n
-i
-m
-a
-l
- 
-s
-i
-g
-n
-e
-d
- 
-s
-c
-a
-l
-a
-r
- 
-d
-t
-y
-p
-e
+    > the minimal signed scalar dtype
 
 
 

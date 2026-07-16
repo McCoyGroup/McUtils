@@ -21,25 +21,7 @@ when `pad_base` is set).
   - `pad_base`: `bool`
     > append the base array's shape to the target shape
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-b
-r
-o
-a
-d
-c
-a
-s
-t
- 
-a
-r
-r
-a
-y
+    > the broadcast array
 
 
 

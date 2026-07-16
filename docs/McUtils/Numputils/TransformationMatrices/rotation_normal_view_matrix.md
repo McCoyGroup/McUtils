@@ -21,30 +21,7 @@ right vector; the frame is then built with `view_matrix`.
   - `output_order`: `tuple`
     > axis output ordering
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-v
-i
-e
-w
-i
-n
-g
- 
-f
-r
-a
-m
-e
- 
-m
-a
-t
-r
-i
-x
+    > the viewing frame matrix
 
 
 

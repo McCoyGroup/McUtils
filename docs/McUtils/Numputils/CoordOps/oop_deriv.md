@@ -40,53 +40,7 @@ coordinate set when `reproject` is set.
   - `expanded_vectors`: `Iterable[int] | None`
     > which defining vectors to expand
   - `:returns`: `list`
-    > t
-h
-e
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-v
-a
-l
-u
-e
-,
- 
-d
-1
-,
- 
-d
-2
-,
- 
-.
-.
-.
-]
-`
+    > the derivative expansion `[value, d1, d2, ...]`
 
 
 

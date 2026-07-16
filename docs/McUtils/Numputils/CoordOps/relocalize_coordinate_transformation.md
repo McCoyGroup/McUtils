@@ -20,36 +20,7 @@ SVD gives the orthogonal rotation `R = U V` applied to the transformation.
   - `untransformed_coordinates`: `Iterable[int] | None`
     > coordinates to align to (identity if omitted)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-l
-o
-c
-a
-l
-i
-z
-e
-d
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-a
-t
-i
-o
-n
+    > the relocalized transformation
 
 
 

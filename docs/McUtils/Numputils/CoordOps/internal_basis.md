@@ -21,56 +21,7 @@ function to collect its basis, orthogonal complement, and sub-projection.
   - `opts`: `Any`
     > options forwarded to `internal_basis_specs`
   - `:returns`: `tuple[list, list, list]`
-    > `
-(
-b
-a
-s
-e
-s
-,
- 
-o
-r
-t
-h
-o
-g
-o
-n
-a
-l
-_
-c
-o
-m
-p
-l
-e
-m
-e
-n
-t
-s
-,
- 
-s
-u
-b
-_
-p
-r
-o
-j
-e
-c
-t
-i
-o
-n
-s
-)
-`
+    > `(bases, orthogonal_complements, sub_projections)`
 
 
 

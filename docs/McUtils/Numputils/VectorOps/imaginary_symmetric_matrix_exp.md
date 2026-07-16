@@ -14,35 +14,7 @@ applying `cos` and `sin` to its eigenvalues.
   - `mats`: `np.ndarray`
     > the symmetric matrix (or stack)
   - `:returns`: `list[np.ndarray]`
-    > `
-[
-r
-e
-a
-l
-_
-p
-a
-r
-t
-,
- 
-i
-m
-a
-g
-i
-n
-a
-r
-y
-_
-p
-a
-r
-t
-]
-`
+    > `[real_part, imaginary_part]`
 
 
 

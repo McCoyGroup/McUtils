@@ -46,31 +46,7 @@ commented block preserves an earlier explicit-construction approach.)
   - `return_rot`: `bool`
     > whether to include rotational modes
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-o
-r
-i
-e
-n
-t
-a
-t
-i
-o
-n
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
+    > the orientation expansion
 
 
 

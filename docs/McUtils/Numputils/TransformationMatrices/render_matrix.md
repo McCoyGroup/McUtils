@@ -47,32 +47,7 @@ perspective stage.
   - `include_perspective`: `bool`
     > include the perspective projection stage
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-o
-m
-b
-i
-n
-e
-d
- 
-r
-e
-n
-d
-e
-r
- 
-m
-a
-t
-r
-i
-x
+    > the combined render matrix
 
 
 

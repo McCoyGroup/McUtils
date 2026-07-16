@@ -14,57 +14,7 @@ coordinate padding used for affine transforms).
   - `vecs`: `np.ndarray`
     > the vectors to pad
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-v
-e
-c
-t
-o
-r
-s
- 
-w
-i
-t
-h
- 
-a
- 
-`
-1
-`
- 
-a
-p
-p
-e
-n
-d
-e
-d
- 
-a
-l
-o
-n
-g
- 
-t
-h
-e
- 
-l
-a
-s
-t
- 
-a
-x
-i
-s
+    > the vectors with a `1` appended along the last axis
 
 
 

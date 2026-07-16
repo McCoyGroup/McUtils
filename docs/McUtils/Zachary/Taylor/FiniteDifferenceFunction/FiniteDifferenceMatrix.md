@@ -160,12 +160,7 @@ w1 w2 w3 ...
 ...
 .... b3 b2 b1
   - `:returns`: `np.ndarray | sp.csr_matrix`
-    > f
-d
-_
-m
-a
-t
+    > fd_mat
  </div>
 </div>
 

@@ -59,11 +59,7 @@ Tries to merge with another TransformationFunction
   - `other`: `TransformationFunction`
     > a TransformationFunction to try to merge with
   - `:returns`: `TransformationFunction`
-    > t
-f
-u
-n
-c
+    > tfunc
 
 
 <a id="McUtils.Numputils.GeometricTransformations.TransformationFunction.TransformationFunction.operate" class="docs-object-method">&nbsp;</a> 

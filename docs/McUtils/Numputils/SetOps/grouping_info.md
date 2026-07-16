@@ -13,32 +13,7 @@ Grouping info for keys
   - `sorting`: `Any`
     > 
   - `:returns`: `_`
-    > g
-r
-o
-u
-p
- 
-p
-a
-i
-r
-s
- 
-&
- 
-s
-o
-r
-t
-i
-n
-g
- 
-i
-n
-f
-o
+    > group pairs & sorting info
 
 
 

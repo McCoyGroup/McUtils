@@ -25,47 +25,7 @@ reconstructed from its axis/root/order, and any scaling is reapplied on top.
   - `orders`: `np.ndarray`
     > the rational angle denominators (rotation orders)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-c
-o
-n
-s
-t
-r
-u
-c
-t
-e
-d
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-a
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-c
-e
-s
+    > the reconstructed transformation matrices
 
 
 

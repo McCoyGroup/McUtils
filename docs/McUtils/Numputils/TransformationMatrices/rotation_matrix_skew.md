@@ -20,39 +20,7 @@ reassembled as `T U Tᵀ`.
   - `create_skew`: `bool`
     > coerce the input into a skew matrix first
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-o
-r
-r
-e
-s
-p
-o
-n
-d
-i
-n
-g
- 
-r
-o
-t
-a
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
+    > the corresponding rotation matrix
 
 
 

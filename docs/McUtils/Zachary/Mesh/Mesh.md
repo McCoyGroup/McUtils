@@ -211,15 +211,7 @@ Determines what kind of grid we're working with
   - `grid`: `np.ndarray`
     > 
   - `:returns`: `MeshType`
-    > m
-e
-s
-h
-_
-t
-y
-p
-e
+    > mesh_type
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.RegularMesh" class="docs-object-method">&nbsp;</a> 

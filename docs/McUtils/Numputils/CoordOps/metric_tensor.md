@@ -20,23 +20,7 @@ expansion.
   - `masses`: `np.ndarray | None`
     > per-atom masses for mass-weighting
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-m
-e
-t
-r
-i
-c
- 
-t
-e
-n
-s
-o
-r
+    > the metric tensor
 
 
 

@@ -26,33 +26,7 @@ when `mass_weighted` is off.
   - `strip_embedding`: `bool`
     > drop the translation/rotation columns from the result
   - `:returns`: `tuple[np.ndarray, np.ndarray]`
-    > `
-(
-t
-r
-a
-n
-s
-f
-o
-r
-m
-a
-t
-i
-o
-n
-,
- 
-i
-n
-v
-e
-r
-s
-e
-)
-`
+    > `(transformation, inverse)`
 
 
 

@@ -17,38 +17,7 @@ coordinates. Batched inputs are supported.
   - `axes`: `np.ndarray`
     > the axis (or axes) defining the reflected subspace
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-f
-l
-e
-c
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the reflection matrix (or stack)
 
 
 

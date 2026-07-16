@@ -30,46 +30,7 @@ transformation and reference internals.
   - `opts`: `Any`
     > options forwarded to `internal_conversion_specs`
   - `:returns`: `Callable`
-    > a
- 
-`
-c
-o
-n
-v
-e
-r
-t
-(
-c
-o
-o
-r
-d
-s
-,
- 
-o
-r
-d
-e
-r
-=
-N
-o
-n
-e
-)
-`
- 
-f
-u
-n
-c
-t
-i
-o
-n
+    > a `convert(coords, order=None)` function
 
 
 

@@ -21,46 +21,7 @@ angle expressed as a root/order pair.
   - `max_rotation_order`: `int | None`
     > largest rotation order to rationalize angles against
   - `:returns`: `tuple`
-    > `
-(
-s
-c
-a
-l
-i
-n
-g
-s
-,
- 
-t
-y
-p
-e
-s
-,
- 
-a
-x
-e
-s
-,
- 
-r
-o
-o
-t
-s
-,
- 
-o
-r
-d
-e
-r
-s
-)
-`
+    > `(scalings, types, axes, roots, orders)`
 
 
 

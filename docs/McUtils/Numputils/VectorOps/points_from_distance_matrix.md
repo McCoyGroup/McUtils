@@ -28,41 +28,7 @@ the output can be zero-padded up to `target_dim`.
   - `zero_cutoff`: `float`
     > eigenvalue cutoff for counting significant dimensions
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-c
-o
-n
-s
-t
-r
-u
-c
-t
-e
-d
- 
-p
-o
-i
-n
-t
- 
-c
-o
-o
-r
-d
-i
-n
-a
-t
-e
-s
+    > the reconstructed point coordinates
 
 
 

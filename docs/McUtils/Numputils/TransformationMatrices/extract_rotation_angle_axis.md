@@ -20,44 +20,7 @@ decomposed via a Schur/Youla factorization into a set of plane angles and axes.
   - `normalize`: `bool`
     > normalize the extracted axis
   - `:returns`: `tuple`
-    > `
-(
-a
-n
-g
-l
-e
-,
- 
-a
-x
-i
-s
-)
-`
- 
-(
-a
-x
-i
-s
- 
-i
-s
- 
-`
-N
-o
-n
-e
-`
- 
-i
-n
- 
-2
-D
-)
+    > `(angle, axis)` (axis is `None` in 2D)
 
 
 

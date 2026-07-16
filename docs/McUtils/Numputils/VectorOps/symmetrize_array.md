@@ -31,27 +31,7 @@ control which index tuples and permutations participate.
   - `out`: `np.ndarray | None`
     > optional output array to write into
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-s
-y
-m
-m
-e
-t
-r
-i
-z
-e
-d
- 
-a
-r
-r
-a
-y
+    > the symmetrized array
 
 
 

@@ -16,39 +16,7 @@ stack of matrices.
   - `perm`: `np.ndarray`
     > the permutation(s)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the permutation matrix (or stack)
 
 
 

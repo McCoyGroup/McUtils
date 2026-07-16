@@ -78,18 +78,7 @@ Initializes the subplots for the Graphics object
   - `kw`: `Any`
     > 
   - `:returns`: `GraphicsFigure, GraphicsAxes`
-    > f
-i
-g
-u
-r
-e
-,
- 
-a
-x
-e
-s
+    > figure, axes
 
 
 <a id="McUtils.Plots.Graphics.GraphicsBase.parent" class="docs-object-method">&nbsp;</a> 
@@ -352,40 +341,7 @@ Saves the image to file
   - `kw`: `Any`
     > 
   - `:returns`: `str`
-    > f
-i
-l
-e
- 
-i
-t
- 
-w
-a
-s
- 
-s
-a
-v
-e
-d
- 
-t
-o
- 
-(
-I
- 
-t
-h
-i
-n
-k
-.
-.
-.
-?
-)
+    > file it was saved to (I think...?)
 
 
 <a id="McUtils.Plots.Graphics.GraphicsBase.to_png" class="docs-object-method">&nbsp;</a> 

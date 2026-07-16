@@ -14,31 +14,7 @@ value.
   - `indexing_array`: `np.ndarray`
     > the indices to recast
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-d
-o
-w
-n
--
-c
-a
-s
-t
- 
-i
-n
-d
-e
-x
- 
-a
-r
-r
-a
-y
+    > the down-cast index array
 
 
 

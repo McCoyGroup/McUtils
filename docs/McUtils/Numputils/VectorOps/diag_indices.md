@@ -22,30 +22,7 @@ values along the generalized diagonal.
   - `k`: `int`
     > number of diagonal axes
   - `:returns`: `tuple`
-    > t
-h
-e
- 
-d
-i
-a
-g
-o
-n
-a
-l
- 
-i
-n
-d
-e
-x
- 
-t
-u
-p
-l
-e
+    > the diagonal index tuple
 
 
 

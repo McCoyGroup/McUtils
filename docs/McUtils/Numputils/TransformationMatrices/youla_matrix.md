@@ -21,40 +21,7 @@ fixed axis (for odd dimensions) as an identity entry.
   - `axis_pos`: `int`
     > index of the fixed axis for odd dimensions
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-b
-l
-o
-c
-k
--
-d
-i
-a
-g
-o
-n
-a
-l
- 
-r
-o
-t
-a
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
+    > the block-diagonal rotation matrix
 
 
 

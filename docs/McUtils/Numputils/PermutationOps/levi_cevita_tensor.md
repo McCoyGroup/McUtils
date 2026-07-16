@@ -18,28 +18,7 @@ Uses `levi_cevita_maps` to place `±1` at the permutation positions; a
   - `sparse`: `bool`
     > return a `SparseArray` instead of a dense array
   - `:returns`: `np.ndarray | SparseArray`
-    > t
-h
-e
- 
-L
-e
-v
-i
--
-C
-i
-v
-i
-t
-a
- 
-t
-e
-n
-s
-o
-r
+    > the Levi-Civita tensor
 
 
 

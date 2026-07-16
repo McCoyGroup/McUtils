@@ -24,55 +24,7 @@ For each operation the transformed points are compared against the current set
   - `tol`: `float`
     > duplicate-detection tolerance
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-e
-x
-p
-a
-n
-d
-e
-d
- 
-c
-o
-o
-r
-d
-i
-n
-a
-t
-e
-s
- 
-(
-a
-n
-d
- 
-l
-a
-b
-e
-l
-s
- 
-i
-f
- 
-p
-r
-o
-v
-i
-d
-e
-d
-)
+    > the expanded coordinates (and labels if provided)
 
 
 

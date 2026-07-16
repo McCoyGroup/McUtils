@@ -55,31 +55,7 @@ Iteratively applies the stored finite difference objects to the vals
   - `axes`: `int | Iterable[int]`
     > The axis or axes to take the differences along (defaults to `self.axes`)
   - `:returns`: `np.ndarray`
-    > T
-h
-e
- 
-t
-e
-n
-s
-o
-r
- 
-o
-f
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
-s
+    > The tensor of derivatives
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.__call__" class="docs-object-method">&nbsp;</a> 
@@ -103,43 +79,7 @@ order(self):
 </div>
 
   - `:returns`: `tuple[int]`
-    > t
-h
-e
- 
-o
-r
-d
-e
-r
- 
-o
-f
- 
-t
-h
-e
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
+    > the order of the derivative requested
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.weights" class="docs-object-method">&nbsp;</a> 
@@ -153,43 +93,7 @@ weights(self):
 </div>
 
   - `:returns`: `tuple[np.array[float]]`
-    > t
-h
-e
- 
-w
-e
-i
-g
-h
-t
-s
- 
-f
-o
-r
- 
-t
-h
-e
- 
-s
-p
-e
-c
-i
-f
-i
-e
-d
- 
-s
-t
-e
-n
-c
-i
-l
+    > the weights for the specified stencil
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.widths" class="docs-object-method">&nbsp;</a> 
@@ -203,87 +107,7 @@ widths(self):
 </div>
 
   - `:returns`: `tuple[(int, int)]`
-    > t
-h
-e
- 
-n
-u
-m
-b
-e
-r
- 
-o
-f
- 
-p
-o
-i
-n
-t
-s
- 
-i
-n
- 
-e
-a
-c
-h
- 
-d
-i
-m
-e
-n
-s
-i
-o
-n
-,
- 
-l
-e
-f
-t
- 
-a
-n
-d
- 
-r
-i
-g
-h
-t
-,
- 
-f
-o
-r
- 
-t
-h
-e
- 
-s
-p
-e
-c
-i
-f
-i
-e
-d
- 
-s
-t
-e
-n
-c
-i
-l
+    > the number of points in each dimension, left and right, for the specified stencil
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.regular_difference" class="docs-object-method">&nbsp;</a> 
@@ -334,16 +158,7 @@ Deconstructs the grid into its subgrids and builds a different differencer for e
   - `stencil`: `int or list of ints`
     > number of points to use in the stencil
   - `:returns`: `FiniteDifferenceFunction`
-    > d
-e
-r
-i
-v
- 
-f
-u
-n
-c
+    > deriv func
  </div>
 </div>
 

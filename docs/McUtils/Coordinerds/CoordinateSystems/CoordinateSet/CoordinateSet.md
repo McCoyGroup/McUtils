@@ -132,16 +132,7 @@ Converts across coordinate systems
   - `system`: `CoordinateSystem`
     > the target coordinate system
   - `:returns`: `CoordinateSet`
-    > n
-e
-w
-_
-c
-o
-o
-r
-d
-s
+    > new_coords
 
 
 <a id="McUtils.Coordinerds.CoordinateSystems.CoordinateSet.CoordinateSet.derivatives" class="docs-object-method">&nbsp;</a> 

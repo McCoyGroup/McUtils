@@ -21,31 +21,7 @@ in one at a time via `np.concatenate`.
   - `padding`: `int`
     > extra trailing axes to leave untouched
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-o
-l
-l
-a
-p
-s
-e
-d
- 
-d
-e
-n
-s
-e
- 
-a
-r
-r
-a
-y
+    > the collapsed dense array
 
 
 

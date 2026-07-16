@@ -18,43 +18,7 @@ Convenience wrapper around `is_array_like` restricted to numeric dtypes.
   - `ndim`: `int | None`
     > required number of dimensions (any if omitted)
   - `:returns`: `bool`
-    > w
-h
-e
-t
-h
-e
-r
- 
-t
-h
-e
- 
-o
-b
-j
-e
-c
-t
- 
-i
-s
- 
-a
- 
-n
-u
-m
-e
-r
-i
-c
- 
-a
-r
-r
-a
-y
+    > whether the object is a numeric array
 
 
 

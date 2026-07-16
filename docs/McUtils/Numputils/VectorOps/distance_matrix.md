@@ -28,53 +28,7 @@ alongside the distances.
   - `return_diffs`: `bool`
     > also return the difference vectors
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-d
-i
-s
-t
-a
-n
-c
-e
-s
- 
-(
-p
-l
-u
-s
- 
-i
-n
-d
-i
-c
-e
-s
-/
-d
-i
-f
-f
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the distances (plus indices/diffs if requested)
 
 
 

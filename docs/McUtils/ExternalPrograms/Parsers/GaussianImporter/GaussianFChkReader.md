@@ -47,16 +47,7 @@ read_header(self):
 </div>
 Reads the header and skips the stream to where we want to be
   - `:returns`: `str`
-    > t
-h
-e
- 
-h
-e
-a
-d
-e
-r
+    > the header
 
 
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianFChkReader.get_next_block_params" class="docs-object-method">&nbsp;</a> 

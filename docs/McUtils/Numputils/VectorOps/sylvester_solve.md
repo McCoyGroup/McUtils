@@ -20,22 +20,7 @@ A) vec(X) = vec(C)` and solved with `np.linalg.solve`.
   - `C`: `np.ndarray`
     > the right-hand side
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-s
-o
-l
-u
-t
-i
-o
-n
- 
-`
-X
-`
+    > the solution `X`
 
 
 

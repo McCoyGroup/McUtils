@@ -17,44 +17,7 @@ instead.
   - `reflection_mat`: `np.ndarray`
     > the reflection matrix (or stack)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-f
-l
-e
-c
-t
-i
-o
-n
- 
-a
-x
-i
-s
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
- 
-o
-f
- 
-a
-x
-e
-s
-)
+    > the reflection axis (or stack of axes)
 
 
 

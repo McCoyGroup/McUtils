@@ -19,54 +19,7 @@ Build the complementary projector that removes the span of a basis (`I - P`).
   - `allow_pinv`: `bool`
     > use the pseudoinverse instead of QR/transpose
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-o
-r
-t
-h
-o
-g
-o
-n
-a
-l
- 
-(
-c
-o
-m
-p
-l
-e
-m
-e
-n
-t
-a
-r
-y
-)
- 
-p
-r
-o
-j
-e
-c
-t
-i
-o
-n
- 
-m
-a
-t
-r
-i
-x
+    > the orthogonal (complementary) projection matrix
 
 
 

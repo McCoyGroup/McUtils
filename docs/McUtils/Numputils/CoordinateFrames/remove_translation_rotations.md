@@ -21,29 +21,7 @@ Cartesian axis.
   - `mass_weighted`: `bool`
     > whether the working space is mass-weighted
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-p
-r
-o
-j
-e
-c
-t
-e
-d
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
+    > the projected expansion
 
 
 

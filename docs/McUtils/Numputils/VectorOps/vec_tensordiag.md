@@ -21,34 +21,7 @@ prepended to the trailing block and the input is written along that diagonal via
   - `extra_dims`: `int`
     > number of extra diagonal axes to add
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-d
-i
-a
-g
-o
-n
-a
-l
--
-e
-m
-b
-e
-d
-d
-e
-d
- 
-t
-e
-n
-s
-o
-r
+    > the diagonal-embedded tensor
 
 
 

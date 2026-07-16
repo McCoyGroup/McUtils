@@ -19,55 +19,7 @@ array.
   - `axis`: `int`
     > the axis to scan along
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-f
-i
-r
-s
-t
--
-n
-o
-n
-z
-e
-r
-o
- 
-i
-n
-d
-e
-x
- 
-p
-e
-r
- 
-r
-o
-w
- 
-(
-`
--
-1
-`
- 
-w
-h
-e
-r
-e
- 
-n
-o
-n
-e
-)
+    > the first-nonzero index per row (`-1` where none)
 
 
 

@@ -17,37 +17,7 @@ chosen from the trailing dimension size.
   - `permutation_array`: `np.ndarray`
     > the permutation(s) to recast
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-d
-o
-w
-n
--
-c
-a
-s
-t
- 
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
- 
-a
-r
-r
-a
-y
+    > the down-cast permutation array
 
 
 

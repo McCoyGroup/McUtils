@@ -28,25 +28,7 @@ clipping to the target interval.
   - `clip`: `bool`
     > whether to clip the result to the target range
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-s
-c
-a
-l
-e
-d
- 
-v
-a
-l
-u
-e
-s
+    > the rescaled values
 
 
 

@@ -21,52 +21,7 @@ Convenience wrapper over `group_by` that groups a plain `arange` by `keys`.
   - `return_indices`: `bool | None`
     > also return grouping indices
   - `:returns`: `tuple`
-    > t
-h
-e
- 
-g
-r
-o
-u
-p
-e
-d
- 
-i
-n
-d
-i
-c
-e
-s
- 
-(
-p
-l
-u
-s
- 
-e
-x
-t
-r
-a
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the grouped indices (plus extras if requested)
 
 
 

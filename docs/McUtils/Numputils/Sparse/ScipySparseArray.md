@@ -745,20 +745,7 @@ Saves a SparseArray to a file (must have the npz extension)
   - `compressed`: `Any`
     > 
   - `:returns`: `str`
-    > t
-h
-e
- 
-s
-a
-v
-e
-d
- 
-f
-i
-l
-e
+    > the saved file
 
 
 <a id="McUtils.Numputils.Sparse.ScipySparseArray.loadz" class="docs-object-method">&nbsp;</a> 

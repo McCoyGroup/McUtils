@@ -15,25 +15,7 @@ Cast an index array down to the smallest dtype that can hold `max_val`.
   - `max_val`: `int`
     > the largest value the array needs to represent
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-d
-o
-w
-n
--
-c
-a
-s
-t
- 
-a
-r
-r
-a
-y
+    > the down-cast array
 
 
 

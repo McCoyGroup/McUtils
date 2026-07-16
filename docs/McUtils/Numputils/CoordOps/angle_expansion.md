@@ -39,48 +39,7 @@ for the split rotation.
     > differentiation order w.r.t. the axis (see
     `rotation_expansion_from_axis_angle`)
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-r
-o
-t
-a
-t
-i
-o
-n
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-c
-o
-o
-r
-d
-s
-,
- 
-d
-1
-,
- 
-.
-.
-.
-]
-`
+    > the rotation expansion `[coords, d1, ...]`
 
 
 

@@ -33,39 +33,7 @@ plot(self, *params, insert_default_styles=True, **plot_style):
 </div>
 Plots a set of data | stores the result
   - `:returns`: `_`
-    > t
-h
-e
- 
-g
-r
-a
-p
-h
-i
-c
-s
- 
-t
-h
-a
-t
- 
-m
-a
-t
-p
-l
-o
-t
-l
-i
-b
- 
-m
-a
-d
-e
+    > the graphics that matplotlib made
  </div>
 </div>
 

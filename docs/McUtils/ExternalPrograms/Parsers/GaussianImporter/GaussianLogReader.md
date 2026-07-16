@@ -64,92 +64,7 @@ The main function we'll actually use. Parses bits out of a .log file.
   - `num`: `int or None`
     > for keys with multiple entries, the number of entries to pull
   - `:returns`: `dict`
-    > t
-h
-e
- 
-d
-a
-t
-a
- 
-p
-u
-l
-l
-e
-d
- 
-f
-r
-o
-m
- 
-t
-h
-e
- 
-l
-o
-g
- 
-f
-i
-l
-e
-,
- 
-s
-t
-r
-u
-n
-g
- 
-t
-o
-g
-e
-t
-h
-e
-r
- 
-a
-s
- 
-a
- 
-`
-d
-i
-c
-t
-`
- 
-a
-n
-d
- 
-k
-e
-y
-e
-d
- 
-b
-y
- 
-t
-h
-e
- 
-_
-k
-e
-y
-s
-_
+    > the data pulled from the log file, strung together as a `dict` and keyed by the _keys_
 
 
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.get_default_keys" class="docs-object-method">&nbsp;</a> 
@@ -163,17 +78,7 @@ get_default_keys(self):
 Tries to get the default keys one might be expected to want depending on the type of job as determined from the Header
 Currently only supports 'opt', 'scan', and 'popt' as job types.
   - `:returns`: `tuple(str)`
-    > k
-e
-y
- 
-l
-i
-s
-t
-i
-n
-g
+    > key listing
 
 
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianLogReader.read_props" class="docs-object-method">&nbsp;</a> 

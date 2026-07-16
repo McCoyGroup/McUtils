@@ -21,37 +21,7 @@ fixed axis position for odd dimensions.
   - `axis_pos`: `int`
     > index of the fixed (unpaired) axis for odd dimensions
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-a
-n
-o
-n
-i
-c
-a
-l
- 
-Y
-o
-u
-l
-a
- 
-s
-k
-e
-w
- 
-m
-a
-t
-r
-i
-x
+    > the canonical Youla skew matrix
 
 
 

@@ -33,52 +33,7 @@ atoms) is resolved by `_handle_expansion_atom_exclusions`.
   - `amount`: `float`
     > displacement magnitude applied to the value term
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-d
-i
-s
-p
-l
-a
-c
-e
-m
-e
-n
-t
- 
-e
-x
-p
-a
-n
-s
-i
-o
-n
- 
-`
-[
-c
-o
-o
-r
-d
-s
-,
- 
-d
-1
-,
- 
-.
-.
-.
-]
-`
+    > the displacement expansion `[coords, d1, ...]`
 
 
 

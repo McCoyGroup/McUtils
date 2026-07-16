@@ -15,44 +15,7 @@ Gets the angles and normals between two vectors
   - `up_vectors`: `None | np.ndarray`
     > orientation vectors to obtain signed angles
   - `:returns`: `(np.ndarray, np.ndarray)`
-    > a
-n
-g
-l
-e
-s
- 
-a
-n
-d
- 
-n
-o
-r
-m
-a
-l
-s
- 
-b
-e
-t
-w
-e
-e
-n
- 
-t
-w
-o
- 
-v
-e
-c
-t
-o
-r
-s
+    > angles and normals between two vectors
 
 
 

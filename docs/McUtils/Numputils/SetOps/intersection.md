@@ -29,50 +29,7 @@ into the inputs can optionally be returned.
   - `minimal_dtype`: `bool`
     > down-cast returned indices to a minimal dtype
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-i
-n
-t
-e
-r
-s
-e
-c
-t
-i
-o
-n
- 
-(
-p
-l
-u
-s
- 
-i
-n
-d
-i
-c
-e
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the intersection (plus indices if requested)
 
 
 

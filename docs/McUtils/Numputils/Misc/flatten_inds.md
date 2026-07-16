@@ -20,24 +20,7 @@ bookkeeping used when flattening atom/component blocks.
   - `idx_blocks`: `tuple[int, int]`
     > `(start, end)` inclusive axis ranges to collapse
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-r
-e
-s
-h
-a
-p
-e
-d
- 
-a
-r
-r
-a
-y
+    > the reshaped array
 
 
 

@@ -22,33 +22,7 @@ while sharing the first `shared` batch axes.
   - `shared`: `int | None`
     > number of shared leading batch axes (inferred if omitted)
   - `:returns`: `tuple`
-    > t
-h
-e
- 
-b
-r
-o
-a
-d
-c
-a
-s
-t
-e
-d
- 
-i
-n
-d
-e
-x
- 
-t
-u
-p
-l
-e
+    > the broadcasted index tuple
 
 
 

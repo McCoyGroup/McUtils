@@ -23,27 +23,7 @@ Project vectors onto the span of a basis.
   - `allow_pinv`: `bool`
     > use the pseudoinverse
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-p
-r
-o
-j
-e
-c
-t
-e
-d
- 
-v
-e
-c
-t
-o
-r
-s
+    > the projected vectors
 
 
 

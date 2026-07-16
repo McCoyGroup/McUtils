@@ -22,33 +22,7 @@ given a `bbox` the coordinates are optionally rescaled into a normalized cube
   - `rescale`: `bool`
     > rescale the bounding box into a normalized cube
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-w
-o
-r
-l
-d
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the world matrix (or stack)
 
 
 

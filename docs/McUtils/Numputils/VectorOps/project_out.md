@@ -24,40 +24,7 @@ complement).
   - `allow_pinv`: `bool`
     > use the pseudoinverse
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-v
-e
-c
-t
-o
-r
-s
- 
-w
-i
-t
-h
- 
-t
-h
-e
- 
-b
-a
-s
-i
-s
- 
-r
-e
-m
-o
-v
-e
-d
+    > the vectors with the basis removed
 
 
 

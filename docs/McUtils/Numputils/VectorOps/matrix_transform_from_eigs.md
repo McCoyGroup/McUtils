@@ -18,28 +18,7 @@ original eigenbasis (`Vᵀ diag(f(evals)) V`).
   - `tf`: `Callable`
     > scalar function applied to the eigenvalues
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-e
-d
- 
-m
-a
-t
-r
-i
-x
+    > the transformed matrix
 
 
 

@@ -28,37 +28,7 @@ forced.
   - `recursive`: `bool`
     > force the recursive evaluation
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-e
-v
-a
-l
-u
-a
-t
-e
-d
- 
-c
-o
-m
-m
-u
-t
-a
-t
-o
-r
- 
-m
-a
-t
-r
-i
-x
+    > the evaluated commutator matrix
 
 
 

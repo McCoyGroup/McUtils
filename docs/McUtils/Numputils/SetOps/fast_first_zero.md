@@ -18,52 +18,7 @@ The integer counterpart of `fast_first_nonzero`, using a byte-view trick.
   - `axis`: `int`
     > the axis to scan along
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-f
-i
-r
-s
-t
--
-z
-e
-r
-o
- 
-i
-n
-d
-e
-x
- 
-p
-e
-r
- 
-r
-o
-w
- 
-(
-`
--
-1
-`
- 
-w
-h
-e
-r
-e
- 
-n
-o
-n
-e
-)
+    > the first-zero index per row (`-1` where none)
 
 
 

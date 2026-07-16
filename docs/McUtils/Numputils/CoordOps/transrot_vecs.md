@@ -31,51 +31,7 @@ term, otherwise the full expansion.
   - `fixed_atoms`: `Iterable[int] | None`
     > atoms whose contributions should be zeroed
   - `:returns`: `np.ndarray | list`
-    > t
-h
-e
- 
-t
-r
-a
-n
-s
-l
-a
-t
-i
-o
-n
-/
-r
-o
-t
-a
-t
-i
-o
-n
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-v
-e
-c
-t
-o
-r
-(
-s
-)
+    > the translation/rotation derivative vector(s)
 
 
 

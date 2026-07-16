@@ -19,33 +19,7 @@ is flattened into a single dense `(stack * rows, stack * cols)` matrix.
   - `kroneckerize`: `bool`
     > whether to flatten the block structure into a dense matrix
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-b
-l
-o
-c
-k
--
-d
-i
-a
-g
-o
-n
-a
-l
- 
-m
-a
-t
-r
-i
-c
-e
-s
+    > the block-diagonal matrices
 
 
 

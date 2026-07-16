@@ -18,57 +18,7 @@ shape `shape`, broadcasting over any leading batch dimensions carried by `inds`.
   - `return_shape`: `bool`
     > also return the broadcast output shape
   - `:returns`: `tuple`
-    > t
-h
-e
- 
-i
-n
-d
-e
-x
- 
-t
-u
-p
-l
-e
- 
-(
-a
-n
-d
- 
-t
-h
-e
- 
-o
-u
-t
-p
-u
-t
- 
-s
-h
-a
-p
-e
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the index tuple (and the output shape if requested)
 
 
 

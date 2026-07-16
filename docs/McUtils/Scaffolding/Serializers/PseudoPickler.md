@@ -67,38 +67,7 @@ falling back to `pickle`
   - `obj`: `Any`
     > object to be serialized
   - `:returns`: `dict`
-    > s
-p
-e
-c
- 
-f
-o
-r
- 
-t
-h
-e
- 
-p
-s
-e
-u
-d
-o
--
-p
-i
-c
-k
-l
-e
-d
- 
-d
-a
-t
-a
+    > spec for the pseudo-pickled data
 
 
 <a id="McUtils.Scaffolding.Serializers.PseudoPickler.deserialize" class="docs-object-method">&nbsp;</a> 

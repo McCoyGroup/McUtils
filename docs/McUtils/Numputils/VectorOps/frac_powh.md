@@ -28,33 +28,7 @@ inputs are padded to square first.
   - `nonzero_cutoff`: `float | None`
     > eigenvalue magnitude below which values are treated as zero
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-f
-r
-a
-c
-t
-i
-o
-n
-a
-l
- 
-m
-a
-t
-r
-i
-x
- 
-p
-o
-w
-e
-r
+    > the fractional matrix power
 
 
 

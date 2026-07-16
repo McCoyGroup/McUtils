@@ -77,28 +77,7 @@ write(self, objects, max_depth=-1, index='index.md'):
 </div>
 Walks through the objects supplied and applies the appropriate templates
   - `:returns`: `str`
-    > i
-n
-d
-e
-x
- 
-o
-f
- 
-w
-r
-i
-t
-t
-e
-n
- 
-f
-i
-l
-e
-s
+    > index of written files
  </div>
 </div>
 

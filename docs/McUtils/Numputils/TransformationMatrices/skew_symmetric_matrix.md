@@ -17,42 +17,7 @@ scattered above the diagonal and negated below it.
   - `upper_tri`: `np.ndarray`
     > the strict-upper-triangle entries
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-s
-k
-e
-w
--
-s
-y
-m
-m
-e
-t
-r
-i
-c
- 
-m
-a
-t
-r
-i
-x
- 
-(
-o
-r
- 
-s
-t
-a
-c
-k
-)
+    > the skew-symmetric matrix (or stack)
 
 
 

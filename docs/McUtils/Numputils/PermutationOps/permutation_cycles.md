@@ -20,52 +20,7 @@ groups are requested.
   - `return_groups`: `bool`
     > return explicit cycle index lists rather than labels
   - `:returns`: `np.ndarray | list`
-    > p
-e
-r
--
-p
-o
-s
-i
-t
-i
-o
-n
- 
-c
-y
-c
-l
-e
- 
-l
-a
-b
-e
-l
-s
-,
- 
-o
-r
- 
-t
-h
-e
- 
-c
-y
-c
-l
-e
- 
-g
-r
-o
-u
-p
-s
+    > per-position cycle labels, or the cycle groups
 
 
 

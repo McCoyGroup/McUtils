@@ -36,49 +36,7 @@ relabeling.
   - `permutable_groups`: `Iterable | None`
     > groups of atoms allowed to permute (defaults to all)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-o
-p
-t
-i
-m
-a
-l
- 
-p
-e
-r
--
-s
-t
-r
-u
-c
-t
-u
-r
-e
- 
-a
-t
-o
-m
- 
-p
-e
-r
-m
-u
-t
-a
-t
-i
-o
-n
-s
+    > the optimal per-structure atom permutations
 
 
 

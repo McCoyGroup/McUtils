@@ -39,47 +39,7 @@ The coordinates are optionally Eckart-embedded onto the reference (using
   - `embedding_parameters`: `Any`
     > extra options forwarded to `eckart_embedding`
   - `:returns`: `np.ndarray | tuple`
-    > t
-h
-e
- 
-E
-c
-k
-a
-r
-t
- 
-R
-M
-S
-D
- 
-(
-p
-l
-u
-s
- 
-d
-i
-f
-f
-s
- 
-i
-f
- 
-r
-e
-q
-u
-e
-s
-t
-e
-d
-)
+    > the Eckart RMSD (plus diffs if requested)
 
 
 

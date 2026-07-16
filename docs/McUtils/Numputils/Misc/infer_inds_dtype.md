@@ -14,30 +14,7 @@ Choose the smallest unsigned integer dtype that can represent a value up to
   - `max_size`: `int`
     > the largest (non-negative) value to represent
   - `:returns`: `np.dtype`
-    > t
-h
-e
- 
-m
-i
-n
-i
-m
-a
-l
- 
-s
-c
-a
-l
-a
-r
- 
-d
-t
-y
-p
-e
+    > the minimal scalar dtype
 
 
 

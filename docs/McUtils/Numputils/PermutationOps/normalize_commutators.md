@@ -19,39 +19,7 @@ involved.
   - `commutator_string`: `Sequence`
     > the `[a, b]` commutator specification (nesting allowed)
   - `:returns`: `tuple[list, list, list]`
-    > `
-(
-p
-h
-a
-s
-e
-s
-,
- 
-n
-o
-r
-m
-a
-l
-_
-f
-o
-r
-m
-s
-,
- 
-s
-y
-m
-b
-o
-l
-s
-)
-`
+    > `(phases, normal_forms, symbols)`
 
 
 

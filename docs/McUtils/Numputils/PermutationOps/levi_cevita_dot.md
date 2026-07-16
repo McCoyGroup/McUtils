@@ -22,27 +22,7 @@ Delegates to `VectorOps.semisparse_tensordot` with the Levi-Civita nonzeros.
   - `shared`: `int | None`
     > number of shared leading batch axes
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-c
-o
-n
-t
-r
-a
-c
-t
-e
-d
- 
-r
-e
-s
-u
-l
-t
+    > the contracted result
 
 
 

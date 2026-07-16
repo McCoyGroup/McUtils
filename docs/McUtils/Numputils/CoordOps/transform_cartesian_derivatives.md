@@ -23,40 +23,7 @@ batched), and restores the original shape. Numeric (scalar) entries are skipped.
   - `axes`: `list[int] | int | None`
     > `(derivative_axis, transform_axis)`; defaults to `[-1, -2]`
   - `:returns`: `list[np.ndarray]`
-    > t
-h
-e
- 
-t
-r
-a
-n
-s
-f
-o
-r
-m
-e
-d
- 
-d
-e
-r
-i
-v
-a
-t
-i
-v
-e
- 
-t
-e
-n
-s
-o
-r
-s
+    > the transformed derivative tensors
 
 
 

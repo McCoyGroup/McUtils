@@ -16,44 +16,7 @@ zero-dimensional numeric array).
   - `types`: `tuple | None`
     > the numeric types to accept (defaults to int/float types)
   - `:returns`: `bool`
-    > w
-h
-e
-t
-h
-e
-r
- 
-t
-h
-e
- 
-o
-b
-j
-e
-c
-t
- 
-i
-s
- 
-a
- 
-n
-u
-m
-e
-r
-i
-c
- 
-s
-c
-a
-l
-a
-r
+    > whether the object is a numeric scalar
 
 
 

@@ -19,31 +19,7 @@ supplied.
   - `axis_pos`: `int | None`
     > index of the fixed axis (auto-detected if omitted)
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-p
-l
-a
-n
-e
- 
-r
-o
-t
-a
-t
-i
-o
-n
- 
-a
-n
-g
-l
-e
-s
+    > the plane rotation angles
 
 
 

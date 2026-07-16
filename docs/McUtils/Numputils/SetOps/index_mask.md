@@ -18,22 +18,7 @@ when `complement` is set).
   - `complement`: `bool`
     > mark everything *except* the given positions
   - `:returns`: `np.ndarray`
-    > t
-h
-e
- 
-b
-o
-o
-l
-e
-a
-n
- 
-m
-a
-s
-k
+    > the boolean mask
 
 
 
