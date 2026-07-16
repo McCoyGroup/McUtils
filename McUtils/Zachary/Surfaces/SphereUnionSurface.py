@@ -5,6 +5,7 @@ import numpy as np
 import scipy.spatial
 import scipy.spatial as spat
 import scipy.sparse
+import scipy.ndimage
 from ... import Devutils as dev
 from ... import Numputils as nput
 from ... import Combinatorics as comb
@@ -853,28 +854,90 @@ class SphereUnionSurface:
             np.max(self.centers + self.radii[:, np.newaxis], axis=0)
             ])
 
-    def ses_scalar_field(self, grid_pts, centers, radii, probe_radius=None):
+    @classmethod
+    def signed_distance(cls, inside_mask, spacing=1.0):
         """
-        For each grid point, compute the SES scalar field:
-          f(x) = max_i( R_i - ||x - c_i|| ) + probe_radius
-        The SES isosurface is f(x) = probe_radius,
-        equivalently: max_i(radii_i - dist_i) = 0
-        """
-        if centers is None:
-            centers = self.centers
-        if radii is None:
-            radii = self.radii
-        if probe_radius is None:
-            probe_radius = 0
-        grid_pts = np.asanyarray(grid_pts)
-        base_shape = grid_pts.shape[:-1]
-        grid_pts = grid_pts.reshape((-1, 3))
-        inflated_R = radii + probe_radius
-        diff = grid_pts[:, None, :] - centers[None, :, :]  # (G, n, 3)
-        dist = np.linalg.norm(diff, axis=-1)  # (G, n)
-        return (inflated_R[None, :] - dist).max(axis=1).reshape(base_shape)  # (G,)
+        Exact signed distance field from a binary mask.
+        Positive outside, negative inside, zero at the boundary.
 
-    def get_surface_function(self, probe_radius=None, distance_function=None):
+        inside_mask : bool ndarray, True where the object is
+        spacing     : float or tuple of floats, physical size of one voxel per axis
+        """
+        if np.isscalar(spacing):
+            spacing = (spacing,) * inside_mask.ndim
+
+        # distance_transform_edt gives, for each voxel, distance to the
+        # NEAREST voxel of the opposite value (i.e. distance to the mask's complement)
+        dist_out = scipy.ndimage.distance_transform_edt(~inside_mask, sampling=spacing)  # >=0 outside, 0 inside
+        dist_in =  scipy.ndimage.distance_transform_edt(inside_mask, sampling=spacing)  # >=0 inside, 0 outside
+
+        # combine: negative inside, positive outside
+        sdf = dist_out - dist_in
+        return sdf
+
+    @classmethod
+    def morphological_close_sdf(cls, inside_mask, probe_radius, spacing=1.0):
+        """
+        Fill concave crevices smaller than probe_radius via
+        SDF dilate -> redistance -> erode.
+
+        Returns
+        -------
+        F_final : float ndarray
+            Signed distance field whose zero level set is the closed surface.
+        """
+        # --- Step 1: exact SDF of the original surface ---
+        D1 = cls.signed_distance(inside_mask, spacing)
+
+        # --- Step 2: dilate by probe_radius (cheap level shift) ---
+        dilated_inside = D1 < probe_radius
+
+        # --- Step 3: redistance to the new (dilated) surface ---
+        if dilated_inside.all():
+            # Everything got swallowed -- probe_radius bigger than the whole domain.
+            return np.full_like(D1, -np.inf)
+
+        D2 = cls.signed_distance(dilated_inside, spacing)
+
+        # --- Step 4: erode back by probe_radius ---
+        F_final = D2 + probe_radius
+
+        return F_final
+
+    @classmethod
+    def solvent_surface_distance(cls, points, centers, radii, probe_radius=0, probe_type='sas', grid_spacing=None):
+        points = np.asanyarray(points)
+        base_shape = points.shape[:-1]
+        points = points.reshape((-1,) + points.shape[-1:])
+        if probe_radius != 0 and probe_type == 'ses':
+            if len(base_shape) != 3: raise ValueError("must have voxel grid to get this to work")
+            if grid_spacing is None: raise ValueError("grid_spacing required for SES")
+            base_dists = np.linalg.norm(
+                points[:, np.newaxis, :] - centers[np.newaxis, :, :],
+                axis=-1
+            )
+            vdw_dists = np.min(
+                base_dists - (radii[np.newaxis, :]),
+                axis=-1
+            ).reshape(base_shape)
+            inside_mask = vdw_dists <= 0
+            probe_radius = probe_radius / np.min(grid_spacing)
+            dists = cls.morphological_close_sdf(inside_mask, probe_radius, spacing=grid_spacing)
+            dists = np.minimum(vdw_dists, dists)
+        else:
+            base_dists = np.linalg.norm(
+                points[:, np.newaxis, :] - centers[np.newaxis, :, :],
+                axis=-1
+            )
+            dists = np.min(
+                base_dists - (radii[np.newaxis, :] + probe_radius),
+                axis=-1
+            )
+        return dists.reshape(base_shape)
+
+    def get_surface_function(self, probe_radius=None, distance_function=None,
+                             probe_type='sas'
+                             ):
         centers = np.asanyarray(self.centers)
         radii = np.asanyarray(self.radii)
 
@@ -882,16 +945,13 @@ class SphereUnionSurface:
             distance_function = lambda r: np.exp(-r)
         if probe_radius is None:
             probe_radius = 0
-        def surface(points, probe_radius=probe_radius):
-            points = np.asanyarray(points)
-            base_shape = points.shape[:-1]
-            points = points.reshape((-1,) + points.shape[-1:])
-            dvs = np.linalg.norm(
-                points[:, np.newaxis, :] - centers[np.newaxis, :, :],
-                axis=-1
-            ) - (radii[np.newaxis, :] + probe_radius)
-            dists = np.min(dvs, axis=-1)
-            return distance_function(dists).reshape(base_shape)
+        def surface(points, probe_radius=probe_radius, probe_type=probe_type, grid_spacing=None):
+            dists = self.solvent_surface_distance(
+                points, centers, radii,
+                probe_radius=probe_radius, probe_type=probe_type,
+                grid_spacing=grid_spacing
+            )
+            return distance_function(dists)
         return surface
 
     default_triangulation_method = 'hull-union'
@@ -905,6 +965,7 @@ class SphereUnionSurface:
                           bbox_scaling=1.2,
                           grid_samples=20,
                           probe_radius=None,
+                          probe_type='sas',
                           **surface_opts):
         if method is None:
             method = self.default_triangulation_method
@@ -932,7 +993,7 @@ class SphereUnionSurface:
             )
         elif method == 'isosurface':
             from .MarchingCubesSurface import marching_cubes
-            surface_function = self.get_surface_function(probe_radius=probe_radius)
+            surface_function = self.get_surface_function(probe_radius=probe_radius, probe_type=probe_type)
             bbox = self.get_bbox()
             if probe_radius is not None:
                 bbox[0] -= probe_radius
@@ -943,7 +1004,10 @@ class SphereUnionSurface:
                 grid_samples = [grid_samples] * 3
             meshes = np.meshgrid(*[np.linspace(bm, bM, s) for bm,bM,s in zip(*bbox, grid_samples)], indexing='ij')
             # values = self.ses_scalar_field(np.moveaxis(meshes, 0, -1))
-            values = surface_function(np.moveaxis(meshes, 0, -1))
+            values = surface_function(
+                np.moveaxis(meshes, 0, -1),
+                grid_spacing=((MX - mx) / grid_samples[0], (MY - my) / grid_samples[1], (MZ - mz) / grid_samples[2])
+            )
 
             nx, ny, nz = np.array(grid_samples) - 1
             def unembed_points(points):
