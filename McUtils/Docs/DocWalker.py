@@ -565,7 +565,7 @@ class DocTemplateHandler(TemplateHandler):
                         param_map[name] = {"name": name, "type": "_", "description": []}
                     t = bits[1].strip() if len(bits) == 2 else ""
                     if len(t) > 0:
-                        param_map[name]["description"] = t
+                        param_map[name]["description"].append(t)
                 elif line.startswith(":rtype"):
                     bits = line.split(":", 2)[1:]
                     name = ":returns"
