@@ -1,14 +1,51 @@
 # <a id="McUtils.Numputils.VectorOps.block_array">block_array</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L657)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L657?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L848)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L848?message=Update%20Docs)]
 </div>
 
 ```python
 block_array(blocks, ndim=2, padding=0): 
 ```
+**LLM Docstring**
 
+Collapse a nested block array into a single dense array by concatenating the
+outer block axes.
 
+The leading block axes (those beyond `ndim + padding` trailing axes) are folded
+in one at a time via `np.concatenate`.
+  - `blocks`: `np.ndarray`
+    > the block array to collapse
+  - `ndim`: `int`
+    > number of trailing axes belonging to each block
+  - `padding`: `int`
+    > extra trailing axes to leave untouched
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+c
+o
+l
+l
+a
+p
+s
+e
+d
+ 
+d
+e
+n
+s
+e
+ 
+a
+r
+r
+a
+y
 
 
 
@@ -59,7 +96,7 @@ block_array(blocks, ndim=2, padding=0):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/block_array.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/block_array.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L657?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L848?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

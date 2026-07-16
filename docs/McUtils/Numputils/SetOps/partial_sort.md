@@ -1,14 +1,84 @@
 # <a id="McUtils.Numputils.SetOps.partial_sort">partial_sort</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L783)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L783?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L1030)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L1030?message=Update%20Docs)]
 </div>
 
 ```python
 partial_sort(array, k, return_order=False): 
 ```
+**LLM Docstring**
 
+Return the `k` smallest (or, for negative `k`, the `|k|` largest) elements of
+an array in sorted order.
 
+Uses `np.argpartition` to isolate the partition cheaply, then sorts only that
+slice. The corresponding original indices can optionally be returned.
+  - `array`: `np.ndarray`
+    > the array to partially sort
+  - `k`: `int`
+    > number of smallest (positive) or largest (negative) elements
+  - `return_order`: `bool`
+    > also return the original indices of the selected elements
+  - `:returns`: `np.ndarray | tuple`
+    > t
+h
+e
+ 
+s
+o
+r
+t
+e
+d
+ 
+p
+a
+r
+t
+i
+a
+l
+ 
+v
+a
+l
+u
+e
+s
+ 
+(
+a
+n
+d
+ 
+t
+h
+e
+i
+r
+ 
+i
+n
+d
+i
+c
+e
+s
+ 
+i
+f
+ 
+r
+e
+q
+u
+e
+s
+t
+e
+d
+)
 
 
 
@@ -59,7 +129,7 @@ partial_sort(array, k, return_order=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/partial_sort.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/partial_sort.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L783?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L1030?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

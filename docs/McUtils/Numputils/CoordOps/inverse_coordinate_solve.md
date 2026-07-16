@@ -1,14 +1,145 @@
 # <a id="McUtils.Numputils.CoordOps.inverse_coordinate_solve">inverse_coordinate_solve</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3199)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3199?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L4583)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L4583?message=Update%20Docs)]
 </div>
 
 ```python
 inverse_coordinate_solve(specs, target_internals, initial_cartesians, masses=None, remove_translation_rotation=True, order=None, solver_order=None, tol=0.001, max_iterations=15, max_displacement=0.5, gradient_function=None, gradient_scaling=0.1, method='gradient-descent', optimizer_parameters=None, line_search=False, damping_parameter=None, damping_exponent=None, restart_interval=None, raise_on_failure=False, return_internals=True, return_expansions=True, base_transformation=None, reference_internals=None, fixed_atoms=None, fixed_coords=None, angle_ordering='ijk'): 
 ```
+**LLM Docstring**
 
+Solve for the Cartesian geometry that reproduces a target set of internal
+coordinates, starting from an initial guess.
 
+Wraps the forward conversion (`specs` may be a spec list or a ready-made
+conversion function) in an `_inverse_coordinate_conversion_caller` and drives it
+with the iterative minimizer from the `Optimization` module (gradient-descent by
+default, quasi-Newton optionally). Handles batching, optional
+translation/rotation removal, an external gradient bias, and returns the solved
+coordinates together with convergence errors and, optionally, the internal
+values and/or inverse expansions.
+  - `specs`: `Iterable | Callable`
+    > coordinate specifications or a conversion function
+  - `target_internals`: `np.ndarray`
+    > target internal-coordinate values
+  - `initial_cartesians`: `np.ndarray`
+    > initial Cartesian guess
+  - `masses`: `np.ndarray | None`
+    > per-atom masses
+  - `remove_translation_rotation`: `bool`
+    > whether to strip translation/rotation
+  - `order`: `int | None`
+    > expansion order for the returned inverse tensors
+  - `solver_order`: `int | None`
+    > expansion order used inside the solver
+  - `tol`: `float`
+    > convergence tolerance
+  - `max_iterations`: `int`
+    > maximum solver iterations
+  - `max_displacement`: `float`
+    > cap on the per-step Cartesian displacement
+  - `gradient_function`: `Callable | None`
+    > optional external gradient function
+  - `gradient_scaling`: `float`
+    > scaling for the external gradient
+  - `method`: `str`
+    > optimizer method (`'gradient-descent'` or `'quasi-newton'`)
+  - `optimizer_parameters`: `dict | None`
+    > extra optimizer options
+  - `line_search`: `bool`
+    > whether to use a line search
+  - `damping_parameter`: `float | None`
+    > optional step damping parameter
+  - `damping_exponent`: `float | None`
+    > optional step damping exponent
+  - `restart_interval`: `int | None`
+    > optional optimizer restart interval
+  - `raise_on_failure`: `bool`
+    > raise if convergence is not reached
+  - `return_internals`: `bool`
+    > whether to also return the solved internals
+  - `return_expansions`: `bool`
+    > whether to also return the inverse expansions
+  - `base_transformation`: `list[np.ndarray] | None`
+    > optional coordinate-basis transformation
+  - `reference_internals`: `np.ndarray | None`
+    > reference internals for the transformation
+  - `fixed_atoms`: `Iterable[int] | None`
+    > atoms to hold fixed
+  - `fixed_coords`: `Iterable[int] | None`
+    > internal coordinates to hold fixed
+  - `angle_ordering`: `str`
+    > default angle-index ordering
+  - `:returns`: `tuple`
+    > t
+h
+e
+ 
+s
+o
+l
+v
+e
+d
+ 
+t
+r
+a
+n
+s
+f
+o
+r
+m
+a
+t
+i
+o
+n
+ 
+a
+n
+d
+ 
+e
+r
+r
+o
+r
+s
+ 
+(
+w
+i
+t
+h
+ 
+i
+n
+t
+e
+r
+n
+a
+l
+s
+ 
+w
+h
+e
+n
+ 
+r
+e
+q
+u
+e
+s
+t
+e
+d
+)
 
 
 
@@ -59,7 +190,7 @@ inverse_coordinate_solve(specs, target_internals, initial_cartesians, masses=Non
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/inverse_coordinate_solve.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/inverse_coordinate_solve.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3199?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L4583?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

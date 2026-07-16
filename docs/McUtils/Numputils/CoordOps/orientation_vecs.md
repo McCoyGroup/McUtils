@@ -1,14 +1,74 @@
 # <a id="McUtils.Numputils.CoordOps.orientation_vecs">orientation_vecs</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2276)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2276?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3038)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3038?message=Update%20Docs)]
 </div>
 
 ```python
 orientation_vecs(coords, frame_pos_1, frame_pos_2, *, order=None, masses=None, cache=None, reproject=True, fixed_atoms=None, return_rot=True): 
 ```
+**LLM Docstring**
 
+Convenience wrapper returning the orientation-coordinate derivative(s) as bare
+vectors.
 
+Calls `orientation_deriv`; when `order is None` returns only the
+first-derivative term, otherwise the full expansion.
+  - `coords`: `np.ndarray`
+    > Cartesian coordinates, shape `(..., N, 3)`
+  - `frame_pos_1`: `Iterable[int]`
+    > atom indices of the first fragment
+  - `frame_pos_2`: `Iterable[int]`
+    > atom indices of the second fragment
+  - `order`: `int | None`
+    > derivative order (`None` returns only the first derivative)
+  - `masses`: `np.ndarray | None`
+    > per-atom masses
+  - `cache`: `dict | None`
+    > expansion cache (interface parity)
+  - `reproject`: `bool`
+    > interface parity
+  - `fixed_atoms`: `Iterable[int] | None`
+    > atoms whose contributions should be zeroed
+  - `return_rot`: `bool`
+    > whether to include rotational modes
+  - `:returns`: `np.ndarray | list`
+    > t
+h
+e
+ 
+o
+r
+i
+e
+n
+t
+a
+t
+i
+o
+n
+ 
+d
+e
+r
+i
+v
+a
+t
+i
+v
+e
+ 
+v
+e
+c
+t
+o
+r
+(
+s
+)
 
 
 
@@ -59,7 +119,7 @@ orientation_vecs(coords, frame_pos_1, frame_pos_2, *, order=None, masses=None, c
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/orientation_vecs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/orientation_vecs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2276?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3038?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

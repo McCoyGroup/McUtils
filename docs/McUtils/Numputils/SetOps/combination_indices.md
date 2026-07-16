@@ -1,14 +1,64 @@
 # <a id="McUtils.Numputils.SetOps.combination_indices">combination_indices</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L612)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L612?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L729)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L729?message=Update%20Docs)]
 </div>
 
 ```python
 combination_indices(n, r, dtype=<class 'int'>): 
 ```
+**LLM Docstring**
 
-
+Enumerate all length-`r` combinations of `range(n)` as an index array.
+  - `n`: `int`
+    > size of the pool
+  - `r`: `int`
+    > size of each combination
+  - `dtype`: `np.dtype`
+    > index dtype
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+`
+(
+C
+(
+n
+,
+ 
+r
+)
+,
+ 
+r
+)
+`
+ 
+c
+o
+m
+b
+i
+n
+a
+t
+i
+o
+n
+-
+i
+n
+d
+e
+x
+ 
+a
+r
+r
+a
+y
 
 
 
@@ -59,7 +109,7 @@ combination_indices(n, r, dtype=<class 'int'>):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/combination_indices.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/combination_indices.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L612?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L729?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

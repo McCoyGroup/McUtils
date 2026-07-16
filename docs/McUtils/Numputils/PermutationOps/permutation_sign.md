@@ -7,8 +7,53 @@
 ```python
 permutation_sign(perm, check=True): 
 ```
+**LLM Docstring**
 
+Compute the sign (parity) of a permutation via a swap sort.
 
+Counts the transpositions needed to sort the permutation; an even count gives
+`+1`, odd gives `-1`. When `check` is set the input is first normalized to a
+proper `0..n-1` permutation with a double `argsort`.
+  - `perm`: `np.ndarray`
+    > the permutation
+  - `check`: `bool`
+    > normalize the input to a rank permutation first
+  - `:returns`: `int`
+    > t
+h
+e
+ 
+p
+e
+r
+m
+u
+t
+a
+t
+i
+o
+n
+ 
+s
+i
+g
+n
+ 
+(
+`
++
+1
+`
+ 
+o
+r
+ 
+`
+-
+1
+`
+)
 
 
 

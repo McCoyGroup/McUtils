@@ -1,14 +1,39 @@
 # <a id="McUtils.Numputils.SetOps.index_mask">index_mask</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L642)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L642?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L788)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L788?message=Update%20Docs)]
 </div>
 
 ```python
 index_mask(shape, inds, complement=False): 
 ```
+**LLM Docstring**
 
-
+Build a boolean mask that is `True` at the given positions (or `False` there
+when `complement` is set).
+  - `shape`: `int | tuple[int, ...]`
+    > the shape of the mask
+  - `inds`: `tuple | np.ndarray`
+    > the positions to mark
+  - `complement`: `bool`
+    > mark everything *except* the given positions
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+b
+o
+o
+l
+e
+a
+n
+ 
+m
+a
+s
+k
 
 
 
@@ -59,7 +84,7 @@ index_mask(shape, inds, complement=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/index_mask.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/index_mask.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L642?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L788?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

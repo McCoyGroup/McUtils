@@ -1,14 +1,58 @@
 # <a id="McUtils.Numputils.TransformationMatrices.rotation_matrix_skew">rotation_matrix_skew</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L417)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L417?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L557)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L557?message=Update%20Docs)]
 </div>
 
 ```python
 rotation_matrix_skew(upper_tri, create_skew=True): 
 ```
+**LLM Docstring**
 
+Exponentiate a skew-symmetric generator into a rotation matrix via its Youla
+decomposition.
 
+When `create_skew` is set the input may be given as the flattened upper triangle
+(or a non-skew matrix) and is converted to skew form first, then decomposed and
+reassembled as `T U Tᵀ`.
+  - `upper_tri`: `np.ndarray`
+    > the skew generator (matrix or flattened upper triangle)
+  - `create_skew`: `bool`
+    > coerce the input into a skew matrix first
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+c
+o
+r
+r
+e
+s
+p
+o
+n
+d
+i
+n
+g
+ 
+r
+o
+t
+a
+t
+i
+o
+n
+ 
+m
+a
+t
+r
+i
+x
 
 
 
@@ -59,7 +103,7 @@ rotation_matrix_skew(upper_tri, create_skew=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/rotation_matrix_skew.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/rotation_matrix_skew.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L417?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L557?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

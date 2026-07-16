@@ -1,14 +1,80 @@
 # <a id="McUtils.Numputils.Misc.is_array_like">is_array_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L90?message=Update%20Docs)]
 </div>
 
 ```python
 is_array_like(obj, valid_dtypes=None, ndim=None): 
 ```
+**LLM Docstring**
 
+Test whether an object is (or can be coerced into) a numeric-friendly array,
+optionally constraining the dtype and/or number of dimensions.
 
+Object-dtype arrays and atomic scalars are rejected; anything else is coerced
+with `np.asanyarray` and validated against `valid_dtypes` and `ndim`.
+  - `obj`: `Any`
+    > the object to test
+  - `valid_dtypes`: `Iterable | None`
+    > acceptable dtype super-types (any-match)
+  - `ndim`: `int | None`
+    > required number of dimensions (any if omitted)
+  - `:returns`: `bool`
+    > w
+h
+e
+t
+h
+e
+r
+ 
+t
+h
+e
+ 
+o
+b
+j
+e
+c
+t
+ 
+i
+s
+ 
+a
+r
+r
+a
+y
+-
+l
+i
+k
+e
+ 
+u
+n
+d
+e
+r
+ 
+t
+h
+e
+ 
+c
+o
+n
+s
+t
+r
+a
+i
+n
+t
+s
 
 
 
@@ -59,7 +125,7 @@ is_array_like(obj, valid_dtypes=None, ndim=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/is_array_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/is_array_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L40?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L90?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

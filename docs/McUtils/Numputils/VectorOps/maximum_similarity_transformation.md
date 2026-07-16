@@ -1,14 +1,75 @@
 # <a id="McUtils.Numputils.VectorOps.maximum_similarity_transformation">maximum_similarity_transformation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1594)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1594?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2167)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2167?message=Update%20Docs)]
 </div>
 
 ```python
 maximum_similarity_transformation(basis, target, apply_transformation=True): 
 ```
+**LLM Docstring**
 
+Find the unitary transformation that best maps a basis onto a target (in the
+least-squares sense) and optionally apply it.
 
+A least-squares fit is unitarized with `unitarize_transformation`; the resulting
+rotation is returned, or applied to `basis` when `apply_transformation` is set.
+  - `basis`: `np.ndarray`
+    > the source basis
+  - `target`: `np.ndarray`
+    > the target the basis should align with
+  - `apply_transformation`: `bool`
+    > return `basis @ tf` instead of `tf`
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+a
+l
+i
+g
+n
+e
+d
+ 
+b
+a
+s
+i
+s
+ 
+o
+r
+ 
+t
+h
+e
+ 
+a
+l
+i
+g
+n
+m
+e
+n
+t
+ 
+t
+r
+a
+n
+s
+f
+o
+r
+m
+a
+t
+i
+o
+n
 
 
 
@@ -59,7 +120,7 @@ maximum_similarity_transformation(basis, target, apply_transformation=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/maximum_similarity_transformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/maximum_similarity_transformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1594?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2167?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

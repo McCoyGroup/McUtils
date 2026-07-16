@@ -1,14 +1,54 @@
 # <a id="McUtils.Numputils.TransformationMatrices.permutation_matrix">permutation_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L986)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L986?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L1338)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L1338?message=Update%20Docs)]
 </div>
 
 ```python
 permutation_matrix(perm): 
 ```
+**LLM Docstring**
 
+Build the permutation matrix (or stack) corresponding to a permutation array.
 
+Places a `1` at `(i, perm[i])` for each row; batched permutations produce a
+stack of matrices.
+  - `perm`: `np.ndarray`
+    > the permutation(s)
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+p
+e
+r
+m
+u
+t
+a
+t
+i
+o
+n
+ 
+m
+a
+t
+r
+i
+x
+ 
+(
+o
+r
+ 
+s
+t
+a
+c
+k
+)
 
 
 
@@ -59,7 +99,7 @@ permutation_matrix(perm):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/permutation_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/permutation_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L986?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L1338?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

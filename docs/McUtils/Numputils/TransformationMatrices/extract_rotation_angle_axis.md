@@ -1,14 +1,63 @@
 # <a id="McUtils.Numputils.TransformationMatrices.extract_rotation_angle_axis">extract_rotation_angle_axis</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L248)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L248?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L291)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L291?message=Update%20Docs)]
 </div>
 
 ```python
 extract_rotation_angle_axis(rot_mat, normalize=True): 
 ```
+**LLM Docstring**
 
+Extract the rotation angle and axis from a rotation matrix.
 
+For 2D matrices only the angle is returned; for 3D the axis comes from the skew
+part with careful handling of the near-`pi` and identity degeneracies, and the
+angle from an orthogonal reference vector. Higher-dimensional rotations are
+decomposed via a Schur/Youla factorization into a set of plane angles and axes.
+  - `rot_mat`: `np.ndarray`
+    > the rotation matrix (or stack)
+  - `normalize`: `bool`
+    > normalize the extracted axis
+  - `:returns`: `tuple`
+    > `
+(
+a
+n
+g
+l
+e
+,
+ 
+a
+x
+i
+s
+)
+`
+ 
+(
+a
+x
+i
+s
+ 
+i
+s
+ 
+`
+N
+o
+n
+e
+`
+ 
+i
+n
+ 
+2
+D
+)
 
 
 
@@ -59,7 +108,7 @@ extract_rotation_angle_axis(rot_mat, normalize=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/extract_rotation_angle_axis.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/extract_rotation_angle_axis.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L248?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L291?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

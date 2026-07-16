@@ -1,14 +1,89 @@
 # <a id="McUtils.Numputils.CoordOps.com_dist_deriv">com_dist_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1788)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1788?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2292?message=Update%20Docs)]
 </div>
 
 ```python
 com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, cache=None, reproject=True, fixed_atoms=None): 
 ```
+**LLM Docstring**
 
+Derivative expansion of the distance between the centers of mass of two atom
+fragments with respect to the Cartesian coordinates.
 
+The center-of-mass expansions of the two fragments (from `transrot_deriv` with
+rotation disabled) are subtracted and the norm of the resulting vector is
+expanded via `TensorDerivatives.vec_norm_unit_deriv`.
+  - `coords`: `np.ndarray`
+    > Cartesian coordinates, shape `(..., N, 3)`
+  - `frame_pos_1`: `Iterable[int]`
+    > atom indices of the first fragment
+  - `frame_pos_2`: `Iterable[int]`
+    > atom indices of the second fragment
+  - `order`: `int`
+    > maximum derivative order
+  - `masses`: `np.ndarray | None`
+    > per-atom masses
+  - `cache`: `dict | None`
+    > expansion cache (interface parity)
+  - `reproject`: `bool`
+    > interface parity
+  - `fixed_atoms`: `Iterable[int] | None`
+    > atoms whose contributions should be zeroed
+  - `:returns`: `list`
+    > t
+h
+e
+ 
+n
+o
+r
+m
+ 
+d
+e
+r
+i
+v
+a
+t
+i
+v
+e
+ 
+e
+x
+p
+a
+n
+s
+i
+o
+n
+ 
+`
+[
+v
+a
+l
+u
+e
+,
+ 
+d
+1
+,
+ 
+d
+2
+,
+ 
+.
+.
+.
+]
+`
 
 
 
@@ -59,7 +134,7 @@ com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, cache=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/com_dist_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/com_dist_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1788?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2292?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

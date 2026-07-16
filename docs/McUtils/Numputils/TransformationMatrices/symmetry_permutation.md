@@ -1,14 +1,81 @@
 # <a id="McUtils.Numputils.TransformationMatrices.symmetry_permutation">symmetry_permutation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L1061)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L1061?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L1447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L1447?message=Update%20Docs)]
 </div>
 
 ```python
 symmetry_permutation(coords, op: numpy.ndarray, return_row_ordering=False, tol=None): 
 ```
+**LLM Docstring**
 
+Convert a symmetry operation into the atom permutation it induces on a set of
+coordinates.
 
+Applies the operation to the coordinates and matches the result back to the
+original atoms with `find_coordinate_matching_permutation`.
+  - `coords`: `np.ndarray`
+    > the coordinates
+  - `op`: `np.ndarray`
+    > the symmetry operation matrix
+  - `return_row_ordering`: `bool`
+    > return separate row/column orderings
+  - `tol`: `float | None`
+    > maximum allowed matching deviation
+  - `:returns`: `np.ndarray | tuple`
+    > t
+h
+e
+ 
+i
+n
+d
+u
+c
+e
+d
+ 
+p
+e
+r
+m
+u
+t
+a
+t
+i
+o
+n
+ 
+(
+o
+r
+ 
+t
+h
+e
+ 
+r
+o
+w
+/
+c
+o
+l
+u
+m
+n
+ 
+o
+r
+d
+e
+r
+i
+n
+g
+s
+)
 
 
 
@@ -59,7 +126,7 @@ symmetry_permutation(coords, op: numpy.ndarray, return_row_ordering=False, tol=N
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/symmetry_permutation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/symmetry_permutation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L1061?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L1447?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,56 @@
 # <a id="McUtils.Numputils.Misc.is_zero">is_zero</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L37)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L37?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L75)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L75?message=Update%20Docs)]
 </div>
 
 ```python
 is_zero(obj, numeric_types=None): 
 ```
+**LLM Docstring**
 
-
+Test whether an object is a numeric scalar equal to zero.
+  - `obj`: `Any`
+    > the object to test
+  - `numeric_types`: `tuple | None`
+    > the numeric types to accept
+  - `:returns`: `bool`
+    > w
+h
+e
+t
+h
+e
+r
+ 
+t
+h
+e
+ 
+o
+b
+j
+e
+c
+t
+ 
+i
+s
+ 
+a
+ 
+n
+u
+m
+e
+r
+i
+c
+ 
+z
+e
+r
+o
 
 
 
@@ -59,7 +101,7 @@ is_zero(obj, numeric_types=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/is_zero.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/is_zero.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L37?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L75?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

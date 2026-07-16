@@ -1,14 +1,48 @@
 # <a id="McUtils.Numputils.VectorOps.imaginary_symmetric_matrix_log">imaginary_symmetric_matrix_log</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1620)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1620?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2259)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2259?message=Update%20Docs)]
 </div>
 
 ```python
 imaginary_symmetric_matrix_log(mats_real, mats_imag): 
 ```
+**LLM Docstring**
 
+Recover the symmetric generator `A` from the real and imaginary parts of
+`exp(i A)`.
 
+The real part is diagonalized to obtain `arccos` of its eigenvalues, the
+imaginary part is rotated into the same basis to supply `arcsin`, and the
+generator is rebuilt in that eigenbasis.
+  - `mats_real`: `np.ndarray`
+    > real part of `exp(i A)`
+  - `mats_imag`: `np.ndarray`
+    > imaginary part of `exp(i A)`
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+s
+y
+m
+m
+e
+t
+r
+i
+c
+ 
+g
+e
+n
+e
+r
+a
+t
+o
+r
 
 
 
@@ -59,7 +93,7 @@ imaginary_symmetric_matrix_log(mats_real, mats_imag):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/imaginary_symmetric_matrix_log.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/imaginary_symmetric_matrix_log.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1620?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2259?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

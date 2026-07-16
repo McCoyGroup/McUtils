@@ -1,14 +1,42 @@
 # <a id="McUtils.Numputils.CoordOps.metric_tensor">metric_tensor</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L5149)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L5149?message=Update%20Docs)]
 </div>
 
 ```python
 metric_tensor(internals_by_cartesians, masses=None): 
 ```
+**LLM Docstring**
 
+Compute the internal-coordinate metric (Wilson G-style) tensor from an
+internals-by-Cartesians transformation.
 
+Optionally mass-weights the transformation with `M^{-1/2}` before forming
+`Jᵀ J`. A bare 2D array is accepted and treated as the first (linear) term of an
+expansion.
+  - `internals_by_cartesians`: `np.ndarray | list[np.ndarray]`
+    > the transformation (or its expansion)
+  - `masses`: `np.ndarray | None`
+    > per-atom masses for mass-weighting
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+m
+e
+t
+r
+i
+c
+ 
+t
+e
+n
+s
+o
+r
 
 
 
@@ -59,7 +87,7 @@ metric_tensor(internals_by_cartesians, masses=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/metric_tensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/metric_tensor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3507?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L5149?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

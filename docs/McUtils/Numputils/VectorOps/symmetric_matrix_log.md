@@ -1,14 +1,39 @@
 # <a id="McUtils.Numputils.VectorOps.symmetric_matrix_log">symmetric_matrix_log</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1616)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1616?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2244)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2244?message=Update%20Docs)]
 </div>
 
 ```python
 symmetric_matrix_log(mats): 
 ```
+**LLM Docstring**
 
-
+Matrix logarithm of a symmetric matrix, computed by taking the log of its
+eigenvalues.
+  - `mats`: `np.ndarray`
+    > the symmetric matrix (or stack)
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+m
+a
+t
+r
+i
+x
+ 
+l
+o
+g
+a
+r
+i
+t
+h
+m
 
 
 
@@ -59,7 +84,7 @@ symmetric_matrix_log(mats):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/symmetric_matrix_log.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/symmetric_matrix_log.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1616?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2244?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

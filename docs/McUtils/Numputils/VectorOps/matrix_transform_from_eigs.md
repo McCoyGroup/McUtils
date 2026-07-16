@@ -1,14 +1,45 @@
 # <a id="McUtils.Numputils.VectorOps.matrix_transform_from_eigs">matrix_transform_from_eigs</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1602)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1602?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2193?message=Update%20Docs)]
 </div>
 
 ```python
 matrix_transform_from_eigs(evals, evecs, tf): 
 ```
+**LLM Docstring**
 
-
+Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
+original eigenbasis (`Vᵀ diag(f(evals)) V`).
+  - `evals`: `np.ndarray`
+    > the eigenvalues
+  - `evecs`: `np.ndarray`
+    > the eigenvectors
+  - `tf`: `Callable`
+    > scalar function applied to the eigenvalues
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+t
+r
+a
+n
+s
+f
+o
+r
+m
+e
+d
+ 
+m
+a
+t
+r
+i
+x
 
 
 
@@ -59,7 +90,7 @@ matrix_transform_from_eigs(evals, evecs, tf):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/matrix_transform_from_eigs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/matrix_transform_from_eigs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1602?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2193?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

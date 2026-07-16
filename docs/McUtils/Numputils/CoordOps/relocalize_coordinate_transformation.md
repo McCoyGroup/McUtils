@@ -1,14 +1,55 @@
 # <a id="McUtils.Numputils.CoordOps.relocalize_coordinate_transformation">relocalize_coordinate_transformation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3582)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3582?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L5265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L5265?message=Update%20Docs)]
 </div>
 
 ```python
 relocalize_coordinate_transformation(redund_tf, untransformed_coordinates=None): 
 ```
+**LLM Docstring**
 
+Rotate a redundant/delocalized coordinate transformation so that it aligns as
+closely as possible with a chosen set of localized target coordinates.
 
+A target matrix is built (an identity block, or unit columns on the requested
+`untransformed_coordinates`), the least-squares alignment is solved, and its
+SVD gives the orthogonal rotation `R = U V` applied to the transformation.
+  - `redund_tf`: `np.ndarray`
+    > the transformation to relocalize
+  - `untransformed_coordinates`: `Iterable[int] | None`
+    > coordinates to align to (identity if omitted)
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+r
+e
+l
+o
+c
+a
+l
+i
+z
+e
+d
+ 
+t
+r
+a
+n
+s
+f
+o
+r
+m
+a
+t
+i
+o
+n
 
 
 
@@ -59,7 +100,7 @@ relocalize_coordinate_transformation(redund_tf, untransformed_coordinates=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/relocalize_coordinate_transformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/relocalize_coordinate_transformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3582?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L5265?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

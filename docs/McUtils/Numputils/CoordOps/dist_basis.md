@@ -1,14 +1,75 @@
 # <a id="McUtils.Numputils.CoordOps.dist_basis">dist_basis</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3417)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3417?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L4917)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L4917?message=Update%20Docs)]
 </div>
 
 ```python
 dist_basis(coords, i, j, **opts): 
 ```
+**LLM Docstring**
 
+Return the projection data for a distance coordinate between atoms `i` and `j`.
 
+Builds the distance basis with `dist_basis_mat` and passes it through
+`coordinate_projection_data`.
+  - `coords`: `np.ndarray`
+    > Cartesian coordinates, shape `(..., N, 3)`
+  - `i`: `int`
+    > first atom index
+  - `j`: `int`
+    > second atom index
+  - `opts`: `Any`
+    > options forwarded to `coordinate_projection_data`
+  - `:returns`: `tuple`
+    > `
+(
+b
+a
+s
+i
+s
+,
+ 
+c
+o
+m
+p
+l
+e
+m
+e
+n
+t
+a
+r
+y
+_
+b
+a
+s
+i
+s
+,
+ 
+s
+e
+l
+e
+c
+t
+i
+o
+n
+_
+m
+a
+t
+r
+i
+x
+)
+`
 
 
 
@@ -59,7 +120,7 @@ dist_basis(coords, i, j, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/dist_basis.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/dist_basis.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3417?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L4917?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

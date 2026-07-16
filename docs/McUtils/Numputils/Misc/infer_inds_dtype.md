@@ -1,14 +1,43 @@
 # <a id="McUtils.Numputils.Misc.infer_inds_dtype">infer_inds_dtype</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L201?message=Update%20Docs)]
 </div>
 
 ```python
 infer_inds_dtype(max_size): 
 ```
+**LLM Docstring**
 
-
+Choose the smallest unsigned integer dtype that can represent a value up to
+`max_size`.
+  - `max_size`: `int`
+    > the largest (non-negative) value to represent
+  - `:returns`: `np.dtype`
+    > t
+h
+e
+ 
+m
+i
+n
+i
+m
+a
+l
+ 
+s
+c
+a
+l
+a
+r
+ 
+d
+t
+y
+p
+e
 
 
 
@@ -59,7 +88,7 @@ infer_inds_dtype(max_size):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/infer_inds_dtype.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/infer_inds_dtype.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L81?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L201?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

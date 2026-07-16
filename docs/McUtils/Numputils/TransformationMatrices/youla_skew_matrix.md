@@ -1,14 +1,57 @@
 # <a id="McUtils.Numputils.TransformationMatrices.youla_skew_matrix">youla_skew_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L356)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L356?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L444)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L444?message=Update%20Docs)]
 </div>
 
 ```python
 youla_skew_matrix(l, n, axis_pos=0): 
 ```
+**LLM Docstring**
 
+Build the canonical Youla skew-symmetric block matrix from a list of block
+magnitudes.
 
+Places each magnitude on the appropriate super-/sub-diagonal pair, skipping the
+fixed axis position for odd dimensions.
+  - `l`: `np.ndarray`
+    > the block magnitudes
+  - `n`: `int`
+    > the matrix dimension
+  - `axis_pos`: `int`
+    > index of the fixed (unpaired) axis for odd dimensions
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+c
+a
+n
+o
+n
+i
+c
+a
+l
+ 
+Y
+o
+u
+l
+a
+ 
+s
+k
+e
+w
+ 
+m
+a
+t
+r
+i
+x
 
 
 
@@ -59,7 +102,7 @@ youla_skew_matrix(l, n, axis_pos=0):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/youla_skew_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/youla_skew_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L356?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L444?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

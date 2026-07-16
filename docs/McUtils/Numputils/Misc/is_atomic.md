@@ -1,14 +1,49 @@
 # <a id="McUtils.Numputils.Misc.is_atomic">is_atomic</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L25)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L25?message=Update%20Docs)]
 </div>
 
 ```python
 is_atomic(obj, types=None): 
 ```
+**LLM Docstring**
 
-
+Test whether an object is a scalar/atomic value (a number or string, or a
+zero-dimensional array wrapping one).
+  - `obj`: `Any`
+    > the object to test
+  - `types`: `tuple | None`
+    > the atomic types to accept (defaults to numbers and `str`)
+  - `:returns`: `bool`
+    > w
+h
+e
+t
+h
+e
+r
+ 
+t
+h
+e
+ 
+o
+b
+j
+e
+c
+t
+ 
+i
+s
+ 
+a
+t
+o
+m
+i
+c
 
 
 
@@ -59,7 +94,7 @@ is_atomic(obj, types=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/is_atomic.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/is_atomic.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L26?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L25?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

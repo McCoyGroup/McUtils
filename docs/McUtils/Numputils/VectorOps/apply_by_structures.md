@@ -1,14 +1,82 @@
 # <a id="McUtils.Numputils.VectorOps.apply_by_structures">apply_by_structures</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1343)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1343?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1726)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1726?message=Update%20Docs)]
 </div>
 
 ```python
 apply_by_structures(tf, points, ndim=1, **kwargs): 
 ```
+**LLM Docstring**
 
+Apply a transformation function to each structure in a batch individually.
 
+The leading batch axes are flattened, `tf` is called once per structure, and the
+results are restacked. If `tf` returns extra values alongside its primary array,
+those are collected and returned separately.
+  - `tf`: `Callable`
+    > the per-structure transformation function
+  - `points`: `np.ndarray`
+    > the batched points/structures
+  - `ndim`: `int`
+    > number of trailing axes belonging to a single structure
+  - `kwargs`: `Any`
+    > extra keyword arguments forwarded to `tf`
+  - `:returns`: `np.ndarray | tuple`
+    > t
+h
+e
+ 
+s
+t
+a
+c
+k
+e
+d
+ 
+r
+e
+s
+u
+l
+t
+s
+ 
+(
+p
+l
+u
+s
+ 
+a
+n
+y
+ 
+e
+x
+t
+r
+a
+ 
+r
+e
+t
+u
+r
+n
+s
+ 
+f
+r
+o
+m
+ 
+`
+t
+f
+`
+)
 
 
 
@@ -59,7 +127,7 @@ apply_by_structures(tf, points, ndim=1, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/apply_by_structures.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/apply_by_structures.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1343?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1726?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

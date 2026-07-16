@@ -1,14 +1,73 @@
 # <a id="McUtils.Numputils.CoordOps.delocalized_internal_coordinate_transformation">delocalized_internal_coordinate_transformation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3521)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3521?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L5180)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L5180?message=Update%20Docs)]
 </div>
 
 ```python
 delocalized_internal_coordinate_transformation(internals_by_cartesians, untransformed_coordinates=None, masses=None, relocalize=False): 
 ```
+**LLM Docstring**
 
+Construct a set of delocalized (non-redundant) internal coordinates from a
+redundant internals-by-Cartesians transformation.
 
+Optionally mass-weights the transformation and separates out any
+`untransformed_coordinates` (projecting their contribution out of the remaining
+coordinates so the space dimension is preserved). Diagonalizing the internal
+`G` matrix and keeping the nonzero-eigenvalue eigenvectors yields the
+delocalized transformation, which is optionally relocalized to align with the
+untransformed coordinates.
+  - `internals_by_cartesians`: `np.ndarray | list[np.ndarray]`
+    > the redundant transformation (or its expansion)
+  - `untransformed_coordinates`: `Iterable[int] | None`
+    > coordinates to keep out of the delocalization
+  - `masses`: `np.ndarray | None`
+    > per-atom masses for mass-weighting
+  - `relocalize`: `bool`
+    > whether to relocalize onto the untransformed coordinates
+  - `:returns`: `np.ndarray | list[np.ndarray]`
+    > t
+h
+e
+ 
+d
+e
+l
+o
+c
+a
+l
+i
+z
+e
+d
+ 
+c
+o
+o
+r
+d
+i
+n
+a
+t
+e
+ 
+t
+r
+a
+n
+s
+f
+o
+r
+m
+a
+t
+i
+o
+n
 
 
 
@@ -59,7 +118,7 @@ delocalized_internal_coordinate_transformation(internals_by_cartesians, untransf
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/delocalized_internal_coordinate_transformation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/delocalized_internal_coordinate_transformation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3521?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L5180?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

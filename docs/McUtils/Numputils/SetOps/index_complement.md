@@ -1,14 +1,52 @@
 # <a id="McUtils.Numputils.SetOps.index_complement">index_complement</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L648)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L648?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L809)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L809?message=Update%20Docs)]
 </div>
 
 ```python
 index_complement(shape, inds): 
 ```
+**LLM Docstring**
 
+Return the index tuple for all positions *not* in `inds` within `shape`.
 
+Builds the complement mask and reshapes the `where` result to preserve any
+leading batch dimensions.
+  - `shape`: `int | tuple[int, ...]`
+    > the shape of the space
+  - `inds`: `tuple | np.ndarray`
+    > the positions to exclude
+  - `:returns`: `tuple[np.ndarray, ...]`
+    > t
+h
+e
+ 
+c
+o
+m
+p
+l
+e
+m
+e
+n
+t
+a
+r
+y
+ 
+i
+n
+d
+e
+x
+ 
+t
+u
+p
+l
+e
 
 
 
@@ -59,7 +97,7 @@ index_complement(shape, inds):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/index_complement.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/index_complement.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L648?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L809?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,41 @@
 # <a id="McUtils.Numputils.VectorOps.symmetric_matrix_exp">symmetric_matrix_exp</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1605)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1605?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2211)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2211?message=Update%20Docs)]
 </div>
 
 ```python
 symmetric_matrix_exp(mats): 
 ```
+**LLM Docstring**
 
-
+Matrix exponential of a symmetric matrix, computed by exponentiating its
+eigenvalues.
+  - `mats`: `np.ndarray`
+    > the symmetric matrix (or stack)
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+m
+a
+t
+r
+i
+x
+ 
+e
+x
+p
+o
+n
+e
+n
+t
+i
+a
+l
 
 
 
@@ -59,7 +86,7 @@ symmetric_matrix_exp(mats):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/symmetric_matrix_exp.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/symmetric_matrix_exp.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1605?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2211?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

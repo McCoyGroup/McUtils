@@ -1,14 +1,53 @@
 # <a id="McUtils.Numputils.Misc.recast_permutation">recast_permutation</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L166?message=Update%20Docs)]
 </div>
 
 ```python
 recast_permutation(permutation_array): 
 ```
+**LLM Docstring**
 
+Down-cast a permutation array to the smallest dtype able to index its own
+length.
 
+Since a permutation of length `n` only holds values `0..n-1`, the dtype is
+chosen from the trailing dimension size.
+  - `permutation_array`: `np.ndarray`
+    > the permutation(s) to recast
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+d
+o
+w
+n
+-
+c
+a
+s
+t
+ 
+p
+e
+r
+m
+u
+t
+a
+t
+i
+o
+n
+ 
+a
+r
+r
+a
+y
 
 
 
@@ -59,7 +98,7 @@ recast_permutation(permutation_array):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/recast_permutation.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/recast_permutation.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L71?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L166?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

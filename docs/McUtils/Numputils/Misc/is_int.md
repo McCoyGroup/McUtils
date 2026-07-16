@@ -1,14 +1,60 @@
 # <a id="McUtils.Numputils.Misc.is_int">is_int</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L59?message=Update%20Docs)]
 </div>
 
 ```python
 is_int(obj, types=None): 
 ```
+**LLM Docstring**
 
-
+Test whether an object is a scalar integer (Python or NumPy int, or a
+zero-dimensional integer array).
+  - `obj`: `Any`
+    > the object to test
+  - `types`: `tuple | None`
+    > the integer types to accept
+  - `:returns`: `bool`
+    > w
+h
+e
+t
+h
+e
+r
+ 
+t
+h
+e
+ 
+o
+b
+j
+e
+c
+t
+ 
+i
+s
+ 
+a
+n
+ 
+i
+n
+t
+e
+g
+e
+r
+ 
+s
+c
+a
+l
+a
+r
 
 
 
@@ -59,7 +105,7 @@ is_int(obj, types=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/is_int.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/is_int.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L34?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L59?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

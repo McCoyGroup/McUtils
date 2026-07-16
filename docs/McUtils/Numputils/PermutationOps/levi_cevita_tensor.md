@@ -1,14 +1,45 @@
 # <a id="McUtils.Numputils.PermutationOps.levi_cevita_tensor">levi_cevita_tensor</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/PermutationOps.py#L41)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L41?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/PermutationOps.py#L71)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L71?message=Update%20Docs)]
 </div>
 
 ```python
 levi_cevita_tensor(k, sparse=False): 
 ```
+**LLM Docstring**
 
+Build the rank-`k` Levi-Civita (permutation) tensor, dense or sparse.
 
+Uses `levi_cevita_maps` to place `±1` at the permutation positions; a
+`SparseArray` is returned when `sparse` is set, otherwise a dense integer array.
+  - `k`: `int`
+    > the tensor rank
+  - `sparse`: `bool`
+    > return a `SparseArray` instead of a dense array
+  - `:returns`: `np.ndarray | SparseArray`
+    > t
+h
+e
+ 
+L
+e
+v
+i
+-
+C
+i
+v
+i
+t
+a
+ 
+t
+e
+n
+s
+o
+r
 
 
 
@@ -59,7 +90,7 @@ levi_cevita_tensor(k, sparse=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/PermutationOps/levi_cevita_tensor.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/PermutationOps/levi_cevita_tensor.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L41?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L71?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,96 @@
 # <a id="McUtils.Numputils.VectorOps.integer_exponent">integer_exponent</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1783)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1783?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2484)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2484?message=Update%20Docs)]
 </div>
 
 ```python
 integer_exponent(ints, k, max_its=None): 
 ```
+**LLM Docstring**
 
+For each integer, factor out the largest power of `k` that divides it.
 
+Repeatedly divides the entries still divisible by `k`, counting the divisions,
+until no entry is divisible or `max_its` is reached.
+  - `ints`: `np.ndarray`
+    > the integers to factor
+  - `k`: `int`
+    > the base to factor out
+  - `max_its`: `int | None`
+    > cap on the number of division passes (inferred if omitted)
+  - `:returns`: `tuple[np.ndarray, np.ndarray]`
+    > `
+(
+r
+e
+s
+i
+d
+u
+a
+l
+s
+,
+ 
+e
+x
+p
+o
+n
+e
+n
+t
+s
+)
+`
+ 
+—
+ 
+t
+h
+e
+ 
+c
+o
+-
+f
+a
+c
+t
+o
+r
+s
+ 
+a
+n
+d
+ 
+t
+h
+e
+ 
+p
+o
+w
+e
+r
+s
+ 
+o
+f
+ 
+`
+k
+`
+ 
+r
+e
+m
+o
+v
+e
+d
 
 
 
@@ -59,7 +141,7 @@ integer_exponent(ints, k, max_its=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/integer_exponent.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/integer_exponent.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1783?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2484?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,79 @@
 # <a id="McUtils.Numputils.CoordinateFrames.translation_rotation_projector">translation_rotation_projector</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L512)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L512?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordinateFrames.py#L583)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L583?message=Update%20Docs)]
 </div>
 
 ```python
 translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False, orthonormal=True): 
 ```
+**LLM Docstring**
 
+Build the projector that removes overall translation and rotation from a
+Cartesian displacement space.
 
+The translation/rotation eigenvectors are obtained from
+`translation_rotation_eigenvectors` and passed to
+`frame_displacement_projector`. The mode vectors themselves can optionally be
+returned alongside the projector.
+  - `coords`: `np.ndarray`
+    > Cartesian coordinates, shape `(..., N, 3)`
+  - `masses`: `np.ndarray | None`
+    > per-atom masses (defaults to unit masses)
+  - `mass_weighted`: `bool`
+    > whether the output space should be mass-weighted
+  - `return_modes`: `bool`
+    > also return the translation/rotation modes
+  - `orthonormal`: `bool`
+    > whether to build an orthonormal projector
+  - `:returns`: `np.ndarray | tuple`
+    > t
+h
+e
+ 
+p
+r
+o
+j
+e
+c
+t
+o
+r
+ 
+(
+a
+n
+d
+ 
+t
+h
+e
+ 
+m
+o
+d
+e
+s
+ 
+i
+f
+ 
+`
+r
+e
+t
+u
+r
+n
+_
+m
+o
+d
+e
+s
+`
+)
 
 
 
@@ -59,7 +124,7 @@ translation_rotation_projector(coords, masses=None, mass_weighted=False, return_
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordinateFrames/translation_rotation_projector.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordinateFrames/translation_rotation_projector.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L512?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordinateFrames.py#L583?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

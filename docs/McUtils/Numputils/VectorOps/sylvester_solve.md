@@ -1,14 +1,41 @@
 # <a id="McUtils.Numputils.VectorOps.sylvester_solve">sylvester_solve</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1631)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1631?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2287)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2287?message=Update%20Docs)]
 </div>
 
 ```python
 sylvester_solve(A, B, C): 
 ```
+**LLM Docstring**
 
+Solve the Sylvester equation `A X + X B = C` for `X`.
 
+The equation is vectorized into the Kronecker-form linear system `(Bᵀ ⊗ I + I ⊗
+A) vec(X) = vec(C)` and solved with `np.linalg.solve`.
+  - `A`: `np.ndarray`
+    > the left coefficient matrix
+  - `B`: `np.ndarray`
+    > the right coefficient matrix
+  - `C`: `np.ndarray`
+    > the right-hand side
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+s
+o
+l
+u
+t
+i
+o
+n
+ 
+`
+X
+`
 
 
 
@@ -59,7 +86,7 @@ sylvester_solve(A, B, C):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/sylvester_solve.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/sylvester_solve.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1631?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2287?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

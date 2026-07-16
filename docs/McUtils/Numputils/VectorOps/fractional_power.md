@@ -1,14 +1,86 @@
 # <a id="McUtils.Numputils.VectorOps.fractional_power">fractional_power</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1535)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1535?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L2061)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2061?message=Update%20Docs)]
 </div>
 
 ```python
 fractional_power(A, pow, zero_cutoff=1e-08): 
 ```
+**LLM Docstring**
 
+Raise a symmetric matrix to an arbitrary (fractional) power, discarding
+near-zero eigenvalues.
 
+The matrix is diagonalized with `np.linalg.eigh`; eigenvalues with magnitude
+above `zero_cutoff` are kept and raised to `pow`, and the matrix is reassembled
+from the retained eigenpairs. Batched inputs are handled per matrix, returning a
+list when the retained rank varies across the batch.
+  - `A`: `np.ndarray`
+    > the symmetric matrix (or stack)
+  - `pow`: `float`
+    > the exponent
+  - `zero_cutoff`: `float`
+    > eigenvalue magnitude below which directions are dropped
+  - `:returns`: `np.ndarray | list[np.ndarray]`
+    > t
+h
+e
+ 
+f
+r
+a
+c
+t
+i
+o
+n
+a
+l
+ 
+m
+a
+t
+r
+i
+x
+ 
+p
+o
+w
+e
+r
+ 
+(
+o
+r
+ 
+a
+ 
+l
+i
+s
+t
+ 
+f
+o
+r
+ 
+r
+a
+g
+g
+e
+d
+ 
+b
+a
+t
+c
+h
+e
+s
+)
 
 
 
@@ -59,7 +131,7 @@ fractional_power(A, pow, zero_cutoff=1e-08):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/fractional_power.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/fractional_power.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1535?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L2061?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

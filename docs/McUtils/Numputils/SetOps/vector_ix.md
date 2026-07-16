@@ -1,14 +1,74 @@
 # <a id="McUtils.Numputils.SetOps.vector_ix">vector_ix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L623)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L623?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/SetOps.py#L754)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L754?message=Update%20Docs)]
 </div>
 
 ```python
 vector_ix(shape, inds, return_shape=False): 
 ```
+**LLM Docstring**
 
-
+Build the fancy-index tuple that addresses positions `inds` within an array of
+shape `shape`, broadcasting over any leading batch dimensions carried by `inds`.
+  - `shape`: `int | tuple[int, ...]`
+    > the shape of the array being indexed
+  - `inds`: `tuple | np.ndarray`
+    > the per-axis index arrays (a tuple, or a single array)
+  - `return_shape`: `bool`
+    > also return the broadcast output shape
+  - `:returns`: `tuple`
+    > t
+h
+e
+ 
+i
+n
+d
+e
+x
+ 
+t
+u
+p
+l
+e
+ 
+(
+a
+n
+d
+ 
+t
+h
+e
+ 
+o
+u
+t
+p
+u
+t
+ 
+s
+h
+a
+p
+e
+ 
+i
+f
+ 
+r
+e
+q
+u
+e
+s
+t
+e
+d
+)
 
 
 
@@ -59,7 +119,7 @@ vector_ix(shape, inds, return_shape=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/SetOps/vector_ix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/SetOps/vector_ix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L623?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/SetOps.py#L754?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

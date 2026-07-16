@@ -1,14 +1,100 @@
 # <a id="McUtils.Numputils.CoordOps.prep_disp_expansion">prep_disp_expansion</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L820)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L820?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1050)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1050?message=Update%20Docs)]
 </div>
 
 ```python
 prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True): 
 ```
+**LLM Docstring**
 
+Prepare the derivative expansion of the displacement vector `coords[j] -
+coords[i]`.
 
+Returns the vector itself and, when `expand` is truthy, its first-order
+Jacobian (flattened over the atom/axis dimensions), optionally zeroing out the
+rows belonging to any `fixed_atoms`. When `expand` is falsey only the raw vector
+is returned.
+  - `coords`: `np.ndarray`
+    > Cartesian coordinates, shape `(..., N, 3)`
+  - `i`: `int`
+    > index of the tail atom
+  - `j`: `int`
+    > index of the head atom
+  - `at_list`: `Iterable[int]`
+    > atoms retained in the reduced (projected) block
+  - `fixed_atoms`: `Iterable[int] | None`
+    > atoms whose Jacobian rows should be zeroed
+  - `expand`: `bool`
+    > whether to also compute the Jacobian
+  - `:returns`: `tuple | list`
+    > `
+(
+p
+r
+o
+j
+e
+c
+t
+i
+o
+n
+,
+ 
+[
+v
+e
+c
+t
+o
+r
+,
+ 
+j
+a
+c
+o
+b
+i
+a
+n
+]
+)
+`
+ 
+w
+h
+e
+n
+ 
+e
+x
+p
+a
+n
+d
+i
+n
+g
+,
+ 
+e
+l
+s
+e
+ 
+`
+[
+v
+e
+c
+t
+o
+r
+]
+`
 
 
 
@@ -59,7 +145,7 @@ prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/prep_disp_expansion.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/prep_disp_expansion.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L820?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1050?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

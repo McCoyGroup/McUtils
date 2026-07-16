@@ -1,14 +1,44 @@
 # <a id="McUtils.Numputils.Misc.recast_indices">recast_indices</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L76)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L76?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L185)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L185?message=Update%20Docs)]
 </div>
 
 ```python
 recast_indices(indexing_array): 
 ```
+**LLM Docstring**
 
-
+Down-cast an indexing array to the smallest dtype able to hold its maximum
+value.
+  - `indexing_array`: `np.ndarray`
+    > the indices to recast
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+d
+o
+w
+n
+-
+c
+a
+s
+t
+ 
+i
+n
+d
+e
+x
+ 
+a
+r
+r
+a
+y
 
 
 
@@ -59,7 +89,7 @@ recast_indices(indexing_array):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/recast_indices.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/recast_indices.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L76?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L185?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

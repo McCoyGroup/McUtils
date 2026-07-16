@@ -1,14 +1,72 @@
 # <a id="McUtils.Numputils.VectorOps.orthogonal_projection_matrix">orthogonal_projection_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1942)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1942?message=Update%20Docs)]
 </div>
 
 ```python
 orthogonal_projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False): 
 ```
+**LLM Docstring**
 
-
+Build the complementary projector that removes the span of a basis (`I - P`).
+  - `basis`: `np.ndarray`
+    > the basis vectors (columns)
+  - `inverse`: `np.ndarray | None`
+    > explicit left inverse of the basis (optional)
+  - `orthonormal`: `bool`
+    > whether the basis is already orthonormal
+  - `allow_pinv`: `bool`
+    > use the pseudoinverse instead of QR/transpose
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+o
+r
+t
+h
+o
+g
+o
+n
+a
+l
+ 
+(
+c
+o
+m
+p
+l
+e
+m
+e
+n
+t
+a
+r
+y
+)
+ 
+p
+r
+o
+j
+e
+c
+t
+i
+o
+n
+ 
+m
+a
+t
+r
+i
+x
 
 
 
@@ -59,7 +117,7 @@ orthogonal_projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/orthogonal_projection_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/orthogonal_projection_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1500?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1942?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,92 @@
 # <a id="McUtils.Numputils.CoordOps.oop_deriv">oop_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1706)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1706?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2137?message=Update%20Docs)]
 </div>
 
 ```python
 oop_deriv(coords, i, j, k, l=None, *, order=1, method='expansion', fixed_atoms=None, cache=None, reproject=True, expanded_vectors=None): 
 ```
+**LLM Docstring**
 
+Analytic derivative expansion of an *out-of-plane* coordinate for the
+`i`-`j`-`k` group (with `j` treated as fixed) with respect to the Cartesian
+coordinates.
 
+Only `method='expansion'` is implemented. The out-of-plane value is formed as
+the difference of two dihedral-style derivatives (one holding the `k` vector
+frozen, one holding the `i` vector frozen), then reprojected onto the full
+coordinate set when `reproject` is set.
+  - `coords`: `np.ndarray`
+    > Cartesian coordinates, shape `(..., N, 3)`
+  - `i`: `int`
+    > first outer atom
+  - `j`: `int`
+    > central atom (held fixed)
+  - `k`: `int`
+    > second outer atom
+  - `l`: `int | None`
+    > optional reference atom (defaults to `i`)
+  - `order`: `int`
+    > maximum derivative order
+  - `method`: `str`
+    > derivative method (`'expansion'` only)
+  - `fixed_atoms`: `Iterable[int] | None`
+    > additional atoms to hold fixed
+  - `cache`: `dict | None`
+    > expansion cache
+  - `reproject`: `bool`
+    > whether to reproject the derivatives
+  - `expanded_vectors`: `Iterable[int] | None`
+    > which defining vectors to expand
+  - `:returns`: `list`
+    > t
+h
+e
+ 
+d
+e
+r
+i
+v
+a
+t
+i
+v
+e
+ 
+e
+x
+p
+a
+n
+s
+i
+o
+n
+ 
+`
+[
+v
+a
+l
+u
+e
+,
+ 
+d
+1
+,
+ 
+d
+2
+,
+ 
+.
+.
+.
+]
+`
 
 
 
@@ -59,7 +137,7 @@ oop_deriv(coords, i, j, k, l=None, *, order=1, method='expansion', fixed_atoms=N
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/oop_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/oop_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1706?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2137?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

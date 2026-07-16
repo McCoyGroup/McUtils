@@ -1,14 +1,58 @@
 # <a id="McUtils.Numputils.TransformationMatrices.skew_symmetric_matrix">skew_symmetric_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/TransformationMatrices.py#L263)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L263?message=Update%20Docs)]
 </div>
 
 ```python
 skew_symmetric_matrix(upper_tri): 
 ```
+**LLM Docstring**
 
+Build a skew-symmetric matrix from the flattened entries of its strict upper
+triangle.
 
+The vector length must correspond to a valid upper triangle; the entries are
+scattered above the diagonal and negated below it.
+  - `upper_tri`: `np.ndarray`
+    > the strict-upper-triangle entries
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+s
+k
+e
+w
+-
+s
+y
+m
+m
+e
+t
+r
+i
+c
+ 
+m
+a
+t
+r
+i
+x
+ 
+(
+o
+r
+ 
+s
+t
+a
+c
+k
+)
 
 
 
@@ -59,7 +103,7 @@ skew_symmetric_matrix(upper_tri):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/TransformationMatrices/skew_symmetric_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/TransformationMatrices/skew_symmetric_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L234?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/TransformationMatrices.py#L263?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

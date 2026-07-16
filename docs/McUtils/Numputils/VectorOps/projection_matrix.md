@@ -1,14 +1,49 @@
 # <a id="McUtils.Numputils.VectorOps.projection_matrix">projection_matrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1486)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1486?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1908)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1908?message=Update%20Docs)]
 </div>
 
 ```python
 projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False): 
 ```
+**LLM Docstring**
 
+Build the projection matrix onto the span of a basis.
 
+The projector is `basis @ inverse`; the inverse defaults to the transpose when
+the basis is orthonormal (or after an internal QR), or to the pseudoinverse when
+`allow_pinv` is set.
+  - `basis`: `np.ndarray`
+    > the basis vectors (columns)
+  - `inverse`: `np.ndarray | None`
+    > explicit left inverse of the basis (optional)
+  - `orthonormal`: `bool`
+    > whether the basis is already orthonormal
+  - `allow_pinv`: `bool`
+    > use the pseudoinverse instead of QR/transpose
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+p
+r
+o
+j
+e
+c
+t
+i
+o
+n
+ 
+m
+a
+t
+r
+i
+x
 
 
 
@@ -59,7 +94,7 @@ projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/projection_matrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/projection_matrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1486?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1908?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

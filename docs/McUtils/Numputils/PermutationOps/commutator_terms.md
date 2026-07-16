@@ -1,14 +1,51 @@
 # <a id="McUtils.Numputils.PermutationOps.commutator_terms">commutator_terms</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/PermutationOps.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/PermutationOps.py#L304)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L304?message=Update%20Docs)]
 </div>
 
 ```python
 commutator_terms(commutator_strings): 
 ```
+**LLM Docstring**
 
+Expand a commutator specification into all signed operator-product terms.
 
+Normalizes the commutator (`normalize_commutators`) and then materializes every
+product ordering with its phase via `_setup_com_terms`.
+  - `commutator_strings`: `Sequence`
+    > the commutator specification
+  - `:returns`: `tuple[np.ndarray, np.ndarray]`
+    > `
+(
+p
+h
+a
+s
+e
+s
+,
+ 
+o
+p
+e
+r
+a
+t
+o
+r
+_
+o
+r
+d
+e
+r
+i
+n
+g
+s
+)
+`
 
 
 
@@ -59,7 +96,7 @@ commutator_terms(commutator_strings):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/PermutationOps/commutator_terms.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/PermutationOps/commutator_terms.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L186?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/PermutationOps.py#L304?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

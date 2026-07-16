@@ -1,14 +1,52 @@
 # <a id="McUtils.Numputils.Misc.infer_int_dtype">infer_int_dtype</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L225)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L225?message=Update%20Docs)]
 </div>
 
 ```python
 infer_int_dtype(max_dim): 
 ```
+**LLM Docstring**
 
+Choose the smallest *signed* integer dtype that can represent dimensions up to
+`max_dim`.
 
+Uses `np.min_scalar_type` on `-(max_dim + 1)` to force a signed result.
+  - `max_dim`: `int`
+    > the largest dimension to represent
+  - `:returns`: `np.dtype`
+    > t
+h
+e
+ 
+m
+i
+n
+i
+m
+a
+l
+ 
+s
+i
+g
+n
+e
+d
+ 
+s
+c
+a
+l
+a
+r
+ 
+d
+t
+y
+p
+e
 
 
 
@@ -59,7 +97,7 @@ infer_int_dtype(max_dim):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/infer_int_dtype.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/infer_int_dtype.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L94?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L225?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

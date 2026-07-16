@@ -1,14 +1,70 @@
 # <a id="McUtils.Numputils.VectorOps.one_pad_vecs">one_pad_vecs</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1464)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1464?message=Update%20Docs)]
 </div>
 
 ```python
 one_pad_vecs(vecs): 
 ```
+**LLM Docstring**
 
-
+Append a trailing column of ones to a stack of vectors (the homogeneous-
+coordinate padding used for affine transforms).
+  - `vecs`: `np.ndarray`
+    > the vectors to pad
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+v
+e
+c
+t
+o
+r
+s
+ 
+w
+i
+t
+h
+ 
+a
+ 
+`
+1
+`
+ 
+a
+p
+p
+e
+n
+d
+e
+d
+ 
+a
+l
+o
+n
+g
+ 
+t
+h
+e
+ 
+l
+a
+s
+t
+ 
+a
+x
+i
+s
 
 
 
@@ -59,7 +115,7 @@ one_pad_vecs(vecs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/one_pad_vecs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/one_pad_vecs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1115?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1464?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

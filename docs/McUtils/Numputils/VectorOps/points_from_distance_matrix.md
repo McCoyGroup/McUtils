@@ -7,8 +7,62 @@
 ```python
 points_from_distance_matrix(dist_mat, test_idx=None, target_dim=None, use_triu=False, zero_cutoff=1e-08): 
 ```
+**LLM Docstring**
 
+Reconstruct a set of point coordinates that reproduce a given pairwise
+distance matrix (classical multidimensional scaling).
 
+The distance matrix is squared and double-centered (or centered on `test_idx`
+when supplied) to form the Gram matrix, which is diagonalized; the positive
+eigenvalues and their eigenvectors give the embedded coordinates. Distances may
+be passed as a dense matrix or as the flattened upper triangle (`use_triu`), and
+the output can be zero-padded up to `target_dim`.
+  - `dist_mat`: `np.ndarray`
+    > pairwise distances (dense matrix or flattened upper triangle)
+  - `test_idx`: `int | None`
+    > reference point to center on (double-centering if omitted)
+  - `target_dim`: `int | None`
+    > dimension to zero-pad the coordinates up to
+  - `use_triu`: `bool`
+    > whether `dist_mat` is a flattened upper triangle
+  - `zero_cutoff`: `float`
+    > eigenvalue cutoff for counting significant dimensions
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+r
+e
+c
+o
+n
+s
+t
+r
+u
+c
+t
+e
+d
+ 
+p
+o
+i
+n
+t
+ 
+c
+o
+o
+r
+d
+i
+n
+a
+t
+e
+s
 
 
 

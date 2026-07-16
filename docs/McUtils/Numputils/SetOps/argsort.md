@@ -7,8 +7,48 @@
 ```python
 argsort(ar): 
 ```
+**LLM Docstring**
 
+Stable argsort that supports multi-dimensional rows by coercing them to a
+compound dtype first.
 
+Uses a mergesort for stability and down-casts the resulting permutation to a
+minimal dtype.
+  - `ar`: `np.ndarray`
+    > the array to sort
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+(
+d
+o
+w
+n
+-
+c
+a
+s
+t
+)
+ 
+s
+o
+r
+t
+ 
+p
+e
+r
+m
+u
+t
+a
+t
+i
+o
+n
 
 
 

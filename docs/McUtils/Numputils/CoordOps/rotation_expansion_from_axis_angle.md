@@ -1,14 +1,88 @@
 # <a id="McUtils.Numputils.CoordOps.rotation_expansion_from_axis_angle">rotation_expansion_from_axis_angle</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2607)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2607?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3608)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3608?message=Update%20Docs)]
 </div>
 
 ```python
 rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0.0, axis_order=0): 
 ```
+**LLM Docstring**
 
+Build the derivative expansion of coordinates rotated about a given axis, taken
+with respect to either the rotation angle or the axis itself.
 
+The rotation-generator derivatives come from `Geometry.axis_rot_gen_deriv`. With
+`axis_order = 0` the expansion is taken in the angle; otherwise it is taken in
+the axis components. A batched axis whose leading shape matches the coordinates
+is handled by looping over the batch (a slow path); mismatched broadcasting is
+not supported.
+  - `coords`: `np.ndarray`
+    > coordinates to rotate, shape `(..., N, 3)`
+  - `axis`: `np.ndarray`
+    > rotation axis (normalized internally)
+  - `order`: `int`
+    > maximum derivative order
+  - `angle`: `float`
+    > rotation angle
+  - `axis_order`: `int`
+    > `0` to differentiate w.r.t. the angle, else w.r.t. the axis
+  - `:returns`: `list[np.ndarray]`
+    > t
+h
+e
+ 
+r
+o
+t
+a
+t
+e
+d
+-
+c
+o
+o
+r
+d
+i
+n
+a
+t
+e
+ 
+e
+x
+p
+a
+n
+s
+i
+o
+n
+ 
+`
+[
+v
+a
+l
+u
+e
+,
+ 
+d
+1
+,
+ 
+d
+2
+,
+ 
+.
+.
+.
+]
+`
 
 
 
@@ -59,7 +133,7 @@ rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0.0, axis_ord
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/rotation_expansion_from_axis_angle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/rotation_expansion_from_axis_angle.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2607?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3608?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

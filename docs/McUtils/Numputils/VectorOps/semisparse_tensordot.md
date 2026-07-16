@@ -1,14 +1,52 @@
 # <a id="McUtils.Numputils.VectorOps.semisparse_tensordot">semisparse_tensordot</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L837)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L837?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L1111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1111?message=Update%20Docs)]
 </div>
 
 ```python
 semisparse_tensordot(sparse_data, a, /, axes, shared=None): 
 ```
+**LLM Docstring**
 
+Contract a sparse tensor (given as `(positions, values, shape)`) with a dense
+array, analogous to `np.tensordot` but exploiting the sparsity.
 
+The requested `axes` of each operand are aligned (with an optional number of
+`shared` leading batch axes), the sparse positions are flattened into a
+contracted/free index pair, and the contraction is performed either as a single
+`vec_tensordot` (full contraction) or an explicit accumulation over the nonzero
+entries.
+  - `sparse_data`: `tuple`
+    > the sparse tensor as `(positions, values, shape)`
+  - `a`: `np.ndarray`
+    > the dense array to contract against
+  - `axes`: `tuple`
+    > `(sparse_axes, dense_axes)` to contract
+  - `shared`: `int | None`
+    > number of shared leading batch axes
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+c
+o
+n
+t
+r
+a
+c
+t
+e
+d
+ 
+r
+e
+s
+u
+l
+t
 
 
 
@@ -59,7 +97,7 @@ semisparse_tensordot(sparse_data, a, /, axes, shared=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/semisparse_tensordot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/semisparse_tensordot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L837?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L1111?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

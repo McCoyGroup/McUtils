@@ -1,14 +1,45 @@
 # <a id="McUtils.Numputils.VectorOps.broadcast_constant">broadcast_constant</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L700)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L700?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/VectorOps.py#L956)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L956?message=Update%20Docs)]
 </div>
 
 ```python
 broadcast_constant(base_array, target_shape, pad_base=False): 
 ```
+**LLM Docstring**
 
+Broadcast a scalar or array up to a target shape.
 
+A scalar is filled into `target_shape`; an array is expanded with leading axes
+so it broadcasts against `target_shape` (with the array's own shape appended
+when `pad_base` is set).
+  - `base_array`: `float | np.ndarray`
+    > the value to broadcast
+  - `target_shape`: `tuple[int, ...]`
+    > the desired leading shape
+  - `pad_base`: `bool`
+    > append the base array's shape to the target shape
+  - `:returns`: `np.ndarray`
+    > t
+h
+e
+ 
+b
+r
+o
+a
+d
+c
+a
+s
+t
+ 
+a
+r
+r
+a
+y
 
 
 
@@ -59,7 +90,7 @@ broadcast_constant(base_array, target_shape, pad_base=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/VectorOps/broadcast_constant.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/VectorOps/broadcast_constant.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L700?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/VectorOps.py#L956?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
