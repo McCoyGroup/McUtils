@@ -1,14 +1,23 @@
 # <a id="McUtils.Coordinerds.ZMatrices.center_bound_zmatrix">center_bound_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L770)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L770?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L1038)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1038?message=Update%20Docs)]
 </div>
 
 ```python
 center_bound_zmatrix(n, center=-1): 
 ```
+**LLM Docstring**
 
+Construct rows whose bond reference is a common center.
 
+Each generated atom uses `center` as its distance reference. Angle and dihedral references are chosen from earlier generated atoms, with negative embedding placeholders in the first rows.
+  - `n`: `int`
+    > Number of rows to generate.
+  - `center`: `int`
+    > Common bond-reference index, often a negative attachment placeholder.
+  - `:returns`: `list[list[int]]`
+    > Four-column center-bound fragment ordering.
 
 
 
@@ -59,7 +68,7 @@ center_bound_zmatrix(n, center=-1):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/center_bound_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/center_bound_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L770?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1038?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,19 @@
 # <a id="McUtils.Coordinerds.Internals.coordinate_indices">coordinate_indices</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1317)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1317?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L2363)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2363?message=Update%20Docs)]
 </div>
 
 ```python
 coordinate_indices(coords): 
 ```
+**LLM Docstring**
 
-
+Flatten a coordinate list into an integer array and return the per-coordinate arity indicators needed to reconstruct the original tuples.
+  - `coords`: `Any`
+    > Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+  - `:returns`: `tuple[np.ndarray, np.ndarray]`
+    > The flattened coordinate indices and per-coordinate arity indicators.
 
 
 
@@ -59,7 +64,7 @@ coordinate_indices(coords):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/coordinate_indices.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/coordinate_indices.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1317?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2363?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

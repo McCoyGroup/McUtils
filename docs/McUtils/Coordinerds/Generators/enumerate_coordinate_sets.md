@@ -1,14 +1,25 @@
 # <a id="McUtils.Coordinerds.Generators.enumerate_coordinate_sets">enumerate_coordinate_sets</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L600)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L600?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L1083)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L1083?message=Update%20Docs)]
 </div>
 
 ```python
 enumerate_coordinate_sets(groups, coords, canonicalize=True): 
 ```
+**LLM Docstring**
 
+Recursively enumerate coordinate sets that complete each supplied atom group.
 
+Existing coordinates are canonicalized into a set by default. For each group, negative padding indices are removed, every completion from `enumerate_coordinate_completions_line` is merged into the current set, and recursion continues through the remaining groups. The outer loop also starts recursion at each group position, so overlapping suffix traversals may yield duplicate sets.
+  - `groups`: `collections.abc.Sequence[collections.abc.Sequence[int]]`
+    > Sequence of atom-index groups; negative entries are ignored as padding.
+  - `coords`: `collections.abc.Iterable[tuple[int, ...]]`
+    > Existing internal coordinates.
+  - `canonicalize`: `bool`
+    > Whether to canonicalize `coords` on the initial call.
+  - `:returns`: `collections.abc.Iterator[set[tuple[int, ...]]]`
+    > Generator yielding completed coordinate sets.
 
 
 
@@ -59,7 +70,7 @@ enumerate_coordinate_sets(groups, coords, canonicalize=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Generators/enumerate_coordinate_sets.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Generators/enumerate_coordinate_sets.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L600?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L1083?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

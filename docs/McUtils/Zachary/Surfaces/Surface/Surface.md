@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Surfaces.Surface.Surface">Surface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface.py#L10)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L10?message=Update%20Docs)]
 </div>
 
 This actually isn't a concrete implementation of BaseSurface.
@@ -25,8 +25,8 @@ Instead it's a class that _dispatches_ to an implementation of BaseSurface to do
 __init__(self, data, dimension=None, base=None, **metadata): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface.py#L16)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L16?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L15?message=Update%20Docs)]
 </div>
 
   - `data`: `Any`
@@ -45,9 +45,14 @@ __init__(self, data, dimension=None, base=None, **metadata):
 data(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L39?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The backing data of the dispatched base surface.
+  - `:returns`: `_`
+    > the surface data
 
 
 <a id="McUtils.Zachary.Surfaces.Surface.Surface.minimize" class="docs-object-method">&nbsp;</a> 
@@ -55,8 +60,8 @@ data(self):
 minimize(self, initial_guess=None, function_options=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L50?message=Update%20Docs)]
 </div>
 Provides a uniform interface for minimization, basically just dispatching to the BaseSurface implementation if provided
   - `initial_guess`: `np.ndarray | None`
@@ -75,8 +80,8 @@ Provides a uniform interface for minimization, basically just dispatching to the
 detect_base(cls, data, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L70)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L70?message=Update%20Docs)]
 </div>
 Infers what type of base surface works for the data that's passed in.
 It's _super_ roughly done so...yeah generally better to pass the base class you want explicitly.
@@ -101,9 +106,18 @@ iii. just like...one big array -> Interpolatin
 __call__(self, gridpoints, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L114?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate the surface at the given grid points (dispatching to the base surface).
+  - `gridpoints`: `np.ndarray`
+    > the points to evaluate at
+  - `kwargs`: `Any`
+    > extra evaluation options
+  - `:returns`: `np.ndarray`
+    > the surface values
 
 
 <a id="McUtils.Zachary.Surfaces.Surface.Surface.center" class="docs-object-method">&nbsp;</a> 
@@ -112,9 +126,14 @@ __call__(self, gridpoints, **kwargs):
 center(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L128?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The expansion center of the base surface (if it has one).
+  - `:returns`: `_`
+    > the center
 
 
 <a id="McUtils.Zachary.Surfaces.Surface.Surface.ref" class="docs-object-method">&nbsp;</a> 
@@ -123,9 +142,14 @@ center(self):
 ref(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L138?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The reference value of the base surface (if it has one).
+  - `:returns`: `_`
+    > the reference value
 
 
 <a id="McUtils.Zachary.Surfaces.Surface.Surface.expansion_tensors" class="docs-object-method">&nbsp;</a> 
@@ -134,9 +158,14 @@ ref(self):
 expansion_tensors(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L148)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface/Surface.py#L148?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The expansion tensors of the base surface (if it has them).
+  - `:returns`: `_`
+    > the expansion tensors
  </div>
 </div>
 
@@ -190,7 +219,7 @@ expansion_tensors(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/Surface/Surface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/Surface/Surface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L11?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/Surface.py#L10?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

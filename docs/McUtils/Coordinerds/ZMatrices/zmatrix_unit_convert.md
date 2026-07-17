@@ -7,8 +7,23 @@
 ```python
 zmatrix_unit_convert(zmat, distance_conversion, angle_conversion=None, rad2deg=False, deg2rad=False): 
 ```
+**LLM Docstring**
 
+Scale the distance and angular columns of a Z-matrix value array.
 
+A copy is made when `np.asanyarray` returns the original object. Column 0 is multiplied by `distance_conversion`. Columns 1 and 2 are multiplied by `angle_conversion` when supplied; otherwise they are optionally converted between degrees and radians.
+  - `zmat`: `array-like`
+    > Z-matrix values whose final two axes are atoms by `(distance, angle, dihedral)`.
+  - `distance_conversion`: `float`
+    > Multiplicative factor applied to all distances.
+  - `angle_conversion`: `float | None`
+    > Multiplicative factor applied to bends and dihedrals. When omitted, `rad2deg` or `deg2rad` controls angular conversion.
+  - `rad2deg`: `bool`
+    > Convert angular columns from radians to degrees when `angle_conversion` is omitted.
+  - `deg2rad`: `bool`
+    > Convert angular columns from degrees to radians when `angle_conversion` is omitted.
+  - `:returns`: `np.ndarray`
+    > Converted Z-matrix values, without modifying the input array in place.
 
 
 

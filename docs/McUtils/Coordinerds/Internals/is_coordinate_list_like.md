@@ -1,14 +1,19 @@
 # <a id="McUtils.Coordinerds.Internals.is_coordinate_list_like">is_coordinate_list_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1079)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1079?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1913)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1913?message=Update%20Docs)]
 </div>
 
 ```python
 is_coordinate_list_like(clist): 
 ```
+**LLM Docstring**
 
-
+Return whether every element of a sequence is a valid distance, angle, or dihedral specification.
+  - `clist`: `Any`
+    > Sequence to test as a coordinate list.
+  - `:returns`: `bool`
+    > Whether the tested condition is satisfied.
 
 
 
@@ -59,7 +64,7 @@ is_coordinate_list_like(clist):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/is_coordinate_list_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/is_coordinate_list_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1079?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1913?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

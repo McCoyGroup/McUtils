@@ -27,6 +27,13 @@ __init__(self, data, dimension):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L20)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L20?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store the core surface data and its dimension.
+  - `data`: `Any`
+    > the surface's backing data (interpreted by the subclass)
+  - `dimension`: `int | None`
+    > the dimensionality of the surface's input space
 
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.BaseSurface.evaluate" class="docs-object-method">&nbsp;</a> 
@@ -34,8 +41,8 @@ __init__(self, data, dimension):
 evaluate(self, points, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L34?message=Update%20Docs)]
 </div>
 Evaluates the function at the points based off of "data"
   - `points`: `Any`
@@ -49,9 +56,21 @@ Evaluates the function at the points based off of "data"
 check_dimension(self, gridpoints, target=None, raise_exception=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L45?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Check that a set of grid points matches the surface's expected dimension,
+optionally raising on a mismatch.
+  - `gridpoints`: `np.ndarray`
+    > the points to check
+  - `target`: `int | None`
+    > the expected dimension (defaults to the surface's)
+  - `raise_exception`: `bool`
+    > raise (rather than return `False`) on a mismatch
+  - `:returns`: `bool`
+    > whether the dimension matches
 
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.BaseSurface.__call__" class="docs-object-method">&nbsp;</a> 
@@ -59,8 +78,8 @@ check_dimension(self, gridpoints, target=None, raise_exception=True):
 __call__(self, gridpoints, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L53)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L53?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/BaseSurface.py#L78?message=Update%20Docs)]
 </div>
 
   - `gridpoints`: `np.ndarray`

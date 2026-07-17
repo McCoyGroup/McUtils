@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface">TaylorSeriesSurface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L121?message=Update%20Docs)]
 </div>
 
 A surface with an evaluator built off of a Taylor series expansion
@@ -24,8 +24,8 @@ A surface with an evaluator built off of a Taylor series expansion
 __init__(self, *derivs, dimension=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface.py#L125)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L125?message=Update%20Docs)]
 </div>
 
   - `data`: `Any`
@@ -40,9 +40,14 @@ __init__(self, *derivs, dimension=None, **opts):
 center(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L141)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L141?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The expansion center of the underlying Taylor series.
+  - `:returns`: `np.ndarray`
+    > the center
 
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.ref" class="docs-object-method">&nbsp;</a> 
@@ -51,9 +56,14 @@ center(self):
 ref(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L152?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The reference (constant) value of the underlying Taylor series.
+  - `:returns`: `_`
+    > the reference value
 
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.expansion_tensors" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +72,14 @@ ref(self):
 expansion_tensors(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L162)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L162?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The derivative tensors of the underlying Taylor series.
+  - `:returns`: `list`
+    > the expansion tensors
 
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.check_dimension" class="docs-object-method">&nbsp;</a> 
@@ -72,9 +87,21 @@ expansion_tensors(self):
 check_dimension(self, gridpoints, target=None, raise_exception=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L174)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L174?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Check the grid-point dimension, additionally accepting either side of the
+expansion's coordinate transform when one is present.
+  - `gridpoints`: `np.ndarray`
+    > the points to check
+  - `target`: `int | None`
+    > an explicit expected dimension
+  - `raise_exception`: `bool`
+    > raise on a mismatch
+  - `:returns`: `bool`
+    > whether the dimension matches
 
 
 <a id="McUtils.Zachary.Surfaces.BaseSurface.TaylorSeriesSurface.evaluate" class="docs-object-method">&nbsp;</a> 
@@ -82,8 +109,8 @@ check_dimension(self, gridpoints, target=None, raise_exception=True):
 evaluate(self, points, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.py#L201?message=Update%20Docs)]
 </div>
 Since the Taylor expansion stuff is already built out this is super easy
   - `points`: `Any`
@@ -145,7 +172,7 @@ Since the Taylor expansion stuff is already built out this is super easy
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/BaseSurface/TaylorSeriesSurface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L96?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/BaseSurface.py#L121?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

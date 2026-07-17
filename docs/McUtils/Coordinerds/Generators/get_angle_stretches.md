@@ -1,14 +1,19 @@
 # <a id="McUtils.Coordinerds.Generators.get_angle_stretches">get_angle_stretches</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L93?message=Update%20Docs)]
 </div>
 
 ```python
 get_angle_stretches(angles): 
 ```
+**LLM Docstring**
 
-
+Expand each angle into its two adjacent bond coordinates.
+  - `angles`: `collections.abc.Iterable[tuple[int, int, int]]`
+    > Angle triples `(a, b, c)`.
+  - `:returns`: `list[tuple[int, int]]`
+    > Flattened bond list containing `(a, b)` and `(b, c)` for every angle, including duplicates.
 
 
 
@@ -59,7 +64,7 @@ get_angle_stretches(angles):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Generators/get_angle_stretches.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Generators/get_angle_stretches.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L67?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L93?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

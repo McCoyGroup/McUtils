@@ -30,6 +30,15 @@ register(cls, type, typename=None):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L38)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L38?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Register an `InternalCoordinateType` subclass under a dispatch name. Called with a string alone, this returns a decorator that assigns that name to the decorated class; otherwise it invalidates the cached dispatcher, stores the class in `registry`, and returns the class unchanged.
+  - `type`: `Any`
+    > A coordinate class, or a registration name when using decorator form.
+  - `typename`: `Any`
+    > The registry key to assign to the coordinate class.
+  - `:returns`: `type | Callable[[type], type]`
+    > The registered class, or a decorator awaiting the class.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_dispatch" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +47,14 @@ register(cls, type, typename=None):
 get_dispatch(cls) -> 'dev.OptionsMethodDispatch': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L54)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L54?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L78?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the lazily constructed options dispatcher used to turn dictionaries containing a `type` key into registered coordinate classes and their constructor options.
+  - `:returns`: `dev.OptionsMethodDispatch`
+    > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.resolve" class="docs-object-method">&nbsp;</a> 
@@ -49,9 +63,16 @@ get_dispatch(cls) -> 'dev.OptionsMethodDispatch':
 resolve(cls, input): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L100?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert either a typed option dictionary or a bare index sequence into an instantiated coordinate object. Dictionary inputs are dispatched by `type`; bare sequences are tested against each registered class with `could_be`, and an unmatched input raises `ValueError`.
+  - `input`: `Any`
+    > A typed option mapping or bare coordinate-index sequence.
+  - `:returns`: `InternalCoordinateType`
+    > An instantiated registered coordinate object.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.could_be" class="docs-object-method">&nbsp;</a> 
@@ -60,9 +81,16 @@ resolve(cls, input):
 could_be(cls, input): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L127)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L127?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Report whether an input can represent this coordinate type. The base implementation always returns `False` and is intended to be overridden.
+  - `input`: `Any`
+    > A typed option mapping or bare coordinate-index sequence.
+  - `:returns`: `bool`
+    > Whether the tested condition is satisfied.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.equivalent_to" class="docs-object-method">&nbsp;</a> 
@@ -70,9 +98,16 @@ could_be(cls, input):
 equivalent_to(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L141)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L141?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether two coordinates have the same concrete type and the same indices after each is put in canonical orientation.
+  - `other`: `Any`
+    > The coordinate to compare against.
+  - `:returns`: `bool`
+    > Whether the tested condition is satisfied.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.__eq__" class="docs-object-method">&nbsp;</a> 
@@ -80,9 +115,16 @@ equivalent_to(self, other):
 __eq__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L156)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L156?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compare coordinates using canonical coordinate equivalence rather than object identity.
+  - `other`: `Any`
+    > The coordinate to compare against.
+  - `:returns`: `bool`
+    > Whether the tested condition is satisfied.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.canonicalize" class="docs-object-method">&nbsp;</a> 
@@ -90,9 +132,14 @@ __eq__(self, other):
 canonicalize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L97)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L97?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L169?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return an equivalent coordinate in the canonical index orientation defined by the concrete coordinate type.
+  - `:returns`: `Any`
+    > The value or updated object described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_indices" class="docs-object-method">&nbsp;</a> 
@@ -100,9 +147,14 @@ canonicalize(self):
 get_indices(self) -> 'Tuple[int, ...]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L181?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the atom indices that define this internal coordinate, in the type-specific ordering.
+  - `:returns`: `Tuple[int, ...]`
+    > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.__hash__" class="docs-object-method">&nbsp;</a> 
@@ -110,9 +162,14 @@ get_indices(self) -> 'Tuple[int, ...]':
 __hash__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L105)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L105?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L193?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hash the coordinate from its concrete class and stored index tuple so it can be used as a dictionary key or set member.
+  - `:returns`: `int`
+    > The coordinate hash value.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.reindex" class="docs-object-method">&nbsp;</a> 
@@ -120,9 +177,16 @@ __hash__(self):
 reindex(self, reindexing): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L203?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the same coordinate expressed under a supplied old-index to new-index mapping.
+  - `reindexing`: `Any`
+    > A mapping from existing atom indices to replacement indices.
+  - `:returns`: `Any`
+    > The value or updated object described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_carried_atoms" class="docs-object-method">&nbsp;</a> 
@@ -130,9 +194,16 @@ reindex(self, reindexing):
 get_carried_atoms(self, context: 'InternalSpec'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L217)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L217?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Determine the atom groups displaced on the two sides of this coordinate when it is varied in an `InternalSpec`.
+  - `context`: `InternalSpec`
+    > The surrounding coordinate specification used to infer connectivity and moved fragments.
+  - `:returns`: `Any`
+    > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_constraint_rads" class="docs-object-method">&nbsp;</a> 
@@ -140,9 +211,14 @@ get_carried_atoms(self, context: 'InternalSpec'):
 get_constraint_rads(self) -> 'list[Distance | Angle | Dihedral]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L115)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L115?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L231)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L231?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the primitive distance, angle, or dihedral coordinates that must remain available to constrain this coordinate.
+  - `:returns`: `list[Distance | Angle | Dihedral]`
+    > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_expansion" class="docs-object-method">&nbsp;</a> 
@@ -150,9 +226,20 @@ get_constraint_rads(self) -> 'list[Distance | Angle | Dihedral]':
 get_expansion(self, coords, order=None, **opts) -> 'List[np.ndarray]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L243)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L243?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate Cartesian derivatives of this internal coordinate through the requested order.
+  - `coords`: `Any`
+    > Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+  - `order`: `Any`
+    > Highest derivative order to compute.
+  - `opts`: `Any`
+    > Additional options forwarded to the numerical conversion routine.
+  - `:returns`: `List[np.ndarray]`
+    > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
 
 
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateType.get_inverse_expansion" class="docs-object-method">&nbsp;</a> 
@@ -160,9 +247,22 @@ get_expansion(self, coords, order=None, **opts) -> 'List[np.ndarray]':
 get_inverse_expansion(self, coords, order=None, moved_indices=None, **opts) -> 'List[np.ndarray]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L123)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L123?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L261)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateType.py#L261?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate derivatives of the Cartesian displacement generated by changing this internal coordinate, optionally restricted to selected moved atoms.
+  - `coords`: `Any`
+    > Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+  - `order`: `Any`
+    > Highest derivative order to compute.
+  - `moved_indices`: `Any`
+    > Explicit pair of atom groups moved on the two sides of a coordinate.
+  - `opts`: `Any`
+    > Additional options forwarded to the numerical conversion routine.
+  - `:returns`: `List[np.ndarray]`
+    > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
  </div>
 </div>
 

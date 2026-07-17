@@ -1,14 +1,19 @@
 # <a id="McUtils.Coordinerds.Generators.get_dihedral_stretches">get_dihedral_stretches</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L109)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L109?message=Update%20Docs)]
 </div>
 
 ```python
 get_dihedral_stretches(dihedrals): 
 ```
+**LLM Docstring**
 
-
+Expand each dihedral into its three adjacent bond coordinates.
+  - `dihedrals`: `collections.abc.Iterable[tuple[int, int, int, int]]`
+    > Dihedral quadruples `(a, b, c, d)`.
+  - `:returns`: `list[tuple[int, int]]`
+    > Flattened bond list containing `(a, b)`, `(b, c)`, and `(c, d)` for every dihedral, including duplicates.
 
 
 
@@ -59,7 +64,7 @@ get_dihedral_stretches(dihedrals):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Generators/get_dihedral_stretches.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Generators/get_dihedral_stretches.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L73?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L109?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

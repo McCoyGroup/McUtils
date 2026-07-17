@@ -1,14 +1,27 @@
 # <a id="McUtils.Coordinerds.Generators.get_fragment_coordinate_system">get_fragment_coordinate_system</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L186?message=Update%20Docs)]
 </div>
 
 ```python
 get_fragment_coordinate_system(bond_graph: McUtils.Graphs.EdgeGraph.EdgeGraph, fragments=None, masses=None, distance_matrix=None): 
 ```
+**LLM Docstring**
 
+Choose fragment pairs and describe intermolecular orientation coordinates between them.
 
+Fragments default to the connected components of `bond_graph`. A single fragment produces no coordinates. With more than two fragments and a distance matrix, each fragment is paired with its nearest other fragment using the minimum inter-fragment atom distance; reciprocal pairs are collapsed. Otherwise adjacent fragments in the supplied order are paired. Each pair is returned as an `orientation` specification, optionally carrying the same `masses` object.
+  - `bond_graph`: `EdgeGraph`
+    > Molecular connectivity graph used to obtain fragments when none are supplied.
+  - `fragments`: `collections.abc.Sequence[collections.abc.Sequence[int]] | None`
+    > Atom-index groups representing disconnected fragments.
+  - `masses`: `np.ndarray | None`
+    > Optional masses attached to every generated orientation specification.
+  - `distance_matrix`: `np.ndarray | None`
+    > Pairwise atom-distance matrix used to connect each fragment to its nearest neighbor when there are more than two fragments.
+  - `:returns`: `list[dict]`
+    > Orientation-coordinate specification dictionaries for selected fragment pairs.
 
 
 
@@ -59,7 +72,7 @@ get_fragment_coordinate_system(bond_graph: McUtils.Graphs.EdgeGraph.EdgeGraph, f
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Generators/get_fragment_coordinate_system.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Generators/get_fragment_coordinate_system.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L112?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L186?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

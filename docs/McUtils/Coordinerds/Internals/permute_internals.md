@@ -1,14 +1,23 @@
 # <a id="McUtils.Coordinerds.Internals.permute_internals">permute_internals</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1264)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1264?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L2282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2282?message=Update%20Docs)]
 </div>
 
 ```python
 permute_internals(coords, perm, canonicalize=True): 
 ```
+**LLM Docstring**
 
-
+Apply an atom-index permutation to each coordinate and optionally canonicalize the resulting coordinate orientations.
+  - `coords`: `Any`
+    > Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+  - `perm`: `Any`
+    > Atom-index permutation or vertex permutation.
+  - `canonicalize`: `Any`
+    > Whether to put coordinates in canonical orientation before comparison or storage.
+  - `:returns`: `Any`
+    > The value or updated object described above.
 
 
 
@@ -59,7 +68,7 @@ permute_internals(coords, perm, canonicalize=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/permute_internals.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/permute_internals.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1264?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L2282?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

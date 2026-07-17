@@ -7,8 +7,15 @@
 ```python
 get_stretch_angles(stretches): 
 ```
+**LLM Docstring**
 
+Generate every bond angle implied by pairs of stretches that share one atom.
 
+For each pair of bonds, the shared atom becomes the angle vertex and the two nonshared atoms become the endpoints. Identical stretches are skipped, but the result is not otherwise canonicalized or deduplicated.
+  - `stretches`: `collections.abc.Sequence[tuple[int, int]]`
+    > Bond coordinates represented as `(atom_i, atom_j)` pairs.
+  - `:returns`: `list[tuple[int, int, int]]`
+    > Angle triples `(endpoint_1, vertex, endpoint_2)` implied by the bond list.
 
 
 

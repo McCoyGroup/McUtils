@@ -1,14 +1,23 @@
 # <a id="McUtils.Coordinerds.Generators.get_stretch_angle_dihedrals">get_stretch_angle_dihedrals</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Generators.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L48?message=Update%20Docs)]
 </div>
 
 ```python
 get_stretch_angle_dihedrals(stretches, angles): 
 ```
+**LLM Docstring**
 
+Extend an angle by a bonded atom to form candidate dihedral coordinates.
 
+Each stretch is compared with each angle. If both stretch atoms already occur in the angle, it is ignored. If exactly one stretch atom matches any angle position, the other atom is inserted at the corresponding end or adjacent position so the angle remains a contiguous three-atom segment of the resulting four-atom coordinate.
+  - `stretches`: `collections.abc.Iterable[tuple[int, int]]`
+    > Bond coordinates as atom-index pairs.
+  - `angles`: `collections.abc.Iterable[tuple[int, int, int]]`
+    > Angle coordinates as `(a, b, c)` triples.
+  - `:returns`: `list[tuple[int, int, int, int]]`
+    > Candidate four-atom dihedral coordinates.
 
 
 
@@ -59,7 +68,7 @@ get_stretch_angle_dihedrals(stretches, angles):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Generators/get_stretch_angle_dihedrals.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Generators/get_stretch_angle_dihedrals.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L36?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Generators.py#L48?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

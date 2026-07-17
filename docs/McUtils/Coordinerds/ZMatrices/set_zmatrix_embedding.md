@@ -1,14 +1,25 @@
 # <a id="McUtils.Coordinerds.ZMatrices.set_zmatrix_embedding">set_zmatrix_embedding</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L841)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L841?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L1159)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1159?message=Update%20Docs)]
 </div>
 
 ```python
 set_zmatrix_embedding(zmat, embedding=None, partial_embedding=False): 
 ```
+**LLM Docstring**
 
+Write standard embedding reference values into a Z-matrix ordering.
 
+The positions are obtained from `zmatrix_embedding_coords(..., array_inds=True)`. Full embedding writes six conventional negative references; partial embedding writes three.
+  - `zmat`: `array-like`
+    > Z-matrix ordering to copy and modify.
+  - `embedding`: `Sequence[int] | None`
+    > Replacement values in embedding-position order, or standard defaults.
+  - `partial_embedding`: `bool`
+    > Use the reduced three-entry embedding convention.
+  - `:returns`: `np.ndarray`
+    > Integer array with embedding references assigned.
 
 
 
@@ -59,7 +70,7 @@ set_zmatrix_embedding(zmat, embedding=None, partial_embedding=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/set_zmatrix_embedding.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/set_zmatrix_embedding.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L841?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1159?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,25 @@
 # <a id="McUtils.Coordinerds.ZMatrices.zmatrix_from_values">zmatrix_from_values</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L331)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L331?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L479)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L479?message=Update%20Docs)]
 </div>
 
 ```python
 zmatrix_from_values(flat_z, strip_embedding=True, partial_embedding=False): 
 ```
+**LLM Docstring**
 
+Reconstruct an atom-by-three Z-matrix value array from flattened values.
 
+Unstripped data is reshaped directly. For partial embedding, the first atom's distance and the second atom's distance/angle are restored before remaining triples are filled. For full embedding, the first three atoms receive the conventional zero-valued undefined entries, and the supplied values begin with atom 1's distance, atom 2's distance/angle, then complete triples.
+  - `flat_z`: `array-like`
+    > Flattened Z-matrix values with optional leading batch dimensions.
+  - `strip_embedding`: `bool`
+    > Whether embedding entries are absent from `flat_z`.
+  - `partial_embedding`: `bool`
+    > Interpret `flat_z` using the reduced three-coordinate embedding convention.
+  - `:returns`: `np.ndarray`
+    > Z-matrix values with shape `(..., n_atoms, 3)`.
 
 
 
@@ -59,7 +70,7 @@ zmatrix_from_values(flat_z, strip_embedding=True, partial_embedding=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/zmatrix_from_values.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/zmatrix_from_values.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L331?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L479?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

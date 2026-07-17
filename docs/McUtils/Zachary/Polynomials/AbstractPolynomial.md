@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Polynomials.AbstractPolynomial">AbstractPolynomial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L14)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L14?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L15?message=Update%20Docs)]
 </div>
 
 Provides the general interface an abstract polynomial needs ot support, including
@@ -26,9 +26,14 @@ multiplication, addition, shifting, access of coefficients, and evaluation
 scaling(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L20)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L20?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L21)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L21?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: the overall scalar prefactor multiplying the polynomial.
+  - `:returns`: `float`
+    > the scaling factor
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__mul__" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +41,16 @@ scaling(self):
 __mul__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L34?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: multiply this polynomial by another polynomial or a scalar.
+  - `other`: `Any`
+    > the multiplier
+  - `:returns`: `AbstractPolynomial`
+    > the product polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__add__" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +58,16 @@ __mul__(self, other) -> 'AbstractPolynomial':
 __add__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L47?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: add another polynomial or a scalar to this one.
+  - `other`: `Any`
+    > the addend
+  - `:returns`: `AbstractPolynomial`
+    > the sum polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.shift" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +75,16 @@ __add__(self, other) -> 'AbstractPolynomial':
 shift(self, shift) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L60?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: return the polynomial shifted in its variables (i.e. `p(x + shift)`).
+  - `shift`: `Any`
+    > the per-variable shift
+  - `:returns`: `AbstractPolynomial`
+    > the shifted polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__rmul__" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +92,17 @@ shift(self, shift) -> 'AbstractPolynomial':
 __rmul__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L73?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right multiplication, delegating to `__mul__` (multiplication is commutative
+here).
+  - `other`: `Any`
+    > the multiplier
+  - `:returns`: `AbstractPolynomial`
+    > the product polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__radd__" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +110,16 @@ __rmul__(self, other) -> 'AbstractPolynomial':
 __radd__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L86)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L86?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right addition, delegating to `__add__`.
+  - `other`: `Any`
+    > the addend
+  - `:returns`: `AbstractPolynomial`
+    > the sum polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__truediv__" class="docs-object-method">&nbsp;</a> 
@@ -86,9 +127,16 @@ __radd__(self, other) -> 'AbstractPolynomial':
 __truediv__(self, other) -> 'AbstractPolynomial': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L98)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L98?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Divide the polynomial by a scalar (multiply by its reciprocal).
+  - `other`: `Any`
+    > the scalar divisor
+  - `:returns`: `AbstractPolynomial`
+    > the scaled polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__neg__" class="docs-object-method">&nbsp;</a> 
@@ -96,9 +144,14 @@ __truediv__(self, other) -> 'AbstractPolynomial':
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L110?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Negate the polynomial.
+  - `:returns`: `AbstractPolynomial`
+    > the negated polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__sub__" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +159,16 @@ __neg__(self):
 __sub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L121?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Subtract another polynomial or scalar (add its negation).
+  - `other`: `Any`
+    > the subtrahend
+  - `:returns`: `AbstractPolynomial`
+    > the difference polynomial
 
 
 <a id="McUtils.Zachary.Polynomials.AbstractPolynomial.__rsub__" class="docs-object-method">&nbsp;</a> 
@@ -116,9 +176,16 @@ __sub__(self, other):
 __rsub__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L46)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L46?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials/AbstractPolynomial.py#L133?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right subtraction (`other - self`), via negation and addition.
+  - `other`: `Any`
+    > the minuend
+  - `:returns`: `AbstractPolynomial`
+    > the difference polynomial
  </div>
 </div>
 
@@ -172,7 +239,7 @@ __rsub__(self, other):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Polynomials/AbstractPolynomial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Polynomials/AbstractPolynomial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L14?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Polynomials.py#L15?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

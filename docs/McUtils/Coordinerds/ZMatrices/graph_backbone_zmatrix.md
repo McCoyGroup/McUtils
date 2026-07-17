@@ -1,14 +1,29 @@
 # <a id="McUtils.Coordinerds.ZMatrices.graph_backbone_zmatrix">graph_backbone_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L2157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L2157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L2791)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L2791?message=Update%20Docs)]
 </div>
 
 ```python
 graph_backbone_zmatrix(bond_graph: McUtils.Graphs.EdgeGraph.EdgeGraph, root=None, segments=None, return_remainder=False, return_segments=False, validate=True): 
 ```
+**LLM Docstring**
 
+Create a Z-matrix backbone from chain segments of a connectivity graph.
 
+The graph is segmented into chains, optionally relative to a chosen root. Each segment is converted to a chain Z-matrix and the segments are joined through `canonical_fragment_zmatrix` or `complex_zmatrix` according to the available connectivity. Depending on requested flags, the function also returns segment or graph metadata alongside the ordering.
+  - `bond_graph`: `EdgeGraph`
+    > Connectivity graph to segment.
+  - `root`: `int | None`
+    > Preferred root atom for chain segmentation.
+  - `validate`: `bool`
+    > Validate fragment joins.
+  - `return_segments`: `bool`
+    > Include the chain segments in the result.
+  - `return_graph`: `bool`
+    > Include the graph in the result.
+  - `:returns`: `tuple | list[list[int]]`
+    > Z-matrix, optionally followed by segments and graph metadata.
 
 
 
@@ -59,7 +74,7 @@ graph_backbone_zmatrix(bond_graph: McUtils.Graphs.EdgeGraph.EdgeGraph, root=None
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/graph_backbone_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/graph_backbone_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L2157?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L2791?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

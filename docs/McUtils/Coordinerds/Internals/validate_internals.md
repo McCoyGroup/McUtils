@@ -1,14 +1,23 @@
 # <a id="McUtils.Coordinerds.Internals.validate_internals">validate_internals</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L4062)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L4062?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L6050)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L6050?message=Update%20Docs)]
 </div>
 
 ```python
 validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure=True): 
 ```
+**LLM Docstring**
 
-
+Validate that an internal-coordinate set can produce a complete, consistent triangulation and optionally raise an exception containing the unresolved coordinates.
+  - `internals`: `Any`
+    > Available internal-coordinate specifications or their numerical values.
+  - `triangles_and_dihedrons`: `Any`
+    > Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+  - `raise_on_failure`: `Any`
+    > Whether unresolved triangulation or conversion terms raise an exception.
+  - `:returns`: `bool`
+    > Whether the coordinate set passes triangulation validation.
 
 
 
@@ -59,7 +68,7 @@ validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure=Tru
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/validate_internals.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/validate_internals.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L4062?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L6050?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

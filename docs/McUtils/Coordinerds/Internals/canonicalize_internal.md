@@ -1,14 +1,23 @@
 # <a id="McUtils.Coordinerds.Internals.canonicalize_internal">canonicalize_internal</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1028)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1028?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals.py#L1838)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1838?message=Update%20Docs)]
 </div>
 
 ```python
 canonicalize_internal(coord, return_sign=False, check_invalid=True): 
 ```
+**LLM Docstring**
 
-
+Put a distance, angle, or dihedral index sequence into its canonical orientation. Distances and angles are reversed when their last index is smaller than the first; dihedrals also track the sign change caused by equivalent permutations.
+  - `coord`: `Any`
+    > A single coordinate specification or target coordinate.
+  - `return_sign`: `Any`
+    > Whether to return the orientation sign together with the canonical coordinate.
+  - `check_invalid`: `Any`
+    > Whether invalid coordinate lengths or repeated indices raise an error.
+  - `:returns`: `tuple[int, ...] | tuple[tuple[int, ...], int]`
+    > The canonical coordinate, optionally paired with its orientation sign.
 
 
 
@@ -59,7 +68,7 @@ canonicalize_internal(coord, return_sign=False, check_invalid=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/Internals/canonicalize_internal.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/Internals/canonicalize_internal.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1028?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals.py#L1838?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

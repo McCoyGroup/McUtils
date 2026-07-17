@@ -1,14 +1,21 @@
 # <a id="McUtils.Coordinerds.ZMatrices.chain_zmatrix">chain_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L758)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L758?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L1014)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1014?message=Update%20Docs)]
 </div>
 
 ```python
 chain_zmatrix(n): 
 ```
+**LLM Docstring**
 
+Construct a linear-chain Z-matrix ordering.
 
+Each atom references the immediately preceding atom for distance, the atom two positions back for angle, and the atom three positions back for dihedral. Negative references naturally provide embedding placeholders for the first rows. An explicit atom sequence is preserved in column 0 while references use earlier entries from that sequence.
+  - `n`: `int | Sequence[int]`
+    > Number of atoms or explicit atom ordering.
+  - `:returns`: `list[list[int]]`
+    > Four-column chain Z-matrix rows.
 
 
 
@@ -59,7 +66,7 @@ chain_zmatrix(n):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/chain_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/chain_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L758?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1014?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

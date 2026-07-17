@@ -1,7 +1,7 @@
 # <a id="McUtils.Zachary.Surfaces.MarchingCubesSurface.marching_cubes">marching_cubes</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/MarchingCubesSurface.py#L381)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/MarchingCubesSurface.py#L381?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/MarchingCubesSurface.py#L425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/MarchingCubesSurface.py#L425?message=Update%20Docs)]
 </div>
 
 ```python
@@ -68,7 +68,7 @@ World-space coordinate of grid point (0, 0, 0).
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/MarchingCubesSurface/marching_cubes.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/MarchingCubesSurface/marching_cubes.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/MarchingCubesSurface.py#L381?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/MarchingCubesSurface.py#L425?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

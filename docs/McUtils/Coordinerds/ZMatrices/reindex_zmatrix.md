@@ -1,14 +1,23 @@
 # <a id="McUtils.Coordinerds.ZMatrices.reindex_zmatrix">reindex_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L1064)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1064?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/ZMatrices.py#L1436)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1436?message=Update%20Docs)]
 </div>
 
 ```python
 reindex_zmatrix(zm, perm): 
 ```
+**LLM Docstring**
 
+Replace every nonnegative atom index in a Z-matrix using `perm`.
 
+Negative embedding and attachment placeholders are preserved unchanged.
+  - `zm`: `Sequence[Sequence[int]]`
+    > Z-matrix rows to remap.
+  - `perm`: `Mapping | Sequence[int]`
+    > Indexable mapping from old labels to new labels.
+  - `:returns`: `list[list[int]]`
+    > Reindexed rows.
 
 
 
@@ -59,7 +68,7 @@ reindex_zmatrix(zm, perm):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Coordinerds/ZMatrices/reindex_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Coordinerds/ZMatrices/reindex_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1064?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/ZMatrices.py#L1436?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
