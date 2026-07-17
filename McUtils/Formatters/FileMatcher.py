@@ -12,6 +12,18 @@ class StringMatcher:
     """
 
     def __init__(self, match_patterns, negative_match = False):
+        """
+        **LLM Docstring**
+
+        Initialize `StringMatcher` state from the supplied configuration.
+
+        :param match_patterns: regex, matcher, predicate, or iterable of match specifications
+        :type match_patterns: object
+        :param negative_match: whether to invert the match result
+        :type negative_match: object
+        :return: `None`; the operation mutates state, writes output, or raises by design.
+        :rtype: None
+        """
         if isinstance(match_patterns, str):
             pattern = re.compile(match_patterns)
             self.matcher = lambda f, p = pattern: re.match(p, f)
@@ -31,6 +43,16 @@ class StringMatcher:
         self.negate = negative_match
 
     def matches(self, f):
+        """
+        **LLM Docstring**
+
+        Evaluate the configured matcher against the input and apply optional negation.
+
+        :param f: string or file path being tested
+        :type f: object
+        :return: whether the input satisfies the matcher after optional negation
+        :rtype: bool
+        """
         m = self.matcher(f)
         if self.negate:
             m = not m
@@ -42,9 +64,31 @@ class MatchList(StringMatcher):
     """
 
     def __init__(self, *matches, negative_match = False):
+        """
+        **LLM Docstring**
+
+        Initialize `MatchList` state from the supplied configuration.
+
+        :param matches: additional positional values forwarded or collected by this operation
+        :type matches: tuple
+        :param negative_match: whether to invert the match result
+        :type negative_match: object
+        :return: `None`; the operation mutates state, writes output, or raises by design.
+        :rtype: None
+        """
         self.match_list = set(matches)
         super().__init__(lambda f, m=self.test_match: m(f), negative_match = negative_match)
     def test_match(self, f):
+        """
+        **LLM Docstring**
+
+        Test constant-time membership in the stored literal match set.
+
+        :param f: string or file path being tested
+        :type f: object
+        :return: whether the input is present in the literal match set
+        :rtype: bool
+        """
         return f in self.match_list
 
 class FileMatcher(StringMatcher):
@@ -53,9 +97,33 @@ class FileMatcher(StringMatcher):
     """
 
     def __init__(self, match_patterns, negative_match = False, use_basename = False):
+        """
+        **LLM Docstring**
+
+        Initialize `FileMatcher` state from the supplied configuration.
+
+        :param match_patterns: regex, matcher, predicate, or iterable of match specifications
+        :type match_patterns: object
+        :param negative_match: whether to invert the match result
+        :type negative_match: object
+        :param use_basename: whether matching is performed only on `os.path.basename(f)`
+        :type use_basename: object
+        :return: `None`; the operation mutates state, writes output, or raises by design.
+        :rtype: None
+        """
         super().__init__(match_patterns, negative_match = negative_match)
         self.use_basename = use_basename
 
     def matches(self, f):
+        """
+        **LLM Docstring**
+
+        Evaluate the configured matcher against the input and apply optional negation.
+
+        :param f: string or file path being tested
+        :type f: object
+        :return: whether the input satisfies the matcher after optional negation
+        :rtype: bool
+        """
         f_name = f if not self.use_basename else os.path.basename(f)
         return super().matches(f_name)
