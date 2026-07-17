@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData">FiniteDifferenceData</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L625)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L625?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L688)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L688?message=Update%20Docs)]
 </div>
 
 Holds the data used by to construct a finite difference matrix
@@ -24,9 +24,18 @@ Holds the data used by to construct a finite difference matrix
 __init__(self, weights, widths, order): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L629)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L629?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L692)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L692?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hold the (cleaned) finite-difference weights, widths, and derivative order.
+  - `weights`: `Any`
+    > the left/center/right weight lists
+  - `widths`: `Any`
+    > the stencil widths
+  - `order`: `int`
+    > the derivative order
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.weights" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +44,14 @@ __init__(self, weights, widths, order):
 weights(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L637)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L637?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L710)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L710?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The finite-difference weights.
+  - `:returns`: `tuple`
+    > the weights
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.widths" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +60,14 @@ weights(self):
 widths(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L640)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L640?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L721)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L721?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The stencil widths.
+  - `:returns`: `tuple`
+    > the widths
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceData.order" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +76,14 @@ widths(self):
 order(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L643)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L643?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L732)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.py#L732?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The derivative order.
+  - `:returns`: `int`
+    > the order
  </div>
 </div>
 
@@ -149,7 +173,7 @@ ___
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceData.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L625?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction.py#L688?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

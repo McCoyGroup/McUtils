@@ -47,6 +47,16 @@ __call__(self, *args, **opts):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L58)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L58?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compute the requested finite-difference derivatives (delegates to
+`derivatives`).
+  - `args`: `Any`
+    > positional arguments for `derivatives`
+  - `opts`: `Any`
+    > keyword arguments for `derivatives`
+  - `:returns`: `object`
+    > the derivative tensors
 
 
 <a id="McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative.derivatives" class="docs-object-method">&nbsp;</a> 
@@ -54,8 +64,8 @@ __call__(self, *args, **opts):
 derivatives(self, center, displacement_function=None, prep=None, lazy=None, mesh_spacing=None, **fd_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L72)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/Derivatives/FiniteDifferenceDerivative.py#L72?message=Update%20Docs)]
 </div>
 Generates a differencer object that can be used to get derivs however your little heart desires
   - `center`: `np.ndarray`

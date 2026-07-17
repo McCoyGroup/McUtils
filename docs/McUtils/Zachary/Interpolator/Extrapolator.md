@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Interpolator.Extrapolator">Extrapolator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L580)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L580?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L651)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L651?message=Update%20Docs)]
 </div>
 
 A general purpose that takes your data and just extrapolates it.
@@ -25,8 +25,8 @@ This currently only exists in template format.
 __init__(self, extrapolation_function, warning=False, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L585)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L585?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L656)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L656?message=Update%20Docs)]
 </div>
 
   - `extrapolation_function`: `None | function | Callable | Interpolator`
@@ -42,9 +42,17 @@ __init__(self, extrapolation_function, warning=False, **opts):
 derivative(self, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L602)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L602?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L673)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L673?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return an extrapolator for the `n`-th derivative of the wrapped extrapolation
+function.
+  - `n`: `int`
+    > the derivative order
+  - `:returns`: `Extrapolator`
+    > the derivative extrapolator
 
 
 <a id="McUtils.Zachary.Interpolator.Extrapolator.find_extrapolated_points" class="docs-object-method">&nbsp;</a> 
@@ -52,8 +60,8 @@ derivative(self, n):
 find_extrapolated_points(self, gps, vals, extrap_value=nan): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L608)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L608?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L690)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L690?message=Update%20Docs)]
 </div>
 Currently super rough heuristics to determine at which points we need to extrapolate
   - `gps`: `Any`
@@ -69,9 +77,21 @@ Currently super rough heuristics to determine at which points we need to extrapo
 apply(self, gps, vals, extrap_value=nan): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L629)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L629?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L711)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L711?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Replace the values at the extrapolated (out-of-range) grid points with values
+from the extrapolation function.
+  - `gps`: `np.ndarray`
+    > the grid points
+  - `vals`: `np.ndarray`
+    > the interpolated values (modified for the extrapolated points)
+  - `extrap_value`: `Any`
+    > the sentinel marking points that need extrapolation
+  - `:returns`: `np.ndarray`
+    > the values with extrapolated points filled in
 
 
 <a id="McUtils.Zachary.Interpolator.Extrapolator.__call__" class="docs-object-method">&nbsp;</a> 
@@ -79,9 +99,18 @@ apply(self, gps, vals, extrap_value=nan):
 __call__(self, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L637)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L637?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/Extrapolator.py#L733)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/Extrapolator.py#L733?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Apply the extrapolator (delegates to `apply`).
+  - `args`: `Any`
+    > positional arguments for `apply`
+  - `kwargs`: `Any`
+    > keyword arguments for `apply`
+  - `:returns`: `np.ndarray`
+    > the values with extrapolated points filled in
  </div>
 </div>
 
@@ -135,7 +164,7 @@ __call__(self, *args, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Interpolator/Extrapolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Interpolator/Extrapolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L580?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L651?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

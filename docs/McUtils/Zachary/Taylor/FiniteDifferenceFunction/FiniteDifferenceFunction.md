@@ -66,6 +66,17 @@ __call__(self, vals, axes=None, mesh_spacing=None):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L91)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L91?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Apply the finite-difference weights to a set of values (delegates to `apply`).
+  - `vals`: `np.ndarray`
+    > the values on the grid
+  - `axes`: `Any`
+    > the axes to difference along
+  - `mesh_spacing`: `Any`
+    > the grid spacing(s)
+  - `:returns`: `np.ndarray`
+    > the finite-difference derivative
 
 
 <a id="McUtils.Zachary.Taylor.FiniteDifferenceFunction.FiniteDifferenceFunction.order" class="docs-object-method">&nbsp;</a> 
@@ -74,8 +85,8 @@ __call__(self, vals, axes=None, mesh_spacing=None):
 order(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L106?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[int]`
@@ -88,8 +99,8 @@ order(self):
 weights(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L114?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[np.array[float]]`
@@ -102,8 +113,8 @@ weights(self):
 widths(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Taylor/FiniteDifferenceFunction/FiniteDifferenceFunction.py#L122?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[(int, int)]`
@@ -116,8 +127,8 @@ widths(self):
 regular_difference(cls, order, mesh_spacing=None, accuracy=2, stencil=None, end_point_accuracy=2, axes=0, contract=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L130?message=Update%20Docs)]
 </div>
 Constructs a `FiniteDifferenceFunction` appropriate for a _regular grid_ with the given stencil
   - `order`: `tuple[int]`
@@ -146,8 +157,8 @@ Constructs a `FiniteDifferenceFunction` appropriate for a _regular grid_ with th
 from_grid(cls, grid, order, accuracy=2, stencil=None, end_point_accuracy=2, axes=0, contract=True, allow_irregular=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L188?message=Update%20Docs)]
 </div>
 Constructs a `FiniteDifferenceFunction` from a grid and order.
 Deconstructs the grid into its subgrids and builds a different differencer for each dimension

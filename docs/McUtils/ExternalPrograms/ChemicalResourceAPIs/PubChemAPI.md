@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ChemicalResourceAPIs.PubChemAPI">PubChemAPI</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L211)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L211?message=Update%20Docs)]
 </div>
 
 It is better in general to just use the ChemSpiderPy package, but this works for now
@@ -35,9 +35,16 @@ default_fields: list
 __init__(self, request_delay_time=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L218?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a connection to the PubChem PUG REST API.
+  - `request_delay_time`: `float | None`
+    > minimum delay between requests
+  - `opts`: `Any`
+    > extra options for the base connection
 
 
 <a id="McUtils.ExternalPrograms.ChemicalResourceAPIs.PubChemAPI.compound" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +53,14 @@ __init__(self, request_delay_time=None, **opts):
 compound(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L230)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L230?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The `compound` sub-API.
+  - `:returns`: `object`
+    > the sub-API connection
 
 
 <a id="McUtils.ExternalPrograms.ChemicalResourceAPIs.PubChemAPI.name" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +69,14 @@ compound(self):
 name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L242)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L242?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The `compound/name` sub-API (lookups by compound name).
+  - `:returns`: `object`
+    > the sub-API connection
 
 
 <a id="McUtils.ExternalPrograms.ChemicalResourceAPIs.PubChemAPI.get_property_list" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +85,15 @@ name(self):
 get_property_list(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L172)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L172?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L353)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L353?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return (and cache) the mapping of case-folded property names to their canonical
+PubChem spellings.
+  - `:returns`: `dict`
+    > the property-name mapping
 
 
 <a id="McUtils.ExternalPrograms.ChemicalResourceAPIs.PubChemAPI.get_compounds_by_name" class="docs-object-method">&nbsp;</a> 
@@ -78,9 +101,29 @@ get_property_list(cls):
 get_compounds_by_name(self, name, fields=None, subfield='json', limit=10, query=None, wrap=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L194)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L194?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L396)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.py#L396?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Look up compounds by name via the PubChem name endpoint (with result caching),
+returning the requested properties as `Compound` objects (or the raw records).
+  - `name`: `str`
+    > the compound name
+  - `fields`: `list | str | None`
+    > the properties to fetch (defaults to SMILES and name)
+  - `subfield`: `str`
+    > the response format sub-path (e.g. `'json'`)
+  - `limit`: `int`
+    > the maximum number of records
+  - `query`: `dict | None`
+    > extra query parameters
+  - `wrap`: `bool`
+    > wrap the records as `Compound` objects
+  - `opts`: `Any`
+    > extra request options
+  - `:returns`: `list`
+    > the compounds (or raw records)
  </div>
 </div>
 
@@ -134,7 +177,7 @@ get_compounds_by_name(self, name, fields=None, subfield='json', limit=10, query=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L94?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ChemicalResourceAPIs.py#L211?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

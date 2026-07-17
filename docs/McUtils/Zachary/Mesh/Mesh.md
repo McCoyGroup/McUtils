@@ -50,6 +50,14 @@ __init__(self, *args, **kwargs):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh.py#L63)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh.py#L63?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+No-op initializer; the real setup happens in `__new__` (as required for an
+`np.ndarray` subclass).
+  - `args`: `Any`
+    > ignored
+  - `kwargs`: `Any`
+    > ignored
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.__array_finalize__" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +65,16 @@ __init__(self, *args, **kwargs):
 __array_finalize__(self, mesh): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L76?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+NumPy subclass hook: propagate (or infer) the mesh type and the
+`allow_indeterminate` flag onto a newly created view/copy, validating that an
+indeterminate mesh is only allowed when explicitly permitted.
+  - `mesh`: `Any`
+    > the source array being finalized from
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.mesh_spacings" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +83,14 @@ __array_finalize__(self, mesh):
 mesh_spacings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L102?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The per-axis grid spacings (computed and cached lazily).
+  - `:returns`: `np.ndarray | list`
+    > the mesh spacings
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.subgrids" class="docs-object-method">&nbsp;</a> 
@@ -79,9 +99,15 @@ mesh_spacings(self):
 subgrids(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L88)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L88?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L115?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The per-axis subgrids for a regular or structured mesh (or `None` for
+unstructured meshes).
+  - `:returns`: `list | None`
+    > the subgrids, or `None`
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.bounding_box" class="docs-object-method">&nbsp;</a> 
@@ -90,9 +116,14 @@ subgrids(self):
 bounding_box(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L98)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L98?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L134)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L134?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The `(min, max)` extent of the mesh along each coordinate.
+  - `:returns`: `list[tuple]`
+    > the per-coordinate bounds
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.dimension" class="docs-object-method">&nbsp;</a> 
@@ -101,8 +132,8 @@ bounding_box(self):
 dimension(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L146)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L146?message=Update%20Docs)]
 </div>
 Returns the dimension of the grid (not necessarily ndim)
   - `:returns`: `int`
@@ -115,8 +146,8 @@ Returns the dimension of the grid (not necessarily ndim)
 npoints(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L154?message=Update%20Docs)]
 </div>
 Returns the number of gridpoints in the mesh
   - `:returns`: `int`
@@ -129,8 +160,8 @@ Returns the number of gridpoints in the mesh
 gridpoints(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Mesh/Mesh.py#L163)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Mesh/Mesh.py#L163?message=Update%20Docs)]
 </div>
 Returns the flattened set of gridpoints for a structured tensor grid and otherwise just returns the gridpoints
   - `:returns`: `_`
@@ -143,8 +174,8 @@ Returns the flattened set of gridpoints for a structured tensor grid and otherwi
 get_npoints(cls, g): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L172?message=Update%20Docs)]
 </div>
 Returns the number of gridpoints in the grid
   - `g`: `np.ndarray`
@@ -159,8 +190,8 @@ Returns the number of gridpoints in the grid
 get_gridpoints(cls, g): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L182?message=Update%20Docs)]
 </div>
 Returns the gridpoints in the grid
   - `g`: `np.ndarray`
@@ -175,8 +206,8 @@ Returns the gridpoints in the grid
 get_mesh_subgrids(cls, grid, tol=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L195?message=Update%20Docs)]
 </div>
 Returns the subgrids for a mesh
   - `grid`: `Any`
@@ -193,9 +224,19 @@ Returns the subgrids for a mesh
 get_mesh_spacings(cls, grid, tol=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L233)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L233?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compute the per-axis spacings of a grid as the unique rounded successive
+differences of each subgrid (or `None` if there are no subgrids).
+  - `grid`: `np.ndarray`
+    > the grid
+  - `tol`: `int | None`
+    > the rounding tolerance (decimal places)
+  - `:returns`: `np.ndarray | list | None`
+    > the per-axis spacings
 
 
 <a id="McUtils.Zachary.Mesh.Mesh.get_mesh_type" class="docs-object-method">&nbsp;</a> 
@@ -204,8 +245,8 @@ get_mesh_spacings(cls, grid, tol=None):
 get_mesh_type(cls, grid, check_product_grid=True, check_regular_grid=True, tol=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L210)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L210?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L277)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L277?message=Update%20Docs)]
 </div>
 Determines what kind of grid we're working with
   - `grid`: `np.ndarray`
@@ -220,8 +261,8 @@ Determines what kind of grid we're working with
 RegularMesh(cls, *mesh_specs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L305)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L305?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L372)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L372?message=Update%20Docs)]
 </div>
 Builds a grid from multiple linspace arguments,
 basically insuring it's structured (if non-Empty)

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Interpolator.ProductGridInterpolator">ProductGridInterpolator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L79)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L79?message=Update%20Docs)]
 </div>
 
 A set of interpolators that support interpolation
@@ -25,8 +25,8 @@ on a regular (tensor product) grid
 __init__(self, grids, vals, caller=None, order=None, extrapolate=True, periodic=False, boundary_conditions=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L66)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L66?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L85?message=Update%20Docs)]
 </div>
 
   - `grids`: `Any`
@@ -45,9 +45,27 @@ __init__(self, grids, vals, caller=None, order=None, extrapolate=True, periodic=
 get_base_spline(cls, grid, vals, order, periodic=False, boundary_conditions=None, extrapolate=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L132)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L132?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a piecewise-polynomial (`PPoly`) spline of the given order along one grid
+axis, handling multi-valued data by splining each component and stacking.
+  - `grid`: `np.ndarray`
+    > the 1-D grid points
+  - `vals`: `np.ndarray`
+    > the values at the grid points
+  - `order`: `int`
+    > the spline order
+  - `periodic`: `bool`
+    > use periodic boundary conditions
+  - `boundary_conditions`: `Any`
+    > explicit spline boundary conditions
+  - `extrapolate`: `bool`
+    > allow extrapolation outside the grid
+  - `:returns`: `interpolate.PPoly`
+    > the piecewise-polynomial spline
 
 
 <a id="McUtils.Zachary.Interpolator.ProductGridInterpolator.construct_ndspline" class="docs-object-method">&nbsp;</a> 
@@ -56,8 +74,8 @@ get_base_spline(cls, grid, vals, order, periodic=False, boundary_conditions=None
 construct_ndspline(cls, grids, vals, order, extrapolate=True, periodic=False, boundary_conditions=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L170)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L170?message=Update%20Docs)]
 </div>
 Builds a tensor product ndspline by constructing a product of 1D splines
   - `grids`: `Iterable[np.ndarray]`
@@ -75,9 +93,17 @@ Builds a tensor product ndspline by constructing a product of 1D splines
 handle_periodicity(self, coords): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L185)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L185?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L224?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap query coordinates into the base period of each periodic axis so they land
+within the grid.
+  - `coords`: `np.ndarray`
+    > the query coordinates
+  - `:returns`: `np.ndarray`
+    > the wrapped coordinates
 
 
 <a id="McUtils.Zachary.Interpolator.ProductGridInterpolator.__call__" class="docs-object-method">&nbsp;</a> 
@@ -85,8 +111,8 @@ handle_periodicity(self, coords):
 __call__(self, coords, *etc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L220)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L220?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L270)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L270?message=Update%20Docs)]
 </div>
 
   - `args`: `Any`
@@ -102,8 +128,8 @@ __call__(self, coords, *etc, **kwargs):
 derivative(self, order): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L232)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L232?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator/ProductGridInterpolator.py#L282?message=Update%20Docs)]
 </div>
 
   - `order`: `Any`
@@ -163,7 +189,7 @@ derivative(self, order):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Interpolator/ProductGridInterpolator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Interpolator/ProductGridInterpolator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L60?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Interpolator.py#L79?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
