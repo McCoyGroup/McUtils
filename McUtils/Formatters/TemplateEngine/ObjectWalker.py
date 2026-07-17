@@ -27,14 +27,59 @@ class MethodDispatch(collections.OrderedDict):
     """
 
     def __init__(self, *args, default=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Initialize the ordered dispatch table and record the fallback callable used when no key matches.
+
+        :param default: fallback callable or value used when no match is found
+        :type default: Any
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: Any
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: Any
+
+        :return: `None`.
+        :rtype: None
+        """
         self.default = default
         super().__init__(*args, **kwargs)
     class DispatchTests:
         def __init__(self, *tests):
+            """
+            **LLM Docstring**
+
+            Store predicates that must all match for a compound dispatch key to succeed.
+
+            :param tests: dispatch predicates combined by the helper
+            :type tests: Any
+
+            :return: `None`.
+            :rtype: None
+            """
             self.tests = tests
         def __hash__(self):
+            """
+            **LLM Docstring**
+
+            Return the hash of the stored predicate tuple so the compound test can be used as a mapping key.
+
+            :return: The the hash of the stored predicate tuple so the compound test can be used as a mapping key.
+            :rtype: Any
+            """
             return self.tests.__hash__()
         def __call__(self, obj):
+            """
+            **LLM Docstring**
+
+            Evaluate every stored dispatch predicate against an object and require all of them to match.
+
+            :param obj: the object to inspect or dispatch
+            :type obj: Any
+
+            :return: `True` when every stored predicate matches the object; otherwise `False`.
+            :rtype: Any
+            """
             return all(self.test(t, obj) for t in self.tests)
         @classmethod
         def test(cls, k, obj):
@@ -90,6 +135,21 @@ class MethodDispatch(collections.OrderedDict):
         else:
             return self.default(obj, *args, **kwargs)
     def __call__(self, obj, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Dispatch an object through the ordered table using the same arguments as `method_dispatch`.
+
+        :param obj: the object to inspect or dispatch
+        :type obj: Any
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: Any
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: Any
+
+        :return: The value returned by the first matching handler or by the fallback handler.
+        :rtype: Any
+        """
         return self.method_dispatch(obj, *args, **kwargs)
     def __setitem__(self, key, value):
         """
@@ -126,6 +186,31 @@ class ObjectHandler(metaclass=abc.ABCMeta):
                  extra_fields=None,
                  **kwargs
                  ):
+        """
+        **LLM Docstring**
+
+        Initialize handler state, merge extra fields with defaults, and remove protected field overrides.
+
+        :param obj: the object to inspect or dispatch
+        :type obj: Any
+        :param spec: the object specification or template expression
+        :type spec: Any
+        :param tree: the shared object-documentation tree
+        :type tree: Any
+        :param name: an explicit display name
+        :type name: Any
+        :param parent: the parent object or handler
+        :type parent: Any
+        :param walker: the walker used to resolve related objects
+        :type walker: 'ObjectWalker'
+        :param extra_fields: additional fields exposed to handlers and templates
+        :type extra_fields: Any
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: Any
+
+        :return: `None`.
+        :rtype: None
+        """
 
         self.walker = walker
         self.obj = obj
@@ -150,8 +235,32 @@ class ObjectHandler(metaclass=abc.ABCMeta):
 
 
     def __getitem__(self, item):
+        """
+        **LLM Docstring**
+
+        Resolve a handler field from the object specification or extra field mapping.
+
+        :param item: the field name or positional key to resolve
+        :type item: Any
+
+        :return: The resolved specification or extra-field value.
+        :rtype: Any
+        """
         return self.resolve_key(item)
     def resolve_key(self, key, default=None):
+        """
+        **LLM Docstring**
+
+        Look up a field in the object specification first and then in the extra field mapping.
+
+        :param key: the lookup, assignment, or formatting key
+        :type key: Any
+        :param default: fallback callable or value used when no match is found
+        :type default: Any
+
+        :return: The matching specification or extra-field value, or `default` when absent.
+        :rtype: Any
+        """
         if key in self.spec:
             return self.spec.get(key, default)
         elif key in self.extra_fields:
@@ -189,6 +298,17 @@ class ObjectHandler(metaclass=abc.ABCMeta):
 
     @classmethod
     def get_identifier(cls, o):
+        """
+        **LLM Docstring**
+
+        Build a dotted identifier from an explicit identifier, module name, and qualified object name.
+
+        :param o: the object or import path to resolve
+        :type o: Any
+
+        :return: The dotted identifier assembled for the object.
+        :rtype: Any
+        """
         if hasattr(o, '__identifier__'):
             return o.__identifier__
 
@@ -209,6 +329,14 @@ class ObjectHandler(metaclass=abc.ABCMeta):
         return qn
     @property
     def identifier(self):
+        """
+        **LLM Docstring**
+
+        Lazily compute and cache the dotted identifier for the handled object.
+
+        :return: The cached dotted identifier for the handled object.
+        :rtype: Any
+        """
         if self._id is None:
             self._id = self.get_identifier(self.obj)
         return self._id
@@ -272,6 +400,17 @@ class ObjectHandler(metaclass=abc.ABCMeta):
         return self.walker.resolve_object(modspec)
 
     def resolve_relative_obj(self, spec:str):
+        """
+        **LLM Docstring**
+
+        Resolve a relative or attribute-based object specification against the handled object and its module.
+
+        :param spec: the object specification or template expression
+        :type spec: str
+
+        :return: The object resolved from the relative specification.
+        :rtype: Any
+        """
 
         if '.' == spec[0]:
             n = 0
@@ -362,8 +501,24 @@ class ObjectHandler(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def handle(self):
+        """
+        **LLM Docstring**
+
+        Define the abstract operation performed after an object and its descendants have been traversed.
+
+        :return: The handler-specific traversal result.
+        :rtype: Any
+        """
         raise NotImplementedError("abstract method")
     def stop_traversal(self):
+        """
+        **LLM Docstring**
+
+        Report whether traversal should stop before recording or visiting the handled object.
+
+        :return: `False`, allowing traversal to continue by default.
+        :rtype: bool
+        """
         return False
 
 class ObjectWalker:
@@ -431,6 +586,23 @@ class ObjectWalker:
         return writers
 
     def get_handler(self, obj, *, tree=None, walker=None, cls=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Construct an explicitly requested handler class or dispatch the object through the configured handler table.
+
+        :param obj: the object to inspect or dispatch
+        :type obj: Any
+        :param tree: the shared object-documentation tree
+        :type tree: Any
+        :param walker: the walker used to resolve related objects
+        :type walker: Any
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: Any
+
+        :return: The instantiated handler for `obj`.
+        :rtype: Any
+        """
         if cls is not None:
             return cls(obj, **dict(self.extra_fields, walker=self, tree=self.tree, **kwargs))
         else:
