@@ -1869,9 +1869,17 @@ class PureMonicPolynomial(SparsePolynomial):
             return type(self)(self.terms, prefactor=self.prefactor*other if self.prefactor is not None else other, canonicalize=False)
 
     def rebuild(self, new_terms, prefactor=None, canonicalize=None):
+        """
+        **LLM Docstring**
 
+        Build a new polynomial of the same type from a term mapping, inheriting the
+        prefactor by default.
 
         :param new_terms: the new term mapping
+        :type new_terms: dict
+        :param prefactor: the prefactor (inherited if omitted)
+        :type prefactor: float | None
+        :param canonicalize: canonicalize the keys (off by default)
         :type canonicalize: bool | None
         :return: the rebuilt polynomial
         :rtype: PureMonicPolynomial
