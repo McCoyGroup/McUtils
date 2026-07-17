@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTML.HTML">HTML</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L1245)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L1245?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L2051)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L2051?message=Update%20Docs)]
 </div>
 
 A namespace for holding various HTML attributes
@@ -158,9 +158,21 @@ Wbr: Wbr
 image_from_string(cls, image_string: 'bytes | str', format='image/png', **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4034)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4034?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create an `<img>` element whose source is a base64 data URI, encoding byte input when necessary.
+  - `image_string`: `bytes | str`
+    > Raw image bytes or an already base64-encoded string.
+  - `format`: `object`
+    > MIME type used in the generated data URI.
+  - `styles`: `dict`
+    > Style values to apply.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
  </div>
 </div>
 
@@ -214,7 +226,7 @@ image_from_string(cls, image_string: 'bytes | str', format='image/png', **styles
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/HTML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/HTML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L1245?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L2051?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

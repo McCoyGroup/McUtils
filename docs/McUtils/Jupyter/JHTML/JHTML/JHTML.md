@@ -40,9 +40,17 @@ Compound: Compound
 manage_class(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L865)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L865?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1308)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1308?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a class specification into a list of class-name strings.
+  - `kls`: `object`
+    > The manager class performing normalization.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.HTMLManager.manage_styles" class="docs-object-method">&nbsp;</a> 
@@ -50,9 +58,17 @@ manage_class(cls):
 manage_style(styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L880)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L880?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1334)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1334?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert mappings or strings into a `CSS` object while leaving existing style objects unchanged.
+  - `styles`: `object`
+    > Style values to apply.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.HTMLManager.extract_styles" class="docs-object-method">&nbsp;</a> 
@@ -60,9 +76,21 @@ manage_style(styles):
 extract_styles(attrs, style_props=None, ignored_styles=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L925)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L925?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1425?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Remove recognized style properties from an attribute mapping and return them separately.
+  - `attrs`: `object`
+    > Attribute values to normalize or apply.
+  - `style_props`: `object`
+    > The set of attribute names treated as CSS properties.
+  - `ignored_styles`: `object`
+    > Style names to exclude from extraction.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.HTMLManager.manage_attrs" class="docs-object-method">&nbsp;</a> 
@@ -70,9 +98,19 @@ extract_styles(attrs, style_props=None, ignored_styles=None):
 manage_attrs(attrs, sanitize=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L914)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L914?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1401)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1401?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Canonicalize attribute names and optionally sanitize each attribute value.
+  - `attrs`: `object`
+    > Attribute values to normalize or apply.
+  - `sanitize`: `object`
+    > Whether to convert supported Python values into HTML-compatible representations.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
 
 
 <a id="McUtils.Jupyter.JHTML.JHTML.JHTML.load" class="docs-object-method">&nbsp;</a> 

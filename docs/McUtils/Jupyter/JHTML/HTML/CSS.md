@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTML.CSS">CSS</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L522)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L522?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L914)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L914?message=Update%20Docs)]
 </div>
 
 Defines a holder for CSS properties
@@ -27,9 +27,16 @@ validators: dict
 __init__(self, *selectors, **props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L526)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L526?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L918)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L918?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store CSS selectors and canonicalize underscore-separated property names to hyphenated CSS names.
+  - `selectors`: `tuple`
+    > CSS selectors associated with the rule.
+  - `props`: `dict`
+    > The property mapping to validate or normalize.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.construct" class="docs-object-method">&nbsp;</a> 
@@ -38,8 +45,8 @@ __init__(self, *selectors, **props):
 construct(cls, *selectors, aspect_ratio=None, background=None, background_attachment=None, background_color=None, background_image=None, background_position=None, background_repeat=None, border=None, border_bottom=None, border_bottom_color=None, border_bottom_style=None, border_bottom_width=None, border_color=None, border_left=None, border_left_color=None, border_left_style=None, border_left_width=None, border_right=None, border_right_color=None, border_right_style=None, border_right_width=None, border_style=None, border_top=None, border_top_color=None, border_top_style=None, border_top_width=None, border_width=None, clear=None, clip=None, color=None, cursor=None, display=None, filter=None, float=None, font=None, font_family=None, font_size=None, font_variant=None, font_weight=None, height=None, left=None, letter_spacing=None, line_height=None, list_style=None, list_style_image=None, list_style_position=None, list_style_type=None, margin=None, margin_bottom=None, margin_left=None, margin_right=None, margin_top=None, overflow=None, padding=None, padding_bottom=None, padding_left=None, padding_right=None, padding_top=None, page_break_after=None, page_break_before=None, position=None, text_align=None, text_decoration=None, text_indent=None, text_transform=None, top=None, vertical_align=None, visibility=None, width=None, z_index=None, **props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L530)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L530?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L932)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L932?message=Update%20Docs)]
 </div>
 Provides a convenience constructor for systems with autocompletions
   - `selectors`: `Any`
@@ -194,9 +201,17 @@ Provides a convenience constructor for systems with autocompletions
 canonicalize_props(cls, props): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L829)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L829?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1231)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1231?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert Python-style underscore property names to CSS hyphenated names without changing values.
+  - `props`: `object`
+    > The property mapping to validate or normalize.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.parse" class="docs-object-method">&nbsp;</a> 
@@ -205,9 +220,17 @@ canonicalize_props(cls, props):
 parse(cls, sty): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L832)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L832?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1245)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1245?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse either inline declarations or selector blocks into one or more `CSS` objects; block parsing returns after the first parsed block in the current implementation.
+  - `sty`: `object`
+    > A CSS declaration string or complete rule block.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.tostring" class="docs-object-method">&nbsp;</a> 
@@ -215,9 +238,14 @@ parse(cls, sty):
 tostring(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L851)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L851?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1275)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1275?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Serialize the stored CSS rule as either a selector block or an inline declaration string.
+  - `:returns`: `str`
+    > The generated string representation.
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.validate" class="docs-object-method">&nbsp;</a> 
@@ -225,9 +253,17 @@ tostring(self):
 validate(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L861)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L861?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1293?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Validate the stored CSS properties with the class validator mapping.
+  - `kwargs`: `dict`
+    > Additional attributes or options forwarded to the constructed element.
+
+  - `:returns`: `object`
+    > The value produced by the implemented operation.
  </div>
 </div>
 
@@ -281,7 +317,7 @@ validate(self, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/CSS.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/CSS.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L522?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L914?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
