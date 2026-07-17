@@ -52,6 +52,20 @@ class GraphLayout:
     _registry = {}
 
     def __init__(self, graph:EdgeGraph, weights=None):
+        """
+        **LLM Docstring**
+
+        Initialize layout state from an `EdgeGraph`, including node indexing and a dense adjacency matrix.
+
+        :param graph: Graph object, adjacency matrix, or adjacency mapping used by the operation.
+        :type graph: EdgeGraph
+
+        :param weights: Optional mapping or values used as edge weights.
+        :type weights: object
+
+        :return: No value is returned.
+        :rtype: None
+        """
         self.graph = graph
         self.nodes = list(graph.labels)
         self.edges = list(graph.edges)
@@ -63,6 +77,17 @@ class GraphLayout:
     # -- construction -------------------------------------------------
 
     def _build_adjacency(self, weights):
+        """
+        **LLM Docstring**
+
+        Copy the graph adjacency matrix to dense form and overwrite selected directed entries with supplied weights.
+
+        :param weights: Optional mapping or values used as edge weights.
+        :type weights: object
+
+        :return: A dense adjacency array.
+        :rtype: object
+        """
         adj = self.graph.graph.toarray()
         if weights is not None:
             for (i,j), w in weights.items():
@@ -81,6 +106,17 @@ class GraphLayout:
         """
 
         def decorator(func):
+            """
+            **LLM Docstring**
+
+            Register a layout function under the enclosing decorator name and return it unchanged.
+
+            :param func: The layout function to associate with the registry name.
+            :type func: object
+
+            :return: The same function after registry insertion.
+            :rtype: object
+            """
             cls._registry[name] = func
             return func
 
@@ -88,10 +124,32 @@ class GraphLayout:
 
     @classmethod
     def available_layouts(cls) -> List[str]:
+        """
+        **LLM Docstring**
+
+        List registered layout algorithm names in sorted order.
+
+        :return: Sorted registered layout names.
+        :rtype: object
+        """
         return sorted(cls._registry.keys())
 
     default_layout_method = "kamada_kawai"
     def compute(self, method: str = "default", **kwargs):
+        """
+        **LLM Docstring**
+
+        Dispatch to a registered layout algorithm, cache its node-position mapping, and return it.
+
+        :param method: Layout method name or callable selector.
+        :type method: str
+
+        :param kwargs: Additional keyword options forwarded to lower-level calls.
+        :type kwargs: object
+
+        :return: A mapping from node labels to 2D coordinate pairs.
+        :rtype: dict
+        """
         if dev.str_is(method, 'default'):
             method = self.default_layout_method
         if method not in self._registry:
@@ -105,6 +163,14 @@ class GraphLayout:
     # -- shared utilities -------------------------------------------------
 
     def shortest_path_distances(self) -> np.ndarray:
+        """
+        **LLM Docstring**
+
+        Compute and copy the graph-theoretic all-pairs shortest-path distance matrix.
+
+        :return: A square shortest-path distance matrix.
+        :rtype: np.ndarray
+        """
         dits = self.graph.get_distances()
         dits = dits.copy()
         return dits
@@ -115,6 +181,20 @@ class GraphLayout:
 
 @GraphLayout.register("circular")
 def circular_layout(layout: GraphLayout, scale: float = 1.0):
+    """
+    **LLM Docstring**
+
+    Place graph nodes evenly around a circle of the requested radius.
+
+    :param layout: Layout object whose nodes and graph data are used.
+    :type layout: GraphLayout
+
+    :param scale: Overall layout radius or target size.
+    :type scale: float
+
+    :return: A node-to-coordinate mapping.
+    :rtype: dict
+    """
     n = len(layout.nodes)
     if n == 0:
         return {}
@@ -187,6 +267,17 @@ def kamada_kawai_layout(
         pos[i] = [scale * math.cos(angle) + jitter, scale * math.sin(angle) + jitter]
 
     def stress(p: np.ndarray) -> float:
+        """
+        **LLM Docstring**
+
+        Evaluate the weighted Kamada-Kawai stress of a candidate 2D embedding.
+
+        :param p: Candidate coordinates with shape `(n_nodes, 2)`.
+        :type p: np.ndarray
+
+        :return: The scalar weighted stress.
+        :rtype: object
+        """
         diff = p[:, None, :] - p[None, :, :]
         dist = np.linalg.norm(diff, axis=2)
         return float(np.sum(K * (dist - L) ** 2)) / 2.0
@@ -261,6 +352,20 @@ class GraphPlotter:
     }
 
     def __init__(self, graph, coords):
+        """
+        **LLM Docstring**
+
+        Store a graph and validate that its supplied coordinates have shape `(N, 2)`.
+
+        :param graph: Graph object, adjacency matrix, or adjacency mapping used by the operation.
+        :type graph: object
+
+        :param coords: Node coordinates.
+        :type coords: object
+
+        :return: No value is returned.
+        :rtype: None
+        """
         self.graph = graph
         self.coords = np.asanyarray(coords, dtype=float)
         if self.coords.ndim != 2 or self.coords.shape[1] != 2:
@@ -273,6 +378,14 @@ class GraphPlotter:
     # ------------------------------------------------------------------ #
     @property
     def nodes(self):
+        """
+        **LLM Docstring**
+
+        Resolve node identities from `graph.nodes`, `graph.node_list`, or positional indices.
+
+        :return: A list of node identities.
+        :rtype: object
+        """
         # node identities (labels/keys); positions are always self.coords[i]
         nodes = getattr(self.graph, 'nodes', None)
         if nodes is None:
@@ -311,12 +424,43 @@ class GraphPlotter:
     #  Layout / pose  (coords are already 2D, so this is just a transform)
     # ------------------------------------------------------------------ #
     def _apply_pose(self, coords, masses=None, pose=None, principal_axis_order=(0, 1)):
+        """
+        **LLM Docstring**
+
+        Convert or transform coordinates into a 2D plotting pose using principal axes, an explicit projection, or a callback.
+
+        :param coords: Node coordinates.
+        :type coords: object
+
+        :param masses: Optional per-node masses used for center-of-mass and inertia calculations.
+        :type masses: object
+
+        :param pose: A callable, explicit coordinates, or projection/rotation matrix selecting the plotted pose.
+        :type pose: object
+
+        :param principal_axis_order: Two principal-axis indices to retain in the 2D projection.
+        :type principal_axis_order: object
+
+        :return: An array with shape `(N, 2)`.
+        :rtype: object
+        """
         coords = np.asanyarray(coords, dtype=float)
         if coords.shape[-1] == 2:
             coords = np.pad(coords, [[0, 0], [0, 1]])
         i, j = principal_axis_order
 
         def _pa_project(c):
+            """
+            **LLM Docstring**
+
+            Center 3D coordinates, rotate into principal axes, and select two requested axes.
+
+            :param c: Coordinates with shape `(N, 3)` to center and project.
+            :type c: object
+
+            :return: Principal-axis coordinates with shape `(N, 2)`.
+            :rtype: object
+            """
             com = nput.center_of_mass(c, masses)
             _, axes = nput.moments_of_inertia(c, masses)  # ascending moment; cols=axes
             proj = (c - com[np.newaxis, :]) @ axes
@@ -350,6 +494,17 @@ class GraphPlotter:
     # ------------------------------------------------------------------ #
     @staticmethod
     def _clean_style(sty):
+        """
+        **LLM Docstring**
+
+        Translate an unsupported `glow` style into a stroke color when no stroke is already specified.
+
+        :param sty: Style mapping to copy and normalize.
+        :type sty: object
+
+        :return: A normalized style dictionary.
+        :rtype: object
+        """
         # 2D Disk/Line don't take `glow`; fold it into a stroke outline instead
         sty = dict(sty)
         glow = sty.pop('glow', None)
@@ -383,6 +538,23 @@ class GraphPlotter:
         return styles
 
     def _plot_range_2d(self, xy, radii, plot_range_padding):
+        """
+        **LLM Docstring**
+
+        Compute axis limits enclosing all coordinates with fixed, automatic, or zero padding.
+
+        :param xy: Planar node coordinates with shape `(N, 2)`.
+        :type xy: object
+
+        :param radii: Per-node disk radii.
+        :type radii: object
+
+        :param plot_range_padding: Numeric padding, `None`, or `"auto"` based on the largest node radius.
+        :type plot_range_padding: object
+
+        :return: Two `[minimum, maximum]` axis intervals.
+        :rtype: object
+        """
         lo = np.min(xy, axis=0)
         hi = np.max(xy, axis=0)
         if plot_range_padding is None:
@@ -394,6 +566,20 @@ class GraphPlotter:
         return [[lo[0] - pad, hi[0] + pad], [lo[1] - pad, hi[1] + pad]]
 
     def _get_node_radii(self, node_radius, n):
+        """
+        **LLM Docstring**
+
+        Normalize a scalar or length-`N` node-radius specification to a NumPy vector.
+
+        :param node_radius: Scalar radius or length-`N` radius vector.
+        :type node_radius: object
+
+        :param n: Number of items to normalize or process.
+        :type n: object
+
+        :return: A float array of length `N`.
+        :rtype: object
+        """
         if node_radius is None:
             node_radius = self.subthemes['default']['node_radius']
         if np.ndim(node_radius) == 0:
@@ -408,6 +594,41 @@ class GraphPlotter:
     # ------------------------------------------------------------------ #
     def _get_node_primitives_2d(self, xy, radii, colors, node_style, drawn, *,
                                 disk_class, disk_options, theme_function, plotos):
+        """
+        **LLM Docstring**
+
+        Build disk primitives for enabled nodes after applying per-node colors, radii, modifiers, and theme hooks.
+
+        :param xy: Planar node coordinates with shape `(N, 2)`.
+        :type xy: object
+
+        :param radii: Per-node disk radii.
+        :type radii: object
+
+        :param colors: Per-node base colors.
+        :type colors: object
+
+        :param node_style: Normalized per-node style dictionaries.
+        :type node_style: object
+
+        :param drawn: Boolean mask indicating which node glyphs are drawn.
+        :type drawn: object
+
+        :param disk_class: Primitive class used to construct node disks.
+        :type disk_class: object
+
+        :param disk_options: Base keyword options for every disk primitive.
+        :type disk_options: object
+
+        :param theme_function: Optional callback that can rewrite primitive styles before construction.
+        :type theme_function: object
+
+        :param plotos: Remaining primitive keyword options shared by all generated objects.
+        :type plotos: object
+
+        :return: A list of disk primitives.
+        :rtype: object
+        """
         prims = []
         base = dict(disk_options)
         for i, (coord, r, color, sty0) in enumerate(zip(xy, radii, colors, node_style)):
@@ -431,6 +652,56 @@ class GraphPlotter:
     def _get_edge_primitives_2d(self, xy, edges, radii, colors, node_style, drawn, *,
                                 line_class, edge_style, edge_color, line_options,
                                 trim_edges, half_colored_edges, theme_function, plotos):
+        """
+        **LLM Docstring**
+
+        Build line primitives for graph edges, optionally trimming them to node disks and splitting each edge into endpoint-colored halves.
+
+        :param xy: Planar node coordinates with shape `(N, 2)`.
+        :type xy: object
+
+        :param edges: Undirected edges as endpoint pairs, optionally carrying weights.
+        :type edges: object
+
+        :param radii: Per-node disk radii.
+        :type radii: object
+
+        :param colors: Per-node base colors.
+        :type colors: object
+
+        :param node_style: Normalized per-node style dictionaries.
+        :type node_style: object
+
+        :param drawn: Boolean mask indicating which node glyphs are drawn.
+        :type drawn: object
+
+        :param line_class: Primitive class used to construct graph edges.
+        :type line_class: object
+
+        :param edge_style: Per-edge styles keyed by index or endpoint pair.
+        :type edge_style: object
+
+        :param edge_color: Fallback color for edges that are not endpoint-colored.
+        :type edge_color: object
+
+        :param line_options: Base keyword options for every line primitive.
+        :type line_options: object
+
+        :param trim_edges: Whether edge endpoints are shortened by the radii of drawn nodes.
+        :type trim_edges: object
+
+        :param half_colored_edges: Whether each edge is split at its midpoint and colored by its endpoint nodes.
+        :type half_colored_edges: object
+
+        :param theme_function: Optional callback that can rewrite primitive styles before construction.
+        :type theme_function: object
+
+        :param plotos: Remaining primitive keyword options shared by all generated objects.
+        :type plotos: object
+
+        :return: A list of line primitives.
+        :rtype: object
+        """
         prims = []
         base = dict(line_options)
         # allow keying edge_style by edge index OR by (i, j) tuple
@@ -479,6 +750,38 @@ class GraphPlotter:
 
     def _get_label_primitives_2d(self, xy, colors, node_style, labels, *,
                                  text_class, label_style, plot_range, plotos):
+        """
+        **LLM Docstring**
+
+        Build text primitives for non-`None` labels with per-label overrides and node-derived colors.
+
+        :param xy: Planar node coordinates with shape `(N, 2)`.
+        :type xy: object
+
+        :param colors: Per-node base colors.
+        :type colors: object
+
+        :param node_style: Normalized per-node style dictionaries.
+        :type node_style: object
+
+        :param labels: Node labels indexed consistently with the graph.
+        :type labels: object
+
+        :param text_class: Primitive class used to construct labels.
+        :type text_class: object
+
+        :param label_style: Base text style for all labels.
+        :type label_style: object
+
+        :param plot_range: Figure plot range passed to text primitives.
+        :type plot_range: object
+
+        :param plotos: Remaining primitive keyword options shared by all generated objects.
+        :type plotos: object
+
+        :return: A list of text primitives.
+        :rtype: object
+        """
         prims = []
         for j, (coord, color, lab) in enumerate(zip(xy, colors, labels)):
             if lab is None:
@@ -545,11 +848,33 @@ class GraphPlotter:
     #  Entry point
     # ------------------------------------------------------------------ #
     def plot(self, **styles):
+        """
+        **LLM Docstring**
+
+        Resolve graph styles and geometry, construct node, edge, label, and annotation primitives, and render or return them.
+
+        :param styles: The value supplied for `styles`, interpreted according to the algorithm described above.
+        :type styles: object
+
+        :return: A graphics figure, rendered objects, or primitive groups according to output flags.
+        :rtype: object
+        """
         from McUtils.Plots import Graphics, Disk, Line, Text
 
         theme = self.subthemes['default']
 
         def _merge(key):  # shallow-merge nested option dicts over the theme
+            """
+            **LLM Docstring**
+
+            Shallow-merge a nested plotting option dictionary over the default theme entry.
+
+            :param key: Index, path, or mapping key selecting an item.
+            :type key: object
+
+            :return: The merged option dictionary.
+            :rtype: object
+            """
             return {**theme.get(key, {}), **(styles.pop(key, None) or {})}
 
         line_options = _merge('line_options')
@@ -670,6 +995,17 @@ class GraphPlotter:
 
         # ---- render / return --------------------------------------------------
         def _render(prims):
+            """
+            **LLM Docstring**
+
+            Either return primitives unchanged or plot each primitive into the current figure.
+
+            :param prims: The value supplied for `prims`, interpreted according to the algorithm described above.
+            :type prims: object
+
+            :return: The primitives or their rendered artists.
+            :rtype: object
+            """
             if objects:
                 return prims
             out = []
