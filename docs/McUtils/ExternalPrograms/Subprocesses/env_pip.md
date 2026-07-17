@@ -1,14 +1,20 @@
 # <a id="McUtils.ExternalPrograms.Subprocesses.env_pip">env_pip</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Subprocesses.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Subprocesses.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Subprocesses.py#L70)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Subprocesses.py#L70?message=Update%20Docs)]
 </div>
 
 ```python
 env_pip(*args): 
 ```
+**LLM Docstring**
 
+Invoke `env_proc_call` with `pip` as the command.
+  - `args`: `object`
+    > positional command or function arguments
 
+  - `:returns`: `subprocess.CompletedProcess`
+    > invoke `env_proc_call` with `pip` as the command.
 
 
 
@@ -59,7 +65,7 @@ env_pip(*args):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Subprocesses/env_pip.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Subprocesses/env_pip.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Subprocesses.py#L44?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Subprocesses.py#L70?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -7,8 +7,29 @@
 ```python
 env_proc_call(*args, executable=None, text=True, env=None, shell=False, **subprocess_run_kwargs): 
 ```
+**LLM Docstring**
 
+Run a command with an environment-specific executable directory prepended to `PATH`; string commands are shell-split, and non-shell mode currently prefixes non-PATH assignments as literal argv entries.
+  - `executable`: `object`
+    > Python or environment executable whose directory is added to `PATH`
 
+  - `text`: `object`
+    > whether subprocess streams use text mode
+
+  - `env`: `object`
+    > environment mapping passed to the child process
+
+  - `shell`: `object`
+    > whether `subprocess.run` uses a shell
+
+  - `args`: `object`
+    > positional command or function arguments
+
+  - `subprocess_run_kwargs`: `object`
+    > remaining options forwarded to `subprocess.run`
+
+  - `:returns`: `subprocess.CompletedProcess`
+    > run a command with an environment-specific executable directory prepended to `PATH`; string commands are shell-split, and non-shell mode currently prefixes non-PATH assignments as literal argv entries.
 
 
 

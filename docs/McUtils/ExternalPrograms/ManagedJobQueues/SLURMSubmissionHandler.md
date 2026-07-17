@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ManagedJobQueues.SLURMSubmissionHandler">SLURMSubmissionHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L158)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L158?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L331)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L331?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,20 @@ START_JOB_COMMAND: list
 prep_job_kwargs(cls, *, sbatch_file, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L161)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L161?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L334)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L334?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Move `sbatch_file` into the positional argument list expected by `sbatch`.
+  - `sbatch_file`: `object`
+    > path to the sbatch script
+
+  - `etc`: `object`
+    > additional scheduler options
+
+  - `:returns`: `tuple[tuple, dict]`
+    > move `sbatch_file` into the positional argument list expected by `sbatch`.
 
 
 <a id="McUtils.ExternalPrograms.ManagedJobQueues.SLURMSubmissionHandler.parse_job_id" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +49,17 @@ prep_job_kwargs(cls, *, sbatch_file, **etc):
 parse_job_id(self, res: str): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L353)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L353?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Extract the numeric job id from SLURM’s `Submitted batch job N` response.
+  - `res`: `str`
+    > captured scheduler response text
+
+  - `:returns`: `str`
+    > extract the numeric job id from SLURM’s `Submitted batch job N` response.
  </div>
 </div>
 
@@ -94,7 +113,7 @@ parse_job_id(self, res: str):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L158?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L331?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

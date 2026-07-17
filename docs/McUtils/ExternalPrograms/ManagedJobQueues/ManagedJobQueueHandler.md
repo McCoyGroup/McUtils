@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueHandler">ManagedJobQueueHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L268)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L268?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,20 @@
 __init__(self, information_handler: McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueInformationHandler, submission_handler: McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueSubmissionHandler): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L142)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L142?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L271?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Combine independent scheduler information and submission handlers behind one queue interface.
+  - `information_handler`: `ManagedJobQueueInformationHandler`
+    > the component that queries scheduler state
+
+  - `submission_handler`: `ManagedJobQueueSubmissionHandler`
+    > the component that submits jobs
+
+  - `:returns`: `None`
+    > No value is returned.
 
 
 <a id="McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueHandler.get_job_info" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +45,14 @@ __init__(self, information_handler: McUtils.ExternalPrograms.ManagedJobQueues.Ma
 get_job_info(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L291)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L291?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return all current job records from the information handler.
+  - `:returns`: `dict`
+    > return all current job records from the information handler.
 
 
 <a id="McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueHandler.get_job_status" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +60,17 @@ get_job_info(self):
 get_job_status(self, job_id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L302)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L302?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Look up a job record and return its `status` field.
+  - `job_id`: `object`
+    > the scheduler-assigned job identifier
+
+  - `:returns`: `ManagedJobQueueJobStatus`
+    > look up a job record and return its `status` field.
 
 
 <a id="McUtils.ExternalPrograms.ManagedJobQueues.ManagedJobQueueHandler.submit_job" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +78,17 @@ get_job_status(self, job_id):
 submit_job(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L155)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L155?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L317)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.py#L317?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Forward scheduler options to the submission handler and return its submission result.
+  - `kwargs`: `object`
+    > scheduler, backend, or function keyword arguments
+
+  - `:returns`: `tuple`
+    > forward scheduler options to the submission handler and return its submission result.
  </div>
 </div>
 
@@ -110,7 +142,7 @@ submit_job(self, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L139?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ManagedJobQueues.py#L268?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
