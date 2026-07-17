@@ -33,6 +33,17 @@ input_start_tag = FileStreamerTag(
 )
 input_end_tag = "----------------"
 def parse_command_line(inp_str):
+    """
+    **LLM Docstring**
+
+    Pass the matched block through unchanged (the command-line / calculation-info
+    text is stored as-is).
+
+    :param inp_str: the block text
+    :type inp_str: str
+    :return: the block text unchanged
+    :rtype: str
+    """
     return inp_str
 
 Components["CommandLine"] = {
@@ -48,6 +59,17 @@ calc_start_tag = FileStreamerTag(
 )
 calc_end_tag = "----------------"
 def parse_command_line(inp_str):
+    """
+    **LLM Docstring**
+
+    Pass the matched block through unchanged (the command-line / calculation-info
+    text is stored as-is).
+
+    :param inp_str: the block text
+    :type inp_str: str
+    :return: the block text unchanged
+    :rtype: str
+    """
     return inp_str
 
 Components["CalculationInfo"] = {
@@ -68,6 +90,16 @@ cartesian_end_tag = "\n\n"
 
 CRESTCoords = namedtuple("CRESTCoords", ["atoms", "coords"])
 def cartesian_coordinates_parser(cart):
+    """
+    **LLM Docstring**
+
+    Parse a CREST Cartesian-coordinates block into atom labels and coordinates.
+
+    :param cart: the coordinates block text
+    :type cart: str
+    :return: the parsed `(atoms, coords)`
+    :rtype: CRESTCoords
+    """
     coords = np.array(Number.findall(cart)).astype(float)
     atoms = Word.findall(cart)
     return CRESTCoords(
@@ -86,6 +118,16 @@ Components["InputStructure"] = {
 final_opt_info_start = "Final Geometry Optimization"
 final_opt_info_end = "--------------------------"
 def parse_opt_info(opt_block):
+    """
+    **LLM Docstring**
+
+    Pass the final-optimization-info block through unchanged.
+
+    :param opt_block: the block text
+    :type opt_block: str
+    :return: the block text unchanged
+    :rtype: str
+    """
     return opt_block
 
 Components["FinalOptInfo"] = {
@@ -103,6 +145,17 @@ final_ensemble_info = FileStreamerTag(
 final_ensemble_info_end = "-------"
 EnsembleInfo = namedtuple('EnsembleInfo', ['relative_energies', 'total_energies', 'weights', 'report'])
 def parse_ensemble_info(opt_block:str):
+    """
+    **LLM Docstring**
+
+    Parse the final ensemble-information block into the per-conformer energies
+    (relative energy, weight, and degeneracy) plus the surrounding report text.
+
+    :param opt_block: the ensemble-info block text
+    :type opt_block: str
+    :return: the parsed `EnsembleInfo`
+    :rtype: EnsembleInfo
+    """
     header, engs = opt_block.split("Erel/kcal", 1)
     engs, footer = engs.rsplit('T /K', 1)
     report = header + 'T /K' + footer

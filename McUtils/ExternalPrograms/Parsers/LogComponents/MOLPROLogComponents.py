@@ -64,12 +64,33 @@ CartParser = StringParser(
 )
 
 def strip_recursive(at_list):
+    """
+    **LLM Docstring**
+
+    Recursively strip whitespace (and leading integer labels) from every string in a
+    nested list.
+
+    :param at_list: the (possibly nested) list of strings
+    :type at_list: list
+    :return: the cleaned list
+    :rtype: list
+    """
     return [
         Integer.remove(s.strip()) if isinstance(s, str) else strip_recursive(s)
         for s in at_list
     ]
 MOLPROCoords = namedtuple("MOLPROCoords", ["atoms", "coords"])
 def cartesian_coordinates_parser(strs):
+    """
+    **LLM Docstring**
+
+    Parse a MOLPRO Cartesian-coordinates block into atom labels and coordinates.
+
+    :param strs: the matched block string(s)
+    :type strs: list[str]
+    :return: the parsed `(atoms, coordinates)`
+    :rtype: MOLPROCoords
+    """
     strss = "\n\n".join(strs)
 
     parse = CartParser.parse_all(strss)
@@ -96,6 +117,17 @@ normal_modes_end_tag = "Frequencies dumped"
 
 MOLPRONormalModes = namedtuple("MOLPRONormalModes", ["freqs", "modes"])
 def normal_modes_parser(strs):
+    """
+    **LLM Docstring**
+
+    Parse a MOLPRO normal-modes block into per-structure frequencies and mode
+    displacement matrices, concatenating the column sub-blocks.
+
+    :param strs: the matched block string(s)
+    :type strs: list[str]
+    :return: the parsed `(frequencies, modes)`
+    :rtype: MOLPRONormalModes
+    """
     all_freqs = []
     all_modes = []
     for s in strs:
@@ -128,6 +160,17 @@ quadratic_terms_start_tag = FileStreamerTag(
 quadratic_terms_end_tag = "\n\n"
 
 def quadratic_terms_parser(qts):
+    """
+    **LLM Docstring**
+
+    Parse the MOLPRO quadratic force-constant terms into their mode index and value
+    arrays.
+
+    :param qts: the quadratic-terms block text
+    :type qts: str
+    :return: `[indices, values]`
+    :rtype: list[np.ndarray]
+    """
     # qts = qts.split('\n\n')[-1]
     return [
         np.loadtxt(io.StringIO(qts), usecols=[1], dtype=int),
@@ -149,6 +192,17 @@ cubic_terms_start_tag = FileStreamerTag(
 cubic_terms_end_tag = "\n\n"
 
 def cubic_terms_parser(qts):
+    """
+    **LLM Docstring**
+
+    Parse the MOLPRO cubic force-constant terms into their mode-index triples and
+    value arrays.
+
+    :param qts: the cubic-terms block text
+    :type qts: str
+    :return: `[index_triples, values]`
+    :rtype: list[np.ndarray]
+    """
     # qts = qts.split('\n\n')[-1]
     return [
         np.loadtxt(io.StringIO(qts), usecols=[0, 1, 2], dtype=int),
@@ -170,6 +224,17 @@ quartic_terms_start_tag = FileStreamerTag(
 quartic_terms_end_tag = "\n\n"
 
 def quartic_terms_parser(qts):
+    """
+    **LLM Docstring**
+
+    Parse the MOLPRO quartic force-constant terms into their mode-index quadruples
+    and value arrays.
+
+    :param qts: the quartic-terms block text
+    :type qts: str
+    :return: `[index_quadruples, values]`
+    :rtype: list[np.ndarray]
+    """
     # qts = qts.split('\n\n')[-1]
     return [
         np.loadtxt(io.StringIO(qts), usecols=[0, 1, 2, 3], dtype=int),

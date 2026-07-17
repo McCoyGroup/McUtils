@@ -1,4 +1,3 @@
-
 import numpy as np
 from collections import namedtuple
 from .Parsers import ElectronicStructureLogReader
@@ -17,6 +16,15 @@ class OrcaLogReader(ElectronicStructureLogReader):
 class OrcaHessReader(FileStreamReader):
 
     def __init__(self, file, **kwargs):
+        """
+        **LLM Docstring**
+
+        Open an ORCA `.hess` file for stream reading.
+
+        :param file: the `.hess` file
+        :type file: str
+        :param kwargs: extra arguments for the stream reader
+        """
         super().__init__(file, **kwargs)
         self._num_atoms = None
 
@@ -31,12 +39,34 @@ class OrcaHessReader(FileStreamReader):
     }
     @classmethod
     def get_special_handlers(cls):
+        """
+        **LLM Docstring**
+
+        Return the mapping of block tags that need a dedicated parser to that parser.
+
+        :return: the tag-to-handler mapping
+        :rtype: dict
+        """
         return {
             'atoms': cls.parse_atoms
             # 'ir_spectrum':cls.parse_ir
         }
     @classmethod
     def handle_orca_block(cls, tag, data:str):
+        """
+        **LLM Docstring**
+
+        Dispatch a `.hess` block to the appropriate parser, choosing by tag: a special
+        handler, a typed matrix/array parser, or a size-based guess between a scalar,
+        array, and matrix.
+
+        :param tag: the block tag
+        :type tag: str
+        :param data: the block text
+        :type data: str
+        :return: the parsed block
+        :rtype: Any
+        """
         special_handler = cls.get_special_handlers().get(tag)
         if special_handler is not None:
             return special_handler(data)
@@ -66,6 +96,22 @@ class OrcaHessReader(FileStreamReader):
 
     @classmethod
     def parse_matrix(cls, data, col_blocks=5, data_pattern=None):
+        """
+        **LLM Docstring**
+
+        Parse an ORCA block-formatted matrix (a header giving the dimensions followed by
+        column-blocked numeric data) into a dense array.
+
+        :param data: the block text
+        :type data: str
+        :param col_blocks: number of columns per printed block
+        :type col_blocks: int
+        :param data_pattern: the numeric pattern to match (defaults to ORCA's `E`-number)
+        :type data_pattern: object | None
+        :return: the parsed matrix
+        :rtype: np.ndarray
+        :raises ValueError: if the element count doesn't match the declared size
+        """
         header, rem = data.split("\n", 1)
         header = header.split()
         if len(header) == 1:
@@ -98,6 +144,19 @@ class OrcaHessReader(FileStreamReader):
 
     @classmethod
     def parse_array(cls, data, data_pattern=None):
+        """
+        **LLM Docstring**
+
+        Parse an ORCA block whose header gives a length followed by that many numeric
+        rows, flattening single-column results.
+
+        :param data: the block text
+        :type data: str
+        :param data_pattern: the numeric pattern to match (defaults to ORCA's `E`-number)
+        :type data_pattern: object | None
+        :return: the parsed array
+        :rtype: np.ndarray
+        """
         header, rem = data.split("\n", 1)
         header = int(header.split()[0])
         if data_pattern is None:
@@ -111,6 +170,16 @@ class OrcaHessReader(FileStreamReader):
     OrcaCoords = namedtuple("OrcaCoords", ["atoms", "mass", "coords"])
     @classmethod
     def parse_atoms(cls, data):
+        """
+        **LLM Docstring**
+
+        Parse the atoms block into element labels, masses, and coordinates.
+
+        :param data: the block text
+        :type data: str
+        :return: the parsed `(atoms, mass, coords)`
+        :rtype: OrcaHessReader.OrcaCoords
+        """
         base_data = cls.parse_array(data, Number)
         atoms = Word.findall(data)
         return cls.OrcaCoords(
@@ -120,12 +189,34 @@ class OrcaHessReader(FileStreamReader):
         )
 
     def get_next_block(self):
+        """
+        **LLM Docstring**
+
+        Read the next `$tag ... ` block from the file, returning its tag and body (or
+        `None` at end of file).
+
+        :return: `(tag, body)` or `None`
+        :rtype: tuple | None
+        """
         block = self.get_tagged_block("$", "\n\n")
         if block is None: return None
         tag, rem = block.split("\n", 1)
         return tag, rem
 
     def parse(self, tags=None, excludes=None):
+        """
+        **LLM Docstring**
+
+        Parse the `.hess` file into a dict of tag to parsed block, optionally restricting
+        to (or excluding) specific tags.
+
+        :param tags: tags to include (all if omitted)
+        :type tags: Iterable[str] | None
+        :param excludes: tags to exclude
+        :type excludes: Iterable[str] | None
+        :return: the parsed blocks keyed by tag
+        :rtype: dict
+        """
         res = {}
         block = self.get_next_block()
         while block is not None:
@@ -140,4 +231,3 @@ class OrcaHessReader(FileStreamReader):
             block = self.get_next_block()
 
         return res
-
