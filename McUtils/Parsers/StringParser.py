@@ -82,6 +82,14 @@ class StringParser:
     """
 
     def __init__(self, regex:RegexPattern):
+        """
+        **LLM Docstring**
+
+        Store the declarative `RegexPattern` used by parsing methods when no override is supplied.
+
+        :param regex: the pattern override; defaults to the parser's stored pattern
+        :type regex: RegexPattern
+        """
         self.regex = regex
 
     def parse(self,
@@ -222,6 +230,32 @@ class StringParser:
                   dtypes = None,
                   out = None
                   ):
+        """
+        **LLM Docstring**
+
+        Find all non-overlapping matches, allocate or reuse typed result storage, add a result axis for newly allocated arrays, and insert every match through the shared match-processing pipeline.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param regex: the pattern override; defaults to the parser's stored pattern
+        :type regex: object
+
+        :param num_results: the maximum number of matches to consume
+        :type num_results: object
+
+        :param block_handlers: post-processors aligned with captured groups
+        :type block_handlers: object
+
+        :param dtypes: the structured result type inferred from or supplied for the pattern
+        :type dtypes: object
+
+        :param out: existing result storage or an insertion-control mapping
+        :type out: object
+
+        :return: The parsed block or typed result structure, with endpoint metadata when requested.
+        :rtype: object
+        """
 
         if regex is None:
             regex = self.regex
@@ -287,15 +321,54 @@ class StringParser:
     class MatchIterator:
         class Match:
             def __init__(self, parent, block):
+                """
+                **LLM Docstring**
+
+                Store the parent iterator and one raw `re.Match` object.
+
+                :param parent: the parent reader or regex node
+                :type parent: object
+
+                :param block: the candidate TeX or BibTeX source block
+                :type block: object
+                """
                 self.parent = parent
                 self.block = block
             @property
             def value(self):
+                """
+                **LLM Docstring**
+
+                Allocate typed result storage and parse this match into it on demand.
+
+                :return: allocate typed result storage and parse this match into it on demand.
+                :rtype: object
+                """
                 res = self.parent.parser._set_up_result_arrays(self.parent.dtypes)
                 self.parent.parser._handle_parse_match(self.block, res, block_handlers=self.parent.block_handlers)
                 return res
 
         def __init__(self, parser, match_iter, num_results, dtypes, block_handlers):
+            """
+            **LLM Docstring**
+
+            Store parsing metadata and optionally cap the underlying match iterator with `itertools.islice`.
+
+            :param parser: an optional callable that converts extracted block text
+            :type parser: object
+
+            :param match_iter: an iterator of raw regex matches
+            :type match_iter: object
+
+            :param num_results: the maximum number of matches to consume
+            :type num_results: object
+
+            :param dtypes: the structured result type inferred from or supplied for the pattern
+            :type dtypes: object
+
+            :param block_handlers: post-processors aligned with captured groups
+            :type block_handlers: object
+            """
             if num_results is not None:
                 import itertools as it
                 match_iter = it.islice(match_iter, None, num_results)
@@ -306,9 +379,25 @@ class StringParser:
             self.match_iter = match_iter
 
         def __iter__(self):
+            """
+            **LLM Docstring**
+
+            Yield lazy wrapper objects for each remaining regex match.
+
+            :return: An iterator yielding the records described above.
+            :rtype: object
+            """
             for match in self.match_iter:
                 yield self.Match(self, match)
         def __next__(self):
+            """
+            **LLM Docstring**
+
+            Return a lazy wrapper for the next regex match.
+
+            :return: return a lazy wrapper for the next regex match.
+            :rtype: object
+            """
             match = next(self.match_iter)
             return self.Match(self, match)
 
@@ -318,6 +407,29 @@ class StringParser:
                   block_handlers = None,
                   dtypes = None
                   ):
+        """
+        **LLM Docstring**
+
+        Create a lazy iterator over matches, carrying the inferred dtypes and block handlers needed to parse each match on demand.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param regex: the pattern override; defaults to the parser's stored pattern
+        :type regex: object
+
+        :param num_results: the maximum number of matches to consume
+        :type num_results: object
+
+        :param block_handlers: post-processors aligned with captured groups
+        :type block_handlers: object
+
+        :param dtypes: the structured result type inferred from or supplied for the pattern
+        :type dtypes: object
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
 
         if regex is None:
             regex = self.regex
@@ -412,6 +524,17 @@ class StringParser:
     #region StructuredTypeArray interface
 
     def _set_up_result_arrays(self, dtypes):
+        """
+        **LLM Docstring**
+
+        Construct one `StructuredTypeArray` from the inferred structured dtype.
+
+        :param dtypes: the structured result type inferred from or supplied for the pattern
+        :type dtypes: object
+
+        :return: construct one `StructuredTypeArray` from the inferred structured dtype.
+        :rtype: object
+        """
         # we'll always force our dtypes and results to be a StructuredType and StructuredTypeArray
         # as these will force the results to be conformaing
         res = StructuredTypeArray(dtypes)
@@ -693,6 +816,17 @@ class StringParser:
 
     @classmethod
     def _get_regex_handler(cls, r):
+        """
+        **LLM Docstring**
+
+        Return an explicit handler when present; return no handler for scalar primitive captures; otherwise construct a recursive parser that removes the outer capture and parses repeated or compound matched text into compatible result arrays.
+
+        :param r: the regex node or structured result array processed by the helper
+        :type r: object
+
+        :return: A callable compatible with the parser's block-handler interface, or `None` for directly castable scalar captures.
+        :rtype: object
+        """
         # if we have a simple dtype we just parse out the whole thing, no need for parse_all
         # otherwise if we have non-None repetitions we need parse_all
 
@@ -803,6 +937,20 @@ class StringParser:
                             rr = s.parse(l)
                             if skipped_rows > 0:
                                 def add_skips(r, skipped = skipped_rows):
+                                    """
+                                    **LLM Docstring**
+
+                                    Prepend copies of the first parsed rows to account for optional empty rows skipped before the first non-empty parse result.
+
+                                    :param r: the regex node or structured result array processed by the helper
+                                    :type r: object
+
+                                    :param skipped: the number of leading empty rows omitted before a parse result was created
+                                    :type skipped: object
+
+                                    :return: prepend copies of the first parsed rows to account for optional empty rows skipped before the first non-empty parse result.
+                                    :rtype: object
+                                    """
                                     a = r.array
                                     if isinstance(a, np.ndarray):
                                         r.extend(a[:skipped], prepend = True)
@@ -876,12 +1024,46 @@ class StringParser:
         """
 
         def handler(data, method = method, array = None, append = False):
+            """
+            **LLM Docstring**
+
+            Adapt a plain one-argument transformation into the parser handler signature by ignoring array and append context.
+
+            :param data: the input bytes, text, matched values, or replacement data
+            :type data: object
+
+            :param method: the one-argument callable to adapt
+            :type method: object
+
+            :param array: the result array, input array, or existing structured storage
+            :type array: object
+
+            :param append: whether or along which axis results are appended
+            :type append: object
+
+            :return: adapt a plain one-argument transformation into the parser handler signature by ignoring array and append context.
+            :rtype: object
+            """
             return method(data)
 
         return handler
 
     @staticmethod
     def load_array(data, dtype='float'):
+        """
+        **LLM Docstring**
+
+        Parse whitespace-delimited text into a NumPy array with `numpy.loadtxt`.
+
+        :param data: the input bytes, text, matched values, or replacement data
+        :type data: object
+
+        :param dtype: the declared value type for captures
+        :type dtype: object
+
+        :return: The parsed NumPy array.
+        :rtype: object
+        """
         import io
         return np.loadtxt(io.StringIO(data), dtype=dtype)
     @classmethod
@@ -908,6 +1090,20 @@ class StringParser:
             if isinstance(data, np.ndarray) and data.ndim > 1:
                 # we need to load each chunk in turn...
                 def hold_me_closer_tiny_dancer(data, dtype = dtype, cls = cls):
+                    """
+                    **LLM Docstring**
+
+                    Recursively convert nested arrays of text lines into numeric arrays, joining each one-dimensional leaf with newlines before loading it.
+
+                    :param data: the input bytes, text, matched values, or replacement data
+                    :type data: object
+
+                    :param dtype: the declared value type for captures
+                    :type dtype: object
+
+                    :return: recursively convert nested arrays of text lines into numeric arrays, joining each one-dimensional leaf with newlines before loading it.
+                    :rtype: object
+                    """
                     if data.ndim == 1:
                         bleh = '\n'.join((d.strip() for d in data))
                         if pre is not None:
@@ -974,6 +1170,29 @@ class StringParser:
         :rtype:
         """
         def handler(data, array = array, append = append, dtype = dtype, shape = shape, cls=cls):
+            """
+            **LLM Docstring**
+
+            Call `to_array` with the dtype, shape, preprocessing callback, and default context captured by `array_handler`.
+
+            :param data: the input bytes, text, matched values, or replacement data
+            :type data: object
+
+            :param array: the result array, input array, or existing structured storage
+            :type array: object
+
+            :param append: whether or along which axis results are appended
+            :type append: object
+
+            :param dtype: the declared value type for captures
+            :type dtype: object
+
+            :param shape: the required or inferred array shape
+            :type shape: object
+
+            :return: call `to_array` with the dtype, shape, preprocessing callback, and default context captured by `array_handler`.
+            :rtype: object
+            """
             return cls.to_array(data, array = array, append = append, dtype = dtype, shape = shape, pre=pre)
         return handler
     #endregion

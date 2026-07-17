@@ -22,6 +22,26 @@ class StructuredType:
                  is_optional = False,
                  default_value = None
                  ):
+        """
+        **LLM Docstring**
+
+        Normalize a primitive, shaped primitive, alternative, optional, or compound dtype specification and choose an explicit or inferred missing-value sentinel.
+
+        :param base_type: the primitive or compound type specification
+        :type base_type: object
+
+        :param shape: the required or inferred array shape
+        :type shape: object
+
+        :param is_alternative: whether the specification represents alternative accepted types
+        :type is_alternative: object
+
+        :param is_optional: whether missing values are allowed
+        :type is_optional: object
+
+        :param default_value: the value used for optional or unmatched data
+        :type default_value: object
+        """
 
         if shape is None and isinstance(base_type, tuple) and len(base_type) == 2 and (
                 isinstance(base_type[1], int) or isinstance(base_type[1], tuple)
@@ -42,6 +62,14 @@ class StructuredType:
         self.default = default_value if default_value is not None else self._infer_default_value() # for optional types
 
     def _infer_default_value(self):
+        """
+        **LLM Docstring**
+
+        Choose `[NaN]` for strings, a large negative integer sentinel for integer types, `NaN` for floating types, and `None` otherwise.
+
+        :return: choose `[NaN]` for strings, a large negative integer sentinel for integer types, `NaN` for floating types, and `None` otherwise.
+        :rtype: object
+        """
         missing = None
         if isinstance(self.dtype, type):
             if self.dtype is str:
@@ -56,6 +84,14 @@ class StructuredType:
 
     @property
     def is_simple(self):
+        """
+        **LLM Docstring**
+
+        Report whether the specification is an unqualified primitive type (or `None`) rather than an optional, alternative, or compound structure.
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         return (
                 self.dtype is None or (isinstance(self.dtype, type) and not self.is_optional and not self.is_alternative)
         )
@@ -134,6 +170,17 @@ class StructuredType:
                 return new
 
     def __add__(self, other):
+        """
+        **LLM Docstring**
+
+        Combine sibling type specifications using `add_types`.
+
+        :param other: the pattern or type combined with this object
+        :type other: object
+
+        :return: combine sibling type specifications using `add_types`.
+        :rtype: object
+        """
         return self.add_types(other)
 
     def compound_types(self, other):
@@ -146,6 +193,17 @@ class StructuredType:
         """
         raise NotImplemented
     def __call__(self, other):
+        """
+        **LLM Docstring**
+
+        Request nested type composition through `compound_types`, which is currently unimplemented.
+
+        :param other: the pattern or type combined with this object
+        :type other: object
+
+        :return: request nested type composition through `compound_types`, which is currently unimplemented.
+        :rtype: object
+        """
         return self.compound_types(other)
 
 
@@ -209,6 +267,20 @@ class StructuredType:
             self.shape = base_shape + shape
 
     def _condense_types(self, base_types, shape):
+        """
+        **LLM Docstring**
+
+        Collapse identical child primitive types into one type with an added length axis when no conflicting outer shape is supplied.
+
+        :param base_types: the child structured types considered for condensation
+        :type base_types: object
+
+        :param shape: the required or inferred array shape
+        :type shape: object
+
+        :return: collapse identical child primitive types into one type with an added length axis when no conflicting outer shape is supplied.
+        :rtype: object
+        """
         # what do I do about this existing shape...?
 
         raw_types = [ b.dtype for b in base_types ]
@@ -233,6 +305,14 @@ class StructuredType:
 
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Show the represented dtype and shape.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         return "{}({}, shape={})".format(
             type(self).__name__,
             self.dtype,
@@ -244,6 +324,11 @@ class DisappearingTypeClass(StructuredType):
     A special type that is entirely ignored in the structured type algebra
     """
     def __init__(self):
+        """
+        **LLM Docstring**
+
+        Create the singleton type marker that is ignored when structured types are added together.
+        """
         self.is_disappearing = True
         super().__init__(None)
 DisappearingType = DisappearingTypeClass() # redefinition but it should be a singleton anyway
@@ -316,6 +401,14 @@ class StructuredTypeArray:
         return self._is_simple
     @property
     def dict_like(self):
+        """
+        **LLM Docstring**
+
+        Report whether compound storage is keyed by a dictionary or `OrderedDict`.
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         return isinstance(self._array, (dict, OrderedDict))
     @property
     def extension_axis(self):
@@ -339,9 +432,31 @@ class StructuredTypeArray:
         return self._extend_along
     @extension_axis.setter
     def extension_axis(self, ax):
+        """
+        **LLM Docstring**
+
+        Get or set the axis used for growth; when unset, choose the first indeterminate axis, falling back to axis zero.
+
+        :param ax: the explicit extension axis
+        :type ax: object
+
+        :return: get or set the axis used for growth; when unset, choose the first indeterminate axis, falling back to axis zero.
+        :rtype: object
+        """
         self._extend_along = ax
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        Get the filled shape of simple storage or the component shapes of compound storage; the setter stores an explicit cached shape.
+
+        :param s: the shape assigned to the object
+        :type s: object
+
+        :return: The populated shape for simple storage or component shapes for compound storage.
+        :rtype: object
+        """
         if self._array is None:
             return None
         if self.is_simple:
@@ -360,9 +475,28 @@ class StructuredTypeArray:
         return self._shape
     @shape.setter
     def shape(self, s):
+        """
+        **LLM Docstring**
+
+        Get the filled shape of simple storage or the component shapes of compound storage; the setter stores an explicit cached shape.
+
+        :param s: the shape assigned to the object
+        :type s: object
+
+        :return: The populated shape for simple storage or component shapes for compound storage.
+        :rtype: object
+        """
         self._shape = s
     @property
     def block_size(self):
+        """
+        **LLM Docstring**
+
+        Return the number of scalar values in one element along the extension axis, summing component block sizes for compound storage.
+
+        :return: return the number of scalar values in one element along the extension axis, summing component block sizes for compound storage.
+        :rtype: object
+        """
         if self.is_simple:
             s = list(self.shape)
             s[self.extension_axis] = 1 # this will mess up on things like (3,)...
@@ -372,9 +506,31 @@ class StructuredTypeArray:
         return self._block_size
     @property
     def append_depth(self):
+        """
+        **LLM Docstring**
+
+        Get or set recursive append depth; changing it propagates the same increment to all compound subarrays.
+
+        :param d: the new recursive append depth
+        :type d: object
+
+        :return: get or set recursive append depth; changing it propagates the same increment to all compound subarrays.
+        :rtype: object
+        """
         return self._append_depth
     @append_depth.setter
     def append_depth(self, d):
+        """
+        **LLM Docstring**
+
+        Get or set recursive append depth; changing it propagates the same increment to all compound subarrays.
+
+        :param d: the new recursive append depth
+        :type d: object
+
+        :return: get or set recursive append depth; changing it propagates the same increment to all compound subarrays.
+        :rtype: object
+        """
         inc = d - self._append_depth
         self._append_depth = d
         if not self._is_simple:
@@ -390,6 +546,14 @@ class StructuredTypeArray:
         self._dtype = None
 
     def _get_complex_dtype(self):
+        """
+        **LLM Docstring**
+
+        Materialize compound child `StructuredType` objects, push any outer shape into each child, or reconstruct the parent type from existing subarrays.
+
+        :return: materialize compound child `StructuredType` objects, push any outer shape into each child, or reconstruct the parent type from existing subarrays.
+        :rtype: object
+        """
         # I think all the shape changes get adequately passed down...?
         # Like I think Repeating and friends manage stuff fine
         arr = self._array
@@ -461,6 +625,14 @@ class StructuredTypeArray:
 
     @property
     def array(self):
+        """
+        **LLM Docstring**
+
+        Return the filled slice of simple NumPy storage, or the complete tuple/mapping of compound subarrays.
+
+        :return: The populated NumPy view or compound collection of populated subarrays.
+        :rtype: object
+        """
         if self.is_simple:
             slices = tuple(slice(0, x) for x in self.filled_to if x > 0) # treating 0 as "all"
             try:
@@ -474,6 +646,14 @@ class StructuredTypeArray:
             return self._array
     @property
     def _subarrays(self):
+        """
+        **LLM Docstring**
+
+        Iterate over compound child arrays, using mapping values for keyed storage.
+
+        :return: iterate over compound child arrays, using mapping values for keyed storage.
+        :rtype: object
+        """
         return self._array.values() if isinstance(self._array, OrderedDict) else self._array
 
     def axis_shape_indeterminate(self, axis):
@@ -513,6 +693,17 @@ class StructuredTypeArray:
 
     @property
     def filled_to(self):
+        """
+        **LLM Docstring**
+
+        Get per-axis populated extents for simple storage or nested extents for compound storage; setting accepts an integer or extent sequence only for simple storage.
+
+        :param filling: the populated extent or sequence of per-axis extents to record
+        :type filling: object
+
+        :return: The populated extent of each axis.
+        :rtype: object
+        """
         if self._is_simple:
             if self._filled_to is None:
                 self._filled_to = [ 0 ] * len(self._array.shape)
@@ -521,6 +712,17 @@ class StructuredTypeArray:
             return [ s.filled_to for s in self._subarrays ]
     @filled_to.setter
     def filled_to(self, filling):
+        """
+        **LLM Docstring**
+
+        Get per-axis populated extents for simple storage or nested extents for compound storage; setting accepts an integer or extent sequence only for simple storage.
+
+        :param filling: the populated extent or sequence of per-axis extents to record
+        :type filling: object
+
+        :return: The populated extent of each axis.
+        :rtype: object
+        """
         # print(">>>>", self._filled_to)
         if self._is_simple:
             if isinstance(filling, int):
@@ -541,6 +743,20 @@ class StructuredTypeArray:
 
         # print(self._filled_to, "<<<<")
     def set_filling(self, amt, axis = 0):
+        """
+        **LLM Docstring**
+
+        Set one populated extent directly, propagating the update through compound children.
+
+        :param amt: the populated extent to assign
+        :type amt: object
+
+        :param axis: the axis being inspected, changed, or extended
+        :type axis: object
+
+        :return: None.
+        :rtype: None
+        """
         if self._is_simple:
             if self._filled_to is None:
                 _ = self.filled_to # populates it
@@ -550,6 +766,20 @@ class StructuredTypeArray:
             for a in self._subarrays:
                 a.set_filling(amt, axis = axis)
     def increment_filling(self, inc = 1, axis = 0):
+        """
+        **LLM Docstring**
+
+        Increase one populated extent, propagating the increment through compound children.
+
+        :param inc: the amount added to the populated extent
+        :type inc: object
+
+        :param axis: the axis being inspected, changed, or extended
+        :type axis: object
+
+        :return: None.
+        :rtype: None
+        """
         if self._is_simple:
             if self._filled_to is None:
                 _ = self.filled_to # populates it
@@ -560,6 +790,14 @@ class StructuredTypeArray:
                 a.increment_filling(inc = inc, axis = axis)
 
     def __len__(self):
+        """
+        **LLM Docstring**
+
+        Return the length of the currently filled array view.
+
+        :return: The number of populated top-level elements.
+        :rtype: int
+        """
         return len(self.array)
 
     def empty_array(self, shape = None, num_elements = None):
@@ -606,6 +844,17 @@ class StructuredTypeArray:
             return tuple( StructuredTypeArray(s) for s in dt )
 
     def extend_array(self, axis = None):
+        """
+        **LLM Docstring**
+
+        Grow storage by concatenating an equally shaped empty block along the extension axis, recursively growing compound children.
+
+        :param axis: the axis being inspected, changed, or extended
+        :type axis: object
+
+        :return: None.
+        :rtype: None
+        """
         array = self._array
         if isinstance(array, np.ndarray):
             ax = self.extension_axis if axis is None else axis
@@ -625,6 +874,20 @@ class StructuredTypeArray:
                 arr.extend_array( axis = axis )
 
     def __setitem__(self, key, value):
+        """
+        **LLM Docstring**
+
+        Assign through `set_part`, including automatic growth and recursive compound dispatch.
+
+        :param key: the name assigned to a captured group
+        :type key: object
+
+        :param value: the value assigned into the structured array
+        :type value: object
+
+        :return: None.
+        :rtype: None
+        """
         self.set_part(key, value)
     def set_part(self, key, value):
         """Recursively sets parts of an array if not simple, otherwise just delegates to NumPy
@@ -751,6 +1014,17 @@ class StructuredTypeArray:
             for a, k, v in zip(self._array, key, value):
                 a[k] = v
     def __getitem__(self, item):
+        """
+        **LLM Docstring**
+
+        Read through `get_part` from the filled array view rather than unused capacity.
+
+        :param item: the child key or array index/slice being accessed
+        :type item: object
+
+        :return: The named child or populated array portion selected by the index.
+        :rtype: object
+        """
         return self.get_part(item, use_full_array=False)
     def get_part(self, item, use_full_array = True):
         """If simple, delegates to NumPy, otherwise tries to recursively get parts...?
@@ -927,6 +1201,20 @@ class StructuredTypeArray:
         # self._filled_to+=1 # handled automatically by a small bit of cleverness in the filling code
 
     def _get_casting_shape(self, val, axis = None):
+        """
+        **LLM Docstring**
+
+        Determine whether input values can be reshaped by changing only the extension axis, returning the inferred axis length and any fractional remainder.
+
+        :param val: the value or values being tested, appended, or extended
+        :type val: object
+
+        :param axis: the axis being inspected, changed, or extended
+        :type axis: object
+
+        :return: determine whether input values can be reshaped by changing only the extension axis, returning the inferred axis length and any fractional remainder.
+        :rtype: object
+        """
         axis = self.extension_axis if axis is None else axis
         vs = val.shape
         ss = self.shape
@@ -1186,6 +1474,14 @@ class StructuredTypeArray:
         return arr
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Show the populated shape and resolved dtype.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         return "{}(shape={}, dtype={})".format(
             type(self).__name__,
             self.shape,

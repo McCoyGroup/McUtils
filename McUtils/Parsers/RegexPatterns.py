@@ -152,6 +152,23 @@ class RegexPattern:
         self._joiner = joiner
         if join_function is None:
             def join_function(j, k, **ignore):
+                """
+                **LLM Docstring**
+
+                Join already-built child regex strings with the supplied separator and raise a contextual error when the separator cannot join them.
+
+                :param j: the separator used to join child regex strings
+                :type j: object
+
+                :param k: the sequence of built child regex strings
+                :type k: object
+
+                :param ignore: unused keyword arguments accepted for compatibility
+                :type ignore: object
+
+                :return: join already-built child regex strings with the supplied separator and raise a contextual error when the separator cannot join them.
+                :rtype: object
+                """
                 try:
                     return j.join(k)
                 except TypeError:
@@ -181,9 +198,31 @@ class RegexPattern:
 
     @property
     def pat(self):
+        """
+        **LLM Docstring**
+
+        Return or replace the primitive pattern/wrapper used by this node; setting it invalidates all compiled caches.
+
+        :param pat: a literal regex fragment or callable wrapper
+        :type pat: object
+
+        :return: return or replace the primitive pattern/wrapper used by this node; setting it invalidates all compiled caches.
+        :rtype: object
+        """
         return self._pat
     @pat.setter
     def pat(self, pat):
+        """
+        **LLM Docstring**
+
+        Return or replace the primitive pattern/wrapper used by this node; setting it invalidates all compiled caches.
+
+        :param pat: a literal regex fragment or callable wrapper
+        :type pat: object
+
+        :return: return or replace the primitive pattern/wrapper used by this node; setting it invalidates all compiled caches.
+        :rtype: object
+        """
         self._pat = pat
         self.invalidate_cache()
     @property
@@ -231,6 +270,17 @@ class RegexPattern:
         return self._joiner
     @joiner.setter
     def joiner(self, j):
+        """
+        **LLM Docstring**
+
+        Return or replace the separator placed between built child patterns; setting it invalidates the pattern-string cache.
+
+        :param j: the separator used to join child regex strings
+        :type j: object
+
+        :return: return or replace the separator placed between built child patterns; setting it invalidates the pattern-string cache.
+        :rtype: object
+        """
         self._joiner = j
         self._cached = None
 
@@ -245,6 +295,17 @@ class RegexPattern:
 
     @join_function.setter
     def join_function(self, j):
+        """
+        **LLM Docstring**
+
+        Return or replace the callable that combines the joiner and built children; setting it invalidates the pattern-string cache.
+
+        :param j: the separator used to join child regex strings
+        :type j: object
+
+        :return: return or replace the callable that combines the joiner and built children; setting it invalidates the pattern-string cache.
+        :rtype: object
+        """
         self._join_function = j
         self._cached = None
     @property
@@ -257,6 +318,17 @@ class RegexPattern:
         return self._suffix
     @suffix.setter
     def suffix(self, e):
+        """
+        **LLM Docstring**
+
+        Return or replace the suffix appended after the combined children; setting it invalidates the pattern-string cache.
+
+        :param e: the new suffix pattern
+        :type e: object
+
+        :return: return or replace the suffix appended after the combined children; setting it invalidates the pattern-string cache.
+        :rtype: object
+        """
         self._suffix = e
         self._cached = None
     @property
@@ -269,6 +341,17 @@ class RegexPattern:
         return self._prefix
     @prefix.setter
     def prefix(self, s):
+        """
+        **LLM Docstring**
+
+        Return or replace the prefix prepended before the combined children; setting it invalidates the pattern-string cache.
+
+        :param s: the shape assigned to the object
+        :type s: object
+
+        :return: return or replace the prefix prepended before the combined children; setting it invalidates the pattern-string cache.
+        :rtype: object
+        """
         self._prefix = s
         self._cached = None
     @property
@@ -328,12 +411,42 @@ class RegexPattern:
 
     @property
     def is_repeating(self):
+        """
+        **LLM Docstring**
+
+        Report whether repetition metadata is stored as a `(minimum, maximum)` tuple.
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         return isinstance(self.repetitions, tuple)
     @property
     def capturing(self):
+        """
+        **LLM Docstring**
+
+        Report whether this node captures directly, including the implicit case where a repeating node contains capturing descendants.
+
+        :param cap: whether this node captures directly
+        :type cap: object
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         return self._capturing or (self._capturing is None and self.is_repeating and self.has_capturing_child)
     @capturing.setter
     def capturing(self, cap):
+        """
+        **LLM Docstring**
+
+        Report whether this node captures directly, including the implicit case where a repeating node contains capturing descendants.
+
+        :param cap: whether this node captures directly
+        :type cap: object
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         self._capturing = cap
 
     def get_capturing_groups(self, allow_inners = None):
@@ -427,12 +540,70 @@ class RegexPattern:
             return self.pat + op
         elif isinstance(self.pat, str):
             def apply_op(p, *arg, wrap=op, prefix=self.pat, a=args, kw=kwargs, **kwarg):
+                """
+                **LLM Docstring**
+
+                Prefix the wrapped callable's generated pattern with this node's literal pattern.
+
+                :param p: the regex source fragment to wrap
+                :type p: object
+
+                :param wrap: the inner pattern wrapper callable
+                :type wrap: object
+
+                :param prefix: text or a pattern prepended to this node
+                :type prefix: object
+
+                :param a: positional arguments captured for the wrapper callable
+                :type a: object
+
+                :param kw: extra keyword arguments forwarded to the underlying stream constructor
+                :type kw: object
+
+                :param arg: additional positional arguments accepted by the closure
+                :type arg: object
+
+                :param kwarg: additional keyword arguments accepted by the closure
+                :type kwarg: object
+
+                :return: prefix the wrapped callable's generated pattern with this node's literal pattern.
+                :rtype: object
+                """
                 return prefix + wrap(p, *a, **kw)
             return apply_op
         elif isinstance(op, str):
             return self.pat(op, *args, **kwargs)
         else:
             def merge_ops(p, *arg, wrap=op, prewrap=self.pat, a=args, kw=kwargs, **kwarg):
+                """
+                **LLM Docstring**
+
+                Compose two callable pattern wrappers so the other wrapper runs first and this node's wrapper runs around its result.
+
+                :param p: the regex source fragment to wrap
+                :type p: object
+
+                :param wrap: the inner pattern wrapper callable
+                :type wrap: object
+
+                :param prewrap: the outer pattern wrapper callable
+                :type prewrap: object
+
+                :param a: positional arguments captured for the wrapper callable
+                :type a: object
+
+                :param kw: extra keyword arguments forwarded to the underlying stream constructor
+                :type kw: object
+
+                :param arg: additional positional arguments accepted by the closure
+                :type arg: object
+
+                :param kwarg: additional keyword arguments accepted by the closure
+                :type kwarg: object
+
+                :return: compose two callable pattern wrappers so the other wrapper runs first and this node's wrapper runs around its result.
+                :rtype: object
+                """
                 return prewrap(wrap(p, *a, **kw))
             return merge_ops
 
@@ -447,6 +618,23 @@ class RegexPattern:
 
     @staticmethod
     def _join_kids(joiner, kids, no_capture=True):
+        """
+        **LLM Docstring**
+
+        Group ungrouped children when more than one is present, then join them with the requested separator.
+
+        :param joiner: text or a pattern inserted between children
+        :type joiner: object
+
+        :param kids: already-built child regex strings
+        :type kids: object
+
+        :param no_capture: whether the resulting regex must avoid a capturing group
+        :type no_capture: object
+
+        :return: group ungrouped children when more than one is present, then join them with the requested separator.
+        :rtype: object
+        """
         if len(kids) > 1:
             kids = [ group(k, no_capture=no_capture) if not is_grouped(k) else k for k in kids ]
         return joiner.join(kids)
@@ -458,6 +646,32 @@ class RegexPattern:
               no_captures=False,
               verbose=False
               ):
+        """
+        **LLM Docstring**
+
+        Recursively build the regex text for this node, suppressing inner captures when an outer node captures, applying prefix/joiner/suffix and wrapper functions, and caching the normal capturing form.
+
+        :param joiner: text or a pattern inserted between children
+        :type joiner: object
+
+        :param prefix: text or a pattern prepended to this node
+        :type prefix: object
+
+        :param suffix: text or a pattern appended to this node
+        :type suffix: object
+
+        :param recompile: whether to rebuild instead of reusing cached regex text
+        :type recompile: object
+
+        :param no_captures: whether captures are suppressed throughout this build
+        :type no_captures: object
+
+        :param verbose: whether to print intermediate regex construction details
+        :type verbose: object
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         # might want to add a flag that checks if a block has already been wrapped in no-capture? That would cut down
         # on regex length...
         if recompile or self._cached is None:
@@ -531,39 +745,124 @@ class RegexPattern:
         return self._cached
     @property
     def compiled(self):
+        """
+        **LLM Docstring**
+
+        Compile and cache the regex string returned by `build`.
+
+        :return: The cached compiled regular-expression object.
+        :rtype: object
+        """
         if self._comp is None:
             self._comp = re.compile(self.build())
         return self._comp
 
     def add_parent(self, parent):
+        """
+        **LLM Docstring**
+
+        Register an ancestor that must be invalidated when this node changes.
+
+        :param parent: the parent reader or regex node
+        :type parent: object
+
+        :return: None.
+        :rtype: None
+        """
         self._parents.append(parent)
     def remove_parent(self, parent):
+        """
+        **LLM Docstring**
+
+        Remove a previously registered ancestor.
+
+        :param parent: the parent reader or regex node
+        :type parent: object
+
+        :return: None.
+        :rtype: None
+        """
         self._parents.remove(parent)
 
     def add_child(self, child):
+        """
+        **LLM Docstring**
+
+        Append one child, update named/capturing-descendant flags, and invalidate this node and its ancestors.
+
+        :param child: the child pattern to add or remove
+        :type child: object
+
+        :return: None.
+        :rtype: None
+        """
         self._children.append(child)
         self._child_map = None
         self.has_capturing_child = self.has_capturing_child or (child.capturing or child.has_capturing_child)
         self.has_named_child = self.has_named_child or (child.has_named_child or child.key is not None)
         self.invalidate_cache()
     def add_children(self, children):
+        """
+        **LLM Docstring**
+
+        Append several children, merge their named/capturing-descendant flags, and invalidate caches.
+
+        :param children: child patterns combined by this node
+        :type children: object
+
+        :return: None.
+        :rtype: None
+        """
         self._children.extend(children)
         self._child_map = None
         self.has_capturing_child = self.has_capturing_child or any((c.capturing or c.has_capturing_child) for c in children)
         self.has_named_child = self.has_named_child or any((c.has_named_child or c.key is not None) for c in children)
         self.invalidate_cache()
     def remove_child(self, child):
+        """
+        **LLM Docstring**
+
+        Remove one child, recompute descendant flags from the remaining children, and invalidate caches.
+
+        :param child: the child pattern to add or remove
+        :type child: object
+
+        :return: None.
+        :rtype: None
+        """
         self._children.remove(child)
         self._child_map = None
         self.has_capturing_child = self.has_capturing_child and any((c.capturing or c.has_capturing_child) for c in self._children)
         self.has_named_child = self.has_named_child and any((c.has_named_child or c.key is not None) for c in self._children)
         self.invalidate_cache()
     def insert_child(self, index, child):
+        """
+        **LLM Docstring**
+
+        Insert a child at a specific position and invalidate cached pattern state.
+
+        :param index: the insertion position
+        :type index: object
+
+        :param child: the child pattern to add or remove
+        :type child: object
+
+        :return: None.
+        :rtype: None
+        """
         self._children.insert(index, child)
         self._child_map = None
         self.invalidate_cache()
 
     def invalidate_cache(self):
+        """
+        **LLM Docstring**
+
+        Clear built-string, compiled-regex, and capturing-group caches, then recursively invalidate all parents.
+
+        :return: None.
+        :rtype: None
+        """
         # propagating this up the tree is the _only_ time I need _parents
         # which is a potential source of memory leaks... should I kill off the upwards propagation?
         self._cached = None
@@ -579,6 +878,14 @@ class RegexPattern:
     #     for c in self._children:
     #         c.remove_parent(self)
     def __copy__(self):
+        """
+        **LLM Docstring**
+
+        Make a shallow node copy with an independent child list, no parents, and no built-pattern cache.
+
+        :return: An independent shallow copy of the regex node.
+        :rtype: object
+        """
         from copy import copy
         cls = type(self)
         new = cls.__new__(cls) # avoid init call
@@ -599,6 +906,17 @@ class RegexPattern:
         if not isinstance(other, RegexPattern):
             other = RegexPattern(other)
         def null_pat(p):
+            """
+            **LLM Docstring**
+
+            Return the combined child text unchanged for concatenation nodes created by `__add__`.
+
+            :param p: the regex source fragment to wrap
+            :type p: object
+
+            :return: return the combined child text unchanged for concatenation nodes created by `__add__`.
+            :rtype: object
+            """
             return p
         return type(self)(
             null_pat,
@@ -615,6 +933,17 @@ class RegexPattern:
         if not isinstance(other, RegexPattern):
             other = RegexPattern(other)
         def null_pat(p):
+            """
+            **LLM Docstring**
+
+            Return the combined child text unchanged for concatenation nodes created by `__radd__`.
+
+            :param p: the regex source fragment to wrap
+            :type p: object
+
+            :return: return the combined child text unchanged for concatenation nodes created by `__radd__`.
+            :rtype: object
+            """
             return p
         return type(self)(
             null_pat,
@@ -693,6 +1022,14 @@ class RegexPattern:
         return new
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a diagnostic representation containing the key, child count, and primitive pattern.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         return "{}(key: {!r}, children : <{}>, pattern : {})".format(
             type(self).__name__,
             self.key,
@@ -700,30 +1037,184 @@ class RegexPattern:
             self._pat
         )
     def __str__(self):
+        """
+        **LLM Docstring**
+
+        Build and return the regex source string.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         wat = self.build()
         return wat
 
     def __getitem__(self, item):
+        """
+        **LLM Docstring**
+
+        Look up a directly named child by its key.
+
+        :param item: the child key or array index/slice being accessed
+        :type item: object
+
+        :return: The named child or populated array portion selected by the index.
+        :rtype: object
+        """
         return self.child_map[item]
 
     ### Supporting the re mechanisms directly for convenience
     def match(self, txt, *args):
+        """
+        **LLM Docstring**
+
+        Match the compiled pattern only at the beginning of the input.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: match the compiled pattern only at the beginning of the input.
+        :rtype: object
+        """
         return re.match(self.compiled, txt, *args)
     def fullmatch(self, txt, *args):
+        """
+        **LLM Docstring**
+
+        Require the compiled pattern to match the complete input.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: require the compiled pattern to match the complete input.
+        :rtype: object
+        """
         return re.fullmatch(self.compiled, txt, *args)
     def search(self, txt, *args):
+        """
+        **LLM Docstring**
+
+        Find the first occurrence of the compiled pattern in the input.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: find the first occurrence of the compiled pattern in the input.
+        :rtype: object
+        """
         return re.search(self.compiled, txt, *args)
     def findall(self, txt, *args):
+        """
+        **LLM Docstring**
+
+        Return all non-overlapping matches of the compiled pattern.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: return all non-overlapping matches of the compiled pattern.
+        :rtype: object
+        """
         return re.findall(self.compiled, txt, *args)
     def finditer(self, txt, *args):
+        """
+        **LLM Docstring**
+
+        Iterate over match objects for all non-overlapping matches.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         return re.finditer(self.compiled, txt, *args)
     def sub(self, rep, txt, *args):
+        """
+        **LLM Docstring**
+
+        Replace matches using `re.sub`.
+
+        :param rep: the replacement string or callable
+        :type rep: object
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: replace matches using `re.sub`.
+        :rtype: object
+        """
         return re.sub(self.compiled, rep, txt, *args)
     def subn(self, rep, txt, *args):
+        """
+        **LLM Docstring**
+
+        Replace matches and return both the resulting text and replacement count.
+
+        :param rep: the replacement string or callable
+        :type rep: object
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: replace matches and return both the resulting text and replacement count.
+        :rtype: object
+        """
         return re.subn(self.compiled, rep, txt, *args)
     def replace(self, txt, replacement, *args):
+        """
+        **LLM Docstring**
+
+        Replace matches with a supplied replacement string or callable.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param replacement: the replacement string or callable
+        :type replacement: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: replace matches with a supplied replacement string or callable.
+        :rtype: object
+        """
         return re.sub(self.compiled, replacement, txt, *args)
     def remove(self, txt, *args):
+        """
+        **LLM Docstring**
+
+        Delete every match by replacing it with an empty string.
+
+        :param txt: the input text or text block to parse
+        :type txt: object
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :return: delete every match by replacing it with an empty string.
+        :rtype: object
+        """
         return self.replace(txt, '', *args)
 
 ######################################################################################################################
@@ -773,23 +1264,96 @@ def is_grouped(p):
 
     return all_is_well
 def group(p, no_capture = False):
+    """
+    **LLM Docstring**
+
+    Wrap a pattern in a capturing group, or in a non-capturing group when `no_capture` is true.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if no_capture:
         return non_capturing(p)
     else:
         return r"("+p+r")"
 def non_capturing(p, *a, **kw):
+    """
+    **LLM Docstring**
+
+    Wrap a pattern in a `(?:...)` group.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param a: positional arguments captured for the wrapper callable
+    :type a: object
+
+    :param kw: extra keyword arguments forwarded to the underlying stream constructor
+    :type kw: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     return r"(?:"+p+r")"
 def optional(p, no_capture = False):
+    """
+    **LLM Docstring**
+
+    Apply `?` to an already grouped atom, otherwise first place the pattern in a non-capturing group.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if not is_grouped(p):
         return non_capturing(p) + "?"
     else:
         return p + "?"
 def alternatives(p, no_capture = False):
+    """
+    **LLM Docstring**
+
+    Ensure an alternation expression is grouped, choosing capturing or non-capturing grouping from `no_capture`.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if is_grouped(p):
         return p
     else:
         return group(p, no_capture=no_capture)
 def shortest(p, no_capture = False):
+    """
+    **LLM Docstring**
+
+    Convert a pattern to a lazy zero-or-more expression, or make an existing `*`/`+` quantifier lazy.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if not p.endswith("*") | p.endswith("+"):
         if not is_grouped(p):
             return non_capturing(p) + "*?"
@@ -798,6 +1362,26 @@ def shortest(p, no_capture = False):
     else:
         return p + "?"
 def repeating(p, min = 1, max = None, no_capture = False):
+    """
+    **LLM Docstring**
+
+    Apply `*`, `+`, `{n}`, `{n,}`, or `{n,m}` according to the supplied bounds, then capture the entire repetition unless `no_capture` is true.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param min: the minimum repetition count, or `None` for zero
+    :type min: object
+
+    :param max: the maximum repetition count, or `None` for no upper bound
+    :type max: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if not is_grouped(p):
         p = non_capturing(p)
     if max is None:
@@ -818,10 +1402,47 @@ def repeating(p, min = 1, max = None, no_capture = False):
     else:
         return grp_p(base_pattern)
 def duplicated(p, num, riffle="", no_capture = False):
+    """
+    **LLM Docstring**
+
+    Repeat the same pattern exactly `num` times with `riffle` inserted between copies.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param num: the number of matches, blocks, elements, or copies requested
+    :type num: object
+
+    :param riffle: text inserted between duplicated pattern copies
+    :type riffle: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if isinstance(riffle, RegexPattern):
         riffle = str(riffle)
     return riffle.join([p]*num)
 def named(p, n, no_capture=False):
+    """
+    **LLM Docstring**
+
+    Wrap a pattern in a Python named capture, or suppress the named capture when `no_capture` is true.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param n: the requested count or fixed repetition count
+    :type n: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     if no_capture:
         return non_cap_p(p)
     else:
@@ -844,6 +1465,20 @@ NonCapturing.__doc__ = """
 
 op_p = optional # optional group
 def opnb_p(p, no_capture=False):
+    """
+    **LLM Docstring**
+
+    Wrap a pattern in an optional non-capturing group.
+
+    :param p: the regex source fragment to wrap
+    :type p: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: The regex source or textual representation constructed by the operation.
+    :rtype: str
+    """
     return r"(?:"+p+r")?" # optional non-binding group
 Optional = RegexPattern(optional,
                         "Optional"
@@ -874,6 +1509,23 @@ Shortest.__doc__ = """
     """
 
 def wrap_repeats(self, min = None, max = None, no_capture=None):
+    """
+    **LLM Docstring**
+
+    Store repetition bounds on a `RegexPattern` when the `Repeating` wrapper is applied.
+
+    :param min: the minimum repetition count, or `None` for zero
+    :type min: object
+
+    :param max: the maximum repetition count, or `None` for no upper bound
+    :type max: object
+
+    :param no_capture: whether the resulting regex must avoid a capturing group
+    :type no_capture: object
+
+    :return: None.
+    :rtype: None
+    """
     self.repetitions = (min, max)
 Repeating = RegexPattern(repeating,
                          "Repeating",
@@ -885,6 +1537,17 @@ Repeating.__doc__ = """
     """
 
 def wrap_name(self, n):
+    """
+    **LLM Docstring**
+
+    Assign a capture key and, when unnamed, use that key as the node's descriptive name.
+
+    :param n: the requested count or fixed repetition count
+    :type n: object
+
+    :return: None.
+    :rtype: None
+    """
     self.key = n
     if self.name is None:
         self.name = n
@@ -900,6 +1563,20 @@ Named.__doc__ = """
     """
 
 def wrap_duplicate_type(self, n, riffle = ""):
+    """
+    **LLM Docstring**
+
+    Update the node's declared dtype shape to prepend the fixed duplication count.
+
+    :param n: the requested count or fixed repetition count
+    :type n: object
+
+    :param riffle: text inserted between duplicated pattern copies
+    :type riffle: object
+
+    :return: None.
+    :rtype: None
+    """
     dt = self._dtype
     if isinstance(dt, tuple):
         dt, shape = dt
