@@ -31,6 +31,24 @@ class Job:
                  parallelizer=None,
                  job_parameters=None
                  ):
+        """
+        **LLM Docstring**
+
+        Initialize a job directory, checkpoint, logger, optional parallelizer, and parameter payload.
+
+        :param job_dir: job working directory
+        :type job_dir: object
+        :param job_file: checkpoint filename or path
+        :type job_file: object
+        :param logger: logger specification or instance
+        :type logger: object
+        :param parallelizer: parallelizer specification or instance
+        :type parallelizer: object
+        :param job_parameters: job parameter mapping written to the checkpoint
+        :type job_parameters: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         self.dir = job_dir
         self.end = None
 
@@ -50,6 +68,24 @@ class Job:
                     parallelizer=None,
                     job_parameters=None
                     ):
+        """
+        **LLM Docstring**
+
+        Construct a job from configuration-compatible keyword arguments, using `config_location` as its directory.
+
+        :param config_location: directory supplied by configuration persistence
+        :type config_location: object
+        :param job_file: checkpoint filename or path
+        :type job_file: object
+        :param logger: logger specification or instance
+        :type logger: object
+        :param parallelizer: parallelizer specification or instance
+        :type parallelizer: object
+        :param job_parameters: job parameter mapping written to the checkpoint
+        :type job_parameters: object
+        :return: The newly constructed object.
+        :rtype: object
+        """
         return cls(config_location,
                    job_file=job_file,
                    logger=logger,
@@ -138,6 +174,14 @@ class Job:
 
     @property
     def working_directory(self):
+        """
+        **LLM Docstring**
+
+        Resolve a configured working directory relative to the job directory without permanently changing the process directory.
+
+        :return: The resolved filesystem path or basename.
+        :rtype: str
+        """
         if 'working_directory' in self.job_parameters:
             init_dir = os.getcwd()
             try:
@@ -149,6 +193,14 @@ class Job:
             return self.dir
 
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Enter the job directory, open checkpointing and parallelism contexts, and record start metadata and parameters.
+
+        :return: The active context object.
+        :rtype: object
+        """
         self._init_dir = os.getcwd()
         os.chdir(self.dir)
         self.checkpoint.__enter__()
@@ -164,6 +216,20 @@ class Job:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Restore the original directory, store elapsed runtime, and close checkpoint and parallelizer contexts.
+
+        :param exc_type: exception type passed by the context manager protocol
+        :type exc_type: object
+        :param exc_val: exception instance passed by the context manager protocol
+        :type exc_val: object
+        :param exc_tb: traceback passed by the context manager protocol
+        :type exc_tb: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         os.chdir(self._init_dir)
         end = time.time()
         self.checkpoint['runtime'] = end - self.start
@@ -177,6 +243,18 @@ class JobManager(PersistenceManager):
     """
     default_job_type=Job
     def __init__(self, job_dir, job_type=None):
+        """
+        **LLM Docstring**
+
+        Bind a persistence manager to a job directory and the selected job class.
+
+        :param job_dir: job working directory
+        :type job_dir: object
+        :param job_type: concrete `Job` subclass to construct, or `None` for the default
+        :type job_type: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if job_type is None:
             job_type = self.default_job_type
         super().__init__(job_type, persistence_loc=job_dir)

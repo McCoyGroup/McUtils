@@ -17,6 +17,18 @@ class Command:
     that sort of thing
     """
     def __init__(self, name, method):
+        """
+        **LLM Docstring**
+
+        Inspect a callable, recording its type hints and treating every parameter without a default as positional.
+
+        :param name: registry, command, resource, or object name
+        :type name: object
+        :param method: callable wrapped as a command
+        :type method: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         self.name = name
         self.meth = method
         self.hints = typing.get_type_hints(method)
@@ -121,6 +133,18 @@ class Command:
 
     @staticmethod
     def _get_typed(val:str, converter:callable):
+        """
+        **LLM Docstring**
+
+        Convert a nonempty command-line string with the supplied converter, using `None` for the empty sentinel.
+
+        :param val: the value being stored, converted, or installed
+        :type val: str
+        :param converter: callable used to convert a command-line value
+        :type converter: callable
+        :return: `None` for an empty string, otherwise `converter(val)`
+        :rtype: object | None
+        """
         if val == "":
             return None
         else:
@@ -198,6 +222,14 @@ class CommandGroup:
 
     @classmethod
     def _get_tag(cls):
+        """
+        **LLM Docstring**
+
+        Return the explicit group tag or derive one by lowercasing the group name.
+
+        :return: the command-group tag
+        :rtype: str
+        """
         if cls._tag is None:
             return cls._name.lower()
         else:
@@ -303,6 +335,14 @@ class CLI:
         return (group, cmd)
 
     def get_command(self):
+        """
+        **LLM Docstring**
+
+        Consume the group and command tokens, support the default-group shorthand, and return a bound `Command` or help text.
+
+        :return: The resolved command or command group.
+        :rtype: Command | type[CommandGroup] | str
+        """
         group, cmd = self.parse_group_command()
         if cmd == "": # either means we asked for --help or we've got a default command group
             if '--help' == sys.argv[0]: # quick hack but effective
@@ -312,6 +352,16 @@ class CLI:
         return self.get_group(group)._get_command(cmd)
 
     def get_group(self, grp):
+        """
+        **LLM Docstring**
+
+        Resolve a registered command group and raise an informative error for missing or absent default groups.
+
+        :param grp: command-group tag
+        :type grp: object
+        :return: The resolved command or command group.
+        :rtype: Command | type[CommandGroup] | str
+        """
         if grp in self.groups:
             return self.groups[grp]
         elif grp == "":
@@ -320,6 +370,14 @@ class CLI:
             raise KeyError("No command group '{}'. Available groups: {}".format(grp, list(self.groups.keys())))
 
     def run_command(self):
+        """
+        **LLM Docstring**
+
+        Resolve and execute the selected command, printing the result only when resolution produced help text.
+
+        :return: the command return value, or the printed help string
+        :rtype: object | str
+        """
         res = self.get_command()
         if not isinstance(res, str):
             # parse and call semantics are
@@ -346,6 +404,16 @@ class CLI:
         return help_str
 
     def help(self, print_help=True):
+        """
+        **LLM Docstring**
+
+        Remove the help token, generate the full help text, optionally print it, and return it.
+
+        :param print_help: whether generated help text should be printed
+        :type print_help: object
+        :return: the complete CLI help text
+        :rtype: str
+        """
         sys.argv.pop(1)
         res = self.get_help()
         if print_help:
