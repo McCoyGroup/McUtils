@@ -25,18 +25,75 @@ class FileStreamCheckPoint:
     A checkpoint for a file that can be returned to when parsing
     """
     def __init__(self, parent, revert = True):
+        """
+        **LLM Docstring**
+
+        Record the reader's current byte/character offset and configure whether leaving the context restores that position.
+
+        :param parent: the parent reader or regex node
+        :type parent: object
+
+        :param revert: whether to restore the captured position on context exit
+        :type revert: object
+        """
         self.parent = parent
         self.chk = parent.tell()
         self._revert = revert
     def disable(self):
+        """
+        **LLM Docstring**
+
+        Disable automatic restoration when the checkpoint context exits.
+
+        :return: None.
+        :rtype: None
+        """
         self._revert = False
     def enable(self):
+        """
+        **LLM Docstring**
+
+        Enable automatic restoration when the checkpoint context exits.
+
+        :return: None.
+        :rtype: None
+        """
         self._revert = True
     def revert(self):
+        """
+        **LLM Docstring**
+
+        Seek the parent reader back to the offset captured when this checkpoint was created.
+
+        :return: None.
+        :rtype: None
+        """
         self.parent.seek(self.chk)
     def __enter__(self, ):
+        """
+        **LLM Docstring**
+
+        Return this checkpoint for use in a `with` statement.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Restore the captured stream position when reversion is enabled; exceptions are not suppressed.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         if self._revert:
             self.revert()
 
@@ -51,8 +108,30 @@ class SearchStream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def read(self, n=-1):
+        """
+        **LLM Docstring**
+
+        Define the interface for reading up to `n` units from the current stream position.
+
+        :param n: the requested count or fixed repetition count
+        :type n: object
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         raise NotImplementedError("SearchStream is a base class")
     def rread(self, n=-1):
+        """
+        **LLM Docstring**
+
+        Read the `n` units immediately preceding the current position, leaving the stream positioned at the beginning of the returned block.
+
+        :param n: the requested count or fixed repetition count
+        :type n: object
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         cur = self.tell()
         if n > 0:
             if n > cur:
@@ -70,29 +149,134 @@ class SearchStream(metaclass=abc.ABCMeta):
         return res
     @abc.abstractmethod
     def readline(self):
+        """
+        **LLM Docstring**
+
+        Define the interface for reading one line from the stream.
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         raise NotImplementedError("SearchStream is a base class")
     @abc.abstractmethod
     def seek(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Define the interface for repositioning the stream.
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: dict
+
+        :return: define the interface for repositioning the stream.
+        :rtype: object
+        """
         raise NotImplementedError("SearchStream is a base class")
     @abc.abstractmethod
     def tell(self):
+        """
+        **LLM Docstring**
+
+        Define the interface for reporting the current stream offset.
+
+        :return: The current stream offset.
+        :rtype: int
+        """
         raise NotImplementedError("SearchStream is a base class")
     @abc.abstractmethod
     def find(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Define the interface for locating the first occurrence of a tag within optional bounds.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         raise NotImplementedError("SearchStream is a base class")
     @abc.abstractmethod
     def rfind(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Define the interface for locating the last occurrence of a tag within optional bounds.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         raise NotImplementedError("SearchStream is a base class")
     @abc.abstractmethod
     def tag_size(self, tag):
+        """
+        **LLM Docstring**
+
+        Define the interface for measuring a tag in the stream's native units.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: The tag length in the stream's native position units.
+        :rtype: int
+        """
         raise NotImplementedError("SearchStream is a base class")
 
     @abc.abstractmethod
     def __iter__(self):
+        """
+        **LLM Docstring**
+
+        Define iteration over stream records or lines.
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         ...
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Return the stream object without opening additional resources in the abstract implementation.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Perform no cleanup in the abstract implementation.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         pass
 
 class ByteSearchStream(SearchStream):
@@ -114,11 +298,41 @@ class ByteSearchStream(SearchStream):
         self._stream = None
         self._wasopen = None
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Open an in-memory `BytesIO` view over the stored byte sequence.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         self._stream = io.BytesIO(self._data)
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Close the in-memory byte stream.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         self._stream.close()
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a shortened representation of the stored bytes or active `BytesIO` object.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         cls = type(self)
         stream = textwrap.shorten(repr(
             self._data
@@ -127,20 +341,97 @@ class ByteSearchStream(SearchStream):
         ), 100)
         return f"{cls.__name__}({stream})"
     def __iter__(self):
+        """
+        **LLM Docstring**
+
+        Iterate over lines from the active `BytesIO` stream.
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         return iter(self._stream)
     def read(self, n=-1):
+        """
+        **LLM Docstring**
+
+        Read bytes from the active buffer and decode them with the configured encoding.
+
+        :param n: the requested count or fixed repetition count
+        :type n: object
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self._stream.read(n).decode(self._encoding)
     def readline(self):
+        """
+        **LLM Docstring**
+
+        Read one byte line and decode it with the configured encoding.
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self._stream.readline().decode(self._encoding)
     def seek(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Move the active byte-buffer cursor using `BytesIO.seek` semantics.
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: dict
+
+        :return: move the active byte-buffer cursor using `BytesIO.seek` semantics.
+        :rtype: object
+        """
         return self._stream.seek(*args, **kwargs)
     def tell(self):
+        """
+        **LLM Docstring**
+
+        Return the active byte-buffer cursor offset.
+
+        :return: The current stream offset.
+        :rtype: int
+        """
         return self._stream.tell()
     def encode_tag(self, tag):
+        """
+        **LLM Docstring**
+
+        Convert a text tag to bytes using the configured encoding, leaving byte tags unchanged.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: convert a text tag to bytes using the configured encoding, leaving byte tags unchanged.
+        :rtype: object
+        """
         if not isinstance(tag, bytes):
             tag = tag.encode(self._encoding)
         return tag
     def find(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Search the stored bytes forward for a tag, defaulting to the current cursor as the lower bound.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         enc_tag = self.encode_tag(tag)
         if start is None:
             start = self.tell()
@@ -149,6 +440,23 @@ class ByteSearchStream(SearchStream):
         arg_vec = [enc_tag, start, end]
         return self._data.find(*arg_vec)
     def rfind(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Search the stored bytes backward for a tag, defaulting to the current cursor as the upper bound.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         enc_tag = self.encode_tag(tag)
         if start is None:
             start = 0
@@ -157,6 +465,17 @@ class ByteSearchStream(SearchStream):
         arg_vec = [enc_tag, start, end]
         return self._data.rfind(*arg_vec)
     def tag_size(self, tag):
+        """
+        **LLM Docstring**
+
+        Return the encoded byte length of a search tag.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: The tag length in the stream's native position units.
+        :rtype: int
+        """
         enc_tag = self.encode_tag(tag)
         return len(enc_tag)
 
@@ -169,6 +488,32 @@ class FileSearchStream(SearchStream):
                  check_decoding=False,
                  decoding_mode="strict",
                  **kw):
+        """
+        **LLM Docstring**
+
+        Configure a file-backed searchable stream, normalizing the mode to read/write binary or text-compatible form for memory mapping.
+
+        :param file: a filesystem path or open file object
+        :type file: object
+
+        :param mode: the file open mode or parser multiplicity mode
+        :type mode: object
+
+        :param binary: whether stream values should remain bytes
+        :type binary: object
+
+        :param encoding: the text encoding used to convert between bytes and strings
+        :type encoding: object
+
+        :param check_decoding: whether decoding errors should be converted to contextual `ValueError`s
+        :type check_decoding: object
+
+        :param decoding_mode: the error policy passed to `bytes.decode`
+        :type decoding_mode: object
+
+        :param kw: extra keyword arguments forwarded to the underlying stream constructor
+        :type kw: object
+        """
         self._file = file
         if binary is None:
             binary = self.default_binary
@@ -184,9 +529,25 @@ class FileSearchStream(SearchStream):
         self._stream = None
         self._wasopen = None
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Show the file object/path and normalized open mode.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}({self._file}, {self._mode!r})"
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Open the file when given a path and memory-map its complete contents.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         if isinstance(self._file, str):
             self._wasopen = False
             self._fstream = open(self._file, mode=self._mode, **self._kw)
@@ -197,10 +558,32 @@ class FileSearchStream(SearchStream):
         self._stream = mmap(handle, 0)
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Close the memory map and close the underlying file only when this object opened it.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         self._stream.close()
         if not self._wasopen:
             self._fstream.close()
     def __iter__(self):
+        """
+        **LLM Docstring**
+
+        Yield successive raw lines from the memory map until its cursor stops advancing.
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         new_pos = self._stream.tell()
         not_exhausted = True
         while not_exhausted:
@@ -211,6 +594,17 @@ class FileSearchStream(SearchStream):
             if not_exhausted:
                 yield line
     def handle_chunk(self, chunk):
+        """
+        **LLM Docstring**
+
+        Decode byte chunks with the configured encoding and error mode, optionally converting decode failures to `ValueError`.
+
+        :param chunk: a raw chunk read from the memory map
+        :type chunk: object
+
+        :return: decode byte chunks with the configured encoding and error mode, optionally converting decode failures to `ValueError`.
+        :rtype: object
+        """
         if isinstance(chunk, bytes):
             if self.check_decoding:
                 try:
@@ -221,14 +615,72 @@ class FileSearchStream(SearchStream):
                 chunk = chunk.decode(self._encoding, self.decoding_mode)
         return chunk
     def read(self, n=-1):
+        """
+        **LLM Docstring**
+
+        Read from the memory map and decode the returned chunk.
+
+        :param n: the requested count or fixed repetition count
+        :type n: object
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self.handle_chunk(self._stream.read(n))
     def readline(self):
+        """
+        **LLM Docstring**
+
+        Read one line from the memory map and decode it.
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self.handle_chunk(self._stream.readline())
     def seek(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Move the memory-map cursor.
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: dict
+
+        :return: move the memory-map cursor.
+        :rtype: object
+        """
         return self._stream.seek(*args, **kwargs)
     def tell(self):
+        """
+        **LLM Docstring**
+
+        Return the memory-map cursor offset.
+
+        :return: The current stream offset.
+        :rtype: int
+        """
         return self._stream.tell()
     def find(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Find the next encoded tag in the memory map, starting at the current cursor unless bounds are supplied.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         enc_tag = tag.encode(self._encoding)
         if start is None:
             start = self.tell()
@@ -237,6 +689,23 @@ class FileSearchStream(SearchStream):
         arg_vec = [enc_tag, start, end]
         return self._stream.find(*arg_vec)
     def rfind(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Find the previous encoded tag in the memory map, ending at the current cursor unless bounds are supplied.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         enc_tag = tag.encode(self._encoding)
         if start is None:
             start = 0
@@ -246,6 +715,17 @@ class FileSearchStream(SearchStream):
 
         return self._stream.rfind(*arg_vec)
     def tag_size(self, tag):
+        """
+        **LLM Docstring**
+
+        Return the byte length of a tag encoded with this stream's encoding.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: The tag length in the stream's native position units.
+        :rtype: int
+        """
         enc_tag = tag.encode(self._encoding)
         return len(enc_tag)
 
@@ -265,22 +745,110 @@ class StringSearchStream(SearchStream):
         self._stream = None
 
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Open a `StringIO` cursor over the stored string.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         self._stream = io.StringIO(self._data)
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Close the active `StringIO` object.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         self._stream.close()
     def __iter__(self):
+        """
+        **LLM Docstring**
+
+        Iterate over lines from the active `StringIO` object.
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         return iter(self._stream)
 
     def read(self, n=-1):
+        """
+        **LLM Docstring**
+
+        Read characters from the active string cursor.
+
+        :param n: the requested count or fixed repetition count
+        :type n: object
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self._stream.read(n)
     def readline(self):
+        """
+        **LLM Docstring**
+
+        Read one line from the active string cursor.
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self._stream.readline()
     def seek(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Move the string cursor.
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: dict
+
+        :return: move the string cursor.
+        :rtype: object
+        """
         return self._stream.seek(*args, **kwargs)
     def tell(self):
+        """
+        **LLM Docstring**
+
+        Return the current character offset.
+
+        :return: The current stream offset.
+        :rtype: int
+        """
         return self._stream.tell()
     def find(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Find the next tag in the original string, beginning at the current cursor by default.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         if start is None:
             start = self.tell()
         if end is None:
@@ -289,6 +857,23 @@ class StringSearchStream(SearchStream):
 
         return self._data.find(*arg_vec)
     def rfind(self, tag, start=None, end=None):
+        """
+        **LLM Docstring**
+
+        Find the previous tag in the original string, ending at the current cursor by default.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param end: the exclusive upper search bound or ending stream position
+        :type end: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         if start is None:
             start = 0
         if end is None:
@@ -296,6 +881,17 @@ class StringSearchStream(SearchStream):
         arg_vec = [tag, start, end]
         return self._data.rfind(*arg_vec)
     def tag_size(self, tag):
+        """
+        **LLM Docstring**
+
+        Return the number of characters in a tag.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: The tag length in the stream's native position units.
+        :rtype: int
+        """
         return len(tag)
 
 class SearchStreamReader:
@@ -312,11 +908,41 @@ class SearchStreamReader:
         self._exhausted_tag_pos = {} # an optimization for tag alternative searching
         self._next_tag_pos = [{}, {}] # an optimization for tag alternative searching
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Open the wrapped search stream and return this reader.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         self.stream.__enter__()
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Forward context-manager cleanup to the wrapped stream.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         self.stream.__exit__(exc_type, exc_val, exc_tb)
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Represent the reader together with its wrapped search stream.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}({self.stream})"
 
@@ -328,10 +954,32 @@ class SearchStreamReader:
 
     @classmethod
     def _is_forward(self, direction):
+        """
+        **LLM Docstring**
+
+        Return whether a direction value is exactly the forward-search enum member.
+
+        :param direction: the direction in which delimiters are searched
+        :type direction: object
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         #TODO: optimize this away
         return self.StreamSearchDirection(direction) is self.StreamSearchDirection.Forward
     @classmethod
     def _is_reverse(self, direction):
+        """
+        **LLM Docstring**
+
+        Return whether a direction value is exactly the reverse-search enum member.
+
+        :param direction: the direction in which delimiters are searched
+        :type direction: object
+
+        :return: `True` when the condition described above holds; otherwise `False`.
+        :rtype: bool
+        """
         #TODO: optimize this away
         return self.StreamSearchDirection(direction) is self.StreamSearchDirection.Reverse
 
@@ -584,6 +1232,32 @@ class SearchStreamReader:
                          expand_until_valid, validator,
                          direction="forward"
                          ):
+        """
+        **LLM Docstring**
+
+        Starting from a known boundary, locate an end tag, read the intervening block in the requested direction, and optionally extend across later end tags until validation succeeds.
+
+        :param start: the inclusive lower search bound or starting stream position
+        :type start: object
+
+        :param tag_end: the delimiter that terminates the block
+        :type tag_end: object
+
+        :param allow_terminal: whether end-of-stream may terminate an otherwise unterminated block
+        :type allow_terminal: object
+
+        :param expand_until_valid: whether to continue through later end delimiters until validation succeeds
+        :type expand_until_valid: object
+
+        :param validator: a callable that decides whether an extracted block is complete and valid
+        :type validator: object
+
+        :param direction: the direction in which delimiters are searched
+        :type direction: object
+
+        :return: The extracted block, optionally paired with delimiter text or source endpoints according to the flags.
+        :rtype: object
+        """
         with FileStreamCheckPoint(self):
             end = self.find_tag(tag_end, allow_terminal=allow_terminal, seek=False, direction=direction)
         reverse = self._is_reverse(direction)
@@ -650,6 +1324,17 @@ class SearchStreamReader:
 
     @classmethod
     def _get_search_directions(cls, direction):
+        """
+        **LLM Docstring**
+
+        Translate a combined search mode into separate directions for locating the start and end delimiters.
+
+        :param direction: the direction in which delimiters are searched
+        :type direction: object
+
+        :return: A `(start_direction, end_direction)` pair.
+        :rtype: object
+        """
         direction = cls.StreamSearchDirection(direction)
         if direction is cls.StreamSearchDirection.Forward:
             start_direction = end_direction = cls.StreamSearchDirection.Forward
@@ -740,6 +1425,41 @@ class SearchStreamReader:
 
     def _parse_block(self, tag_start, tag_end, validator, tag_validator,
                      allow_terminal, expand_until_valid, preserve_tag, return_end_points, direction):
+        """
+        **LLM Docstring**
+
+        Extract one tagged block, optionally restore the start tag text, and normalize optional endpoint metadata.
+
+        :param tag_start: the delimiter that begins the block, or `None` to begin at the current cursor
+        :type tag_start: object
+
+        :param tag_end: the delimiter that terminates the block
+        :type tag_end: object
+
+        :param validator: a callable that decides whether an extracted block is complete and valid
+        :type validator: object
+
+        :param tag_validator: a callable that accepts or redirects candidate start tags
+        :type tag_validator: object
+
+        :param allow_terminal: whether end-of-stream may terminate an otherwise unterminated block
+        :type allow_terminal: object
+
+        :param expand_until_valid: whether to continue through later end delimiters until validation succeeds
+        :type expand_until_valid: object
+
+        :param preserve_tag: whether to prepend a skipped start tag back onto the returned block
+        :type preserve_tag: object
+
+        :param return_end_points: whether to return source offsets with the parsed block
+        :type return_end_points: object
+
+        :param direction: the direction in which delimiters are searched
+        :type direction: object
+
+        :return: The extracted block, optionally paired with delimiter text or source endpoints according to the flags.
+        :rtype: object
+        """
         ret_tag = preserve_tag
         if ret_tag and isinstance(tag_start, FileStreamerTag):
             ret_tag = tag_start.skip_tag
@@ -875,16 +1595,82 @@ class SearchStreamReader:
             return block
 
     def read(self, n=1):
+        """
+        **LLM Docstring**
+
+        Read from the wrapped stream.
+
+        :param n: the requested count or fixed repetition count
+        :type n: object
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self.stream.read(n)
     def readline(self):
+        """
+        **LLM Docstring**
+
+        Read one line from the wrapped stream.
+
+        :return: The text read from the requested region of the stream.
+        :rtype: object
+        """
         return self.stream.readline()
     def seek(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Reposition the wrapped stream.
+
+        :param args: positional arguments forwarded to the wrapped callable
+        :type args: tuple
+
+        :param kwargs: keyword arguments forwarded to the wrapped callable
+        :type kwargs: dict
+
+        :return: reposition the wrapped stream.
+        :rtype: object
+        """
         return self.stream.seek(*args, **kwargs)
     def tell(self):
+        """
+        **LLM Docstring**
+
+        Return the wrapped stream's current offset.
+
+        :return: The current stream offset.
+        :rtype: int
+        """
         return self.stream.tell()
     def find(self, tag):
+        """
+        **LLM Docstring**
+
+        Find a tag in the wrapped stream using its native search operation.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         return self.stream.find(tag)
     def rfind(self, tag, search_window=None):
+        """
+        **LLM Docstring**
+
+        Find a preceding tag, using the stream's reverse search when available or a bounded read-and-search fallback.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :param search_window: the maximum number of preceding characters to inspect in the fallback reverse search
+        :type search_window: object
+
+        :return: The matching stream offset, or `-1` when the tag is absent.
+        :rtype: int
+        """
         if hasattr(self.stream, 'rfind'):
             return self.stream.rfind(tag)
         else:
@@ -900,8 +1686,30 @@ class SearchStreamReader:
                 pos = start + pos
             return pos
     def skip_tag(self, tag):
+        """
+        **LLM Docstring**
+
+        Call the wrapped stream's `skip_tag` operation; the supplied stream implementations do not define this method.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: call the wrapped stream's `skip_tag` operation; the supplied stream implementations do not define this method.
+        :rtype: object
+        """
         return self.stream.skip_tag(tag)
     def rskip_tag(self, tag):
+        """
+        **LLM Docstring**
+
+        Call the wrapped stream's `rskip_tag` operation; the supplied stream implementations do not define this method.
+
+        :param tag: the delimiter or search token
+        :type tag: object
+
+        :return: call the wrapped stream's `rskip_tag` operation; the supplied stream implementations do not define this method.
+        :rtype: object
+        """
         return self.stream.rskip_tag(tag)
 
 class FileStreamReader(SearchStreamReader):
@@ -909,6 +1717,23 @@ class FileStreamReader(SearchStreamReader):
     Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
     """
     def __init__(self, file, mode="r", encoding="utf-8", **kw):
+        """
+        **LLM Docstring**
+
+        Wrap a path or file object in `FileSearchStream` and initialize tagged-block parsing over it.
+
+        :param file: a filesystem path or open file object
+        :type file: object
+
+        :param mode: the file open mode or parser multiplicity mode
+        :type mode: object
+
+        :param encoding: the text encoding used to convert between bytes and strings
+        :type encoding: object
+
+        :param kw: extra keyword arguments forwarded to the underlying stream constructor
+        :type kw: object
+        """
         stream = FileSearchStream(file, mode=mode, encoding=encoding, **kw)
         super().__init__(stream)
 class StringStreamReader(SearchStreamReader):
@@ -916,6 +1741,14 @@ class StringStreamReader(SearchStreamReader):
     Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
     """
     def __init__(self, string):
+        """
+        **LLM Docstring**
+
+        Wrap a string in `StringSearchStream` and initialize tagged-block parsing over it.
+
+        :param string: the source string or byte sequence wrapped by the reader
+        :type string: object
+        """
         stream = StringSearchStream(string)
         super().__init__(stream)
 class ByteStreamReader(SearchStreamReader):
@@ -923,6 +1756,20 @@ class ByteStreamReader(SearchStreamReader):
     Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
     """
     def __init__(self, string, encoding="utf-8", **kw):
+        """
+        **LLM Docstring**
+
+        Wrap bytes in `ByteSearchStream` and initialize tagged-block parsing over it.
+
+        :param string: the source string or byte sequence wrapped by the reader
+        :type string: object
+
+        :param encoding: the text encoding used to convert between bytes and strings
+        :type encoding: object
+
+        :param kw: extra keyword arguments forwarded to the underlying stream constructor
+        :type kw: object
+        """
         stream = ByteSearchStream(string, encoding=encoding, **kw)
         super().__init__(stream)
 
@@ -935,6 +1782,29 @@ class FileStreamerTag:
                  skip_tag=True,
                  seek=True
                  ):
+        """
+        **LLM Docstring**
+
+        Normalize one or more alternative delimiters plus optional follow-up delimiters, offset, direction, skip, and seek behavior into a tag specification.
+
+        :param tag_alternatives: one delimiter or a collection of alternative delimiters
+        :type tag_alternatives: object
+
+        :param follow_ups: additional delimiters that must be located in sequence after the first tag
+        :type follow_ups: object
+
+        :param offset: an additional cursor displacement applied after a match
+        :type offset: object
+
+        :param direction: the direction in which delimiters are searched
+        :type direction: object
+
+        :param skip_tag: whether the returned position should lie after the matched delimiter
+        :type skip_tag: object
+
+        :param seek: whether finding a delimiter should move the stream cursor
+        :type seek: object
+        """
         if tag_alternatives is None:
             raise FileStreamReaderException("{} needs to be supplied with some set of tag_alternatives to look for".format(
                 type(self).__name__
@@ -947,6 +1817,14 @@ class FileStreamerTag:
         self.seek = seek
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Show the configured tag alternatives and the skip/seek flags.
+
+        :return: The regex source or textual representation constructed by the operation.
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}({self.tags=}, {self.skip_tag=}, {self.seek=})"
 
@@ -963,16 +1841,98 @@ class LineByLineParser(metaclass=abc.ABCMeta):
         self.ignore_comments = ignore_comments
 
     def __enter__(self):
+        """
+        **LLM Docstring**
+
+        Open the underlying stream and return this parser.
+
+        :return: The opened stream, reader, parser, or checkpoint object.
+        :rtype: object
+        """
         self.stream.__enter__()
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Close the underlying stream through its context-manager interface.
+
+        :param exc_type: the exception class raised in the context, if any
+        :type exc_type: object
+
+        :param exc_val: the exception instance raised in the context, if any
+        :type exc_val: object
+
+        :param exc_tb: the traceback raised in the context, if any
+        :type exc_tb: object
+        """
         self.stream.__exit__(exc_type, exc_val, exc_tb)
     @abc.abstractmethod
     def check_tag(self, line, depth:int=0, active_tag=None, label:str=None, history:list[str]=None):
+        """
+        **LLM Docstring**
+
+        Classify a line as a block boundary, value, comment, skip, or other parser tag; subclasses must implement the classification.
+
+        :param line: the current stream line
+        :type line: object
+
+        :param depth: the current recursive block depth
+        :type depth: int
+
+        :param active_tag: the tag currently defining the block
+        :type active_tag: object
+
+        :param label: the current block label
+        :type label: str
+
+        :param history: lines or values accumulated for the current block
+        :type history: list[str]
+
+        :return: classify a line as a block boundary, value, comment, skip, or other parser tag; subclasses must implement the classification.
+        :rtype: object
+        """
         ...
     def handle_block_line(self, label, line, depth=0, history:list[str]=None):
+        """
+        **LLM Docstring**
+
+        Return a line unchanged before it is added to the current block; subclasses may transform it.
+
+        :param label: the current block label
+        :type label: object
+
+        :param line: the current stream line
+        :type line: object
+
+        :param depth: the current recursive block depth
+        :type depth: object
+
+        :param history: lines or values accumulated for the current block
+        :type history: list[str]
+
+        :return: return a line unchanged before it is added to the current block; subclasses may transform it.
+        :rtype: object
+        """
         return line
     def handle_block(self, label, block, depth=0):
+        """
+        **LLM Docstring**
+
+        Return an accumulated block unchanged; subclasses may convert it to another representation.
+
+        :param label: the current block label
+        :type label: object
+
+        :param block: the candidate TeX or BibTeX source block
+        :type block: object
+
+        :param depth: the current recursive block depth
+        :type depth: object
+
+        :return: return an accumulated block unchanged; subclasses may convert it to another representation.
+        :rtype: object
+        """
         return block
     class LineReaderTags(enum.Enum):
         RESETTING_BLOCK_END = 'implict_end'
@@ -983,6 +1943,17 @@ class LineByLineParser(metaclass=abc.ABCMeta):
         VALUE = "value"
         CONSUME_REST = 'consume'
     def read_stream_line(self, binary=None):
+        """
+        **LLM Docstring**
+
+        Read the next iterated line and decode it when text mode is requested.
+
+        :param binary: whether stream values should remain bytes
+        :type binary: object
+
+        :return: read the next iterated line and decode it when text mode is requested.
+        :rtype: object
+        """
         if binary is None:
             binary = self.binary
         data = next(iter(self.stream))
@@ -990,6 +1961,17 @@ class LineByLineParser(metaclass=abc.ABCMeta):
             data = data.decode(self.encoding)
         return data
     def stream_iter(self, binary=None):
+        """
+        **LLM Docstring**
+
+        Yield every line from the underlying stream, decoding byte lines exactly once when operating in text mode.
+
+        :param binary: whether stream values should remain bytes
+        :type binary: object
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         if binary is None:
             binary = self.binary
         line_iter = iter(self.stream)
@@ -1011,6 +1993,29 @@ class LineByLineParser(metaclass=abc.ABCMeta):
 
     def find_next_block(self, binary=None, ignore_comments=None, max_nesting_depth=None,
                         aggregate_values=True, depth=0):
+        """
+        **LLM Docstring**
+
+        Consume lines until a logical block ends, recursively parse nested blocks, optionally discard comments, and return either the transformed block or a one-key mapping when the block has a label.
+
+        :param binary: whether stream values should remain bytes
+        :type binary: object
+
+        :param ignore_comments: whether comment-tagged lines are discarded
+        :type ignore_comments: object
+
+        :param max_nesting_depth: the maximum recursive block depth, with a negative value meaning unlimited
+        :type max_nesting_depth: object
+
+        :param aggregate_values: whether value-tagged lines are accumulated in the current block
+        :type aggregate_values: object
+
+        :param depth: the current recursive block depth
+        :type depth: object
+
+        :return: consume lines until a logical block ends, recursively parse nested blocks, optionally discard comments, and return either the transformed block or a one-key mapping when the block has a label.
+        :rtype: object
+        """
         if ignore_comments is None:
             ignore_comments = self.ignore_comments
         if max_nesting_depth is None:
@@ -1115,6 +2120,14 @@ class LineByLineParser(metaclass=abc.ABCMeta):
 
     MAX_BLOCKS = sys.maxsize # a debug tool
     def __iter__(self):
+        """
+        **LLM Docstring**
+
+        Repeatedly call `find_next_block` until exhaustion or `MAX_BLOCKS` is reached.
+
+        :return: An iterator yielding the records described above.
+        :rtype: object
+        """
         block = self.find_next_block()
         for i in range(self.MAX_BLOCKS):
             if block is None: break
@@ -1128,6 +2141,32 @@ class FileLineByLineReader(LineByLineParser):
     def __init__(self, file,
                  mode="r", binary=False, encoding="utf-8",
                  ignore_comments=False, max_nesting_depth=-1, **kw):
+        """
+        **LLM Docstring**
+
+        Create a line-oriented parser over a file-backed search stream with configured binary, encoding, comment, and nesting behavior.
+
+        :param file: a filesystem path or open file object
+        :type file: object
+
+        :param mode: the file open mode or parser multiplicity mode
+        :type mode: object
+
+        :param binary: whether stream values should remain bytes
+        :type binary: object
+
+        :param encoding: the text encoding used to convert between bytes and strings
+        :type encoding: object
+
+        :param ignore_comments: whether comment-tagged lines are discarded
+        :type ignore_comments: object
+
+        :param max_nesting_depth: the maximum recursive block depth, with a negative value meaning unlimited
+        :type max_nesting_depth: object
+
+        :param kw: extra keyword arguments forwarded to the underlying stream constructor
+        :type kw: object
+        """
         stream = FileSearchStream(file, binary=binary, mode=mode, encoding=encoding, **kw)
         super().__init__(stream,
                          binary='b' in stream._mode, encoding=encoding,
@@ -1138,6 +2177,20 @@ class StringLineByLineReader(LineByLineParser):
     Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
     """
     def __init__(self, string, ignore_comments=False, max_nesting_depth=-1):
+        """
+        **LLM Docstring**
+
+        Create a text-mode line parser over an in-memory string.
+
+        :param string: the source string or byte sequence wrapped by the reader
+        :type string: object
+
+        :param ignore_comments: whether comment-tagged lines are discarded
+        :type ignore_comments: object
+
+        :param max_nesting_depth: the maximum recursive block depth, with a negative value meaning unlimited
+        :type max_nesting_depth: object
+        """
         stream = StringSearchStream(string)
         super().__init__(stream, binary=False, ignore_comments=ignore_comments, max_nesting_depth=max_nesting_depth)
 class ByteLineByLineReader(LineByLineParser):
@@ -1145,6 +2198,26 @@ class ByteLineByLineReader(LineByLineParser):
     Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
     """
     def __init__(self, string, encoding="utf-8", ignore_comments=False, max_nesting_depth=-1, **kw):
+        """
+        **LLM Docstring**
+
+        Create a binary line parser over an in-memory byte sequence.
+
+        :param string: the source string or byte sequence wrapped by the reader
+        :type string: object
+
+        :param encoding: the text encoding used to convert between bytes and strings
+        :type encoding: object
+
+        :param ignore_comments: whether comment-tagged lines are discarded
+        :type ignore_comments: object
+
+        :param max_nesting_depth: the maximum recursive block depth, with a negative value meaning unlimited
+        :type max_nesting_depth: object
+
+        :param kw: extra keyword arguments forwarded to the underlying stream constructor
+        :type kw: object
+        """
         stream = ByteSearchStream(string, encoding=encoding, **kw)
         super().__init__(stream, binary=True, encoding=encoding,
                          ignore_comments=ignore_comments,
