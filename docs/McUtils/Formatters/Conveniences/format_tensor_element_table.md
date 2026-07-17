@@ -7,8 +7,25 @@
 ```python
 format_tensor_element_table(inds, vals, headers=('Indices', 'Value'), format='{:8.3f}', column_join='|', index_format='{:>5.0f}', **etc): 
 ```
+**LLM Docstring**
 
-
+Combine transposed index arrays with one or more value columns and format them under spanning headers.
+  - `inds`: `object`
+    > index arrays identifying tensor elements
+  - `vals`: `object`
+    > values paired with the index tuples
+  - `headers`: `object`
+    > optional header rows
+  - `format`: `object`
+    > numeric value formatter or formatter sequence
+  - `column_join`: `object`
+    > separator or separator sequence between columns
+  - `index_format`: `object`
+    > formatter applied to tensor index columns
+  - `etc`: `dict`
+    > additional keyword options forwarded to the underlying formatter or operation
+  - `:returns`: `str`
+    > formatted text
 
 
 

@@ -1,14 +1,35 @@
 # <a id="McUtils.Formatters.Conveniences.format_mode_labels">format_mode_labels</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L131)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L131?message=Update%20Docs)]
 </div>
 
 ```python
 format_mode_labels(labels, freqs=None, high_to_low=True, mode_index_format='{:.0f}', frequency_format='{:.0f}', headers=None, column_join=' | ', none_tag='mixed', **etc): 
 ```
+**LLM Docstring**
 
-
+Render one-based mode numbers with normalized label text and optional frequencies, optionally reversing high-to-low order.
+  - `labels`: `object`
+    > mode-label objects
+  - `freqs`: `object`
+    > optional frequencies paired with mode labels
+  - `high_to_low`: `object`
+    > whether modes and frequencies are reversed before numbering
+  - `mode_index_format`: `object`
+    > formatter for one-based mode indices
+  - `frequency_format`: `object`
+    > formatter for frequencies
+  - `headers`: `object`
+    > optional header rows
+  - `column_join`: `object`
+    > separator or separator sequence between columns
+  - `none_tag`: `object`
+    > text used when a mode label has no type
+  - `etc`: `dict`
+    > additional keyword options forwarded to the underlying formatter or operation
+  - `:returns`: `str`
+    > formatted text
 
 
 
@@ -59,7 +80,7 @@ format_mode_labels(labels, freqs=None, high_to_low=True, mode_index_format='{:.0
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_mode_labels.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_mode_labels.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L85?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L131?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

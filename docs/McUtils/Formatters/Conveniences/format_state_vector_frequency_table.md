@@ -1,14 +1,31 @@
 # <a id="McUtils.Formatters.Conveniences.format_state_vector_frequency_table">format_state_vector_frequency_table</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L254)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L254?message=Update%20Docs)]
 </div>
 
 ```python
 format_state_vector_frequency_table(state_list, freq_data, state_header='State', freq_header='Freq.', freq_fmt='{:.3f}', sep=' | ', join=' '): 
 ```
+**LLM Docstring**
 
-
+Join state-vector columns with one or more frequency columns under spanning headers.
+  - `state_list`: `object`
+    > state vectors or state labels
+  - `freq_data`: `object`
+    > one or more frequency columns
+  - `state_header`: `object`
+    > header for state-vector columns
+  - `freq_header`: `object`
+    > header or headers for frequency columns
+  - `freq_fmt`: `object`
+    > frequency formatter or sequence of formatters
+  - `sep`: `object`
+    > separator between state and frequency blocks
+  - `join`: `object`
+    > separator between multiple frequency columns
+  - `:returns`: `str`
+    > formatted text
 
 
 
@@ -59,7 +76,7 @@ format_state_vector_frequency_table(state_list, freq_data, state_header='State',
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_state_vector_frequency_table.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_state_vector_frequency_table.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L166?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L254?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

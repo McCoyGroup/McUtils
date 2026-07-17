@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateWriter.OptionalTemplate">OptionalTemplate</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter.py#L105)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter.py#L105?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter.py#L128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter.py#L128?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,18 @@ DefaultFormatter: DefaultFormatter
 __init__(self, template, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter.py#L129)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter.py#L129?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize `OptionalTemplate` state from the supplied configuration.
+  - `template`: `object`
+    > template text or template-file path
+  - `opts`: `dict`
+    > additional keyword options forwarded to the underlying formatter or operation
+  - `:returns`: `None`
+    > `None`; the operation mutates state, writes output, or raises by design.
 
 
 <a id="McUtils.Formatters.TemplateWriter.OptionalTemplate.apply_template" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +46,24 @@ __init__(self, template, **opts):
 apply_template(cls, template, opts, formatter=None, strip_missing_blocks=None, strip_missing=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L125)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L125?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L174)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L174?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Format optional placeholders with a sentinel for missing keys, then remove missing values or entire missing lines as configured.
+  - `template`: `object`
+    > template text or template-file path
+  - `opts`: `object`
+    > replacement values or formatter options
+  - `formatter`: `object`
+    > `string.Formatter`-compatible formatter
+  - `strip_missing_blocks`: `object`
+    > whether lines containing unresolved placeholders are removed
+  - `strip_missing`: `object`
+    > whether unresolved placeholder sentinels are removed
+  - `:returns`: `str`
+    > formatted template text
 
 
 <a id="McUtils.Formatters.TemplateWriter.OptionalTemplate.apply" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +71,16 @@ apply_template(cls, template, opts, formatter=None, strip_missing_blocks=None, s
 apply(self, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter/OptionalTemplate.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter/OptionalTemplate.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateWriter/OptionalTemplate.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter/OptionalTemplate.py#L204?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Merge instance defaults with call-time options and apply them to the stored optional template.
+  - `opts`: `dict`
+    > additional keyword options forwarded to the underlying formatter or operation
+  - `:returns`: `str`
+    > formatted template text
  </div>
 </div>
 
@@ -103,7 +134,7 @@ apply(self, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateWriter/OptionalTemplate.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateWriter/OptionalTemplate.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter.py#L105?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateWriter.py#L128?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,33 @@
 # <a id="McUtils.Formatters.Conveniences.format_symmetric_tensor_elements">format_symmetric_tensor_elements</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L67)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L67?message=Update%20Docs)]
 </div>
 
 ```python
 format_symmetric_tensor_elements(tensor, symmetries=None, cutoff=1e-06, headers=('Indices', 'Value'), allowed_indices=None, filter=None, format='{:12.3f}', **etc): 
 ```
+**LLM Docstring**
 
-
+Select entries above a cutoff, retain one ordered representative per declared symmetry, apply optional masks, and format them.
+  - `tensor`: `object`
+    > tensor whose non-negligible symmetry-unique elements are formatted
+  - `symmetries`: `object`
+    > groups of tensor axes across which only nondecreasing index tuples are retained
+  - `cutoff`: `object`
+    > absolute-value threshold for retaining tensor entries
+  - `headers`: `object`
+    > optional header rows
+  - `allowed_indices`: `object`
+    > per-axis allowed index collections
+  - `filter`: `object`
+    > additional callable mask over retained index arrays
+  - `format`: `object`
+    > numeric value formatter or formatter sequence
+  - `etc`: `dict`
+    > additional keyword options forwarded to the underlying formatter or operation
+  - `:returns`: `str`
+    > formatted text
 
 
 
@@ -59,7 +78,7 @@ format_symmetric_tensor_elements(tensor, symmetries=None, cutoff=1e-06, headers=
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_symmetric_tensor_elements.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_symmetric_tensor_elements.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L45?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L67?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

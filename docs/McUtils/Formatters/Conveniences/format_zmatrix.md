@@ -1,14 +1,25 @@
 # <a id="McUtils.Formatters.Conveniences.format_zmatrix">format_zmatrix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L200)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L200?message=Update%20Docs)]
 </div>
 
 ```python
 format_zmatrix(zm, preserve_embedding=True, preserve_indices=True, list_form=True): 
 ```
+**LLM Docstring**
 
-
+Format Z-matrix index rows with width chosen from the largest index and optionally remove embedding placeholders or atom indices.
+  - `zm`: `object`
+    > Z-matrix index table
+  - `preserve_embedding`: `object`
+    > whether placeholder embedding references in the first rows are retained
+  - `preserve_indices`: `object`
+    > whether the leading atom-index column and first row are retained
+  - `list_form`: `object`
+    > whether output is formatted as a Python-style nested list
+  - `:returns`: `str`
+    > formatted text
 
 
 
@@ -59,7 +70,7 @@ format_zmatrix(zm, preserve_embedding=True, preserve_indices=True, list_form=Tru
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_zmatrix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_zmatrix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L128?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L200?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

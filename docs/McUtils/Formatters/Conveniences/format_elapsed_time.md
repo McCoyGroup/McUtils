@@ -1,14 +1,23 @@
 # <a id="McUtils.Formatters.Conveniences.format_elapsed_time">format_elapsed_time</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L226)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L226?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/Conveniences.py#L352)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L352?message=Update%20Docs)]
 </div>
 
 ```python
 format_elapsed_time(duration, target_format='{hours:d}:{minutes:02d}:{seconds:02d}', format_variables=None): 
 ```
+**LLM Docstring**
 
-
+Convert a numeric or `timedelta` duration to seconds and format it through the configured year/day/hour/minute/second radix map.
+  - `duration`: `object`
+    > value to decompose into radix units
+  - `target_format`: `object`
+    > format string naming the desired radix components
+  - `format_variables`: `object`
+    > ordered names or mapping of components to unit sizes
+  - `:returns`: `str`
+    > formatted text
 
 
 
@@ -59,7 +68,7 @@ format_elapsed_time(duration, target_format='{hours:d}:{minutes:02d}:{seconds:02
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/Conveniences/format_elapsed_time.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/Conveniences/format_elapsed_time.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L226?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/Conveniences.py#L352?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.FileMatcher.MatchList">MatchList</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L61?message=Update%20Docs)]
 </div>
 
 Defines a set of matches that must be matched directly (uses `set` to make this basically a constant time check)
@@ -24,9 +24,18 @@ Defines a set of matches that must be matched directly (uses `set` to make this 
 __init__(self, *matches, negative_match=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L66)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L66?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize `MatchList` state from the supplied configuration.
+  - `matches`: `tuple`
+    > additional positional values forwarded or collected by this operation
+  - `negative_match`: `object`
+    > whether to invert the match result
+  - `:returns`: `None`
+    > `None`; the operation mutates state, writes output, or raises by design.
 
 
 <a id="McUtils.Formatters.FileMatcher.MatchList.test_match" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +43,16 @@ __init__(self, *matches, negative_match=False):
 test_match(self, f): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher/MatchList.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher/MatchList.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher/MatchList.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher/MatchList.py#L81?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test constant-time membership in the stored literal match set.
+  - `f`: `object`
+    > string or file path being tested
+  - `:returns`: `bool`
+    > whether the input is present in the literal match set
  </div>
 </div>
 
@@ -90,7 +106,7 @@ test_match(self, f):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/FileMatcher/MatchList.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/FileMatcher/MatchList.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L39?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L61?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

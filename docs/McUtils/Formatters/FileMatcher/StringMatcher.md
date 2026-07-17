@@ -27,6 +27,15 @@ __init__(self, match_patterns, negative_match=False):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher.py#L14)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher.py#L14?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize `StringMatcher` state from the supplied configuration.
+  - `match_patterns`: `object`
+    > regex, matcher, predicate, or iterable of match specifications
+  - `negative_match`: `object`
+    > whether to invert the match result
+  - `:returns`: `None`
+    > `None`; the operation mutates state, writes output, or raises by design.
 
 
 <a id="McUtils.Formatters.FileMatcher.StringMatcher.matches" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +43,16 @@ __init__(self, match_patterns, negative_match=False):
 matches(self, f): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher/StringMatcher.py#L33)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher/StringMatcher.py#L33?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/FileMatcher/StringMatcher.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/FileMatcher/StringMatcher.py#L45?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate the configured matcher against the input and apply optional negation.
+  - `f`: `object`
+    > string or file path being tested
+  - `:returns`: `bool`
+    > whether the input satisfies the matcher after optional negation
  </div>
 </div>
 
