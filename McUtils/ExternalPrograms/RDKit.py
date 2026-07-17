@@ -1,5 +1,3 @@
-
-
 __all__ = [
     "RDMolecule"
 ]
@@ -24,6 +22,16 @@ class RDMolecule(ExternalMolecule):
     """
 
     def __init__(self, rdconf, charge=None):
+        """
+        **LLM Docstring**
+
+        Wrap an RDKit conformer (and its owning mol) as an `RDMolecule`.
+
+        :param rdconf: the RDKit conformer
+        :type rdconf: Chem.Conformer
+        :param charge: the molecular charge
+        :type charge: int | None
+        """
         #atoms, coords, bonds):
         self._rdmol = rdconf.GetOwningMol()
         super().__init__(rdconf)
@@ -31,15 +39,39 @@ class RDMolecule(ExternalMolecule):
 
     @property
     def rdmol(self):
+        """
+        **LLM Docstring**
+
+        The underlying RDKit `Mol` object (recovered from the conformer if needed).
+
+        :return: the RDKit mol
+        :rtype: Chem.Mol
+        """
         if self._rdmol is None:
             self._rdmol = self.mol.GetOwningMol()
         return self._rdmol
     @property
     def atoms(self):
+        """
+        **LLM Docstring**
+
+        The element symbols of the atoms, in order.
+
+        :return: the atom symbols
+        :rtype: list[str]
+        """
         mol = self.rdmol
         return [atom.GetSymbol() for atom in mol.GetAtoms()]
     @property
     def bonds(self):
+        """
+        **LLM Docstring**
+
+        The bonds as `[begin_atom, end_atom, order]` triples.
+
+        :return: the bond list
+        :rtype: list[list]
+        """
         mol = self.rdmol
         return [
             [b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble()]
@@ -47,19 +79,61 @@ class RDMolecule(ExternalMolecule):
         ]
     @property
     def coords(self):
+        """
+        **LLM Docstring**
+
+        The atomic Cartesian coordinates (Angstroms). Setting this writes new positions
+        onto the conformer.
+
+        :return: the coordinates
+        :rtype: np.ndarray
+        """
         return self.mol.GetPositions()
     @coords.setter
     def coords(self, coords):
+        """
+        **LLM Docstring**
+
+        The atomic Cartesian coordinates (Angstroms). Setting this writes new positions
+        onto the conformer.
+
+        :return: the coordinates
+        :rtype: np.ndarray
+        """
         coords = np.asanyarray(coords)
         self.mol.SetPositions(coords)
     @property
     def rings(self):
+        """
+        **LLM Docstring**
+
+        The atom-index tuples of the rings found by RDKit's ring perception.
+
+        :return: the ring atom indices
+        :rtype: tuple
+        """
         return self.rdmol.GetRingInfo().AtomRings()
     @property
     def meta(self):
+        """
+        **LLM Docstring**
+
+        The molecule's RDKit properties as a dict.
+
+        :return: the property dict
+        :rtype: dict
+        """
         return self.rdmol.GetPropsAsDict()
 
     def copy(self):
+        """
+        **LLM Docstring**
+
+        Return a copy of this molecule, carrying over the current conformer and charge.
+
+        :return: the copied molecule
+        :rtype: RDMolecule
+        """
         Chem = self.chem_api()
         conf = self.mol
         new_mol = Chem.AddHs(Chem.Mol(self.rdmol), explicitOnly=True)
@@ -72,6 +146,14 @@ class RDMolecule(ExternalMolecule):
                                      )
     @property
     def charges(self):
+        """
+        **LLM Docstring**
+
+        The per-atom Gasteiger partial charges (computed on access).
+
+        :return: the partial charges
+        :rtype: list[float]
+        """
         from rdkit.Chem import AllChem
         AllChem.ComputeGasteigerCharges(self.rdmol)
         return [
@@ -81,6 +163,14 @@ class RDMolecule(ExternalMolecule):
 
     @property
     def formal_charges(self):
+        """
+        **LLM Docstring**
+
+        The per-atom formal charges.
+
+        :return: the formal charges
+        :rtype: list[int]
+        """
         return [
             at.GetFormalCharge()
             for at in self.rdmol.GetAtoms()
@@ -88,11 +178,38 @@ class RDMolecule(ExternalMolecule):
 
     class NullContext:
         def __enter__(self):
+            """
+            **LLM Docstring**
+
+            Enter the no-op context (used when error suppression is disabled).
+
+            :return: None
+            """
             ...
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            **LLM Docstring**
+
+            Exit the no-op context.
+
+            :param exc_type: the exception type, if any
+            :param exc_val: the exception value, if any
+            :param exc_tb: the traceback, if any
+            """
             ...
     @classmethod
     def quiet_errors(cls, verbose=False):
+        """
+        **LLM Docstring**
+
+        Return a context manager that suppresses RDKit's C++ log output, unless
+        `verbose` is set (in which case a no-op context is returned).
+
+        :param verbose: don't suppress logging
+        :type verbose: bool
+        :return: the (log-blocking or no-op) context manager
+        :rtype: object
+        """
         from rdkit.rdBase import BlockLogs
         if verbose:
             return cls.NullContext()
@@ -101,16 +218,51 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def chem_api(cls):
+        """
+        **LLM Docstring**
+
+        Return the RDKit `Chem` submodule.
+
+        :return: the `Chem` module
+        :rtype: module
+        """
         return RDKitInterface.submodule("Chem")
 
     @classmethod
     def _prep_mol(cls, rdkit_mol):
+        """
+        **LLM Docstring**
+
+        Do the minimal ring/hybridization/property-cache setup needed to work with a
+        mol that hasn't been fully sanitized.
+
+        :param rdkit_mol: the mol to prepare (modified in place)
+        :type rdkit_mol: Chem.Mol
+        """
         Chem = cls.allchem_api()
         rdkit_mol.UpdatePropertyCache(strict=False)
         _ = Chem.GetSymmSSSR(rdkit_mol)
         Chem.SetHybridization(rdkit_mol)
     @classmethod
     def guess_rdmol_bonds(cls, rdmol, charge=None, determine_orders=True, in_place=False):
+        """
+        **LLM Docstring**
+
+        Perceive the bonds (and, optionally, bond orders) of a mol from its atomic
+        coordinates, falling back to connectivity-only perception when order
+        determination fails.
+
+        :param rdmol: the mol
+        :type rdmol: Chem.Mol
+        :param charge: the molecular charge (inferred if omitted)
+        :type charge: int | None
+        :param determine_orders: also perceive bond orders
+        :type determine_orders: bool
+        :param in_place: modify the mol in place rather than copying
+        :type in_place: bool
+        :return: the mol with perceived bonds
+        :rtype: Chem.Mol
+        """
         Chem = cls.chem_api()
         if not in_place:
             rdmol = Chem.Mol(rdmol)
@@ -135,6 +287,38 @@ class RDMolecule(ExternalMolecule):
                    optimize=False,
                    take_min=True,
                    force_field_type='mmff'):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from an RDKit mol, adding hydrogens and optionally guessing
+        bonds, sanitizing, and generating conformers.
+
+        :param rdmol: the source mol
+        :type rdmol: Chem.Mol
+        :param conf_id: the conformer id to use
+        :type conf_id: int
+        :param charge: the molecular charge (inferred if omitted)
+        :type charge: int | None
+        :param guess_bonds: perceive bonds from geometry
+        :type guess_bonds: bool
+        :param sanitize: run RDKit sanitization
+        :type sanitize: bool
+        :param add_implicit_hydrogens: add implicit (not just explicit) hydrogens
+        :type add_implicit_hydrogens: bool
+        :param sanitize_ops: sanitization operation flags
+        :param allow_generate_conformers: generate conformers if none exist
+        :type allow_generate_conformers: bool
+        :param num_confs: number of conformers to generate
+        :type num_confs: int
+        :param optimize: force-field optimize generated conformers
+        :type optimize: bool
+        :param take_min: keep only the lowest-energy generated conformer
+        :type take_min: bool
+        :param force_field_type: the force field for optimization
+        :type force_field_type: str
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api() # to get nice errors
         rdmol = Chem.AddHs(rdmol, explicitOnly=not add_implicit_hydrogens)
         if charge is None:
@@ -179,6 +363,17 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def resolve_bond_type(cls, t):
+        """
+        **LLM Docstring**
+
+        Map a numeric bond order to the corresponding RDKit `BondType` (handling the
+        aromatic/half-integer cases).
+
+        :param t: the numeric bond order
+        :type t: float
+        :return: the RDKit bond type
+        :rtype: Chem.BondType
+        """
         Chem = cls.chem_api()
 
         if abs(t - 1.5) < 1e-2:
@@ -195,6 +390,24 @@ class RDMolecule(ExternalMolecule):
     default_new_coord_alignment_method = 'rigid'
     @classmethod
     def _align_new_conf_coords(cls, mol, coords, coords2, method=None):
+        """
+        **LLM Docstring**
+
+        Align a freshly generated conformer's coordinates back onto a set of reference
+        coordinates (e.g. after adding implicit hydrogens), placing the new atoms via a
+        local rigid frame or a global Eckart embedding.
+
+        :param mol: the mol (for connectivity)
+        :type mol: Chem.Mol
+        :param coords: the reference coordinates (heavy atoms)
+        :type coords: np.ndarray
+        :param coords2: the full generated coordinates
+        :type coords2: np.ndarray
+        :param method: `'rigid'`, `'eckart'`, or otherwise pass through
+        :type method: str | None
+        :return: the aligned coordinates
+        :rtype: np.ndarray
+        """
 
         if method is None:
             method = cls.default_new_coord_alignment_method
@@ -300,6 +513,45 @@ class RDMolecule(ExternalMolecule):
                     sanitize=False,
                     **opts
                     ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from atoms, coordinates, and (optional) bonds, optionally
+        adding implicit hydrogens (placed by conformer generation) and guessing bonds.
+
+        :param atoms: the element symbols
+        :type atoms: Sequence[str]
+        :param coords: the Cartesian coordinates
+        :type coords: np.ndarray
+        :param bonds: the bonds as `[i, j(, order)]`
+        :type bonds: Sequence | None
+        :param charge: the molecular charge
+        :type charge: int | None
+        :param formal_charges: per-atom formal charges
+        :type formal_charges: Sequence | None
+        :param guess_bonds: perceive bonds from geometry (defaults to when no bonds given)
+        :type guess_bonds: bool | None
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param implicit_hydrogen_method: how to place added hydrogens (`'align'`/`'initial'`/`'builtin'`)
+        :type implicit_hydrogen_method: str | None
+        :param distance_matrix_tol: tolerance for distance constraints when aligning
+        :type distance_matrix_tol: float
+        :param num_confs: number of conformers to generate
+        :type num_confs: int | None
+        :param optimize: force-field optimize generated conformers
+        :type optimize: bool
+        :param take_min: keep only the lowest-energy conformer
+        :type take_min: bool | None
+        :param force_field_type: the force field for optimization
+        :type force_field_type: str
+        :param confgen_opts: extra conformer-generation options
+        :type confgen_opts: dict | None
+        :param sanitize: run sanitization
+        :type sanitize: bool
+        :return: the wrapped molecule (or a list, when multiple conformers are kept)
+        :rtype: RDMolecule | list
+        """
         Chem = cls.allchem_api()
         mol = Chem.EditableMol(Chem.Mol())
         mol.BeginBatchEdit()
@@ -432,6 +684,20 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def from_mol(cls, mol, coord_unit="Angstroms", guess_bonds=None):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a generic molecule object, converting its coordinates
+        to Angstroms.
+
+        :param mol: the source molecule
+        :param coord_unit: the source coordinate unit
+        :type coord_unit: str
+        :param guess_bonds: perceive bonds from geometry
+        :type guess_bonds: bool | None
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         from ..Data import UnitsData
 
         return cls.from_coords(
@@ -445,6 +711,17 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _load_sdf_conf(cls, stream, which=0):
+        """
+        **LLM Docstring**
+
+        Read the `which`-th molecule from an SDF stream.
+
+        :param stream: the SDF byte stream
+        :param which: the index of the entry to read
+        :type which: int
+        :return: the RDKit mol
+        :rtype: Chem.Mol
+        """
         Chem = cls.chem_api()
         mol = None
         for i in range(which+1):
@@ -452,6 +729,18 @@ class RDMolecule(ExternalMolecule):
         return mol
     @classmethod
     def from_sdf(cls, sdf_string, which=0):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from an SDF file path or string.
+
+        :param sdf_string: the SDF file path or content
+        :type sdf_string: str
+        :param which: the index of the entry to read
+        :type which: int
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         if os.path.isfile(sdf_string):
             with open(sdf_string, 'rb') as stream:
                 mol = cls._load_sdf_conf(stream, which=which)
@@ -466,6 +755,22 @@ class RDMolecule(ExternalMolecule):
                          use_basic_knowledge=True,
                          **opts
                          ):
+        """
+        **LLM Docstring**
+
+        Build an RDKit ETKDG conformer-generation parameter object of the requested
+        version, applying the torsion/knowledge flags and any extra options.
+
+        :param version: the ETKDG version (`'v1'`/`'v2'`/`'v3'`)
+        :type version: str
+        :param use_experimental_torsion_angle_prefs: use experimental torsion prefs
+        :type use_experimental_torsion_angle_prefs: bool
+        :param use_basic_knowledge: use basic chemical knowledge
+        :type use_basic_knowledge: bool
+        :param opts: extra parameters set on the params object (camel-cased)
+        :return: the parameter object
+        :rtype: object
+        """
         AllChem = cls.allchem_api()
         version = version.lower()
         if version == 'v3':
@@ -496,6 +801,35 @@ class RDMolecule(ExternalMolecule):
                      quiet=False,
                      **opts
                      ):
+        """
+        **LLM Docstring**
+
+        Parse a SMILES (or CXSMILES) string into an RDKit mol, with control over
+        sanitization, hydrogen handling, and atom-map-based reordering.
+
+        :param smiles: the SMILES string
+        :type smiles: str
+        :param sanitize: run sanitization
+        :type sanitize: bool
+        :param parse_name: parse a trailing molecule name
+        :type parse_name: bool
+        :param allow_cxsmiles: allow CXSMILES extensions
+        :type allow_cxsmiles: bool
+        :param strict_cxsmiles: fail on bad CXSMILES rather than ignoring
+        :type strict_cxsmiles: bool
+        :param remove_hydrogens: remove explicit hydrogens
+        :type remove_hydrogens: bool
+        :param add_implicit_hydrogens: add hydrogens (or `'full'` to also re-enable implicit Hs)
+        :type add_implicit_hydrogens: bool | str | None
+        :param reorder_from_atom_map: renumber atoms by their atom-map numbers
+        :type reorder_from_atom_map: bool
+        :param replacements: SMILES token replacements
+        :type replacements: dict | None
+        :param quiet: suppress RDKit logging
+        :type quiet: bool
+        :return: the parsed mol, or `None` on failure
+        :rtype: Chem.Mol | None
+        """
         Chem = cls.chem_api()
         if quiet:
             from rdkit.rdBase import BlockLogs
@@ -570,6 +904,53 @@ class RDMolecule(ExternalMolecule):
                     coords=None,
                     conf_tag=None,
                     **opts):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a SMILES string (or file), embedding a conformer
+        (generated, or decoded from a conformer tag / supplied coordinates).
+
+        :param smiles: the SMILES string or file path
+        :type smiles: str
+        :param sanitize: run sanitization
+        :type sanitize: bool
+        :param parse_name: parse a trailing molecule name
+        :type parse_name: bool
+        :param allow_cxsmiles: allow CXSMILES extensions
+        :type allow_cxsmiles: bool
+        :param strict_cxsmiles: fail on bad CXSMILES
+        :type strict_cxsmiles: bool
+        :param remove_hydrogens: remove explicit hydrogens
+        :type remove_hydrogens: bool
+        :param replacements: SMILES token replacements
+        :type replacements: dict | None
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param call_add_hydrogens: call `AddHs` before embedding
+        :type call_add_hydrogens: bool
+        :param conf_id: the conformer id to use
+        :type conf_id: int | None
+        :param num_confs: number of conformers to generate
+        :type num_confs: int | None
+        :param optimize: force-field optimize generated conformers
+        :type optimize: bool
+        :param take_min: keep only the lowest-energy conformer
+        :type take_min: bool
+        :param force_field_type: the force field for optimization
+        :type force_field_type: str
+        :param reorder_from_atom_map: renumber atoms by atom-map number
+        :type reorder_from_atom_map: bool
+        :param confgen_opts: extra conformer-generation options
+        :type confgen_opts: dict | None
+        :param check_tag: split off a trailing `_`-delimited conformer tag
+        :type check_tag: bool
+        :param coords: explicit coordinates to use instead of generating a conformer
+        :type coords: np.ndarray | None
+        :param conf_tag: an explicit conformer tag to decode
+        :type conf_tag: str | None
+        :return: the wrapped molecule (or list, for multiple conformers)
+        :rtype: RDMolecule | list
+        """
 
         if os.path.isfile(smiles):
             with open(smiles) as f:
@@ -637,6 +1018,30 @@ class RDMolecule(ExternalMolecule):
                       force_field_type='mmff',
                       confgen_opts=None,
                       **mol_opts):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from an RDKit mol, using an existing conformer when
+        available and otherwise generating one.
+
+        :param mol: the source mol
+        :type mol: Chem.Mol
+        :param conf_id: the conformer id to use
+        :type conf_id: int | None
+        :param num_confs: number of conformers to generate
+        :type num_confs: int | None
+        :param optimize: force-field optimize generated conformers
+        :type optimize: bool
+        :param take_min: keep only the lowest-energy conformer
+        :type take_min: bool | None
+        :param force_field_type: the force field for optimization
+        :type force_field_type: str
+        :param confgen_opts: extra conformer-generation options
+        :type confgen_opts: dict | None
+        :param mol_opts: extra options forwarded to `from_rdmol`
+        :return: the wrapped molecule (or list)
+        :rtype: RDMolecule | list
+        """
         conf = None
         if conf_id is not None:
             try:
@@ -670,6 +1075,28 @@ class RDMolecule(ExternalMolecule):
     different_fragment_embedding_distance = 5
     @classmethod
     def _set_fragment_centroids(cls, frag_inds, frag_atoms, frag_bonds, frag_coord_sets, frag_positions, min_dist=None):
+        """
+        **LLM Docstring**
+
+        Place disconnected fragments relative to one another by offsetting each
+        fragment's inertial frame along a fixed displacement, returning the combined
+        per-conformer coordinate sets.
+
+        :param frag_inds: the original atom indices of each fragment
+        :type frag_inds: list
+        :param frag_atoms: the element symbols of each fragment
+        :type frag_atoms: list
+        :param frag_bonds: the bonds of each fragment
+        :type frag_bonds: list
+        :param frag_coord_sets: the per-conformer coordinates of each fragment
+        :type frag_coord_sets: list
+        :param frag_positions: optional target positions per fragment
+        :type frag_positions: list
+        :param min_dist: the inter-fragment separation
+        :type min_dist: float | None
+        :return: the combined coordinate sets
+        :rtype: list
+        """
         if min_dist is None:
             min_dist = cls.different_fragment_embedding_distance
         masses = [[AtomData[a, "Mass"] for a in fa] for fa in frag_atoms]
@@ -704,6 +1131,28 @@ class RDMolecule(ExternalMolecule):
                                 frag_coord_sets,
                                 frag_positions,
                                 use_actual=False):
+        """
+        **LLM Docstring**
+
+        Place disconnected fragments by aligning each onto supplied target positions
+        (via a shift for one point or an Eckart embedding for several), returning the
+        combined per-conformer coordinate sets.
+
+        :param frag_inds: the original atom indices of each fragment
+        :type frag_inds: list
+        :param frag_atoms: the element symbols of each fragment
+        :type frag_atoms: list
+        :param frag_bonds: the bonds of each fragment
+        :type frag_bonds: list
+        :param frag_coord_sets: the per-conformer coordinates of each fragment
+        :type frag_coord_sets: list
+        :param frag_positions: the target positions (per fragment, keyed by atom)
+        :type frag_positions: list
+        :param use_actual: pin the mapped atoms exactly to their targets
+        :type use_actual: bool
+        :return: the combined coordinate sets
+        :rtype: list
+        """
         # align axes by default
         conf_sets = []
         remapping = np.argsort(np.concatenate(frag_inds))
@@ -742,6 +1191,22 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _centroid_frag_dists(cls, mol, graph, fragments, min_dist=None):
+        """
+        **LLM Docstring**
+
+        Compute the inter-fragment distance constraints between the fragments' graph
+        centroids.
+
+        :param mol: the mol
+        :type mol: Chem.Mol
+        :param graph: the molecular edge graph
+        :param fragments: the fragment atom-index groups
+        :type fragments: list
+        :param min_dist: the minimum separation
+        :type min_dist: float | None
+        :return: the distance constraints between centroid atoms
+        :rtype: object
+        """
         from ..Graphs import EdgeGraph
         graph: EdgeGraph
         centroids = [
@@ -759,6 +1224,20 @@ class RDMolecule(ExternalMolecule):
         )
     @classmethod
     def _take_submol(cls, atoms, bonds, inds):
+        """
+        **LLM Docstring**
+
+        Build a sub-mol containing only the given atom indices and the bonds among them.
+
+        :param atoms: the full atom list
+        :type atoms: list
+        :param bonds: the full bond list
+        :type bonds: list
+        :param inds: the atom indices to keep
+        :type inds: Sequence[int]
+        :return: the sub-mol
+        :rtype: Chem.Mol
+        """
         Chem = cls.allchem_api()
         mol = Chem.EditableMol(Chem.Mol())
         bond_map = {}
@@ -795,6 +1274,41 @@ class RDMolecule(ExternalMolecule):
                                     verbose=False,
                                     **opts
                                     ):
+        """
+        **LLM Docstring**
+
+        Generate one or more conformers for a mol via RDKit's ETKDG embedding,
+        handling disconnected fragments (embedded separately and placed), distance
+        constraints, fixed initial coordinates, optional force-field optimization, and
+        lowest-energy selection.
+
+        :param mol: the mol to embed (modified in place; conformers are added)
+        :type mol: Chem.Mol
+        :param num_confs: number of conformers to generate
+        :type num_confs: int
+        :param optimize: force-field optimize the conformers
+        :type optimize: bool
+        :param take_min: return only the lowest-energy conformer id
+        :type take_min: bool
+        :param force_field_type: the force field for optimization/selection
+        :type force_field_type: str
+        :param add_implicit_hydrogens: add implicit hydrogens before embedding
+        :type add_implicit_hydrogens: bool
+        :param distance_constraints: pairwise distance bounds (or a full bounds matrix)
+        :type distance_constraints: dict | list | None
+        :param initial_coordinates: fixed starting coordinates for some/all atoms
+        :type initial_coordinates: dict | Sequence | None
+        :param fragment_placement_method: how to place disconnected fragments
+        :type fragment_placement_method: str | Callable | None
+        :param fragments: precomputed fragment atom groups
+        :type fragments: list | None
+        :param embedding_mol: a hydrogen-added mol to embed into
+        :type embedding_mol: Chem.Mol | None
+        :param verbose: don't suppress RDKit logging
+        :type verbose: bool
+        :return: the generated conformer id (or list of ids)
+        :rtype: int | list
+        """
 
         AllChem = cls.allchem_api()
         if embedding_mol is None:
@@ -1013,6 +1527,32 @@ class RDMolecule(ExternalMolecule):
                                    confgen_opts=None,
                                    **etc
                                    ):
+        """
+        **LLM Docstring**
+
+        Generate conformer(s) for a mol that has none, then wrap the result(s) as
+        `RDMolecule`(s).
+
+        :param mol: the source mol
+        :type mol: Chem.Mol
+        :param conf_id: a specific conformer id to keep (disables optimization)
+        :type conf_id: int | None
+        :param num_confs: number of conformers to generate
+        :type num_confs: int
+        :param optimize: force-field optimize the conformers
+        :type optimize: bool
+        :param take_min: keep only the lowest-energy conformer
+        :type take_min: bool
+        :param force_field_type: the force field for optimization
+        :type force_field_type: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param confgen_opts: extra conformer-generation options
+        :type confgen_opts: dict | None
+        :param etc: extra options forwarded to `from_rdmol`
+        :return: the wrapped molecule (or list)
+        :rtype: RDMolecule | list
+        """
         if confgen_opts is None:
             confgen_opts = {}
         if conf_id is not None and conf_id >= 0:
@@ -1037,6 +1577,19 @@ class RDMolecule(ExternalMolecule):
 
     @staticmethod
     def _camel_case(o, caps_all=False):
+        """
+        **LLM Docstring**
+
+        Convert a snake_case string to camelCase (or PascalCase when `caps_all` is set),
+        for mapping option names onto RDKit's API.
+
+        :param o: the snake_case string
+        :type o: str
+        :param caps_all: capitalize the first word too
+        :type caps_all: bool
+        :return: the camel-cased string
+        :rtype: str
+        """
         if caps_all:
             return "".join(b.capitalize() for b in o.split("_"))
         else:
@@ -1052,6 +1605,36 @@ class RDMolecule(ExternalMolecule):
                   coords=None,
                   mol=None,
                   **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to a SMILES string, with options for hydrogen/stereo
+        handling, atom-order preservation, and appending a conformer tag encoding the
+        3D geometry.
+
+        :param remove_hydrogens: remove explicit hydrogens
+        :type remove_hydrogens: bool | None
+        :param remove_implicit_hydrogens: remove only implicit hydrogens
+        :type remove_implicit_hydrogens: bool | None
+        :param include_tag: append a `_`-delimited conformer tag
+        :type include_tag: bool
+        :param canonical: emit canonical SMILES
+        :type canonical: bool
+        :param compute_stereo: assign stereochemistry from the 3D coordinates first
+        :type compute_stereo: bool
+        :param remove_stereo: strip stereochemistry
+        :type remove_stereo: bool
+        :param preserve_atom_order: keep the current atom ordering
+        :type preserve_atom_order: bool
+        :param binary: return/encode the tag in binary form
+        :type binary: bool
+        :param coords: coordinates to encode in the tag (defaults to the current ones)
+        :type coords: np.ndarray | None
+        :param mol: an explicit mol to serialize (defaults to this one)
+        :type mol: Chem.Mol | None
+        :return: the SMILES string (optionally with a conformer tag)
+        :rtype: str | bytes
+        """
         Chem = self.allchem_api()
         if mol is None:
             mol = self.rdmol
@@ -1148,6 +1731,19 @@ class RDMolecule(ExternalMolecule):
     }
     @classmethod
     def _draw_ipython(cls, mol, format='svg', **opts):
+        """
+        **LLM Docstring**
+
+        Configure RDKit's IPython console drawing options and display the mol inline.
+
+        :param mol: the mol to display
+        :type mol: Chem.Mol
+        :param format: `'svg'` or `'png'`
+        :type format: str
+        :param opts: drawing options (camel-cased onto the RDKit draw options)
+        :return: the display result
+        :rtype: object
+        """
         from rdkit.Chem.Draw import IPythonConsole
         from ..Jupyter.JHTML.WidgetTools import JupyterAPIs
         if format == 'svg':
@@ -1162,6 +1758,22 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _drawer_png(cls, *, image_size, plot_range=None, no_free_type=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a PNG (raster) RDKit 2D drawer at the given image size, optionally with a
+        fixed plot range/scale.
+
+        :param image_size: the `(width, height)` of the image
+        :type image_size: Sequence[int]
+        :param plot_range: `((min_x, max_x), (min_y, max_y))` to fix the scale
+        :type plot_range: tuple | None
+        :param no_free_type: disable FreeType font rendering
+        :type no_free_type: bool | None
+        :param opts: remaining (unconsumed) options
+        :return: `(drawer, remaining_opts)`
+        :rtype: tuple
+        """
         Chem = cls.chem_api()
         import rdkit.Geometry as Geom
         rdMolDraw2D = Chem.Draw.rdMolDraw2D
@@ -1180,6 +1792,22 @@ class RDMolecule(ExternalMolecule):
         return drawer, opts
     @classmethod
     def _drawer_svg(cls, *, image_size, plot_range=None, no_free_type=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build an SVG RDKit 2D drawer at the given image size, optionally with a fixed
+        plot range/scale.
+
+        :param image_size: the image size (a scalar is squared)
+        :type image_size: Sequence[int] | int
+        :param plot_range: `((min_x, max_x), (min_y, max_y))` to fix the scale
+        :type plot_range: tuple | None
+        :param no_free_type: disable FreeType font rendering
+        :type no_free_type: bool | None
+        :param opts: remaining (unconsumed) options
+        :return: `(drawer, remaining_opts)`
+        :rtype: tuple
+        """
         Chem = cls.chem_api()
         import rdkit.Geometry as Geom
         rdMolDraw2D = Chem.Draw.rdMolDraw2D
@@ -1201,6 +1829,19 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _prep_draw_opts(cls, format, opts):
+        """
+        **LLM Docstring**
+
+        Merge the default drawing options (global and per-format) with the supplied
+        options, dropping any `None` values.
+
+        :param format: the output format
+        :type format: str
+        :param opts: the user-supplied options
+        :type opts: dict
+        :return: the merged options
+        :rtype: dict
+        """
         return {
             k:v
             for k,v in (
@@ -1216,6 +1857,19 @@ class RDMolecule(ExternalMolecule):
                           label_style=None,
                           **etc
                           ):
+        """
+        **LLM Docstring**
+
+        Translate high-level label-style options (font size, color) into the low-level
+        RDKit annotation-scale/color options, returning the RDKit options plus the
+        deferred style values.
+
+        :param label_style: a `{font_size, color}` style dict
+        :type label_style: dict | None
+        :param etc: the remaining options
+        :return: `(rdkit_options, deferred_style)`
+        :rtype: tuple
+        """
         deferred = {}
         if label_style is not None:
             font_size = label_style.get('font_size')
@@ -1234,6 +1888,16 @@ class RDMolecule(ExternalMolecule):
 
     @staticmethod
     def _set_font_file(draw_opts, font_name):
+        """
+        **LLM Docstring**
+
+        Set the drawer's font file, resolving a font *name* to a file path via
+        matplotlib's font manager when needed.
+
+        :param draw_opts: the RDKit draw-options object (modified in place)
+        :param font_name: a font file path or font family name
+        :type font_name: str
+        """
         if len(font_name) > 0 and not os.path.isfile(font_name):
             from matplotlib import font_manager
             font_file = font_manager.findfont(font_name)
@@ -1242,6 +1906,15 @@ class RDMolecule(ExternalMolecule):
         draw_opts.fontFile = font_file
     @staticmethod
     def _get_font_file(draw_opts):
+        """
+        **LLM Docstring**
+
+        Return the drawer's currently configured font file.
+
+        :param draw_opts: the RDKit draw-options object
+        :return: the font file path
+        :rtype: str
+        """
         return draw_opts.fontFile
     _drawer_opts = {
         'fill_polys':'fill_polys',
@@ -1258,6 +1931,17 @@ class RDMolecule(ExternalMolecule):
     }
     @classmethod
     def _handle_color(cls, v):
+        """
+        **LLM Docstring**
+
+        Normalize a color (name/string or RGB sequence) into an RDKit `(r, g, b)` tuple
+        in `[0, 1]`.
+
+        :param v: the color specification
+        :type v: str | Sequence | None
+        :return: the normalized color tuple, or `None`
+        :rtype: tuple | None
+        """
         from ..Plots import ColorPalette
         if v is None: return None
         if isinstance(v, str):
@@ -1266,6 +1950,17 @@ class RDMolecule(ExternalMolecule):
         return tuple(float(vv) for vv in v)
     @classmethod
     def _handle_draw_elements(cls, elements):
+        """
+        **LLM Docstring**
+
+        Resolve a draw-element specification (names or flags) into the combined RDKit
+        `DrawElement` bit mask.
+
+        :param elements: the element name(s)/flag(s)
+        :type elements: list | tuple | object
+        :return: the element mask
+        :rtype: object
+        """
         import rdkit.Chem.Draw.rdMolDraw2D as Draw
         if isinstance(elements, (list, tuple)):
             elements = [
@@ -1285,6 +1980,19 @@ class RDMolecule(ExternalMolecule):
         return element_mask
     @classmethod
     def _get_draw_opt(cls, drawer, draw_options, k):
+        """
+        **LLM Docstring**
+
+        Read a drawing option, dispatching to the drawer method, the draw-options
+        getter, or a plain attribute depending on where the option lives.
+
+        :param drawer: the RDKit drawer
+        :param draw_options: the drawer's options object
+        :param k: the option name
+        :type k: str
+        :return: the option value
+        :rtype: Any
+        """
         if k in cls._drawer_opts:
             k = cls._drawer_opts[k]
             if isinstance(k, str):
@@ -1312,6 +2020,20 @@ class RDMolecule(ExternalMolecule):
             return getattr(draw_options, cls._camel_case(k))
     @classmethod
     def _set_draw_opt(cls, drawer, draw_options, k, v):
+        """
+        **LLM Docstring**
+
+        Set a drawing option, dispatching to the drawer method, the draw-options setter,
+        or a plain attribute, and normalizing colors/element masks as needed.
+
+        :param drawer: the RDKit drawer
+        :param draw_options: the drawer's options object
+        :param k: the option name
+        :type k: str
+        :param v: the value to set (ignored if `None`)
+        :return: the setter's return value, if any
+        :rtype: Any
+        """
         if v is not None:
             if k in cls._drawer_opts:
                 k = cls._drawer_opts[k]
@@ -1351,6 +2073,21 @@ class RDMolecule(ExternalMolecule):
                 return setattr(draw_options, cls._camel_case(k), v)
     @classmethod
     def _handle_annotation_draw(cls, caller, drawer, draw_options, *args, styles:dict, **kwargs):
+        """
+        **LLM Docstring**
+
+        Temporarily apply a set of drawing-option overrides, invoke a draw callback, then
+        restore the original options.
+
+        :param caller: the draw callback to invoke
+        :type caller: Callable
+        :param drawer: the RDKit drawer
+        :param draw_options: the drawer's options object
+        :param args: positional arguments for the callback
+        :param styles: the option overrides to apply during the call
+        :type styles: dict
+        :param kwargs: keyword arguments for the callback
+        """
         cur_draw_options = {
             k: cls._get_draw_opt(drawer, draw_options, k)
             for k in styles
@@ -1369,6 +2106,17 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _prep_draw_coords(cls, draw_coords):
+        """
+        **LLM Docstring**
+
+        Normalize the various accepted `draw_coords` forms (dict, list of keys, list of
+        dicts) into a uniform list of `{key, ...}` annotation dicts.
+
+        :param draw_coords: the annotation coordinate specifications
+        :type draw_coords: dict | list | None
+        :return: the normalized annotation dicts
+        :rtype: list[dict]
+        """
         if draw_coords is None:
             return []
         if isinstance(draw_coords, dict):
@@ -1415,6 +2163,45 @@ class RDMolecule(ExternalMolecule):
                               no_free_type=None,
                               **opts
                               ):
+        """
+        **LLM Docstring**
+
+        Render a mol to a static SVG/PNG with RDKit's 2D drawer, applying highlights,
+        legends, coordinate annotations, a fixed plot range, and optional pre-draw
+        callbacks.
+
+        :param mol: the mol to draw
+        :type mol: Chem.Mol
+        :param figure: an existing figure/drawer to draw into
+        :param format: `'svg'` or `'png'`
+        :type format: str
+        :param drawer: an explicit drawer to use
+        :param drawer_options: extra drawer construction options
+        :type drawer_options: dict | None
+        :param legend: a legend string
+        :type legend: str | None
+        :param highlight_atoms: atoms to highlight
+        :param highlight_bonds: bonds to highlight
+        :param highlight_atom_colors: per-atom highlight colors
+        :param highlight_bond_colors: per-bond highlight colors
+        :param highlight_atom_radii: per-atom highlight radii
+        :param highlight_bond_radii: per-bond highlight radii
+        :param coords: 2D coordinates to draw at (defaults to the conformer's)
+        :type coords: np.ndarray | None
+        :param draw_coords: extra coordinate annotations
+        :param plot_range: a fixed drawing range
+        :type plot_range: tuple | None
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param predraw: a callback invoked before finishing the drawing
+        :type predraw: Callable | None
+        :param return_splits: also return the drawing element split metadata
+        :type return_splits: bool
+        :param no_free_type: disable FreeType font rendering
+        :type no_free_type: bool | None
+        :return: the rendered image (and split metadata if requested)
+        :rtype: object
+        """
         Draw = RDKitInterface.submodule("Chem.Draw")
         import rdkit.Chem.Draw.rdMolDraw2D as rdMolDraw2D
 
@@ -1765,6 +2552,16 @@ class RDMolecule(ExternalMolecule):
             return drawer
 
     def find_substructure(self, query):
+        """
+        **LLM Docstring**
+
+        Return all substructure matches of a SMARTS query in the molecule.
+
+        :param query: the SMARTS query
+        :type query: str
+        :return: the matching atom-index tuples
+        :rtype: tuple
+        """
         Chem = self.chem_api()
         query = Chem.MolFromSmarts(query)
         return self.rdmol.GetSubstructMatches(query)
@@ -1773,6 +2570,25 @@ class RDMolecule(ExternalMolecule):
     def apply_smarts_to_mol(cls, mol, pattern,
                             remove_hydrogens=True,
                             readd_hydrogens=True):#, remove_intermediate_hydrogens=True):
+        """
+        **LLM Docstring**
+
+        Apply a SMARTS reaction transform to a mol, running the reaction and
+        reassembling the products while preserving atom mapping and re-adding
+        hydrogens consistently.
+
+        :param mol: the reactant mol
+        :type mol: Chem.Mol
+        :param pattern: the SMARTS reaction (string or reaction object)
+        :type pattern: str | object
+        :param remove_hydrogens: strip hydrogens before reacting
+        :type remove_hydrogens: bool
+        :param readd_hydrogens: re-add hydrogens to the products
+        :type readd_hydrogens: bool
+        :return: the product mols
+        :rtype: list[Chem.Mol]
+        :raises ValueError: if the pattern doesn't map all atoms
+        """
         # import rdkit.Chem as Chem
         Chem = cls.allchem_api()
         if isinstance(pattern, str):
@@ -1873,6 +2689,17 @@ class RDMolecule(ExternalMolecule):
         return prods
 
     def apply_smarts(self, tf):
+        """
+        **LLM Docstring**
+
+        Apply a SMARTS reaction transform to this molecule, returning the products as
+        `RDMolecule`s carrying the current coordinates.
+
+        :param tf: the SMARTS reaction
+        :type tf: str | object
+        :return: the product molecules
+        :rtype: list[RDMolecule]
+        """
         Chem = self.chem_api()
         base_products = self.apply_smarts_to_mol(self.rdmol, tf)
 
@@ -1917,6 +2744,21 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def take_mol_fragment(cls, mol, inds, conf_id=None):
+        """
+        **LLM Docstring**
+
+        Build a sub-mol from the given atom indices (with the bonds among them),
+        optionally carrying over a conformer's coordinates.
+
+        :param mol: the source mol
+        :type mol: Chem.Mol
+        :param inds: the atom indices to keep
+        :type inds: Sequence[int]
+        :param conf_id: a conformer id whose coordinates to copy
+        :type conf_id: int | None
+        :return: the sub-mol
+        :rtype: Chem.Mol
+        """
         Chem = cls.allchem_api()
         submol = Chem.EditableMol(Chem.Mol())
         if conf_id is not None:
@@ -1946,6 +2788,23 @@ class RDMolecule(ExternalMolecule):
                     add_dummies=False,
                     reguess_bonds=True,
                     return_fragments=False):
+        """
+        **LLM Docstring**
+
+        Break the given bonds and return the resulting (fragmented) molecule, carrying
+        over coordinates and optionally re-perceiving bond orders.
+
+        :param bonds: the `(i, j)` bonds to break
+        :type bonds: Sequence
+        :param add_dummies: add dummy atoms at the broken bonds
+        :type add_dummies: bool
+        :param reguess_bonds: re-perceive bond orders afterward
+        :type reguess_bonds: bool
+        :param return_fragments: unused flag
+        :type return_fragments: bool
+        :return: the fragmented molecule
+        :rtype: RDMolecule
+        """
         Chem = self.chem_api()
         from rdkit.Chem.rdmolops import FragmentOnBonds
 
@@ -1973,6 +2832,18 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def fragment_rdmol(cls, mol, inds):
+        """
+        **LLM Docstring**
+
+        Build a sub-mol from the given atom indices and the bonds among them.
+
+        :param mol: the source mol
+        :type mol: Chem.Mol
+        :param inds: the atom indices to keep
+        :type inds: Sequence[int]
+        :return: the sub-mol
+        :rtype: Chem.Mol
+        """
         Chem = cls.allchem_api()
         submol = Chem.EditableMol(Chem.Mol())
         submol.BeginBatchEdit()
@@ -1988,6 +2859,21 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def fragment_rdmol_on_bonds(cls, mol, bonds, addDummies=True):
+        """
+        **LLM Docstring**
+
+        Fragment a mol by breaking the given bonds, returning a mapping from each
+        fragment's atom-index tuple to its sub-mol (with atom maps restored).
+
+        :param mol: the source mol
+        :type mol: Chem.Mol
+        :param bonds: the `(i, j)` bonds to break (by atom-map number)
+        :type bonds: Sequence
+        :param addDummies: add dummy atoms at the broken bonds
+        :type addDummies: bool
+        :return: the `{fragment_indices: sub_mol}` mapping
+        :rtype: dict
+        """
         Chem = cls.allchem_api()
         bond_indices = []
         no_map = {a.GetAtomMapNum(): i for i, a in enumerate(mol.GetAtoms())}
@@ -2009,6 +2895,21 @@ class RDMolecule(ExternalMolecule):
         return new_mols
 
     def get_atom_neighbors(self, i, n=1, mol=None, graph=None):
+        """
+        **LLM Docstring**
+
+        Return the labels of the atoms within `n` bonds of a given atom.
+
+        :param i: the central atom index
+        :type i: int
+        :param n: the neighborhood radius (in bonds)
+        :type n: int
+        :param mol: an explicit mol (defaults to this one)
+        :type mol: Chem.Mol | None
+        :param graph: a precomputed edge graph
+        :return: the neighbor atom labels
+        :rtype: list
+        """
         if graph is None:
             graph = self.get_edge_graph(mol=mol)
         neighbor_graph = graph.neighbor_graph(i, num=n)
@@ -2020,6 +2921,22 @@ class RDMolecule(ExternalMolecule):
     def _get_view_settings(self,
                          up_vector=None, right_vector=None, view_vector=None,
                          view_matrix=None, view_distance=None, view_center=None):
+            """
+            **LLM Docstring**
+
+            Build a 3D view specification (rotation matrix, distance, center) from any
+            combination of up/right/view vectors, filling in the missing axes by cross
+            products.
+
+            :param up_vector: the up direction
+            :param right_vector: the right direction
+            :param view_vector: the view/forward direction
+            :param view_matrix: an explicit view rotation matrix
+            :param view_distance: the camera distance
+            :param view_center: the view center
+            :return: the `{matrix, distance, center}` view settings
+            :rtype: dict
+            """
             if view_matrix is None and (
                     view_vector is not None
                     or right_vector is not None
@@ -2102,6 +3019,67 @@ class RDMolecule(ExternalMolecule):
              return_splits=None,
              radius_to_range_scaling=None,
              **draw_opts):
+        """
+        **LLM Docstring**
+
+        Draw the molecule in 2D (SVG/PNG), with extensive control over hydrogen removal,
+        2D-coordinate generation and alignment, atom/bond labels and highlights, ring
+        highlighting, and save buttons.
+
+        :param figure: an existing figure/drawer to draw into
+        :param background: the background color
+        :param remove_atom_numbers: strip atom-map numbers from the drawing
+        :type remove_atom_numbers: bool | None
+        :param remove_hydrogens: hide hydrogens
+        :type remove_hydrogens: bool
+        :param display_atom_numbers: annotate atoms with their indices
+        :type display_atom_numbers: bool
+        :param format: `'svg'` or `'png'`
+        :type format: str
+        :param drawer: an explicit drawing function
+        :param coords: explicit 2D coordinates to draw at
+        :type coords: np.ndarray | None
+        :param use_coords: draw using the molecule's own coordinates (projected)
+        :type use_coords: bool
+        :param align_2d: align the generated 2D coordinates to the view
+        :type align_2d: bool | None
+        :param view_settings: 3D view settings for coordinate alignment
+        :type view_settings: dict | None
+        :param plot_range: a fixed drawing range
+        :type plot_range: tuple | None
+        :param atom_labels: per-atom label overrides
+        :param bond_labels: per-bond label overrides
+        :param blend_mixed_bonds: blend colors on bonds between differently colored atoms
+        :type blend_mixed_bonds: bool
+        :param highlight_atoms: atoms to highlight
+        :param highlight_bonds: bonds to highlight
+        :param highlight_atom_colors: per-atom highlight colors
+        :param highlight_bond_colors: per-bond highlight colors
+        :param highlight_atom_radii: per-atom highlight radii
+        :param highlight_bond_radii: per-bond highlight radii
+        :param highlight_bond_width_multiplier: highlight bond-width multiplier
+        :param atom_radii: per-atom radii
+        :param bond_radius: the bond radius
+        :param allow_radius_rescaling: allow radii to rescale with the plot range
+        :type allow_radius_rescaling: bool
+        :param draw_coords: extra coordinate annotations
+        :param highlight_rings: rings to highlight
+        :param label_offset: the annotation label offset
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param include_save_buttons: include save buttons in the output
+        :type include_save_buttons: bool
+        :param no_free_type: disable FreeType font rendering
+        :type no_free_type: bool | None
+        :param postdraw: a callback invoked after drawing
+        :type postdraw: Callable | None
+        :param return_splits: also return drawing element split metadata
+        :type return_splits: bool | None
+        :param radius_to_range_scaling: radius-to-range scaling factor
+        :param draw_opts: extra drawing options
+        :return: the rendered drawing
+        :rtype: object
+        """
         from ..Plots import ColorPalette
 
         if drawer is None:
@@ -2604,6 +3582,20 @@ class RDMolecule(ExternalMolecule):
              conf_id=None,
              image_size=(450, 450),
              **opts):
+        """
+        **LLM Docstring**
+
+        Display an interactive 3D rendering of the molecule (via RDKit's IPython 3D
+        console).
+
+        :param conf_id: the conformer id (defaults to the current one)
+        :type conf_id: int | None
+        :param image_size: the `(width, height)` of the view
+        :type image_size: tuple
+        :param opts: extra drawing options
+        :return: the 3D display
+        :rtype: object
+        """
         # import py3Dmol
         from rdkit.Chem.Draw import IPythonConsole
 
@@ -2616,6 +3608,18 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _plain_encode(cls, flat_z, byte_size):
+        """
+        **LLM Docstring**
+
+        Encode a flat coordinate array as raw bytes of the given float precision.
+
+        :param flat_z: the flat values
+        :type flat_z: Sequence[float]
+        :param byte_size: the float bit width (16/32/64/128)
+        :type byte_size: int
+        :return: the encoded array
+        :rtype: np.ndarray
+        """
         if byte_size == 16:
             dtype = np.float16
         elif byte_size == 32:
@@ -2630,6 +3634,18 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _plain_decode(cls, buffer, byte_size):
+        """
+        **LLM Docstring**
+
+        Decode a raw-bytes buffer back into a float array of the given precision.
+
+        :param buffer: the byte buffer
+        :type buffer: bytes
+        :param byte_size: the float bit width (16/32/64/128)
+        :type byte_size: int
+        :return: the decoded values
+        :rtype: np.ndarray
+        """
         if byte_size == 16:
             dtype = np.float16
         elif byte_size == 32:
@@ -2804,6 +3820,30 @@ class RDMolecule(ExternalMolecule):
                              coords=None, graph=None, zmatrix=None,
                              encoder=None, byte_size=None, byte_encoding=None,
                              binary=False, include_zmatrix=False):
+        """
+        **LLM Docstring**
+
+        Encode the molecule's 3D geometry into a compact string tag (a Z-matrix of the
+        canonical-fragment internal coordinates, packed and base-N encoded) suitable for
+        appending to a SMILES string.
+
+        :param coords: the coordinates to encode (defaults to the current ones)
+        :type coords: np.ndarray | None
+        :param graph: the molecular edge graph (built if omitted)
+        :param zmatrix: an explicit Z-matrix connectivity (built if omitted)
+        :param encoder: the value encoder (`'plain'`/`'compressed'`/`'precision'` or a callable)
+        :type encoder: str | Callable | None
+        :param byte_size: the per-value bit width
+        :type byte_size: int | None
+        :param byte_encoding: the base-N text encoding (16/32/64/85)
+        :type byte_encoding: int | Callable | None
+        :param binary: return raw bytes rather than text
+        :type binary: bool
+        :param include_zmatrix: also return the encoded Z-matrix connectivity
+        :type include_zmatrix: bool
+        :return: the conformer tag (and Z-matrix data if requested)
+        :rtype: str | bytes | tuple
+        """
         if zmatrix is None:
             if graph is None:
                 graph = self.get_edge_graph()
@@ -2865,6 +3905,25 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def conformer_from_smiles_tag(cls, tag, graph, decoder=None, byte_size=None, byte_encoding=None, zmatrix=None):
+        """
+        **LLM Docstring**
+
+        Decode a conformer tag back into Cartesian coordinates, using the molecular graph
+        to reconstruct the canonical-fragment Z-matrix.
+
+        :param tag: the conformer tag
+        :type tag: str
+        :param graph: the molecular edge graph
+        :param decoder: the value decoder (`'plain'`/`'compressed'`/`'precision'` or a callable)
+        :type decoder: str | Callable | None
+        :param byte_size: the per-value bit width
+        :type byte_size: int | None
+        :param byte_encoding: the base-N text encoding
+        :type byte_encoding: int | Callable | None
+        :param zmatrix: an explicit Z-matrix connectivity (built if omitted)
+        :return: the decoded Cartesian coordinates
+        :rtype: np.ndarray
+        """
         if zmatrix is None:
             frags = graph.get_canonical_fragments()
             zmatrix = coordops.canonical_fragment_zmatrix(frags, validate_additions=True)
@@ -2902,6 +3961,16 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def get_mol_edge_graph(cls, mol):
+        """
+        **LLM Docstring**
+
+        Build an `EdgeGraph` of a mol's atom/bond connectivity.
+
+        :param mol: the mol
+        :type mol: Chem.Mol
+        :return: the edge graph
+        :rtype: EdgeGraph
+        """
         from .. import Graphs
         atoms = np.arange(len(mol.GetAtoms()))
         bonds = [
@@ -2910,6 +3979,16 @@ class RDMolecule(ExternalMolecule):
         ]
         return Graphs.EdgeGraph(atoms, bonds)
     def get_edge_graph(self, mol=None):
+        """
+        **LLM Docstring**
+
+        Build an `EdgeGraph` of this molecule's connectivity (or of a supplied mol).
+
+        :param mol: an explicit mol (defaults to this one)
+        :type mol: Chem.Mol | None
+        :return: the edge graph
+        :rtype: EdgeGraph
+        """
         from .. import Graphs
         if mol is None:
             atoms, bonds = np.arange(len(self.atoms)), [b[:2] for b in self.bonds]
@@ -2918,6 +3997,11 @@ class RDMolecule(ExternalMolecule):
             return self.get_mol_edge_graph(mol)
 
     def _ipython_display_(self):
+        """
+        **LLM Docstring**
+
+        Display the molecule inline in IPython (delegates to `draw`).
+        """
         self.draw()._ipython_display_()
 
     @classmethod
@@ -2939,6 +4023,45 @@ class RDMolecule(ExternalMolecule):
                           force_field_type='mmff',
                           **kwargs
                           ):
+        """
+        **LLM Docstring**
+
+        Shared helper for the `from_*` format importers: read a mol from a file path or
+        an in-memory block using the supplied file/block reader functions, then wrap it
+        via `from_rdmol`.
+
+        :param file_reader: the file-reading function (or `None`)
+        :type file_reader: Callable | None
+        :param block_reader: the string/block-reading function
+        :type block_reader: Callable
+        :param block: the file path or block content
+        :type block: str | bytes
+        :param binary: treat the content as binary
+        :type binary: bool
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param guess_bonds: perceive bonds from geometry
+        :type guess_bonds: bool
+        :param conf_id: the conformer id
+        :type conf_id: int
+        :param charge: the molecular charge
+        :type charge: int | None
+        :param sanitize_ops: sanitization flags
+        :param post_sanitize: sanitize after reading
+        :type post_sanitize: bool
+        :param allow_generate_conformers: generate conformers if none exist
+        :type allow_generate_conformers: bool
+        :param num_confs: number of conformers to generate
+        :type num_confs: int
+        :param optimize: force-field optimize generated conformers
+        :type optimize: bool
+        :param take_min: keep only the lowest-energy conformer
+        :type take_min: bool
+        :param force_field_type: the force field for optimization
+        :type force_field_type: str
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         if os.path.isfile(block):
             if file_reader is None:
                 return cls._from_file_reader(
@@ -2976,6 +4099,23 @@ class RDMolecule(ExternalMolecule):
                       sanitize=False, remove_hydrogens=False,
                       **mol_opts
                       ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a MDL molblock/`.mol` file or string.
+
+        :param molblock: the molblock file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param sanitize: run sanitization
+        :type sanitize: bool
+        :param remove_hydrogens: remove explicit hydrogens
+        :type remove_hydrogens: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolFromMolFile,
@@ -2993,6 +4133,23 @@ class RDMolecule(ExternalMolecule):
                  sanitize=False, remove_hydrogens=False,
                  **mol_opts
                  ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a Marvin `.mrv` file or string.
+
+        :param molblock: the MRV file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param sanitize: run sanitization
+        :type sanitize: bool
+        :param remove_hydrogens: remove explicit hydrogens
+        :type remove_hydrogens: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolFromMrvFile,
@@ -3010,6 +4167,21 @@ class RDMolecule(ExternalMolecule):
                  guess_bonds=True,
                  **mol_opts
                  ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from an XYZ file or string (perceiving bonds by default).
+
+        :param molblock: the XYZ file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param guess_bonds: perceive bonds from geometry
+        :type guess_bonds: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolFromXYZFile,
@@ -3027,6 +4199,23 @@ class RDMolecule(ExternalMolecule):
                   sanitize=False, remove_hydrogens=False,
                   **mol_opts
                   ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a Tripos `.mol2` file or string.
+
+        :param molblock: the mol2 file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param sanitize: run sanitization
+        :type sanitize: bool
+        :param remove_hydrogens: remove explicit hydrogens
+        :type remove_hydrogens: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolFromMol2File,
@@ -3043,6 +4232,19 @@ class RDMolecule(ExternalMolecule):
                    add_implicit_hydrogens=True,
                    **mol_opts
                    ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a ChemDraw `.cdxml` file or string.
+
+        :param molblock: the CDXML file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolsFromCDXMLFile,
@@ -3058,6 +4260,19 @@ class RDMolecule(ExternalMolecule):
                  add_implicit_hydrogens=True,
                  **mol_opts
                  ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a PDB file or string.
+
+        :param molblock: the PDB file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolFromPDBFile,
@@ -3073,6 +4288,19 @@ class RDMolecule(ExternalMolecule):
                  add_implicit_hydrogens=False,
                  **mol_opts
                  ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from an RDKit-metadata-bearing PNG file or string.
+
+        :param molblock: the PNG file path or content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             Chem.MolFromPNGFile,
@@ -3089,6 +4317,21 @@ class RDMolecule(ExternalMolecule):
                    allow_generate_conformers=True,
                    **mol_opts
                    ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a FASTA sequence (generating a conformer by default).
+
+        :param molblock: the FASTA content
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param allow_generate_conformers: generate a conformer
+        :type allow_generate_conformers: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             None,
@@ -3106,6 +4349,21 @@ class RDMolecule(ExternalMolecule):
                    allow_generate_conformers=True,
                    **mol_opts
                    ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from an InChI string (generating a conformer by default).
+
+        :param molblock: the InChI string
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param allow_generate_conformers: generate a conformer
+        :type allow_generate_conformers: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             None,
@@ -3123,6 +4381,22 @@ class RDMolecule(ExternalMolecule):
                    allow_generate_conformers=True,
                    **mol_opts
                    ):
+        """
+        **LLM Docstring**
+
+        Build an `RDMolecule` from a HELM (macromolecule) string (generating a conformer
+        by default).
+
+        :param molblock: the HELM string
+        :type molblock: str
+        :param add_implicit_hydrogens: add implicit hydrogens
+        :type add_implicit_hydrogens: bool
+        :param allow_generate_conformers: generate a conformer
+        :type allow_generate_conformers: bool
+        :param mol_opts: extra options forwarded to the reader
+        :return: the wrapped molecule
+        :rtype: RDMolecule
+        """
         Chem = cls.chem_api()
         return cls._from_file_reader(
             None,
@@ -3140,6 +4414,27 @@ class RDMolecule(ExternalMolecule):
                            mode='w+',
                            binary=False,
                            **converter_opts):
+        """
+        **LLM Docstring**
+
+        Shared helper for the `to_*` exporters: write the mol either to a file (via a
+        file writer) or to a returned string (via a string writer), synthesizing the
+        missing path through a temporary file when only one writer is available.
+
+        :param file_writer: the file-writing function (or `None`)
+        :type file_writer: Callable | None
+        :param string_writer: the string-writing function (or `None`)
+        :type string_writer: Callable | None
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param mode: the file open mode
+        :type mode: str
+        :param binary: treat the content as binary
+        :type binary: bool
+        :param converter_opts: extra options for the writer
+        :return: the file path, or the serialized string
+        :rtype: str | bytes
+        """
         if filename is None:
             if string_writer is None:
                 if binary:
@@ -3171,6 +4466,19 @@ class RDMolecule(ExternalMolecule):
                 return file_writer(self.rdmol, filename, **converter_opts)
 
     def to_xyz(self, filename=None, conf_id=None, **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to XYZ (returned as a string, or written to a file).
+
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param opts: extra writer options
+        :return: the file path or XYZ string
+        :rtype: str
+        """
         Chem = self.chem_api()
         if conf_id is None:
             conf_id = self.mol.GetId()
@@ -3183,6 +4491,20 @@ class RDMolecule(ExternalMolecule):
         )
 
     def to_molblock(self, filename=None, conf_id=None, **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to an MDL molblock (returned as a string, or written to a
+        file).
+
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param opts: extra writer options
+        :return: the file path or molblock string
+        :rtype: str
+        """
         Chem = self.chem_api()
         if conf_id is None:
             conf_id = self.mol.GetId()
@@ -3195,6 +4517,20 @@ class RDMolecule(ExternalMolecule):
         )
 
     def to_mrv(self, filename=None, conf_id=None, **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to Marvin MRV (returned as a string, or written to a
+        file).
+
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param opts: extra writer options
+        :return: the file path or MRV string
+        :rtype: str
+        """
         Chem = self.chem_api()
         if conf_id is None:
             conf_id = self.mol.GetId()
@@ -3207,6 +4543,19 @@ class RDMolecule(ExternalMolecule):
         )
 
     def to_pdb(self, filename=None, conf_id=None, **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to PDB (returned as a string, or written to a file).
+
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param opts: extra writer options
+        :return: the file path or PDB string
+        :rtype: str
+        """
         Chem = self.chem_api()
         if conf_id is None:
             conf_id = self.mol.GetId()
@@ -3219,6 +4568,17 @@ class RDMolecule(ExternalMolecule):
         )
 
     def to_cml(self, filename=None, **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to CML (returned as a string, or written to a file).
+
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param opts: extra writer options
+        :return: the file path or CML string
+        :rtype: str
+        """
         Chem = self.chem_api()
         return self._to_file_or_string(
             Chem.MolToCMLFile,
@@ -3234,6 +4594,22 @@ class RDMolecule(ExternalMolecule):
                    id_col=None,
                    conf_ids=None
                    ):
+        """
+        **LLM Docstring**
+
+        Write the mol (optionally multiple conformers) to an SDF stream, creating an
+        `SDWriter` when one isn't supplied.
+
+        :param mol: the mol to write
+        :type mol: Chem.Mol
+        :param file: the output file/stream
+        :param base_writer: an existing SD writer to reuse
+        :param id_col: the id column for the writer
+        :param conf_ids: the conformer ids to write (all in one record if omitted)
+        :type conf_ids: Sequence | None
+        :return: the file that was written
+        :rtype: object
+        """
         import rdkit.Chem.AllChem as Chem
         if base_writer is None:
             base_writer = Chem.SDWriter(file, idCol=id_col) if id_col is not None else Chem.SDWriter(file)
@@ -3252,6 +4628,17 @@ class RDMolecule(ExternalMolecule):
         return file
 
     def to_sdf(self, filename=None, **opts):
+        """
+        **LLM Docstring**
+
+        Serialize the molecule to SDF (returned as a string, or written to a file).
+
+        :param filename: the output file path (or `None` to return a string)
+        :type filename: str | None
+        :param opts: extra writer options (e.g. `conf_ids`)
+        :return: the file path or SDF string
+        :rtype: str
+        """
         return self._to_file_or_string(
             self._write_sdf,
             None,
@@ -3261,9 +4648,28 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def allchem_api(cls):
+        """
+        **LLM Docstring**
+
+        Return the RDKit `Chem.AllChem` submodule.
+
+        :return: the `AllChem` module
+        :rtype: module
+        """
         return RDKitInterface.submodule("Chem.AllChem")
     @classmethod
     def get_force_field_type(cls, ff_type):
+        """
+        **LLM Docstring**
+
+        Resolve a force-field name to the RDKit `(force_field_getter, property_generator)`
+        pair.
+
+        :param ff_type: the force-field name (`'mmff'`/`'uff'`) or an existing pair
+        :type ff_type: str | tuple
+        :return: the force-field getter (and property generator)
+        :rtype: tuple
+        """
         AllChem = cls.allchem_api()
 
         if isinstance(ff_type, str):
@@ -3277,6 +4683,22 @@ class RDMolecule(ExternalMolecule):
         return ff_type
 
     def get_force_field(self, force_field_type='mmff', conf=None, mol=None, conf_id=None, **extra_props):
+        """
+        **LLM Docstring**
+
+        Build an RDKit force-field object for a conformer, computing any needed
+        force-field properties.
+
+        :param force_field_type: the force-field name or getter pair
+        :type force_field_type: str | tuple
+        :param conf: an explicit conformer
+        :param mol: an explicit mol
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :param extra_props: extra keyword arguments for the force-field getter
+        :return: the force-field object
+        :rtype: object
+        """
         if conf is None:
             if mol is None:
                 mol = self
@@ -3310,6 +4732,20 @@ class RDMolecule(ExternalMolecule):
             return force_field_type(mol, confId=conf_id, **extra_props)
 
     def evaluate_charges(self, coords, model='gasteiger'):
+        """
+        **LLM Docstring**
+
+        Compute the per-atom partial charges for a set of coordinates (currently only
+        the Gasteiger model).
+
+        :param coords: the coordinates (used to set the conformer)
+        :type coords: np.ndarray
+        :param model: the charge model
+        :type model: str
+        :return: the partial charges
+        :rtype: list[float]
+        :raises ValueError: for an unsupported charge model
+        """
         if model == 'gasteiger':
             from rdkit.Chem import AllChem
             AllChem.ComputeGasteigerCharges(self.rdmol)
@@ -3321,6 +4757,23 @@ class RDMolecule(ExternalMolecule):
             raise ValueError(f"charge model {model} not supported in RDKit")
 
     def calculate_energy(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
+        """
+        **LLM Docstring**
+
+        Compute the force-field energy of the current geometry, or of each geometry in a
+        batch.
+
+        :param geoms: a batch of geometries (or `None` for the current one)
+        :type geoms: np.ndarray | None
+        :param force_field_generator: a force-field factory (defaults to `get_force_field`)
+        :type force_field_generator: Callable | None
+        :param force_field_type: the force-field name
+        :type force_field_type: str
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :return: the energy (or array of energies)
+        :rtype: float | np.ndarray
+        """
         Chem = self.chem_api()
         if conf_id is None:
             conf_id = self.mol.GetId()
@@ -3350,6 +4803,23 @@ class RDMolecule(ExternalMolecule):
                 return ff.CalcEnergy()
 
     def calculate_gradient(self, geoms=None, force_field_generator=None, force_field_type='mmff', conf_id=None):
+        """
+        **LLM Docstring**
+
+        Compute the force-field energy gradient of the current geometry, or of each
+        geometry in a batch.
+
+        :param geoms: a batch of geometries (or `None` for the current one)
+        :type geoms: np.ndarray | None
+        :param force_field_generator: a force-field factory (defaults to `get_force_field`)
+        :type force_field_generator: Callable | None
+        :param force_field_type: the force-field name
+        :type force_field_type: str
+        :param conf_id: the conformer id
+        :type conf_id: int | None
+        :return: the gradient (or batch of gradients)
+        :rtype: np.ndarray
+        """
         if force_field_generator is None:
             force_field_generator = self.get_force_field
 
@@ -3380,6 +4850,24 @@ class RDMolecule(ExternalMolecule):
                 return np.array(ff.CalcGrad()).reshape(-1)
 
     def calculate_hessian(self, force_field_generator=None, force_field_type='mmff', stencil=5, mesh_spacing=.01, **fd_opts):
+        """
+        **LLM Docstring**
+
+        Compute the force-field Hessian at the current geometry by finite-differencing
+        the analytic gradient.
+
+        :param force_field_generator: a force-field factory
+        :type force_field_generator: Callable | None
+        :param force_field_type: the force-field name
+        :type force_field_type: str
+        :param stencil: the finite-difference stencil size
+        :type stencil: int
+        :param mesh_spacing: the finite-difference step
+        :type mesh_spacing: float
+        :param fd_opts: extra finite-difference options
+        :return: the Hessian tensor
+        :rtype: np.ndarray
+        """
         from ..Zachary import FiniteDifferenceDerivative
 
         cur_geom = np.array(self.mol.GetPositions()).reshape(-1, 3)
@@ -3395,6 +4883,17 @@ class RDMolecule(ExternalMolecule):
         # return der.derivatives(cur_geom.flatten()).derivative_tensor(2)
 
         def jac(structs):
+            """
+            **LLM Docstring**
+
+            Gradient function passed to the finite-difference differentiator: reshape the
+            flattened structures and return their force-field gradients.
+
+            :param structs: the flattened structures
+            :type structs: np.ndarray
+            :return: the gradients
+            :rtype: np.ndarray
+            """
             structs = structs.reshape(structs.shape[:-1] + (-1, 3))
             new_grad = self.calculate_gradient(structs,
                                                force_field_generator=force_field_generator,
@@ -3405,6 +4904,21 @@ class RDMolecule(ExternalMolecule):
         return der.derivatives(cur_geom.flatten()).derivative_tensor(1)
 
     def get_optimizer_params(self, maxAttempts=1000, useExpTorsionAnglePrefs=True, useBasicKnowledge=True, **etc):
+        """
+        **LLM Docstring**
+
+        Build an RDKit ETKDGv3 parameter object for structure optimization/embedding.
+
+        :param maxAttempts: the maximum embedding attempts
+        :type maxAttempts: int
+        :param useExpTorsionAnglePrefs: use experimental torsion prefs
+        :type useExpTorsionAnglePrefs: bool
+        :param useBasicKnowledge: use basic chemical knowledge
+        :type useBasicKnowledge: bool
+        :param etc: extra parameters set on the params object
+        :return: the parameter object
+        :rtype: object
+        """
         AllChem = self.allchem_api()
 
         params = AllChem.ETKDGv3()
@@ -3417,10 +4931,40 @@ class RDMolecule(ExternalMolecule):
         return params
 
     def optimize_structure(self, geoms=None, force_field_type='mmff', optimizer=None, maxIters=1000, **opts):
+        """
+        **LLM Docstring**
+
+        Force-field optimize the current geometry, or each geometry in a batch, returning
+        the optimizer status and optimized coordinates.
+
+        :param geoms: a batch of geometries (or `None` for the current one)
+        :type geoms: np.ndarray | None
+        :param force_field_type: the force-field name
+        :type force_field_type: str
+        :param optimizer: a custom optimizer callable
+        :type optimizer: Callable | None
+        :param maxIters: the maximum optimization iterations
+        :type maxIters: int
+        :param opts: extra optimizer options
+        :return: `(status, optimized_coords, extra)`
+        :rtype: tuple
+        """
 
         if optimizer is None:
             ff_helpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
             def optimizer(mol, **etc):
+                """
+                **LLM Docstring**
+
+                Default optimizer: build the force field for the mol and run RDKit's
+                force-field minimization.
+
+                :param mol: the molecule to optimize
+                :type mol: RDMolecule
+                :param etc: extra options (e.g. `maxIters`)
+                :return: the optimization status code
+                :rtype: int
+                """
                 ff = mol.get_force_field(force_field_type)
                 return ff_helpers.OptimizeMolecule(ff)
 
@@ -3445,6 +4989,15 @@ class RDMolecule(ExternalMolecule):
             return opt, self.mol.GetPositions(), {}
 
     def show(self):
+        """
+        **LLM Docstring**
+
+        Display an interactive 3D rendering of the current conformer (via RDKit's
+        IPython 3D console).
+
+        :return: the 3D display
+        :rtype: object
+        """
         return RDKitInterface.submodule('Chem.Draw.IPythonConsole').drawMol3D(
             self.mol.GetOwningMol(),
             confId=self.mol.GetId()

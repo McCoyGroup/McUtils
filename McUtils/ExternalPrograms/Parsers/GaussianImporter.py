@@ -137,6 +137,19 @@ class GaussianLogReader(FileStreamReader):
 
     @classmethod
     def read_props(cls, file, keys):
+        """
+        **LLM Docstring**
+
+        Convenience classmethod: open `file`, parse the requested keys, and return the
+        result (unwrapped to the single value when one key is given).
+
+        :param file: the Gaussian `.log` file
+        :type file: str
+        :param keys: the component key(s) to read
+        :type keys: str | list[str]
+        :return: the parsed data
+        :rtype: dict | Any
+        """
         with cls(file) as reader:
             parse = reader.parse(keys)
         if isinstance(keys, str):
@@ -162,6 +175,15 @@ class GaussianFChkReader(FileStreamReader):
     to_common_name = FormattedCheckpointCommonNames
 
     def __init__(self, file, **kwargs):
+        """
+        **LLM Docstring**
+
+        Open a Gaussian `.fchk` file for stream reading.
+
+        :param file: the `.fchk` file
+        :type file: str
+        :param kwargs: extra arguments for the stream reader
+        """
         super().__init__(file, **kwargs)
         self._num_atoms = None
         # with self: self.num_atoms = self.parse("Number of atoms")["Number of atoms"]
@@ -281,10 +303,35 @@ class GaussianFChkReader(FileStreamReader):
 
     @property
     def num_atoms(self):
+        """
+        **LLM Docstring**
+
+        The number of atoms in the file, parsed (and cached) from the `Number of atoms`
+        block on first access.
+
+        :return: the atom count
+        :rtype: int
+        """
         if self._num_atoms is None:
             self._num_atoms = self.parse(["Number of atoms"])["Number of atoms"]
         return self._num_atoms
     def parse(self, keys=None, default='raise'):
+        """
+        **LLM Docstring**
+
+        Parse the requested blocks out of the `.fchk` file (or every block when no keys
+        are given), resolving common-name aliases and skipping unrequested blocks.
+
+        Malformed blocks are skipped where possible; when a requested key can't be found,
+        either raises or fills in `default` depending on the `default` argument.
+
+        :param keys: the block key(s) to read (all if omitted)
+        :type keys: str | Iterable[str] | None
+        :param default: value to use for missing keys, or `'raise'` to error
+        :type default: Any
+        :return: the parsed blocks keyed by name
+        :rtype: dict
+        """
         if keys is None:
             keys_to_go = None
         else:
@@ -356,9 +403,21 @@ class GaussianFChkReader(FileStreamReader):
 
     @classmethod
     def read_props(cls, file, keys):
+        """
+        **LLM Docstring**
+
+        Convenience classmethod: open `file`, parse the requested keys, and return the
+        result (unwrapped to the single value when one key is given).
+
+        :param file: the `.fchk` file
+        :type file: str
+        :param keys: the block key(s) to read
+        :type keys: str | list[str]
+        :return: the parsed data
+        :rtype: dict | Any
+        """
         with cls(file) as reader:
             parse = reader.parse(keys)
         if isinstance(keys, str):
             parse = parse[keys]
         return parse
-

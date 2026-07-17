@@ -61,12 +61,32 @@ CartParser = StringParser(
 )
 
 def strip_recursive(at_list):
+    """
+    **LLM Docstring**
+
+    Recursively strip whitespace from every string in a nested list.
+
+    :param at_list: the (possibly nested) list of strings
+    :type at_list: list
+    :return: the stripped list
+    :rtype: list
+    """
     return [
         s.strip() if isinstance(s, str) else strip_recursive(s)
         for s in at_list
     ]
 OrcaCoords = namedtuple("OrcaCoords", ["atoms", "coords"])
 def cartesian_coordinates_parser(strs):
+    """
+    **LLM Docstring**
+
+    Parse an ORCA Cartesian-coordinates block into atom labels and coordinates.
+
+    :param strs: the matched block string(s)
+    :type strs: list[str]
+    :return: the parsed `(atoms, coordinates)`
+    :rtype: OrcaCoords
+    """
     strss = "\n\n".join(strs)
 
     parse = CartParser.parse_all(strss)
@@ -136,6 +156,17 @@ CartAUParser = StringParser(
 
 OrcaAUCoords = namedtuple("OrcaAUCoords", ["atoms", "masses", "coords"])
 def cartesian_au_coordinates_parser(strs):
+    """
+    **LLM Docstring**
+
+    Parse an ORCA atomic-units Cartesian-coordinates block into atom labels, masses,
+    and coordinates.
+
+    :param strs: the matched block string(s)
+    :type strs: list[str]
+    :return: the parsed `(atoms, mass, coordinates)`
+    :rtype: OrcaAUCoords
+    """
     strss = "\n\n".join(strs)
 
     parse = CartAUParser.parse_all(strss)
@@ -178,6 +209,16 @@ FreqsParser = StringParser(
 )
 
 def freqs_parser(freq_str):
+    """
+    **LLM Docstring**
+
+    Parse an ORCA vibrational-frequencies block into a flat frequency array.
+
+    :param freq_str: the frequencies block text
+    :type freq_str: str
+    :return: the frequencies
+    :rtype: np.ndarray
+    """
 
     parse = FreqsParser.parse_all(freq_str)
     # coords = (
@@ -214,6 +255,17 @@ OrcaMatrixParser = StringParser(
 )
 
 def parse_orca_matrix(orca_mat):
+    """
+    **LLM Docstring**
+
+    Parse an ORCA column-blocked matrix printout into a dense array, dropping the
+    row-index column of each block and concatenating the blocks.
+
+    :param orca_mat: the matrix block text
+    :type orca_mat: str
+    :return: the parsed matrix
+    :rtype: np.ndarray
+    """
 
     parse = np.concatenate(
         [

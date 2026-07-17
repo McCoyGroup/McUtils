@@ -18,6 +18,19 @@ class FchkForceConstants:
     Allows us to construct the force constant matrix in lazy fashion if we want.
     """
     def __init__(self, fcs, num_atoms=None, reader=None):
+        """
+        **LLM Docstring**
+
+        Hold the flattened force-constant (lower-triangle) data, optionally with the atom
+        count (or a reader that can supply it).
+
+        :param fcs: the flattened lower-triangle force constants
+        :type fcs: np.ndarray
+        :param num_atoms: the number of atoms (inferred lazily if omitted)
+        :type num_atoms: int | None
+        :param reader: a reader from which to pull the atom count
+        :type reader: object | None
+        """
         self.fcs = fcs
         self._n = (
             num_atoms
@@ -28,6 +41,14 @@ class FchkForceConstants:
         )
 
     def __len__(self):
+        """
+        **LLM Docstring**
+
+        The length of the raw flattened force-constant data.
+
+        :return: the number of stored values
+        :rtype: int
+        """
         return len(self.fcs)
 
     def _get_n(self):
@@ -41,9 +62,25 @@ class FchkForceConstants:
 
     @property
     def n(self):
+        """
+        **LLM Docstring**
+
+        The number of atoms, inferred from the data length if not supplied.
+
+        :return: the atom count
+        :rtype: int
+        """
         return self._get_n()
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        The shape of the full force-constant matrix, `(3n, 3n)`.
+
+        :return: the matrix shape
+        :rtype: tuple[int, int]
+        """
         return (3*self.n, 3*self.n)
 
     def _get_array(self):
@@ -59,12 +96,36 @@ class FchkForceConstants:
 
     @property
     def array(self):
+        """
+        **LLM Docstring**
+
+        The full, symmetrized `(3n, 3n)` force-constant matrix reconstructed from the
+        lower-triangle data.
+
+        :return: the force-constant matrix
+        :rtype: np.ndarray
+        """
         return self._get_array()
 
 
 class FchkForceDerivatives:
     """Holder class for force constant derivatives coming out of an fchk file"""
     def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
+        """
+        **LLM Docstring**
+
+        Hold the flattened third/fourth force-constant derivative data, optionally with
+        the atom and mode counts (or a reader supplying the atom count).
+
+        :param derivs: the flattened derivative data
+        :type derivs: np.ndarray
+        :param num_atoms: the number of atoms (inferred lazily if omitted)
+        :type num_atoms: int | None
+        :param num_modes: the number of modes (inferred lazily if omitted)
+        :type num_modes: int | None
+        :param reader: a reader from which to pull the atom count
+        :type reader: object | None
+        """
         self.derivs = derivs
         self._n = (
             num_atoms
@@ -76,9 +137,27 @@ class FchkForceDerivatives:
         self._m = num_modes
 
     def __len__(self):
+        """
+        **LLM Docstring**
+
+        The length of the raw flattened derivative data.
+
+        :return: the number of stored values
+        :rtype: int
+        """
         return len(self.derivs)
 
     def _get_n_m(self):
+        """
+        **LLM Docstring**
+
+        Infer and cache the atom count `n` and mode count `m` from the data length,
+        using the closed-form solutions of the sizing polynomials (with a Mathematica-
+        derived cubic for the fully unknown case).
+
+        :return: None
+        :rtype: None
+        """
         if self._n is None:
             l = len(self)
             if self._m is None:
@@ -105,32 +184,80 @@ class FchkForceDerivatives:
 
     @property
     def n(self):
+        """
+        **LLM Docstring**
+
+        The number of atoms, inferred from the data length if not supplied.
+
+        :return: the atom count
+        :rtype: int
+        """
         if self._n is None:
             self._get_n_m()
         return self._n
 
     @property
     def num_modes(self):
+        """
+        **LLM Docstring**
+
+        The number of modes, inferred from the data length if not supplied.
+
+        :return: the mode count
+        :rtype: int
+        """
         if self._m is None:
             self._get_n_m()
         return self._m
 
     def _get_third_derivs(self):
+        """
+        **LLM Docstring**
+
+        The first half of the raw data, holding the third derivatives.
+
+        :return: the third-derivative data
+        :rtype: np.ndarray
+        """
         # fourth and third derivs are same len
         d = self.derivs
         return d[:int(len(d)/2)]
 
     def _get_fourth_derivs(self):
+        """
+        **LLM Docstring**
+
+        The second half of the raw data, holding the (diagonal) fourth derivatives.
+
+        :return: the fourth-derivative data
+        :rtype: np.ndarray
+        """
         # fourth and third derivs are same len
         d = self.derivs
         return d[int(len(d)/2):]
 
     @property
     def third_derivs(self):
+        """
+        **LLM Docstring**
+
+        The raw third-derivative data.
+
+        :return: the third-derivative data
+        :rtype: np.ndarray
+        """
         return self._get_third_derivs()
 
     @property
     def fourth_derivs(self):
+        """
+        **LLM Docstring**
+
+        The raw fourth-derivative data.
+
+        :return: the fourth-derivative data
+        :rtype: np.ndarray
+        """
         return self._get_fourth_derivs()
     @staticmethod
     def _fill_3d_tensor(n, derivs, m=None):
@@ -169,6 +296,15 @@ class FchkForceDerivatives:
         return self._fill_3d_tensor(n, derivs, m=self.num_modes)
     @property
     def third_deriv_array(self):
+        """
+        **LLM Docstring**
+
+        The third derivatives as a full `(m, 3n, 3n)` tensor, symmetrized from the
+        lower-triangle data.
+
+        :return: the third-derivative tensor
+        :rtype: np.ndarray
+        """
         return self._get_third_deriv_array()
     def _get_fourth_deriv_array(self):
         """We'll make our array of fourth derivs exactly the same as the third
@@ -183,11 +319,33 @@ class FchkForceDerivatives:
         return SparseArray.from_diag(self._fill_3d_tensor(n, derivs, m=self.num_modes))
     @property
     def fourth_deriv_array(self):
+        """
+        **LLM Docstring**
+
+        The fourth derivatives as a sparse tensor built from the diagonal elements
+        Gaussian provides.
+
+        :return: the fourth-derivative tensor
+        :rtype: SparseArray
+        """
         return self._get_fourth_deriv_array()
 
 class FchkDipoleDerivatives:
     """Holder class for dipole derivatives coming out of an fchk file"""
     def __init__(self, derivs, num_atoms=None, reader=None):
+        """
+        **LLM Docstring**
+
+        Hold the flattened dipole-derivative data, optionally with the atom count (or a
+        reader supplying it).
+
+        :param derivs: the flattened dipole derivatives
+        :type derivs: np.ndarray
+        :param num_atoms: the number of atoms (inferred lazily if omitted)
+        :type num_atoms: int | None
+        :param reader: a reader from which to pull the atom count
+        :type reader: object | None
+        """
         self.derivs = derivs
         self._n = (
             num_atoms
@@ -208,17 +366,57 @@ class FchkDipoleDerivatives:
         return self._n
     @property
     def n(self):
+        """
+        **LLM Docstring**
+
+        The number of atoms, inferred from the data length (`3 * 3n` values) if not
+        supplied.
+
+        :return: the atom count
+        :rtype: int
+        """
         return self._get_n()
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        The shape of the dipole-derivative array, `(3n, 3)`.
+
+        :return: the array shape
+        :rtype: tuple[int, int]
+        """
         return (3*self.n, 3)
     @property
     def array(self):
+        """
+        **LLM Docstring**
+
+        The dipole derivatives reshaped to `(3n, 3)`.
+
+        :return: the dipole-derivative array
+        :rtype: np.ndarray
+        """
         return np.reshape(self.derivs, self.shape)
 
 class FchkDipoleHigherDerivatives:
     """Holder class for dipole derivatives coming out of an fchk file"""
     def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
+        """
+        **LLM Docstring**
+
+        Hold the flattened higher dipole-derivative data (numerical derivatives w.r.t.
+        the modes of the Cartesian dipole derivatives), optionally with atom/mode counts.
+
+        :param derivs: the flattened higher dipole derivatives
+        :type derivs: np.ndarray
+        :param num_atoms: the number of atoms (inferred lazily if omitted)
+        :type num_atoms: int | None
+        :param num_modes: the number of modes (inferred lazily if omitted)
+        :type num_modes: int | None
+        :param reader: a reader from which to pull the atom count
+        :type reader: object | None
+        """
         self.derivs = derivs
         self._n = (
             num_atoms
@@ -248,11 +446,27 @@ class FchkDipoleHigherDerivatives:
         # return self._n
     @property
     def num_modes(self):
+        """
+        **LLM Docstring**
+
+        The number of modes, inferred from the data length if not supplied.
+
+        :return: the mode count
+        :rtype: int
+        """
         if self._m is None:
             self._get_n_m()
         return self._m
     @property
     def n(self):
+        """
+        **LLM Docstring**
+
+        The number of atoms, inferred from the data length if not supplied.
+
+        :return: the atom count
+        :rtype: int
+        """
         if self._n is None:
             self._get_n_m()
         return self._n
@@ -261,14 +475,39 @@ class FchkDipoleHigherDerivatives:
     #     self._n = n
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        The shape of one derivative block, `(m, 3n, 3)`.
+
+        :return: the block shape
+        :rtype: tuple[int, int, int]
+        """
         return (self.num_modes, 3*self.n, 3)
 
     @property
     def second_deriv_array(self):
+        """
+        **LLM Docstring**
+
+        The second dipole derivatives (`d^2 mu / dQ dx`) reshaped to `(m, 3n, 3)`.
+
+        :return: the second-derivative array
+        :rtype: np.ndarray
+        """
         nels = int(np.prod(self.shape))
         return np.reshape(self.derivs[:nels], self.shape)
     @property
     def third_deriv_array(self):
+        """
+        **LLM Docstring**
+
+        The third dipole derivatives (`d^3 mu / dQ^2 dx`) as a `(m, m, 3n, 3)` tensor,
+        built from the diagonal blocks Gaussian provides.
+
+        :return: the third-derivative tensor
+        :rtype: np.ndarray
+        """
         nels = int(np.prod(self.shape))
         base_array = np.reshape(self.derivs[nels:], self.shape)
         full_array = np.zeros((self.num_modes, self.num_modes, 3*self.n, 3))
@@ -282,6 +521,21 @@ class FchkDipoleNumDerivatives:
     Gaussian returns first and second derivatives
     """
     def __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
+        """
+        **LLM Docstring**
+
+        Hold the flattened numerical dipole derivatives (first and second) with respect
+        to the modes, optionally with the mode count.
+
+        :param derivs: the flattened numerical derivatives
+        :type derivs: np.ndarray
+        :param num_atoms: unused (kept for signature parity)
+        :type num_atoms: int | None
+        :param num_modes: the number of modes (inferred lazily if omitted)
+        :type num_modes: int | None
+        :param reader: unused (kept for signature parity)
+        :type reader: object | None
+        """
         self.derivs = derivs
         # self._n = num_atoms if num_atoms is not None else reader.num_atoms
         self._m = num_modes
@@ -297,13 +551,45 @@ class FchkDipoleNumDerivatives:
         return self._m
     @property
     def num_modes(self):
+        """
+        **LLM Docstring**
+
+        The number of modes, inferred from the data length if not supplied.
+
+        :return: the mode count
+        :rtype: int
+        """
         return self._get_m()
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        The shape of one derivative block, `(m, 3)`.
+
+        :return: the block shape
+        :rtype: tuple[int, int]
+        """
         return (self.num_modes, 3)
     @property
     def first_derivatives(self):
+        """
+        **LLM Docstring**
+
+        The first numerical dipole derivatives, reshaped to `(m, 3)`.
+
+        :return: the first-derivative array
+        :rtype: np.ndarray
+        """
         return np.reshape(self.derivs[:len(self.derivs)//2], self.shape)
     @property
     def second_derivatives(self):
+        """
+        **LLM Docstring**
+
+        The second numerical dipole derivatives, reshaped to `(m, 3)`.
+
+        :return: the second-derivative array
+        :rtype: np.ndarray
+        """
         return np.reshape(self.derivs[len(self.derivs)//2:], self.shape)

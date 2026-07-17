@@ -1,4 +1,3 @@
-
 import importlib
 from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException
 
@@ -20,6 +19,15 @@ class ElectronicStructureLogReader(FileStreamReader):
     _comps = None
     @classmethod
     def load_components(cls):
+        """
+        **LLM Docstring**
+
+        Import (and cache) the module registering this reader's parse components (the
+        block tag/parser table), resolving a relative `components_package`.
+
+        :return: the loaded components module
+        :rtype: module
+        """
         if cls._comps is None:
             pkg_root = cls.components_package
             if pkg_root.startswith('.'):
@@ -28,12 +36,39 @@ class ElectronicStructureLogReader(FileStreamReader):
         return cls._comps
     @property
     def registered_components(self):
+        """
+        **LLM Docstring**
+
+        The mapping of component name to its block specification (tags, parser, mode),
+        taken from the loaded components module.
+
+        :return: the registered components
+        :rtype: dict
+        """
         return self.load_components().__components__
     @property
     def default_keys(self):
+        """
+        **LLM Docstring**
+
+        The default set of component keys to parse, taken from the loaded components
+        module.
+
+        :return: the default keys
+        :rtype: tuple
+        """
         return self.load_components().__defaults__
     @property
     def default_ordering(self):
+        """
+        **LLM Docstring**
+
+        The default parse ordering for the components, taken from the loaded components
+        module.
+
+        :return: the ordering mapping
+        :rtype: dict
+        """
         return self.load_components().__ordering__
 
     def parse(self, keys, num=None, reset=False):
@@ -116,6 +151,19 @@ class ElectronicStructureLogReader(FileStreamReader):
 
     @classmethod
     def read_props(cls, file, keys):
+        """
+        **LLM Docstring**
+
+        Convenience classmethod: open `file`, parse the requested keys, and return the
+        result (unwrapped to the single value when one key is given).
+
+        :param file: the log file
+        :type file: str
+        :param keys: the component key(s) to read
+        :type keys: str | list[str]
+        :return: the parsed data
+        :rtype: dict | Any
+        """
         with cls(file) as reader:
             parse = reader.parse(keys)
         if isinstance(keys, str):
