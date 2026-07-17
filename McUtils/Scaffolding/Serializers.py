@@ -44,6 +44,20 @@ class PseudoPickler:
                  protocol=1,
                  b64encode=False
                  ):
+        """
+        **LLM Docstring**
+
+        Configure pseudo-pickling fallback, protocol marker, and optional base64 encoding for embedded pickle bytes.
+
+        :param allow_pickle: whether unsupported values may fall back to pickle
+        :type allow_pickle: object
+        :param protocol: pseudo-pickle protocol marker
+        :type protocol: object
+        :param b64encode: whether pickle bytes are base64 encoded
+        :type b64encode: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         self.allow_pickle=allow_pickle
         self.protocol=protocol
         self.b64encode=b64encode
@@ -60,6 +74,16 @@ class PseudoPickler:
     _safe_modules = ["numpy", "multiprocessing"]
 
     def _sanitize_key(self, key):
+        """
+        **LLM Docstring**
+
+        Reject nonprimitive mapping keys so the serialized structure remains compatible with JSON-like formats.
+
+        :param key: the storage or lookup key
+        :type key: object
+        :return: the validated primitive key unchanged
+        :rtype: str | int | float | bool
+        """
         # JSON only supports string/int/bool keys
         if not isinstance(key, (str, int, float, bool)):
             raise ValueError("serialized keys must be primitive types")
@@ -117,6 +141,16 @@ class PseudoPickler:
             return self.serialize(odict, cache=cache)
 
     def _to_importable_state(self, obj):
+        """
+        **LLM Docstring**
+
+        Pickle an importable object and wrap the bytes with protocol metadata, optionally base64-encoding them.
+
+        :param obj: object to serialize or manage
+        :type obj: object
+        :return: a protocol-tagged mapping containing pickle bytes or base64 text
+        :rtype: dict
+        """
         try:
             dump = pickle.dumps(obj)
         except:
@@ -128,6 +162,16 @@ class PseudoPickler:
             "pickle_data": dump
         }
     def _can_import(self, obj):
+        """
+        **LLM Docstring**
+
+        Allow direct pickle state for objects from the configured safe top-level modules and builtin functions.
+
+        :param obj: object to serialize or manage
+        :type obj: object
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         # print(type(obj).__module__)
         return (
                 type(obj).__module__.split(".")[0] in self._safe_modules
@@ -256,6 +300,18 @@ class ConvertedData:
     Wrapper class for holding serialized data so we can be sure it's clean
     """
     def __init__(self, data, serializer):
+        """
+        **LLM Docstring**
+
+        Pair already-converted payload data with the serializer that produced it.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param serializer: serializer instance or specification
+        :type serializer: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         self.data = data
         self.serializer = serializer
 
@@ -271,16 +327,50 @@ class BaseSerializer(metaclass=abc.ABCMeta):
     registry = {}
     @classmethod
     def register(cls, name, serializer=None):
+        """
+        **LLM Docstring**
+
+        Register a serializer class under a name, either immediately or through decorator syntax.
+
+        :param name: registry, command, resource, or object name
+        :type name: object
+        :param serializer: serializer instance or specification
+        :type serializer: object
+        :return: No explicit value unless noted by the underlying delegated operation.
+        :rtype: None | object
+        """
         if serializer is not None:
             cls.registry[name] = serializer
             serializer.registry_name = name
             return serializer
         else:
             def register(serializer):
+                """
+                **LLM Docstring**
+
+                Decorator closure that registers the supplied serializer under the captured name.
+
+                :param serializer: serializer instance or specification
+                :type serializer: object
+                :return: No explicit value unless noted by the underlying delegated operation.
+                :rtype: None | object
+                """
                 return cls.register(name, serializer)
             return register
     @classmethod
     def construct(cls, serializer_type, **kwargs):
+        """
+        **LLM Docstring**
+
+        Return an existing serializer or instantiate one resolved from a registry name or class.
+
+        :param serializer_type: serializer instance, registry name, or class
+        :type serializer_type: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The resolved or newly constructed helper object.
+        :rtype: object
+        """
         if isinstance(serializer_type, BaseSerializer): return serializer_type
         if isinstance(serializer_type, str):
             serializer_type = cls.registry[serializer_type]
@@ -365,23 +455,93 @@ class PicklingSerializer(BaseSerializer):
     binary = True
 
     def __init__(self, allow_pickle=True, pseudopickler=None):
+        """
+        **LLM Docstring**
+
+        Configure a pseudo-pickler-backed binary serializer and whether nested pseudo-pickle payloads are restored.
+
+        :param allow_pickle: whether unsupported values may fall back to pickle
+        :type allow_pickle: object
+        :param pseudopickler: pseudo-pickler used for arbitrary objects
+        :type pseudopickler: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if pseudopickler is None:
             pseudopickler = PseudoPickler(b64encode=True)
         self.pickler = pseudopickler
         self.allow_pickle = allow_pickle
     def convert(self, data):
+        """
+        **LLM Docstring**
+
+        Pseudo-pickle arbitrary input and wrap the resulting payload as converted data.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return ConvertedData(self.pickler.serialize(data), self)
     def deconvert(self, data):
+        """
+        **LLM Docstring**
+
+        Restore a pseudo-pickled payload to Python objects.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         return self.pickler.deserialize(data)
     def serialize(self, file, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        Convert input when needed and write its binary payload to the file object.
+
+        :param file: path or file-like object
+        :type file: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         file.write(data.data)
     def dumps(self, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        Return the converted binary pseudo-pickle payload directly.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: the binary pseudo-pickle payload
+        :rtype: bytes | bytearray | memoryview
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         return data.data
     def _deserialize_dict(self, dat, key=None):
+        """
+        **LLM Docstring**
+
+        Restore a payload, optionally descend through a slash-separated key path, and perform a second pseudo-pickle restoration when enabled.
+
+        :param dat: serialized payload to restore
+        :type dat: object
+        :param key: the storage or lookup key
+        :type key: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = self.deconvert(dat)
         if key is not None:
             if '/' in key:
@@ -395,10 +555,38 @@ class PicklingSerializer(BaseSerializer):
             dat = self.pickler.deserialize(dat)
         return dat
     def loads(self, data, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Deserialize an in-memory payload and optionally select a nested key.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = self.pickler.deserialize(data)
         dat = self._deserialize_dict(dat, key)
         return dat
     def deserialize(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Read bytes from a file or path and delegate to `loads`.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = dev.read_file(file, mode='rb')
         return self.loads(dat, key=key, **kwargs)
 
@@ -410,12 +598,38 @@ class JSONSerializer(BaseSerializer):
     default_extension = ".json"
     class BaseEncoder(json.JSONEncoder):
         def __init__(self, *args, pseudopickler=None, allow_pickle=True, **kwargs):
+            """
+            **LLM Docstring**
+
+            Initialize JSON encoding with NumPy handling and optional pseudo-pickle fallback for unsupported objects.
+
+            :param pseudopickler: pseudo-pickler used for arbitrary objects
+            :type pseudopickler: object
+            :param allow_pickle: whether unsupported values may fall back to pickle
+            :type allow_pickle: object
+            :param args: positional arguments forwarded to a callable
+            :type args: object
+            :param kwargs: keyword arguments forwarded to a callable
+            :type kwargs: object
+            :return: No explicit value; the method mutates state or performs I/O.
+            :rtype: None
+            """
             super().__init__(*args, **kwargs)
             if pseudopickler is None:
                 pseudopickler = PseudoPickler(b64encode=True)
             self.allow_pickle=allow_pickle
             self.pickler = pseudopickler
         def default(self, obj):
+            """
+            **LLM Docstring**
+
+            Convert NumPy arrays and scalars to JSON primitives, otherwise use the base encoder or pseudo-pickle fallback.
+
+            :param obj: object to serialize or manage
+            :type obj: object
+            :return: a JSON-compatible primitive, list, or pseudo-pickle state
+            :rtype: object
+            """
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
             elif isinstance(obj, (np.integer,)):
@@ -433,6 +647,20 @@ class JSONSerializer(BaseSerializer):
                     return json.JSONEncoder.default(self, obj)
 
     def __init__(self, encoder=None, allow_pickle=True, pseudopickler=None):
+        """
+        **LLM Docstring**
+
+        Configure the JSON encoder, pseudo-pickler, and unsupported-object fallback policy.
+
+        :param encoder: JSON encoder instance
+        :type encoder: object
+        :param allow_pickle: whether unsupported values may fall back to pickle
+        :type allow_pickle: object
+        :param pseudopickler: pseudo-pickler used for arbitrary objects
+        :type pseudopickler: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if pseudopickler is None:
             pseudopickler = PseudoPickler(b64encode=True)
         self.pseudopickler = pseudopickler
@@ -440,18 +668,76 @@ class JSONSerializer(BaseSerializer):
         if encoder is None:
             self.encoder = self.BaseEncoder(pseudopickler=pseudopickler, allow_pickle=allow_pickle)
     def convert(self, data):
+        """
+        **LLM Docstring**
+
+        Encode data to a JSON string and mark it as converted.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return ConvertedData(self.encoder.encode(data), self)
     def deconvert(self, data):
+        """
+        **LLM Docstring**
+
+        Return decoded JSON data unchanged before optional pseudo-pickle restoration.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         return data
     def serialize(self, file, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        JSON-encode input when needed and write the resulting text.
+
+        :param file: path or file-like object
+        :type file: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         file.write(data.data)
     def dumps(self, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        Return the JSON text representation directly.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: the JSON document text
+        :rtype: str
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         return data.data
     def _deserialize_dict(self, dat, key=None):
+        """
+        **LLM Docstring**
+
+        Optionally select a slash-delimited key path and recursively restore pseudo-pickled objects.
+
+        :param dat: decoded JSON value to postprocess
+        :type dat: object
+        :param key: the storage or lookup key
+        :type key: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = self.deconvert(dat)
         if key is not None:
             if '/' in key:
@@ -465,10 +751,38 @@ class JSONSerializer(BaseSerializer):
             dat = self.pseudopickler.deserialize(dat)
         return dat
     def loads(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Decode JSON text and postprocess optional key selection and pseudo-pickled values.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = json.loads(file)
         dat = self._deserialize_dict(dat, key)
         return dat
     def deserialize(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Decode JSON from a file object and postprocess optional key selection and pseudo-pickled values.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = json.load(file)
         dat = self._deserialize_dict(dat, key)
         return dat
@@ -482,20 +796,76 @@ class YAMLSerializer(BaseSerializer):
     """
     default_extension = ".yml"
     def __init__(self):
+        """
+        **LLM Docstring**
+
+        Import and retain the YAML backend, raising at construction time when YAML support is unavailable.
+
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         # just checks that we do really have YAML support...
         import yaml as api
         self.api = api
 
     def convert(self, data):
+        """
+        **LLM Docstring**
+
+        Wrap YAML-compatible data without structural conversion.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return ConvertedData(data, self)
     def deconvert(self, data):
+        """
+        **LLM Docstring**
+
+        Return YAML-loaded data unchanged.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         return data
     def serialize(self, file, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        Dump converted or raw data through the YAML API.
+
+        :param file: path or file-like object
+        :type file: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         data = data.data
         self.api.dump(data, file, **kwargs)
     def deserialize(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Load YAML data, deconvert it, and optionally select a nested slash-separated key.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = self.api.unshare(file)
         dat = self.deconvert(dat)
         if key is not None:
@@ -523,6 +893,26 @@ class NDarrayMarshaller:
                  all_dicts=False,
                  converters=None
                  ):
+        """
+        **LLM Docstring**
+
+        Configure recursive conversion to NumPy-compatible trees, pseudo-pickle fallback, record handling, and custom dispatch.
+
+        :param base_serializer: parent serializer used during deconversion
+        :type base_serializer: object
+        :param allow_pickle: whether unsupported values may fall back to pickle
+        :type allow_pickle: object
+        :param psuedopickler: pseudo-pickler used for arbitrary objects
+        :type psuedopickler: object
+        :param allow_records: whether homogeneous object sequences may become NumPy record arrays
+        :type allow_records: object
+        :param all_dicts: whether heterogeneous sequences are encoded as dictionaries
+        :type all_dicts: object
+        :param converters: custom ordered conversion dispatch
+        :type converters: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
 
         self.parent=base_serializer
         self.allow_pickle = allow_pickle
@@ -539,6 +929,14 @@ class NDarrayMarshaller:
 
     @classmethod
     def get_default_converters(self):
+        """
+        **LLM Docstring**
+
+        Build the ordered type/duck-type dispatch table used to coerce values into NumPy-compatible forms.
+
+        :return: an ordered converter-dispatch mapping
+        :rtype: collections.OrderedDict
+        """
         return OrderedDict((
             ((np.ndarray,), lambda data, cls: cls._iterable_to_numpy(data)),
             ('to_state', lambda x, s: s._psuedo_pickle_to_numpy(x)),
@@ -551,6 +949,14 @@ class NDarrayMarshaller:
 
     @property
     def converter_dispatch(self):
+        """
+        **LLM Docstring**
+
+        Return the custom converter mapping or create the default ordered dispatch table.
+
+        :return: the active ordered converter-dispatch mapping
+        :rtype: collections.OrderedDict
+        """
         if self._converter_dispatch is None:
             return self.get_default_converters()
         else:
@@ -558,15 +964,55 @@ class NDarrayMarshaller:
 
     @classmethod
     def _literal_to_numpy(cls, data):
+        """
+        **LLM Docstring**
+
+        Represent a scalar literal as a zero-dimensional NumPy array.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return np.array([data]).reshape(())
 
     def _dict_to_numpy(self, data):
+        """
+        **LLM Docstring**
+
+        Recursively convert each dictionary value while preserving keys.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return {k: self.convert(v) for k, v in data.items()}
 
     def _none_to_none(self, data):
+        """
+        **LLM Docstring**
+
+        Preserve `None` as the sentinel for an empty HDF5 dataset.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: `None`, preserved as an HDF5 empty-dataset sentinel
+        :rtype: None
+        """
         return None
 
     def _prep_iterable(self, data):
+        """
+        **LLM Docstring**
+
+        Attempt homogeneous NumPy conversion, falling back to an object array for ragged or incompatible sequences.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         if isinstance(data, np.ndarray):
             arr = data
         else:
@@ -616,6 +1062,16 @@ class NDarrayMarshaller:
         return arr
 
     def _iterable_to_numpy(self, data):
+        """
+        **LLM Docstring**
+
+        Convert homogeneous sequences directly and encode object sequences as records, keyed dictionaries, or recursively converted lists.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         # we do an initial pass to check if data is a numpy array
         # or if it needs to be/can conceivably be converted
 
@@ -652,26 +1108,96 @@ class NDarrayMarshaller:
 
     class _pickle_cache:
         def __init__(self, parent):
+            """
+            **LLM Docstring**
+
+            Initialize a stack and identity set used to detect recursive object conversion.
+
+            :param parent: owning parser or context object
+            :type parent: object
+            :return: No explicit value; the method mutates state or performs I/O.
+            :rtype: None
+            """
             self.parent = parent
             self.tree = []
             self.parents = set()
         def __call__(self, key):
+            """
+            **LLM Docstring**
+
+            Push an object identity into the recursion tracker and return the tracker as a context manager.
+
+            :param key: the storage or lookup key
+            :type key: object
+            :return: this recursion tracker, ready for use as a context manager
+            :rtype: NDarrayMarshaller._pickle_cache
+            """
             self.add(key)
             return self
         def __enter__(self):
+            """
+            **LLM Docstring**
+
+            Return the active recursion tracker.
+
+            :return: The active context object.
+            :rtype: object
+            """
             return self
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            **LLM Docstring**
+
+            Pop the current object and clear the parent marshaller cache when the outermost conversion finishes.
+
+            :param exc_type: exception type passed by the context manager protocol
+            :type exc_type: object
+            :param exc_val: exception instance passed by the context manager protocol
+            :type exc_val: object
+            :param exc_tb: traceback passed by the context manager protocol
+            :type exc_tb: object
+            :return: No explicit value; the method mutates state or performs I/O.
+            :rtype: None
+            """
             self.pop()
             if len(self.parents) == 0:
                 self.parent._seen_cache = None
         def add(self, key):
+            """
+            **LLM Docstring**
+
+            Record an object identity and raise `RecursionError` when conversion revisits an active object.
+
+            :param key: the storage or lookup key
+            :type key: object
+            :return: No explicit value; the method mutates state or performs I/O.
+            :rtype: None
+            """
             if id(key) in self.parents:
                 raise RecursionError("conversion on object of type {} hit an infinite recusion: {}".format(type(key), key))
             self.parents.add(id(key))
             self.tree.append(id(key))
         def pop(self):
+            """
+            **LLM Docstring**
+
+            Remove the most recently tracked object identity.
+
+            :return: No explicit value; the method mutates state or performs I/O.
+            :rtype: None
+            """
             self.parents.remove(self.tree.pop())
     def _psuedo_pickle_to_numpy(self, data):
+        """
+        **LLM Docstring**
+
+        Pseudo-pickle an unsupported object under recursion protection and recursively convert the resulting state.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: the recursively converted pseudo-pickle state
+        :rtype: object
+        """
         if self._seen_cache is None:
             self._seen_cache = self._pickle_cache(self)
         with self._seen_cache(data):
@@ -721,6 +1247,18 @@ class NDarrayMarshaller:
 
     @staticmethod
     def _default_convert(x, converter):
+        """
+        **LLM Docstring**
+
+        Fallback converter that pseudo-pickles an otherwise unsupported value.
+
+        :param x: unsupported value requiring pseudo-pickle conversion
+        :type x: object
+        :param converter: callable used to convert a command-line value
+        :type converter: object
+        :return: the pseudo-pickled NumPy-compatible representation
+        :rtype: object
+        """
         return converter._psuedo_pickle_to_numpy(x)
 
     def deconvert(self, data):
@@ -774,6 +1312,18 @@ class NDarrayMarshaller:
         return res
 
     def __call__(self, data, allow_pickle=None):
+        """
+        **LLM Docstring**
+
+        Invoke recursive conversion, using the marshaller default pickle policy unless overridden.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param allow_pickle: whether unsupported values may fall back to pickle
+        :type allow_pickle: object
+        :return: the NumPy-compatible converted representation
+        :rtype: object
+        """
         if allow_pickle is None:
             allow_pickle = self.allow_pickle
         return self.convert(data, allow_pickle=allow_pickle)
@@ -788,6 +1338,20 @@ class HDF5Serializer(BaseSerializer):
     default_extension = ".hdf5"
     binary = True
     def __init__(self, allow_pickle=True, psuedopickler=None, converters=None):
+        """
+        **LLM Docstring**
+
+        Initialize `h5py` and an ndarray marshaller configured to encode all nested sequences as dictionary-like HDF5 trees.
+
+        :param allow_pickle: whether unsupported values may fall back to pickle
+        :type allow_pickle: object
+        :param psuedopickler: pseudo-pickler used for arbitrary objects
+        :type psuedopickler: object
+        :param converters: custom ordered conversion dispatch
+        :type converters: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         import h5py as api
         self.api = api
         self.allow_pickle = allow_pickle
@@ -835,11 +1399,33 @@ class HDF5Serializer(BaseSerializer):
             #     raise Exception(data.dtype, data)
 
     def _validate_datatype(self, data):
+        """
+        **LLM Docstring**
+
+        Accept only `None` or NumPy arrays as leaf HDF5 dataset values.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return (
             data is None
             or isinstance(data, np.ndarray)
         )
     def _prune_existing(self, h5_obj, key):
+        """
+        **LLM Docstring**
+
+        Navigate a key path and delete the existing final HDF5 object.
+
+        :param h5_obj: HDF5 file or group
+        :type h5_obj: object
+        :param key: the storage or lookup key
+        :type key: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         og = h5_obj
         if isinstance(key, str):
             key = [key]
@@ -850,6 +1436,20 @@ class HDF5Serializer(BaseSerializer):
         except OSError:
             raise IOError("failed to remove key {} from {}".format(key, og))
     def _destroy_and_add(self, h5_obj, key, data):
+        """
+        **LLM Docstring**
+
+        Delete an incompatible object, recreate intermediate groups, and create a replacement dataset.
+
+        :param h5_obj: HDF5 file or group
+        :type h5_obj: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         self._prune_existing(h5_obj, key)
         if isinstance(key, str):
             key = [key]
@@ -970,6 +1570,20 @@ class HDF5Serializer(BaseSerializer):
                 self._write_data(h5_obj, k, v)
 
     def serialize(self, file, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        Convert data, open an HDF5 file or group, and update either the `_data` dataset or a nested dictionary tree.
+
+        :param file: path or file-like object
+        :type file: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         if not isinstance(file, (self.api.File, self.api.Group)):
@@ -1009,6 +1623,18 @@ class HDF5Serializer(BaseSerializer):
 
     @classmethod
     def _extract_key(cls, dataset, key):
+        """
+        **LLM Docstring**
+
+        Descend through a string key or iterable key path in an HDF5 group.
+
+        :param dataset: HDF5 file, group, or dataset at which traversal begins
+        :type dataset: object
+        :param key: the storage or lookup key
+        :type key: object
+        :return: The concrete value described by the summary, with the exact type determined by the selected backend.
+        :rtype: object
+        """
         if not isinstance(key, str):
             for k in key:
                 dataset = dataset[k]
@@ -1016,6 +1642,20 @@ class HDF5Serializer(BaseSerializer):
             dataset = dataset[key]
         return dataset
     def deserialize(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Open an HDF5 source, optionally select a nested object, and deconvert it to Python data.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         if not isinstance(file, (self.api.File, self.api.Group)):
             if not isinstance(file, str) and hasattr(file, 'name'):
                 file = self.api.File(file.name, "a")
@@ -1040,6 +1680,14 @@ class NumPySerializer(BaseSerializer):
     converter_dispatch = None
     @classmethod
     def get_default_converters(self):
+        """
+        **LLM Docstring**
+
+        Build the ordered dispatch table for NumPy arrays, array-like objects, scalars, mappings, and sequences.
+
+        :return: an ordered converter-dispatch mapping
+        :rtype: collections.OrderedDict
+        """
         return OrderedDict((
         ((np.ndarray,), lambda data, cls: data),
         ('asarray', lambda data, cls: data.asarray()),
@@ -1050,6 +1698,14 @@ class NumPySerializer(BaseSerializer):
 
     @classmethod
     def get_converters(self):
+        """
+        **LLM Docstring**
+
+        Return the custom converter dispatch or the default converter mapping.
+
+        :return: the active converter-dispatch mapping
+        :rtype: collections.OrderedDict
+        """
         if self.converter_dispatch is None:
             return self.get_default_converters()
         else:
@@ -1058,14 +1714,44 @@ class NumPySerializer(BaseSerializer):
 
     @classmethod
     def _literal_to_numpy(cls, data):
+        """
+        **LLM Docstring**
+
+        Represent a scalar as a zero-dimensional NumPy array.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return np.array([data]).reshape(())
 
     @classmethod
     def _dict_to_numpy(cls, data):
+        """
+        **LLM Docstring**
+
+        Recursively convert dictionary values to NumPy-compatible structures.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return {k: cls._convert(v) for k, v in data.items()}
 
     @classmethod
     def _iterable_to_numpy(cls, data):
+        """
+        **LLM Docstring**
+
+        Convert homogeneous sequences to arrays and encode heterogeneous sequences as numbered dictionary entries.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         arr = np.array(data)
         if arr.dtype == np.dtype(object):
             # map iterable into a stack of datasets :|
@@ -1124,6 +1810,16 @@ class NumPySerializer(BaseSerializer):
         return new
 
     def convert(self, data):
+        """
+        **LLM Docstring**
+
+        Recursively convert data and flatten nested dictionaries into separator-delimited NPZ keys.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         first_pass = self._convert(data)
         if isinstance(first_pass, dict):
             # we need to flatten out nested dictionaries
@@ -1135,6 +1831,16 @@ class NumPySerializer(BaseSerializer):
         return ConvertedData(data, self)
 
     def _deconvert_val(self, data):
+        """
+        **LLM Docstring**
+
+        Reconstruct heterogeneous lists encoded with `_list_item_` keys and recursively restore mappings.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         if isinstance(data, dict):
             # we check to make sure we don't have an implicitly encoded mixed-type list
             if '_list_numitems' in data:
@@ -1180,6 +1886,20 @@ class NumPySerializer(BaseSerializer):
             return self._deconvert_val(new_data)
 
     def serialize(self, file, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        Write a single array with `np.save` or a flattened mapping with `np.savez`.
+
+        :param file: path or file-like object
+        :type file: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: No explicit value unless noted by the underlying delegated operation.
+        :rtype: None | object
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         data = data.data
@@ -1188,6 +1908,20 @@ class NumPySerializer(BaseSerializer):
         else:
             return np.savez(file, **data)
     def deserialize(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Load NumPy data, reconstruct nested structures, and optionally select a slash-separated key.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         dat = np.load(file)
         dat = self.deconvert(dat)
         if isinstance(dat, np.ndarray):
@@ -1217,11 +1951,31 @@ class ModuleSerializer(BaseSerializer):
     default_loader = None
     default_attr = "config"
     def __init__(self, attr=None, loader=None):
+        """
+        **LLM Docstring**
+
+        Configure the target module attribute and optional module loader.
+
+        :param attr: attribute name
+        :type attr: object
+        :param loader: module loader
+        :type loader: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         self._loader =loader
         self._attr = attr
 
     @property
     def loader(self):
+        """
+        **LLM Docstring**
+
+        Lazily construct or return the module loader used for deserialization.
+
+        :return: the configured or lazily created module loader
+        :rtype: object
+        """
         if self._loader is None:
             if self.default_loader is None:
                 self.default_loader = self._get_loader()
@@ -1230,20 +1984,70 @@ class ModuleSerializer(BaseSerializer):
             return self._loader
     @property
     def attr(self):
+        """
+        **LLM Docstring**
+
+        Return the configured module attribute or the default `config` name.
+
+        :return: the module attribute containing serialized data
+        :rtype: str
+        """
         if self._attr is None:
             return self.default_attr
         else:
             return self._attr
     @classmethod
     def _get_loader(cls):
+        """
+        **LLM Docstring**
+
+        Create a `ModuleLoader` rooted at the `Configs` package namespace.
+
+        :return: a module loader rooted at `Configs`
+        :rtype: ModuleLoader
+        """
         from McUtils.Extensions import ModuleLoader
         return ModuleLoader(rootpkg="Configs")
 
     def convert(self, data):
+        """
+        **LLM Docstring**
+
+        Wrap module configuration data without structural conversion.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The converted representation described above.
+        :rtype: object
+        """
         return ConvertedData(data, self)
     def deconvert(self, data):
+        """
+        **LLM Docstring**
+
+        Return the loaded module attribute unchanged.
+
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         return data
     def serialize(self, file, data, **kwargs):
+        """
+        **LLM Docstring**
+
+        JSON-encode data and emit a Python assignment to the configured module attribute.
+
+        :param file: path or file-like object
+        :type file: object
+        :param data: data to serialize, convert, or write
+        :type data: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
         if not isinstance(data, ConvertedData):
             data = self.convert(data)
         data = data.data
@@ -1256,6 +2060,20 @@ class ModuleSerializer(BaseSerializer):
             file=file
         )
     def deserialize(self, file, key=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Execute/load the module, retrieve the configured attribute, and optionally select a nested key.
+
+        :param file: path or file-like object
+        :type file: object
+        :param key: the storage or lookup key
+        :type key: object
+        :param kwargs: keyword arguments forwarded to a callable
+        :type kwargs: object
+        :return: The reconstructed, loaded, or selected Python value.
+        :rtype: object
+        """
         module = self.loader.load(file)
         dat = self.deconvert(getattr(module, self.attr))
         if key is not None:
@@ -1269,6 +2087,16 @@ class ModuleSerializer(BaseSerializer):
             return dat
 
 def dictify_lists(tree:dict):
+    """
+    **LLM Docstring**
+
+    Recursively replace lists of dictionaries and ragged nested sequences with numbered dictionary entries and a length marker.
+
+    :param tree: nested structure or recursion tracker
+    :type tree: dict
+    :return: The converted representation described above.
+    :rtype: object
+    """
     tree = tree.copy()
     for k,subtree in tree.items():
         if isinstance(subtree, dict):
@@ -1292,6 +2120,20 @@ def dictify_lists(tree:dict):
                 tree[k]['_num_list_items'] = len(subtree)
     return tree
 def disambiguate_tree(tree_obj, type_map=None, aliases=None):
+    """
+    **LLM Docstring**
+
+    Assign stable key types across a nested tree, creating aliases when the same key name appears with incompatible value types.
+
+    :param tree_obj: nested dictionary to encode
+    :type tree_obj: object
+    :param type_map: mapping from key names to observed value types
+    :type type_map: object
+    :param aliases: mapping from generated aliases to original key names
+    :type aliases: object
+    :return: The converted representation described above.
+    :rtype: object
+    """
     if type_map is None:
         type_map = {}
     if aliases is None:
@@ -1342,6 +2184,22 @@ def disambiguate_tree(tree_obj, type_map=None, aliases=None):
     return new_tree, aliases
 
 def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
+    """
+    **LLM Docstring**
+
+    Encode a nested dictionary as traversal metadata plus flattened value arrays and shape/sentinel streams.
+
+    :param tree_obj: nested dictionary to encode
+    :type tree_obj: object
+    :param top_level: whether this is the outermost flattening call
+    :type top_level: object
+    :param prep_tree: whether list normalization and key disambiguation should run
+    :type prep_tree: object
+    :param allow_pickle: whether unsupported values may fall back to pickle
+    :type allow_pickle: object
+    :return: The converted representation described above.
+    :rtype: object
+    """
     if prep_tree:
         tree_obj = dictify_lists(tree_obj)
         tree_obj, aliases = disambiguate_tree(tree_obj)
@@ -1381,6 +2239,18 @@ def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
     return merge_trees(subtrees, top_level=top_level)
 
 def merge_trees(subtrees, top_level=True):
+    """
+    **LLM Docstring**
+
+    Merge recursively flattened subtrees into shared key tables, traversal markers, shape streams, and concatenated value arrays.
+
+    :param subtrees: flattened child structures to merge
+    :type subtrees: object
+    :param top_level: whether this is the outermost flattening call
+    :type top_level: object
+    :return: The converted representation described above.
+    :rtype: object
+    """
     key_lists = {
         'visited_keys': subtrees.pop('visited_keys', []),
         'key_map': subtrees.pop('key_map', {}),
@@ -1448,6 +2318,16 @@ def merge_trees(subtrees, top_level=True):
     return key_lists
 
 def undictify_lists(tree:dict):
+    """
+    **LLM Docstring**
+
+    Recursively reconstruct numbered dictionary encodings back into Python lists.
+
+    :param tree: nested structure or recursion tracker
+    :type tree: dict
+    :return: The converted representation described above.
+    :rtype: object
+    """
     tree = tree.copy()
     for k,subtree in tree.items():
         if isinstance(subtree, dict):
@@ -1460,6 +2340,18 @@ def undictify_lists(tree:dict):
                 tree[k] = undictify_lists(subtree)
     return tree
 def unflatten_tree(serial_tree, unprep_tree=True):
+    """
+    **LLM Docstring**
+
+    Replay traversal markers and per-key shape/value pointers to rebuild the nested tree and restore list/`None` sentinels.
+
+    :param serial_tree: flat-tree metadata and arrays
+    :type serial_tree: object
+    :param unprep_tree: whether numbered list dictionaries should be restored
+    :type unprep_tree: object
+    :return: The reconstructed, loaded, or selected Python value.
+    :rtype: object
+    """
     tree = {}
     tree_stack = collections.deque()
     key_map = serial_tree.pop('key_map')
@@ -1519,6 +2411,26 @@ def unflatten_tree(serial_tree, unprep_tree=True):
     return tree
 
 def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, **writer_options):
+    """
+    **LLM Docstring**
+
+    Flatten a tree when needed and write metadata, shape streams, and value arrays to an NPZ-style writer.
+
+    :param file: path or file-like object
+    :type file: object
+    :param tree: nested structure or recursion tracker
+    :type tree: object
+    :param flatten: whether input should be flattened before writing
+    :type flatten: object
+    :param allow_pickle: whether unsupported values may fall back to pickle
+    :type allow_pickle: object
+    :param writer: NPZ-compatible writer callable
+    :type writer: object
+    :param writer_options: options forwarded to the writer
+    :type writer_options: object
+    :return: the return value from the selected NPZ writer
+    :rtype: object
+    """
     if writer is None:
         compress = writer_options.pop('compress', False)
         if compress:
@@ -1560,6 +2472,24 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, *
     )
 
 def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, **reader_options):
+    """
+    **LLM Docstring**
+
+    Read the NPZ-style flat-tree representation, rebuild its metadata structure, and optionally unflatten it.
+
+    :param file: path or file-like object
+    :type file: object
+    :param unflatten: whether read data should be reconstructed into a nested tree
+    :type unflatten: object
+    :param reader: NPZ-compatible reader callable
+    :type reader: object
+    :param allow_pickle: whether unsupported values may fall back to pickle
+    :type allow_pickle: object
+    :param reader_options: options forwarded to the reader
+    :type reader_options: object
+    :return: The reconstructed, loaded, or selected Python value.
+    :rtype: object
+    """
     if reader is None:
         reader = np.load
 
