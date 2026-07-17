@@ -12,6 +12,20 @@ class ClientServerRunner:
     """
 
     def __init__(self, client_runner:typing.Callable, server_runner:typing.Callable, parallelizer:Parallelizer):
+        """
+        **LLM Docstring**
+
+        Store client and server callables together with the parallelizer used to choose between them.
+
+        :param client_runner: Value supplied for `client_runner`.
+        :type client_runner: typing.Callable
+        :param server_runner: Value supplied for `server_runner`.
+        :type server_runner: typing.Callable
+        :param parallelizer: Value supplied for `parallelizer`.
+        :type parallelizer: Parallelizer
+        :return: None.
+        :rtype: None
+        """
         self.client = client_runner
         self.server = server_runner
         self.par = parallelizer
