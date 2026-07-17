@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker">TemplateWalker</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L969)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L969?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1874)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1874?message=Update%20Docs)]
 </div>
 
 
@@ -31,9 +31,23 @@ index_handler: IndexTemplateHandler
 __init__(self, engine: McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine, out=None, description=None, **extra_fields): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L976)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L976?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1881)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1881?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store template-engine output settings and initialize the underlying object walker.
+  - `engine`: `TemplateEngine`
+    > the template engine used to render content
+  - `out`: `Any`
+    > the output root, file, or stream
+  - `description`: `Any`
+    > the description passed to the generated index
+  - `extra_fields`: `Any`
+    > additional fields exposed to handlers and templates
+
+  - `:returns`: `None`
+    > `None`.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.default_handlers" class="docs-object-method">&nbsp;</a> 
@@ -42,9 +56,14 @@ __init__(self, engine: McUtils.Formatters.TemplateEngine.TemplateEngine.Template
 default_handlers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L982)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L982?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1904)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1904?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the ordered mapping from modules, classes, functions, and fallback objects to handler classes.
+  - `:returns`: `Any`
+    > The ordered mapping from dispatch tests to handler classes.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.get_handler" class="docs-object-method">&nbsp;</a> 
@@ -52,9 +71,25 @@ default_handlers(self):
 get_handler(self, obj, *, out=None, engine=None, tree=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L991)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L991?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1921)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1921?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Construct a handler while injecting this walker’s output directory and template engine.
+  - `obj`: `Any`
+    > the object to inspect or dispatch
+  - `out`: `Any`
+    > the output root, file, or stream
+  - `engine`: `Any`
+    > the template engine used to render content
+  - `tree`: `Any`
+    > the shared object-documentation tree
+  - `kwargs`: `Any`
+    > keyword arguments forwarded to the wrapped callable
+
+  - `:returns`: `Any`
+    > The handler constructed with this walker’s engine and output settings.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.visit_root" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +97,19 @@ get_handler(self, obj, *, out=None, engine=None, tree=None, **kwargs):
 visit_root(self, o, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1000)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1000?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1949)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1949?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Visit a root object through the standard traversal implementation.
+  - `o`: `Any`
+    > the object or import path to resolve
+  - `kwargs`: `Any`
+    > keyword arguments forwarded to the wrapped callable
+
+  - `:returns`: `Any`
+    > The result returned by visiting the root object.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateWalker.write" class="docs-object-method">&nbsp;</a> 
@@ -72,8 +117,8 @@ visit_root(self, o, **kwargs):
 write(self, objects, max_depth=-1, index='index.md'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1003)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1003?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1965)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.py#L1965?message=Update%20Docs)]
 </div>
 Walks through the objects supplied and applies the appropriate templates
   - `:returns`: `str`
@@ -131,7 +176,7 @@ Walks through the objects supplied and applies the appropriate templates
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L969?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1874?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

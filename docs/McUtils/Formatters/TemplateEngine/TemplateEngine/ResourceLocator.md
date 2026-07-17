@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator">ResourceLocator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L534)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L534?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1171)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1171?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,17 @@
 __init__(self, locators: Iterable[Union[McUtils.Formatters.TemplateEngine.TemplateEngine.ResourcePathLocator, Iterable[str], Tuple[Iterable[str], Union[str, Iterable[str]]]]]): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L535)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L535?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1172?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize heterogeneous locator specifications into a flat sequence of path locators.
+  - `locators`: `Iterable[Union[ResourcePathLocator, Iterable[str], Tuple[Iterable[str], Union[str, Iterable[str]]]]]`
+    > resource locator definitions to combine
+
+  - `:returns`: `None`
+    > `None`.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.locate" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +42,17 @@ __init__(self, locators: Iterable[Union[McUtils.Formatters.TemplateEngine.Templa
 locate(self, identifier): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L551)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L551?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1199?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the first resource path resolved by the configured locators.
+  - `identifier`: `Any`
+    > the resource or Python object identifier
+
+  - `:returns`: `Any`
+    > The first resource resolved by any component locator, or `None`.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.paths" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +60,19 @@ locate(self, identifier):
 paths(self, filter_pattern=None, **_): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L556)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L556?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1215)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1215?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Combine resource paths from all locators and optionally filter them by regex or glob.
+  - `filter_pattern`: `Any`
+    > a regular expression or glob used to filter resource paths
+  - `_`: `Any`
+    > an unused callback key
+
+  - `:returns`: `Iterable[str]`
+    > The combined resource identifiers, optionally filtered by the supplied pattern.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.directories" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +80,14 @@ paths(self, filter_pattern=None, **_):
 directories(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L566)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L566?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1238)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1238?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return unique search directories from all component locators in encounter order.
+  - `:returns`: `Iterable[str]`
+    > The unique component search directories in encounter order.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.ResourceLocator.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +95,14 @@ directories(self):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L568)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L568?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1248)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.py#L1248?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a representation based on the combined search directories.
+  - `:returns`: `Any`
+    > A constructor-style string containing the combined directories.
 
 
 <a id="typing.Protocol.__init_subclass__.<locals>._proto_hook" class="docs-object-method">&nbsp;</a> 
@@ -130,7 +166,7 @@ __subclasshook__(other):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/ResourceLocator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L534?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1171?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

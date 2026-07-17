@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parallelizers.Parallelizers.Parallelizer">Parallelizer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L69?message=Update%20Docs)]
 </div>
 
 Abstract base class to help manage parallelism.
@@ -40,9 +40,26 @@ mode_map: dict
 __init__(self, logger=None, contract=None, uid=None, initialization_function=None, initialization_args=None, initialization_kwargs=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L90?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize registry, logging, call-contract, worker-initialization, and context state for a parallelizer.
+  - `logger`: `Any`
+    > Value supplied for `logger`.
+  - `contract`: `Any`
+    > Value supplied for `contract`.
+  - `uid`: `Any`
+    > Value supplied for `uid`.
+  - `initialization_function`: `Any`
+    > Value supplied for `initialization_function`.
+  - `initialization_args`: `Any`
+    > Value supplied for `initialization_args`.
+  - `initialization_kwargs`: `Any`
+    > Value supplied for `initialization_kwargs`.
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.load_registry" class="docs-object-method">&nbsp;</a> 
@@ -51,9 +68,14 @@ __init__(self, logger=None, contract=None, uid=None, initialization_function=Non
 load_registry(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L143?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Lazily create the shared parallelizer registry with a serial fallback as its default.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.parallelizer_registry" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +84,14 @@ load_registry(cls):
 parallelizer_registry(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L155?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the lazily initialized class-level parallelizer registry.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.get_default" class="docs-object-method">&nbsp;</a> 
@@ -73,8 +100,8 @@ parallelizer_registry(self):
 get_default(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L166?message=Update%20Docs)]
 </div>
 For compat.
   - `:returns`: `_`
@@ -87,9 +114,14 @@ For compat.
 get_paralellizer_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L123)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L123?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L179)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L179?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the built-in backend enum-to-class mapping. The method name retains the source spelling.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.lookup" class="docs-object-method">&nbsp;</a> 
@@ -98,8 +130,8 @@ get_paralellizer_types(cls):
 lookup(cls, key, construct=True) -> 'Parallelizer': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L194)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L194?message=Update%20Docs)]
 </div>
 Checks in the registry to see if a given parallelizer is there
 otherwise returns a `SerialNonParallelizer`.
@@ -114,8 +146,8 @@ otherwise returns a `SerialNonParallelizer`.
 register(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L167)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L167?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L230)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L230?message=Update%20Docs)]
 </div>
 Checks in the registry to see if a given parallelizer is there
 otherwise returns a `SerialNonParallelizer`.
@@ -131,9 +163,14 @@ otherwise returns a `SerialNonParallelizer`.
 active(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L241)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L241?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return whether at least one nested parallelizer context is active.
+  - `:returns`: `bool`
+    > Whether the context nesting count is positive.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.set_initializer" class="docs-object-method">&nbsp;</a> 
@@ -141,9 +178,20 @@ active(self):
 set_initializer(self, func, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L252)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L252?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store a partially bound initializer and immediately run it through the parallelizer.
+  - `func`: `Any`
+    > Value supplied for `func`.
+  - `args`: `Any`
+    > Value supplied for `args`.
+  - `kwargs`: `Any`
+    > Value supplied for `kwargs`.
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.initialize" class="docs-object-method">&nbsp;</a> 
@@ -151,8 +199,8 @@ set_initializer(self, func, *args, **kwargs):
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L193)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L193?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L277)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L277?message=Update%20Docs)]
 </div>
 Initializes a parallelizer
 if necessary
@@ -165,8 +213,8 @@ if necessary
 finalize(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L202)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L202?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L286)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L286?message=Update%20Docs)]
 </div>
 Finalizes a parallelizer (if necessary)
 if necessary
@@ -179,8 +227,8 @@ if necessary
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L296)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L296?message=Update%20Docs)]
 </div>
 Allows the parallelizer context to be set
 using `with`
@@ -193,8 +241,8 @@ using `with`
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L228)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L228?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L312)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L312?message=Update%20Docs)]
 </div>
 Allows the parallelizer context to be unset
 using `with`
@@ -214,8 +262,8 @@ using `with`
 on_main(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L264)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L264?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L348)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L348?message=Update%20Docs)]
 </div>
 Returns whether or not the executing process is the main
 process or not
@@ -229,8 +277,8 @@ process or not
 main_restricted(func): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L358)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L358?message=Update%20Docs)]
 </div>
 A decorator to indicate that a function should only be
 run when on the main process
@@ -246,8 +294,8 @@ run when on the main process
 worker_restricted(func): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L296)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L296?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L394)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L394?message=Update%20Docs)]
 </div>
 A decorator to indicate that a function should only be
 run when on a worker process
@@ -262,8 +310,8 @@ run when on a worker process
 send(self, data, loc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L326)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L326?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L438)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L438?message=Update%20Docs)]
 </div>
 Sends data to the process specified by loc
   - `data`: `Any`
@@ -279,8 +327,8 @@ Sends data to the process specified by loc
 receive(self, data, loc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L339)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L339?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L451)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L451?message=Update%20Docs)]
 </div>
 Receives data from the process specified by loc
   - `data`: `Any`
@@ -296,8 +344,8 @@ Receives data from the process specified by loc
 broadcast(self, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L352)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L352?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L464)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L464?message=Update%20Docs)]
 </div>
 Sends the same data to all processes
   - `data`: `Any`
@@ -313,8 +361,8 @@ Sends the same data to all processes
 scatter(self, data, locs=None, return_locs=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L365)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L365?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L477)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L477?message=Update%20Docs)]
 </div>
 Performs a scatter of data to the different
 available parallelizer processes.
@@ -334,8 +382,8 @@ processes
 gather(self, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L382)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L382?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L494)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L494?message=Update%20Docs)]
 </div>
 Performs a gather of data from the different
 available parallelizer processes
@@ -352,8 +400,8 @@ available parallelizer processes
 map(self, function, data, extra_args=None, extra_kwargs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L401)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L401?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L513)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L513?message=Update%20Docs)]
 </div>
 Performs a parallel map of function over
 the held data on different processes
@@ -372,8 +420,8 @@ the held data on different processes
 starmap(self, function, data, extra_args=None, extra_kwargs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L418)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L418?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L530)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L530?message=Update%20Docs)]
 </div>
 Performs a parallel map with unpacking of function over
 the held data on different processes
@@ -392,8 +440,8 @@ the held data on different processes
 apply(self, func, *args, main_kwargs=None, cleanup=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L436)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L436?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L548)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L548?message=Update%20Docs)]
 </div>
 Runs the callable `func` in parallel
   - `func`: `Any`
@@ -411,8 +459,8 @@ Runs the callable `func` in parallel
 run(self, func, *args, comm=None, main_kwargs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L451)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L451?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L563)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L563?message=Update%20Docs)]
 </div>
 Calls `apply`, but makes sure state is handled cleanly
   - `func`: `Any`
@@ -431,9 +479,18 @@ Calls `apply`, but makes sure state is handled cleanly
 from_config(cls, mode=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L469)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L469?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L581)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L581?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Construct the backend registered for a mode by delegating the remaining options to its `from_config` method.
+  - `mode`: `Any`
+    > Value supplied for `mode`.
+  - `kwargs`: `Any`
+    > Value supplied for `kwargs`.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.nprocs" class="docs-object-method">&nbsp;</a> 
@@ -442,8 +499,8 @@ from_config(cls, mode=None, **kwargs):
 nprocs(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L485)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L485?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L609)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L609?message=Update%20Docs)]
 </div>
 Returns the number of processes the parallelizer has
 to work with
@@ -456,8 +513,8 @@ to work with
 get_nprocs(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L494)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L494?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L618)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L618?message=Update%20Docs)]
 </div>
 Returns the number of processes
   - `:returns`: `_`
@@ -470,8 +527,8 @@ Returns the number of processes
 id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L502)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L502?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L626)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L626?message=Update%20Docs)]
 </div>
 Returns some form of identifier for the current process
   - `:returns`: `_`
@@ -484,9 +541,14 @@ Returns some form of identifier for the current process
 pid(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L510)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L510?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L634)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L634?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Lazily cache and return the current operating-system process ID.
+  - `:returns`: `int`
+    > The cached process ID.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.get_id" class="docs-object-method">&nbsp;</a> 
@@ -494,8 +556,8 @@ pid(self):
 get_id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L646)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L646?message=Update%20Docs)]
 </div>
 Returns the id for the current process
   - `:returns`: `_`
@@ -508,9 +570,14 @@ Returns the id for the current process
 printer(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L524)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L524?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L655?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the default printer when no logger is set, otherwise return `logger.log_print`.
+  - `:returns`: `Callable`
+    > The callable used for output.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.main_print" class="docs-object-method">&nbsp;</a> 
@@ -518,8 +585,8 @@ printer(self):
 main_print(self, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L533)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L533?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L678)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L678?message=Update%20Docs)]
 </div>
 Prints from the main process
   - `args`: `Any`
@@ -535,8 +602,8 @@ Prints from the main process
 worker_print(self, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L544)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L544?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L689)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L689?message=Update%20Docs)]
 </div>
 Prints from a main worker process
   - `args`: `Any`
@@ -552,8 +619,8 @@ Prints from a main worker process
 print(self, *args, where='both', **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L555)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L555?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L700)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L700?message=Update%20Docs)]
 </div>
 An implementation of print that operates differently on workers than on main
 processes
@@ -570,8 +637,8 @@ processes
 wait(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L574)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L574?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L719)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L719?message=Update%20Docs)]
 </div>
 Causes all processes to wait until they've met up at this point.
   - `:returns`: `_`
@@ -583,9 +650,14 @@ Causes all processes to wait until they've met up at this point.
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L583)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L583?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L728)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L728?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a diagnostic representation with backend type, process id, process count, and UUID.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.Parallelizer.share" class="docs-object-method">&nbsp;</a> 
@@ -593,8 +665,8 @@ __repr__(self):
 share(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L594)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L594?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L746)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/Parallelizer.py#L746?message=Update%20Docs)]
 </div>
 Converts `obj` into a form that can be cleanly used with shared memory via a `SharedObjectManager`
   - `obj`: `Any`
@@ -654,7 +726,7 @@ Converts `obj` into a form that can be cleanly used with shared memory via a `Sh
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers/Parallelizers/Parallelizer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers/Parallelizers/Parallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L47?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L69?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

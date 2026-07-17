@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.ObjectWalker.ObjectWalker">ObjectWalker</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L369)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L369?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L524)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L524?message=Update%20Docs)]
 </div>
 
 A class that walks a module/object structure, calling handlers
@@ -33,8 +33,8 @@ default_handlers: OrderedDict
 __init__(self, handlers=None, tree=None, **extra_fields): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L382)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L382?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L537)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L537?message=Update%20Docs)]
 </div>
 
   - `objects`: `Iterable[Any]`
@@ -53,9 +53,23 @@ the directory in which to write the files (`None` means `sys.stdout`)
 get_handler(self, obj, *, tree=None, walker=None, cls=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L588)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L588?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Construct an explicitly requested handler class or dispatch the object through the configured handler table.
+  - `obj`: `Any`
+    > the object to inspect or dispatch
+  - `tree`: `Any`
+    > the shared object-documentation tree
+  - `walker`: `Any`
+    > the walker used to resolve related objects
+  - `kwargs`: `Any`
+    > keyword arguments forwarded to the wrapped callable
+
+  - `:returns`: `Any`
+    > The instantiated handler for `obj`.
 
 
 <a id="McUtils.Formatters.TemplateEngine.ObjectWalker.ObjectWalker.resolve_object" class="docs-object-method">&nbsp;</a> 
@@ -64,8 +78,8 @@ get_handler(self, obj, *, tree=None, walker=None, cls=None, **kwargs):
 resolve_object(o): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L440)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L440?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L612)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L612?message=Update%20Docs)]
 </div>
 Resolves to an arbitrary object by name
   - `o`: `Any`
@@ -79,8 +93,8 @@ Resolves to an arbitrary object by name
 resolve_spec(self, spec, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L489)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L489?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L661)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L661?message=Update%20Docs)]
 </div>
 Resolves an object spec.
   - `spec`: `ObjectSpec`
@@ -94,8 +108,8 @@ Resolves an object spec.
 visit(self, o, parent=None, depth=0, max_depth=-1, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L504)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L504?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L676)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.py#L676?message=Update%20Docs)]
 </div>
 Visits a single object in the tree
 Provides type dispatching to a handler, basically.
@@ -158,7 +172,7 @@ Provides type dispatching to a handler, basically.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/ObjectWalker/ObjectWalker.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L369?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/ObjectWalker.py#L524?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine">TemplateEngine</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L574)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L574?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1262)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1262?message=Update%20Docs)]
 </div>
 
 Provides an engine for generating content using a
@@ -28,9 +28,25 @@ outStream: outStream
 __init__(self, locator: McUtils.Formatters.TemplateEngine.TemplateEngine.Locator, template_pattern='*.*', ignore_missing=False, formatter_class=None, ignore_paths=()): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L581)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L581?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1269)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1269?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Discover matching template resources, construct the formatter, and store output-control options.
+  - `locator`: `Locator`
+    > the resource locator supplying templates
+  - `template_pattern`: `Any`
+    > the pattern selecting template resources
+  - `ignore_missing`: `Any`
+    > whether missing format fields should resolve through a default mapping
+  - `formatter_class`: `Any`
+    > the formatter implementation to instantiate
+  - `ignore_paths`: `Any`
+    > target paths that should not be written
+
+  - `:returns`: `None`
+    > `None`.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +54,14 @@ __init__(self, locator: McUtils.Formatters.TemplateEngine.TemplateEngine.Locator
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L598)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L598?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1305?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return an elided representation containing the locator.
+  - `:returns`: `Any`
+    > An elided constructor-style string identifying the locator.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine.format_map" class="docs-object-method">&nbsp;</a> 
@@ -48,9 +69,19 @@ __repr__(self):
 format_map(self, template, parameters): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L603)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L603?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1318)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1318?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve a template identifier when registered and render it with a parameter mapping.
+  - `template`: `Any`
+    > the template name, template text, or template callable
+  - `parameters`: `Any`
+    > the values exposed while formatting
+
+  - `:returns`: `Any`
+    > The rendered template text.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine.format" class="docs-object-method">&nbsp;</a> 
@@ -58,9 +89,19 @@ format_map(self, template, parameters):
 format(self, template, **parameters): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L611)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L611?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1339)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1339?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render a template using keyword parameters.
+  - `template`: `Any`
+    > the template name, template text, or template callable
+  - `parameters`: `Any`
+    > the values exposed while formatting
+
+  - `:returns`: `Any`
+    > The rendered template text.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine.write_string" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +109,19 @@ format(self, template, **parameters):
 write_string(self, target, txt): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L642)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L642?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1432)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1432?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Write rendered text to a target through `outStream`.
+  - `target`: `Any`
+    > the destination path, stream, or key
+  - `txt`: `Any`
+    > the text to normalize
+
+  - `:returns`: `Any`
+    > The destination returned by `outStream.write`.
 
 
 <a id="McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateEngine.apply" class="docs-object-method">&nbsp;</a> 
@@ -78,9 +129,21 @@ write_string(self, target, txt):
 apply(self, template, target, **template_params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L644)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L644?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.py#L1447?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render a template and either return the string or write it unless the target is ignored.
+  - `template`: `Any`
+    > the template name, template text, or template callable
+  - `target`: `Any`
+    > the destination path, stream, or key
+  - `template_params`: `Any`
+    > values supplied to the template
+
+  - `:returns`: `Any`
+    > The rendered text when `target` is `None`, the written target otherwise, or `None` for ignored paths.
  </div>
 </div>
 
@@ -134,7 +197,7 @@ apply(self, template, target, **template_params):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Formatters/TemplateEngine/TemplateEngine/TemplateEngine.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L574?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Formatters/TemplateEngine/TemplateEngine.py#L1262?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

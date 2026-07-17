@@ -28,6 +28,17 @@ __init__(self, client_runner: Callable, server_runner: Callable, parallelizer: M
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Runner.py#L14)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner.py#L14?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store client and server callables together with the parallelizer used to choose between them.
+  - `client_runner`: `typing.Callable`
+    > Value supplied for `client_runner`.
+  - `server_runner`: `typing.Callable`
+    > Value supplied for `server_runner`.
+  - `parallelizer`: `Parallelizer`
+    > Value supplied for `parallelizer`.
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parallelizers.Runner.ClientServerRunner.run" class="docs-object-method">&nbsp;</a> 
@@ -35,8 +46,8 @@ __init__(self, client_runner: Callable, server_runner: Callable, parallelizer: M
 run(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Runner/ClientServerRunner.py#L33?message=Update%20Docs)]
 </div>
 Runs the client/server processes depending on if the parallelizer
 is on the main or server processes

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parallelizers.Parallelizers.SerialNonParallelizer">SerialNonParallelizer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L1844)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1844?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L2327)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L2327?message=Update%20Docs)]
 </div>
 
 Totally serial evaluation for cases where no parallelism
@@ -25,9 +25,14 @@ is provide
 get_nprocs(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1850)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1850?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2333)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2333?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the fixed serial process count of one.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.SerialNonParallelizer.get_id" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +40,14 @@ get_nprocs(self):
 get_id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1852)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1852?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2342)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2342?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the fixed serial process identifier zero.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.SerialNonParallelizer.initialize" class="docs-object-method">&nbsp;</a> 
@@ -45,8 +55,8 @@ get_id(self):
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1855)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1855?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2352)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2352?message=Update%20Docs)]
 </div>
 Initializes a parallelizer
 if necessary
@@ -59,8 +69,8 @@ if necessary
 finalize(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1865)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1865?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2362)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2362?message=Update%20Docs)]
 </div>
 Finalizes a parallelizer (if necessary)
 if necessary
@@ -74,8 +84,8 @@ if necessary
 on_main(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1873)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1873?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2370)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2370?message=Update%20Docs)]
 </div>
 Returns whether or not the executing process is the main
 process or not
@@ -88,8 +98,8 @@ process or not
 send(self, data, loc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1882)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1882?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2379)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2379?message=Update%20Docs)]
 </div>
 A no-op
   - `data`: `Any`
@@ -105,8 +115,8 @@ A no-op
 receive(self, data, loc, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1894)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1894?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2391)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2391?message=Update%20Docs)]
 </div>
 A no-op
   - `data`: `Any`
@@ -122,8 +132,8 @@ A no-op
 broadcast(self, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1906)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1906?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2403?message=Update%20Docs)]
 </div>
 A no-op
   - `data`: `Any`
@@ -139,8 +149,8 @@ A no-op
 scatter(self, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1918)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1918?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2415)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2415?message=Update%20Docs)]
 </div>
 A no-op
   - `data`: `Any`
@@ -156,8 +166,8 @@ A no-op
 gather(self, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1930)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1930?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2427)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2427?message=Update%20Docs)]
 </div>
 A no-op
   - `data`: `Any`
@@ -173,8 +183,8 @@ A no-op
 map(self, function, data, extra_args=None, extra_kwargs=None, vectorized=True, aggregate=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1943)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1943?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2440)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2440?message=Update%20Docs)]
 </div>
 Performs a serial map of the function over
 the passed data
@@ -193,8 +203,8 @@ the passed data
 starmap(self, function, data, extra_args=None, extra_kwargs=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1975)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1975?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2472)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2472?message=Update%20Docs)]
 </div>
 Performs a serial map with unpacking of the function over
 the passed data
@@ -213,9 +223,26 @@ the passed data
 apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1998)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L1998?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2495)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2495?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Call the function once, injecting this serial parallelizer and merging `main_kwargs` before ordinary keyword arguments.
+  - `func`: `Any`
+    > Value supplied for `func`.
+  - `comm`: `Any`
+    > Value supplied for `comm`.
+  - `main_kwargs`: `Any`
+    > Value supplied for `main_kwargs`.
+  - `cleanup`: `Any`
+    > Value supplied for `cleanup`.
+  - `args`: `Any`
+    > Value supplied for `args`.
+  - `kwargs`: `Any`
+    > Value supplied for `kwargs`.
+  - `:returns`: `Any`
+    > The value produced by the implementation; see the summary for its exact semantics.
 
 
 <a id="McUtils.Parallelizers.Parallelizers.SerialNonParallelizer.wait" class="docs-object-method">&nbsp;</a> 
@@ -223,8 +250,8 @@ apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs):
 wait(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2004)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2004?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2521)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.py#L2521?message=Update%20Docs)]
 </div>
 No need to wait when you're in a serial environment
   - `:returns`: `_`
@@ -282,7 +309,7 @@ No need to wait when you're in a serial environment
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers/Parallelizers/SerialNonParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1844?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L2327?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
