@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Redirects.DefaultDirectory">DefaultDirectory</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L155)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L155?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L286)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L286?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,19 @@
 __init__(self, output_dir=None, chdir=True, **tempdir_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L156)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L156?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L287)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L287?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Context manager providing a working directory (a given one, or a fresh temporary
+one), optionally `chdir`-ing into it.
+  - `output_dir`: `str | None`
+    > the directory to use (a temp dir is created if omitted)
+  - `chdir`: `bool`
+    > change into the directory on enter
+  - `tempdir_opts`: `Any`
+    > options for the temporary-directory creation
 
 
 <a id="McUtils.Devutils.Redirects.DefaultDirectory.get_temp_dir" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +44,14 @@ __init__(self, output_dir=None, chdir=True, **tempdir_opts):
 get_temp_dir(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L163)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L163?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L306)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L306?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a `TemporaryDirectory` using the stored options.
+  - `:returns`: `_`
+    > the temporary directory
 
 
 <a id="McUtils.Devutils.Redirects.DefaultDirectory.dirname" class="docs-object-method">&nbsp;</a> 
@@ -45,9 +60,14 @@ get_temp_dir(self):
 dirname(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L316)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L316?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The path of the managed directory (or `None` before entering).
+  - `:returns`: `str | None`
+    > the directory path
 
 
 <a id="McUtils.Devutils.Redirects.DefaultDirectory.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -55,9 +75,15 @@ dirname(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L333)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L333?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Establish the directory (creating a temp dir if needed) and optionally `chdir`
+into it, returning its path.
+  - `:returns`: `str`
+    > the directory path
 
 
 <a id="McUtils.Devutils.Redirects.DefaultDirectory.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -65,9 +91,19 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L187)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L187?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L354)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/DefaultDirectory.py#L354?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Restore the previous working directory and clean up the temporary directory if
+one was created.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
  </div>
 </div>
 
@@ -121,7 +157,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/DefaultDirectory.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/DefaultDirectory.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L155?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L286?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

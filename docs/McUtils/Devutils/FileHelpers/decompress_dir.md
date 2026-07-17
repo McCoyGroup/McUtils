@@ -1,14 +1,19 @@
 # <a id="McUtils.Devutils.FileHelpers.decompress_dir">decompress_dir</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L265)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L265?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L522?message=Update%20Docs)]
 </div>
 
 ```python
 decompress_dir(target_dir, config_gzip): 
 ```
+**LLM Docstring**
 
-
+Unpack an archive into a target directory.
+  - `target_dir`: `str`
+    > the destination directory
+  - `config_gzip`: `str`
+    > the archive path
 
 
 
@@ -59,7 +64,7 @@ decompress_dir(target_dir, config_gzip):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/decompress_dir.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/decompress_dir.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L265?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L522?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.FileHelpers.safe_open">safe_open</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L59?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,17 @@
 __init__(self, file, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L60)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L60?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Context manager that opens a file path, or passes through an already-open
+stream.
+  - `file`: `Any`
+    > the file path or open stream
+  - `opts`: `Any`
+    > options forwarded to `open`
 
 
 <a id="McUtils.Devutils.FileHelpers.safe_open.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +42,15 @@ __init__(self, file, **opts):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/safe_open.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/safe_open.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/safe_open.py#L73)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/safe_open.py#L73?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the stream: the passed-in object if it's already stream-like, else a
+freshly opened file.
+  - `:returns`: `_`
+    > the open stream
 
 
 <a id="McUtils.Devutils.FileHelpers.safe_open.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +58,18 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/safe_open.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/safe_open.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/safe_open.py#L87)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/safe_open.py#L87?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Close the stream if this manager opened it.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
  </div>
 </div>
 
@@ -100,7 +123,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/safe_open.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/safe_open.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L47?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L59?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

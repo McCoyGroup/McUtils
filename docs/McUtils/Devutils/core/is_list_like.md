@@ -1,14 +1,25 @@
 # <a id="McUtils.Devutils.core.is_list_like">is_list_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L196)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L196?message=Update%20Docs)]
 </div>
 
 ```python
 is_list_like(obj, interface_types=(<class 'list'>, <class 'tuple'>), exlusion_types=(<class 'str'>, <class 'dict'>, <class 'type'>), implementation_props=('__getitem__',)): 
 ```
+**LLM Docstring**
 
-
+Test whether an object is list-like (a sequence, excluding strings/dicts/types).
+  - `obj`: `Any`
+    > the object to test
+  - `interface_types`: `Any`
+    > the sequence types
+  - `exlusion_types`: `Any`
+    > types to exclude
+  - `implementation_props`: `Any`
+    > attributes an object must have to qualify
+  - `:returns`: `bool`
+    > whether the object is list-like
 
 
 
@@ -59,7 +70,7 @@ is_list_like(obj, interface_types=(<class 'list'>, <class 'tuple'>), exlusion_ty
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_list_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_list_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L116?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L196?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

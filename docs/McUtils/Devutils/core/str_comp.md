@@ -1,14 +1,26 @@
 # <a id="McUtils.Devutils.core.str_comp">str_comp</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L220)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L220?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L427)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L427?message=Update%20Docs)]
 </div>
 
 ```python
 str_comp(str_val, test, test_val, ignore_case=False): 
 ```
+**LLM Docstring**
 
-
+Compare a string against a test value with a comparison callback, optionally
+case-insensitively (folding both sides, including iterables of strings).
+  - `str_val`: `Any`
+    > the value being tested (must be a string to match)
+  - `test`: `Callable`
+    > the comparison callback `(a, b) -> bool`
+  - `test_val`: `Any`
+    > the value to compare against
+  - `ignore_case`: `bool`
+    > compare case-insensitively
+  - `:returns`: `bool`
+    > the comparison result
 
 
 
@@ -59,7 +71,7 @@ str_comp(str_val, test, test_val, ignore_case=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/str_comp.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/str_comp.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L220?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L427?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

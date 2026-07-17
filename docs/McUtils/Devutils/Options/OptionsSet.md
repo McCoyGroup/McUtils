@@ -29,6 +29,14 @@ __init__(self, *d, **ops):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options.py#L21)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options.py#L21?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap a set of options (from a dict and/or keyword arguments) for filtering and
+binding.
+  - `d`: `Any`
+    > an optional initial options dict (positional)
+  - `ops`: `Any`
+    > additional options as keyword arguments
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__getitem__" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +44,16 @@ __init__(self, *d, **ops):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L39)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L39?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Get an option by key.
+  - `item`: `Any`
+    > the option name
+  - `:returns`: `_`
+    > the option value
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__setitem__" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +61,16 @@ __getitem__(self, item):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L49?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set an option by key.
+  - `key`: `Any`
+    > the option name
+  - `value`: `Any`
+    > the option value
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__delitem__" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +78,14 @@ __setitem__(self, key, value):
 __delitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L34)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L34?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L59?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Delete an option by key.
+  - `item`: `Any`
+    > the option name
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__getattr__" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +93,16 @@ __delitem__(self, item):
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L68)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L68?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Get an option via attribute access.
+  - `item`: `Any`
+    > the option name
+  - `:returns`: `_`
+    > the option value
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__setattr__" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +110,16 @@ __getattr__(self, item):
 __setattr__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L78)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L78?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set an option via attribute access (the `ops` dict itself is set normally).
+  - `key`: `Any`
+    > the option name (or `'ops'`)
+  - `value`: `Any`
+    > the value
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__delattr__" class="docs-object-method">&nbsp;</a> 
@@ -86,9 +127,14 @@ __setattr__(self, key, value):
 __delattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L91?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Delete an option via attribute access.
+  - `item`: `Any`
+    > the option name
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.__hasattr__" class="docs-object-method">&nbsp;</a> 
@@ -96,9 +142,16 @@ __delattr__(self, item):
 __hasattr__(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L100?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether an option exists.
+  - `key`: `Any`
+    > the option name
+  - `:returns`: `bool`
+    > whether the option is present
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.update" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +159,14 @@ __hasattr__(self, key):
 update(self, **ops): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L111?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Update the options from keyword arguments.
+  - `ops`: `Any`
+    > the options to merge in
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.keys" class="docs-object-method">&nbsp;</a> 
@@ -116,9 +174,14 @@ update(self, **ops):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L121?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The option names.
+  - `:returns`: `_`
+    > the option keys
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.items" class="docs-object-method">&nbsp;</a> 
@@ -126,9 +189,14 @@ keys(self):
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L130?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The option `(name, value)` pairs.
+  - `:returns`: `_`
+    > the option items
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.save" class="docs-object-method">&nbsp;</a> 
@@ -136,9 +204,18 @@ items(self):
 save(self, file, mode=None, attribute=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L55)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L55?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L140?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Serialize the options to a file.
+  - `file`: `Any`
+    > the destination file
+  - `mode`: `Any`
+    > the serialization mode
+  - `attribute`: `Any`
+    > an attribute to serialize under
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.load" class="docs-object-method">&nbsp;</a> 
@@ -147,9 +224,20 @@ save(self, file, mode=None, attribute=None):
 load(cls, file, mode=None, attribute=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L151)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L151?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load options from a file into a new `OptionsSet`.
+  - `file`: `Any`
+    > the source file
+  - `mode`: `Any`
+    > the serialization mode
+  - `attribute`: `Any`
+    > the attribute to read from
+  - `:returns`: `OptionsSet`
+    > the loaded options
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.extract_kwarg_keys" class="docs-object-method">&nbsp;</a> 
@@ -157,9 +245,17 @@ load(cls, file, mode=None, attribute=None):
 extract_kwarg_keys(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L166?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Determine the keyword-argument names of a callable from its signature (the
+trailing arguments that have defaults).
+  - `obj`: `Any`
+    > the callable
+  - `:returns`: `tuple | None`
+    > the keyword-argument names, or `None`
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.get_props" class="docs-object-method">&nbsp;</a> 
@@ -167,9 +263,18 @@ extract_kwarg_keys(self, obj):
 get_props(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L182?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Determine the set of option names an object accepts, from its `__props__`,
+its annotations, or (failing those) its keyword-argument signature; unions the
+results across a list/tuple of objects.
+  - `obj`: `Any`
+    > the object (or list of objects) to inspect
+  - `:returns`: `tuple`
+    > the accepted option names
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.bind" class="docs-object-method">&nbsp;</a> 
@@ -177,9 +282,16 @@ get_props(self, obj):
 bind(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L220)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L220?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set each option that `obj` accepts as an attribute on `obj`.
+  - `obj`: `Any`
+    > the object to bind onto
+  - `props`: `Sequence[str] | None`
+    > the option names to consider (inferred if omitted)
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.filter" class="docs-object-method">&nbsp;</a> 
@@ -187,9 +299,18 @@ bind(self, obj, props=None):
 filter(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L232)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L232?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the subset of options whose names are accepted by `obj`.
+  - `obj`: `Any`
+    > the object whose props to filter against
+  - `props`: `Sequence[str] | None`
+    > the option names (inferred if omitted)
+  - `:returns`: `dict`
+    > the matching options
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.exclude" class="docs-object-method">&nbsp;</a> 
@@ -197,9 +318,18 @@ filter(self, obj, props=None):
 exclude(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L248)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L248?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the subset of options whose names are *not* accepted by `obj`.
+  - `obj`: `Any`
+    > the object whose props to filter against
+  - `props`: `Sequence[str] | None`
+    > the option names (inferred if omitted)
+  - `:returns`: `dict`
+    > the non-matching options
 
 
 <a id="McUtils.Devutils.Options.OptionsSet.split" class="docs-object-method">&nbsp;</a> 
@@ -207,9 +337,18 @@ exclude(self, obj, props=None):
 split(self, obj, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Options/OptionsSet.py#L264)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Options/OptionsSet.py#L264?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Split the options into the `(accepted, excluded)` subsets for `obj`.
+  - `obj`: `Any`
+    > the object whose props to split against
+  - `props`: `Sequence[str] | None`
+    > the option names (inferred if omitted)
+  - `:returns`: `tuple`
+    > `(filtered, excluded)`
  </div>
 </div>
 

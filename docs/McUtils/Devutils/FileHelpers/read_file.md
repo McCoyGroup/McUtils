@@ -1,14 +1,21 @@
 # <a id="McUtils.Devutils.FileHelpers.read_file">read_file</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L76)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L76?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L126?message=Update%20Docs)]
 </div>
 
 ```python
 read_file(file, **opts): 
 ```
+**LLM Docstring**
 
-
+Read the full contents of a file (path or stream).
+  - `file`: `Any`
+    > the file path or stream
+  - `opts`: `Any`
+    > options forwarded to `open`
+  - `:returns`: `_`
+    > the file contents
 
 
 
@@ -59,7 +66,7 @@ read_file(file, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/read_file.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/read_file.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L76?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L126?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

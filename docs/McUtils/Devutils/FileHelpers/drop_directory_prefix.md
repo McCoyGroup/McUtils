@@ -1,14 +1,21 @@
 # <a id="McUtils.Devutils.FileHelpers.drop_directory_prefix">drop_directory_prefix</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L261)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L261?message=Update%20Docs)]
 </div>
 
 ```python
 drop_directory_prefix(prefix, path): 
 ```
+**LLM Docstring**
 
-
+Return `path` with the leading portion it shares with `prefix` removed.
+  - `prefix`: `Any`
+    > the prefix path
+  - `path`: `Any`
+    > the path to trim
+  - `:returns`: `_`
+    > the path relative to the shared prefix
 
 
 
@@ -59,7 +66,7 @@ drop_directory_prefix(prefix, path):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/drop_directory_prefix.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/drop_directory_prefix.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L136?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L261?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

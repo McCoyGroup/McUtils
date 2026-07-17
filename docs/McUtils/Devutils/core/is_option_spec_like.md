@@ -1,14 +1,22 @@
 # <a id="McUtils.Devutils.core.is_option_spec_like">is_option_spec_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L237)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L237?message=Update%20Docs)]
 </div>
 
 ```python
 is_option_spec_like(obj, allow_enums=True): 
 ```
+**LLM Docstring**
 
-
+Test whether an object can be destructured into a `(method, options)` option
+specification.
+  - `obj`: `Any`
+    > the object to test
+  - `allow_enums`: `bool`
+    > allow enum members (using their `value` as the method)
+  - `:returns`: `bool`
+    > whether the object is option-spec-like
 
 
 
@@ -59,7 +67,7 @@ is_option_spec_like(obj, allow_enums=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_option_spec_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_option_spec_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L133?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L237?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

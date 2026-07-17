@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Redirects.OutputRedirect">OutputRedirect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L143?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,25 @@
 __init__(self, redirect=True, stdout=None, stderr=None, capture_output=False, capture_errors=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L144)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L144?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Context manager that redirects `stdout`/`stderr`, optionally capturing them to
+in-memory buffers, files, or discarding them.
+  - `redirect`: `bool`
+    > whether to actually redirect
+  - `stdout`: `Any`
+    > an explicit stdout target (stream or file path)
+  - `stderr`: `Any`
+    > an explicit stderr target (stream or file path)
+  - `capture_output`: `bool`
+    > capture stdout to a buffer/temp file
+  - `capture_errors`: `bool | None`
+    > capture stderr (defaults to `capture_output`)
+  - `file_handles`: `bool`
+    > use file handles rather than in-memory buffers when capturing
 
 
 <a id="McUtils.Devutils.Redirects.OutputRedirect.get_handle" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +51,19 @@ __init__(self, redirect=True, stdout=None, stderr=None, capture_output=False, ca
 get_handle(cls, handles=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve a capture target: return the supplied handle, a fresh in-memory buffer,
+or `None` (for a file handle to be created later).
+  - `handles`: `Any`
+    > an explicit handle
+  - `file_handles`: `bool`
+    > prefer a file handle (returns `None`) over a buffer
+  - `:returns`: `_`
+    > the capture handle, or `None`
 
 
 <a id="McUtils.Devutils.Redirects.OutputRedirect.get_temp_stream" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +72,14 @@ get_handle(cls, handles=None, file_handles=False):
 get_temp_stream(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L96)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L96?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L204?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Open and enter a writable named temporary file to capture output into.
+  - `:returns`: `_`
+    > the temporary file stream
 
 
 <a id="McUtils.Devutils.Redirects.OutputRedirect.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +87,13 @@ get_temp_stream(cls):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L215)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L215?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Redirect `sys.stdout`/`sys.stderr` to the configured targets (buffers, temp
+files, given streams/paths, or the null device), saving the originals.
 
 
 <a id="McUtils.Devutils.Redirects.OutputRedirect.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +101,19 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L259)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L259?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Restore the original `sys.stdout`/`sys.stderr` and close any streams opened on
+entry.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
  </div>
 </div>
 
@@ -122,7 +167,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/OutputRedirect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/OutputRedirect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L63?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L143?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

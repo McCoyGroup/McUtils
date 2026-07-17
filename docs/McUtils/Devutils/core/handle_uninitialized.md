@@ -1,14 +1,28 @@
 # <a id="McUtils.Devutils.core.handle_uninitialized">handle_uninitialized</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L332)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L332?message=Update%20Docs)]
 </div>
 
 ```python
 handle_uninitialized(opt, initializer, allow_None=True, args=(), kwargs=None): 
 ```
+**LLM Docstring**
 
-
+Return the result of calling `initializer` when `opt` is uninitialized, else
+`opt` (lazy initialization).
+  - `opt`: `Any`
+    > the supplied value
+  - `initializer`: `Callable`
+    > the callable producing the initial value
+  - `allow_None`: `bool`
+    > treat `None` as uninitialized
+  - `args`: `Any`
+    > positional arguments for the initializer
+  - `kwargs`: `Any`
+    > keyword arguments for the initializer
+  - `:returns`: `_`
+    > the resolved value
 
 
 
@@ -59,7 +73,7 @@ handle_uninitialized(opt, initializer, allow_None=True, args=(), kwargs=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/handle_uninitialized.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/handle_uninitialized.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L178?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L332?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

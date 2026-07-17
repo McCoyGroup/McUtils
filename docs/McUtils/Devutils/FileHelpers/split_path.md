@@ -1,14 +1,22 @@
 # <a id="McUtils.Devutils.FileHelpers.split_path">split_path</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L224?message=Update%20Docs)]
 </div>
 
 ```python
 split_path(path, nsteps=-1): 
 ```
+**LLM Docstring**
 
-
+Split a path into its components, either fully (`nsteps < 0`) or only the last
+`nsteps` (returning the remaining root as the first element).
+  - `path`: `Any`
+    > the path (string or `Path`)
+  - `nsteps`: `int`
+    > the number of trailing components to split off (all if negative)
+  - `:returns`: `list`
+    > the path components
 
 
 
@@ -59,7 +67,7 @@ split_path(path, nsteps=-1):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/split_path.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/split_path.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L111?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L224?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,23 @@
 # <a id="McUtils.Devutils.core.str_startswith">str_startswith</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L236)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L236?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L483)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L483?message=Update%20Docs)]
 </div>
 
 ```python
 str_startswith(str_val, test_vals, ignore_case=False): 
 ```
+**LLM Docstring**
 
-
+Test whether a string starts with a prefix (optionally case-insensitively).
+  - `str_val`: `Any`
+    > the value being tested
+  - `test_vals`: `Any`
+    > the prefix(es)
+  - `ignore_case`: `bool`
+    > compare case-insensitively
+  - `:returns`: `bool`
+    > whether the string starts with the prefix
 
 
 
@@ -59,7 +68,7 @@ str_startswith(str_val, test_vals, ignore_case=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/str_startswith.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/str_startswith.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L236?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L483?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

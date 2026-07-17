@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Schema.Schema">Schema</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema.py#L250)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema.py#L250?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema.py#L391)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema.py#L391?message=Update%20Docs)]
 </div>
 
 An object that represents a schema that can be used to test
@@ -29,9 +29,17 @@ json_schema_version: str
 __init__(self, schema, optional_schema=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema.py#L258)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema.py#L258?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema.py#L399)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema.py#L399?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a schema object from a schema specification (and optional additional
+optional-key schema).
+  - `schema`: `Any`
+    > the schema specification
+  - `optional_schema`: `Any`
+    > extra, non-required properties
 
 
 <a id="McUtils.Devutils.Schema.Schema.required_keys" class="docs-object-method">&nbsp;</a> 
@@ -40,9 +48,14 @@ __init__(self, schema, optional_schema=None):
 required_keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L262)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L262?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L412)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L412?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The set of property keys the schema requires (computed lazily).
+  - `:returns`: `set`
+    > the required keys
 
 
 <a id="McUtils.Devutils.Schema.Schema.is_json_schema" class="docs-object-method">&nbsp;</a> 
@@ -51,9 +64,16 @@ required_keys(self):
 is_json_schema(self, schema): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L271)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L271?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L429)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L429?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether a schema dict is already a JSON schema (has a `$schema` key).
+  - `schema`: `Any`
+    > the schema dict
+  - `:returns`: `bool`
+    > whether it's a JSON schema
 
 
 <a id="McUtils.Devutils.Schema.Schema.canonicalize_schema" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +82,19 @@ is_json_schema(self, schema):
 canonicalize_schema(cls, schema, optional_schema=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L324)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L324?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L513)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L513?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize any accepted schema form into a JSON schema with validator objects,
+folding in the required and optional properties.
+  - `schema`: `Any`
+    > the schema specification
+  - `optional_schema`: `Any`
+    > extra optional properties
+  - `:returns`: `dict | None`
+    > the canonicalized schema (or `None`)
 
 
 <a id="McUtils.Devutils.Schema.Schema.validate" class="docs-object-method">&nbsp;</a> 
@@ -72,8 +102,8 @@ canonicalize_schema(cls, schema, optional_schema=None):
 validate(self, obj, throw=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L413)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L413?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L643)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L643?message=Update%20Docs)]
 </div>
 Validates that `obj` matches the provided schema
 and throws an error if not
@@ -90,8 +120,8 @@ and throws an error if not
 to_dict(self, obj, throw=True, ignore_invalid=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L432)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L432?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L662)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L662?message=Update%20Docs)]
 </div>
 Converts `obj` into a plain `dict` representation
   - `obj`: `Any`
@@ -105,9 +135,14 @@ Converts `obj` into a plain `dict` representation
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L456)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L456?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Schema/Schema.py#L686)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema/Schema.py#L686?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a representation showing the canonicalized schema.
+  - `:returns`: `str`
+    > the representation
  </div>
 </div>
 
@@ -161,7 +196,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Schema/Schema.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Schema/Schema.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema.py#L250?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Schema.py#L391?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

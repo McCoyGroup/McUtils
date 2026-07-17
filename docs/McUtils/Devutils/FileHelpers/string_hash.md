@@ -1,14 +1,25 @@
 # <a id="McUtils.Devutils.FileHelpers.string_hash">string_hash</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L196)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L196?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L365?message=Update%20Docs)]
 </div>
 
 ```python
 string_hash(string, base=None, bits=None, id_generator=None): 
 ```
+**LLM Docstring**
 
-
+Hash a string (via its UTF-8 bytes).
+  - `string`: `str`
+    > the string to hash
+  - `base`: `int | None`
+    > the string-encoding base
+  - `bits`: `int | None`
+    > truncate the digest to this many bytes
+  - `id_generator`: `Any`
+    > the id encoding (see `_digest_hash`)
+  - `:returns`: `_`
+    > the hash
 
 
 
@@ -59,7 +70,7 @@ string_hash(string, base=None, bits=None, id_generator=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/string_hash.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/string_hash.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L196?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L365?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

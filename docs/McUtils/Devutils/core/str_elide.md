@@ -1,14 +1,24 @@
 # <a id="McUtils.Devutils.core.str_elide">str_elide</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L240)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L240?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L511)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L511?message=Update%20Docs)]
 </div>
 
 ```python
 str_elide(long_str, width=80, placeholder='...'): 
 ```
+**LLM Docstring**
 
-
+Truncate a long string to `width` characters by replacing its middle with a
+placeholder.
+  - `long_str`: `str`
+    > the string to elide
+  - `width`: `int`
+    > the maximum width
+  - `placeholder`: `str`
+    > the middle placeholder
+  - `:returns`: `str`
+    > the elided string
 
 
 
@@ -59,7 +69,7 @@ str_elide(long_str, width=80, placeholder='...'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/str_elide.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/str_elide.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L240?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L511?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

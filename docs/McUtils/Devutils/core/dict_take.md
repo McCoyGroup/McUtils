@@ -1,14 +1,22 @@
 # <a id="McUtils.Devutils.core.dict_take">dict_take</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L670)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L670?message=Update%20Docs)]
 </div>
 
 ```python
 dict_take(dict_obj: mappingproxy, spec): 
 ```
+**LLM Docstring**
 
-
+Extract entries from a mapping by an integer position, a slice of positions, a
+list of keys, or a list of integer positions.
+  - `dict_obj`: `Mapping`
+    > the mapping
+  - `spec`: `Any`
+    > the extraction spec (int, slice, key list, or position list)
+  - `:returns`: `_`
+    > the extracted `(key, value)` entry or sub-dict
 
 
 
@@ -59,7 +67,7 @@ dict_take(dict_obj: mappingproxy, spec):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/dict_take.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/dict_take.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L313?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L670?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -7,8 +7,16 @@
 ```python
 is_filepath_like(file, bad_chars=None): 
 ```
+**LLM Docstring**
 
-
+Test whether a value looks like a file path (a `Path`, or a string free of
+whitespace/other bad characters).
+  - `file`: `Any`
+    > the value to test
+  - `bad_chars`: `set | None`
+    > characters that disqualify a string (defaults to whitespace)
+  - `:returns`: `bool`
+    > whether it looks path-like
 
 
 

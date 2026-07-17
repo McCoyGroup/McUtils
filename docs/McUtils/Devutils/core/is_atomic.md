@@ -1,14 +1,25 @@
 # <a id="McUtils.Devutils.core.is_atomic">is_atomic</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L76)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L76?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L94?message=Update%20Docs)]
 </div>
 
 ```python
 is_atomic(obj, interface_types=(<class 'str'>, <class 'bool'>, <class 'numbers.Number'>), exlusion_types=None, implementation_props=None): 
 ```
+**LLM Docstring**
 
-
+Test whether an object is an atomic value (string, bool, or number by default).
+  - `obj`: `Any`
+    > the object to test
+  - `interface_types`: `Any`
+    > the types treated as atomic
+  - `exlusion_types`: `Any`
+    > types to explicitly exclude
+  - `implementation_props`: `Any`
+    > attributes an object must have to qualify
+  - `:returns`: `bool`
+    > whether the object is atomic
 
 
 
@@ -59,7 +70,7 @@ is_atomic(obj, interface_types=(<class 'str'>, <class 'bool'>, <class 'numbers.N
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_atomic.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_atomic.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L76?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L94?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

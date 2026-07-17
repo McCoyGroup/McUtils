@@ -1,14 +1,25 @@
 # <a id="McUtils.Devutils.core.is_number">is_number</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L113)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L113?message=Update%20Docs)]
 </div>
 
 ```python
 is_number(obj, interface_types=(<class 'numbers.Number'>,), exlusion_types=None, implementation_props=None): 
 ```
+**LLM Docstring**
 
-
+Test whether an object is a number.
+  - `obj`: `Any`
+    > the object to test
+  - `interface_types`: `Any`
+    > the numeric types
+  - `exlusion_types`: `Any`
+    > types to exclude
+  - `implementation_props`: `Any`
+    > attributes an object must have to qualify
+  - `:returns`: `bool`
+    > whether the object is a number
 
 
 
@@ -59,7 +70,7 @@ is_number(obj, interface_types=(<class 'numbers.Number'>,), exlusion_types=None,
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/is_number.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/is_number.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L83?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L113?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

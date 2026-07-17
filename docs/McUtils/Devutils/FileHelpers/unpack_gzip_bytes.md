@@ -1,14 +1,20 @@
 # <a id="McUtils.Devutils.FileHelpers.unpack_gzip_bytes">unpack_gzip_bytes</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L268)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L268?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L535)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L535?message=Update%20Docs)]
 </div>
 
 ```python
 unpack_gzip_bytes(build_dir, gzip: 'bytes'): 
 ```
+**LLM Docstring**
 
-
+Unpack a gzipped tar archive supplied as raw bytes into a directory (via a
+temporary file).
+  - `build_dir`: `str`
+    > the destination directory
+  - `gzip`: `bytes`
+    > the archive bytes
 
 
 
@@ -59,7 +65,7 @@ unpack_gzip_bytes(build_dir, gzip: 'bytes'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/unpack_gzip_bytes.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/unpack_gzip_bytes.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L268?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L535?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

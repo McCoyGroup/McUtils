@@ -1,14 +1,27 @@
 # <a id="McUtils.Devutils.FileHelpers.directory_hash">directory_hash</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L436)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L436?message=Update%20Docs)]
 </div>
 
 ```python
 directory_hash(directory, files=None, base=None, bits=None, id_generator=None): 
 ```
+**LLM Docstring**
 
-
+Hash the contents of a directory's files.
+  - `directory`: `str`
+    > the directory path
+  - `files`: `Iterable[str] | None`
+    > the file names to include (defaults to all)
+  - `base`: `int | None`
+    > the string-encoding base
+  - `bits`: `int | None`
+    > truncate the digest to this many bytes
+  - `id_generator`: `Any`
+    > the id encoding
+  - `:returns`: `_`
+    > the directory hash
 
 
 
@@ -59,7 +72,7 @@ directory_hash(directory, files=None, base=None, bits=None, id_generator=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/directory_hash.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/directory_hash.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L225?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L436?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

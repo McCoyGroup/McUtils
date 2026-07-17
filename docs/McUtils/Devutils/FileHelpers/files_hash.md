@@ -1,14 +1,25 @@
 # <a id="McUtils.Devutils.FileHelpers.files_hash">files_hash</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L413)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L413?message=Update%20Docs)]
 </div>
 
 ```python
 files_hash(files, base=None, bits=None, id_generator=None): 
 ```
+**LLM Docstring**
 
-
+Hash the concatenated contents of several files into a single digest.
+  - `files`: `Iterable[str]`
+    > the file paths
+  - `base`: `int | None`
+    > the string-encoding base
+  - `bits`: `int | None`
+    > truncate the digest to this many bytes
+  - `id_generator`: `Any`
+    > the id encoding
+  - `:returns`: `_`
+    > the combined hash
 
 
 
@@ -59,7 +70,7 @@ files_hash(files, base=None, bits=None, id_generator=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/files_hash.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/files_hash.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L216?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L413?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

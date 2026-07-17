@@ -1,14 +1,23 @@
 # <a id="McUtils.Devutils.FileHelpers.read_json">read_json</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L139?message=Update%20Docs)]
 </div>
 
 ```python
 read_json(file, loader=None, **opts): 
 ```
+**LLM Docstring**
 
-
+Read and parse JSON from a file, separating `open` options from loader options.
+  - `file`: `Any`
+    > the file path or stream
+  - `loader`: `Callable | None`
+    > the JSON loader (defaults to `json.load`)
+  - `opts`: `Any`
+    > mixed `open` and loader options
+  - `:returns`: `_`
+    > the parsed JSON
 
 
 
@@ -59,7 +68,7 @@ read_json(file, loader=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/read_json.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/read_json.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L80?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L139?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

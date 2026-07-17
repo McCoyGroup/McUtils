@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.FileHelpers.StreamInterface">StreamInterface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L336)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L336?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L679)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L679?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,19 @@
 __init__(self, stream, file_backed=False, **file_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L337)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L337?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers.py#L680)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L680?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Uniform context manager over a stream: accepts an open stream, a file path, or
+raw string/bytes content.
+  - `stream`: `Any`
+    > the stream, file path, or raw content
+  - `file_backed`: `bool`
+    > back raw content with a temporary file rather than an in-memory buffer
+  - `file_opts`: `Any`
+    > options for opening/creating the stream
 
 
 <a id="McUtils.Devutils.FileHelpers.StreamInterface.is_binary" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +44,14 @@ __init__(self, stream, file_backed=False, **file_opts):
 is_binary(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L345)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L345?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L699)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L699?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Whether the stream is (or would be opened in) binary mode.
+  - `:returns`: `bool`
+    > whether the stream is binary
 
 
 <a id="McUtils.Devutils.FileHelpers.StreamInterface.get_encoding" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +59,14 @@ is_binary(self):
 get_encoding(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L351)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L351?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L713)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L713?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The stream's text encoding.
+  - `:returns`: `str`
+    > the encoding
 
 
 <a id="McUtils.Devutils.FileHelpers.StreamInterface.is_path_like" class="docs-object-method">&nbsp;</a> 
@@ -55,9 +75,17 @@ get_encoding(self):
 is_path_like(cls, input): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L727)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L727?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Heuristic test for whether a string is a path rather than inline content (no
+newlines, commas, or parentheses).
+  - `input`: `str`
+    > the string to test
+  - `:returns`: `bool`
+    > whether it looks like a path
 
 
 <a id="McUtils.Devutils.FileHelpers.StreamInterface.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -65,9 +93,15 @@ is_path_like(cls, input):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L361)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L361?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L742)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L742?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve the input into an open stream: open a file path, wrap raw content in a
+buffer/file-backed stream, or pass through an already-open stream.
+  - `:returns`: `_`
+    > the open stream
 
 
 <a id="McUtils.Devutils.FileHelpers.StreamInterface.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -75,9 +109,18 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L380)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L380?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L769)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers/StreamInterface.py#L769?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Close any stream/buffer this interface opened, leaving already-open inputs alone.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
  </div>
 </div>
 
@@ -131,7 +174,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/FileHelpers/StreamInterface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/FileHelpers/StreamInterface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L336?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/FileHelpers.py#L679?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

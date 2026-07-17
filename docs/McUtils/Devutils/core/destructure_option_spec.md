@@ -1,14 +1,25 @@
 # <a id="McUtils.Devutils.core.destructure_option_spec">destructure_option_spec</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L253)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L253?message=Update%20Docs)]
 </div>
 
 ```python
 destructure_option_spec(spec, allow_enums=True, method_key='method'): 
 ```
+**LLM Docstring**
 
-
+Split an option specification into a `(method, options)` pair, accepting bare
+values/callables, enum members, dicts (with a method key), and `(method, opts)`
+tuples.
+  - `spec`: `Any`
+    > the option specification
+  - `allow_enums`: `bool`
+    > treat enum members as methods
+  - `method_key`: `str`
+    > the dict key holding the method
+  - `:returns`: `tuple`
+    > `(method, options)` (both `None` if it can't be destructured)
 
 
 
@@ -59,7 +70,7 @@ destructure_option_spec(spec, allow_enums=True, method_key='method'):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/destructure_option_spec.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/destructure_option_spec.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L137?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L253?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

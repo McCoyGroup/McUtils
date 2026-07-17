@@ -35,6 +35,13 @@ __eq__(self, other):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L24)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L24?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compare the log level against another level or a raw numeric value (`==`).
+  - `other`: `Any`
+    > the level or number to compare against
+  - `:returns`: `bool`
+    > the comparison result
 
 
 <a id="McUtils.Devutils.Loggers.LogLevel.__le__" class="docs-object-method">&nbsp;</a> 
@@ -42,9 +49,16 @@ __eq__(self, other):
 __le__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L37?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compare the log level against another level or a raw numeric value (`<=`).
+  - `other`: `Any`
+    > the level or number to compare against
+  - `:returns`: `bool`
+    > the comparison result
 
 
 <a id="McUtils.Devutils.Loggers.LogLevel.__ge__" class="docs-object-method">&nbsp;</a> 
@@ -52,9 +66,16 @@ __le__(self, other):
 __ge__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L50?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compare the log level against another level or a raw numeric value (`>=`).
+  - `other`: `Any`
+    > the level or number to compare against
+  - `:returns`: `bool`
+    > the comparison result
 
 
 <a id="McUtils.Devutils.Loggers.LogLevel.__lt__" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +83,16 @@ __ge__(self, other):
 __lt__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L36)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L36?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L63?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compare the log level against another level or a raw numeric value (`<`).
+  - `other`: `Any`
+    > the level or number to compare against
+  - `:returns`: `bool`
+    > the comparison result
 
 
 <a id="McUtils.Devutils.Loggers.LogLevel.__gt__" class="docs-object-method">&nbsp;</a> 
@@ -72,9 +100,16 @@ __lt__(self, other):
 __gt__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L40)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L40?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Loggers/LogLevel.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Loggers/LogLevel.py#L76?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compare the log level against another level or a raw numeric value (`>`).
+  - `other`: `Any`
+    > the level or number to compare against
+  - `:returns`: `bool`
+    > the comparison result
 
 
 <a id="enum.Enum.__new__" class="docs-object-method">&nbsp;</a> 

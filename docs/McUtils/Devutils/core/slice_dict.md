@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.core.slice_dict">slice_dict</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L306)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L306?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L646)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L646?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,14 @@ dict_obj: member_descriptor
 __init__(self, dict_obj: mappingproxy): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L308)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L308?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L648)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L648?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap a mapping to support slice/index/key-based extraction via `[]`.
+  - `dict_obj`: `Mapping`
+    > the mapping to wrap
 
 
 <a id="McUtils.Devutils.core.slice_dict.__getitem__" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +41,17 @@ __init__(self, dict_obj: mappingproxy):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/slice_dict.py#L310)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/slice_dict.py#L310?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/slice_dict.py#L658)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/slice_dict.py#L658?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Extract from the wrapped mapping by index, slice, or key spec (delegates to
+`dict_take`).
+  - `item`: `Any`
+    > the extraction spec
+  - `:returns`: `_`
+    > the extracted entries
  </div>
 </div>
 
@@ -92,7 +105,7 @@ __getitem__(self, item):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/slice_dict.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/slice_dict.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L306?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L646?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
