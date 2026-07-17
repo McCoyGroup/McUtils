@@ -17,6 +17,22 @@ class TemplateWriter:
     ignored_files = [".DS_Store"]
 
     def __init__(self, template_dir, replacements = None, file_filter = None, **opts):
+        """
+        **LLM Docstring**
+
+        Initialize `TemplateWriter` state from the supplied configuration.
+
+        :param template_dir: template-root directory used to compute relative output paths
+        :type template_dir: object
+        :param replacements: value consumed as `replacements` by the documented formatting path
+        :type replacements: object
+        :param file_filter: value consumed as `file_filter` by the documented formatting path
+        :type file_filter: object
+        :param opts: additional keyword options forwarded to the underlying formatter or operation
+        :type opts: dict
+        :return: `None`; the operation mutates state, writes output, or raises by design.
+        :rtype: None
+        """
         if replacements is not None:
             opts = replacements
         self._rep_dict = opts
@@ -29,6 +45,13 @@ class TemplateWriter:
 
     @property
     def replacements(self):
+        """
+        **LLM Docstring**
+
+        Lazily compile replacement keys into backtick-delimited string substitution pairs.
+        :return: compiled `(placeholder, replacement)` pairs
+        :rtype: tuple[tuple[str, str], ...]
+        """
         if self._reps is None:
             self._reps =  tuple(("`"+k+"`", str(v)) for k,v in self._rep_dict.items())
         return self._reps
@@ -104,6 +127,18 @@ class TemplateWriter:
 
 class OptionalTemplate:
     def __init__(self, template, **opts):
+        """
+        **LLM Docstring**
+
+        Initialize `OptionalTemplate` state from the supplied configuration.
+
+        :param template: template text or template-file path
+        :type template: object
+        :param opts: additional keyword options forwarded to the underlying formatter or operation
+        :type opts: dict
+        :return: `None`; the operation mutates state, writes output, or raises by design.
+        :rtype: None
+        """
         self.opts = opts
         if os.path.isfile(template):
             with open(template) as t:
@@ -114,6 +149,20 @@ class OptionalTemplate:
         default_key = "-MISSING-"
 
         def get_value(self, key, args, kwds):
+            """
+            **LLM Docstring**
+
+            Resolve and return the requested derived value from the object’s current configuration.
+
+            :param key: field name requested by `string.Formatter`
+            :type key: object
+            :param args: command arguments enclosed in braces
+            :type args: object
+            :param kwds: keyword formatting arguments
+            :type kwds: object
+            :return: resolved field value or the missing-value sentinel
+            :rtype: object
+            """
             if isinstance(key, str):
                 try:
                     return kwds[key]
@@ -124,6 +173,24 @@ class OptionalTemplate:
 
     @classmethod
     def apply_template(cls, template, opts, formatter=None, strip_missing_blocks=None, strip_missing=True):
+        """
+        **LLM Docstring**
+
+        Format optional placeholders with a sentinel for missing keys, then remove missing values or entire missing lines as configured.
+
+        :param template: template text or template-file path
+        :type template: object
+        :param opts: replacement values or formatter options
+        :type opts: object
+        :param formatter: `string.Formatter`-compatible formatter
+        :type formatter: object
+        :param strip_missing_blocks: whether lines containing unresolved placeholders are removed
+        :type strip_missing_blocks: object
+        :param strip_missing: whether unresolved placeholder sentinels are removed
+        :type strip_missing: object
+        :return: formatted template text
+        :rtype: str
+        """
         if formatter is None:
             formatter = cls.DefaultFormatter()
         applied_template = formatter.format(template, **opts)
@@ -135,4 +202,14 @@ class OptionalTemplate:
         return applied_template
 
     def apply(self, **opts):
+        """
+        **LLM Docstring**
+
+        Merge instance defaults with call-time options and apply them to the stored optional template.
+
+        :param opts: additional keyword options forwarded to the underlying formatter or operation
+        :type opts: dict
+        :return: formatted template text
+        :rtype: str
+        """
         return self.apply_template(self.template, dict(self.opts, **opts))
