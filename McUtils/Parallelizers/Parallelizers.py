@@ -29,10 +29,32 @@ class CallerContract:
     """
 
     def __init__(self, calls):
+        """
+        **LLM Docstring**
+
+        Initialize an ordered cyclic contract for collective or point-to-point calls.
+
+        :param calls: Value supplied for `calls`.
+        :type calls: Any
+        :return: None.
+        :rtype: None
+        """
         self.calls = calls
         self.which_call = 0
 
     def handle_call(self, caller, next_call):
+        """
+        **LLM Docstring**
+
+        Validate the next operation against the contract and advance the expected-call index cyclically.
+
+        :param caller: Value supplied for `caller`.
+        :type caller: Any
+        :param next_call: Value supplied for `next_call`.
+        :type next_call: Any
+        :return: None.
+        :rtype: None
+        """
         if next_call != self.calls[self.which_call]:
             raise ValueError("caller {} tried to call {} but expected to call {}".format(
                 caller,
@@ -70,6 +92,26 @@ class Parallelizer(metaclass=abc.ABCMeta):
                  initialization_args=None,
                  initialization_kwargs=None
                  ):
+        """
+        **LLM Docstring**
+
+        Initialize registry, logging, call-contract, worker-initialization, and context state for a parallelizer.
+
+        :param logger: Value supplied for `logger`.
+        :type logger: Any
+        :param contract: Value supplied for `contract`.
+        :type contract: Any
+        :param uid: Value supplied for `uid`.
+        :type uid: Any
+        :param initialization_function: Value supplied for `initialization_function`.
+        :type initialization_function: Any
+        :param initialization_args: Value supplied for `initialization_args`.
+        :type initialization_args: Any
+        :param initialization_kwargs: Value supplied for `initialization_kwargs`.
+        :type initialization_kwargs: Any
+        :return: None.
+        :rtype: None
+        """
         self._active_sentinel=0
         self._pickle_prot = None
         if logger is None:
@@ -100,11 +142,25 @@ class Parallelizer(metaclass=abc.ABCMeta):
 
     @classmethod
     def load_registry(cls):
+        """
+        **LLM Docstring**
+
+        Lazily create the shared parallelizer registry with a serial fallback as its default.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         if cls._par_registry is None:
             cls._par_registry = ObjectRegistry(default=SerialNonParallelizer())
         return cls._par_registry
     @property
     def parallelizer_registry(self):
+        """
+        **LLM Docstring**
+
+        Return the lazily initialized class-level parallelizer registry.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return self.load_registry()
 
     @classmethod
@@ -122,6 +178,13 @@ class Parallelizer(metaclass=abc.ABCMeta):
         Multiprocessing = "multiprocessing"
     @classmethod
     def get_paralellizer_types(cls):
+        """
+        **LLM Docstring**
+
+        Return the built-in backend enum-to-class mapping. The method name retains the source spelling.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return {
             cls.Backends.Serial:SerialNonParallelizer,
             cls.Backends.MPI:MPIParallelizer,
@@ -177,9 +240,30 @@ class Parallelizer(metaclass=abc.ABCMeta):
 
     @property
     def active(self):
+        """
+        **LLM Docstring**
+
+        Return whether at least one nested parallelizer context is active.
+        :return: Whether the context nesting count is positive.
+        :rtype: bool
+        """
         return self._active_sentinel > 0
 
     def set_initializer(self, func, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Store a partially bound initializer and immediately run it through the parallelizer.
+
+        :param func: Value supplied for `func`.
+        :type func: Any
+        :param args: Value supplied for `args`.
+        :type args: Any
+        :param kwargs: Value supplied for `kwargs`.
+        :type kwargs: Any
+        :return: None.
+        :rtype: None
+        """
         self.initialization_function = functools.partial(func, *args, **kwargs)
         self.run(self.initialization_function)
         # self.pool.map(
@@ -283,6 +367,20 @@ class Parallelizer(metaclass=abc.ABCMeta):
         """
 
         def main_process_func(*args, parallelizer=None, **kwargs):
+            """
+            **LLM Docstring**
+
+            Run the wrapped callable only on the main process and return a worker sentinel elsewhere.
+
+            :param parallelizer: Value supplied for `parallelizer`.
+            :type parallelizer: Any
+            :param args: Value supplied for `args`.
+            :type args: Any
+            :param kwargs: Value supplied for `kwargs`.
+            :type kwargs: Any
+            :return: The value produced by the implementation; see the summary for its exact semantics.
+            :rtype: Any
+            """
             if parallelizer is None:
                 parallelizer = Parallelizer.lookup(None)
             if parallelizer.on_main:
@@ -306,6 +404,20 @@ class Parallelizer(metaclass=abc.ABCMeta):
 
         @functools.wraps(func)
         def worker_process_func(*args, parallelizer=None, **kwargs):
+            """
+            **LLM Docstring**
+
+            Run the wrapped callable only on worker processes and return a main-process sentinel elsewhere.
+
+            :param parallelizer: Value supplied for `parallelizer`.
+            :type parallelizer: Any
+            :param args: Value supplied for `args`.
+            :type args: Any
+            :param kwargs: Value supplied for `kwargs`.
+            :type kwargs: Any
+            :return: The value produced by the implementation; see the summary for its exact semantics.
+            :rtype: Any
+            """
             if parallelizer is None:
                 parallelizer = Parallelizer.lookup(None)
             if not parallelizer.on_main:
@@ -471,6 +583,18 @@ class Parallelizer(metaclass=abc.ABCMeta):
                     mode=None,
                     **kwargs
                     ):
+        """
+        **LLM Docstring**
+
+        Construct the backend registered for a mode by delegating the remaining options to its `from_config` method.
+
+        :param mode: Value supplied for `mode`.
+        :type mode: Any
+        :param kwargs: Value supplied for `kwargs`.
+        :type kwargs: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         if mode not in cls.mode_map:
             raise KeyError("don't know what to do with parallelization mode '{}'".format(
                 mode
@@ -509,6 +633,13 @@ class Parallelizer(metaclass=abc.ABCMeta):
         return self.get_id()
     @property
     def pid(self):
+        """
+        **LLM Docstring**
+
+        Lazily cache and return the current operating-system process ID.
+        :return: The cached process ID.
+        :rtype: int
+        """
         if self._pid is None:
             self._pid = os.getpid()
         return self._pid
@@ -523,12 +654,26 @@ class Parallelizer(metaclass=abc.ABCMeta):
 
     @property
     def printer(self):
+        """
+        **LLM Docstring**
+
+        Return the default printer when no logger is set, otherwise return `logger.log_print`.
+        :return: The callable used for output.
+        :rtype: Callable
+        """
         if self.logger is None:
             return self.default_printer
         else:
             return self.logger.log_print
     @printer.setter
     def printer(self, p):
+        """
+        **LLM Docstring**
+
+        Return the default printer when no logger is set, otherwise return `logger.log_print`.
+        :return: The callable used for output.
+        :rtype: Callable
+        """
         self._printer = p
     def main_print(self, *args, **kwargs):
         """
@@ -581,6 +726,13 @@ class Parallelizer(metaclass=abc.ABCMeta):
         raise NotImplementedError("Parallelizer is an abstract base class")
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a diagnostic representation with backend type, process id, process count, and UUID.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         try:
             id = self.id
         except:
@@ -619,6 +771,16 @@ class SendRecieveParallelizer(Parallelizer):
 
     class ReceivedError:
         def __init__(self, error):
+            """
+            **LLM Docstring**
+
+            Wrap an exception so it can be transferred through the communicator and re-raised by the receiver.
+
+            :param error: Value supplied for `error`.
+            :type error: Any
+            :return: None.
+            :rtype: None
+            """
             self.error = error
     class SendReceieveCommunicator(metaclass=abc.ABCMeta):
         """
@@ -920,11 +1082,30 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
 
     class SendRecvQueuePair:
         def __init__(self, id:int, manager:'mp.managers.SyncManager'):
+            """
+            **LLM Docstring**
+
+            Allocate managed send/receive queues and an initialization event for one pool location.
+
+            :param id: Value supplied for `id`.
+            :type id: int
+            :param manager: Value supplied for `manager`.
+            :type manager: 'mp.managers.SyncManager'
+            :return: None.
+            :rtype: None
+            """
             self.id=id
             self.send_queue = manager.Queue()
             self.receive_queue = manager.Queue()
             self.init_flag = manager.Event()
         def __repr__(self):
+            """
+            **LLM Docstring**
+
+            Return the queue-pair type and numeric location identifier.
+            :return: The value produced by the implementation; see the summary for its exact semantics.
+            :rtype: Any
+            """
             return "{}({})".format(type(self).__name__, self.id)
     class PoolCommunicator(SendRecieveParallelizer.SendReceieveCommunicator):
         """
@@ -940,6 +1121,24 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                      initialization_timeout:float=None,
                      group:typing.Iterable['MultiprocessingParallelizer.PoolCommunicator']=None
                      ):
+            """
+            **LLM Docstring**
+
+            Bind a pool rank to shared queue pairs, an optional initialization timeout, and an optional communicator group.
+
+            :param parent: Value supplied for `parent`.
+            :type parent: 'MultiprocessingParallelizer'
+            :param id: Value supplied for `id`.
+            :type id: int
+            :param queues: Value supplied for `queues`.
+            :type queues: typing.Iterable['MultiprocessingParallelizer.SendRecvQueuePair']
+            :param initialization_timeout: Value supplied for `initialization_timeout`.
+            :type initialization_timeout: float
+            :param group: Value supplied for `group`.
+            :type group: typing.Iterable['MultiprocessingParallelizer.PoolCommunicator']
+            :return: None.
+            :rtype: None
+            """
             self.parent = parent
             self.id = id
             self.queues = tuple(queues)
@@ -947,6 +1146,13 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             self.group = tuple(group) if group is not None else None
 
         def __repr__(self):
+            """
+            **LLM Docstring**
+
+            Return the communicator type and current rank.
+            :return: The value produced by the implementation; see the summary for its exact semantics.
+            :rtype: Any
+            """
             return "{}({})".format(
                 type(self).__name__,
                 self.id
@@ -1068,6 +1274,16 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                 return data
 
         def get_subcomm(self, idx):
+            """
+            **LLM Docstring**
+
+            Create a communicator restricted to selected queue and group indices while preserving the current communicator id.
+
+            :param idx: Value supplied for `idx`.
+            :type idx: Any
+            :return: The value produced by the implementation; see the summary for its exact semantics.
+            :rtype: Any
+            """
             return type(self)(
                 self.parent,
                 self.id,
@@ -1093,6 +1309,42 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                  initialization_kwargs=None,
                  **kwargs
                  ):
+        """
+        **LLM Docstring**
+
+        Configure multiprocessing pool ownership, communicator state, worker rank, restart behavior, and initialization options.
+
+        :param worker: Value supplied for `worker`.
+        :type worker: Any
+        :param pool: Value supplied for `pool`.
+        :type pool: mp.Pool
+        :param context: Value supplied for `context`.
+        :type context: Any
+        :param manager: Value supplied for `manager`.
+        :type manager: Any
+        :param logger: Value supplied for `logger`.
+        :type logger: Any
+        :param contract: Value supplied for `contract`.
+        :type contract: Any
+        :param comm: Value supplied for `comm`.
+        :type comm: Any
+        :param rank: Value supplied for `rank`.
+        :type rank: Any
+        :param allow_restart: Value supplied for `allow_restart`.
+        :type allow_restart: Any
+        :param initialization_timeout: Value supplied for `initialization_timeout`.
+        :type initialization_timeout: Any
+        :param initialization_function: Value supplied for `initialization_function`.
+        :type initialization_function: Any
+        :param initialization_args: Value supplied for `initialization_args`.
+        :type initialization_args: Any
+        :param initialization_kwargs: Value supplied for `initialization_kwargs`.
+        :type initialization_kwargs: Any
+        :param kwargs: Value supplied for `kwargs`.
+        :type kwargs: Any
+        :return: None.
+        :rtype: None
+        """
         self.initialization_timeout=initialization_timeout
         super().__init__(logger=logger, contract=contract,
                          initialization_function=initialization_function,
@@ -1110,8 +1362,22 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         self.allow_restart = allow_restart
 
     def get_nprocs(self):
+        """
+        **LLM Docstring**
+
+        Return the cached multiprocessing process count.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return self.nproc
     def get_id(self):
+        """
+        **LLM Docstring**
+
+        Return the explicit rank when set, otherwise obtain the id from the current communicator.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         if self._id is None:
             return self.comm.id
         else:
@@ -1136,6 +1402,16 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         return self._comm
     @comm.setter
     def comm(self, c):
+        """
+        **LLM Docstring**
+
+        Return the current communicator, lazily constructing the full communicator group when necessary.
+
+        :param c: Value supplied for `c`.
+        :type c: Any
+        :return: None.
+        :rtype: None
+        """
         self._comm = c
 
     # def to_state(self, serializer=None):
@@ -1146,6 +1422,13 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
     #         worker=state['worker']
     #     )
     def __getstate__(self):
+        """
+        **LLM Docstring**
+
+        Prepare the parallelizer for pickling by removing live pool, manager, queue, stack, communicator, and PID state.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         # most things don't need to be mapped over...
         state = self.__dict__.copy()
         state['pool'] = None
@@ -1161,6 +1444,16 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         # state['_par_registry'] = None
         return state
     def __setstate__(self, state):
+        """
+        **LLM Docstring**
+
+        Restore pickled state and, when available, replace it with the registered parent parallelizer state.
+
+        :param state: Value supplied for `state`.
+        :type state: Any
+        :return: None.
+        :rtype: None
+        """
         self.__dict__.update(state)
         # allow for better syncing...
         if self.uid in self.parallelizer_registry:
@@ -1330,6 +1623,18 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                   manager: mp.Manager,
                   **kwargs
                   ) -> mp.pool.Pool:
+        """
+        **LLM Docstring**
+
+        Create a process pool from the supplied multiprocessing context, adding default size and worker initializer options.
+
+        :param manager: Value supplied for `manager`.
+        :type manager: mp.Manager
+        :param kwargs: Value supplied for `kwargs`.
+        :type kwargs: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: mp.pool.Pool
+        """
         if 'processes' not in kwargs:
             kwargs['processes'] = mp.cpu_count() - 1
         if 'initializer' not in kwargs:
@@ -1340,12 +1645,39 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         return manager.Pool(**kwargs)
     @staticmethod
     def get_pool_context(pool):
+        """
+        **LLM Docstring**
+
+        Return the private multiprocessing context stored by a pool.
+
+        :param pool: Value supplied for `pool`.
+        :type pool: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return pool._ctx # I don't like doing this but seems like only way?
     @staticmethod
     def get_pool_nprocs(pool):
+        """
+        **LLM Docstring**
+
+        Return the private process-count field stored by a pool.
+
+        :param pool: Value supplied for `pool`.
+        :type pool: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return pool._processes  # see above
 
     def _reset_mp_caches(self):
+        """
+        **LLM Docstring**
+
+        Clear cached pool, queues, and communicator state before attempting a restart.
+        :return: None.
+        :rtype: None
+        """
         self.pool = None
         self.queues = None
         self.comm = None
@@ -1359,6 +1691,20 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             initializer()
         cls._is_worker = True
     def set_initializer(self, func, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Install and run an initializer locally, map worker initialization across the pool, and update the pool initializer.
+
+        :param func: Value supplied for `func`.
+        :type func: Any
+        :param args: Value supplied for `args`.
+        :type args: Any
+        :param kwargs: Value supplied for `kwargs`.
+        :type kwargs: Any
+        :return: None.
+        :rtype: None
+        """
         self.initialization_function = functools.partial(func, *args, **kwargs)
         self.initialization_function()
         self.pool.map(
@@ -1371,6 +1717,16 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         )
 
     def initialize(self, allow_restart=None):
+        """
+        **LLM Docstring**
+
+        Create or re-enter the pool, create manager-backed communication queues, initialize workers, and establish process-count state.
+
+        :param allow_restart: Value supplied for `allow_restart`.
+        :type allow_restart: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         if not self.worker:
             if self.pool is None:
                 self.print("Initializing pool...", log_level=Parallelizer.base_log_level)
@@ -1407,6 +1763,20 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             ]
 
     def finalize(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Exit the owned pool on the main process and clear communication queues and the cached communicator.
+
+        :param exc_type: Value supplied for `exc_type`.
+        :type exc_type: Any
+        :param exc_val: Value supplied for `exc_val`.
+        :type exc_val: Any
+        :param exc_tb: Value supplied for `exc_tb`.
+        :type exc_tb: Any
+        :return: None.
+        :rtype: None
+        """
         if not self.worker:
             if self.pool is not None:
                 self.pool.__exit__(exc_type, exc_val, exc_tb)
@@ -1414,10 +1784,27 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             self._comm = None
     @property
     def on_main(self):
+        """
+        **LLM Docstring**
+
+        Return `True` when this instance is not marked as a worker.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return not self.worker
 
     @classmethod
     def from_config(cls, **kw):
+        """
+        **LLM Docstring**
+
+        Construct a multiprocessing parallelizer directly from keyword options.
+
+        :param kw: Value supplied for `kw`.
+        :type kw: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return cls(**kw)
 Parallelizer.mode_map['multiprocessing'] = MultiprocessingParallelizer
 
@@ -1433,6 +1820,20 @@ class MPIParallelizer(SendRecieveParallelizer):
         """
 
         def __init__(self, parent, mpi_comm, api):
+            """
+            **LLM Docstring**
+
+            Bind the parent parallelizer, mpi4py communicator, and MPI API module.
+
+            :param parent: Value supplied for `parent`.
+            :type parent: Any
+            :param mpi_comm: Value supplied for `mpi_comm`.
+            :type mpi_comm: Any
+            :param api: Value supplied for `api`.
+            :type api: Any
+            :return: None.
+            :rtype: None
+            """
             self.parent = parent
             self.comm = mpi_comm
             self.api = api
@@ -1638,6 +2039,20 @@ class MPIParallelizer(SendRecieveParallelizer):
             else:
                 return self.scatter_obj(data, root=root, **kwargs)
         def gather_obj(self, data, root=0, **kwargs):
+            """
+            **LLM Docstring**
+
+            Gather arbitrary Python objects to the root using the communicator's request/response receive protocol.
+
+            :param data: Value supplied for `data`.
+            :type data: Any
+            :param root: Value supplied for `root`.
+            :type root: Any
+            :param kwargs: Value supplied for `kwargs`.
+            :type kwargs: Any
+            :return: The value produced by the implementation; see the summary for its exact semantics.
+            :rtype: Any
+            """
             if self.location == root:
                 locs = list(self.locations)  # gotta be safe
                 nlocs = len(locs)  # we reserve space for the main thread
@@ -1714,6 +2129,22 @@ class MPIParallelizer(SendRecieveParallelizer):
                 return self.gather_obj(data, root=root, **kwargs)
 
     def __init__(self, root=0, comm=None, contract=None, logger=None):
+        """
+        **LLM Docstring**
+
+        Load mpi4py, select the world or supplied communicator, and initialize the root-aware communicator wrapper.
+
+        :param root: Value supplied for `root`.
+        :type root: Any
+        :param comm: Value supplied for `comm`.
+        :type comm: Any
+        :param contract: Value supplied for `contract`.
+        :type contract: Any
+        :param logger: Value supplied for `logger`.
+        :type logger: Any
+        :return: None.
+        :rtype: None
+        """
         super().__init__(contract=contract, logger=logger)
 
         from mpi4py import MPI as api
@@ -1727,14 +2158,49 @@ class MPIParallelizer(SendRecieveParallelizer):
         self.world_rank = None
 
     def get_nprocs(self):
+        """
+        **LLM Docstring**
+
+        Return the MPI communicator size.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return self._comm.nprocs
     def get_id(self):
+        """
+        **LLM Docstring**
+
+        Return the current MPI rank.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return self._comm.location
 
     def initialize(self):
+        """
+        **LLM Docstring**
+
+        Perform no initialization because mpi4py owns MPI startup.
+        :return: None.
+        :rtype: None
+        """
         # handled by mpi4py?
         pass
     def finalize(self, exc_type, exc_val, exc_tb):
+        """
+        **LLM Docstring**
+
+        Perform no finalization because mpi4py owns MPI shutdown.
+
+        :param exc_type: Value supplied for `exc_type`.
+        :type exc_type: Any
+        :param exc_val: Value supplied for `exc_val`.
+        :type exc_val: Any
+        :param exc_tb: Value supplied for `exc_tb`.
+        :type exc_tb: Any
+        :return: None.
+        :rtype: None
+        """
         # handled by mpi4py?
         pass
 
@@ -1749,6 +2215,13 @@ class MPIParallelizer(SendRecieveParallelizer):
 
     @property
     def on_main(self):
+        """
+        **LLM Docstring**
+
+        Return whether the current communicator rank is zero. This ignores the configurable `root` field.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return self.comm.location == 0
 
     def broadcast(self, data, **kwargs):
@@ -1838,6 +2311,16 @@ class MPIParallelizer(SendRecieveParallelizer):
 
     @classmethod
     def from_config(cls, **kw):
+        """
+        **LLM Docstring**
+
+        Construct an MPI parallelizer directly from keyword options.
+
+        :param kw: Value supplied for `kw`.
+        :type kw: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return cls(**kw)
 Parallelizer.mode_map['mpi'] = MPIParallelizer
 
@@ -1848,8 +2331,22 @@ class SerialNonParallelizer(Parallelizer):
     """
 
     def get_nprocs(self):
+        """
+        **LLM Docstring**
+
+        Return the fixed serial process count of one.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return 1
     def get_id(self):
+        """
+        **LLM Docstring**
+
+        Return the fixed serial process identifier zero.
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         return 0
 
     def initialize(self):
@@ -1996,6 +2493,26 @@ class SerialNonParallelizer(Parallelizer):
         return list(map(function, data, **kwargs))
 
     def apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs):
+        """
+        **LLM Docstring**
+
+        Call the function once, injecting this serial parallelizer and merging `main_kwargs` before ordinary keyword arguments.
+
+        :param func: Value supplied for `func`.
+        :type func: Any
+        :param comm: Value supplied for `comm`.
+        :type comm: Any
+        :param main_kwargs: Value supplied for `main_kwargs`.
+        :type main_kwargs: Any
+        :param cleanup: Value supplied for `cleanup`.
+        :type cleanup: Any
+        :param args: Value supplied for `args`.
+        :type args: Any
+        :param kwargs: Value supplied for `kwargs`.
+        :type kwargs: Any
+        :return: The value produced by the implementation; see the summary for its exact semantics.
+        :rtype: Any
+        """
         kwargs['parallelizer'] = self
         if main_kwargs is None:
             main_kwargs = {}
