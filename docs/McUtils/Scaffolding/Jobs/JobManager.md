@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Jobs.JobManager">JobManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L239)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L239?message=Update%20Docs)]
 </div>
 
 A class to manage job instances.
@@ -27,9 +27,18 @@ default_job_type: Job
 __init__(self, job_dir, job_type=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L245)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L245?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Bind a persistence manager to a job directory and the selected job class.
+  - `job_dir`: `object`
+    > job working directory
+  - `job_type`: `object`
+    > concrete `Job` subclass to construct, or `None` for the default
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Jobs.JobManager.job" class="docs-object-method">&nbsp;</a> 
@@ -37,8 +46,8 @@ __init__(self, job_dir, job_type=None):
 job(self, name, timestamp=False, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/JobManager.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/JobManager.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/JobManager.py#L262)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/JobManager.py#L262?message=Update%20Docs)]
 </div>
 Returns a loaded or new job with the given name and settings
   - `name`: `str`
@@ -57,8 +66,8 @@ Returns a loaded or new job with the given name and settings
 job_from_folder(cls, folder, job_type=None, make_config=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L204)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L204?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L282?message=Update%20Docs)]
 </div>
 A special case convenience function that goes
 directly to starting a job from a folder
@@ -72,8 +81,8 @@ directly to starting a job from a folder
 current_job(cls, job_type=None, make_config=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L223)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L223?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L301)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L301?message=Update%20Docs)]
 </div>
 A special case convenience function that starts a
 JobManager one directory up from the current
@@ -134,7 +143,7 @@ current working directory
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Jobs/JobManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Jobs/JobManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L173?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L239?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

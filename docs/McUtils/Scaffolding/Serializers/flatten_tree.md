@@ -1,14 +1,25 @@
 # <a id="McUtils.Scaffolding.Serializers.flatten_tree">flatten_tree</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1344)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1344?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2186?message=Update%20Docs)]
 </div>
 
 ```python
 flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False): 
 ```
+**LLM Docstring**
 
-
+Encode a nested dictionary as traversal metadata plus flattened value arrays and shape/sentinel streams.
+  - `tree_obj`: `object`
+    > nested dictionary to encode
+  - `top_level`: `object`
+    > whether this is the outermost flattening call
+  - `prep_tree`: `object`
+    > whether list normalization and key disambiguation should run
+  - `allow_pickle`: `object`
+    > whether unsupported values may fall back to pickle
+  - `:returns`: `object`
+    > The converted representation described above.
 
 
 
@@ -59,7 +70,7 @@ flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/flatten_tree.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/flatten_tree.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1344?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2186?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

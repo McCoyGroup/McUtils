@@ -1,14 +1,29 @@
 # <a id="McUtils.Scaffolding.Serializers.write_flat_tree">write_flat_tree</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1521)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1521?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2413)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2413?message=Update%20Docs)]
 </div>
 
 ```python
 write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, **writer_options): 
 ```
+**LLM Docstring**
 
-
+Flatten a tree when needed and write metadata, shape streams, and value arrays to an NPZ-style writer.
+  - `file`: `object`
+    > path or file-like object
+  - `tree`: `object`
+    > nested structure or recursion tracker
+  - `flatten`: `object`
+    > whether input should be flattened before writing
+  - `allow_pickle`: `object`
+    > whether unsupported values may fall back to pickle
+  - `writer`: `object`
+    > NPZ-compatible writer callable
+  - `writer_options`: `object`
+    > options forwarded to the writer
+  - `:returns`: `object`
+    > the return value from the selected NPZ writer
 
 
 
@@ -59,7 +74,7 @@ write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, **wri
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/write_flat_tree.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/write_flat_tree.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1521?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2413?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -65,6 +65,13 @@ get_serializer(self, file):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L65)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L65?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Select a serializer instance from the configuration file extension.
+  - `file`: `object`
+    > path or file-like object
+  - `:returns`: `object`
+    > The resolved or newly constructed helper object.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.new" class="docs-object-method">&nbsp;</a> 
@@ -73,9 +80,18 @@ get_serializer(self, file):
 new(cls, loc, init=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L73)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L73?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L83)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L83?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create the default JSON configuration file in a directory and initialize it with the supplied mapping.
+  - `loc`: `object`
+    > filesystem location
+  - `init`: `object`
+    > initial configuration mapping or source
+  - `:returns`: `object`
+    > The newly constructed object.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.serialize" class="docs-object-method">&nbsp;</a> 
@@ -83,9 +99,18 @@ new(cls, loc, init=None):
 serialize(self, file, ops): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L85)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L85?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L107)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L107?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Choose the configured or extension-derived serializer and write options to a text file.
+  - `file`: `object`
+    > path or file-like object
+  - `ops`: `object`
+    > options mapping to serialize
+  - `:returns`: `None | object`
+    > No explicit value unless noted by the underlying delegated operation.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.deserialize" class="docs-object-method">&nbsp;</a> 
@@ -93,9 +118,16 @@ serialize(self, file, ops):
 deserialize(self, file): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L92)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L92?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L126?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Choose the configured or extension-derived serializer and read options from a text file.
+  - `file`: `object`
+    > path or file-like object
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.save" class="docs-object-method">&nbsp;</a> 
@@ -103,9 +135,14 @@ deserialize(self, file):
 save(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L144)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L144?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Serialize the current merged option dictionary back to the configuration file.
+  - `:returns`: `None | object`
+    > No explicit value unless noted by the underlying delegated operation.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.load" class="docs-object-method">&nbsp;</a> 
@@ -113,9 +150,14 @@ save(self):
 load(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L154?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Deserialize and return the raw configuration file contents.
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.name" class="docs-object-method">&nbsp;</a> 
@@ -124,9 +166,14 @@ load(self):
 name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L105)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L105?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L165)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L165?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the configured `name`, falling back to the configuration filename when absent.
+  - `:returns`: `str`
+    > the configured name or configuration filename
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.opt_dict" class="docs-object-method">&nbsp;</a> 
@@ -135,9 +182,14 @@ name(self):
 opt_dict(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L180)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L180?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return loaded configuration values merged with runtime-only extra parameters.
+  - `:returns`: `dict`
+    > a new dictionary containing file options plus runtime extras
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.filter" class="docs-object-method">&nbsp;</a> 
@@ -145,8 +197,8 @@ opt_dict(self):
 filter(self, keys, strict=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L193?message=Update%20Docs)]
 </div>
 Returns a filtered option dictionary according to keys.
 Strict mode will raise an error if there is a key in the config that isn't
@@ -164,8 +216,8 @@ in keys.
 apply(self, func, strict=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L152)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L152?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L228)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L228?message=Update%20Docs)]
 </div>
 Applies func to stored parameters
   - `func`: `Any`
@@ -179,9 +231,16 @@ Applies func to stored parameters
 update(self, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L164)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L164?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L240)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L240?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Merge keyword updates into the current option dictionary and persist the result.
+  - `kw`: `object`
+    > keyword values merged into the current configuration
+  - `:returns`: `None`
+    > no explicit value; the configuration file is rewritten
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.load_opts" class="docs-object-method">&nbsp;</a> 
@@ -189,9 +248,14 @@ update(self, **kw):
 load_opts(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L255?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load the configuration once and add its containing directory as `config_location`.
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.get_conf_attr" class="docs-object-method">&nbsp;</a> 
@@ -199,9 +263,16 @@ load_opts(self):
 get_conf_attr(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L271?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Read a value from the loaded configuration object using item or attribute access according to its stored type.
+  - `item`: `object`
+    > the lookup key or index
+  - `:returns`: `object`
+    > the selected configuration value
 
 
 <a id="McUtils.Scaffolding.Configurations.Config.__getattr__" class="docs-object-method">&nbsp;</a> 
@@ -209,9 +280,16 @@ get_conf_attr(self, item):
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L185)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L185?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/Config.py#L289)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/Config.py#L289?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Forward unresolved attributes to the loaded configuration data.
+  - `item`: `object`
+    > the lookup key or index
+  - `:returns`: `object`
+    > the selected configuration value
  </div>
 </div>
 

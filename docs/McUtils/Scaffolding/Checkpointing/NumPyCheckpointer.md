@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer">NumPyCheckpointer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L474)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L474?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L760)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L760?message=Update%20Docs)]
 </div>
 
 A checkpointer that uses NumPy as a backend
@@ -26,9 +26,26 @@ default_extension: str
 __init__(self, file, cache=None, serializer=None, open_kwargs=None, allowed_keys=None, omitted_keys=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L480)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L480?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing.py#L766)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L766?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve existing `.npz` or `.npy` variants and configure a binary NumPy dump backend.
+  - `file`: `object`
+    > path or file-like object
+  - `cache`: `object`
+    > initial in-memory backend cache
+  - `serializer`: `object`
+    > serializer instance or specification
+  - `open_kwargs`: `object`
+    > arguments used when opening a file target
+  - `allowed_keys`: `object`
+    > optional whitelist of permitted top-level keys
+  - `omitted_keys`: `object`
+    > optional blacklist of top-level keys
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.load_cache" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +53,14 @@ __init__(self, file, cache=None, serializer=None, open_kwargs=None, allowed_keys
 load_cache(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L501)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L501?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L807)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L807?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load a nonempty NumPy checkpoint into a dictionary, otherwise initialize an empty cache.
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Checkpointing.NumPyCheckpointer.dump" class="docs-object-method">&nbsp;</a> 
@@ -46,8 +68,8 @@ load_cache(self):
 dump(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L829)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.py#L829?message=Update%20Docs)]
 </div>
 Writes the entire data structure
   - `:returns`: `_`
@@ -105,7 +127,7 @@ Writes the entire data structure
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L474?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Checkpointing.py#L760?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

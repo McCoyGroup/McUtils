@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Caches.ObjectRegistry">ObjectRegistry</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L146)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L146?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L488)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L488?message=Update%20Docs)]
 </div>
 
 Provides a simple interface to global object registries
@@ -26,9 +26,16 @@ or parallelizers through every step of the code
 __init__(self, default='raise'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches.py#L495)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L495?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a weak-value registry with configurable behavior for missing keys.
+  - `default`: `object`
+    > the fallback returned when a key is absent
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.temp_default" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +43,16 @@ __init__(self, default='raise'):
 temp_default(self, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L509)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L509?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a context manager that temporarily replaces the registry fallback value.
+  - `val`: `object`
+    > the value being stored, converted, or installed
+  - `:returns`: `object`
+    > The resolved or newly constructed helper object.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.__contains__" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +60,16 @@ temp_default(self, val):
 __contains__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L522)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L522?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether a live weakly referenced object is registered under a key.
+  - `item`: `object`
+    > the lookup key or index
+  - `:returns`: `bool`
+    > Whether the tested condition is satisfied.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.lookup" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +77,16 @@ __contains__(self, item):
 lookup(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L163)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L163?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L535)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L535?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the registered object, or the configured default when missing-key lookup is non-raising.
+  - `key`: `object`
+    > the storage or lookup key
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.__getitem__" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +94,16 @@ lookup(self, key):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L553)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L553?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Look up a registry key using the configured missing-key policy.
+  - `item`: `object`
+    > the lookup key or index
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.register" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +111,18 @@ __getitem__(self, item):
 register(self, key, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L174)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L174?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L566)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L566?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store a weak reference to `val` under `key`.
+  - `key`: `object`
+    > the storage or lookup key
+  - `val`: `object`
+    > the value being stored, converted, or installed
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.__setitem__" class="docs-object-method">&nbsp;</a> 
@@ -86,9 +130,18 @@ register(self, key, val):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L580)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L580?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Register a value using dictionary assignment syntax.
+  - `key`: `object`
+    > the storage or lookup key
+  - `value`: `object`
+    > the value to store
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.keys" class="docs-object-method">&nbsp;</a> 
@@ -96,9 +149,14 @@ __setitem__(self, key, value):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L595)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L595?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the live registry keys.
+  - `:returns`: `collections.abc.KeysView | collections.abc.ItemsView | collections.abc.ValuesView | list`
+    > A view or list of the requested registry, cache, checkpoint, or mapping entries.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.items" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +164,14 @@ keys(self):
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L181)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L181?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L605)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L605?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the live registry key/value pairs.
+  - `:returns`: `collections.abc.KeysView | collections.abc.ItemsView | collections.abc.ValuesView | list`
+    > A view or list of the requested registry, cache, checkpoint, or mapping entries.
 
 
 <a id="McUtils.Scaffolding.Caches.ObjectRegistry.values" class="docs-object-method">&nbsp;</a> 
@@ -116,9 +179,14 @@ items(self):
 values(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L183)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L183?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L615)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/ObjectRegistry.py#L615?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the live registered objects.
+  - `:returns`: `collections.abc.KeysView | collections.abc.ItemsView | collections.abc.ValuesView | list`
+    > A view or list of the requested registry, cache, checkpoint, or mapping entries.
  </div>
 </div>
 
@@ -172,7 +240,7 @@ values(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Caches/ObjectRegistry.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Caches/ObjectRegistry.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L146?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches.py#L488?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

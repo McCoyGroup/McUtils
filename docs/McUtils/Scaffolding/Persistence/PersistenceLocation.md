@@ -29,6 +29,17 @@ __init__(self, loc, name=None, delete=None):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence.py#L28)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence.py#L28?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a persistence path, infer temporary cleanup behavior, and coordinate deletion policy among cached references to the same location.
+  - `loc`: `object`
+    > filesystem location
+  - `name`: `object`
+    > registry, command, resource, or object name
+  - `delete`: `object`
+    > whether the location should be recursively deleted when the tracker is collected
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Persistence.PersistenceLocation.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +47,14 @@ __init__(self, loc, name=None, delete=None):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L74?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the location name, path, and cleanup policy.
+  - `:returns`: `str`
+    > A human-readable string representation.
 
 
 <a id="McUtils.Scaffolding.Persistence.PersistenceLocation.__del__" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +62,14 @@ __repr__(self):
 __del__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L68)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L68?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L90)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Persistence/PersistenceLocation.py#L90?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Recursively delete the location when its cleanup flag is enabled, ignoring filesystem errors.
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
  </div>
 </div>
 

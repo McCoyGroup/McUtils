@@ -27,6 +27,15 @@ __getitem__(self, item):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L16)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L16?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Retrieve a cached value for `item`; concrete cache classes define the storage and access policy.
+
+This is an abstract or unfinished implementation and raises `NotImplementedError`.
+  - `item`: `object`
+    > the lookup key or index
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Caches.Cache.get" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +43,18 @@ __getitem__(self, item):
 get(self, item, default=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L31?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Retrieve `item`, returning `default` only when the cache raises `KeyError`.
+  - `item`: `object`
+    > the lookup key or index
+  - `default`: `object`
+    > the fallback returned when a key is absent
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Caches.Cache.__contains__" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +62,18 @@ get(self, item, default=None):
 __contains__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L24)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L24?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L48)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L48?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether an item is present in the concrete cache backend.
+
+This is an abstract or unfinished implementation and raises `NotImplementedError`.
+  - `item`: `object`
+    > the lookup key or index
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Caches.Cache.__setitem__" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +81,20 @@ __contains__(self, item):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Caches/Cache.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Caches/Cache.py#L63?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store a value under a cache key using the concrete backend policy.
+
+This is an abstract or unfinished implementation and raises `NotImplementedError`.
+  - `key`: `object`
+    > the storage or lookup key
+  - `value`: `object`
+    > the value to store
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
  </div>
 </div>
 

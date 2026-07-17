@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Configurations.ParameterManager">ParameterManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations.py#L302)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L302?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,18 @@
 serialize(self, file, mode=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L304)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations/ParameterManager.py#L304?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Write the managed options as a Python module configuration through `ModuleSerializer`.
+  - `file`: `object`
+    > path or file-like object
+  - `mode`: `object`
+    > serialization or dispatch mode
+  - `:returns`: `None | object`
+    > No explicit value unless noted by the underlying delegated operation.
 
 
 <a id="McUtils.Scaffolding.Configurations.ParameterManager.deserialize" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +44,20 @@ serialize(self, file, mode=None):
 deserialize(cls, file, mode=None, attribute=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L193)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L193?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L319?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load options from a Python module, optionally selecting an attribute.
+  - `file`: `object`
+    > path or file-like object
+  - `mode`: `object`
+    > serialization or dispatch mode
+  - `attribute`: `object`
+    > module attribute to load
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
  </div>
 </div>
 
@@ -91,7 +111,7 @@ deserialize(cls, file, mode=None, attribute=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Configurations/ParameterManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Configurations/ParameterManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L188?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Configurations.py#L302?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

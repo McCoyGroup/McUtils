@@ -33,6 +33,21 @@ __init__(self, job_dir, job_file=None, logger=None, parallelizer=None, job_param
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs.py#L27)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs.py#L27?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize a job directory, checkpoint, logger, optional parallelizer, and parameter payload.
+  - `job_dir`: `object`
+    > job working directory
+  - `job_file`: `object`
+    > checkpoint filename or path
+  - `logger`: `object`
+    > logger specification or instance
+  - `parallelizer`: `object`
+    > parallelizer specification or instance
+  - `job_parameters`: `object`
+    > job parameter mapping written to the checkpoint
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Jobs.Job.from_config" class="docs-object-method">&nbsp;</a> 
@@ -41,9 +56,24 @@ __init__(self, job_dir, job_file=None, logger=None, parallelizer=None, job_param
 from_config(cls, config_location=None, job_file=None, logger=None, parallelizer=None, job_parameters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L63?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Construct a job from configuration-compatible keyword arguments, using `config_location` as its directory.
+  - `config_location`: `object`
+    > directory supplied by configuration persistence
+  - `job_file`: `object`
+    > checkpoint filename or path
+  - `logger`: `object`
+    > logger specification or instance
+  - `parallelizer`: `object`
+    > parallelizer specification or instance
+  - `job_parameters`: `object`
+    > job parameter mapping written to the checkpoint
+  - `:returns`: `object`
+    > The newly constructed object.
 
 
 <a id="McUtils.Scaffolding.Jobs.Job.load_checkpoint" class="docs-object-method">&nbsp;</a> 
@@ -51,8 +81,8 @@ from_config(cls, config_location=None, job_file=None, logger=None, parallelizer=
 load_checkpoint(self, job_file): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L96)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L96?message=Update%20Docs)]
 </div>
 Loads the checkpoint we'll use to dump params
   - `job_file`: `Any`
@@ -66,8 +96,8 @@ Loads the checkpoint we'll use to dump params
 load_logger(self, log_spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L110?message=Update%20Docs)]
 </div>
 Loads the appropriate logger
   - `log_spec`: `str | dict`
@@ -81,8 +111,8 @@ Loads the appropriate logger
 load_parallelizer(self, par_spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L140?message=Update%20Docs)]
 </div>
 Loads the appropriate parallelizer.
 If something other than a dict is passed,
@@ -98,8 +128,8 @@ tries out multiple specs sequentially until it finds one that works
 path(self, *parts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L166?message=Update%20Docs)]
 </div>
 
   - `parts`: `str`
@@ -114,9 +144,14 @@ path(self, *parts):
 working_directory(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L175)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L175?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve a configured working directory relative to the job directory without permanently changing the process directory.
+  - `:returns`: `str`
+    > The resolved filesystem path or basename.
 
 
 <a id="McUtils.Scaffolding.Jobs.Job.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -124,9 +159,14 @@ working_directory(self):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L195?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Enter the job directory, open checkpointing and parallelism contexts, and record start metadata and parameters.
+  - `:returns`: `object`
+    > The active context object.
 
 
 <a id="McUtils.Scaffolding.Jobs.Job.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -134,9 +174,20 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Jobs/Job.py#L218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Jobs/Job.py#L218?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Restore the original directory, store elapsed runtime, and close checkpoint and parallelizer contexts.
+  - `exc_type`: `object`
+    > exception type passed by the context manager protocol
+  - `exc_val`: `object`
+    > exception instance passed by the context manager protocol
+  - `exc_tb`: `object`
+    > traceback passed by the context manager protocol
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
  </div>
 </div>
 

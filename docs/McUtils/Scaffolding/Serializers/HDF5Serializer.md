@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.HDF5Serializer">HDF5Serializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L781)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L781?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1331)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1331?message=Update%20Docs)]
 </div>
 
 Defines a serializer that can prep/dump python data to HDF5.
@@ -30,9 +30,20 @@ registry_name: str
 __init__(self, allow_pickle=True, psuedopickler=None, converters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L790)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L790?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1340)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1340?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initialize `h5py` and an ndarray marshaller configured to encode all nested sequences as dictionary-like HDF5 trees.
+  - `allow_pickle`: `object`
+    > whether unsupported values may fall back to pickle
+  - `psuedopickler`: `object`
+    > pseudo-pickler used for arbitrary objects
+  - `converters`: `object`
+    > custom ordered conversion dispatch
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.HDF5Serializer.convert" class="docs-object-method">&nbsp;</a> 
@@ -40,8 +51,8 @@ __init__(self, allow_pickle=True, psuedopickler=None, converters=None):
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L805)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L805?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1369)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1369?message=Update%20Docs)]
 </div>
 Converts data into format that can be serialized easily
   - `data`: `Any`
@@ -55,9 +66,20 @@ Converts data into format that can be serialized easily
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L972)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L972?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1572)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1572?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert data, open an HDF5 file or group, and update either the `_data` dataset or a nested dictionary tree.
+  - `file`: `object`
+    > path or file-like object
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.HDF5Serializer.deconvert" class="docs-object-method">&nbsp;</a> 
@@ -65,8 +87,8 @@ serialize(self, file, data, **kwargs):
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L985)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L985?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1599)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1599?message=Update%20Docs)]
 </div>
 Converts an HDF5 Dataset into a NumPy array or Group into a dict
   - `data`: `Any`
@@ -80,9 +102,20 @@ Converts an HDF5 Dataset into a NumPy array or Group into a dict
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1018)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1018?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1644)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/HDF5Serializer.py#L1644?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Open an HDF5 source, optionally select a nested object, and deconvert it to Python data.
+  - `file`: `object`
+    > path or file-like object
+  - `key`: `object`
+    > the storage or lookup key
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
  </div>
 </div>
 
@@ -136,7 +169,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/HDF5Serializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/HDF5Serializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L781?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1331?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

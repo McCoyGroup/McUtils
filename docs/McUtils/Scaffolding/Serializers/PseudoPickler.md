@@ -33,6 +33,17 @@ __init__(self, allow_pickle=False, protocol=1, b64encode=False):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L42)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L42?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Configure pseudo-pickling fallback, protocol marker, and optional base64 encoding for embedded pickle bytes.
+  - `allow_pickle`: `object`
+    > whether unsupported values may fall back to pickle
+  - `protocol`: `object`
+    > pseudo-pickle protocol marker
+  - `b64encode`: `object`
+    > whether pickle bytes are base64 encoded
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.PseudoPickler.to_state" class="docs-object-method">&nbsp;</a> 
@@ -40,8 +51,8 @@ __init__(self, allow_pickle=False, protocol=1, b64encode=False):
 to_state(self, obj, cache=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L181?message=Update%20Docs)]
 </div>
 Tries to extract state from `obj`, first through its `to_state`
 interface, but that failing by recursively walking the object
@@ -57,8 +68,8 @@ tree
 serialize(self, obj, cache=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L212)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L212?message=Update%20Docs)]
 </div>
 Serializes an object first by checking for a `to_state`
 method, and that missing, by converting to primitive-ish types
@@ -75,8 +86,8 @@ falling back to `pickle`
 deserialize(self, spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L256)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L256?message=Update%20Docs)]
 </div>
 Deserializes from an object spec, dispatching
 to regular pickle where necessary

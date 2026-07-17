@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.YAMLSerializer">YAMLSerializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L476)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L476?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L790)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L790?message=Update%20Docs)]
 </div>
 
 A serializer that makes dumping data to YAML simpler.
@@ -29,9 +29,14 @@ registry_name: str
 __init__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L484)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L484?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L798)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L798?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Import and retain the YAML backend, raising at construction time when YAML support is unavailable.
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.YAMLSerializer.convert" class="docs-object-method">&nbsp;</a> 
@@ -39,9 +44,16 @@ __init__(self):
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L489)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L489?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L811)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L811?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap YAML-compatible data without structural conversion.
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `:returns`: `object`
+    > The converted representation described above.
 
 
 <a id="McUtils.Scaffolding.Serializers.YAMLSerializer.deconvert" class="docs-object-method">&nbsp;</a> 
@@ -49,9 +61,16 @@ convert(self, data):
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L491)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L491?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L823)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L823?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return YAML-loaded data unchanged.
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Serializers.YAMLSerializer.serialize" class="docs-object-method">&nbsp;</a> 
@@ -59,9 +78,20 @@ deconvert(self, data):
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L493)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L493?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L835)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L835?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Dump converted or raw data through the YAML API.
+  - `file`: `object`
+    > path or file-like object
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.YAMLSerializer.deserialize" class="docs-object-method">&nbsp;</a> 
@@ -69,9 +99,20 @@ serialize(self, file, data, **kwargs):
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L498)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L498?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L854)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/YAMLSerializer.py#L854?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load YAML data, deconvert it, and optionally select a nested slash-separated key.
+  - `file`: `object`
+    > path or file-like object
+  - `key`: `object`
+    > the storage or lookup key
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
  </div>
 </div>
 
@@ -125,7 +166,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/YAMLSerializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/YAMLSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L476?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L790?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

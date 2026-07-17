@@ -29,6 +29,21 @@ __init__(self, file, block_settings=None, binary=False, block_level_padding=None
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging.py#L19)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging.py#L19?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Configure block syntax and padding, then initialize a file-stream parser for the log source.
+  - `file`: `object`
+    > path or file-like object
+  - `block_settings`: `object`
+    > syntax dictionaries for each log nesting level
+  - `binary`: `object`
+    > whether the underlying stream yields bytes
+  - `block_level_padding`: `object`
+    > prefix added when synthesizing deeper block syntax
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Logging.LogParser.get_block_settings" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +51,16 @@ __init__(self, file, block_settings=None, binary=False, block_level_padding=None
 get_block_settings(self, block_level): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L46)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L46?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return syntax for a nesting level, extending the deepest known syntax with repeated padding when necessary.
+  - `block_level`: `object`
+    > zero-based nesting depth
+  - `:returns`: `dict`
+    > The syntax mapping for the requested block depth.
 
 
 <a id="McUtils.Scaffolding.Logging.LogParser.get_block" class="docs-object-method">&nbsp;</a> 
@@ -46,8 +68,8 @@ get_block_settings(self, block_level):
 get_block(self, level=0, tag=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L301)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L301?message=Update%20Docs)]
 </div>
 
   - `level`: `Any`
@@ -63,8 +85,8 @@ get_block(self, level=0, tag=None):
 get_line(self, level=0, tag=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L336)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L336?message=Update%20Docs)]
 </div>
 
   - `level`: `Any`
@@ -80,9 +102,18 @@ get_line(self, level=0, tag=None):
 get_blocks(self, tag=None, level=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L358)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L358?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Yield successive parsed blocks until `get_block` signals that the stream is exhausted.
+  - `tag`: `object`
+    > optional block or line tag
+  - `level`: `object`
+    > log nesting level
+  - `:returns`: `collections.abc.Iterator`
+    > An iterator over parsed blocks, lines, or delimited substrings.
 
 
 <a id="McUtils.Scaffolding.Logging.LogParser.get_lines" class="docs-object-method">&nbsp;</a> 
@@ -90,9 +121,18 @@ get_blocks(self, tag=None, level=0):
 get_lines(self, tag=None, level=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L248)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L248?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L384)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L384?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Yield successive prompt lines until `get_line` signals that the stream is exhausted.
+  - `tag`: `object`
+    > optional block or line tag
+  - `level`: `object`
+    > log nesting level
+  - `:returns`: `collections.abc.Iterator`
+    > An iterator over parsed blocks, lines, or delimited substrings.
 
 
 <a id="McUtils.Scaffolding.Logging.LogParser.tag_match" class="docs-object-method">&nbsp;</a> 
@@ -101,9 +141,18 @@ get_lines(self, tag=None, level=0):
 tag_match(cls, tag, tag_filter): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L262)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L262?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L410)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L410?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test a tag against a regex string or pattern, predicate, or container-style filter.
+  - `tag`: `object`
+    > optional block or line tag
+  - `tag_filter`: `object`
+    > tag exclusion matcher
+  - `:returns`: `object`
+    > The regex match object or predicate/container result used as a truth value.
 
 
 <a id="McUtils.Scaffolding.Logging.LogParser.post_process_treelist" class="docs-object-method">&nbsp;</a> 
@@ -112,9 +161,18 @@ tag_match(cls, tag, tag_filter):
 post_process_treelist(cls, res, combine_subtrees=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L271)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L271?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L431)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L431?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collapse a singleton result and merge sibling dictionaries when their keys do not conflict.
+  - `res`: `object`
+    > list of parsed tree elements
+  - `combine_subtrees`: `object`
+    > whether compatible sibling dictionaries should be merged
+  - `:returns`: `object`
+    > the collapsed singleton, merged dictionary, or original list
 
 
 <a id="McUtils.Scaffolding.Logging.LogParser.to_tree" class="docs-object-method">&nbsp;</a> 
@@ -122,9 +180,20 @@ post_process_treelist(cls, res, combine_subtrees=True):
 to_tree(self, tag_filter=None, depth=-1, combine_subtrees=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L289)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L289?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Logging/LogParser.py#L461)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Logging/LogParser.py#L461?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse all top-level blocks into a `TreeWrapper`, applying tag filtering, recursion depth, and subtree merging.
+  - `tag_filter`: `object`
+    > tag exclusion matcher
+  - `depth`: `object`
+    > remaining recursion depth; negative values are unlimited
+  - `combine_subtrees`: `object`
+    > whether compatible sibling dictionaries should be merged
+  - `:returns`: `dict | list | TreeWrapper`
+    > The recursively constructed tree representation.
  </div>
 </div>
 

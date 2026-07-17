@@ -29,6 +29,13 @@ __init__(self, obj):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers.py#L21)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L21?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Associate the manager with an object and initialize lazy basename storage.
+  - `obj`: `object`
+    > object to serialize or manage
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.get_basename" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +43,14 @@ __init__(self, obj):
 get_basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L25)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L25?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L35)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L35?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a storage basename from the object type and its `serialization_id` or runtime identity.
+  - `:returns`: `str`
+    > the generated storage basename
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.basename" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +59,14 @@ get_basename(self):
 basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L50)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L50?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Lazily compute and cache the manager basename.
+  - `:returns`: `str`
+    > The resolved filesystem path or basename.
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.BaseObjectManager.save_attr" class="docs-object-method">&nbsp;</a> 
@@ -57,8 +74,8 @@ basename(self):
 save_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L64?message=Update%20Docs)]
 </div>
 Saves some attribute of the object
   - `attr`: `Any`
@@ -72,8 +89,8 @@ Saves some attribute of the object
 load_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L76?message=Update%20Docs)]
 </div>
 Loads some attribute of the object
   - `attr`: `Any`
@@ -87,8 +104,8 @@ Loads some attribute of the object
 del_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L62)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L62?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L88)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/BaseObjectManager.py#L88?message=Update%20Docs)]
 </div>
 Deletes some attribute of the object
   - `attr`: `Any`

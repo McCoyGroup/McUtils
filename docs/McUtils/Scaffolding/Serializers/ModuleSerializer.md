@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.ModuleSerializer">ModuleSerializer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1205?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1939)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1939?message=Update%20Docs)]
 </div>
 
 A somewhat hacky serializer that supports module-based serialization.
@@ -33,9 +33,18 @@ registry_name: str
 __init__(self, attr=None, loader=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1219)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1219?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L1953)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1953?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Configure the target module attribute and optional module loader.
+  - `attr`: `object`
+    > attribute name
+  - `loader`: `object`
+    > module loader
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.ModuleSerializer.loader" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +53,14 @@ __init__(self, attr=None, loader=None):
 loader(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1223)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1223?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1969)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1969?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Lazily construct or return the module loader used for deserialization.
+  - `:returns`: `object`
+    > the configured or lazily created module loader
 
 
 <a id="McUtils.Scaffolding.Serializers.ModuleSerializer.attr" class="docs-object-method">&nbsp;</a> 
@@ -55,9 +69,14 @@ loader(self):
 attr(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1231)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1231?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1985)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1985?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the configured module attribute or the default `config` name.
+  - `:returns`: `str`
+    > the module attribute containing serialized data
 
 
 <a id="McUtils.Scaffolding.Serializers.ModuleSerializer.convert" class="docs-object-method">&nbsp;</a> 
@@ -65,9 +84,16 @@ attr(self):
 convert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1242)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1242?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2012)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2012?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap module configuration data without structural conversion.
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `:returns`: `object`
+    > The converted representation described above.
 
 
 <a id="McUtils.Scaffolding.Serializers.ModuleSerializer.deconvert" class="docs-object-method">&nbsp;</a> 
@@ -75,9 +101,16 @@ convert(self, data):
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1244)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1244?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2024)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2024?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the loaded module attribute unchanged.
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
 
 
 <a id="McUtils.Scaffolding.Serializers.ModuleSerializer.serialize" class="docs-object-method">&nbsp;</a> 
@@ -85,9 +118,20 @@ deconvert(self, data):
 serialize(self, file, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1246)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1246?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2036)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2036?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+JSON-encode data and emit a Python assignment to the configured module attribute.
+  - `file`: `object`
+    > path or file-like object
+  - `data`: `object`
+    > data to serialize, convert, or write
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.Serializers.ModuleSerializer.deserialize" class="docs-object-method">&nbsp;</a> 
@@ -95,9 +139,20 @@ serialize(self, file, data, **kwargs):
 deserialize(self, file, key=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1258)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L1258?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2062)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/ModuleSerializer.py#L2062?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Execute/load the module, retrieve the configured attribute, and optionally select a nested key.
+  - `file`: `object`
+    > path or file-like object
+  - `key`: `object`
+    > the storage or lookup key
+  - `kwargs`: `object`
+    > keyword arguments forwarded to a callable
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
  </div>
 </div>
 
@@ -151,7 +206,7 @@ deserialize(self, file, key=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/ModuleSerializer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/ModuleSerializer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1205?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L1939?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

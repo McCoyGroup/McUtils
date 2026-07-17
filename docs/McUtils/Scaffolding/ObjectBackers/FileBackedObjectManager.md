@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager">FileBackedObjectManager</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers.py#L74)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L74?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L100?message=Update%20Docs)]
 </div>
 
 Provides an interface to back an object with
@@ -27,8 +27,8 @@ default_directory: NoneType
 __init__(self, obj, chk=None, loc=None, checkpoint_class=<class 'McUtils.Scaffolding.Checkpointing.NumPyCheckpointer'>): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers.py#L107)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L107?message=Update%20Docs)]
 </div>
 
   - `obj`: `object`
@@ -47,9 +47,14 @@ __init__(self, obj, chk=None, loc=None, checkpoint_class=<class 'McUtils.Scaffol
 get_default_directory(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L134)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L134?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create or return the shared persistence location used for file-backed objects.
+  - `:returns`: `object`
+    > The resolved or newly constructed helper object.
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.basename" class="docs-object-method">&nbsp;</a> 
@@ -58,9 +63,16 @@ get_default_directory(cls):
 basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L148)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L148?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Get or set the explicit file tag used as the manager basename.
+  - `v`: `object`
+    > new explicit backing-file tag
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.get_basename" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +80,14 @@ basename(self):
 get_basename(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L123)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L123?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L177?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the default file tag from the managed object type and stable or runtime identity.
+  - `:returns`: `str`
+    > the generated file tag
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.save_attr" class="docs-object-method">&nbsp;</a> 
@@ -78,9 +95,16 @@ get_basename(self):
 save_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L192)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L192?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Checkpoint an object attribute and return a marker describing the file-backed attribute.
+  - `attr`: `object`
+    > attribute name
+  - `:returns`: `None | object`
+    > No explicit value unless noted by the underlying delegated operation.
 
 
 <a id="McUtils.Scaffolding.ObjectBackers.FileBackedObjectManager.load_attr" class="docs-object-method">&nbsp;</a> 
@@ -88,9 +112,16 @@ save_attr(self, attr):
 load_attr(self, attr): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L207)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.py#L207?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load an attribute value from the backing checkpointer.
+  - `attr`: `object`
+    > attribute name
+  - `:returns`: `object`
+    > The reconstructed, loaded, or selected Python value.
  </div>
 </div>
 
@@ -144,7 +175,7 @@ load_attr(self, attr):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L74?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/ObjectBackers.py#L100?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

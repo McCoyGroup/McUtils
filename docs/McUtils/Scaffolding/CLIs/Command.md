@@ -28,6 +28,15 @@ __init__(self, name, method):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs.py#L19)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs.py#L19?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Inspect a callable, recording its type hints and treating every parameter without a default as positional.
+  - `name`: `object`
+    > registry, command, resource, or object name
+  - `method`: `object`
+    > callable wrapped as a command
+  - `:returns`: `None`
+    > No explicit value; the method mutates state or performs I/O.
 
 
 <a id="McUtils.Scaffolding.CLIs.Command.get_help" class="docs-object-method">&nbsp;</a> 
@@ -35,8 +44,8 @@ __init__(self, name, method):
 get_help(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L28)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L28?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L40?message=Update%20Docs)]
 </div>
 Gets single method help string
   - `:returns`: `_`
@@ -49,8 +58,8 @@ Gets single method help string
 get_parse_dict(*spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L91)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L91?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L103?message=Update%20Docs)]
 </div>
 Builds a parse spec to feed into an ArgumentParser later
   - `spec`: `Any`
@@ -64,8 +73,8 @@ Builds a parse spec to feed into an ArgumentParser later
 get_parse_spec(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L152?message=Update%20Docs)]
 </div>
 Gets a parse spec that can be fed to ArgumentParser
   - `:returns`: `_`
@@ -77,8 +86,8 @@ Gets a parse spec that can be fed to ArgumentParser
 parse(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L184?message=Update%20Docs)]
 </div>
 Generates a parse spec, builds an ArgumentParser, and parses the arguments
   - `:returns`: `_`
@@ -90,8 +99,8 @@ Generates a parse spec, builds an ArgumentParser, and parses the arguments
 __call__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L170)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L170?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/CLIs/Command.py#L194)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/CLIs/Command.py#L194?message=Update%20Docs)]
 </div>
 Parse argv and call bound method
   - `:returns`: `_`
