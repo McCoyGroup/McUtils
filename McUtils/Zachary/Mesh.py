@@ -61,10 +61,29 @@ class Mesh(np.ndarray):
         return self
 
     def __init__(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        No-op initializer; the real setup happens in `__new__` (as required for an
+        `np.ndarray` subclass).
+
+        :param args: ignored
+        :param kwargs: ignored
+        """
         # empty init call because numpy is weird
         ...
 
     def __array_finalize__(self, mesh):
+        """
+        **LLM Docstring**
+
+        NumPy subclass hook: propagate (or infer) the mesh type and the
+        `allow_indeterminate` flag onto a newly created view/copy, validating that an
+        indeterminate mesh is only allowed when explicitly permitted.
+
+        :param mesh: the source array being finalized from
+        :raises MeshError: if the mesh type is indeterminate and that isn't allowed
+        """
         # basically just a validator...
         if mesh is None:
             return None
@@ -82,11 +101,28 @@ class Mesh(np.ndarray):
 
     @property
     def mesh_spacings(self):
+        """
+        **LLM Docstring**
+
+        The per-axis grid spacings (computed and cached lazily).
+
+        :return: the mesh spacings
+        :rtype: np.ndarray | list
+        """
         if self._spacings is None:
             self._spacings = self.get_mesh_spacings(self)
         return self._spacings
     @property
     def subgrids(self):
+        """
+        **LLM Docstring**
+
+        The per-axis subgrids for a regular or structured mesh (or `None` for
+        unstructured meshes).
+
+        :return: the subgrids, or `None`
+        :rtype: list | None
+        """
         if (
                 self.mesh_type == MeshType.Regular
                 or self.mesh_type == MeshType.Structured
@@ -97,6 +133,14 @@ class Mesh(np.ndarray):
             return None
     @property
     def bounding_box(self):
+        """
+        **LLM Docstring**
+
+        The `(min, max)` extent of the mesh along each coordinate.
+
+        :return: the per-coordinate bounds
+        :rtype: list[tuple]
+        """
         gps = self.get_gridpoints(self).T
         return [(np.min(g), np.max(g)) for g in gps]
     @property
@@ -171,6 +215,16 @@ class Mesh(np.ndarray):
         else:
             meshes = np.moveaxis(grid, len(grid.shape)-1, 0)
             def _pull_u(g):
+                """
+                **LLM Docstring**
+
+                Return the unique values of a subgrid axis in their original order.
+
+                :param g: the axis array
+                :type g: np.ndarray
+                :return: the ordered unique values
+                :rtype: np.ndarray
+                """
                 flat = g.flatten()
                 _, idx = np.unique(g.flatten(), return_index=True)
                 return flat[np.sort(idx),]
@@ -178,6 +232,19 @@ class Mesh(np.ndarray):
 
     @classmethod
     def get_mesh_spacings(cls, grid, tol=None):
+        """
+        **LLM Docstring**
+
+        Compute the per-axis spacings of a grid as the unique rounded successive
+        differences of each subgrid (or `None` if there are no subgrids).
+
+        :param grid: the grid
+        :type grid: np.ndarray
+        :param tol: the rounding tolerance (decimal places)
+        :type tol: int | None
+        :return: the per-axis spacings
+        :rtype: np.ndarray | list | None
+        """
         subgrids = cls.get_mesh_subgrids(grid, tol=tol)
         if subgrids is None:
             return None

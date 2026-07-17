@@ -89,6 +89,18 @@ class FiniteDifferenceFunction:
         return vals
 
     def __call__(self, vals, axes=None, mesh_spacing=None):
+        """
+        **LLM Docstring**
+
+        Apply the finite-difference weights to a set of values (delegates to `apply`).
+
+        :param vals: the values on the grid
+        :type vals: np.ndarray
+        :param axes: the axes to difference along
+        :param mesh_spacing: the grid spacing(s)
+        :return: the finite-difference derivative
+        :rtype: np.ndarray
+        """
         return self.apply(vals, axes=axes, mesh_spacing=mesh_spacing)
 
     @property
@@ -287,22 +299,73 @@ class FiniteDifference1D:
     Higher-dimensional derivatives are built by chaining these.
     """
     def __init__(self, finite_difference_data, matrix):
+        """
+        **LLM Docstring**
+
+        Hold a 1-D finite-difference specification and its associated matrix.
+
+        :param finite_difference_data: the weights/widths/order data
+        :type finite_difference_data: FiniteDifferenceData
+        :param matrix: the associated finite-difference matrix
+        :type matrix: FiniteDifferenceMatrix
+        """
         self.data = finite_difference_data
         self.mat = matrix
 
     @property
     def order(self):
+        """
+        **LLM Docstring**
+
+        The derivative order.
+
+        :return: the order
+        :rtype: int
+        """
         return self.data.order
     @property
     def weights(self):
+        """
+        **LLM Docstring**
+
+        The finite-difference weights (left, center, right).
+
+        :return: the weights
+        :rtype: tuple
+        """
         return tuple(tuple(w) for w in self.data.weights)
     @property
     def widths(self):
+        """
+        **LLM Docstring**
+
+        The stencil widths (left, center, right).
+
+        :return: the widths
+        :rtype: tuple
+        """
         return tuple(tuple(w) for w in self.data.widths)
 
     only_odd_orders = False
     @classmethod
     def get_stencil(cls, order, stencil, accuracy, only_odd_orders=None):
+        """
+        **LLM Docstring**
+
+        Compute the stencil size (number of points minus one) for a derivative order and
+        accuracy, optionally forcing an odd number of points.
+
+        :param order: the derivative order
+        :type order: int
+        :param stencil: an explicit stencil size (derived from order+accuracy if omitted)
+        :type stencil: int | None
+        :param accuracy: the requested accuracy order
+        :type accuracy: int
+        :param only_odd_orders: force an odd stencil
+        :type only_odd_orders: bool | None
+        :return: the stencil size
+        :rtype: int
+        """
         if only_odd_orders is None:
             only_odd_orders = cls.only_odd_orders
         if stencil is None:
@@ -627,6 +690,16 @@ class FiniteDifferenceData:
     Holds the data used by to construct a finite difference matrix
     """
     def __init__(self, weights, widths, order):
+        """
+        **LLM Docstring**
+
+        Hold the (cleaned) finite-difference weights, widths, and derivative order.
+
+        :param weights: the left/center/right weight lists
+        :param widths: the stencil widths
+        :param order: the derivative order
+        :type order: int
+        """
         self._weights = self._clean_coeffs(weights)  # used to apply the weights to function values
         # NOTE: the coefficients should be supplied without 'h' if an evenly spaced grid
         # These will be forced back in later
@@ -636,17 +709,50 @@ class FiniteDifferenceData:
     # region Properties
     @property
     def weights(self):
+        """
+        **LLM Docstring**
+
+        The finite-difference weights.
+
+        :return: the weights
+        :rtype: tuple
+        """
         return tuple(tuple(x) for x in self._weights)
     @property
     def widths(self):
+        """
+        **LLM Docstring**
+
+        The stencil widths.
+
+        :return: the widths
+        :rtype: tuple
+        """
         return tuple(tuple(x) for x in self._widths)
     @property
     def order(self):
+        """
+        **LLM Docstring**
+
+        The derivative order.
+
+        :return: the order
+        :rtype: int
+        """
         return self._order
     #endregion
 
     @classmethod
     def _clean_coeffs(cls, cfs):
+        """
+        **LLM Docstring**
+
+        Validate that the weights are supplied as a `(left, center, right)` triple.
+
+        :param cfs: the weights
+        :return: the validated weights
+        :raises TypeError: if not a left/center/right triple
+        """
         try:
             cl, cc, cr = cfs
             islcr = True
@@ -658,12 +764,32 @@ class FiniteDifferenceData:
         return cfs
     @classmethod
     def _clean_order(cls, order):
+        """
+        **LLM Docstring**
+
+        Validate that the derivative order is an integer.
+
+        :param order: the order
+        :return: the validated order
+        :rtype: int
+        :raises TypeError: if not an int
+        """
         if not isinstance(order, (int, np.integer)):
             raise TypeError("{}: order {} is expected to be an int",
                             cls.__name__, order)
         return order
     @classmethod
     def _clean_widths(cls, ws):
+        """
+        **LLM Docstring**
+
+        Normalize the stencil widths into `(left, right)` integer pairs (recursively for
+        nested specifications).
+
+        :param ws: the widths
+        :return: the normalized widths
+        :rtype: tuple
+        """
 
         if isinstance(ws, (int, float, np.integer, np.floating)):
             ws = ( (int(ws), int(ws)) )
@@ -723,60 +849,186 @@ class FiniteDifferenceMatrix:
     #region Properties
     @property
     def weights(self):
+        """
+        **LLM Docstring**
+
+        The finite-difference weights backing the matrix.
+
+        :return: the weights
+        :rtype: tuple
+        """
         return self.data.weights
     @property
     def order(self):
+        """
+        **LLM Docstring**
+
+        The derivative order.
+
+        :return: the order
+        :rtype: int
+        """
         return self.data.order
     @property
     def npts(self):
+        """
+        **LLM Docstring**
+
+        The number of grid points the matrix spans. Setting it invalidates the cached
+        matrix.
+
+        :return: the number of points
+        :rtype: int
+        """
         return self._npts
     @npts.setter
     def npts(self, val):
+        """
+        **LLM Docstring**
+
+        The number of grid points the matrix spans. Setting it invalidates the cached
+        matrix.
+
+        :return: the number of points
+        :rtype: int
+        """
         if val != self._npts:
             self._mat = None
             self._npts = val
     @property
     def mesh_spacing(self):
+        """
+        **LLM Docstring**
+
+        The grid spacing. Setting it invalidates the cached matrix.
+
+        :return: the mesh spacing
+        :rtype: float
+        """
         return self._mesh_spacing
     @mesh_spacing.setter
     def mesh_spacing(self, val):
+        """
+        **LLM Docstring**
+
+        The grid spacing. Setting it invalidates the cached matrix.
+
+        :return: the mesh spacing
+        :rtype: float
+        """
         if val != self._mesh_spacing:
             self._mat = None
             self._mesh_spacing = val
     @property
     def only_core(self):
+        """
+        **LLM Docstring**
+
+        Whether to build only the core (non-boundary) rows. Setting it invalidates the
+        cached matrix.
+
+        :return: the flag
+        :rtype: bool
+        """
         return self._only_core
     @only_core.setter
     def only_core(self, val):
+        """
+        **LLM Docstring**
+
+        Whether to build only the core (non-boundary) rows. Setting it invalidates the
+        cached matrix.
+
+        :return: the flag
+        :rtype: bool
+        """
         if val != self._only_core:
             self._mat = None
             self._only_core = val
     @property
     def only_center(self):
+        """
+        **LLM Docstring**
+
+        Whether to build only the single centered row. Setting it invalidates the cached
+        matrix.
+
+        :return: the flag
+        :rtype: bool
+        """
         return self._only_center
     @only_center.setter
     def only_center(self, val):
+        """
+        **LLM Docstring**
+
+        Whether to build only the single centered row. Setting it invalidates the cached
+        matrix.
+
+        :return: the flag
+        :rtype: bool
+        """
         if val != self._only_center:
             self._mat = None
             self._only_center = val
     @property
     def mode(self):
+        """
+        **LLM Docstring**
+
+        The storage mode (`'dense'` or `'sparse'`). Setting it invalidates the cached
+        matrix.
+
+        :return: the mode
+        :rtype: str
+        """
         return self._mode
     @mode.setter
     def mode(self, val):
+        """
+        **LLM Docstring**
+
+        The storage mode (`'dense'` or `'sparse'`). Setting it invalidates the cached
+        matrix.
+
+        :return: the mode
+        :rtype: str
+        """
         if val != self._mode:
             self._mat = None
             self._mode = val
     @property
     def dtype(self):
+        """
+        **LLM Docstring**
+
+        The matrix dtype. Setting it invalidates the cached matrix.
+
+        :return: the dtype
+        """
         return self._dtype
     @dtype.setter
     def dtype(self, val):
+        """
+        **LLM Docstring**
+
+        The matrix dtype. Setting it invalidates the cached matrix.
+
+        :return: the dtype
+        """
         if val != self._dtype:
             self._mat = None
             self._dtype = val
     @property
     def matrix(self):
+        """
+        **LLM Docstring**
+
+        The finite-difference matrix (built and cached lazily).
+
+        :return: the matrix
+        :rtype: np.ndarray | sparse matrix
+        """
         if self._mat is None:
             self._mat = self.fd_matrix()
         return self._mat
@@ -817,6 +1069,27 @@ class FiniteDifferenceMatrix:
 
     @classmethod
     def _fdm_irregular(cls, c_left, c_center, c_right, npts, only_core, only_center, mode, dtype):
+        """
+        **LLM Docstring**
+
+        Build the finite-difference matrix for an irregular grid, where the boundary,
+        core, and (optionally) center-only rows carry per-position weight lists.
+
+        :param c_left: the left-boundary weights
+        :param c_center: the core (per-row) weights
+        :param c_right: the right-boundary weights
+        :param npts: the number of grid points
+        :type npts: int
+        :param only_core: build only the core rows
+        :type only_core: bool
+        :param only_center: build only the centered row
+        :type only_center: bool
+        :param mode: `'dense'` or `'sparse'`
+        :type mode: str
+        :param dtype: the matrix dtype
+        :return: the finite-difference matrix
+        :rtype: np.ndarray | sparse matrix
+        """
         lcc = len(c_center)
         if only_center:
             shape = (1, npts)
@@ -858,6 +1131,27 @@ class FiniteDifferenceMatrix:
 
     @classmethod
     def _fdm_regular(cls, c_left, c_center, c_right, npts, only_core, only_center, mode, dtype):
+        """
+        **LLM Docstring**
+
+        Build the finite-difference matrix for a regular grid, stacking the
+        left-boundary, core (banded), and right-boundary blocks.
+
+        :param c_left: the left-boundary weights
+        :param c_center: the core weights
+        :param c_right: the right-boundary weights
+        :param npts: the number of grid points
+        :type npts: int
+        :param only_core: build only the core rows
+        :type only_core: bool
+        :param only_center: build only the centered row
+        :type only_center: bool
+        :param mode: `'dense'` or `'sparse'`
+        :type mode: str
+        :param dtype: the matrix dtype
+        :return: the finite-difference matrix
+        :rtype: np.ndarray | sparse matrix
+        """
         lcc = len(c_center)
         if only_center:
 
@@ -890,6 +1184,24 @@ class FiniteDifferenceMatrix:
 
     @classmethod
     def _fdm_core(cls, a, n1, n2, side="l", mode = "dense"):
+        """
+        **LLM Docstring**
+
+        Build a banded (Toeplitz-style) core block of the finite-difference matrix by
+        placing a weight vector along each row, either from the left or right side.
+
+        :param a: the weight vector
+        :param n1: the number of rows
+        :type n1: int
+        :param n2: the number of columns
+        :type n2: int
+        :param side: `'l'` or `'r'` (which side to anchor the band)
+        :type side: str
+        :param mode: `'dense'` or `'sparse'`
+        :type mode: str
+        :return: the banded block
+        :rtype: np.ndarray | sparse matrix
+        """
         # pulled from https://stackoverflow.com/a/52464135/5720002
         # returns the inner blocks of the FD mat
         if mode == "sparse":

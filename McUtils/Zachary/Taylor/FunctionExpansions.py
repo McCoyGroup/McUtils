@@ -62,12 +62,39 @@ class TaylorPoly:
         self._tensors = None
     @property
     def center(self):
+        """
+        **LLM Docstring**
+
+        The expansion center.
+
+        :return: the center
+        :rtype: np.ndarray
+        """
         return self._center
     @property
     def is_multi(self):
+        """
+        **LLM Docstring**
+
+        Whether this is a stacked (multi-function) expansion.
+
+        :return: whether the expansion is stacked
+        :rtype: bool
+        """
         return self._derivs[0].ndim > 1
     @classmethod
     def multipolynomial(cls, *expansions):
+        """
+        **LLM Docstring**
+
+        Build a single stacked expansion from several separate expansions, stacking their
+        per-order tensors, centers, and reference values.
+
+        :param expansions: the component expansions
+        :type expansions: TaylorPoly
+        :return: the stacked expansion
+        :rtype: TaylorPoly
+        """
         return cls(
             list(zip(*[e.expansion_tensors for e in expansions])),
             center=np.asanyarray([e.center for e in expansions]),
@@ -76,6 +103,16 @@ class TaylorPoly:
         )
     @classmethod
     def canonicalize_tfs(cls, tfs):
+        """
+        **LLM Docstring**
+
+        Normalize a coordinate-transform specification into `(forward_tensors,
+        inverse_tensors)`, detecting whether an inverse set was supplied.
+
+        :param tfs: the transform tensors (forward, or forward+inverse)
+        :return: `(forward_tensors, inverse_tensors_or_None)`
+        :rtype: tuple
+        """
         if len(tfs) == 2 and (
                 nput.is_numeric_array_like(tfs[0][0])
                 and nput.is_numeric_array_like(tfs[1][0])
@@ -86,6 +123,15 @@ class TaylorPoly:
             return [np.asanyarray(t) for t in tfs], None
     @property
     def transforms(self):
+        """
+        **LLM Docstring**
+
+        The coordinate-transform tensors (forward, and inverse if present), or `None`
+        when the expansion has no transform.
+
+        :return: the transform tensors
+        :rtype: list | None
+        """
         return (
             [list(self._transf), list(self._inv)]
                 if self._inv is not None else
@@ -134,6 +180,14 @@ class TaylorPoly:
         return self._derivs
     @derivative_tensors.setter
     def derivative_tensors(self, derivs):
+        """
+        **LLM Docstring**
+
+        Set the expansion's derivative tensors.
+
+        :param derivs: the per-order derivative tensors
+        :type derivs: list
+        """
         self._tensors = derivs
 
     def get_expansions(self, coords, transform_displacements=True, subexpansions=None, outer=True, order=None, squeeze=None):
@@ -257,12 +311,42 @@ class TaylorPoly:
         return exps
 
     def __call__(self, coords, **kw):
+        """
+        **LLM Docstring**
+
+        Evaluate the expansion at the given coordinates (delegates to `expand`).
+
+        :param coords: the query coordinates
+        :type coords: np.ndarray
+        :param kw: extra options for `expand`
+        :return: the expansion values
+        :rtype: np.ndarray
+        """
         return self.expand(coords, **kw)
 
     class CoordinateTransforms:
         def __init__(self, transforms):
+            """
+            **LLM Docstring**
+
+            Hold the per-order coordinate-transform tensors.
+
+            :param transforms: the transform tensors
+            :type transforms: list
+            """
             self._transf = [np.asanyarray(t) for t in transforms]
         def __getitem__(self, i):
+            """
+            **LLM Docstring**
+
+            Return the transform tensor for the requested order.
+
+            :param i: the order
+            :type i: int
+            :return: the transform tensor
+            :rtype: np.ndarray
+            :raises FunctionExpansionException: if the order exceeds what was provided
+            """
             if len(self._transf) < i:
                 raise FunctionExpansionException("{}: transformations requested up to order {} but only provided to order {}".format(
                     type(self).__name__,
@@ -271,9 +355,28 @@ class TaylorPoly:
                 ))
             return self._transf[i]
         def __len__(self):
+            """
+            **LLM Docstring**
+
+            The number of transform orders provided.
+
+            :return: the number of orders
+            :rtype: int
+            """
             return len(self._transf)
     class FunctionDerivatives:
         def __init__(self, derivs, weight_coefficients=True):
+            """
+            **LLM Docstring**
+
+            Hold the per-order function-derivative tensors, optionally weighting them by the
+            Taylor coefficients (`1/n!` and permutation factors).
+
+            :param derivs: the per-order derivative tensors
+            :type derivs: list
+            :param weight_coefficients: apply the Taylor coefficient weighting
+            :type weight_coefficients: bool
+            """
             self.derivs = [ np.asanyarray(t) for t in derivs ]
             if weight_coefficients:
                 self.derivs = [self.weight_derivs(t, o+1) if weight_coefficients else t for o, t in enumerate(self.derivs)]
@@ -306,6 +409,17 @@ class TaylorPoly:
             return weighted
 
         def __getitem__(self, i):
+            """
+            **LLM Docstring**
+
+            Return the derivative tensor for the requested order.
+
+            :param i: the order
+            :type i: int
+            :return: the derivative tensor
+            :rtype: np.ndarray
+            :raises FunctionExpansionException: if the order exceeds what was provided
+            """
             if len(self.derivs) < i:
                 raise FunctionExpansionException("{}: derivatives requested up to order {} but only provided to order {}".format(
                     type(self).__name__,
@@ -314,6 +428,14 @@ class TaylorPoly:
                 ))
             return self.derivs[i]
         def __len__(self):
+            """
+            **LLM Docstring**
+
+            The number of derivative orders provided.
+
+            :return: the number of orders
+            :rtype: int
+            """
             return len(self.derivs)
 
     def deriv(self, which=None):
@@ -358,6 +480,26 @@ class TaylorPoly:
 
     @classmethod
     def from_indices(cls, inds, ref=0, expansion_order=None, ndim=None, symmetrize=True, **opts):
+        """
+        **LLM Docstring**
+
+        Build an expansion from a sparse set of `(index_tuple, value)` derivative
+        entries, inferring the dimension and order and (by default) symmetrizing each
+        tensor over its index permutations.
+
+        :param inds: the derivative entries (a mapping or iterable of `(index, value)`)
+        :type inds: dict | Iterable
+        :param ref: the reference (zeroth-order) value
+        :param expansion_order: the highest derivative order (inferred if omitted)
+        :type expansion_order: int | None
+        :param ndim: the coordinate dimension (inferred if omitted)
+        :type ndim: int | None
+        :param symmetrize: fill all index permutations of each entry
+        :type symmetrize: bool
+        :param opts: extra options forwarded to the constructor
+        :return: the expansion
+        :rtype: TaylorPoly
+        """
         #TODO: handle via `SparseArray` methods
         if isinstance(inds, dict):
             inds = tuple(inds.items())
@@ -557,8 +699,3 @@ class FunctionExpansion(TaylorPoly):
             else:
                 transforms = None
         return cls(dts, center=point, ref=ref, transforms=transforms, weight_coefficients=weight_coefficients)
-
-
-
-
-
