@@ -56,6 +56,17 @@ class FiniteDifferenceDerivative:
         self._fd_opts = fd_opts
 
     def __call__(self, *args, **opts):
+        """
+        **LLM Docstring**
+
+        Compute the requested finite-difference derivatives (delegates to
+        `derivatives`).
+
+        :param args: positional arguments for `derivatives`
+        :param opts: keyword arguments for `derivatives`
+        :return: the derivative tensors
+        :rtype: object
+        """
         return self.derivatives(*args, **opts)
 
     def derivatives(self,
@@ -122,6 +133,15 @@ class FunctionSpec:
         self.in_shape = input_shape
         self.output_shape = output_shape
     def __call__(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Evaluate the wrapped function.
+
+        :param args: positional arguments for the function
+        :param kwargs: keyword arguments for the function
+        :return: the function value
+        """
         return self.f(*args, **kwargs)
 
 class DerivativeGenerator:
@@ -235,6 +255,15 @@ class DerivativeGenerator:
         self.logger = NullLogger() if logger is None else logger
 
     def __getstate__(self):
+        """
+        **LLM Docstring**
+
+        Return the picklable state, dropping the (unpicklable / regenerable) evaluation
+        cache.
+
+        :return: the state dict
+        :rtype: dict
+        """
         state = {}
         for k in self.__dict__:
             if k != '_cache':
@@ -243,21 +272,66 @@ class DerivativeGenerator:
         return state
 
     def __setstate__(self, state):
+        """
+        **LLM Docstring**
+
+        Restore state from a pickled dict, reinitializing an empty evaluation cache.
+
+        :param state: the state dict
+        :type state: dict
+        """
         for k in state:
             self.__dict__[k] = state[k]
         self._cache = {}
 
     @staticmethod
     def _default_displace(c, a):
+        """
+        **LLM Docstring**
+
+        Default displacement callback: return the displacement for coordinate `c`,
+        indexing into a per-coordinate array when one is given.
+
+        :param c: the coordinate index
+        :type c: int
+        :param a: the displacement (scalar or per-coordinate)
+        :return: the displacement for this coordinate
+        :rtype: float
+        """
         if not isinstance(a, (int, float, np.integer, np.floating)):
             a = a[c % len(a)]
         return a
 
     @staticmethod
     def _default_prep(c, a, b):
+        """
+        **LLM Docstring**
+
+        Default preparation callback: pass the displacements and function values through
+        unchanged.
+
+        :param c: the derivative spec (unused)
+        :param a: the displacements
+        :param b: the function values
+        :return: `(displacements, function_values)`
+        :rtype: tuple
+        """
         return (a, b)
 
     def _get_fdf(self, ci, mesh_spacing):
+        """
+        **LLM Docstring**
+
+        Build (and cache) the `FiniteDifferenceFunction` for the derivative order implied
+        by a coordinate spec and a mesh spacing, returning its stencil widths/shapes
+        alongside it.
+
+        :param ci: the coordinate spec
+        :param mesh_spacing: the mesh spacing
+        :return: `(stencil_widths, stencil_shapes, finite_difference, derivative_order)`
+        :rtype: tuple
+        :raises ValueError: if the weight/shape bookkeeping is inconsistent
+        """
         # create the different types of finite differences we'll compute for the different coordinates of interest
         dorder = self._dorder(ci)
 
@@ -348,6 +422,22 @@ class DerivativeGenerator:
         return displacement
 
     def _build_displacement_array(self, coord, stencil_shapes, stencil_widths, displacement, use_sparse=False):
+        """
+        **LLM Docstring**
+
+        Build the full tensor of coordinate displacements for a finite-difference
+        stencil, scaling the base displacement of each coordinate by its stencil steps
+        and broadcasting across the stencil grid.
+
+        :param coord: the coordinate index tuples for this derivative
+        :param stencil_shapes: the per-coordinate stencil shapes
+        :param stencil_widths: the per-coordinate stencil widths
+        :param displacement: the per-coordinate base displacements
+        :param use_sparse: build a sparse displacement array
+        :type use_sparse: bool
+        :return: `(displacements, displacement_shape, mesh_spacings)`
+        :rtype: tuple
+        """
 
         # not too worried about looping over coordinates since the number of loops will be like max in the small hundreds
         num_displacements = np.prod(stencil_widths)
@@ -486,6 +576,21 @@ class DerivativeGenerator:
         return abs(subgrid[1] - subgrid[0])
 
     def _get_single_deriv(self, spec, disp_data, fd_data, return_coords):
+        """
+        **LLM Docstring**
+
+        Compute a single derivative tensor: evaluate the function on the displaced
+        coordinates (using the cache when enabled), reshape the values to the stencil
+        grid, and contract them with the finite-difference weights.
+
+        :param spec: the derivative spec (which coordinates, to what order)
+        :param disp_data: `(disp_spec, displacements, displaced_coords, mesh_spacings)`
+        :param fd_data: `(stencil_widths, stencil_shapes, finite_difference, order)`
+        :param return_coords: also return the displaced coordinates
+        :type return_coords: bool
+        :return: the derivative tensor (and the displaced coords if requested)
+        :rtype: np.ndarray | tuple
+        """
 
         if self.cache_evaluations:
             # we assume that evaluating the hash of the array will be faster
@@ -614,6 +719,17 @@ class DerivativeGenerator:
             sub_specs = sub_specs + [coordinates for i in range(order - len(pos))]
             unique = set()
             def test(p):
+                """
+                **LLM Docstring**
+
+                Filter permutations of a derivative index down to the unique ones under sorting
+                (exploiting the total symmetry of derivative tensors).
+
+                :param p: the index permutation
+                :type p: tuple
+                :return: whether this permutation is a new (unseen) sorted index
+                :rtype: bool
+                """
                 # assumes derivative tensors are totally symmetric (good assumption in science)
                 # filters out permutations by whether or not they are equivalent under sorting
                 s = tuple(sorted(p))
@@ -632,6 +748,17 @@ class DerivativeGenerator:
         return [self._idx(s) for s in specs], specs
 
     def _parallel_derivs(self, specs=None, parallelizer=None):
+        """
+        **LLM Docstring**
+
+        Compute the derivative tensors in parallel by scattering the specs across
+        workers and gathering/concatenating the results on the main process.
+
+        :param specs: the derivative specs to compute
+        :param parallelizer: the parallelization backend
+        :return: the stacked derivative tensors (on the main process)
+        :rtype: np.ndarray
+        """
         # if main_kwargs is not None:
         #     specs = main_kwargs['specs']
         # else:
@@ -671,6 +798,15 @@ class DerivativeGenerator:
 
         res = [None]*len(order)
         def lazy_derivs(ders):
+            """
+            **LLM Docstring**
+
+            Yield the derivative tensors one at a time (a lazy generator wrapper).
+
+            :param ders: the derivative tensors
+            :return: a generator over the tensors
+            :rtype: Iterator
+            """
             for d in ders:
                 yield d
 
@@ -793,10 +929,30 @@ class DerivativeGenerator:
         return res
 
     def _idx(self, c, coord_shape = None):
+        """
+        **LLM Docstring**
+
+        Convert flat coordinate indices into their multi-dimensional (unraveled) form.
+
+        :param c: the flat indices
+        :param coord_shape: the coordinate shape (defaults to the generator's)
+        :return: the unraveled indices
+        :rtype: np.ndarray
+        """
         if coord_shape is None:
             coord_shape = self.coord_shape
         return np.array(np.unravel_index(np.array(c), coord_shape)).T
     def _fidx(self, c, coord_shape = None):
+        """
+        **LLM Docstring**
+
+        Convert multi-dimensional coordinate indices into flat (raveled) indices.
+
+        :param c: the multi-dimensional indices
+        :param coord_shape: the coordinate shape (defaults to the generator's)
+        :return: the flat indices
+        :rtype: np.ndarray
+        """
         if coord_shape is None:
             coord_shape = self.coord_shape
         return np.ravel_multi_index(c, coord_shape)
@@ -819,4 +975,3 @@ class DerivativeGenerator:
         else:
             d = self.compute_derivatives(len(item), item, lazy=False)
             return d[0]
-

@@ -40,10 +40,29 @@ class BasicInterpolator(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, grid, values, **opts):
+        """
+        **LLM Docstring**
+
+        Abstract: build an interpolator from a grid and its values.
+
+        :param grid: the sample grid
+        :param values: the values at the grid points
+        :param opts: implementation-specific options
+        :raises NotImplementedError: always (abstract interface)
+        """
         raise NotImplementedError("abstract interface")
 
     @abc.abstractmethod
     def __call__(self, points, **kwargs):
+        """
+        **LLM Docstring**
+
+        Abstract: evaluate the interpolant at the given points.
+
+        :param points: the query points
+        :param kwargs: implementation-specific options
+        :raises NotImplementedError: always (abstract interface)
+        """
         raise NotImplementedError("abstract interface")
 
     @abc.abstractmethod
@@ -112,6 +131,26 @@ class ProductGridInterpolator(BasicInterpolator):
 
     @classmethod
     def get_base_spline(cls, grid, vals, order, periodic=False, boundary_conditions=None, extrapolate=False):
+        """
+        **LLM Docstring**
+
+        Build a piecewise-polynomial (`PPoly`) spline of the given order along one grid
+        axis, handling multi-valued data by splining each component and stacking.
+
+        :param grid: the 1-D grid points
+        :type grid: np.ndarray
+        :param vals: the values at the grid points
+        :type vals: np.ndarray
+        :param order: the spline order
+        :type order: int
+        :param periodic: use periodic boundary conditions
+        :type periodic: bool
+        :param boundary_conditions: explicit spline boundary conditions
+        :param extrapolate: allow extrapolation outside the grid
+        :type extrapolate: bool
+        :return: the piecewise-polynomial spline
+        :rtype: interpolate.PPoly
+        """
         base_spline = interpolate.make_interp_spline(
             grid, vals, k=order,
             bc_type='periodic' if periodic else boundary_conditions
@@ -183,6 +222,17 @@ class ProductGridInterpolator(BasicInterpolator):
         return interpolate.NdPPoly(coeffs, x, extrapolate=extrapolate)
 
     def handle_periodicity(self, coords):
+        """
+        **LLM Docstring**
+
+        Wrap query coordinates into the base period of each periodic axis so they land
+        within the grid.
+
+        :param coords: the query coordinates
+        :type coords: np.ndarray
+        :return: the wrapped coordinates
+        :rtype: np.ndarray
+        """
         if not self.periodic: return coords
 
         coords = np.asanyarray(coords)
@@ -317,6 +367,17 @@ class UnstructuredGridInterpolator(BasicInterpolator):
             self._hull = spat.Delaunay(self._hull)
         return self._hull.find_simplex(points) >= 0
     def __call__(self, points):
+        """
+        **LLM Docstring**
+
+        Evaluate the RBF interpolant, returning `NaN` outside the data's convex hull
+        when extrapolation is disabled.
+
+        :param points: the query points
+        :type points: np.ndarray
+        :return: the interpolated values
+        :rtype: np.ndarray
+        """
         if self.extrapolate:
             return self.caller(points)
         else:
@@ -570,6 +631,16 @@ class Interpolator:
         )
 
     def __call__(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Evaluate the interpolant at the given points (delegates to `apply`).
+
+        :param args: the query points
+        :param kwargs: extra evaluation options
+        :return: the interpolated values
+        :rtype: np.ndarray
+        """
         return self.apply(*args, **kwargs)
 
 ######################################################################################################
@@ -600,6 +671,17 @@ class Extrapolator:
         self.opts = opts
 
     def derivative(self, n):
+        """
+        **LLM Docstring**
+
+        Return an extrapolator for the `n`-th derivative of the wrapped extrapolation
+        function.
+
+        :param n: the derivative order
+        :type n: int
+        :return: the derivative extrapolator
+        :rtype: Extrapolator
+        """
         return type(self)(
             self.extrapolator.derivative(n),
             warning=self.extrapolator
@@ -627,6 +709,20 @@ class Extrapolator:
         return gps[where], where
 
     def apply(self, gps, vals, extrap_value=np.nan):
+        """
+        **LLM Docstring**
+
+        Replace the values at the extrapolated (out-of-range) grid points with values
+        from the extrapolation function.
+
+        :param gps: the grid points
+        :type gps: np.ndarray
+        :param vals: the interpolated values (modified for the extrapolated points)
+        :type vals: np.ndarray
+        :param extrap_value: the sentinel marking points that need extrapolation
+        :return: the values with extrapolated points filled in
+        :rtype: np.ndarray
+        """
         ext_gps, inds = self.find_extrapolated_points(gps, vals, extrap_value=extrap_value)
         if len(ext_gps) > 0:
             new_vals = self.extrapolator(ext_gps)
@@ -635,6 +731,16 @@ class Extrapolator:
         return vals
 
     def __call__(self, *args, **kwargs):
+        """
+        **LLM Docstring**
+
+        Apply the extrapolator (delegates to `apply`).
+
+        :param args: positional arguments for `apply`
+        :param kwargs: keyword arguments for `apply`
+        :return: the values with extrapolated points filled in
+        :rtype: np.ndarray
+        """
         return self.apply(*args, **kwargs)
 
 class IncrementalCartesianCoordinateInterpolation:
@@ -648,6 +754,27 @@ class IncrementalCartesianCoordinateInterpolation:
                  reembed=False,
                  embedding_options=None
                  ):
+        """
+        **LLM Docstring**
+
+        Set up an interpolator for a sequence of Cartesian geometries indexed by
+        abcissae, working in an internal coordinate system and stepping between frames
+        in bounded displacements.
+
+        :param abcissae: the parameter values indexing the geometries
+        :type abcissae: Sequence[float]
+        :param coords: the Cartesian geometries
+        :type coords: np.ndarray
+        :param coordinate_system: the internal coordinate system to interpolate in
+        :param max_displacement_step: the maximum internal displacement per refinement step
+        :type max_displacement_step: float
+        :param max_refinements: the maximum number of refinement steps per interval
+        :type max_refinements: int
+        :param reembed: Eckart-reembed each intermediate geometry
+        :type reembed: bool
+        :param embedding_options: options for the reembedding
+        :type embedding_options: dict | None
+        """
         self.abcissae = list(abcissae)
         self.coords = self.prep_cartesians(coords)
         self.converter = self.prep_coordinate_system_converter(coordinate_system)
@@ -661,12 +788,40 @@ class IncrementalCartesianCoordinateInterpolation:
 
     @classmethod
     def wrap_convert(cls, system):
+        """
+        **LLM Docstring**
+
+        Build a converter callable that converts a coordinate set into the given
+        coordinate system.
+
+        :param system: the target coordinate system
+        :return: the converter callable
+        :rtype: Callable
+        """
         def convert(coords):
+            """
+            **LLM Docstring**
+
+            Convert a coordinate set into the captured target system.
+
+            :param coords: the coordinates to convert
+            :return: the converted coordinates
+            """
             return coords.convert(system)
         return convert
 
     @classmethod
     def prep_coordinate_system_converter(cls, coordinate_system):
+        """
+        **LLM Docstring**
+
+        Resolve a coordinate-system specification into a converter callable (defaulting
+        to Cartesian, or wrapping a system that exposes `convert`).
+
+        :param coordinate_system: the system, a converter, or `None`
+        :return: the converter callable
+        :rtype: Callable
+        """
         from McUtils.Coordinerds import CartesianCoordinates3D
 
         if coordinate_system is None:
@@ -686,6 +841,35 @@ class IncrementalCartesianCoordinateInterpolation:
                           max_refinements=None, max_disp=.5,
                           reembed=False, embedding_options=None
                           ):
+        """
+        **LLM Docstring**
+
+        Interpolate a fraction `pct` of the way between two frames in the internal
+        coordinate system, subdividing the step whenever the internal displacement
+        exceeds `max_disp` (and optionally reembedding), so the conversion back to
+        Cartesians stays well-behaved.
+
+        :param pct: the fractional position between the two frames
+        :type pct: float
+        :param converter: the Cartesian-to-internal converter
+        :type converter: Callable
+        :param init_abc: the starting abcissa
+        :param final_abc: the ending abcissa
+        :param init_coords: the starting Cartesian geometry
+        :param final_coords: the ending Cartesian geometry
+        :param init_internals: the starting internal coordinates
+        :param final_internals: the ending internal coordinates
+        :param max_refinements: the maximum number of refinement steps
+        :type max_refinements: int | None
+        :param max_disp: the maximum internal displacement per step
+        :type max_disp: float
+        :param reembed: Eckart-reembed each intermediate geometry
+        :type reembed: bool
+        :param embedding_options: options for the reembedding
+        :type embedding_options: dict | None
+        :return: `(interpolated_cartesians, (new_abcissae, new_coords, new_internals))`
+        :rtype: tuple
+        """
         from McUtils.Coordinerds import CoordinateSet
 
         if embedding_options is None:
@@ -756,6 +940,17 @@ class IncrementalCartesianCoordinateInterpolation:
         return new_carts, (new_abcissae, new_coords, new_internals)
 
     def prep_cartesians(self, coords):
+        """
+        **LLM Docstring**
+
+        Coerce a coordinate array into a list of `CoordinateSet` frames in the Cartesian
+        system.
+
+        :param coords: the coordinates
+        :type coords: np.ndarray
+        :return: the per-frame coordinate sets
+        :rtype: list
+        """
         from ..Coordinerds import CoordinateSet, CartesianCoordinates3D
         coords = np.asanyarray(coords)
         if not hasattr(coords, 'system'):
@@ -763,6 +958,19 @@ class IncrementalCartesianCoordinateInterpolation:
         return list(coords)
 
     def incremental_interp(self, start, point):
+        """
+        **LLM Docstring**
+
+        Interpolate a single point lying in the interval starting at frame `start`,
+        inserting the newly generated intermediate frames into the stored sequence.
+
+        :param start: the index of the interval's starting frame
+        :type start: int
+        :param point: the abcissa to interpolate at
+        :type point: float
+        :return: the interpolated Cartesian geometry
+        :rtype: np.ndarray
+        """
         b = self.abcissae[start]
         a = self.abcissae[start+1]
         width = a - b
@@ -786,6 +994,17 @@ class IncrementalCartesianCoordinateInterpolation:
         return coords
 
     def interpolate(self, point):
+        """
+        **LLM Docstring**
+
+        Interpolate the Cartesian geometry at each requested abcissa (sorting the
+        queries so intermediate frames can be reused).
+
+        :param point: the abcissa/abcissae to interpolate at
+        :type point: np.ndarray
+        :return: the interpolated geometries
+        :rtype: np.ndarray
+        """
         point = np.asanyarray(point)
         base_shape = point.shape
         point = point.reshape(-1)
@@ -803,6 +1022,16 @@ class IncrementalCartesianCoordinateInterpolation:
         return vals.reshape(base_shape + vals.shape[-2:])
 
     def __call__(self, point):
+        """
+        **LLM Docstring**
+
+        Interpolate at the given abcissa/abcissae (delegates to `interpolate`).
+
+        :param point: the abcissa/abcissae
+        :type point: np.ndarray
+        :return: the interpolated geometries
+        :rtype: np.ndarray
+        """
         return self.interpolate(point)
 
 class CoordinateInterpolator:
@@ -817,6 +1046,22 @@ class CoordinateInterpolator:
                  coordinate_system=None,
                  **interpolator_options
                  ):
+        """
+        **LLM Docstring**
+
+        Interpolate a path of coordinates parametrized by (normalized) arc length,
+        delegating the actual interpolation to a base interpolator.
+
+        :param coordinates: the path coordinates
+        :type coordinates: np.ndarray
+        :param arc_lengths: explicit arc-length abcissae (computed if omitted)
+        :type arc_lengths: np.ndarray | None
+        :param distance_function: the inter-point distance function (or its name)
+        :type distance_function: Callable | str | None
+        :param base_interpolator: the interpolator type to use
+        :param coordinate_system: the coordinate system to interpolate in
+        :param interpolator_options: extra options for the base interpolator
+        """
         coordinates = np.asanyarray(coordinates)
 
         self.distance_function, abcissae = self.get_arc_lengths(
@@ -840,17 +1085,48 @@ class CoordinateInterpolator:
 
     @classmethod
     def euclidean_coordinate_distance(cls, p1, p2):
+        """
+        **LLM Docstring**
+
+        The Euclidean distance between two coordinate frames.
+
+        :param p1: the first frame
+        :param p2: the second frame
+        :return: the distance
+        :rtype: float
+        """
         return np.linalg.norm(p2 - p1)
 
 
     @classmethod
     def lookup_distance_function(cls, distance_function):
+        """
+        **LLM Docstring**
+
+        Resolve a distance-function name to its implementation.
+
+        :param distance_function: the name (e.g. `'uniform'`)
+        :type distance_function: str
+        :return: the distance function
+        :rtype: Callable
+        """
         return {
             'uniform':cls.uniform_distance_function
         }[distance_function.lower()]
 
     @classmethod
     def uniform_distance_function(cls, coords):
+        """
+        **LLM Docstring**
+
+        Assign uniformly-spaced abcissae over `[0, 1]` regardless of the actual
+        inter-point distances.
+
+        :param coords: the path coordinates
+        :type coords: np.ndarray
+        :return: the uniform abcissae
+        :rtype: np.ndarray
+        """
         return np.linspace(0, 1, len(coords))
 
     @classmethod
@@ -859,6 +1135,22 @@ class CoordinateInterpolator:
                         arc_lengths=None,
                         distance_function:'typing.Callable[[np.ndarray, np.ndarray], float]'=None
                         ):
+        """
+        **LLM Docstring**
+
+        Compute the normalized (`[0, 1]`) arc-length abcissae for a path, either from an
+        explicit array, a named scheme, or by accumulating a distance function along the
+        path.
+
+        :param coordinates: the path coordinates
+        :type coordinates: np.ndarray
+        :param arc_lengths: explicit arc lengths (computed if omitted)
+        :type arc_lengths: np.ndarray | None
+        :param distance_function: the inter-point distance function (or its name)
+        :type distance_function: Callable | str | None
+        :return: `(distance_function, normalized_arc_lengths)`
+        :rtype: tuple
+        """
 
         if arc_lengths is None:
             if isinstance(distance_function, str):
@@ -875,4 +1167,15 @@ class CoordinateInterpolator:
         return distance_function, (arc_lengths - np.min(arc_lengths)) / np.ptp(arc_lengths)
 
     def __call__(self, points, **etc):
+        """
+        **LLM Docstring**
+
+        Evaluate the path at the given arc-length parameter(s).
+
+        :param points: the arc-length parameter(s)
+        :type points: np.ndarray
+        :param etc: extra evaluation options
+        :return: the interpolated coordinates
+        :rtype: np.ndarray
+        """
         return self.interpolator(points, **etc)
