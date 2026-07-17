@@ -27,6 +27,12 @@ __init__(self, inds=None):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L20)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L20?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a differentiable function, optionally restricted to act on a subset of the
+input coordinates.
+  - `inds`: `Sequence[int] | None`
+    > the coordinate indices this function depends on (all if `None`)
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.reindex" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +40,17 @@ __init__(self, inds=None):
 reindex(self, idx_perm): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L32)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L32?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a copy of the function with its coordinate indices remapped under a
+permutation of the full coordinate set.
+  - `idx_perm`: `np.ndarray`
+    > the coordinate permutation
+  - `:returns`: `DifferentiableFunction`
+    > the reindexed function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.get_consistent_inds" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +58,17 @@ reindex(self, idx_perm):
 get_consistent_inds(self, funcs: 'list[DifferentiableFunction]'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L51?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compute the union of the coordinate indices used by a set of functions and
+reindex each onto that shared index set.
+  - `funcs`: `list[DifferentiableFunction]`
+    > the functions to reconcile
+  - `:returns`: `tuple`
+    > `(shared_inds, reindexed_funcs)`
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__call__" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +76,20 @@ get_consistent_inds(self, funcs: 'list[DifferentiableFunction]'):
 __call__(self, coords, order=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L69)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L69?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate the function's Taylor expansion (value plus derivatives up to `order`)
+at the given coordinates, scattering the result back into the full coordinate
+space when the function acts on only a subset of coordinates.
+  - `coords`: `np.ndarray`
+    > the coordinates, shape `(..., ncoords)`
+  - `order`: `int`
+    > the highest derivative order to return
+  - `:returns`: `list[np.ndarray]`
+    > the expansion tensors `[value, grad, hess, ...]`
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.evaluate" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +97,19 @@ __call__(self, coords, order=0):
 evaluate(self, coords, order=0) -> list[numpy.ndarray]: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L102?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: evaluate the function's expansion (value and derivatives) at the given
+coordinates.
+  - `coords`: `np.ndarray`
+    > the coordinates
+  - `order`: `int`
+    > the highest derivative order
+  - `:returns`: `list[np.ndarray]`
+    > the expansion tensors
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.get_children" class="docs-object-method">&nbsp;</a> 
@@ -74,9 +117,14 @@ evaluate(self, coords, order=0) -> list[numpy.ndarray]:
 get_children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L119)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L119?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: return the sub-functions this function is built from.
+  - `:returns`: `list[DifferentiableFunction]`
+    > the child functions
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__add__" class="docs-object-method">&nbsp;</a> 
@@ -84,9 +132,17 @@ get_children(self):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L65)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L65?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L131)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L131?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Add another differentiable function (building/merging a `FunctionSum`) or a
+constant (building a `ConstantShiftedFunction`).
+  - `other`: `Any`
+    > the addend
+  - `:returns`: `DifferentiableFunction`
+    > the sum function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__radd__" class="docs-object-method">&nbsp;</a> 
@@ -94,9 +150,16 @@ __add__(self, other):
 __radd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L78)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L78?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L154?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right addition, delegating to `__add__`.
+  - `other`: `Any`
+    > the addend
+  - `:returns`: `DifferentiableFunction`
+    > the sum function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__mul__" class="docs-object-method">&nbsp;</a> 
@@ -104,9 +167,17 @@ __radd__(self, other):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L165)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L165?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Multiply by another differentiable function (building/merging a
+`FunctionProduct`) or a constant (building a `ConstantScaledFunction`).
+  - `other`: `Any`
+    > the multiplier
+  - `:returns`: `DifferentiableFunction`
+    > the product function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__truediv__" class="docs-object-method">&nbsp;</a> 
@@ -114,9 +185,17 @@ __mul__(self, other):
 __truediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L188?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Divide by another differentiable function (multiplying by its reciprocal) or a
+constant.
+  - `other`: `Any`
+    > the divisor
+  - `:returns`: `DifferentiableFunction`
+    > the quotient function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__rtruediv__" class="docs-object-method">&nbsp;</a> 
@@ -124,9 +203,16 @@ __truediv__(self, other):
 __rtruediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L211)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L211?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right division (`other / self`), via the reciprocal of this function.
+  - `other`: `Any`
+    > the numerator
+  - `:returns`: `DifferentiableFunction`
+    > the quotient function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__rmul__" class="docs-object-method">&nbsp;</a> 
@@ -134,9 +220,16 @@ __rtruediv__(self, other):
 __rmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L222)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L222?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right multiplication, delegating to `__mul__`.
+  - `other`: `Any`
+    > the multiplier
+  - `:returns`: `DifferentiableFunction`
+    > the product function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.__neg__" class="docs-object-method">&nbsp;</a> 
@@ -144,9 +237,14 @@ __rmul__(self, other):
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L233)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L233?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Negate the function (unwrapping a double negation).
+  - `:returns`: `DifferentiableFunction`
+    > the negated function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction.flip" class="docs-object-method">&nbsp;</a> 
@@ -154,9 +252,14 @@ __neg__(self):
 flip(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L247)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/DifferentiableFunction.py#L247?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the reciprocal (`1 / self`) as a `ReciprocalFunction`.
+  - `:returns`: `ReciprocalFunction`
+    > the reciprocal function
  </div>
 </div>
 

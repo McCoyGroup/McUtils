@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction">CoordinateFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L395)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L395?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L1007)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L1007?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,18 @@
 __init__(self, conversion, expr: McUtils.Zachary.DifferentiableFunctions.DifferentiableFunction): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L396)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L396?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L1008)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L1008?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compose a coordinate-system conversion with a differentiable expression, so the
+expression (defined in internal coordinates) can be evaluated on raw (e.g.
+Cartesian) inputs.
+  - `conversion`: `Any`
+    > the coordinate conversion (a callable or an internal-coordinate spec)
+  - `expr`: `DifferentiableFunction`
+    > the expression in the converted coordinates
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.canonicalize_conversion" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +44,18 @@ __init__(self, conversion, expr: McUtils.Zachary.DifferentiableFunctions.Differe
 canonicalize_conversion(cls, conv): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L401)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L401?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1024)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1024?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a conversion specification into `(canonical_spec, conversion_function)`,
+building an internal-coordinate conversion function when a coordinate spec is
+given.
+  - `conv`: `Any`
+    > the conversion (callable or internal-coordinate spec)
+  - `:returns`: `tuple`
+    > `(canonical_spec, conversion_function)`
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__call__" class="docs-object-method">&nbsp;</a> 
@@ -45,9 +63,24 @@ canonicalize_conversion(cls, conv):
 __call__(self, coords, order=0, preconverted=False, reexpress=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1045)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1045?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate the composed function: convert the input coordinates (to the requested
+order), evaluate the expression, and re-express its derivatives back in the input
+coordinates via the chain rule.
+  - `coords`: `np.ndarray`
+    > the input coordinates
+  - `order`: `int`
+    > the highest derivative order
+  - `preconverted`: `bool`
+    > treat `coords` as already in the expression's coordinates
+  - `reexpress`: `bool`
+    > re-express the derivatives in the input coordinates
+  - `:returns`: `tuple`
+    > `(coordinate_expansion, expression_expansion)`
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.merge_conversion_functions" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +89,19 @@ __call__(self, coords, order=0, preconverted=False, reexpress=True):
 merge_conversion_functions(cls, conv_1, conv_2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L430)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L430?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1082)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1082?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Merge two coordinate-conversion specs into one, returning the reindexing that
+maps the second spec's coordinates onto the merged set.
+  - `conv_1`: `Any`
+    > the first conversion spec
+  - `conv_2`: `Any`
+    > the second conversion spec
+  - `:returns`: `tuple`
+    > `(reindexing_for_conv_2, merged_conversion)`
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__add__" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +109,17 @@ merge_conversion_functions(cls, conv_1, conv_2):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L446)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L446?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1110)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1110?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Add another coordinate function (merging their conversions and reindexing) or a
+constant.
+  - `other`: `Any`
+    > the addend
+  - `:returns`: `CoordinateFunction`
+    > the sum coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__radd__" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +127,16 @@ __add__(self, other):
 __radd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L455)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L455?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1129)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1129?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right addition, delegating to `__add__`.
+  - `other`: `Any`
+    > the addend
+  - `:returns`: `CoordinateFunction`
+    > the sum coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__mul__" class="docs-object-method">&nbsp;</a> 
@@ -86,9 +144,17 @@ __radd__(self, other):
 __mul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L457)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L457?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1140?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Multiply by another coordinate function (merging their conversions) or a
+constant.
+  - `other`: `Any`
+    > the multiplier
+  - `:returns`: `CoordinateFunction`
+    > the product coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__rmul__" class="docs-object-method">&nbsp;</a> 
@@ -96,9 +162,16 @@ __mul__(self, other):
 __rmul__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L466)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L466?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1159)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1159?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right multiplication, delegating to `__mul__`.
+  - `other`: `Any`
+    > the multiplier
+  - `:returns`: `CoordinateFunction`
+    > the product coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__truediv__" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +179,16 @@ __rmul__(self, other):
 __truediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L468)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L468?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1170)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1170?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Divide by another coordinate function (merging their conversions) or a constant.
+  - `other`: `Any`
+    > the divisor
+  - `:returns`: `CoordinateFunction`
+    > the quotient coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__rtruediv__" class="docs-object-method">&nbsp;</a> 
@@ -116,9 +196,16 @@ __truediv__(self, other):
 __rtruediv__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L477)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L477?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1188?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Right division (`other / self`).
+  - `other`: `Any`
+    > the numerator
+  - `:returns`: `CoordinateFunction`
+    > the quotient coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.__neg__" class="docs-object-method">&nbsp;</a> 
@@ -126,9 +213,14 @@ __rtruediv__(self, other):
 __neg__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L479)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L479?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.py#L1199?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Negate the coordinate function.
+  - `:returns`: `CoordinateFunction`
+    > the negated coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.polynomial" class="docs-object-method">&nbsp;</a> 
@@ -137,9 +229,23 @@ __neg__(self):
 polynomial(cls, coord_spec, *, coeffs, center, ref): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L482)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L482?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1210?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a coordinate function from a polynomial expression in the given
+coordinate(s) (1-D `Poly1D` or multi-D `PolynomialFunction`).
+  - `coord_spec`: `Any`
+    > the coordinate spec the polynomial acts on
+  - `coeffs`: `Any`
+    > the polynomial coefficients
+  - `center`: `Any`
+    > the expansion center
+  - `ref`: `Any`
+    > the reference value
+  - `:returns`: `CoordinateFunction`
+    > the coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.morse" class="docs-object-method">&nbsp;</a> 
@@ -148,9 +254,29 @@ polynomial(cls, coord_spec, *, coeffs, center, ref):
 morse(cls, coord, *, re, a=None, de=None, w=None, wx=None, g=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L500)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L500?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1241)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1241?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a coordinate function from a Morse potential in the given coordinate,
+either from explicit `(de, a)` or from spectroscopic constants.
+  - `coord`: `Any`
+    > the coordinate spec
+  - `re`: `Any`
+    > the equilibrium position
+  - `a`: `Any`
+    > the range parameter
+  - `de`: `Any`
+    > the well depth
+  - `w`: `Any`
+    > the harmonic frequency (alternative parametrization)
+  - `wx`: `Any`
+    > the anharmonicity constant
+  - `g`: `Any`
+    > the reduced-mass factor
+  - `:returns`: `CoordinateFunction`
+    > the coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.sin" class="docs-object-method">&nbsp;</a> 
@@ -159,9 +285,20 @@ morse(cls, coord, *, re, a=None, de=None, w=None, wx=None, g=None):
 sin(cls, coord, *, n=1, l=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1264)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1264?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a coordinate function from a sine in the given coordinate.
+  - `coord`: `Any`
+    > the coordinate spec
+  - `n`: `Any`
+    > the numerator parameter
+  - `l`: `Any`
+    > the denominator parameter
+  - `:returns`: `CoordinateFunction`
+    > the coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.cos" class="docs-object-method">&nbsp;</a> 
@@ -170,9 +307,20 @@ sin(cls, coord, *, n=1, l=1):
 cos(cls, coord, *, n=1, l=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L510)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L510?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1278)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1278?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a coordinate function from a cosine in the given coordinate.
+  - `coord`: `Any`
+    > the coordinate spec
+  - `n`: `Any`
+    > the numerator parameter
+  - `l`: `Any`
+    > the denominator parameter
+  - `:returns`: `CoordinateFunction`
+    > the coordinate function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.CoordinateFunction.exp" class="docs-object-method">&nbsp;</a> 
@@ -181,9 +329,18 @@ cos(cls, coord, *, n=1, l=1):
 exp(cls, coord, *, s=1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L513)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L513?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1292?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a coordinate function from an exponential in the given coordinate.
+  - `coord`: `Any`
+    > the coordinate spec
+  - `s`: `Any`
+    > the exponential rate
+  - `:returns`: `CoordinateFunction`
+    > the coordinate function
  </div>
 </div>
 
@@ -237,7 +394,7 @@ exp(cls, coord, *, s=1):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/DifferentiableFunctions/CoordinateFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L395?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L1007?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

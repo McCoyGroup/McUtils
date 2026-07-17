@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.DifferentiableFunctions.PolynomialFunction">PolynomialFunction</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L255)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L255?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L614)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L614?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,16 @@
 __init__(self, taylor_poly: McUtils.Zachary.Taylor.FunctionExpansions.FunctionExpansion, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions.py#L615)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L615?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap a `FunctionExpansion` (Taylor polynomial) as a differentiable function.
+  - `taylor_poly`: `FunctionExpansion`
+    > the backing expansion
+  - `inds`: `Sequence[int] | None`
+    > the coordinate indices this function acts on
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.PolynomialFunction.from_coefficients" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +42,23 @@ __init__(self, taylor_poly: McUtils.Zachary.Taylor.FunctionExpansions.FunctionEx
 from_coefficients(cls, coeffs, center=None, ref=0, inds=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L260)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L260?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L629)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L629?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a polynomial function from a coefficient tensor, an expansion center, and a
+reference value.
+  - `coeffs`: `Any`
+    > the coefficient tensors
+  - `center`: `Any`
+    > the expansion center
+  - `ref`: `Any`
+    > the reference (constant) value
+  - `inds`: `Sequence[int] | None`
+    > the coordinate indices
+  - `:returns`: `PolynomialFunction`
+    > the polynomial function
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.PolynomialFunction.evaluate" class="docs-object-method">&nbsp;</a> 
@@ -45,9 +66,18 @@ from_coefficients(cls, coeffs, center=None, ref=0, inds=None):
 evaluate(self, coords, order=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L272)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L272?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L655?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Evaluate the backing polynomial's expansion at the given coordinates.
+  - `coords`: `np.ndarray`
+    > the coordinates
+  - `order`: `int`
+    > the highest derivative order
+  - `:returns`: `list[np.ndarray]`
+    > the expansion tensors
 
 
 <a id="McUtils.Zachary.DifferentiableFunctions.PolynomialFunction.get_children" class="docs-object-method">&nbsp;</a> 
@@ -55,9 +85,14 @@ evaluate(self, coords, order=0):
 get_children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L669)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.py#L669?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the sub-functions of this polynomial (a leaf).
+  - `:returns`: `list[DifferentiableFunction]`
+    > the child functions
  </div>
 </div>
 
@@ -111,7 +146,7 @@ get_children(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/DifferentiableFunctions/PolynomialFunction.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L255?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/DifferentiableFunctions.py#L614?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
