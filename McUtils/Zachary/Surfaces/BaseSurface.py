@@ -18,6 +18,15 @@ class BaseSurface(metaclass=abc.ABCMeta):
     Surface base class which can be subclassed for relevant cases
     """
     def __init__(self, data, dimension):
+        """
+        **LLM Docstring**
+
+        Store the core surface data and its dimension.
+
+        :param data: the surface's backing data (interpreted by the subclass)
+        :param dimension: the dimensionality of the surface's input space
+        :type dimension: int | None
+        """
         # we'll just give the core data a consistent attribute name
         self.data = data
         self.dimension = dimension
@@ -34,6 +43,22 @@ class BaseSurface(metaclass=abc.ABCMeta):
         """
         raise NotImplemented
     def check_dimension(self, gridpoints, target=None, raise_exception=True):
+        """
+        **LLM Docstring**
+
+        Check that a set of grid points matches the surface's expected dimension,
+        optionally raising on a mismatch.
+
+        :param gridpoints: the points to check
+        :type gridpoints: np.ndarray
+        :param target: the expected dimension (defaults to the surface's)
+        :type target: int | None
+        :param raise_exception: raise (rather than return `False`) on a mismatch
+        :type raise_exception: bool
+        :return: whether the dimension matches
+        :rtype: bool
+        :raises ValueError: on a mismatch when `raise_exception` is set
+        """
         gridpoints = np.asanyarray(gridpoints)
         if target is None:
             target = self.dimension
@@ -115,15 +140,53 @@ class TaylorSeriesSurface(BaseSurface):
 
     @property
     def center(self):
+        """
+        **LLM Docstring**
+
+        The expansion center of the underlying Taylor series.
+
+        :return: the center
+        :rtype: np.ndarray
+        """
         return self.expansion.center
     @property
     def ref(self):
+        """
+        **LLM Docstring**
+
+        The reference (constant) value of the underlying Taylor series.
+
+        :return: the reference value
+        """
         return self.expansion.ref
     @property
     def expansion_tensors(self):
+        """
+        **LLM Docstring**
+
+        The derivative tensors of the underlying Taylor series.
+
+        :return: the expansion tensors
+        :rtype: list
+        """
         return self.expansion.expansion_tensors
 
     def check_dimension(self, gridpoints, target=None, raise_exception=True):
+        """
+        **LLM Docstring**
+
+        Check the grid-point dimension, additionally accepting either side of the
+        expansion's coordinate transform when one is present.
+
+        :param gridpoints: the points to check
+        :type gridpoints: np.ndarray
+        :param target: an explicit expected dimension
+        :type target: int | None
+        :param raise_exception: raise on a mismatch
+        :type raise_exception: bool
+        :return: whether the dimension matches
+        :rtype: bool
+        """
         if target is not None or self.expansion.transforms is None:
             return super().check_dimension(gridpoints, target=target, raise_exception=raise_exception)
         else:
@@ -222,6 +285,20 @@ class LinearFitSurface(LinearExpansionSurface):
 
     # Is there any way to cleverly minimize a general function like this? My guess is I'd need to know how to take derivs
     def minimize(self, initial_guess=None, function_options=None, **opts):
+        """
+        **LLM Docstring**
+
+        Minimize the fitted surface, defaulting the starting point to the lowest-valued
+        fit sample.
+
+        :param initial_guess: the starting point (defaults to the best fit sample)
+        :type initial_guess: np.ndarray | None
+        :param function_options: options forwarded to the surface evaluation
+        :type function_options: dict | None
+        :param opts: options forwarded to the optimizer
+        :return: the minimizing point
+        :rtype: np.ndarray
+        """
         if initial_guess is None:
             initial_guess = self.fit_data[np.argmin(self.fit_data[:, -1])][:-1]
         return super().minimize(initial_guess, function_options=function_options, **opts)
@@ -231,6 +308,21 @@ class InterpolatedSurface(BaseSurface):
     A surface that operates by doing an interpolation of passed mesh data
     """
     def __init__(self, xdata, ydata=None, dimension=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a surface that evaluates by interpolating supplied mesh data.
+
+        When only `xdata` is given, its last column is taken as the values.
+
+        :param xdata: the sample points (or points-plus-values)
+        :type xdata: np.ndarray
+        :param ydata: the sample values
+        :type ydata: np.ndarray | None
+        :param dimension: the input dimensionality (inferred from `xdata`)
+        :type dimension: int | None
+        :param opts: options forwarded to the interpolator
+        """
         from ..Interpolator import Interpolator
         if ydata is None:
             ydata = xdata[...,  -1]
@@ -253,6 +345,20 @@ class InterpolatedSurface(BaseSurface):
         return self.interp(points)
 
     def minimize(self, initial_guess=None, function_options=None, **opts):
+        """
+        **LLM Docstring**
+
+        Minimize the interpolated surface, defaulting the starting point to the
+        lowest-valued sample.
+
+        :param initial_guess: the starting point (defaults to the best sample)
+        :type initial_guess: np.ndarray | None
+        :param function_options: options forwarded to the surface evaluation
+        :type function_options: dict | None
+        :param opts: options forwarded to the optimizer
+        :return: the minimizing point
+        :rtype: np.ndarray
+        """
         if initial_guess is None:
             initial_guess = self.interp_data[0][np.argmin(self.interp_data[1], axis=-1)]
         return super().minimize(initial_guess, function_options=function_options, **opts)

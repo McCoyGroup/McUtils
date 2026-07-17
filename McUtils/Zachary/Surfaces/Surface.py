@@ -1,4 +1,3 @@
-
 from .BaseSurface import *
 import numpy as np
 from collections import namedtuple
@@ -39,6 +38,13 @@ class Surface:
 
     @property
     def data(self):
+        """
+        **LLM Docstring**
+
+        The backing data of the dispatched base surface.
+
+        :return: the surface data
+        """
         return self.base.data
 
     def minimize(self, initial_guess=None, function_options=None, **opts):
@@ -106,16 +112,48 @@ class Surface:
             return InterpolatedSurface
 
     def __call__(self, gridpoints, **kwargs):
+        """
+        **LLM Docstring**
+
+        Evaluate the surface at the given grid points (dispatching to the base surface).
+
+        :param gridpoints: the points to evaluate at
+        :type gridpoints: np.ndarray
+        :param kwargs: extra evaluation options
+        :return: the surface values
+        :rtype: np.ndarray
+        """
         return self.base(gridpoints, **kwargs)
 
     @property
     def center(self):
+        """
+        **LLM Docstring**
+
+        The expansion center of the base surface (if it has one).
+
+        :return: the center
+        """
         return self.base.center
     @property
     def ref(self):
+        """
+        **LLM Docstring**
+
+        The reference value of the base surface (if it has one).
+
+        :return: the reference value
+        """
         return self.base.ref
     @property
     def expansion_tensors(self):
+        """
+        **LLM Docstring**
+
+        The expansion tensors of the base surface (if it has them).
+
+        :return: the expansion tensors
+        """
         return self.base.expansion_tensors
 
 class MultiSurface:
@@ -131,6 +169,20 @@ class MultiSurface:
         """
         self.surfs = surfs
     def __call__(self, gridpoints, order=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Evaluate every component surface at the grid points, stacking the results (per
+        derivative order when `order` is given).
+
+        :param gridpoints: the points to evaluate at
+        :type gridpoints: np.ndarray
+        :param order: the derivative order to request from each surface
+        :type order: int | None
+        :param kwargs: extra evaluation options
+        :return: the stacked per-surface values
+        :rtype: np.ndarray | list
+        """
         subvals = [s(gridpoints, order=order, **kwargs) for s in self.surfs]
         if order is None:
             return np.array(subvals)

@@ -23,15 +23,56 @@ __all__ = [
 #     ...
 
 def halton_sphere(npts, **etc):
+    """
+    **LLM Docstring**
+
+    Generate quasi-random points on the unit sphere from a 2-D Halton sequence.
+
+    :param npts: the number of points
+    :type npts: int
+    :param etc: extra options for the sequence generator
+    :return: the sphere points
+    :rtype: np.ndarray
+    """
     seq = comb.halton_sequence(npts, 2, **etc)
     return nput.uv_mapping(seq)
 
 def sobol_sphere(npts, **etc):
+    """
+    **LLM Docstring**
+
+    Generate quasi-random points on the unit sphere from a 2-D Sobol sequence.
+
+    :param npts: the number of points
+    :type npts: int
+    :param etc: extra options for the sequence generator
+    :return: the sphere points
+    :rtype: np.ndarray
+    """
     seq = comb.sobol_sequence(npts, 2, **etc)
     return nput.uv_mapping(seq)
 
 
 def sphere_points(npts, center=None, radius=None, method='fibonacci', **etc):
+    """
+    **LLM Docstring**
+
+    Generate points on a sphere by the named method, optionally scaled to a radius
+    and translated to a center.
+
+    :param npts: the number of points
+    :type npts: int
+    :param center: the sphere center
+    :type center: np.ndarray | None
+    :param radius: the sphere radius
+    :type radius: float | None
+    :param method: the generator (`'fibonacci'`, `'lebedev'`, `'halton'`, `'sobol'`, or a callable)
+    :type method: str | Callable
+    :param etc: extra options for the generator
+    :return: the sphere points
+    :rtype: np.ndarray
+    :raises ValueError: for an unknown method name
+    """
     if isinstance(method, str):
         if method == 'fibonacci':
             method = nput.fibonacci_sphere
@@ -62,6 +103,30 @@ class SphereUnionSurface:
                  tolerance=None,
                  add_intersection_circles=False,
                  **generator_options):
+        """
+        **LLM Docstring**
+
+        Set up a surface defined by the union of spheres (e.g. atomic van-der-Waals
+        spheres), deferring sample-point generation.
+
+        :param centers: the sphere centers, shape `(n, 3)`
+        :type centers: np.ndarray
+        :param radii: the sphere radii, shape `(n,)`
+        :type radii: np.ndarray
+        :param scaling: a multiplicative radius scaling
+        :type scaling: float | None
+        :param expansion: an additive radius expansion
+        :type expansion: float | None
+        :param samples: the number of sample points per sphere
+        :type samples: int | None
+        :param density: sample points per unit area (overrides `samples`)
+        :type density: float | None
+        :param tolerance: the occlusion tolerance for exterior-point tests
+        :type tolerance: float | None
+        :param add_intersection_circles: seed extra points along sphere-sphere intersection circles
+        :type add_intersection_circles: bool
+        :param generator_options: extra options for the point generator
+        """
         self.centers = np.asanyarray(centers)
         self.radii = np.asanyarray(radii)
         if samples is None:
@@ -89,6 +154,31 @@ class SphereUnionSurface:
                  tolerance=None,
                  radius_property='IconRadius',
                  distance_units='BohrRadius'):
+        """
+        **LLM Docstring**
+
+        Build a `SphereUnionSurface` from atoms and positions, taking each sphere radius
+        from an atomic radius property.
+
+        :param atoms: the atom labels
+        :type atoms: Sequence[str]
+        :param positions: the atomic positions
+        :type positions: np.ndarray
+        :param scaling: a multiplicative radius scaling
+        :type scaling: float | None
+        :param expansion: an additive radius expansion
+        :type expansion: float | None
+        :param samples: the number of sample points per sphere
+        :type samples: int | None
+        :param tolerance: the occlusion tolerance
+        :type tolerance: float | None
+        :param radius_property: the `AtomData` property to use for the radii
+        :type radius_property: str
+        :param distance_units: the units to convert the radii into
+        :type distance_units: str
+        :return: the surface
+        :rtype: SphereUnionSurface
+        """
         radii = np.array([
             AtomData[a, radius_property] * UnitsData.convert("Angstroms", distance_units)
             for a in atoms
@@ -101,16 +191,42 @@ class SphereUnionSurface:
 
     @property
     def sampling_points(self):
+        """
+        **LLM Docstring**
+
+        The (flattened) exterior sample points on the sphere union, generated lazily.
+        Setting this overrides them.
+
+        :return: the sample points
+        :rtype: np.ndarray
+        """
         if self._sample_points is None:
             self._sample_data = self.generate_points(preserve_origins=True, **self.generator_options)
             self._sample_points = np.concatenate(self._sample_data, axis=0)
         return self._sample_points
     @sampling_points.setter
     def sampling_points(self, pts):
+        """
+        **LLM Docstring**
+
+        The (flattened) exterior sample points on the sphere union, generated lazily.
+        Setting this overrides them.
+
+        :return: the sample points
+        :rtype: np.ndarray
+        """
         if pts is not None: pts = np.asanyarray(pts)
         self._sample_points = pts
     @property
     def atom_sampling_points(self):
+        """
+        **LLM Docstring**
+
+        The per-sphere lists of exterior sample points, generated lazily.
+
+        :return: the per-sphere sample points
+        :rtype: list
+        """
         if self._sample_data is None:
             self._sample_data = self.generate_points(preserve_origins=True, **self.generator_options)
             self._sample_points = np.concatenate(self._sample_data, axis=0)
@@ -118,6 +234,21 @@ class SphereUnionSurface:
 
     @classmethod
     def nearest_centers(cls, pts, centers, return_normals=False):
+        """
+        **LLM Docstring**
+
+        For each point, find the index of the nearest sphere center, optionally also
+        returning the distance and outward unit vector.
+
+        :param pts: the query points
+        :type pts: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param return_normals: also return the `(distances, unit_vectors)`
+        :type return_normals: bool
+        :return: the nearest-center indices (and normals if requested)
+        :rtype: np.ndarray | tuple
+        """
         center_vecs = pts[:, np.newaxis, :] - centers[np.newaxis, :, :]
         center_dm = np.linalg.norm(center_vecs, axis=-1)
         np.fill_diagonal(center_dm, 1e6)
@@ -129,6 +260,20 @@ class SphereUnionSurface:
 
     @classmethod
     def sphere_project(cls, pts, centers, radii):
+        """
+        **LLM Docstring**
+
+        Project each point radially onto the surface of its nearest sphere.
+
+        :param pts: the points to project
+        :type pts: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :return: the projected points
+        :rtype: np.ndarray
+        """
         center_vecs = pts[:, np.newaxis, :] - centers[np.newaxis, :, :]
         center_dm = np.linalg.norm(center_vecs, axis=-1)
         np.fill_diagonal(center_dm, 1e6)
@@ -148,6 +293,22 @@ class SphereUnionSurface:
             min_component=None,
             # max_iterations=15
     ):
+        """
+        **LLM Docstring**
+
+        Prune points that sit too close to a neighbouring sphere's point group,
+        inferring the spacing cutoff from the per-group nearest-neighbour distribution
+        when one isn't supplied.
+
+        :param pts: the points
+        :type pts: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param min_component: the minimum-allowed inter-group spacing (inferred if omitted)
+        :type min_component: float | None
+        :return: the pruned points
+        :rtype: np.ndarray
+        """
         center_vecs = pts[:, np.newaxis, :] - centers[np.newaxis, :, :]
         center_dm = np.linalg.norm(center_vecs, axis=-1)
         np.fill_diagonal(center_dm, 1e6)
@@ -192,6 +353,32 @@ class SphereUnionSurface:
             power=-3,
             max_iterations=15
     ):
+        """
+        **LLM Docstring**
+
+        Relax a point cloud on the sphere union by iterated inverse-power repulsion
+        projected onto the local tangent plane, reprojecting onto the spheres each step
+        (a simple electrostatic-style even-spreading).
+
+        :param pts: the points
+        :type pts: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param min_displacement_cutoff: stop once all repulsive forces fall below this
+        :type min_displacement_cutoff: float
+        :param stochastic_factor: magnitude of a random jitter added each step
+        :type stochastic_factor: float
+        :param force_constant: the repulsion strength
+        :type force_constant: float
+        :param power: the repulsion distance power
+        :type power: float
+        :param max_iterations: the maximum number of relaxation steps
+        :type max_iterations: int
+        :return: the relaxed points
+        :rtype: np.ndarray
+        """
         rows, cols = np.triu_indices(len(pts), k=1)
         n = len(pts)
         for i in range(max_iterations):
@@ -232,6 +419,34 @@ class SphereUnionSurface:
                                    # max_component=None,
                                    same_point_cutoff=1e-6,
                                    max_iterations=15):
+        """
+        **LLM Docstring**
+
+        Even out a point cloud's density by iteratively merging pairs of points that are
+        closer than a spacing cutoff (re-projecting the merged point onto its nearest
+        sphere when centers/radii are given), inferring the cutoff from the
+        nearest-neighbour distribution.
+
+        :param pts: the points
+        :type pts: np.ndarray
+        :param centers: the sphere centers (optional; needed with `radii` to reproject)
+        :type centers: np.ndarray | None
+        :param radii: the sphere radii
+        :type radii: np.ndarray | None
+        :param min_component: the merge distance cutoff (inferred if omitted)
+        :type min_component: float | None
+        :param min_component_bins: histogram bins used to infer the cutoff
+        :type min_component_bins: int
+        :param min_component_scaling: scaling applied to the inferred cutoff
+        :type min_component_scaling: float
+        :param same_point_cutoff: distance below which points are treated as duplicates
+        :type same_point_cutoff: float
+        :param max_iterations: the maximum number of merge iterations
+        :type max_iterations: int
+        :return: the adjusted points
+        :rtype: np.ndarray
+        :raises ValueError: if only one of centers/radii is given
+        """
         if len(pts) == 1: return pts
 
         if centers is not None and radii is None or radii is not None and centers is None:
@@ -380,6 +595,31 @@ class SphereUnionSurface:
                             intersection_point_mask=None,
                             intersection_point_tolerance=None,
                             return_components=False):
+        """
+        **LLM Docstring**
+
+        Return a mask (or per-sphere components) of the points that lie outside (or on)
+        every sphere, i.e. on the exterior surface of the union, within a tolerance.
+
+        :param points: the query points
+        :type points: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param tolerance: the fractional distance tolerance
+        :type tolerance: float
+        :param vertex_map: sphere index(es) each point belongs to, forced exterior
+        :type vertex_map: np.ndarray | None
+        :param intersection_point_mask: points to test with a looser tolerance
+        :type intersection_point_mask: np.ndarray | None
+        :param intersection_point_tolerance: the looser tolerance for those points
+        :type intersection_point_tolerance: float | None
+        :param return_components: return the per-sphere boolean matrix
+        :type return_components: bool
+        :return: the exterior mask (or per-sphere components)
+        :rtype: np.ndarray
+        """
         points = np.asanyarray(points)
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
@@ -406,6 +646,25 @@ class SphereUnionSurface:
 
     @classmethod
     def get_interior_points(cls, points, centers, radii, tolerance: float = 0, return_components=False):
+        """
+        **LLM Docstring**
+
+        Return a mask (or per-sphere components) of the points that lie inside (or on)
+        at least one sphere, within a tolerance.
+
+        :param points: the query points
+        :type points: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param tolerance: the fractional distance tolerance
+        :type tolerance: float
+        :param return_components: return the per-sphere boolean matrix
+        :type return_components: bool
+        :return: the interior mask (or per-sphere components)
+        :rtype: np.ndarray
+        """
         points = np.asanyarray(points)
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
@@ -444,6 +703,54 @@ class SphereUnionSurface:
                            tolerance=0,
                            prune=True
                            ):
+        """
+        **LLM Docstring**
+
+        Generate the exterior surface point cloud for a union of spheres: sample each
+        sphere, optionally add and clip points along the sphere-sphere intersection
+        circles, and prune occluded (interior) points.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param samples: the number of points per sphere
+        :type samples: int
+        :param density: points per unit area (overrides `samples`)
+        :type density: float | None
+        :param scaling: a multiplicative radius scaling
+        :type scaling: float
+        :param point_generator: the per-sphere point generator
+        :type point_generator: str | Callable | None
+        :param expansion: an additive radius expansion
+        :type expansion: float
+        :param preserve_origins: return per-sphere point lists rather than one array
+        :type preserve_origins: bool
+        :param circle_samples: number of points per intersection circle
+        :type circle_samples: int | None
+        :param min_circle_samples: minimum intersection-circle sampling (fraction or count)
+        :type min_circle_samples: float
+        :param add_intersection_circles: add points along the intersection circles
+        :type add_intersection_circles: bool
+        :param intersection_radius_scaling: scaling applied to the intersection-circle radius
+        :type intersection_radius_scaling: float
+        :param intersection_boundary_clipping_threshold: distance for snapping points onto circles
+        :param return_intersection_point_mask: also return which points are intersection points
+        :type return_intersection_point_mask: bool
+        :param extend_intersection_points: add fresh points around the intersection circles
+        :type extend_intersection_points: bool
+        :param intersection_point_tolerance: exterior-test tolerance for intersection points
+        :type intersection_point_tolerance: float | None
+        :param clear_circle_neighbors: drop base points near added circle points
+        :type clear_circle_neighbors: bool | None
+        :param neighborhood_tolerance: the neighbour-clearing tolerance (or `'auto'`)
+        :param tolerance: the occlusion tolerance
+        :type tolerance: float
+        :param prune: drop occluded (interior) points
+        :type prune: bool
+        :return: the surface points (array or per-sphere lists), optionally with the mask
+        :rtype: np.ndarray | list | tuple
+        """
         centers = np.asanyarray(centers)
         radii:np.array[float] = np.asanyarray(radii) * scaling + expansion
 
@@ -700,6 +1007,32 @@ class SphereUnionSurface:
                         preserve_origins=False, tolerance=None, prune=True,
                         add_intersection_circles=None, **etc
                         ):
+        """
+        **LLM Docstring**
+
+        Generate the exterior surface points for this surface, filling unset options
+        from the instance defaults.
+
+        :param scaling: a multiplicative radius scaling
+        :type scaling: float | None
+        :param expansion: an additive radius expansion
+        :type expansion: float | None
+        :param samples: the number of points per sphere
+        :type samples: int | None
+        :param density: points per unit area
+        :type density: float | None
+        :param preserve_origins: return per-sphere point lists
+        :type preserve_origins: bool
+        :param tolerance: the occlusion tolerance
+        :type tolerance: float | None
+        :param prune: drop occluded points
+        :type prune: bool
+        :param add_intersection_circles: add intersection-circle points
+        :type add_intersection_circles: bool | None
+        :param etc: extra options forwarded to `get_surface_points`
+        :return: the surface points
+        :rtype: np.ndarray | list
+        """
         if samples is None: samples = self.samples
         if density is None: density = self.density
         if scaling is None: scaling = self.scaling
@@ -729,6 +1062,32 @@ class SphereUnionSurface:
                       method='poisson',
                       depth=5,
                       **reconstruction_settings):
+        """
+        **LLM Docstring**
+
+        Reconstruct a triangle mesh from the surface point cloud (currently via Open3D
+        Poisson reconstruction), estimating per-point normals from the sphere centers
+        when none are given.
+
+        :param points: the surface points (generated if omitted)
+        :type points: np.ndarray | list | None
+        :param normals: per-point normals (estimated if omitted)
+        :type normals: np.ndarray | None
+        :param scaling: a multiplicative radius scaling for point generation
+        :type scaling: float | None
+        :param expansion: an additive radius expansion for point generation
+        :type expansion: float | None
+        :param samples: the number of points per sphere
+        :type samples: int | None
+        :param method: the reconstruction method (`'poisson'`)
+        :type method: str
+        :param depth: the Poisson reconstruction octree depth
+        :type depth: int
+        :param reconstruction_settings: extra options for the reconstruction
+        :return: the reconstructed mesh
+        :rtype: SphereUnionSurfaceMesh
+        :raises NotImplementedError: for an unsupported method
+        """
 
         if points is None:
             if scaling is None and expansion is None and samples is None:
@@ -762,6 +1121,25 @@ class SphereUnionSurface:
     default_point_generator = 'fibonacci'
     @classmethod
     def sphere_points(cls, centers, radii, samples, generator=None, shells=None):
+        """
+        **LLM Docstring**
+
+        Generate points on each of a (possibly batched) set of spheres, supporting a
+        scalar, per-sphere, or per-sphere-per-batch sample count, and optional radial
+        shells.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param samples: the sample count (scalar, per-sphere, or per-batch)
+        :param generator: the point generator (name, dict spec, or callable)
+        :type generator: str | dict | Callable | None
+        :param shells: number of radial shells (or explicit shell fractions)
+        :type shells: int | np.ndarray | None
+        :return: the sphere points (array or nested lists)
+        :rtype: np.ndarray | list
+        """
         centers = np.asanyarray(centers)
         radii = np.asanyarray(radii)
 
@@ -838,6 +1216,17 @@ class SphereUnionSurface:
 
     @classmethod
     def fibonacci_sphere(cls, samples):
+        """
+        **LLM Docstring**
+
+        Generate `samples` roughly-even points on the unit sphere via the Fibonacci
+        (golden-angle) spiral.
+
+        :param samples: the number of points
+        :type samples: int
+        :return: the unit-sphere points, shape `(samples, 3)`
+        :rtype: np.ndarray
+        """
         phi = np.pi * (np.sqrt(5.) - 1.)  # golden angle in radians
         samps = np.arange(samples)
         y = 1 - (samps / float(samples - 1)) * 2  # y goes from 1 to -1
@@ -849,6 +1238,14 @@ class SphereUnionSurface:
         return np.array([x, y, z]).T
 
     def get_bbox(self):
+        """
+        **LLM Docstring**
+
+        Return the axis-aligned bounding box enclosing all of the spheres.
+
+        :return: the `[min_corner, max_corner]` bounding box
+        :rtype: np.ndarray
+        """
         return np.array([
             np.min(self.centers - self.radii[:, np.newaxis], axis=0),
             np.max(self.centers + self.radii[:, np.newaxis], axis=0)
@@ -906,6 +1303,29 @@ class SphereUnionSurface:
 
     @classmethod
     def solvent_surface_distance(cls, points, centers, radii, probe_radius=0, probe_type='sas', grid_spacing=None):
+        """
+        **LLM Docstring**
+
+        Compute the signed distance from each point to the sphere-union surface, either
+        as the plain solvent-accessible (SAS) van-der-Waals distance or, for the
+        solvent-excluded surface (SES), via a morphological close on a voxel grid.
+
+        :param points: the query points
+        :type points: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param probe_radius: the solvent probe radius
+        :type probe_radius: float
+        :param probe_type: `'sas'` or `'ses'`
+        :type probe_type: str
+        :param grid_spacing: the voxel spacing (required for SES)
+        :type grid_spacing: Sequence[float] | None
+        :return: the signed distances (shaped like the input grid)
+        :rtype: np.ndarray
+        :raises ValueError: for SES without a 3-D voxel grid / grid spacing
+        """
         points = np.asanyarray(points)
         base_shape = points.shape[:-1]
         points = points.reshape((-1,) + points.shape[-1:])
@@ -938,6 +1358,21 @@ class SphereUnionSurface:
     def get_surface_function(self, probe_radius=None, distance_function=None,
                              probe_type='sas'
                              ):
+        """
+        **LLM Docstring**
+
+        Return a callable mapping points to a scalar field whose zero level set is the
+        (SAS/SES) molecular surface, passed through a radial decay function.
+
+        :param probe_radius: the solvent probe radius
+        :type probe_radius: float | None
+        :param distance_function: the radial decay applied to the signed distance
+        :type distance_function: Callable | None
+        :param probe_type: `'sas'` or `'ses'`
+        :type probe_type: str
+        :return: the scalar-field function
+        :rtype: Callable
+        """
         centers = np.asanyarray(self.centers)
         radii = np.asanyarray(self.radii)
 
@@ -946,6 +1381,22 @@ class SphereUnionSurface:
         if probe_radius is None:
             probe_radius = 0
         def surface(points, probe_radius=probe_radius, probe_type=probe_type, grid_spacing=None):
+            """
+            **LLM Docstring**
+
+            Evaluate the surface scalar field at a set of points.
+
+            :param points: the query points
+            :type points: np.ndarray
+            :param probe_radius: the solvent probe radius
+            :type probe_radius: float
+            :param probe_type: `'sas'` or `'ses'`
+            :type probe_type: str
+            :param grid_spacing: the voxel spacing (for SES)
+            :type grid_spacing: Sequence[float] | None
+            :return: the field values
+            :rtype: np.ndarray
+            """
             dists = self.solvent_surface_distance(
                 points, centers, radii,
                 probe_radius=probe_radius, probe_type=probe_type,
@@ -967,6 +1418,38 @@ class SphereUnionSurface:
                           probe_radius=None,
                           probe_type='sas',
                           **surface_opts):
+        """
+        **LLM Docstring**
+
+        Build a triangulated `SphereUnionSurfaceMesh` of the surface, either by hulling
+        and unioning the per-sphere point clouds or by marching cubes on the surface
+        scalar field.
+
+        :param occlusion_type: how to prune occluded triangles (`'auto'`/`'complete'`/`'partial'`/`'centroid'`)
+        :type occlusion_type: str
+        :param deduplicate_points: merge coincident points before meshing
+        :type deduplicate_points: bool | None
+        :param point_gen_options: options for the point generation
+        :type point_gen_options: dict | None
+        :param add_intersection_circles: add intersection-circle points
+        :type add_intersection_circles: bool
+        :param extend_intersection_points: add fresh intersection-circle points
+        :type extend_intersection_points: bool
+        :param method: `'hull-union'` or `'isosurface'`
+        :type method: str | None
+        :param bbox_scaling: bounding-box padding for the isosurface grid
+        :type bbox_scaling: float
+        :param grid_samples: grid resolution for the isosurface
+        :type grid_samples: int | Sequence[int]
+        :param probe_radius: the solvent probe radius (isosurface)
+        :type probe_radius: float | None
+        :param probe_type: `'sas'` or `'ses'` (isosurface)
+        :type probe_type: str
+        :param surface_opts: extra options forwarded to the mesh builder
+        :return: the triangulated mesh
+        :rtype: SphereUnionSurfaceMesh
+        :raises ValueError: for an unknown method
+        """
         if method is None:
             method = self.default_triangulation_method
         if method == 'hull-union':
@@ -1011,6 +1494,17 @@ class SphereUnionSurface:
 
             nx, ny, nz = np.array(grid_samples) - 1
             def unembed_points(points):
+                """
+                **LLM Docstring**
+
+                Map isosurface grid-index coordinates back onto the physical bounding-box
+                coordinates.
+
+                :param points: the grid-index points
+                :type points: np.ndarray
+                :return: the physical-space points
+                :rtype: np.ndarray
+                """
                 x,y,z = np.moveaxis(points, 0, -1)
                 return np.moveaxis([
                                    nput.vec_rescale(x, [mx, MX], [0, nx]),
@@ -1035,6 +1529,30 @@ class SphereUnionSurface:
                                     center_surface_areas=None,
                                     **test_args
                                     ):
+        """
+        **LLM Docstring**
+
+        Estimate the exposed surface area of the sphere union by Monte-Carlo sampling:
+        the fraction of each sphere's sample points that are exterior times its area.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param points: precomputed per-sphere sample points (generated if omitted)
+        :type points: list | None
+        :param exterior_test: the exterior-point test (defaults to `get_exterior_points`)
+        :type exterior_test: Callable | None
+        :param point_generator: the per-sphere point generator
+        :type point_generator: Callable | None
+        :param generator_args: options for the point generator
+        :type generator_args: dict | None
+        :param center_surface_areas: per-sphere areas (computed if omitted)
+        :type center_surface_areas: np.ndarray | None
+        :param test_args: extra arguments for the exterior test
+        :return: the estimated surface area
+        :rtype: float
+        """
         if points is None:
             if generator_args is None:
                 generator_args = {}
@@ -1060,6 +1578,27 @@ class SphereUnionSurface:
 
     @classmethod
     def _monte_carlo_volume(cls, points, centers, radii, interior_test=None, center_volumes=None, **test_args):
+        """
+        **LLM Docstring**
+
+        Estimate the union volume from per-sphere interior samples, weighting each
+        sphere's volume by the average inverse number of spheres that contain its points
+        (so overlaps aren't multiply counted).
+
+        :param points: per-sphere sample points
+        :type points: list
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param interior_test: the interior-point test (defaults to `get_interior_points`)
+        :type interior_test: Callable | None
+        :param center_volumes: per-sphere volumes (computed if omitted)
+        :type center_volumes: np.ndarray | None
+        :param test_args: extra arguments for the interior test
+        :return: the estimated volume
+        :rtype: float
+        """
         if interior_test is None:
             interior_test = cls.get_interior_points
 
@@ -1085,6 +1624,31 @@ class SphereUnionSurface:
                               shells=50,
                               **test_args
                               ):
+        """
+        **LLM Docstring**
+
+        Estimate the union volume by Monte-Carlo sampling of interior shell points.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param points: precomputed per-sphere sample points (generated if omitted)
+        :type points: list | None
+        :param interior_test: the interior-point test
+        :type interior_test: Callable | None
+        :param point_generator: the per-sphere point generator
+        :type point_generator: Callable | None
+        :param generator_args: options for the point generator
+        :type generator_args: dict | None
+        :param center_volumes: per-sphere volumes (computed if omitted)
+        :type center_volumes: np.ndarray | None
+        :param shells: number of radial shells to sample
+        :type shells: int
+        :param test_args: extra arguments for the interior test
+        :return: the estimated volume
+        :rtype: float
+        """
         if points is None:
             if generator_args is None:
                 generator_args = {}
@@ -1107,6 +1671,23 @@ class SphereUnionSurface:
 
     @classmethod
     def random_sphere_sampling(cls, center, radius, samples=500, seed=None, rng=None):
+        """
+        **LLM Docstring**
+
+        Draw uniformly-distributed random points inside a sphere.
+
+        :param center: the sphere center
+        :type center: np.ndarray
+        :param radius: the sphere radius
+        :type radius: float
+        :param samples: the number of points
+        :type samples: int
+        :param seed: a random seed
+        :type seed: int | None
+        :param rng: an explicit random generator
+        :return: the sampled points
+        :rtype: np.ndarray
+        """
         if rng is None:
             if seed is not None:
                 rng = np.random.default_rng(seed)
@@ -1118,6 +1699,22 @@ class SphereUnionSurface:
 
     @classmethod
     def volume_union_mc(cls, centers, radii, n_samples=100000, seed=None):
+        """
+        **LLM Docstring**
+
+        Estimate the union volume by Monte-Carlo sampling uniformly inside each sphere.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param n_samples: the number of samples per sphere
+        :type n_samples: int
+        :param seed: a random seed
+        :type seed: int | None
+        :return: the estimated volume
+        :rtype: float
+        """
         centers = np.asanyarray(centers, dtype=float)
         radii = np.asanyarray(radii, dtype=float)
         if seed is not None:
@@ -1133,6 +1730,21 @@ class SphereUnionSurface:
 
     @classmethod
     def volume_voxel(cls, centers, radii, resolution=200):
+        """
+        **LLM Docstring**
+
+        Estimate the union volume by voxelizing the bounding box and counting the voxels
+        inside any sphere.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param resolution: the number of voxels along each axis
+        :type resolution: int
+        :return: the estimated volume
+        :rtype: float
+        """
         lo = (centers - radii[:, None]).min(axis=0)
         hi = (centers + radii[:, None]).max(axis=0)
 
@@ -1151,6 +1763,22 @@ class SphereUnionSurface:
 
     @classmethod
     def _trip_q(self, a, b, c, alpha, beta, gamma, e):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic triple-sphere intersection area (the `q` term from
+        Gibson & Scheraga's formulation).
+
+        :param a: the first inter-center distance
+        :param b: the second inter-center distance
+        :param c: the third inter-center distance
+        :param alpha: the first radius
+        :param beta: the second radius
+        :param gamma: the third radius
+        :param e: the corresponding eccentricity term
+        :return: the `q` term
+        :rtype: float
+        """
         return a * (
             b**2 + c**2 - a**2
             + beta**2 + gamma**2 - 2*alpha**2
@@ -1158,9 +1786,37 @@ class SphereUnionSurface:
         )
     @classmethod
     def _trip_e(self, a, r2, r3):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic triple-sphere intersection area (the eccentricity `e`
+        term).
+
+        :param a: the inter-center distance
+        :param r2: the second radius
+        :param r3: the third radius
+        :return: the `e` term
+        :rtype: float
+        """
         return (r2**2 - r3**2) / a**2
     @classmethod
     def _trip_w(self, a, b, c, alpha, beta, gamma):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic triple-sphere intersection area: the Cayley-Menger-style
+        determinant term whose sign indicates whether the three spheres share a common
+        intersection.
+
+        :param a: the first inter-center distance
+        :param b: the second inter-center distance
+        :param c: the third inter-center distance
+        :param alpha: the first radius
+        :param beta: the second radius
+        :param gamma: the third radius
+        :return: the `w` term (its square root, or the raw determinant if negative)
+        :rtype: float
+        """
         A = alpha**2
         B = beta**2
         C = gamma**2
@@ -1180,6 +1836,23 @@ class SphereUnionSurface:
             return d
     @classmethod
     def _trip_s(self, beta, a, c, q1, q3, e1, e3, w):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic triple-sphere intersection area: one of the arctangent
+        `s` terms, branch-corrected to `[0, pi]`.
+
+        :param beta: the relevant radius
+        :param a: the first inter-center distance
+        :param c: the second inter-center distance
+        :param q1: the first `q` term
+        :param q3: the third `q` term
+        :param e1: the first eccentricity term
+        :param e3: the third eccentricity term
+        :param w: the `w` determinant term
+        :return: the `s` term
+        :rtype: float
+        """
         ae = a*(1+e1)
         ce = c*(1-e3)
         t1 = np.arctan(ae*w / (beta*q1) )
@@ -1205,9 +1878,38 @@ class SphereUnionSurface:
         )
     @classmethod
     def _trip_t(cls, a, b, c):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic sphere-intersection area: the Heron-style product
+        `(a+b+c)(-a+b+c)(a-b+c)(a+b-c)`.
+
+        :param a: the first length
+        :param b: the second length
+        :param c: the third length
+        :return: the product
+        :rtype: float
+        """
         return (a+b+c)*(-a + b + c)*(a-b+c)*(a+b-c)
     @classmethod
     def _trip_p(cls, a, b, c, r1, r2, r3, t):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic triple-sphere intersection area: the two candidate `p`
+        tests used to classify how the third sphere sits relative to the others'
+        intersection.
+
+        :param a: the opposite inter-center distance
+        :param b: the second inter-center distance
+        :param c: the third inter-center distance
+        :param r1: the first radius
+        :param r2: the second radius
+        :param r3: the third radius
+        :param t: the Heron term from `_trip_t`
+        :return: the `(p_plus, p_minus)` tests
+        :rtype: tuple
+        """
         A = (b ** 2 - c ** 2 + r2 ** 2 - r3 ** 2) ** 2
         t_abg = np.sqrt(cls._trip_t(a, r2, r3))
         pp = (A + (t + t_abg) ** 2) / (4 * a ** 2) - r1 ** 2
@@ -1217,6 +1919,22 @@ class SphereUnionSurface:
         return pp, pm
     @classmethod
     def sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3):
+        """
+        **LLM Docstring**
+
+        Analytic surface area of the triple overlap of three spheres, following Gibson &
+        Scheraga. Returns either a pair-index fallback (when the triple doesn't fully
+        intersect) or the analytic area.
+
+        :param a: the distance between centers 2 and 3
+        :param b: the distance between centers 1 and 3
+        :param c: the distance between centers 1 and 2
+        :param r1: the first radius
+        :param r2: the second radius
+        :param r3: the third radius
+        :return: `(overlap_indices_or_None, area_or_None)`
+        :rtype: tuple
+        """
         # https://www.tandfonline.com/doi/pdf/10.1080/00268978800100453
         # https://www-tandfonline-com/doi/epdf/10.1080/00268978700102951
         w = cls._trip_w(a, b, c, r1, r2, r3)
@@ -1277,6 +1995,21 @@ class SphereUnionSurface:
                                                 )
     @classmethod
     def sphere_double_intersection_circle(cls, centers, radii, dist=None):
+        """
+        **LLM Docstring**
+
+        Compute the circle where two spheres intersect (its center, unit normal, and
+        radius).
+
+        :param centers: the two sphere centers
+        :type centers: np.ndarray
+        :param radii: the two sphere radii
+        :type radii: np.ndarray
+        :param dist: the inter-center distance (computed if omitted)
+        :type dist: float | None
+        :return: the intersection circle
+        :rtype: SphereUnionSurface.IntersectionCircle
+        """
         d = centers[1] - centers[0]
         a = dist
         u, a = nput.vec_normalize(d, norms=dist, return_norms=True)
@@ -1287,6 +2020,21 @@ class SphereUnionSurface:
         return cls.IntersectionCircle(centers[0] + u*x, u, r)
     @classmethod
     def sphere_triple_intersection_point(cls, centers, radii, dists=None):
+        """
+        **LLM Docstring**
+
+        Compute the two points where three (assumed mutually intersecting) spheres meet,
+        by building a local axis system and solving for the coordinates.
+
+        :param centers: the three sphere centers
+        :type centers: np.ndarray
+        :param radii: the three sphere radii
+        :type radii: np.ndarray
+        :param dists: the `(d_12, d_13)` inter-center distances
+        :type dists: tuple | None
+        :return: the two intersection points
+        :rtype: list
+        """
         # we assume it has been checked that the three spheres intersect using the determinant
         # above
 
@@ -1319,6 +2067,19 @@ class SphereUnionSurface:
 
     @classmethod
     def get_intersections(cls, centers, radii):
+        """
+        **LLM Docstring**
+
+        Find all pairwise intersection circles and all triple intersection points among
+        a set of spheres.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :return: `(intersection_points, intersection_disks)`
+        :rtype: tuple
+        """
         dm = nput.distance_matrix(centers)
         nc = len(centers)
         intersects = np.full((nc, nc), True)
@@ -1353,6 +2114,21 @@ class SphereUnionSurface:
 
     @classmethod
     def sphere_double_intersection_area(cls, a, r1, r2):
+        """
+        **LLM Docstring**
+
+        Analytic exposed surface-area contribution of the overlap of two spheres, or a
+        containment fallback when one sphere swallows the other.
+
+        :param a: the inter-center distance
+        :type a: float
+        :param r1: the first radius
+        :type r1: float
+        :param r2: the second radius
+        :type r2: float
+        :return: `(overlap_indices_or_None, area)`
+        :rtype: tuple
+        """
         t1 = r1 + r2 - a
         t2 = r1 - r2 + a
         t3 = -r1 + r2 + a
@@ -1371,6 +2147,21 @@ class SphereUnionSurface:
 
     @classmethod
     def _quad_w(cls, a, b, c, f, g, h):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic quadruple-sphere intersection area: the Cayley-Menger
+        determinant term.
+
+        :param a: an inter-center distance
+        :param b: an inter-center distance
+        :param c: an inter-center distance
+        :param f: an inter-center distance
+        :param g: an inter-center distance
+        :param h: an inter-center distance
+        :return: the `w` term (its root, or the raw determinant if negative)
+        :rtype: float
+        """
         A = a ** 2
         B = b ** 2
         C = c ** 2
@@ -1390,12 +2181,40 @@ class SphereUnionSurface:
             return np.sqrt(1 / 2 * d)
     @classmethod
     def _quad_s(cls, a, b, c, f, g, h):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic quadruple-sphere intersection area: one of the `s` terms.
+
+        :param a: an inter-center distance
+        :param b: an inter-center distance
+        :param c: an inter-center distance
+        :param f: a radius/length term
+        :param g: a radius/length term
+        :param h: a radius/length term
+        :return: the `s` term
+        :rtype: float
+        """
         return a * (
                 b**2 + c**2 - a**2 + g**2 + h**2
                 - 2*f**2 + (g**2 - h**2)*(b**2 - c**2)/a**2
         )
     @classmethod
     def _quad_term(cls, a, beta, gamma, W2, s1):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic quadruple-sphere intersection area: one branch-corrected
+        arctangent area term.
+
+        :param a: an inter-center distance
+        :param beta: a radius
+        :param gamma: a radius
+        :param W2: twice the `w` determinant term
+        :param s1: the corresponding `s` term
+        :return: the area term
+        :rtype: float
+        """
         t = np.arctan(W2 / s1)
         if t < 0:
             t = t + np.pi
@@ -1404,6 +2223,17 @@ class SphereUnionSurface:
         return a*(beta + gamma)*(1 + ((beta - gamma)**2) /a**2) * t
     @classmethod
     def triangle_area(cls, a, b, c):
+        """
+        **LLM Docstring**
+
+        Heron's-formula area of a triangle with the given side lengths.
+
+        :param a: the first side
+        :param b: the second side
+        :param c: the third side
+        :return: the area
+        :rtype: float
+        """
         s = (a + b + c) /2
         area = np.sqrt(s*(s-a)*(s-b)*(s-c))
         return area
@@ -1415,6 +2245,35 @@ class SphereUnionSurface:
                                            A123, A124, A134, A234,
                                            I4, I3, I2, I1
                                            ):
+        """
+        **LLM Docstring**
+
+        Analytic surface-area contribution of the quadruple overlap of four spheres,
+        dispatching on a set of intersection-test bit patterns to the correct lower-order
+        fallback or the full analytic expression.
+
+        :param a: the distance between centers 2 and 3
+        :param b: the distance between centers 1 and 3
+        :param c: the distance between centers 1 and 2
+        :param f: the distance between centers 1 and 4
+        :param g: the distance between centers 2 and 4
+        :param h: the distance between centers 3 and 4
+        :param r1: the first radius
+        :param r2: the second radius
+        :param r3: the third radius
+        :param r4: the fourth radius
+        :param A123: the 1-2-3 triple area
+        :param A124: the 1-2-4 triple area
+        :param A134: the 1-3-4 triple area
+        :param A234: the 2-3-4 triple area
+        :param I4: the pair of tests for center 4 vs the 1-2-3 intersection points
+        :param I3: the pair of tests for center 3
+        :param I2: the pair of tests for center 2
+        :param I1: the pair of tests for center 1
+        :return: `(overlap_indices_or_None, area_or_None)`
+        :rtype: tuple
+        :raises ValueError: for an unhandled intersection-test pattern
+        """
 
 
         W2 = 2*cls._quad_w(a, b, c, f, g, h)
@@ -1607,6 +2466,18 @@ class SphereUnionSurface:
 
     @classmethod
     def sphere_area(cls, radii, axis=None):
+        """
+        **LLM Docstring**
+
+        The total surface area of one or more spheres, `4 pi sum(r^2)`.
+
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param axis: the axis to sum over
+        :type axis: int | None
+        :return: the surface area
+        :rtype: float | np.ndarray
+        """
         return 4*np.pi*np.sum(radii**2, axis=axis)
 
     @classmethod
@@ -1618,6 +2489,30 @@ class SphereUnionSurface:
                                   # include_quintuples=None,
                                   return_terms=False,
                                   overlap_tolerance=0):
+        """
+        **LLM Docstring**
+
+        Compute the exact exposed surface area of a union of spheres via
+        inclusion-exclusion over the analytic single/double/triple/quadruple
+        intersection-area terms, dropping fully-occluded spheres as they are detected.
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param include_doubles: include the pairwise intersection terms
+        :type include_doubles: bool
+        :param include_triples: include the triple terms
+        :type include_triples: bool | None
+        :param include_quadruples: include the quadruple terms
+        :type include_quadruples: bool | None
+        :param return_terms: return the per-combination term dict rather than the sum
+        :type return_terms: bool
+        :param overlap_tolerance: fractional tolerance for treating spheres as overlapping
+        :type overlap_tolerance: float
+        :return: the surface area (or the terms dict)
+        :rtype: float | dict
+        """
         if include_triples is None:
             include_triples = include_doubles
         if include_quadruples is None:
@@ -1761,6 +2656,18 @@ class SphereUnionSurface:
                 )
 
     def surface_area(self, method='union', **opts):
+        """
+        **LLM Docstring**
+
+        Compute the surface area of the sphere union by the chosen method.
+
+        :param method: `'union'` (analytic), `'sampling'`, `'mesh'`, or `'pcmesh'`
+        :type method: str
+        :param opts: method-specific options
+        :return: the surface area
+        :rtype: float
+        :raises ValueError: for an unknown method
+        """
         if method == 'union':
             return self.sphere_union_surface_area(self.centers, self.radii, **opts)
         elif method == 'sampling':
@@ -1785,6 +2692,19 @@ class SphereUnionSurface:
             raise ValueError(f"unknown surface area method '{method}'")
 
     def volume(self, method='monte-carlo', **opts):
+        """
+        **LLM Docstring**
+
+        Compute the volume of the sphere union by the chosen method.
+
+        :param method: `'monte-carlo'`, `'sampling'`, `'voxel'`, `'mesh'`, or `'pcmesh'` (`'union'` not implemented)
+        :type method: str
+        :param opts: method-specific options
+        :return: the volume
+        :rtype: float
+        :raises ValueError: for an unknown method
+        :raises NotImplementedError: for the analytic `'union'` method
+        """
         if method == 'union':
             raise NotImplementedError("analytic sphere volume not yet implemented")
         elif method == 'sampling':
@@ -1825,6 +2745,32 @@ class SphereUnionSurface:
              plot_intersections=False,
              **etc
              ):
+        """
+        **LLM Docstring**
+
+        Plot the surface: the sample points (colored by an optional scalar function),
+        the spheres, and optionally the intersection circles/points.
+
+        :param figure: an existing figure to draw into
+        :param points: the points to plot (defaults to the sampling points)
+        :type points: np.ndarray | None
+        :param function: a scalar function to color the points by
+        :type function: Callable | None
+        :param sphere_color: the sphere color
+        :param sphere_style: extra sphere styling
+        :type sphere_style: dict | None
+        :param point_style: extra point styling
+        :type point_style: dict | None
+        :param point_values: explicit per-point color values
+        :type point_values: np.ndarray | None
+        :param distance_units: the display distance units
+        :type distance_units: str
+        :param plot_intersections: also draw the intersection circles/points
+        :type plot_intersections: bool
+        :param etc: extra plotting options
+        :return: the figure
+        :rtype: object
+        """
 
         if points is None:
             points = self.sampling_points
@@ -1871,6 +2817,44 @@ class SphereUnionSurface:
                            intersection_point_style=None,
                            intersection_circle_style=None,
                            **etc):
+        """
+        **LLM Docstring**
+
+        Plot a set of points, spheres, and optional intersection geometry into a 3-D
+        figure.
+
+        :param points: the points to plot
+        :type points: np.ndarray
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param figure: an existing figure to draw into
+        :param color: the point color
+        :param backend: the plotting backend
+        :type backend: str
+        :param return_objects: also return the created plot objects
+        :type return_objects: bool
+        :param sphere_color: the sphere color
+        :param sphere_style: extra sphere styling
+        :type sphere_style: dict | None
+        :param point_colors: explicit per-point colors
+        :param point_values: per-point scalar values to color by
+        :type point_values: np.ndarray | None
+        :param vertex_colormap: the colormap for point values
+        :type vertex_colormap: str
+        :param rescale_color_values: rescale the color values into the colormap range
+        :type rescale_color_values: bool
+        :param plot_intersections: draw the intersection circles/points
+        :type plot_intersections: bool
+        :param intersection_point_style: styling for intersection points
+        :type intersection_point_style: dict | None
+        :param intersection_circle_style: styling for intersection circles
+        :type intersection_circle_style: dict | None
+        :param etc: extra plotting options
+        :return: the figure (and objects if requested)
+        :rtype: object | tuple
+        """
         from ... import Plots as plt
 
         if figure is None:
@@ -1953,6 +2937,24 @@ class SphereUnionSurface:
 
 class MeshCleaner:
     def __init__(self, verts, inds, vert_map, centers=None, radii=None, max_pair_dist=None):
+        """
+        **LLM Docstring**
+
+        Set up a cleaner for repairing a triangle mesh's topology (seams and holes).
+
+        :param verts: the mesh vertices
+        :type verts: np.ndarray
+        :param inds: the triangle vertex indices
+        :type inds: np.ndarray
+        :param vert_map: the per-vertex owning-sphere map
+        :type vert_map: np.ndarray
+        :param centers: the sphere centers (for orienting new triangles)
+        :type centers: np.ndarray | None
+        :param radii: the sphere radii
+        :type radii: np.ndarray | None
+        :param max_pair_dist: the maximum centroid distance for pairing seam loops
+        :type max_pair_dist: float | None
+        """
         self.verts = verts
         self.inds = inds
         self.vert_map = vert_map
@@ -1964,11 +2966,28 @@ class MeshCleaner:
 
     @property
     def report(self):
+        """
+        **LLM Docstring**
+
+        The (cached) mesh topology report (boundary loops, non-manifold features, Euler
+        characteristic).
+
+        :return: the topology report
+        :rtype: dict
+        """
         if self._report is None:
             self._report = self.mesh_topology_report(self.verts, self.inds)
         return self._report
 
     def clean(self):
+        """
+        **LLM Docstring**
+
+        Return the cleaned mesh, stitching seams and capping holes (computed lazily).
+
+        :return: the `(verts, faces, vert_map)` of the cleaned mesh
+        :rtype: tuple
+        """
         if self._cleaned_mesh is None:
             self._cleaned_mesh = self._stitch_seams(
                 self.verts,
@@ -2159,6 +3178,21 @@ class MeshCleaner:
 
     @classmethod
     def _stitch_pair(cls, verts, loopA, loopB):
+        """
+        **LLM Docstring**
+
+        Stitch two boundary loops together with a ring of triangles, after aligning and
+        orienting them.
+
+        :param verts: the mesh vertices
+        :type verts: np.ndarray
+        :param loopA: the first boundary loop (vertex indices)
+        :type loopA: np.ndarray
+        :param loopB: the second boundary loop
+        :type loopB: np.ndarray
+        :return: the new bridging triangles
+        :rtype: list
+        """
         A = np.asarray(loopA[:-1])
         B = np.asarray(loopB[:-1])
         A, B = cls._align_and_orient(verts, A, B)
@@ -2325,6 +3359,33 @@ class MeshCleaner:
 class SphereUnionSurfaceMesh:
     def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None,
                  vertex_normals=None, centers=None, radii=None):
+        """
+        **LLM Docstring**
+
+        Hold a triangle mesh (vertices and triangle indices) plus optional metadata for
+        a sphere-union surface.
+
+        :param verts: the mesh vertices
+        :type verts: np.ndarray
+        :param inds: the triangle vertex indices
+        :type inds: np.ndarray
+        :param surf: the source surface, if any
+        :type surf: SphereUnionSurface | None
+        :param densities: per-vertex reconstruction densities
+        :type densities: np.ndarray | None
+        :param tri_map: per-triangle owning-sphere map
+        :type tri_map: np.ndarray | None
+        :param vert_map: per-vertex owning-sphere map
+        :type vert_map: np.ndarray | None
+        :param normals: per-triangle normals
+        :type normals: np.ndarray | None
+        :param vertex_normals: per-vertex normals
+        :type vertex_normals: np.ndarray | None
+        :param centers: the sphere centers
+        :type centers: np.ndarray | None
+        :param radii: the sphere radii
+        :type radii: np.ndarray | None
+        """
         self.surf = surf
         self.verts = verts
         self.inds = inds
@@ -2338,6 +3399,17 @@ class SphereUnionSurfaceMesh:
         self._derivative_term_cache = {}
 
     def surface_area(self, return_components=False):
+        """
+        **LLM Docstring**
+
+        Compute the mesh surface area as the sum of its triangle areas (Heron's
+        formula).
+
+        :param return_components: return the per-triangle areas rather than the sum
+        :type return_components: bool
+        :return: the surface area (or per-triangle areas)
+        :rtype: float | np.ndarray
+        """
         dm = nput.distance_matrix(self.verts)
         a = dm[self.inds[:, 0], self.inds[:, 1]]
         b = dm[self.inds[:, 1], self.inds[:, 2]]
@@ -2362,6 +3434,17 @@ class SphereUnionSurfaceMesh:
             return np.sum(np.abs(comps))
 
     def normal_derivatives(self, order=1):
+        """
+        **LLM Docstring**
+
+        Compute the derivatives (up to `order`) of each triangle's normal with respect to
+        its vertex coordinates.
+
+        :param order: the derivative order
+        :type order: int
+        :return: the per-order normal-derivative tensors
+        :rtype: list
+        """
         i_list, j_list, k_list = self.inds.T
         terms = [
             nput.normal_deriv(self.verts, i, j, k, order=order,
@@ -2370,6 +3453,19 @@ class SphereUnionSurfaceMesh:
         ]
         return [np.array(e) for e in zip(*terms)]
     def _dist_deriv(self, i_list, j_list, order):
+        """
+        **LLM Docstring**
+
+        Compute the derivatives (up to `order`) of the edge lengths between paired
+        vertices.
+
+        :param i_list: the first vertex indices
+        :param j_list: the second vertex indices
+        :param order: the derivative order
+        :type order: int
+        :return: the per-order distance-derivative tensors
+        :rtype: list
+        """
         terms = [
             nput.dist_deriv(self.verts, i, j, order=order,
                               cache=self._derivative_term_cache)
@@ -2378,6 +3474,19 @@ class SphereUnionSurfaceMesh:
         return [np.array(e) for e in zip(*terms)]
 
     def area_derivatives(self, order=1, return_components=False):
+        """
+        **LLM Docstring**
+
+        Compute the derivatives (up to `order`) of each triangle's area with respect to
+        its vertex coordinates, via the Heron expansion of its edge lengths.
+
+        :param order: the derivative order
+        :type order: int
+        :param return_components: return the per-triangle derivatives rather than their sum
+        :type return_components: bool
+        :return: the per-order area-derivative tensors
+        :rtype: list
+        """
         i_list, j_list, k_list = self.inds.T
         terms = []
         for i, j, k in zip(i_list, j_list, k_list):
@@ -2424,6 +3533,19 @@ class SphereUnionSurfaceMesh:
             return [np.sum(t, axis=0) for t in tris]
 
     def centroid_derivatives(self, order=1, return_components=False):
+        """
+        **LLM Docstring**
+
+        Compute the derivatives (up to `order`) of each triangle's centroid with respect
+        to its vertex coordinates.
+
+        :param order: the derivative order
+        :type order: int
+        :param return_components: accepted for interface parity
+        :type return_components: bool
+        :return: the per-order centroid-derivative tensors
+        :rtype: list
+        """
         i, j, k = self.inds.T
         # a scaled diagonal (3*n_verts, n_tris, 3)
         centroids = np.average(self.verts[self.inds], axis=-2)
@@ -2445,6 +3567,26 @@ class SphereUnionSurfaceMesh:
                            normal_order=None,
                            area_order=None,
                            centroid_order=None):
+        """
+        **LLM Docstring**
+
+        Compute the derivatives (up to `order`) of the enclosed volume with respect to
+        the vertex coordinates, combining the area, centroid, and normal derivatives via
+        the divergence theorem.
+
+        :param order: the derivative order
+        :type order: int
+        :param return_components: return the per-triangle derivatives rather than their sum
+        :type return_components: bool
+        :param normal_order: override the order for the normal derivatives
+        :type normal_order: int | None
+        :param area_order: override the order for the area derivatives
+        :type area_order: int | None
+        :param centroid_order: override the order for the centroid derivatives
+        :type centroid_order: int | None
+        :return: the per-order volume-derivative tensors
+        :rtype: list
+        """
         # from ...Profilers import Timer
         # with Timer('normals'):
         nd = self.normal_derivatives(order=order if normal_order is None else normal_order)
@@ -2469,15 +3611,43 @@ class SphereUnionSurfaceMesh:
 
     @property
     def normals(self):
+        """
+        **LLM Docstring**
+
+        The per-triangle unit normals (computed lazily).
+
+        :return: the triangle normals
+        :rtype: np.ndarray
+        """
         if self._normals is None:
             self._normals = self.get_normals()
         return self._normals[0]
     @property
     def signed_volumes(self):
+        """
+        **LLM Docstring**
+
+        The per-triangle signed tetrahedron volumes (the cross-product norms used in the
+        divergence-theorem volume), computed lazily.
+
+        :return: the signed volumes
+        :rtype: np.ndarray
+        """
         if self._normals is None:
             self._normals = self.get_normals()
         return self._normals[1]
     def get_normals(self, normalize=True):
+        """
+        **LLM Docstring**
+
+        Compute the per-triangle normals (and their norms) from the triangle edge cross
+        products.
+
+        :param normalize: return unit normals
+        :type normalize: bool
+        :return: the `(normals, norms)`
+        :rtype: tuple
+        """
         tri_pts = self.verts[self.inds]
         crosses = nput.vec_crosses(tri_pts[:, 2] - tri_pts[:, 1], tri_pts[:, 0] - tri_pts[:, 1])
         return nput.vec_normalize(crosses, return_norms=True)
@@ -2494,6 +3664,45 @@ class SphereUnionSurfaceMesh:
                        occlusion_intersection_tolerance=5e-2,
                        stitch=True,
                        **etc):
+        """
+        **LLM Docstring**
+
+        Build a mesh from a shared point set and per-sphere triangle sub-meshes,
+        optionally deduplicating coincident points and pruning triangles occluded inside
+        the sphere union (by vertex or centroid tests), fixing triangle orientations.
+
+        :param pts: the shared vertex set
+        :type pts: np.ndarray
+        :param submeshes: the per-sphere triangle index arrays
+        :type submeshes: list
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param occlusion_type: how to prune occluded triangles (`None`/`'complete'`/`'partial'`/`'centroid'`)
+        :type occlusion_type: str | None
+        :param occlusion_tolerance: the exterior-test tolerance
+        :type occlusion_tolerance: float
+        :param check_normals: reorient triangle normals to point outward
+        :type check_normals: bool
+        :param deduplicate_points: merge coincident points
+        :type deduplicate_points: bool
+        :param duplicate_point_threshold: the coincidence distance threshold
+        :type duplicate_point_threshold: float
+        :param vert_map: per-vertex owning-sphere map
+        :type vert_map: np.ndarray | None
+        :param intersection_point_mask: which points are intersection points
+        :type intersection_point_mask: np.ndarray | None
+        :param occlusion_intersection_tolerance: the looser tolerance for intersection points
+        :type occlusion_intersection_tolerance: float
+        :param stitch: accepted for interface parity
+        :type stitch: bool
+        :param etc: extra options forwarded to the constructor
+        :return: the mesh
+        :rtype: SphereUnionSurfaceMesh
+        :raises ValueError: if all triangles get pruned
+        :raises NotImplementedError: for an unsupported occlusion type
+        """
         pts = np.asanyarray(pts)
         if deduplicate_points:
             pair_dists = nput.distance_matrix(pts, return_triu=True)
@@ -2609,6 +3818,15 @@ class SphereUnionSurfaceMesh:
             raise NotImplementedError(f"`occlusion_type` {occlusion_type} not supported")
 
     def stitch(self):
+        """
+        **LLM Docstring**
+
+        Return a topologically repaired copy of the mesh (seams stitched, holes capped)
+        via `MeshCleaner`.
+
+        :return: the cleaned mesh
+        :rtype: SphereUnionSurfaceMesh
+        """
         cleaner = MeshCleaner(
             self.verts,
             self.inds,
@@ -2633,6 +3851,34 @@ class SphereUnionSurfaceMesh:
                        mesh_kwargs=None,
                        intersection_point_mask=None,
                        **surface_options):
+        """
+        **LLM Docstring**
+
+        Build a mesh by convex-hulling each per-sphere point cloud and unioning the
+        resulting sub-meshes (pruning occluded triangles).
+
+        :param point_clouds: the per-sphere point clouds
+        :type point_clouds: list
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param mesh_type: the per-cloud hull type (`'convex'` or a hull class)
+        :type mesh_type: str | type
+        :param occlusion_type: how to prune occluded triangles
+        :type occlusion_type: str
+        :param vert_map: per-vertex owning-sphere map (built if omitted)
+        :type vert_map: np.ndarray | None
+        :param deduplicate_points: merge coincident points
+        :type deduplicate_points: bool
+        :param mesh_kwargs: extra options for the hull construction
+        :type mesh_kwargs: dict | None
+        :param intersection_point_mask: which points are intersection points
+        :type intersection_point_mask: np.ndarray | None
+        :param surface_options: extra options forwarded to `from_submeshes`
+        :return: the mesh
+        :rtype: SphereUnionSurfaceMesh
+        """
         if dev.str_is(mesh_type, 'convex'):
             mesh_type = spat.ConvexHull
         all_tris = []
@@ -2667,6 +3913,19 @@ class SphereUnionSurfaceMesh:
 
     @classmethod
     def from_o3d(cls, mesh, densities=None, surf=None):
+        """
+        **LLM Docstring**
+
+        Build a mesh from an Open3D triangle mesh.
+
+        :param mesh: the Open3D mesh
+        :param densities: per-vertex reconstruction densities
+        :type densities: np.ndarray | None
+        :param surf: the source surface
+        :type surf: SphereUnionSurface | None
+        :return: the mesh
+        :rtype: SphereUnionSurfaceMesh
+        """
         return cls(
             np.array(mesh.vertices),
             np.array(mesh.triangles),
@@ -2684,6 +3943,26 @@ class SphereUnionSurfaceMesh:
              distance_units='Angstroms',
              **etc
              ):
+        """
+        **LLM Docstring**
+
+        Plot the triangle mesh, optionally coloring vertices by a scalar function and
+        drawing normals.
+
+        :param figure: an existing figure to draw into
+        :param function: a scalar function to color vertices by
+        :type function: Callable | None
+        :param vertex_values: explicit per-vertex color values
+        :type vertex_values: np.ndarray | None
+        :param normals: per-triangle normals to draw (or `True` to use the mesh normals)
+        :param invert_mesh: flip the triangle winding
+        :type invert_mesh: bool
+        :param distance_units: the display distance units
+        :type distance_units: str
+        :param etc: extra plotting options
+        :return: the figure
+        :rtype: object
+        """
 
         # TODO: move this to molecule specific class...
         conv = UnitsData.convert("BohrRadius", distance_units)
@@ -2731,6 +4010,49 @@ class SphereUnionSurfaceMesh:
                            normal_radius=.01,
                            normal_scaling=.5,
                            **etc):
+        """
+        **LLM Docstring**
+
+        Plot a triangle mesh (faces, edges, and optional per-triangle normals) into a 3-D
+        figure.
+
+        :param verts: the mesh vertices
+        :type verts: np.ndarray
+        :param indices: the triangle vertex indices
+        :type indices: np.ndarray
+        :param figure: an existing figure to draw into
+        :param color: the face color
+        :param transparency: the face transparency
+        :type transparency: float
+        :param backend: the plotting backend
+        :type backend: str
+        :param return_objects: also return the created plot objects
+        :type return_objects: bool
+        :param line_color: the edge color
+        :param line_transparency: the edge transparency
+        :type line_transparency: float
+        :param line_style: extra edge styling
+        :type line_style: dict | None
+        :param vertex_colors: explicit per-vertex colors
+        :param vertex_values: per-vertex scalar values to color by
+        :type vertex_values: np.ndarray | None
+        :param vertex_colormap: the colormap for vertex values
+        :type vertex_colormap: str
+        :param rescale_color_values: rescale the color values into the colormap range
+        :type rescale_color_values: bool
+        :param normals: per-triangle normals to draw
+        :type normals: np.ndarray | None
+        :param centroids: triangle centroids for the normals (computed if omitted)
+        :type centroids: np.ndarray | None
+        :param normal_color: the normal-arrow color
+        :param normal_radius: the normal-arrow radius
+        :type normal_radius: float
+        :param normal_scaling: the normal-arrow length scaling
+        :type normal_scaling: float
+        :param etc: extra plotting options
+        :return: the figure (and objects if requested)
+        :rtype: object | tuple
+        """
         from ... import Plots as plt
 
         if figure is None:
@@ -2782,4 +4104,3 @@ class SphereUnionSurfaceMesh:
             return figure, objs
         else:
             return figure
-

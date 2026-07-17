@@ -11,6 +11,7 @@ __all__ = [
     "TensorCoefficientPoly"
 ]
 
+
 class AbstractPolynomial(metaclass=abc.ABCMeta):
     """
     Provides the general interface an abstract polynomial needs ot support, including
@@ -20,32 +21,126 @@ class AbstractPolynomial(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def scaling(self):
+        """
+        **LLM Docstring**
+
+        Abstract: the overall scalar prefactor multiplying the polynomial.
+
+        :return: the scaling factor
+        :rtype: float
+        """
         raise NotImplementedError("abstract base class")
 
     @abc.abstractmethod
-    def __mul__(self, other)->'AbstractPolynomial':
-        raise NotImplementedError("abstract base class")
-    @abc.abstractmethod
-    def __add__(self, other)->'AbstractPolynomial':
+    def __mul__(self, other) -> 'AbstractPolynomial':
+        """
+        **LLM Docstring**
+
+        Abstract: multiply this polynomial by another polynomial or a scalar.
+
+        :param other: the multiplier
+        :return: the product polynomial
+        :rtype: AbstractPolynomial
+        """
         raise NotImplementedError("abstract base class")
 
     @abc.abstractmethod
-    def shift(self, shift)->'AbstractPolynomial':
+    def __add__(self, other) -> 'AbstractPolynomial':
+        """
+        **LLM Docstring**
+
+        Abstract: add another polynomial or a scalar to this one.
+
+        :param other: the addend
+        :return: the sum polynomial
+        :rtype: AbstractPolynomial
+        """
         raise NotImplementedError("abstract base class")
 
-    def __rmul__(self, other)->'AbstractPolynomial':
+    @abc.abstractmethod
+    def shift(self, shift) -> 'AbstractPolynomial':
+        """
+        **LLM Docstring**
+
+        Abstract: return the polynomial shifted in its variables (i.e. `p(x + shift)`).
+
+        :param shift: the per-variable shift
+        :return: the shifted polynomial
+        :rtype: AbstractPolynomial
+        """
+        raise NotImplementedError("abstract base class")
+
+    def __rmul__(self, other) -> 'AbstractPolynomial':
+        """
+        **LLM Docstring**
+
+        Right multiplication, delegating to `__mul__` (multiplication is commutative
+        here).
+
+        :param other: the multiplier
+        :return: the product polynomial
+        :rtype: AbstractPolynomial
+        """
         return self * other
-    def __radd__(self, other)->'AbstractPolynomial':
-        return self + other
-    def __truediv__(self, other)->'AbstractPolynomial':
-        return self * (1/other)
-    def __neg__(self):
-        return -1*self
-    def __sub__(self, other):
-        return self + (-other)
-    def __rsub__(self, other):
-        return (-self)+other
 
+    def __radd__(self, other) -> 'AbstractPolynomial':
+        """
+        **LLM Docstring**
+
+        Right addition, delegating to `__add__`.
+
+        :param other: the addend
+        :return: the sum polynomial
+        :rtype: AbstractPolynomial
+        """
+        return self + other
+
+    def __truediv__(self, other) -> 'AbstractPolynomial':
+        """
+        **LLM Docstring**
+
+        Divide the polynomial by a scalar (multiply by its reciprocal).
+
+        :param other: the scalar divisor
+        :return: the scaled polynomial
+        :rtype: AbstractPolynomial
+        """
+        return self * (1 / other)
+
+    def __neg__(self):
+        """
+        **LLM Docstring**
+
+        Negate the polynomial.
+
+        :return: the negated polynomial
+        :rtype: AbstractPolynomial
+        """
+        return -1 * self
+
+    def __sub__(self, other):
+        """
+        **LLM Docstring**
+
+        Subtract another polynomial or scalar (add its negation).
+
+        :param other: the subtrahend
+        :return: the difference polynomial
+        :rtype: AbstractPolynomial
+        """
+        return self + (-other)
+
+    def __rsub__(self, other):
+        """
+        **LLM Docstring**
+
+        Right subtraction (`other - self`), via negation and addition.
+
+        :param other: the minuend
+        :return: the difference polynomial
+        :rtype: AbstractPolynomial
+        """
+        return (-self) + other
 
     # def __rtruediv__(self, other):
     #     return other * (1/self)
@@ -56,39 +151,122 @@ class DensePolynomial(AbstractPolynomial):
     A straightforward dense n-dimensional polynomial data structure with
     multiplications and shifts
     """
+
     def __init__(self,
                  coeffs,
                  prefactor=None,
                  shift=None,
                  stack_dim=0
                  ):
+        """
+        **LLM Docstring**
+
+        Build a dense n-dimensional polynomial from a coefficient tensor, with a deferred
+        scalar prefactor and variable shift.
+
+        The coefficient tensor is indexed by per-variable powers; a leading `stack_dim`
+        axes hold a batch/stack of polynomials. The `prefactor` and `shift` are applied
+        lazily the first time the coefficients are materialized.
+
+        :param coeffs: the coefficient tensor (dense or `SparseArray`)
+        :type coeffs: np.ndarray | SparseArray
+        :param prefactor: an overall scalar multiplier (applied lazily)
+        :type prefactor: float | None
+        :param shift: a per-variable shift to apply (applied lazily)
+        :type shift: np.ndarray | None
+        :param stack_dim: the number of leading stack/batch axes
+        :type stack_dim: int
+        """
         self._scaling = prefactor
         self._shift = shift
         self._poly_coeffs = np.asanyarray(coeffs) if not isinstance(coeffs, SparseArray) else coeffs
         self._coeff_tensors = None
         self._uc_tensors = None
         self.stack_dim = stack_dim
+
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation showing the coefficient shape and scaling.
+
+        :return: the representation
+        :rtype: str
+        """
         return "{}({}, {})".format(type(self).__name__, self.coeffs.shape, self.scaling)
+
     @classmethod
     def from_tensors(cls, tensors, prefactor=None, shift=None, rescale=True):
+        """
+        **LLM Docstring**
+
+        Build a `DensePolynomial` from a list of derivative/coefficient tensors (one per
+        order), condensing them into a single coefficient tensor.
+
+        :param tensors: the per-order coefficient tensors
+        :type tensors: list
+        :param prefactor: an overall scalar multiplier
+        :type prefactor: float | None
+        :param shift: a per-variable shift
+        :type shift: np.ndarray | None
+        :param rescale: divide each tensor entry by its permutation count
+        :type rescale: bool
+        :return: the polynomial
+        :rtype: DensePolynomial
+        """
         coeffs, stack_dim = cls.condense_tensors(tensors, rescale=rescale)
         new = cls(coeffs, prefactor=prefactor, shift=shift, stack_dim=stack_dim)
         return new
 
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        The shape of the coefficient tensor (including the stack axes).
+
+        :return: the coefficient shape
+        :rtype: tuple
+        """
         return self._poly_coeffs.shape
 
     @property
     def scaling(self):
+        """
+        **LLM Docstring**
+
+        The overall scalar prefactor (1 when unset). Setting it stores a new deferred
+        prefactor.
+
+        :return: the scaling factor
+        :rtype: float
+        """
         return 1 if self._scaling is None else self._scaling
+
     @scaling.setter
     def scaling(self, s):
+        """
+        **LLM Docstring**
+
+        The overall scalar prefactor (1 when unset). Setting it stores a new deferred
+        prefactor.
+
+        :return: the scaling factor
+        :rtype: float
+        """
         self._scaling = s
 
     @property
     def coeffs(self) -> 'np.ndarray|SparseArray':
+        """
+        **LLM Docstring**
+
+        The materialized coefficient tensor, applying (and then clearing) any deferred
+        shift and prefactor on first access. Setting it replaces the raw coefficients.
+
+        :return: the coefficient tensor
+        :rtype: np.ndarray | SparseArray
+        """
         if self._shift is not None:
             self._poly_coeffs = self.compute_shifted_coeffs(self._poly_coeffs, self._shift, stack_dim=self.stack_dim)
             self._shift = None
@@ -96,16 +274,50 @@ class DensePolynomial(AbstractPolynomial):
             self._poly_coeffs = self._poly_coeffs * self._scaling
             self.scaling = None
         return self._poly_coeffs
+
     @coeffs.setter
     def coeffs(self, cs):
+        """
+        **LLM Docstring**
+
+        The materialized coefficient tensor, applying (and then clearing) any deferred
+        shift and prefactor on first access. Setting it replaces the raw coefficients.
+
+        :return: the coefficient tensor
+        :rtype: np.ndarray | SparseArray
+        """
         self._poly_coeffs = cs
 
     @property
     def coordinate_dim(self):
+        """
+        **LLM Docstring**
+
+        The number of polynomial variables (the coefficient rank minus the stack axes).
+
+        :return: the coordinate dimension
+        :rtype: int
+        """
         return self._poly_coeffs.ndim - self.stack_dim
 
     @classmethod
     def _manage_stack_bcast(cls, c1, c2, s1, s2):
+        """
+        **LLM Docstring**
+
+        Broadcast two coefficient tensors (and their stack dimensions) to a common
+        stack/coordinate shape so they can be convolved or combined.
+
+        :param c1: the first coefficient tensor
+        :param c2: the second coefficient tensor
+        :param s1: the first tensor's stack dimension
+        :type s1: int
+        :param s2: the second tensor's stack dimension
+        :type s2: int
+        :return: `(c1, c2, stack_dim)` broadcast to a common shape
+        :rtype: tuple
+        :raises ValueError: if the stack shapes can't be broadcast
+        """
         if s1 == s2:
             if s1 == 0:
                 return c1, c2, 0
@@ -148,15 +360,15 @@ class DensePolynomial(AbstractPolynomial):
         padding = len(sh2) - len(sh1)
         if padding > 0:
             if isinstance(c1, np.ndarray):
-                c1 = np.expand_dims(c1, [-x for x in range(1, padding+1)])
+                c1 = np.expand_dims(c1, [-x for x in range(1, padding + 1)])
             else:
-                c1 = c1.expand_dims([-x for x in range(1, padding+1)])
+                c1 = c1.expand_dims([-x for x in range(1, padding + 1)])
         elif padding < 0:
             padding = -padding
             if isinstance(c2, np.ndarray):
-                c2 = np.expand_dims(c2, [-x for x in range(1, padding+1)])
+                c2 = np.expand_dims(c2, [-x for x in range(1, padding + 1)])
             else:
-                c2 = c2.expand_dims([-x for x in range(1, padding+1)])
+                c2 = c2.expand_dims([-x for x in range(1, padding + 1)])
 
         return c1, c2, sd
 
@@ -165,6 +377,21 @@ class DensePolynomial(AbstractPolynomial):
                                    vals1, vals2,
                                    inds1, inds2,
                                    ):
+        """
+        **LLM Docstring**
+
+        Convolve two sparse coefficient sets by forming the outer product of their
+        values and the pairwise sums of their indices, then summing duplicate indices.
+
+        :param vals1: the first value array
+        :type vals1: np.ndarray
+        :param vals2: the second value array
+        :type vals2: np.ndarray
+        :param inds1: the first index arrays (one per axis)
+        :param inds2: the second index arrays (one per axis)
+        :return: the convolved `(indices, values)`
+        :rtype: tuple
+        """
         # print(inds1)
         # print(inds2)
         vals = (vals1[:, np.newaxis] * vals2[np.newaxis, :]).flatten()
@@ -177,15 +404,29 @@ class DensePolynomial(AbstractPolynomial):
         (inds, valsets) = group_by(vals, inds.T)[0]
         vals = np.array([np.sum(v) for v in valsets])
         return inds.T, vals
+
     @classmethod
     def _sparse_convolve_single(cls, coeffs_1, coeffs_2):
+        """
+        **LLM Docstring**
+
+        Convolve two sparse coefficient tensors (polynomial multiplication) into a new
+        `SparseArray`.
+
+        :param coeffs_1: the first coefficient tensor
+        :type coeffs_1: SparseArray
+        :param coeffs_2: the second coefficient tensor
+        :type coeffs_2: SparseArray
+        :return: the convolved coefficients
+        :rtype: SparseArray
+        """
         v1, i1 = coeffs_1.block_data
         v2, i2 = coeffs_2.block_data
         inds, vals = cls._sparse_convolve_vals_inds(
             v1, v2,
             i1, i2
         )
-        shp = tuple(c1 + c2 - 1 for c1,c2 in zip(coeffs_1.shape, coeffs_2.shape))
+        shp = tuple(c1 + c2 - 1 for c1, c2 in zip(coeffs_1.shape, coeffs_2.shape))
         return SparseArray.from_data(
             (vals, tuple(inds)),
             shape=shp
@@ -193,6 +434,21 @@ class DensePolynomial(AbstractPolynomial):
 
     @classmethod
     def _sparse_convolve_stacks(cls, coeffs_1, coeffs_2, stack_dim):
+        """
+        **LLM Docstring**
+
+        Convolve two stacked sparse coefficient tensors, matching up the stack indices
+        and convolving the coordinate blocks within each matching stack.
+
+        :param coeffs_1: the first stacked coefficient tensor
+        :type coeffs_1: SparseArray
+        :param coeffs_2: the second stacked coefficient tensor
+        :type coeffs_2: SparseArray
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :return: the convolved coefficients
+        :rtype: SparseArray
+        """
         v1, i1 = coeffs_1.block_data
         v2, i2 = coeffs_2.block_data
 
@@ -235,13 +491,25 @@ class DensePolynomial(AbstractPolynomial):
         )
 
         shp = coeffs_1.shape[:stack_dim] + tuple(c1 + c2 - 1
-                    for c1, c2 in zip(coeffs_1.shape[stack_dim:], coeffs_2.shape[stack_dim:])
-                    )
+                                                 for c1, c2 in
+                                                 zip(coeffs_1.shape[stack_dim:], coeffs_2.shape[stack_dim:])
+                                                 )
         return SparseArray.from_data(
             (vals, inds),
             shape=shp
         )
-    def __mul__(self, other)->'DensePolynomial':
+
+    def __mul__(self, other) -> 'DensePolynomial':
+        """
+        **LLM Docstring**
+
+        Multiply this polynomial by another (convolving their coefficient tensors) or by
+        a scalar.
+
+        :param other: the multiplier polynomial or scalar
+        :return: the product polynomial (or `0`/`self` for the scalar special cases)
+        :rtype: DensePolynomial
+        """
         if isinstance(other, (int, float, np.integer, np.floating)):
             if other == 1:
                 return self
@@ -257,7 +525,7 @@ class DensePolynomial(AbstractPolynomial):
                 if isinstance(scs, np.ndarray):
                     new_coeffs = np.array([
                         scipy.signal.convolve(s, o)
-                        for s,o in zip(
+                        for s, o in zip(
                             scs.reshape((-1,) + scs.shape[sd:]),
                             ocs.reshape((-1,) + ocs.shape[sd:]),
                         )
@@ -284,9 +552,20 @@ class DensePolynomial(AbstractPolynomial):
             )
 
     def _force_consistent_addition_shapes(self, other):
+        """
+        **LLM Docstring**
+
+        Broadcast the two polynomials' stack shapes to a common shape ahead of addition,
+        returning their (possibly broadcast) coefficient tensors.
+
+        :param other: the other polynomial
+        :type other: DensePolynomial
+        :return: the two coefficient tensors
+        :rtype: tuple
+        """
         if self.shape[:self.stack_dim] != other.shape[:other.stack_dim]:
-            fcs = self.coeffs #type: np.ndarray | SparseArray
-            ocs = other.coeffs #type: np.ndarray | SparseArray
+            fcs = self.coeffs  # type: np.ndarray | SparseArray
+            ocs = other.coeffs  # type: np.ndarray | SparseArray
             bcast_shape = (np.zeros(self.shape[:self.stack_dim]) * np.zeros(other.shape[:other.stack_dim])).shape
             if isinstance(fcs, np.ndarray):
                 fcs = np.broadcast_to(fcs, bcast_shape + self.shape[self.stack_dim:])
@@ -300,16 +579,48 @@ class DensePolynomial(AbstractPolynomial):
             fcs = self.coeffs
             ocs = other.coeffs
         return fcs, ocs
+
     @staticmethod
-    def _enforce_ndarray_padding(fcs:np.ndarray, consistent_shape, pad_fcs, fc_padding):
+    def _enforce_ndarray_padding(fcs: np.ndarray, consistent_shape, pad_fcs, fc_padding):
+        """
+        **LLM Docstring**
+
+        Pad a dense coefficient tensor (expanding new axes as needed) up to a common
+        coordinate shape for addition.
+
+        :param fcs: the coefficient tensor
+        :type fcs: np.ndarray
+        :param consistent_shape: the target shape
+        :param pad_fcs: the tensor's current padded shape
+        :param fc_padding: the number of axes to add
+        :type fc_padding: int
+        :return: the padded tensor
+        :rtype: np.ndarray
+        """
         if fc_padding > 0:
             fcs = np.expand_dims(fcs, [-x for x in range(1, fc_padding + 1)])
         fcs = np.pad(fcs,
                      [[0, c - s] for c, s in zip(consistent_shape, pad_fcs)]
                      )
         return fcs
+
     @staticmethod
-    def _enforce_sparse_padding(fcs:SparseArray, consistent_shape, pad_fcs, fc_padding):
+    def _enforce_sparse_padding(fcs: SparseArray, consistent_shape, pad_fcs, fc_padding):
+        """
+        **LLM Docstring**
+
+        Pad a sparse coefficient tensor (expanding new axes as needed) up to a common
+        coordinate shape for addition.
+
+        :param fcs: the coefficient tensor
+        :type fcs: SparseArray
+        :param consistent_shape: the target shape
+        :param pad_fcs: the tensor's current padded shape
+        :param fc_padding: the number of axes to add
+        :type fc_padding: int
+        :return: the padded tensor
+        :rtype: SparseArray
+        """
         padding = [c - s for c, s in zip(consistent_shape, pad_fcs)]
         if fc_padding > 0:
             if np.sum(padding) == 0:
@@ -322,13 +633,40 @@ class DensePolynomial(AbstractPolynomial):
         elif np.sum(padding) > 0:
             fcs = fcs.pad_right(padding)
         return fcs
+
     @classmethod
     def _enforce_addition_padding(cls, fcs, consistent_shape, pad_fcs, fc_padding):
+        """
+        **LLM Docstring**
+
+        Pad a coefficient tensor (dense or sparse) to a common coordinate shape for
+        addition.
+
+        :param fcs: the coefficient tensor
+        :type fcs: np.ndarray | SparseArray
+        :param consistent_shape: the target shape
+        :param pad_fcs: the tensor's current padded shape
+        :param fc_padding: the number of axes to add
+        :type fc_padding: int
+        :return: the padded tensor
+        :rtype: np.ndarray | SparseArray
+        """
         if isinstance(fcs, np.ndarray):
             return cls._enforce_ndarray_padding(fcs, consistent_shape, pad_fcs, fc_padding)
         else:
             return cls._enforce_sparse_padding(fcs, consistent_shape, pad_fcs, fc_padding)
-    def __add__(self, other)->'DensePolynomial':
+
+    def __add__(self, other) -> 'DensePolynomial':
+        """
+        **LLM Docstring**
+
+        Add another polynomial (aligning and padding their coefficient tensors) or a
+        scalar (added to the constant term).
+
+        :param other: the addend polynomial or scalar
+        :return: the sum polynomial
+        :rtype: DensePolynomial
+        """
         if isinstance(other, DensePolynomial):
             stack_dim = max([self.stack_dim, other.stack_dim])
 
@@ -352,9 +690,9 @@ class DensePolynomial(AbstractPolynomial):
             try:
                 fcs + ocs * (other.scaling / self.scaling)
             except:
-                raise ValueError(fcs.shape, ocs.shape, (ocs*(other.scaling/self.scaling)).shape)
+                raise ValueError(fcs.shape, ocs.shape, (ocs * (other.scaling / self.scaling)).shape)
             return DensePolynomial(
-                fcs + ocs*(other.scaling/self.scaling),
+                fcs + ocs * (other.scaling / self.scaling),
                 shift=None,
                 stack_dim=stack_dim,
                 prefactor=self.scaling
@@ -375,7 +713,16 @@ class DensePolynomial(AbstractPolynomial):
                 stack_dim=self.stack_dim
             )
 
-    def shift(self, shift)->'DensePolynomial':
+    def shift(self, shift) -> 'DensePolynomial':
+        """
+        **LLM Docstring**
+
+        Return the polynomial with an added deferred variable shift (`p(x + shift)`).
+
+        :param shift: the per-variable shift (scalar or vector)
+        :return: the shifted polynomial
+        :rtype: DensePolynomial
+        """
         if not isinstance(shift, (int, np.integer, float, np.floating)):
             shift = np.asanyarray(shift)
         return DensePolynomial(
@@ -384,9 +731,26 @@ class DensePolynomial(AbstractPolynomial):
             prefactor=self._scaling,
             stack_dim=self.stack_dim
         )
+
     @classmethod
     def compute_shifted_coeffs(cls, poly_coeffs, shift, stack_dim=0):
-        #TODO: make this consistent with non-zero stack_dim
+        """
+        **LLM Docstring**
+
+        Compute the coefficient tensor of a polynomial after a variable shift
+        (`p(x + shift)`), via a factorial-weighted convolution of the coefficients with
+        the shift powers (a Taylor re-expansion).
+
+        :param poly_coeffs: the original coefficient tensor
+        :type poly_coeffs: np.ndarray
+        :param shift: the per-variable shift
+        :type shift: np.ndarray | float
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :return: the shifted coefficient tensor
+        :rtype: np.ndarray
+        """
+        # TODO: make this consistent with non-zero stack_dim
 
         # if fourier_coeffs is None:
         #     raise ValueError("need fourier coeffs for shifted coeff calc")
@@ -400,7 +764,7 @@ class DensePolynomial(AbstractPolynomial):
 
         # handle broadcasting of shift
         if stack_dim > 0 and shift.ndim == 1 and shift.shape[0] == poly_dim:
-            shift = np.expand_dims(shift, list(range(0, stack_dim)))#[0]*stack_dim)
+            shift = np.expand_dims(shift, list(range(0, stack_dim)))  # [0]*stack_dim)
         shift = np.broadcast_to(shift, stack_shape + (poly_dim,))
 
         # factorial outer product
@@ -408,7 +772,7 @@ class DensePolynomial(AbstractPolynomial):
         for s in poly_shape[1:]:
             factorial_terms = np.expand_dims(factorial_terms, -1) * np.reshape(
                 np.array([math.factorial(x) for x in range(s)]),
-                [1]*factorial_terms.ndim + [s]
+                [1] * factorial_terms.ndim + [s]
             )
         if stack_dim > 0:
             factorial_terms = np.broadcast_to(
@@ -422,10 +786,10 @@ class DensePolynomial(AbstractPolynomial):
                 shift[0][..., np.newaxis],
                 np.expand_dims(np.arange(poly_shape[0]), list(range(0, stack_dim)))
             )
-            for f,s in zip(shift[1:], poly_shape[1:]):
+            for f, s in zip(shift[1:], poly_shape[1:]):
                 shift_terms = np.expand_dims(shift_terms, -1) * np.reshape(
                     np.power(f[..., np.newaxis], np.expand_dims(np.arange(s), list(range(0, stack_dim)))),
-                    stack_shape + (1,)*(shift_terms.ndim - stack_dim) + (s,)
+                    stack_shape + (1,) * (shift_terms.ndim - stack_dim) + (s,)
                 )
         else:
             shift_terms = np.power(shift[0], np.arange(poly_shape[0]))
@@ -438,8 +802,8 @@ class DensePolynomial(AbstractPolynomial):
         # build shifted polynomial coefficients
         rev_fac = factorial_terms
         for i in range(factorial_terms.ndim - stack_dim):
-            rev_fac = np.flip(rev_fac, axis=stack_dim+i)
-            shift_terms = np.flip(shift_terms, axis=stack_dim+i)
+            rev_fac = np.flip(rev_fac, axis=stack_dim + i)
+            shift_terms = np.flip(shift_terms, axis=stack_dim + i)
 
         poly_terms = poly_coeffs * factorial_terms
         shift_terms = shift_terms / rev_fac
@@ -455,9 +819,9 @@ class DensePolynomial(AbstractPolynomial):
             if stack_dim > 0:
                 new = np.array([
                     scipy.signal.convolve(p, s)
-                    for p,s in zip(
-                        poly_terms.reshape((-1,)+poly_shape),
-                        shift_terms.reshape((-1,)+poly_shape)
+                    for p, s in zip(
+                        poly_terms.reshape((-1,) + poly_shape),
+                        shift_terms.reshape((-1,) + poly_shape)
                     )
                 ])
                 new = new.reshape(stack_shape + new.shape[1:])
@@ -468,17 +832,37 @@ class DensePolynomial(AbstractPolynomial):
                 )
 
             # stack_slice = (slice(None),)*stack_dim
-            for i,s in enumerate(poly_shape):
-                new = np.take(new, np.arange(-s, 0), axis=stack_dim+i)
+            for i, s in enumerate(poly_shape):
+                new = np.take(new, np.arange(-s, 0), axis=stack_dim + i)
             new = new / factorial_terms
         else:
             raise NotImplementedError(...)
-
 
         return new
 
     @classmethod
     def fill_tensors(self, tensors, idx, value, stack_dim, pcache, permute, rescale):
+        """
+        **LLM Docstring**
+
+        Scatter a single coefficient value into the per-order derivative tensors,
+        filling every index permutation (optionally rescaling by the permutation count)
+        so the resulting tensors are symmetric.
+
+        :param tensors: the per-order tensors being filled (modified in place)
+        :type tensors: list
+        :param idx: the coefficient's power index (with any stack prefix)
+        :type idx: tuple
+        :param value: the coefficient value
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :param pcache: a cache of index permutations
+        :type pcache: dict
+        :param permute: fill all index permutations
+        :type permute: bool
+        :param rescale: divide the value across its permutations
+        :type rescale: bool
+        """
         # we compute the order of the index, compute the number of
         # permutations of the index, and then set all of the permutations
         # equal to the value divided by the number of perms
@@ -514,8 +898,28 @@ class DensePolynomial(AbstractPolynomial):
                 bcast_idx = tuple(np.full(nels, i, dtype=int) for i in extra_idx)
                 fp_inds = bcast_idx + fp_inds
             tensors[order][fp_inds] = subvalue
+
     @classmethod
     def extract_tensors(cls, coeffs, stack_dim=None, permute=True, rescale=True, cutoff=1e-15):
+        """
+        **LLM Docstring**
+
+        Decompose a coefficient tensor into a list of per-order (symmetric) derivative
+        tensors, scattering each nonzero coefficient across its index permutations.
+
+        :param coeffs: the coefficient tensor (dense or sparse)
+        :type coeffs: np.ndarray | SparseArray
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int | None
+        :param permute: fill all index permutations
+        :type permute: bool
+        :param rescale: divide each value across its permutations
+        :type rescale: bool
+        :param cutoff: the magnitude below which dense entries are treated as zero
+        :type cutoff: float
+        :return: the per-order tensors (index 0 is the constant term)
+        :rtype: list
+        """
         if stack_dim is None:
             stack_dim = 0
             stack_shape = ()
@@ -541,7 +945,7 @@ class DensePolynomial(AbstractPolynomial):
         pcache = {}
 
         if isinstance(coeffs, np.ndarray):
-            for idx in zip(*nz_pos): # TODO: speed this up...
+            for idx in zip(*nz_pos):  # TODO: speed this up...
                 value = coeffs[idx]
                 cls.fill_tensors(tensors, idx, value, stack_dim, pcache, permute, rescale)
         else:
@@ -551,8 +955,25 @@ class DensePolynomial(AbstractPolynomial):
                 cls.fill_tensors(tensors, idx, value, stack_dim, pcache, permute, rescale)
 
         return tensors
+
     @classmethod
     def condense_tensors(cls, tensors, rescale=True, allow_sparse=True):
+        """
+        **LLM Docstring**
+
+        Collapse a list of per-order derivative tensors back into a single (dense or
+        sparse) coefficient tensor, choosing a sparse representation when the density is
+        low.
+
+        :param tensors: the per-order tensors
+        :type tensors: list
+        :param rescale: multiply each entry by its permutation count
+        :type rescale: bool
+        :param allow_sparse: allow returning a `SparseArray` when sparse enough
+        :type allow_sparse: bool
+        :return: `(coefficient_tensor, stack_dim)`
+        :rtype: tuple
+        """
         # we'll be a bit slower here in constructing so we can make sure
         # we get the smallest tensor
 
@@ -572,15 +993,15 @@ class DensePolynomial(AbstractPolynomial):
         tensor_elems = {}
         shape = [1] * ncoord
         # we could be more efficient through where tricks if we wanted
-        for o,t in enumerate(tensors):
+        for o, t in enumerate(tensors):
             if o == 0:
                 for idx in zip(*np.where(t != 0)):
-                    tidx = idx + (0,)*ncoord
+                    tidx = idx + (0,) * ncoord
                     tensor_elems[tidx] = t[idx]
             else:
                 utri_pos = tuple(np.array(list(it.combinations_with_replacement(range(ncoord), r=o))).T)
                 if stack_dim > 0:
-                    utri_pos = (slice(None),)*stack_dim + utri_pos
+                    utri_pos = (slice(None),) * stack_dim + utri_pos
                 vals = t[utri_pos]
                 nz_pos = np.where(vals != 0)
                 for p in zip(*nz_pos):
@@ -612,56 +1033,111 @@ class DensePolynomial(AbstractPolynomial):
             )
         else:
             condensed_tensor = np.zeros(shp)
-            for idx,val in tensor_elems.items():
+            for idx, val in tensor_elems.items():
                 condensed_tensor[idx] = val
         return condensed_tensor, stack_dim
 
     @property
     def coefficient_tensors(self):
+        """
+        **LLM Docstring**
+
+        The per-order (permutation-rescaled) derivative tensors of the polynomial,
+        computed lazily.
+
+        :return: the per-order coefficient tensors
+        :rtype: list
+        """
         if self._coeff_tensors is None:
             self._coeff_tensors = self.extract_tensors(self.coeffs, stack_dim=self.stack_dim)
         return self._coeff_tensors
+
     @property
     def unscaled_coefficient_tensors(self):
+        """
+        **LLM Docstring**
+
+        The per-order derivative tensors without permutation rescaling, computed lazily.
+
+        :return: the per-order unscaled coefficient tensors
+        :rtype: list
+        """
         if self._uc_tensors is None:
             self._uc_tensors = self.extract_tensors(self.coeffs, rescale=False, stack_dim=self.stack_dim)
         return self._uc_tensors
+
     def transform(self, lin_transf):
         """
         Applies (for now) a linear transformation to the polynomial
         """
-        #TODO: make this consistent with non-zero stack_dim
+        # TODO: make this consistent with non-zero stack_dim
         if self.stack_dim != 0:
             raise NotImplementedError("need to make work with non-zero stack dims")
 
         tensors = self.coefficient_tensors
         transf_tensors = []
-        for n,t in enumerate(tensors):
+        for n, t in enumerate(tensors):
             for ax in range(n):
-                t = np.tensordot(lin_transf, t, axes=[1, n-1])
+                t = np.tensordot(lin_transf, t, axes=[1, n - 1])
             transf_tensors.append(t)
         new = self.condense_tensors(transf_tensors)
         return DensePolynomial(new)
 
     def outer(self, other):
+        """
+        **LLM Docstring**
+
+        Form the outer-product polynomial of this one with another coefficient tensor
+        (no stack dimensions supported).
+
+        :param other: the other polynomial/coefficients
+        :return: the outer-product polynomial
+        :rtype: DensePolynomial
+        """
         if self.stack_dim != 0 or other.stack_dim != 0:
             raise NotImplementedError("need to make work with non-zero stack dims")
         return DensePolynomial(
             np.multiply.outer(self.coeffs, other),
-            prefactor=self.scaling*other.scaling
+            prefactor=self.scaling * other.scaling
         )
 
     @classmethod
     def _coord_deriv(cls, coeffs, coord, stack_dim):
+        """
+        **LLM Docstring**
+
+        Differentiate a coefficient tensor once with respect to one coordinate (power
+        down-shift with the integer-power scaling).
+
+        :param coeffs: the coefficient tensor
+        :type coeffs: np.ndarray
+        :param coord: the coordinate index (relative to the coordinate axes)
+        :type coord: int
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :return: the differentiated coefficients (or `0` if constant in that coordinate)
+        :rtype: np.ndarray | int
+        """
         coord = coord + stack_dim
         if coeffs.shape[coord] == 1:
             return 0
         n = coeffs.shape[coord]
         scaling = np.arange(1, n)
-        scaling = np.expand_dims(scaling, list(range(coord)) + list(range(coord+1, coeffs.ndim)))
+        scaling = np.expand_dims(scaling, list(range(coord)) + list(range(coord + 1, coeffs.ndim)))
         new_coeffs = scaling * np.take(coeffs, np.arange(1, n), axis=coord)
         return new_coeffs
+
     def deriv(self, coord):
+        """
+        **LLM Docstring**
+
+        Differentiate the polynomial with respect to one coordinate.
+
+        :param coord: the coordinate index
+        :type coord: int
+        :return: the derivative polynomial (or `0` if constant in that coordinate)
+        :rtype: DensePolynomial | int
+        """
         if self._poly_coeffs.shape[self.stack_dim + coord] == 1:
             return 0
         new_coeffs = self._coord_deriv(self.coeffs, coord, self.stack_dim)
@@ -672,7 +1148,24 @@ class DensePolynomial(AbstractPolynomial):
         )
 
     @classmethod
-    def _apply_dense_grad(cls, coeffs, stack_dim ,shape, n, c):
+    def _apply_dense_grad(cls, coeffs, stack_dim, shape, n, c):
+        """
+        **LLM Docstring**
+
+        Build the gradient of a dense coefficient tensor: a new leading axis holding the
+        derivative with respect to each coordinate.
+
+        :param coeffs: the coefficient tensor
+        :type coeffs: np.ndarray
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :param shape: the coefficient shape
+        :param n: the number of coordinates
+        :type n: int
+        :param c: the per-coordinate shape
+        :return: the gradient coefficient tensor
+        :rtype: np.ndarray
+        """
         new_shape = shape[:stack_dim] + (n,) + c
         new_coeffs = np.zeros(new_shape)
         for i in range(n):
@@ -695,9 +1188,25 @@ class DensePolynomial(AbstractPolynomial):
 
     @classmethod
     def _take_sparse_position_derivs(cls, stack_dim, axis, nzvals, nzinds):
+        """
+        **LLM Docstring**
+
+        Differentiate the sparse coefficient data with respect to one coordinate,
+        dropping the zero-power terms and applying the integer-power scaling.
+
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :param axis: the coordinate axis (relative to the coordinate axes)
+        :type axis: int
+        :param nzvals: the nonzero values
+        :type nzvals: np.ndarray
+        :param nzinds: the nonzero indices (one array per axis)
+        :return: the differentiated `(values, indices)`, or `0` if constant
+        :rtype: tuple | int
+        """
         axis = axis + stack_dim
         ax_inds = nzinds[axis]
-        if np.sum(ax_inds) == 0: return 0 # quick fall through
+        if np.sum(ax_inds) == 0: return 0  # quick fall through
         good_pos = np.where(ax_inds > 0)
         nzvals = nzvals[good_pos]
         ax_inds = ax_inds[good_pos]
@@ -705,19 +1214,37 @@ class DensePolynomial(AbstractPolynomial):
         nzvals = nzvals * ax_inds
         nzinds = tuple(
             nzinds[i][good_pos]
-                if i != axis else
+            if i != axis else
             new_ax
             for i in range(len(nzinds))
         )
         return nzvals, nzinds
+
     @classmethod
-    def _apply_sparse_grad(cls, coeffs:SparseArray, stack_dim, shape, n, c):
+    def _apply_sparse_grad(cls, coeffs: SparseArray, stack_dim, shape, n, c):
+        """
+        **LLM Docstring**
+
+        Build the gradient of a sparse coefficient tensor by differentiating along each
+        coordinate and stacking the results under a new leading axis.
+
+        :param coeffs: the coefficient tensor
+        :type coeffs: SparseArray
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :param shape: the coefficient shape
+        :param n: the number of coordinates
+        :type n: int
+        :param c: the per-coordinate shape
+        :return: the gradient coefficient tensor
+        :rtype: SparseArray
+        """
         block_vals, block_inds = coeffs.block_data
         new_stuff = [
             cls._take_sparse_position_derivs(stack_dim, i, block_vals, block_inds)
             for i in range(n)
         ]
-        if all(isinstance(x, int) and x==0 for x in new_stuff):
+        if all(isinstance(x, int) and x == 0 for x in new_stuff):
             return SparseArray.empty(shape[:stack_dim] + (n,))
 
         final_vals = np.concatenate([
@@ -733,7 +1260,7 @@ class DensePolynomial(AbstractPolynomial):
         )
         new_inds = np.concatenate([
             np.full(len(vals_inds[0]), i, dtype='uint8')
-            for i,vals_inds in enumerate(new_stuff)
+            for i, vals_inds in enumerate(new_stuff)
             if not (isinstance(vals_inds, int) and vals_inds == 0)
         ])
         rem_inds = tuple(
@@ -756,6 +1283,18 @@ class DensePolynomial(AbstractPolynomial):
 
     @classmethod
     def _apply_grad(cls, coeffs, stack_dim):
+        """
+        **LLM Docstring**
+
+        Build the gradient coefficient tensor (dense or sparse) of a coefficient tensor.
+
+        :param coeffs: the coefficient tensor
+        :type coeffs: np.ndarray | SparseArray
+        :param stack_dim: the number of leading stack axes
+        :type stack_dim: int
+        :return: the gradient coefficient tensor
+        :rtype: np.ndarray | SparseArray
+        """
         shape = coeffs.shape
         n = coeffs.ndim - stack_dim
         c = shape[stack_dim:]
@@ -768,14 +1307,34 @@ class DensePolynomial(AbstractPolynomial):
         return new_coeffs
 
     def grad(self):
+        """
+        **LLM Docstring**
+
+        Return the gradient polynomial, whose leading stack axis indexes the derivative
+        with respect to each coordinate.
+
+        :return: the gradient polynomial
+        :rtype: DensePolynomial
+        """
 
         return DensePolynomial(
             self._apply_grad(self.coeffs, self.stack_dim),
             prefactor=self._scaling,
-            stack_dim=self.stack_dim+1
+            stack_dim=self.stack_dim + 1
         )
 
     def clip(self, threshold=1e-15):
+        """
+        **LLM Docstring**
+
+        Drop coefficients below a magnitude threshold, returning a trimmed polynomial
+        (or `0` if everything is clipped).
+
+        :param threshold: the magnitude cutoff
+        :type threshold: float
+        :return: the clipped polynomial (or `0`)
+        :rtype: DensePolynomial | int
+        """
         clipped_inds = np.where(np.abs(self.coeffs * self.scaling) > threshold)
         if len(clipped_inds) == 0 or len(clipped_inds[0]) == 0:
             return 0
@@ -789,19 +1348,47 @@ class DensePolynomial(AbstractPolynomial):
         )
 
     def make_sparse_backed(self, threshold=1e-15):
+        """
+        **LLM Docstring**
+
+        Return an equivalent polynomial whose coefficients are stored as a `SparseArray`
+        (after clipping small entries).
+
+        :param threshold: the clipping magnitude cutoff
+        :type threshold: float
+        :return: the sparse-backed polynomial
+        :rtype: DensePolynomial
+        """
         base = SparseArray.from_data(self.clip(threshold).coeffs)
         return type(self)(
             base,
             prefactor=self._scaling,
             stack_dim=self.stack_dim
         )
-    
+
+
 class SparsePolynomial(AbstractPolynomial):
     """
     A semi-symbolic representation of a polynomial of tensor
     coefficients
     """
-    def __init__(self, terms:dict, prefactor=1, ndim=None, canonicalize=True):
+
+    def __init__(self, terms: dict, prefactor=1, ndim=None, canonicalize=True):
+        """
+        **LLM Docstring**
+
+        Build a semi-symbolic sparse polynomial from a `{sorted_index_tuple: coefficient}`
+        term mapping.
+
+        :param terms: the term mapping (keys are sorted variable-index tuples)
+        :type terms: dict
+        :param prefactor: an overall scalar multiplier
+        :type prefactor: float
+        :param ndim: the number of variables (inferred if omitted)
+        :type ndim: int | None
+        :param canonicalize: accepted for interface parity
+        :type canonicalize: bool
+        """
         self.terms = terms
         self.prefactor = prefactor
         self._ndim = ndim
@@ -809,24 +1396,81 @@ class SparsePolynomial(AbstractPolynomial):
 
     @property
     def scaling(self):
+        """
+        **LLM Docstring**
+
+        The overall scalar prefactor (1 when unset). Setting it stores a new prefactor.
+
+        :return: the scaling factor
+        :rtype: float
+        """
         return 1 if self.prefactor is None else self.prefactor
+
     @scaling.setter
     def scaling(self, s):
+        """
+        **LLM Docstring**
+
+        The overall scalar prefactor (1 when unset). Setting it stores a new prefactor.
+
+        :return: the scaling factor
+        :rtype: float
+        """
         self.prefactor = s
 
     def expand(self):
+        """
+        **LLM Docstring**
+
+        Fold the prefactor into the term coefficients, returning an equivalent polynomial
+        with unit prefactor.
+
+        :return: the expanded polynomial
+        :rtype: SparsePolynomial
+        """
         if self.prefactor == 1:
             return self
         else:
-            return type(self)({k:self.prefactor*v for k,v in self.terms.items()}, prefactor=1,
+            return type(self)({k: self.prefactor * v for k, v in self.terms.items()}, prefactor=1,
                               canonicalize=False)
+
     @classmethod
     def monomial(cls, idx, value=1):
-        return cls({idx:value})
+        """
+        **LLM Docstring**
+
+        Build a single-term polynomial for the monomial at the given index.
+
+        :param idx: the monomial's variable-index tuple
+        :type idx: tuple
+        :param value: the coefficient
+        :return: the monomial polynomial
+        :rtype: SparsePolynomial
+        """
+        return cls({idx: value})
+
     def __repr__(self):
-        return "{}({},{})".format(type(self).__name__, self.terms,self.prefactor)
+        """
+        **LLM Docstring**
+
+        Return a representation showing the terms and prefactor.
+
+        :return: the representation
+        :rtype: str
+        """
+        return "{}({},{})".format(type(self).__name__, self.terms, self.prefactor)
 
     def __mul__(self, other):
+        """
+        **LLM Docstring**
+
+        Multiply by another sparse polynomial (merging index tuples and summing
+        coefficients) or by a scalar.
+
+        :param other: the multiplier polynomial or scalar
+        :return: the product polynomial
+        :rtype: SparsePolynomial
+        """
         if isinstance(other, (int, float, np.integer, np.floating)):
             if other == 1:
                 return self
@@ -834,25 +1478,36 @@ class SparsePolynomial(AbstractPolynomial):
                 return SparsePolynomial({})
         if isinstance(other, SparsePolynomial):
             new_terms = {}
-            for k,v in other.terms.items():
-                for k2,v2 in self.terms.items():
+            for k, v in other.terms.items():
+                for k2, v2 in self.terms.items():
                     t = tuple(sorted(k + k2))
                     new_terms[t] = new_terms.get(t, 0) + v * v2
                     if new_terms[t] == 0:
                         del new_terms[t]
-            return type(self)(new_terms, prefactor=self.prefactor*other.prefactor)
+            return type(self)(new_terms, prefactor=self.prefactor * other.prefactor)
         else:
-            return type(self)(self.terms, prefactor=self.prefactor*other)
+            return type(self)(self.terms, prefactor=self.prefactor * other)
             # new_terms = {}
             # for k,v in self.terms.items():
             #     new_terms[k] = self.prefactor*other*v
             # return SparsePolynomial(new_terms)
+
     def __add__(self, other):
+        """
+        **LLM Docstring**
+
+        Add another sparse polynomial (merging matching terms) or a scalar (added to the
+        constant term).
+
+        :param other: the addend polynomial or scalar
+        :return: the sum polynomial (or `0` if everything cancels)
+        :rtype: SparsePolynomial | int
+        """
         if isinstance(other, (int, float, np.integer, np.floating)):
             if other == 0:
                 return self
             else:
-                return self + type(self)({():other})
+                return self + type(self)({(): other})
         else:
             self = self.expand()
             new_terms = {}
@@ -879,8 +1534,23 @@ class SparsePolynomial(AbstractPolynomial):
 
     @classmethod
     def _to_tensor_idx(cls, term, ndim, tupleate=True):
+        """
+        **LLM Docstring**
+
+        Convert a sorted variable-index term into a per-variable power tuple (or array)
+        of length `ndim`.
+
+        :param term: the sorted variable-index tuple
+        :type term: tuple
+        :param ndim: the number of variables
+        :type ndim: int
+        :param tupleate: return a tuple rather than an array
+        :type tupleate: bool
+        :return: the per-variable power index
+        :rtype: tuple | np.ndarray
+        """
         base = np.zeros(ndim, dtype=int)
-        for idx, cnt in zip(*np.unique(term, return_counts=True)): #TODO: kinda dumb to do this 2x but w/e
+        for idx, cnt in zip(*np.unique(term, return_counts=True)):  # TODO: kinda dumb to do this 2x but w/e
             base[idx] = cnt
         if tupleate:
             return tuple(base)
@@ -892,20 +1562,40 @@ class SparsePolynomial(AbstractPolynomial):
         #     m = max(m, t)
         #     idx_terms[t] = idx_terms.get(t, 0) + 1
         # return tuple(idx_terms[t] for t in range(m))
+
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        The dense coefficient shape implied by the terms (per-variable max power + 1),
+        computed lazily.
+
+        :return: the dense shape
+        :rtype: tuple
+        """
         if self._shape is None:
             max_dims = {}
             for t in self.terms.keys():
-                for idx,cnt in zip(*np.unique(t, return_counts=True)): # can I assume sorted?
+                for idx, cnt in zip(*np.unique(t, return_counts=True)):  # can I assume sorted?
                     max_dims[idx] = max(max_dims.get(idx, 1), cnt + 1)
             if self._ndim is None:
                 max_key = max(list(max_dims.keys()))
             else:
                 max_key = self._ndim - 1
-            self._shape = tuple(max_dims.get(k, 1) for k in range(max_key+1))
+            self._shape = tuple(max_dims.get(k, 1) for k in range(max_key + 1))
         return self._shape
-    def as_dense(self)->DensePolynomial:
+
+    def as_dense(self) -> DensePolynomial:
+        """
+        **LLM Docstring**
+
+        Convert to an equivalent `DensePolynomial`, filling a dense coefficient tensor
+        from the terms.
+
+        :return: the dense polynomial
+        :rtype: DensePolynomial
+        """
         new_coeffs = np.zeros(self.shape)
         ndim = new_coeffs.ndim
         for key, val in self.terms.items():
@@ -929,39 +1619,51 @@ class SparsePolynomial(AbstractPolynomial):
 
         max_dim = np.max(term_vector)
         if max_dim == 0:
-            return {():1}
-        bin_mat = Binomial(np.max(term_vector)+1)
-        inds = np.moveaxis(np.indices(term_vector+1), 0, -1).reshape(-1, term_vector.shape[0])
+            return {(): 1}
+        bin_mat = Binomial(np.max(term_vector) + 1)
+        inds = np.moveaxis(np.indices(term_vector + 1), 0, -1).reshape(-1, term_vector.shape[0])
         rp_binoms = bin_mat[term_vector[np.newaxis, :], inds]
         term_diffs = term_vector[np.newaxis, :] - inds
         rp_shifts = shift_vector[np.newaxis, :] ** term_diffs
         # rp_binoms[:, term_vector == 0] = 0 # shift shouldn't contribute here
 
         new_terms = {}
-        full_terms = np.prod(rp_shifts*rp_binoms, axis=-1)
+        full_terms = np.prod(rp_shifts * rp_binoms, axis=-1)
         for idx, t in zip(inds, full_terms):
-            key = sum(( (i,)*n for i,n in enumerate(idx) ), ())
+            key = sum(((i,) * n for i, n in enumerate(idx)), ())
             new_terms[key] = t
 
         return new_terms
-    def shift(self, shift)->'SparsePolynomial':
+
+    def shift(self, shift) -> 'SparsePolynomial':
+        """
+        **LLM Docstring**
+
+        Return the polynomial shifted in its variables (`p(x + shift)`), expanding each
+        term via the binomial theorem.
+
+        :param shift: the per-variable shift
+        :type shift: np.ndarray
+        :return: the shifted polynomial
+        :rtype: SparsePolynomial
+        """
         shift = np.asanyarray(shift)
 
         new_terms = {}
         ndim = len(self.shape)
-        for term,scaling in self.terms.items():
+        for term, scaling in self.terms.items():
             idx = self._to_tensor_idx(term, ndim, tupleate=False)
             # print(ndim, idx, term)
             subterms = self._get_sparse_shift_terms(idx, shift)
             # print(scaling, subterms)
             for s in subterms.keys() & new_terms.keys():
-                v = scaling*subterms[s]
+                v = scaling * subterms[s]
                 v2 = new_terms[s]
                 new = v + v2
                 if new != 0:
                     new_terms[s] = new
             for o in subterms.keys() - new_terms.keys():
-                new_terms[o] = scaling*subterms[o]
+                new_terms[o] = scaling * subterms[o]
             for o in new_terms.keys() - subterms.keys():
                 new_terms[o] = new_terms[o]
 
@@ -974,9 +1676,22 @@ class SparsePolynomial(AbstractPolynomial):
 
 class PureMonicPolynomial(SparsePolynomial):
     def __init__(self, terms: dict, prefactor=1, canonicalize=True):
+        """
+        **LLM Docstring**
+
+        Build a monic-monomial polynomial from a term mapping, canonicalizing (and
+        merging) the monomial keys by default.
+
+        :param terms: the `{monomial_key_tuple: coefficient}` mapping
+        :type terms: dict
+        :param prefactor: an overall scalar multiplier
+        :type prefactor: float
+        :param canonicalize: canonicalize and merge the keys
+        :type canonicalize: bool
+        """
         if canonicalize:
             new_terms = {}
-            for k,v in terms.items():
+            for k, v in terms.items():
                 k = self.canonical_key(k)
                 new_terms[k] = new_terms.get(k, 0) + v
             terms = new_terms
@@ -984,18 +1699,63 @@ class PureMonicPolynomial(SparsePolynomial):
 
     @property
     def shape(self):
+        """
+        **LLM Docstring**
+
+        Not supported: monic-monomial polynomials have no dense counterpart.
+
+        :raises ValueError: always
+        """
         raise ValueError("{} doesn't have a dense counterpart".format(type(self).__name__))
+
     def as_dense(self):
+        """
+        **LLM Docstring**
+
+        Not supported: monic-monomial polynomials have no dense counterpart.
+
+        :raises ValueError: always
+        """
         raise ValueError("{} doesn't have a dense counterpart".format(type(self).__name__))
+
     def shift(self, shift) -> DensePolynomial:
+        """
+        **LLM Docstring**
+
+        Not supported: monic-monomial polynomials have no dense counterpart.
+
+        :param shift: the (ignored) shift
+        :raises ValueError: always
+        """
         raise ValueError("{} doesn't have a dense counterpart".format(type(self).__name__))
 
     @classmethod
     def monomial(cls, idx, value=1):
+        """
+        **LLM Docstring**
+
+        Build a single-term polynomial for one monomial key.
+
+        :param idx: the monomial key
+        :param value: the coefficient
+        :return: the monomial polynomial
+        :rtype: PureMonicPolynomial
+        """
         return cls({(idx,): value})
 
     @classmethod
     def key_hash(cls, monomial_tuple):
+        """
+        **LLM Docstring**
+
+        Cheap order-independent hash of a monomial key (sum of the per-index hashes),
+        used to quickly test key equivalence.
+
+        :param monomial_tuple: the monomial key
+        :type monomial_tuple: tuple
+        :return: the hash
+        :rtype: int
+        """
         # hashes tuples of indices to give a fast check that the tuples
         # are the same independent of ordering
         return sum(hash(x) for x in monomial_tuple)
@@ -1003,9 +1763,34 @@ class PureMonicPolynomial(SparsePolynomial):
     @classmethod
     @abc.abstractmethod
     def canonical_key(cls, monomial_tuple):
+        """
+        **LLM Docstring**
+
+        Abstract: put a monomial key into canonical (sorted) form so equivalent keys
+        compare equal.
+
+        :param monomial_tuple: the monomial key
+        :type monomial_tuple: tuple
+        :return: the canonicalized key
+        :rtype: tuple
+        """
         raise NotImplementedError("{} is abstract".format(cls.__name__))
 
     def direct_multiproduct(self, other, key_value_generator):
+        """
+        **LLM Docstring**
+
+        Multiply with another monic polynomial using a generator that yields the
+        `(key, value)` contributions for each pair of terms, merging canonicalized keys.
+
+        :param other: the other polynomial
+        :type other: PureMonicPolynomial
+        :param key_value_generator: yields `(key, value)` pairs for each term pair
+        :type key_value_generator: Callable
+        :return: the product polynomial
+        :rtype: PureMonicPolynomial
+        :raises TypeError: if `other` isn't a monic polynomial
+        """
         if not isinstance(other, PureMonicPolynomial):
             raise TypeError("doesn't make sense")
 
@@ -1022,7 +1807,7 @@ class PureMonicPolynomial(SparsePolynomial):
                     # else:
                     #     t = self.canonical_key(k3)  # construct new tuple and canonicalize
                     #     term_hashes[new_hash] = t
-                    t = self.canonical_key(k3) # caching this led to collisions, need better tuple hashes
+                    t = self.canonical_key(k3)  # caching this led to collisions, need better tuple hashes
                     new_terms[t] = new_terms.get(t, 0) + v3  # this is the case where after mult. two terms merge
                     if new_terms[t] == 0:
                         del new_terms[t]
@@ -1033,7 +1818,22 @@ class PureMonicPolynomial(SparsePolynomial):
         else:
             pref = self.prefactor * other.prefactor
         return type(self)(new_terms, prefactor=pref, canonicalize=False)
+
     def direct_product(self, other, key_func=None, mul=None):
+        """
+        **LLM Docstring**
+
+        Multiply with another monic polynomial (or scalar) using optional key-combining
+        and value-multiplying callbacks, merging canonicalized keys.
+
+        :param other: the other polynomial or a scalar
+        :param key_func: combines two keys into the product key (concatenation by default)
+        :type key_func: Callable | None
+        :param mul: multiplies two coefficients (ordinary product by default)
+        :type mul: Callable | None
+        :return: the product polynomial
+        :rtype: PureMonicPolynomial
+        """
         if isinstance(other, (int, float, np.integer, np.floating)):
             if other == 1:
                 return self
@@ -1069,12 +1869,31 @@ class PureMonicPolynomial(SparsePolynomial):
             return type(self)(self.terms, prefactor=self.prefactor*other if self.prefactor is not None else other, canonicalize=False)
 
     def rebuild(self, new_terms, prefactor=None, canonicalize=None):
+
+
+        :param new_terms: the new term mapping
+        :type canonicalize: bool | None
+        :return: the rebuilt polynomial
+        :rtype: PureMonicPolynomial
+        """
         return type(self)(new_terms,
                           prefactor=self.prefactor if prefactor is None else prefactor,
                           canonicalize=False if canonicalize is None else canonicalize
                           )
 
     def filter(self, keys, mode='match'):
+        """
+        **LLM Docstring**
+
+        Filter the polynomial's terms by their monomial keys under one of three modes.
+
+        :param keys: the keys to test against
+        :param mode: `'match'` (exact key sets), `'include'` (only these keys), or `'exclude'`
+        :type mode: str
+        :return: the filtered polynomial
+        :rtype: PureMonicPolynomial
+        :raises ValueError: for an unknown mode
+        """
         if mode == 'match':
             return self._filter_exact(keys)
         elif mode == 'include':
@@ -1084,6 +1903,16 @@ class PureMonicPolynomial(SparsePolynomial):
         else:
             raise ValueError("bad mode '{}'".format(mode))
     def _filter_exact(self, test_keys):
+        """
+        **LLM Docstring**
+
+        Keep only the terms that contain every key in one of the required key sets (with
+        multiplicity).
+
+        :param test_keys: the required key sets
+        :return: the filtered polynomial
+        :rtype: PureMonicPolynomial
+        """
         subterms = {}
         test_terms = self.terms
         for t, v in test_terms.items():
@@ -1100,6 +1929,15 @@ class PureMonicPolynomial(SparsePolynomial):
 
         return self.rebuild(subterms)
     def _filter_include(self, test_keys):
+        """
+        **LLM Docstring**
+
+        Keep only the terms whose monomial keys are all drawn from the allowed key set.
+
+        :param test_keys: the allowed keys
+        :return: the filtered polynomial
+        :rtype: PureMonicPolynomial
+        """
         subterms = {}
         test_terms = self.terms
         test_keys = set(test_keys)
@@ -1112,6 +1950,15 @@ class PureMonicPolynomial(SparsePolynomial):
 
         return self.rebuild(subterms)
     def _filter_exclude(self, test_keys):
+        """
+        **LLM Docstring**
+
+        Keep only the terms that contain none of the excluded keys.
+
+        :param test_keys: the excluded keys
+        :return: the filtered polynomial
+        :rtype: PureMonicPolynomial
+        """
         subterms = {}
         test_terms = self.terms
         test_keys = set(test_keys)
@@ -1125,6 +1972,15 @@ class PureMonicPolynomial(SparsePolynomial):
         return self.rebuild(subterms)
 
     def __mul__(self, other):
+        """
+        **LLM Docstring**
+
+        Multiply by another monic polynomial (or scalar) via `direct_product`.
+
+        :param other: the multiplier
+        :return: the product polynomial
+        :rtype: PureMonicPolynomial
+        """
         return self.direct_product(other)
 class TensorCoefficientPoly(PureMonicPolynomial):
     """
@@ -1134,6 +1990,17 @@ class TensorCoefficientPoly(PureMonicPolynomial):
 
     @classmethod
     def canonical_key(cls, monomial_tuple):
+        """
+        **LLM Docstring**
+
+        Canonicalize a monomial key of tensor-coefficient index tuples by grouping the
+        index tuples by length and sorting within each length group.
+
+        :param monomial_tuple: the monomial key (a tuple of index tuples)
+        :type monomial_tuple: tuple
+        :return: the canonicalized key
+        :rtype: tuple
+        """
         # we need a way to sort indices, which we do by grouping by key length,
         # doing a standard sort for each length, and reconcatenating
         s_groups = {}

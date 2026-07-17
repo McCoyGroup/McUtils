@@ -37,9 +37,33 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
     registry = {}
     @classmethod
     def register(cls, type, typename=None):
+        """
+        **LLM Docstring**
+
+        Register an `InternalCoordinateType` subclass under a dispatch name. Called with a string alone, this returns a decorator that assigns that name to the decorated class; otherwise it invalidates the cached dispatcher, stores the class in `registry`, and returns the class unchanged.
+
+        :param type: A coordinate class, or a registration name when using decorator form.
+        :type type: Any
+        :param typename: The registry key to assign to the coordinate class.
+        :type typename: Any
+        :return: The registered class, or a decorator awaiting the class.
+        :rtype: type | Callable[[type], type]
+        """
         if typename is None and isinstance(type, str):
             typename = type
             def register(type, typename=typename):
+                """
+                **LLM Docstring**
+
+                Assign the captured coordinate-type name to the decorated class and register that class with `InternalCoordinateType`.
+
+                :param type: A coordinate class, or a registration name when using decorator form.
+                :type type: Any
+                :param typename: The registry key to assign to the coordinate class.
+                :type typename: Any
+                :return: The registered coordinate class.
+                :rtype: type
+                """
                 type.name = typename
                 return cls.register(type, typename)
             return register
@@ -53,6 +77,14 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
     _dispatch = dev.uninitialized
     @classmethod
     def get_dispatch(cls) -> dev.OptionsMethodDispatch:
+        """
+        **LLM Docstring**
+
+        Return the lazily constructed options dispatcher used to turn dictionaries containing a `type` key into registered coordinate classes and their constructor options.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: dev.OptionsMethodDispatch
+        """
         cls._dispatch = dev.handle_uninitialized(
             cls._dispatch,
             dev.OptionsMethodDispatch,
@@ -67,6 +99,16 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
 
     @classmethod
     def resolve(cls, input):
+        """
+        **LLM Docstring**
+
+        Convert either a typed option dictionary or a bare index sequence into an instantiated coordinate object. Dictionary inputs are dispatched by `type`; bare sequences are tested against each registered class with `could_be`, and an unmatched input raises `ValueError`.
+
+        :param input: A typed option mapping or bare coordinate-index sequence.
+        :type input: Any
+        :return: An instantiated registered coordinate object.
+        :rtype: InternalCoordinateType
+        """
         if isinstance(input, dict):
             type, opts = cls.get_dispatch().resolve(input)
             inds = opts.pop(type.name, None)
@@ -84,47 +126,175 @@ class InternalCoordinateType(metaclass=abc.ABCMeta):
 
     @classmethod
     def could_be(cls, input):
+        """
+        **LLM Docstring**
+
+        Report whether an input can represent this coordinate type. The base implementation always returns `False` and is intended to be overridden.
+
+        :param input: A typed option mapping or bare coordinate-index sequence.
+        :type input: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return False
 
     def equivalent_to(self, other):
+        """
+        **LLM Docstring**
+
+        Test whether two coordinates have the same concrete type and the same indices after each is put in canonical orientation.
+
+        :param other: The coordinate to compare against.
+        :type other: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return (
                 type(self) is type(other)
                 and self.canonicalize().get_indices() == other.canonicalize().get_indices()
         )
     def __eq__(self, other):
+        """
+        **LLM Docstring**
+
+        Compare coordinates using canonical coordinate equivalence rather than object identity.
+
+        :param other: The coordinate to compare against.
+        :type other: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return self.equivalent_to(other)
 
     @abc.abstractmethod
     def canonicalize(self):
+        """
+        **LLM Docstring**
+
+        Return an equivalent coordinate in the canonical index orientation defined by the concrete coordinate type.
+
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         ...
 
     @abc.abstractmethod
     def get_indices(self) -> Tuple[int, ...]:
+        """
+        **LLM Docstring**
+
+        Return the atom indices that define this internal coordinate, in the type-specific ordering.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Tuple[int, ...]
+        """
         ...
 
     def __hash__(self):
+        """
+        **LLM Docstring**
+
+        Hash the coordinate from its concrete class and stored index tuple so it can be used as a dictionary key or set member.
+
+        :return: The coordinate hash value.
+        :rtype: int
+        """
         return hash((type(self), self.get_indices()))
     @abc.abstractmethod
     def reindex(self, reindexing):
+        """
+        **LLM Docstring**
+
+        Return the same coordinate expressed under a supplied old-index to new-index mapping.
+
+        :param reindexing: A mapping from existing atom indices to replacement indices.
+        :type reindexing: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         ...
 
     @abc.abstractmethod
     def get_carried_atoms(self, context:InternalSpec):
+        """
+        **LLM Docstring**
+
+        Determine the atom groups displaced on the two sides of this coordinate when it is varied in an `InternalSpec`.
+
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: InternalSpec
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         ...
 
     @abc.abstractmethod
     def get_constraint_rads(self) -> list[Distance|Angle|Dihedral]:
+        """
+        **LLM Docstring**
+
+        Return the primitive distance, angle, or dihedral coordinates that must remain available to constrain this coordinate.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: list[Distance | Angle | Dihedral]
+        """
         ...
 
     @abc.abstractmethod
     def get_expansion(self, coords, order=None, **opts) -> List[np.ndarray]:
+        """
+        **LLM Docstring**
+
+        Evaluate Cartesian derivatives of this internal coordinate through the requested order.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: List[np.ndarray]
+        """
         ...
 
     @abc.abstractmethod
     def get_inverse_expansion(self, coords, order=None, moved_indices=None, **opts) -> List[np.ndarray]:
+        """
+        **LLM Docstring**
+
+        Evaluate derivatives of the Cartesian displacement generated by changing this internal coordinate, optionally restricted to selected moved atoms.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param moved_indices: Explicit pair of atom groups moved on the two sides of a coordinate.
+        :type moved_indices: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: List[np.ndarray]
+        """
         ...
 
     def _prep_left_right_atoms(self, context, moved_indices, left_atoms, right_atoms):
+        """
+        **LLM Docstring**
+
+        Resolve the two moved-atom groups used by inverse expansions. Explicit `left_atoms` and `right_atoms` take precedence; otherwise `moved_indices` is unpacked, or the groups are inferred from the coordinate graph in `context`.
+
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: Any
+        :param moved_indices: Explicit pair of atom groups moved on the two sides of a coordinate.
+        :type moved_indices: Any
+        :param left_atoms: Atoms assigned to the first side of the displacement.
+        :type left_atoms: Any
+        :param right_atoms: Atoms assigned to the second side of the displacement.
+        :type right_atoms: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if moved_indices is not None:
             left_ats, right_ats = moved_indices
         else:
@@ -142,25 +312,89 @@ class BasicInternalType(InternalCoordinateType):
     forward_conversion: Callable[[np.ndarray, ParamSpec("P")], List[np.ndarray]]
     inverse_conversion: Callable[[np.ndarray, ParamSpec("P")], List[np.ndarray]]
     def __init__(self, indices: Sequence[int]):
+        """
+        **LLM Docstring**
+
+        Store the defining atom indices as an immutable tuple and bind the class-level forward and inverse conversion functions onto the instance.
+
+        :param indices: Atom indices defining the coordinate, or a restricted search index set.
+        :type indices: Sequence[int]
+        :return: None.
+        :rtype: None
+        """
         self.inds = tuple(indices)
         # a hack to make these classes easier to work with
         self.forward_conversion = type(self).forward_conversion
         self.inverse_conversion = type(self).inverse_conversion
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Format the coordinate as its class name followed by its defining index tuple.
+
+        :return: A concise representation of the object.
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}{self.inds}"
     def reindex(self, reindexing):
+        """
+        **LLM Docstring**
+
+        Apply an index lookup to every defining atom and construct a coordinate of the same type with the mapped indices.
+
+        :param reindexing: A mapping from existing atom indices to replacement indices.
+        :type reindexing: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return type(self)([reindexing[i] for i in self.inds])
     def canonicalize(self):
+        """
+        **LLM Docstring**
+
+        Orient a reversible coordinate so that its final atom index is not smaller than its first; reverse the full index tuple when necessary.
+
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if self.inds[-1] < self.inds[0]:
             return type(self)(tuple(self.inds[::-1]))
         else:
             return self
     def get_indices(self):
+        """
+        **LLM Docstring**
+
+        Return the stored tuple of defining atom indices.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return self.inds
     def get_dropped_internals(self):
+        """
+        **LLM Docstring**
+
+        Return the set of coordinates removed from the bond graph when determining which atoms move with this coordinate; the default removes only the coordinate itself.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return [self]
     def get_carried_atoms(self, context:InternalSpec, max_branching=5):
+        """
+        **LLM Docstring**
+
+        Split the internal-coordinate bond graph into fragments associated with the first and last atoms. If dropping the coordinate does not separate them, repeatedly break the midpoint bond on their connecting path until distinct carried-atom groups are obtained.
+
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: InternalSpec
+        :param max_branching: Maximum repeated graph-splitting attempts before declaring the carried fragments ambiguous.
+        :type max_branching: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         subgraph:EdgeGraph = context.get_dropped_internal_bond_graph(self.get_dropped_internals())
         left_atoms = None
         right_atoms = None
@@ -204,10 +438,50 @@ class BasicInternalType(InternalCoordinateType):
         right_atoms = [inv_mapping[i] for i in right_atoms]
         return left_atoms, right_atoms
     def get_expansion(self, coords, *, order=None, masses=None, **opts):
+        """
+        **LLM Docstring**
+
+        Call the coordinate type’s forward derivative routine with the stored atom indices to obtain derivatives of the internal value with respect to Cartesian coordinates.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return self.forward_conversion(coords, *self.inds, order=order, **opts)
     def get_inverse_expansion(self, coords, *, order=None, moved_indices=None,
                               context=None,
                               left_atoms=None, right_atoms=None, masses=None, **opts):
+        """
+        **LLM Docstring**
+
+        Resolve the atoms moved on each side of the coordinate and call the type’s inverse derivative routine to obtain Cartesian response tensors.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param moved_indices: Explicit pair of atom groups moved on the two sides of a coordinate.
+        :type moved_indices: Any
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: Any
+        :param left_atoms: Atoms assigned to the first side of the displacement.
+        :type left_atoms: Any
+        :param right_atoms: Atoms assigned to the second side of the displacement.
+        :type right_atoms: Any
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         left_atoms, right_atoms = self._prep_left_right_atoms(context, moved_indices, left_atoms, right_atoms)
         return self.inverse_conversion(coords, *self.inds,
                                    order=order, left_atoms=left_atoms, right_atoms=right_atoms,
@@ -220,6 +494,16 @@ class Distance(BasicInternalType):
     inverse_conversion = nput.dist_expansion
     @classmethod
     def could_be(cls, input):
+        """
+        **LLM Docstring**
+
+        Recognize a distance specification as a two-element integer index sequence.
+
+        :param input: A typed option mapping or bare coordinate-index sequence.
+        :type input: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return (
             dev.is_list_like(input)
             and len(input) == 2
@@ -227,6 +511,14 @@ class Distance(BasicInternalType):
             and nput.is_int(input[1])
         )
     def get_constraint_rads(self):
+        """
+        **LLM Docstring**
+
+        Return the distance itself as the sole primitive coordinate required to constrain it.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return [self]
 
 @InternalCoordinateType.register("bend")
@@ -235,6 +527,16 @@ class Angle(BasicInternalType):
     inverse_conversion = nput.angle_expansion
     @classmethod
     def could_be(cls, input):
+        """
+        **LLM Docstring**
+
+        Recognize an angle specification as a three-element integer index sequence.
+
+        :param input: A typed option mapping or bare coordinate-index sequence.
+        :type input: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return (
             dev.is_list_like(input)
             and len(input) == 3
@@ -242,8 +544,24 @@ class Angle(BasicInternalType):
             and nput.is_int(input[1])
         )
     def get_constraint_rads(self):
+        """
+        **LLM Docstring**
+
+        Return the angle itself as the primitive coordinate required to constrain it.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return [self]
     def get_dropped_internals(self):
+        """
+        **LLM Docstring**
+
+        Remove the angle and its two adjacent bond distances when finding the atom groups carried by an angle displacement.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         i,j,k = self.get_indices()
         return [self, Distance((i, j)), Distance((j, k))]
 
@@ -253,6 +571,16 @@ class Dihedral(BasicInternalType):
     inverse_conversion = nput.dihed_expansion
     @classmethod
     def could_be(cls, input):
+        """
+        **LLM Docstring**
+
+        Recognize a dihedral specification as a four-element integer index sequence.
+
+        :param input: A typed option mapping or bare coordinate-index sequence.
+        :type input: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         return (
             dev.is_list_like(input)
             and len(input) == 4
@@ -260,8 +588,24 @@ class Dihedral(BasicInternalType):
             and nput.is_int(input[1])
         )
     def get_constraint_rads(self):
+        """
+        **LLM Docstring**
+
+        Return the dihedral itself as the primitive coordinate required to constrain it.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return [self]
     def get_dropped_internals(self):
+        """
+        **LLM Docstring**
+
+        Remove the dihedral, its central angle pair, and the three chain bond distances when separating the two sides of a torsional displacement.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         i,j,k,l = self.get_indices()
         return [self, Distance((i, j)), Distance((j, k)), Distance((k, l))]
 
@@ -270,6 +614,14 @@ class Wag(BasicInternalType):
     forward_conversion = nput.wag_vec
     inverse_conversion = nput.wag_expansion
     def get_constraint_rads(self):
+        """
+        **LLM Docstring**
+
+        Represent a wagging coordinate by the three dihedrals formed by the central atom and each choice of three surrounding atoms.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return [Dihedral()]
 
 @InternalCoordinateType.register("oop")
@@ -282,11 +634,41 @@ class TranslatonRotation(BasicInternalType):
     forward_conversion = nput.transrot_vecs
     inverse_conversion = nput.transrot_expansion
     def __init__(self,  indices: Sequence[int], masses=None):
+        """
+        **LLM Docstring**
+
+        Store the atoms participating in a rigid translation/rotation coordinate and optional masses used to define the rigid-body modes.
+
+        :param indices: Atom indices defining the coordinate, or a restricted search index set.
+        :type indices: Sequence[int]
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :return: None.
+        :rtype: None
+        """
         super().__init__(indices)
         self.masses = masses
     def canonicalize(self):
+        """
+        **LLM Docstring**
+
+        Return the rigid-body coordinate unchanged because its atom set has no reversible endpoint orientation.
+
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return type(self)(np.sort(self.inds))
     def get_carried_atoms(self, context:InternalSpec):
+        """
+        **LLM Docstring**
+
+        Treat all atoms in the rigid-body coordinate as the moved group and return no opposing group.
+
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: InternalSpec
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         moved_indices = None
         groups = context.get_bond_graph().get_fragments()
         for g in groups:
@@ -298,6 +680,28 @@ class TranslatonRotation(BasicInternalType):
                               context=None, moved_indices=None, extra_atoms=None,
                               masses=None,
                               **opts):
+        """
+        **LLM Docstring**
+
+        Build the translation/rotation inverse expansion for the selected atoms using the stored or supplied masses and requested derivative order.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: Any
+        :param moved_indices: Explicit pair of atom groups moved on the two sides of a coordinate.
+        :type moved_indices: Any
+        :param extra_atoms: Additional atom indices to include in the assembled derivative or graph even when they do not appear in a coordinate.
+        :type extra_atoms: Any
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if extra_atoms is None:
             if moved_indices is None and context is not None:
                 moved_indices = self.get_carried_atoms(context)
@@ -316,18 +720,66 @@ class Orientation(BasicInternalType):
     forward_conversion = nput.orientation_vecs
     inverse_conversion = nput.orientation_expansion
     def __init__(self,  indices: Sequence[int], masses=None):
+        """
+        **LLM Docstring**
+
+        Store the oriented atom pair and optional masses used to define an orientation coordinate.
+
+        :param indices: Atom indices defining the coordinate, or a restricted search index set.
+        :type indices: Sequence[int]
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :return: None.
+        :rtype: None
+        """
         super().__init__(indices)
         self.masses = masses
     def canonicalize(self):
+        """
+        **LLM Docstring**
+
+        Return the orientation unchanged because reversing its atom order changes the directed orientation.
+
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return type(self)((np.sort(self.inds[0]), np.sort(self.inds[1])))
     def get_indices(self):
+        """
+        **LLM Docstring**
+
+        Return the stored atom indices defining the orientation.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return tuple(self.inds[0]) + tuple(self.inds[1])
     def reindex(self, reindexing):
+        """
+        **LLM Docstring**
+
+        Map the orientation’s atoms through a supplied reindexing and preserve its mass data.
+
+        :param reindexing: A mapping from existing atom indices to replacement indices.
+        :type reindexing: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return type(self)([
             [reindexing[i] for i in self.inds[0]],
             [reindexing[i] for i in self.inds[1]]
         ])
     def get_carried_atoms(self, context:InternalSpec):
+        """
+        **LLM Docstring**
+
+        Return the orientation atoms as the moved group and no atoms on the opposite side.
+
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: InternalSpec
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         moved_indices_left = None
         moved_indices_right = None
         groups = context.get_bond_graph().get_fragments()
@@ -342,6 +794,30 @@ class Orientation(BasicInternalType):
         return moved_indices_left, moved_indices_right
     def get_inverse_expansion(self, coords, *, order=None, moved_indices=None, context=None,
                               left_extra_atoms=None, right_extra_atoms=None, masses=None, **opts):
+        """
+        **LLM Docstring**
+
+        Construct the Cartesian inverse expansion for changing the orientation of the selected atoms, using optional masses and moved-atom overrides.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param moved_indices: Explicit pair of atom groups moved on the two sides of a coordinate.
+        :type moved_indices: Any
+        :param context: The surrounding coordinate specification used to infer connectivity and moved fragments.
+        :type context: Any
+        :param left_extra_atoms: Additional atoms to assign to the left moved fragment.
+        :type left_extra_atoms: Any
+        :param right_extra_atoms: Additional atoms to assign to the right moved fragment.
+        :type right_extra_atoms: Any
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         left_extra_atoms, right_extra_atoms = self._prep_left_right_atoms(context, moved_indices, left_extra_atoms, right_extra_atoms)
         if left_extra_atoms is not None:
             left_extra_atoms = np.setdiff1d(left_extra_atoms, self.inds[0])
@@ -360,6 +836,28 @@ class InternalSpec:
                  ungraphed_internals=None,
                  distance_conversions=None
                  ):
+        """
+        **LLM Docstring**
+
+        Normalize a collection of coordinate specifications into `InternalCoordinateType` objects, optionally canonicalize and deduplicate them, collect the participating atoms, and initialize cached triangulations, bond graphs, masses, and conversion data.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+        :type canonicalize: Any
+        :param bond_graph: Optional precomputed connectivity graph.
+        :type bond_graph: Any
+        :param triangulation: Optional precomputed triangle/dihedron representation.
+        :type triangulation: Any
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :param ungraphed_internals: Coordinates that cannot be represented directly as edges in the bond graph and therefore require separate handling.
+        :type ungraphed_internals: Any
+        :param distance_conversions: Precomputed recipes for reconstructing pair distances from the available internal coordinates.
+        :type distance_conversions: Any
+        :return: None.
+        :rtype: None
+        """
         self.coords:tuple[InternalCoordinateType] = tuple(
             InternalCoordinateType.resolve(c)
                 if not isinstance(c, InternalCoordinateType) else
@@ -405,6 +903,20 @@ class InternalSpec:
 
     @classmethod
     def from_zmatrix(cls, *zmats, additions=None, **opts):
+        """
+        **LLM Docstring**
+
+        Create an `InternalSpec` from one or more Z-matrix index arrays by collecting each row’s distance, angle, and dihedral definitions, then appending any explicitly requested coordinates.
+
+        :param additions: Additional coordinates to append to those extracted from the Z-matrix.
+        :type additions: Any
+        :param zmats: One or more Z-matrix index arrays.
+        :type zmats: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         from .ZMatrices import extract_zmatrix_internals
         vars = [
             extract_zmatrix_internals(z)
@@ -417,30 +929,78 @@ class InternalSpec:
 
     @property
     def atom_sets(self) -> Tuple[Tuple[int]]:
+        """
+        **LLM Docstring**
+
+        Return the defining atom tuple for every coordinate in the specification.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Tuple[Tuple[int]]
+        """
         if self._atom_lists is None:
             self._atom_lists = tuple(a.get_indices() for a in self.coords)
         return self._atom_lists
     @property
     def atoms(self) -> Tuple[int]:
+        """
+        **LLM Docstring**
+
+        Return the sorted unique atom indices appearing in any coordinate.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Tuple[int]
+        """
         if self._atoms is None:
             self._atoms = tuple(itut.delete_duplicates(c for a in self.atom_sets for c in a))
         return self._atoms
 
     def get_triangulation(self):
+        """
+        **LLM Docstring**
+
+        Lazily derive and cache the triangle and dihedron sets that express the specification as connected distance geometry.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._tri_di is None:
             # print(self.rad_set)
             self._tri_di = get_internal_triangles_and_dihedrons(self.rad_set)
         return self._tri_di
     def get_pruned_rads(self):
+        """
+        **LLM Docstring**
+
+        Return the subset of primitive coordinates retained after removing redundancies implied by the triangulation.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._pruned_rads is None:
             self._pruned_rads = self.non_redundant_rads()
         return self._pruned_rads
     def get_pruned_triangulation(self):
+        """
+        **LLM Docstring**
+
+        Return a triangulation rebuilt from the nonredundant primitive coordinates.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._pruned_tri_di is None:
             # print(self.rad_set)
             self._pruned_tri_di = get_internal_triangles_and_dihedrons(self.get_pruned_rads()[0])
         return self._pruned_tri_di
     def get_bond_graph(self) -> EdgeGraph:
+        """
+        **LLM Docstring**
+
+        Lazily construct an `EdgeGraph` whose edges are the bond distances represented by the coordinate set.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: EdgeGraph
+        """
         if self._bond_graph is None:
             self._bond_graph = get_internal_bond_graph(self.rad_set, self.atoms,
                                                                          triangles_and_dihedrons=self.get_triangulation(),
@@ -448,10 +1008,26 @@ class InternalSpec:
         return self._bond_graph
     @property
     def graph(self):
+        """
+        **LLM Docstring**
+
+        Expose the cached or newly constructed bond graph for the specification.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._graph is None:
             self._graph = InternalCoordinateGraph(self.rad_set, atoms=self.atoms)
         return self._graph
     def get_distance_conversions(self):
+        """
+        **LLM Docstring**
+
+        Build and cache the conversion specification and callable that reconstruct all triangulation distances from the stored internal coordinates.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._dist_convs is None:
             self._dist_convs = self.graph.get_bond_graph()
             # self._dist_convs = get_internal_bond_graph(self.rad_set, self.atoms,
@@ -471,6 +1047,16 @@ class InternalSpec:
     #
     #     return self._rad_conv
     def get_zmat_conv(self, raise_on_incomplete=True):
+        """
+        **LLM Docstring**
+
+        Find and cache a conversion from this coordinate set to a Z-matrix ordering. Optionally raise when no complete Z-matrix can be constructed.
+
+        :param raise_on_incomplete: Whether failure to build a complete conversion raises instead of returning an incomplete result.
+        :type raise_on_incomplete: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._zm_conv is None:
             # pruned_rads, indices = self.get_pruned_rads()
             # tri = self.get_pruned_triangulation()
@@ -491,6 +1077,14 @@ class InternalSpec:
                     self._zm_conv = (None, None)
         return self._zm_conv
     def get_dmat_conv(self):
+        """
+        **LLM Docstring**
+
+        Build and cache a converter from internal-coordinate values to the condensed or square distance-matrix representation required by the triangulation.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._dm_conv is None:
             bg, dist_stuff = self.get_distance_conversions()
             funs = dict(zip(*dist_stuff))
@@ -511,6 +1105,18 @@ class InternalSpec:
                     return None, None
                 else:
                     def prep(internals, blocks=blocks):
+                        """
+                        **LLM Docstring**
+
+                        Reorder and broadcast converted distance values into the distance-matrix index layout expected by the cached distance conversion.
+
+                        :param internals: Available internal-coordinate specifications or their numerical values.
+                        :type internals: Any
+                        :param blocks: Index blocks identifying grouped Cartesian degrees of freedom.
+                        :type blocks: Any
+                        :return: The value or updated object described above.
+                        :rtype: Any
+                        """
                         return np.moveaxis([
                             f(internals) for f in blocks
                         ], 0, -1)
@@ -520,6 +1126,18 @@ class InternalSpec:
 
     graph_split_method = 'dists'
     def get_dropped_internal_bond_graph(self, internals, method=None):
+        """
+        **LLM Docstring**
+
+        Return a copy of the bond graph with the bonds implied by selected coordinates removed, using either direct coordinate decomposition or the requested removal method.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :param method: Strategy used to remove coordinate-implied bonds.
+        :type method: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if method is None:
             method = self.graph_split_method
         bg = self.get_bond_graph()
@@ -605,6 +1223,32 @@ class InternalSpec:
                                combine_expansions=True,
                                terms=None,
                                **opts):
+        """
+        **LLM Docstring**
+
+        Evaluate direct Cartesian derivatives for every coordinate, pad them to the full atom set, and stack like derivative orders into coordinate-by-Cartesian tensors.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param cache: Optional mutable cache of triangulation or conversion results.
+        :type cache: Any
+        :param reproject: Whether to project the orthogonalized transformations back into the original coordinate basis.
+        :type reproject: Any
+        :param base_transformation: Optional transformation used as the starting basis before orthogonalization.
+        :type base_transformation: Any
+        :param reference_internals: Reference internal-coordinate values used to select the periodic branch or initialize reconstruction.
+        :type reference_internals: Any
+        :param combine_expansions: Whether per-coordinate inverse derivatives are assembled into global tensors.
+        :type combine_expansions: Any
+        :param terms: Triangle or dihedron conversion metadata to permute.
+        :type terms: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         coords = np.asanyarray(coords)
         if cache is False:
             cache = None
@@ -634,6 +1278,26 @@ class InternalSpec:
                                       masses=None,
                                       order=None,
                                       remove_translation_rotations=False):
+        """
+        **LLM Docstring**
+
+        Mass-weight and orthogonalize forward and inverse transformation matrices with an SVD-based pseudoinverse, optionally removing translational/rotational null modes and returning the retained singular subspace.
+
+        :param expansion: Forward internal-to-Cartesian derivative tensors to orthogonalize.
+        :type expansion: Any
+        :param inverse: Inverse Cartesian-to-internal derivative tensors paired with `expansion`.
+        :type inverse: Any
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param masses: Atomic masses used for mass weighting or rigid-body modes.
+        :type masses: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param remove_translation_rotations: Whether rigid translations and rotations are removed from the retained Cartesian subspace.
+        :type remove_translation_rotations: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if coords is not None:
             coords = np.asanyarray(coords)
             base_dim = coords.ndim - 2
@@ -704,6 +1368,26 @@ class InternalSpec:
                       orthogonalize=True,
                       # mass_weighted=True,
                       **opts) -> List[np.ndarray]:
+        """
+        **LLM Docstring**
+
+        Assemble derivatives of the complete internal-coordinate vector with respect to Cartesian coordinates. It combines each coordinate’s expansion, optionally applies mass weighting or orthogonalization, and can return the associated inverse transformations.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param return_inverse: Whether to return inverse transformation data in addition to the primary result.
+        :type return_inverse: Any
+        :param remove_translation_rotations: Whether rigid translations and rotations are removed from the retained Cartesian subspace.
+        :type remove_translation_rotations: Any
+        :param orthogonalize: Whether to replace raw derivative transformations with an orthogonalized pair.
+        :type orthogonalize: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: List[np.ndarray]
+        """
         coords = np.asanyarray(coords)
         # base_dim = coords.ndim - 2
         expansion = self.get_direct_derivatives(coords, order=order,
@@ -750,10 +1434,36 @@ class InternalSpec:
 
         return expansion
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Format the specification as the class name containing its normalized coordinate list.
+
+        :return: A concise representation of the object.
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}({self.coords})"
 
     def get_direct_inverses(self, coords, order=1, terms=None, combine_expansions=True, **opts) -> List[np.ndarray]:
+        """
+        **LLM Docstring**
+
+        Evaluate each coordinate’s inverse Cartesian expansion and combine the per-coordinate tensors into global inverse transformation derivatives when requested.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param terms: Triangle or dihedron conversion metadata to permute.
+        :type terms: Any
+        :param combine_expansions: Whether per-coordinate inverse derivatives are assembled into global tensors.
+        :type combine_expansions: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: List[np.ndarray]
+        """
         coords = np.asanyarray(coords)
 
         expansions = []
@@ -769,6 +1479,20 @@ class InternalSpec:
         return expansions
 
     def cartesians_to_internals(self, coords, order=None, **opts):
+        """
+        **LLM Docstring**
+
+        Evaluate every stored coordinate on Cartesian geometries and optionally return its Cartesian derivative expansion.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         just_coords = order is None
         if just_coords: order = 0
         expansions = self.get_direct_derivatives(coords, order=order, **opts)
@@ -785,6 +1509,32 @@ class InternalSpec:
                                 reference_internals=None,
                                 use_distance_matrix_fallback=False,
                                 **deriv_opts):
+        """
+        **LLM Docstring**
+
+        Recover Cartesian geometries from internal values using either the cached Z-matrix route or distance-geometry route, applying reference coordinates, embedding options, and optional derivative information.
+
+        :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+        :type coords: Any
+        :param order: Highest derivative order to compute.
+        :type order: Any
+        :param reference_cartesians: Reference Cartesian geometry used to align or initialize reconstructed structures.
+        :type reference_cartesians: Any
+        :param return_fragments: Whether disconnected fragment geometries are returned separately instead of as one assembled structure.
+        :type return_fragments: Any
+        :param return_inverse: Whether to return inverse transformation data in addition to the primary result.
+        :type return_inverse: Any
+        :param transformations: Optional precomputed coordinate transformations used during reconstruction.
+        :type transformations: Any
+        :param reference_internals: Reference internal-coordinate values used to select the periodic branch or initialize reconstruction.
+        :type reference_internals: Any
+        :param use_distance_matrix_fallback: Whether to fall back to distance-matrix embedding when a direct Z-matrix conversion is unavailable.
+        :type use_distance_matrix_fallback: Any
+        :param deriv_opts: Options forwarded specifically to derivative and inverse-expansion calculations.
+        :type deriv_opts: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         from .ZMatrices import zmatrix_from_values, canonicalize_zmatrix
         from .Conveniences import zmatrix_to_cartesian#, cartesian_to_zmatrix
         # if order is None:
@@ -914,6 +1664,20 @@ class InternalSpec:
                 return carts, expansion
 
     def _novel_distance(self, rad, tris, diheds):
+        """
+        **LLM Docstring**
+
+        For a primitive coordinate, identify a distance introduced by that coordinate that is not already fixed by the supplied triangle and dihedron sets.
+
+        :param rad: Primitive distance, angle, or dihedral coordinate being analyzed.
+        :type rad: Any
+        :param tris: Triangle triangulation records.
+        :type tris: Any
+        :param diheds: Dihedron triangulation records.
+        :type diheds: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if len(rad) == 2:
             return rad
         elif len(rad) == 3:
@@ -980,6 +1744,18 @@ class InternalSpec:
             else:
                 raise ValueError(f"failed to find a matching dihedral to {rad}")
     def get_triangulation_novel_internals(self, rads=None, triangulation=None):
+        """
+        **LLM Docstring**
+
+        Return coordinates that contribute distances not already represented by a triangulation, together with the corresponding novel distance pairs.
+
+        :param rads: Primitive coordinate subset to analyze.
+        :type rads: Any
+        :param triangulation: Optional precomputed triangle/dihedron representation.
+        :type triangulation: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if triangulation is None:
             triangulation = self.get_triangulation()
         if rads is None:
@@ -992,6 +1768,20 @@ class InternalSpec:
             for r in rads
         ]
     def _tri_dists(self, rad, tris, diheds):
+        """
+        **LLM Docstring**
+
+        List the pair distances required to represent one primitive coordinate within the current triangle and dihedron triangulation.
+
+        :param rad: Primitive distance, angle, or dihedral coordinate being analyzed.
+        :type rad: Any
+        :param tris: Triangle triangulation records.
+        :type tris: Any
+        :param diheds: Dihedron triangulation records.
+        :type diheds: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if len(rad) == 2:
             return [rad]
         elif len(rad) == 3:
@@ -1007,6 +1797,18 @@ class InternalSpec:
             else:
                 raise ValueError(f"failed to find a matching dihedron to {rad}")
     def get_triangulation_distances(self, rads=None, triangulation=None):
+        """
+        **LLM Docstring**
+
+        Collect and deduplicate all pair distances required by the triangulation and optionally by an explicit coordinate subset.
+
+        :param rads: Primitive coordinate subset to analyze.
+        :type rads: Any
+        :param triangulation: Optional precomputed triangle/dihedron representation.
+        :type triangulation: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if triangulation is None:
             triangulation = self.get_triangulation()
         if rads is None:
@@ -1019,6 +1821,14 @@ class InternalSpec:
             for r in rads
         ]
     def check_redundancy(self):
+        """
+        **LLM Docstring**
+
+        Check whether the coordinate set contains more independent constraints than its atom count permits, using the triangulation rigidity test.
+
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return pebble_rigidity(
             # self.get_triangulation_distances(),
             self.get_triangulation_novel_internals(),
@@ -1026,6 +1836,20 @@ class InternalSpec:
         )
 
 def canonicalize_internal(coord, return_sign=False, check_invalid=True):
+    """
+    **LLM Docstring**
+
+    Put a distance, angle, or dihedral index sequence into its canonical orientation. Distances and angles are reversed when their last index is smaller than the first; dihedrals also track the sign change caused by equivalent permutations.
+
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :param return_sign: Whether to return the orientation sign together with the canonical coordinate.
+    :type return_sign: Any
+    :param check_invalid: Whether invalid coordinate lengths or repeated indices raise an error.
+    :type check_invalid: Any
+    :return: The canonical coordinate, optionally paired with its orientation sign.
+    :rtype: tuple[int, ...] | tuple[tuple[int, ...], int]
+    """
     sign = 1
     if not check_invalid:
         if coord[-1] < coord[0]:
@@ -1071,18 +1895,52 @@ def canonicalize_internal(coord, return_sign=False, check_invalid=True):
         return coord
 
 def is_valid_coordinate(coord):
+    """
+    **LLM Docstring**
+
+    Return whether a value is an integer index sequence of length two, three, or four.
+
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :return: Whether the tested condition is satisfied.
+    :rtype: bool
+    """
     return (
         len(coord) > 1 and len(coord) < 5
         and all(nput.is_int(c) for c in coord)
     )
 
 def is_coordinate_list_like(clist):
+    """
+    **LLM Docstring**
+
+    Return whether every element of a sequence is a valid distance, angle, or dihedral specification.
+
+    :param clist: Sequence to test as a coordinate list.
+    :type clist: Any
+    :return: Whether the tested condition is satisfied.
+    :rtype: bool
+    """
     return dev.is_list_like(clist) and all(
         is_valid_coordinate(c) for c in clist
     )
 
 class RADInternalCoordinateSet:
     def __init__(self, coord_specs:'list[tuple[int]]', prepped_data=None, triangulation=None):
+        """
+        **LLM Docstring**
+
+        Preprocess coordinate specifications into canonical coordinate and index maps, retain the normalized coordinate list, and optionally store or derive triangulation data.
+
+        :param coord_specs: Coordinate specifications to normalize and index.
+        :type coord_specs: 'list[tuple[int]]'
+        :param prepped_data: Previously prepared coordinate maps, used to avoid recomputation.
+        :type prepped_data: Any
+        :param triangulation: Optional precomputed triangle/dihedron representation.
+        :type triangulation: Any
+        :return: None.
+        :rtype: None
+        """
         self._specs = tuple(coord_specs) if coord_specs is not None else coord_specs
         if prepped_data is not None:
             self._indicator, self.coordinate_indices, self.ind_map, self.coord_map = prepped_data
@@ -1092,6 +1950,14 @@ class RADInternalCoordinateSet:
 
     @property
     def specs(self):
+        """
+        **LLM Docstring**
+
+        Return the normalized coordinate specifications in their original coordinate-type grouping.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._specs is None:
             self._specs = tuple(self._create_coord_list(self._indicator, self.ind_map, self.coord_map))
         return self._specs
@@ -1101,6 +1967,16 @@ class RADInternalCoordinateSet:
     InternalsMap = collections.namedtuple("InternalsMap", ['dists', 'angles', 'diheds'])
     @classmethod
     def prep_coords(cls, coord_specs):
+        """
+        **LLM Docstring**
+
+        Canonicalize input coordinates, group them by arity, deduplicate equivalent entries, and build maps between user coordinates, canonical coordinates, and flattened integer indices.
+
+        :param coord_specs: Coordinate specifications to normalize and index.
+        :type coord_specs: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         dist_inds = []
         dists = []
         angle_inds = []
@@ -1142,6 +2018,18 @@ class RADInternalCoordinateSet:
 
     @classmethod
     def _map_dispatch(cls, map, coord):
+        """
+        **LLM Docstring**
+
+        Apply either a callable map or a lookup mapping to a coordinate, preserving coordinates not present in a partial mapping.
+
+        :param map: Callable or mapping applied to a coordinate.
+        :type map: Any
+        :param coord: A single coordinate specification or target coordinate.
+        :type coord: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if nput.is_int(coord):
             if coord == 0:
                 return map.dists
@@ -1160,14 +2048,62 @@ class RADInternalCoordinateSet:
                 raise ValueError(f"don't know what to do with coord spec {coord}")
 
     def _coord_map_dispatch(self, coord):
+        """
+        **LLM Docstring**
+
+        Map a coordinate through the set’s coordinate-level lookup.
+
+        :param coord: A single coordinate specification or target coordinate.
+        :type coord: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return self._map_dispatch(self.coord_map, coord)
     def _ind_map_dispatch(self, i):
+        """
+        **LLM Docstring**
+
+        Map a flattened coordinate index through the set’s index-level lookup.
+
+        :param i: An atom or flattened-coordinate index, depending on the helper.
+        :type i: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return self._map_dispatch(self.ind_map, i)
     def find(self, coord, missing_val='raise'):
+        """
+        **LLM Docstring**
+
+        Locate a coordinate in the canonical coordinate map, respecting the requested value for missing coordinates.
+
+        :param coord: A single coordinate specification or target coordinate.
+        :type coord: Any
+        :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+        :type missing_val: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return nput.find(self._coord_map_dispatch(coord), coord, missing_val=missing_val)
 
     @classmethod
     def get_coord_from_maps(cls, item, indicator:IndicatorMap, ind_map, coord_map):
+        """
+        **LLM Docstring**
+
+        Resolve an indexed selection through the indicator, flattened-index, and coordinate maps to recover the corresponding canonical coordinate specification.
+
+        :param item: Index, slice, or coordinate selection to resolve.
+        :type item: Any
+        :param indicator: Coordinate-arity indicator array.
+        :type indicator: IndicatorMap
+        :param ind_map: Mapping from flattened coordinate positions to canonical coordinate indices.
+        :type ind_map: Any
+        :param coord_map: Mapping from canonical coordinate tuples to stored coordinate positions.
+        :type coord_map: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if nput.is_int(item):
             map = indicator.primary[item]
             subloc = indicator.child[item]
@@ -1187,15 +2123,51 @@ class RADInternalCoordinateSet:
                 return c_map[subloc,]
 
     def __getitem__(self, item):
+        """
+        **LLM Docstring**
+
+        Support coordinate lookup and indexed/sliced selection through the precomputed coordinate maps.
+
+        :param item: Index, slice, or coordinate selection to resolve.
+        :type item: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return self.get_coord_from_maps(item, self._indicator, self.ind_map, self.coord_map)
 
     @classmethod
     def _create_coord_list(cls, indicator, inds, vals:InternalsMap):
+        """
+        **LLM Docstring**
+
+        Reconstruct coordinate tuples from a coordinate-type indicator array, flattened index data, and mapped coordinate values.
+
+        :param indicator: Coordinate-arity indicator array.
+        :type indicator: Any
+        :param inds: Flattened coordinate index data.
+        :type inds: Any
+        :param vals: Mapped coordinate values used to reconstruct tuples.
+        :type vals: InternalsMap
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         #TODO: make this more efficient, just concat the sub
         map = np.argsort(indicator.child)
         full = vals.diheds.tolist() + vals.angles.tolist() + vals.diheds.tolist()
         return [ tuple(full[i]) for i in map ]
     def permute(self, perm, canonicalize=True):
+        """
+        **LLM Docstring**
+
+        Apply an atom permutation to every coordinate and return a new coordinate set, optionally canonicalizing the permuted coordinates.
+
+        :param perm: Atom-index permutation or vertex permutation.
+        :type perm: Any
+        :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+        :type canonicalize: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         #TODO: handle padding this
         inv = np.argsort(perm)
         dists = self.coord_map.dists
@@ -1216,21 +2188,67 @@ class RADInternalCoordinateSet:
             return cls(None, prepped_data=[self._indicator, self.coordinate_indices, self.ind_map, int_map])
 
     def get_triangulation(self):
+        """
+        **LLM Docstring**
+
+        Compute triangle and dihedron sets from the stored coordinates and cache the result.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return get_internal_triangles_and_dihedrons(self.specs, canonicalize=False)
     @property
     def triangulation(self):
+        """
+        **LLM Docstring**
+
+        Return the cached triangulation, computing it on first access.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._triangulation is None:
             self._triangulation = self.get_triangulation()
         return self._triangulation
 
 
 def get_canonical_internal_list(coords):
+    """
+    **LLM Docstring**
+
+    Canonicalize every coordinate in a sequence and remove duplicates while preserving first-occurrence order.
+
+    :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+    :type coords: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     if isinstance(coords, RADInternalCoordinateSet):
         return coords.specs
     else:
         return [canonicalize_internal(c) for c in coords]
 
 def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, allow_negation=False, indices=None):
+    """
+    **LLM Docstring**
+
+    Find a coordinate in a coordinate list after optional canonicalization. The search can accept the sign-reversed equivalent of directed coordinates and can restrict matching to a supplied index subset.
+
+    :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+    :type coords: Any
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+    :type missing_val: 'Any'
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param allow_negation: Whether sign-reversed directed coordinates count as matches.
+    :type allow_negation: Any
+    :param indices: Atom indices defining the coordinate, or a restricted search index set.
+    :type indices: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     if canonicalize:
         coord = canonicalize_internal(coord)
         if coord is None: raise ValueError(f"invalid internal coordinate {coord}")
@@ -1262,6 +2280,20 @@ def find_internal(coords, coord, missing_val:'Any'='raise', canonicalize=True, a
             return idx
 
 def permute_internals(coords, perm, canonicalize=True):
+    """
+    **LLM Docstring**
+
+    Apply an atom-index permutation to each coordinate and optionally canonicalize the resulting coordinate orientations.
+
+    :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+    :type coords: Any
+    :param perm: Atom-index permutation or vertex permutation.
+    :type perm: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     if isinstance(coords, RADInternalCoordinateSet):
         return coords.permute(perm, canonicalize=canonicalize)
     else:
@@ -1273,6 +2305,20 @@ def permute_internals(coords, perm, canonicalize=True):
         ]
 
 def coordinate_sign(old, new, canonicalize=True):
+    """
+    **LLM Docstring**
+
+    Determine whether two equivalent coordinate specifications have the same or opposite orientation, returning `1`, `-1`, or `0` when they are not equivalent.
+
+    :param old: Original coordinate orientation used as the sign reference.
+    :type old: Any
+    :param new: Coordinates newly added to the graph.
+    :type new: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :return: `1` for equal orientation, `-1` for reversed orientation, or `0` for nonequivalent coordinates.
+    :rtype: int
+    """
     if len(old) != len(new): return 0
     if len(old) == 2:
         i,j = old
@@ -1315,6 +2361,16 @@ def coordinate_sign(old, new, canonicalize=True):
         raise ValueError(f"can't compare coordinates {old} and {new}")
 
 def coordinate_indices(coords):
+    """
+    **LLM Docstring**
+
+    Flatten a coordinate list into an integer array and return the per-coordinate arity indicators needed to reconstruct the original tuples.
+
+    :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+    :type coords: Any
+    :return: The flattened coordinate indices and per-coordinate arity indicators.
+    :rtype: tuple[np.ndarray, np.ndarray]
+    """
     if isinstance(coords, RADInternalCoordinateSet):
         return coords.coordinate_indices
     else:
@@ -1327,18 +2383,52 @@ dm_conv_data = collections.namedtuple("dm_conv_data",
 tri_conv = collections.namedtuple("tri_conv", ['type', 'coords', 'val'])
 dihed_conv = collections.namedtuple("dihed_conv", ['type', 'coords'])
 def _get_input_ind(dm_data):
+    """
+    **LLM Docstring**
+
+    Return the stored index selecting an original internal-coordinate value from a distance-conversion record.
+
+    :param dm_data: Distance-conversion record containing source-index metadata.
+    :type dm_data: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     return (
         dm_data.input_indices[0]
             if dm_data.conversion is None else
         None
     )
 def _get_pregen_ind(dm_data):
+    """
+    **LLM Docstring**
+
+    Return the stored index selecting a previously generated distance from a distance-conversion record.
+
+    :param dm_data: Distance-conversion record containing source-index metadata.
+    :type dm_data: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     return (
         None
             if dm_data.conversion is None else
         dm_data.mapped_pos
     )
 def get_internal_distance_conversion_spec(internals, canonicalize=True, cache=None):
+    """
+    **LLM Docstring**
+
+    Analyze distances, angles, and dihedrals to produce an ordered recipe for reconstructing every required pair distance. Each recipe entry records whether its inputs come directly from the internal vector or from distances generated by earlier entries.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     if isinstance(internals, RADInternalCoordinateSet):
         internals = internals.specs
     dists:dict[tuple[int,int], dm_conv_data] = {}
@@ -1596,8 +2686,32 @@ def get_internal_distance_conversion_spec(internals, canonicalize=True, cache=No
     return dists
 
 def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
+    """
+    **LLM Docstring**
+
+    Compile a distance-conversion specification into a callable specialized for direct distances, law-of-cosines triangle completion, or dihedral tetrahedron completion.
+
+    :param conversion_spec: Ordered recipe describing how each distance is obtained.
+    :type conversion_spec: dm_conv_data
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     if conversion_spec.conversion is None:
         def convert(internal_values, _, n=conversion_spec.input_indices[0]):
+            """
+            **LLM Docstring**
+
+            Evaluate the specialized conversion step: either select an existing internal distance, compute a missing triangle edge from two edges and an angle, or compute the remaining tetrahedral edge from five distances and a dihedral.
+
+            :param internal_values: Numerical values of the source internal coordinates.
+            :type internal_values: Any
+            :param _: Unused positional argument retained to match the common conversion-callable interface.
+            :type _: Any
+            :param n: Source column index captured when the specialized conversion callable is created.
+            :type n: Any
+            :return: The value or updated object described above.
+            :rtype: Any
+            """
             return internal_values[..., n]
     elif hasattr(conversion_spec.conversion, 'val'):
         # a triangle to convert
@@ -1614,6 +2728,20 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
                     converter=triangle_converter,
                     val=val,
                     **kwargs):
+            """
+            **LLM Docstring**
+
+            Evaluate the specialized conversion step: either select an existing internal distance, compute a missing triangle edge from two edges and an angle, or compute the remaining tetrahedral edge from five distances and a dihedral.
+
+            :param internal_values: Numerical values of the source internal coordinates.
+            :type internal_values: Any
+            :param _: Unused positional argument retained to match the common conversion-callable interface.
+            :type _: Any
+            :param n: Source column index captured when the specialized conversion callable is created.
+            :type n: Any
+            :return: The value or updated object described above.
+            :rtype: Any
+            """
             args = [
                 internal_values[..., n]
                     if n is not None else
@@ -1637,6 +2765,20 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
                     dist_args=dist_args,
                     converter=dist_converter,
                     **kwargs):
+            """
+            **LLM Docstring**
+
+            Evaluate the specialized conversion step: either select an existing internal distance, compute a missing triangle edge from two edges and an angle, or compute the remaining tetrahedral edge from five distances and a dihedral.
+
+            :param internal_values: Numerical values of the source internal coordinates.
+            :type internal_values: Any
+            :param _: Unused positional argument retained to match the common conversion-callable interface.
+            :type _: Any
+            :param n: Source column index captured when the specialized conversion callable is created.
+            :type n: Any
+            :return: The value or updated object described above.
+            :rtype: Any
+            """
             args = [
                 internal_values[..., n]
                     if n is not None else
@@ -1649,6 +2791,22 @@ def _prep_interal_distance_conversion(conversion_spec:dm_conv_data):
                 return converter[1](*args, order=order, **kwargs)[val]
     return convert
 def _get_internal_distance_conversion(internals, canonicalize=True, shift_dihedrals=True, abs_dihedrals=True):
+    """
+    **LLM Docstring**
+
+    Return the conversion specification together with a callable that evaluates it sequentially, optionally normalizing dihedral signs and absolute values before tetrahedral reconstruction.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param shift_dihedrals: Whether periodic dihedral values are shifted to the expected reconstruction branch.
+    :type shift_dihedrals: Any
+    :param abs_dihedrals: Whether dihedral magnitudes are used for distance reconstruction.
+    :type abs_dihedrals: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     base_conv = get_internal_distance_conversion_spec(internals, canonicalize=canonicalize)
     final_inds = list(sorted(base_conv.keys(), key=lambda k:base_conv[k].mapped_pos))
     rordered_conversion = list(sorted(base_conv.values(), key=lambda v:v.mapped_pos))
@@ -1660,6 +2818,24 @@ def _get_internal_distance_conversion(internals, canonicalize=True, shift_dihedr
                 inds=final_inds, convs=convs,
                 dihedral_pos=dihedral_pos,
                 shift_dihedrals=shift_dihedrals):
+        """
+        **LLM Docstring**
+
+        Evaluate all generated-distance steps in dependency order and concatenate the original distance values with the newly reconstructed pair distances.
+
+        :param internal_values: Numerical values of the source internal coordinates.
+        :type internal_values: Any
+        :param inds: Flattened coordinate index data.
+        :type inds: Any
+        :param convs: Previously compiled distance-conversion callables evaluated before this step.
+        :type convs: Any
+        :param dihedral_pos: Positions of dihedral values in the source internal-coordinate vector.
+        :type dihedral_pos: Any
+        :param shift_dihedrals: Whether periodic dihedral values are shifted to the expected reconstruction branch.
+        :type shift_dihedrals: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         internal_values = np.asanyarray(internal_values)
         if shift_dihedrals:
             internal_values = internal_values.copy()
@@ -1677,6 +2853,16 @@ def _get_internal_distance_conversion(internals, canonicalize=True, shift_dihedr
 
     return final_inds, convert
 def _check_complete_distances(final_dists):
+    """
+    **LLM Docstring**
+
+    Verify that a generated distance set contains every pair needed for the inferred atom range; raise an error listing missing pairs when it does not.
+
+    :param final_dists: Generated pair-distance mapping or sequence to validate.
+    :type final_dists: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     ds = set(final_dists)
     final_dists = list(final_dists)
     inds = np.unique([x for y in final_dists for x in y])
@@ -1700,6 +2886,26 @@ def internal_distance_convert(coords, specs,
                               shift_dihedrals=True,
                               abs_dihedrals=True,
                               check_distance_spec=True):
+    """
+    **LLM Docstring**
+
+    Convert internal-coordinate values to pair distances using a precomputed or newly generated conversion specification, optionally returning only generated values or validating distance completeness.
+
+    :param coords: Cartesian coordinates, internal-coordinate values, or coordinate specifications as required by the operation.
+    :type coords: Any
+    :param specs: Coordinate specifications associated with the numerical values.
+    :type specs: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param shift_dihedrals: Whether periodic dihedral values are shifted to the expected reconstruction branch.
+    :type shift_dihedrals: Any
+    :param abs_dihedrals: Whether dihedral magnitudes are used for distance reconstruction.
+    :type abs_dihedrals: Any
+    :param check_distance_spec: Whether the supplied distance-conversion specification is checked for completeness.
+    :type check_distance_spec: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     final_dists, converter = get_internal_distance_conversion(specs,
                                                               canonicalize=canonicalize,
                                                               shift_dihedrals=shift_dihedrals,
@@ -1716,6 +2922,24 @@ def internal_distance_convert(coords, specs,
     return final_dists, conv
 
 def _find_coord_comp(coord, a, internals, prior_coords, missing_val):
+    """
+    **LLM Docstring**
+
+    Find a coordinate containing a requested atom combination and return the matching coordinate plus its position, consulting prior-coordinate aliases before applying the requested missing-value behavior.
+
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :param a: Atom whose containing coordinate or attachment is being sought.
+    :type a: Any
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param prior_coords: Aliases for coordinates generated earlier in the dependency chain.
+    :type prior_coords: Any
+    :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+    :type missing_val: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     a_idx = find_internal(internals, a, missing_val=None)
     found_main = True
     if a_idx is None:
@@ -1732,6 +2956,26 @@ _tri_perms = [
     ]
 _tri_perm_inv = _tri_perms
 def _get_tri_bond_key_name(mod_sets, a,b,c, i, j):
+    """
+    **LLM Docstring**
+
+    Classify one triangle edge as an existing internal, a prior generated distance, or a newly generated distance, and return the key/index metadata used in the triangle conversion recipe.
+
+    :param mod_sets: Mutable triangulation-term sets used while classifying an edge or angular term.
+    :type mod_sets: Any
+    :param a: Atom whose containing coordinate or attachment is being sought.
+    :type a: Any
+    :param b: Second atom in the local triangle or tetrahedron.
+    :type b: Any
+    :param c: Third atom in the local triangle or tetrahedron.
+    :type c: Any
+    :param i: An atom or flattened-coordinate index, depending on the helper.
+    :type i: Any
+    :param j: Second local vertex or coordinate index.
+    :type j: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     base = (a, b, c)
     for perm in _tri_perms:
         key = [base[_] for _ in perm]
@@ -1748,6 +2992,18 @@ def _get_tri_bond_key_name(mod_sets, a,b,c, i, j):
     b = tuple(sorted(key.index(_) for _ in [i,j]))
     return key, nput.triangle_property_specifiers(b)["name"], perm
 def _permute_tri_data(terms, perm):
+    """
+    **LLM Docstring**
+
+    Permute triangle recipe terms into a new vertex ordering while updating edge labels and orientation-dependent angle data.
+
+    :param terms: Triangle or dihedron conversion metadata to permute.
+    :type terms: Any
+    :param perm: Atom-index permutation or vertex permutation.
+    :type perm: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     new = set()
     for t in terms:
         x = nput.triangle_property_specifiers(t)["coord"]
@@ -1783,6 +3039,28 @@ _dihedron_perm_inv = [
     (2, 1, 0, 3)
 ]
 def _get_dihedron_bond_key_name(mod_sets, a,b,c,d, i, j):
+    """
+    **LLM Docstring**
+
+    Classify one tetrahedron edge as an input distance, prior generated distance, or new generated distance for a dihedron recipe.
+
+    :param mod_sets: Mutable triangulation-term sets used while classifying an edge or angular term.
+    :type mod_sets: Any
+    :param a: Atom whose containing coordinate or attachment is being sought.
+    :type a: Any
+    :param b: Second atom in the local triangle or tetrahedron.
+    :type b: Any
+    :param c: Third atom in the local triangle or tetrahedron.
+    :type c: Any
+    :param d: Fourth atom in the local tetrahedron.
+    :type d: Any
+    :param i: An atom or flattened-coordinate index, depending on the helper.
+    :type i: Any
+    :param j: Second local vertex or coordinate index.
+    :type j: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     base = (a, b, c, d)
     for perm in _dihedron_perms:
         key = [base[_] for _ in perm]
@@ -1799,6 +3077,30 @@ def _get_dihedron_bond_key_name(mod_sets, a,b,c,d, i, j):
     b = tuple(sorted(key.index(_) for _ in [i,j]))
     return key, nput.dihedron_property_specifiers(b)["name"], perm
 def _get_dihedron_angle_key_name(mod_sets, a,b,c,d, i, j, k):
+    """
+    **LLM Docstring**
+
+    Classify a tetrahedral face angle as an input angle or a value derivable from its three surrounding distances.
+
+    :param mod_sets: Mutable triangulation-term sets used while classifying an edge or angular term.
+    :type mod_sets: Any
+    :param a: Atom whose containing coordinate or attachment is being sought.
+    :type a: Any
+    :param b: Second atom in the local triangle or tetrahedron.
+    :type b: Any
+    :param c: Third atom in the local triangle or tetrahedron.
+    :type c: Any
+    :param d: Fourth atom in the local tetrahedron.
+    :type d: Any
+    :param i: An atom or flattened-coordinate index, depending on the helper.
+    :type i: Any
+    :param j: Second local vertex or coordinate index.
+    :type j: Any
+    :param k: Third local vertex or candidate dihedron key.
+    :type k: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     base = (a, b, c, d)
     for perm in _dihedron_perms:
         key = [base[_] for _ in perm]
@@ -1816,6 +3118,32 @@ def _get_dihedron_angle_key_name(mod_sets, a,b,c,d, i, j, k):
     z = nput.dihedron_property_specifiers(b)["name"]
     return key, z, perm
 def _get_dihedron_dihed_key_name(mod_sets, a,b,c,d, i, j, k, l):
+    """
+    **LLM Docstring**
+
+    Classify a torsion around a tetrahedral edge as an input dihedral or as a value reconstructable from the tetrahedron’s distances.
+
+    :param mod_sets: Mutable triangulation-term sets used while classifying an edge or angular term.
+    :type mod_sets: Any
+    :param a: Atom whose containing coordinate or attachment is being sought.
+    :type a: Any
+    :param b: Second atom in the local triangle or tetrahedron.
+    :type b: Any
+    :param c: Third atom in the local triangle or tetrahedron.
+    :type c: Any
+    :param d: Fourth atom in the local tetrahedron.
+    :type d: Any
+    :param i: An atom or flattened-coordinate index, depending on the helper.
+    :type i: Any
+    :param j: Second local vertex or coordinate index.
+    :type j: Any
+    :param k: Third local vertex or candidate dihedron key.
+    :type k: Any
+    :param l: Fourth local vertex index.
+    :type l: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     base = (a, b, c, d)
     for perm in _dihedron_perms:
         key = [base[_] for _ in perm]
@@ -1834,6 +3162,18 @@ def _get_dihedron_dihed_key_name(mod_sets, a,b,c,d, i, j, k, l):
     z = nput.dihedron_property_specifiers(x)["name"]
     return key, z, perm
 def _permute_dihed_data(terms, perm):
+    """
+    **LLM Docstring**
+
+    Apply a four-vertex permutation to all bond, angle, and dihedral terms in a dihedron recipe and update orientation signs.
+
+    :param terms: Triangle or dihedron conversion metadata to permute.
+    :type terms: Any
+    :param perm: Atom-index permutation or vertex permutation.
+    :type perm: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     new = set()
     for t in terms:
         x = nput.dihedron_property_specifiers(t)["coord"]
@@ -1841,6 +3181,22 @@ def _permute_dihed_data(terms, perm):
         new.add(nput.dihedron_property_specifiers(y)["name"])
     return new
 def _validate_dihed_triangulation(mod_sets, key, internals, adding=None):
+    """
+    **LLM Docstring**
+
+    Check that a proposed dihedron has enough known coordinate information to be completed and optionally account for terms being added in the current step.
+
+    :param mod_sets: Mutable triangulation-term sets used while classifying an edge or angular term.
+    :type mod_sets: Any
+    :param key: Triangulation record key being validated.
+    :type key: Any
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param adding: Terms treated as available during the current update.
+    :type adding: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     for k in mod_sets.keys():
         if None in k: continue
         if canonicalize_internal(k, check_invalid=False) != k:
@@ -1861,6 +3217,18 @@ def _validate_dihed_triangulation(mod_sets, key, internals, adding=None):
                 raise ValueError(f"internal list doesn't contain {c} (from '{a}' on {key}, adding '{adding}') : {internals} ")
     _check_dihed_coords(internals, mod_sets)
 def _check_tri_coords(internals, tri_sets):
+    """
+    **LLM Docstring**
+
+    Validate that each triangle set is supported by the required distances and angle coordinate information.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param tri_sets: Triangle records to validate.
+    :type tri_sets: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     for k, v in tri_sets.items():
         if None not in k:
             for c in v:
@@ -1870,6 +3238,18 @@ def _check_tri_coords(internals, tri_sets):
                 if c not in internals and tuple(reversed(c)) not in internals:
                     raise ValueError(f"triangle {k} has invalid coordinate {c}")
 def _check_dihed_coords(internals, dihed_sets):
+    """
+    **LLM Docstring**
+
+    Validate that each dihedron set is supported by enough bond, angle, and torsional information for tetrahedral reconstruction.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param dihed_sets: Dihedron records to validate.
+    :type dihed_sets: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     for k, v in dihed_sets.items():
         if None not in k:
             if canonicalize_internal(k, check_invalid=False) != k:
@@ -1903,6 +3283,36 @@ def get_internal_triangles_and_dihedrons(internals,
     dict[tuple[int, int, int], nput.TriangleData],
     dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]
 ]:
+    """
+    **LLM Docstring**
+
+    Construct a dependency-ordered triangulation of an internal-coordinate set. It identifies complete triangles and tetrahedra, records how missing pair distances are generated from angles or dihedrals, and can return auxiliary maps describing coordinate provenance and unresolved terms.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param base: Existing triangulation data used as the starting point for adding new coordinates.
+    :type base: Any
+    :param base_internals: Coordinates already accepted by the nonredundancy checker.
+    :type base_internals: Any
+    :param construct_shapes: Whether explicit triangle and dihedron shape records are constructed rather than only dependency metadata.
+    :type construct_shapes: Any
+    :param prune_incomplete: Whether triangle or dihedron candidates lacking enough defining information are discarded.
+    :type prune_incomplete: Any
+    :param validate: Whether the resulting triangulation is checked for consistency before being returned.
+    :type validate: Any
+    :param allow_partially_defined: Whether shapes with unresolved terms are retained for later completion.
+    :type allow_partially_defined: Any
+    :param create_compound_dihedra: Whether overlapping dihedrons may be combined into compound conversion records.
+    :type create_compound_dihedra: Any
+    :param add_dihedron_triangles: Whether triangular faces implied by accepted dihedrons are inserted into the triangle set.
+    :type add_dihedron_triangles: Any
+    :param create_dihedra: Whether four-atom dihedron records are generated at all.
+    :type create_dihedra: Any
+    :return: Triangle and dihedron triangulation records, with optional auxiliary conversion data selected by the function options.
+    :rtype: tuple
+    """
     if base is None:
         tri_sets:dict[tuple[int],set] = {}
         dihed_sets:dict[tuple[int],set] = {}
@@ -2496,6 +3906,16 @@ def get_internal_triangles_and_dihedrons(internals,
 def get_triangulation_internals(
     triangulation:tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]]
 ):
+    """
+    **LLM Docstring**
+
+    Extract the primitive distance, angle, and dihedral coordinates represented by triangle and dihedron triangulation records.
+
+    :param triangulation: Optional precomputed triangle/dihedron representation.
+    :type triangulation: tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]]
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     tri_sets, dihed_sets = triangulation
     return itut.delete_duplicates(
             v
@@ -2505,6 +3925,24 @@ def get_triangulation_internals(
         )
 
 def get_core_triangulation(internal_bag, targets, intersection='partial', cache=None, **kwargs):
+    """
+    **LLM Docstring**
+
+    Reduce a triangulation to the connected subset needed to support target coordinates, retaining records that fully or partially intersect the target atom sets according to `intersection`.
+
+    :param internal_bag: Available triangulation records or coordinates.
+    :type internal_bag: Any
+    :param targets: Coordinates or atom sets whose supporting triangulation is requested.
+    :type targets: Any
+    :param intersection: Rule controlling whether partial or complete atom-set overlap retains a record.
+    :type intersection: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :param kwargs: Additional options forwarded to the triangulation reduction or merge routine.
+    :type kwargs: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     if cache is None:
         cache = {}
     target_set = frozenset(a for t in targets for a in t)
@@ -2531,6 +3969,28 @@ def get_core_triangulation(internal_bag, targets, intersection='partial', cache=
 def _merge_shapes(new_shapes, old_shapes, perms, perm_invs, prop_func,
                   in_place=False,
                   merge_strategy='both'):
+    """
+    **LLM Docstring**
+
+    Merge permuted triangle or dihedron records with an existing set, reconcile shape/broadcast dimensions, and update property caches for records that become equivalent after permutation.
+
+    :param new_shapes: Modified triangle or dihedron records to merge.
+    :type new_shapes: Any
+    :param old_shapes: Existing records into which modified records are merged.
+    :type old_shapes: Any
+    :param perms: Allowed vertex permutations for each record type.
+    :type perms: Any
+    :param perm_invs: Inverse permutations used to restore canonical metadata ordering.
+    :type perm_invs: Any
+    :param prop_func: Function that computes record properties used during merging.
+    :type prop_func: Any
+    :param in_place: Whether the supplied triangulation containers are mutated instead of copied.
+    :type in_place: Any
+    :param merge_strategy: Policy used to reconcile equivalent records and conflicting conversion metadata.
+    :type merge_strategy: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     if not in_place:
         new_shapes = new_shapes.copy()
         old_shapes = old_shapes.copy()
@@ -2588,6 +4048,22 @@ def _merge_shapes(new_shapes, old_shapes, perms, perm_invs, prop_func,
 def merge_dihedral_sets(sub_diheds, unmodified_diheds,
                         in_place=False,
                         merge_strategy='both'):
+    """
+    **LLM Docstring**
+
+    Merge modified dihedron records back into unmodified records while canonicalizing equivalent vertex permutations and preserving conversion metadata.
+
+    :param sub_diheds: Modified dihedron records.
+    :type sub_diheds: Any
+    :param unmodified_diheds: Dihedron records unaffected by the update.
+    :type unmodified_diheds: Any
+    :param in_place: Whether the supplied triangulation containers are mutated instead of copied.
+    :type in_place: Any
+    :param merge_strategy: Policy used to reconcile equivalent records and conflicting conversion metadata.
+    :type merge_strategy: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     return _merge_shapes(
         sub_diheds,
         unmodified_diheds,
@@ -2600,6 +4076,22 @@ def merge_dihedral_sets(sub_diheds, unmodified_diheds,
 def merge_triangle_sets(sub_tris, unmodified_tris,
                         in_place=False,
                         merge_strategy='both'):
+    """
+    **LLM Docstring**
+
+    Merge modified triangle records back into unmodified records while canonicalizing equivalent vertex permutations and preserving conversion metadata.
+
+    :param sub_tris: Modified triangle records.
+    :type sub_tris: Any
+    :param unmodified_tris: Triangle records unaffected by the update.
+    :type unmodified_tris: Any
+    :param in_place: Whether the supplied triangulation containers are mutated instead of copied.
+    :type in_place: Any
+    :param merge_strategy: Policy used to reconcile equivalent records and conflicting conversion metadata.
+    :type merge_strategy: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     return _merge_shapes(
         sub_tris,
         unmodified_tris,
@@ -2618,6 +4110,26 @@ def update_triangulation(
         return_split=False,
         validate=False
 ):
+    """
+    **LLM Docstring**
+
+    Update triangle and dihedron records after coordinates are added, removed, or replaced. The routine rewrites affected terms, generates newly completable shapes, merges equivalent records, and returns the updated triangulation plus optional bookkeeping.
+
+    :param triangulation: Optional precomputed triangle/dihedron representation.
+    :type triangulation: tuple[dict[tuple[int, int, int], nput.TriangleData], dict[tuple[int, int, int, int], nput.DihedralTetrahedronData]]
+    :param added_internals: Coordinates being introduced into the triangulation.
+    :type added_internals: Any
+    :param removed_internals: Coordinates being deleted from the triangulation.
+    :type removed_internals: Any
+    :param triangulation_internals: Cached primitive coordinates represented by the existing triangulation.
+    :type triangulation_internals: Any
+    :param return_split: Whether updated and untouched triangulation subsets are returned separately.
+    :type return_split: Any
+    :param validate: Whether the resulting triangulation is checked for consistency before being returned.
+    :type validate: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     raise NotImplementedError("a little bit broken")
     if triangulation_internals is None:
         triangulation_internals = [canonicalize_internal(c, check_invalid=False) for c in get_triangulation_internals(triangulation)]
@@ -2872,6 +4384,20 @@ def update_triangulation(
         return tri_set, dihed_set
 
 def _triangle_conversion_function(inds, tri, coord):
+    """
+    **LLM Docstring**
+
+    Create a callable that computes a requested triangle coordinate or missing edge from the triangle’s three pair distances.
+
+    :param inds: Flattened coordinate index data.
+    :type inds: Any
+    :param tri: Triangle record supplying the three pair distances used by the conversion.
+    :type tri: Any
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     idx = []
     for i in coord:
         try:
@@ -2885,6 +4411,32 @@ def _triangle_conversion_function(inds, tri, coord):
     return nput.triangle_property_function(tri, target['name'], raise_on_missing=False)
 def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cache=None, completion_handler=None,
                                   disallowed_conversions=None, allow_ambiguous_completions=False, verbose=False):
+    """
+    **LLM Docstring**
+
+    Create a callable that evaluates a requested bond, angle, or dihedral from one tetrahedron’s six pair distances, optionally completing missing terms and reporting completion provenance.
+
+    :param inds: Flattened coordinate index data.
+    :type inds: Any
+    :param dihed: Dihedron record supplying the six tetrahedral pair distances used by the conversion.
+    :type dihed: Any
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :param allow_completion: Whether missing intermediate coordinates may be reconstructed.
+    :type allow_completion: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :param completion_handler: Callback that records completed intermediate coordinates.
+    :type completion_handler: Any
+    :param disallowed_conversions: Coordinate conversions that must not be used while searching for a target conversion.
+    :type disallowed_conversions: Any
+    :param allow_ambiguous_completions: Whether a missing intermediate may be accepted when more than one completion path exists.
+    :type allow_ambiguous_completions: Any
+    :param verbose: Whether diagnostic information is emitted during the search.
+    :type verbose: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     idx = []
     for i in coord:
         try:
@@ -2905,6 +4457,28 @@ def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cac
 def _pair_dihedral_conversion_function(inds1, dihed1, inds2, dihed2, coord,
                                        raise_on_invalid=True,
                                        cache=None):
+    """
+    **LLM Docstring**
+
+    Create a callable that evaluates a target coordinate using two overlapping tetrahedra when no single dihedron record contains all required atoms.
+
+    :param inds1: Distance indices for the first tetrahedron.
+    :type inds1: Any
+    :param dihed1: First tetrahedron conversion record.
+    :type dihed1: Any
+    :param inds2: Distance indices for the second tetrahedron.
+    :type inds2: Any
+    :param dihed2: Second tetrahedron conversion record.
+    :type dihed2: Any
+    :param coord: A single coordinate specification or target coordinate.
+    :type coord: Any
+    :param raise_on_invalid: Whether an invalid or unsupported target conversion raises instead of returning the missing value.
+    :type raise_on_invalid: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     # to get (3, 1, 2, 4), given (0, 1, 2, 3) and (0, 1, 2, 4)
     # I need (0, 1, 2, 3) - (0, 1, 2, 4)
     # so I find the three overlap positions between `inds1` and `inds2` and then
@@ -2974,18 +4548,52 @@ def _pair_dihedral_conversion_function(inds1, dihed1, inds2, dihed2, coord,
 
 class InternalCoordinateConversion:
     def __init__(self, caller, provenance, name=None):
+        """
+        **LLM Docstring**
+
+        Store a conversion callable together with provenance describing which triangulation records and source coordinates support it.
+
+        :param caller: Callable that evaluates the conversion.
+        :type caller: Any
+        :param provenance: Metadata describing the source records and coordinates used by the conversion.
+        :type provenance: Any
+        :param name: Optional display name for the conversion.
+        :type name: Any
+        :return: None.
+        :rtype: None
+        """
         self.caller = caller
         if name is None:
             name = self.caller.__name__
         self.__name__ = name
         self.provenance = provenance
     def __call__(self, internals, **opts):
+        """
+        **LLM Docstring**
+
+        Evaluate the stored conversion callable on an internal-coordinate value array.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :param opts: Additional options forwarded to the numerical conversion routine.
+        :type opts: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         try:
             return self.caller(internals, **opts)
         except:
             ints = np.asanyarray(internals)
             raise ValueError(f"caller error in calling {self} on internals of shape {ints.shape}")
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Format the conversion using its assigned name and provenance description.
+
+        :return: A concise representation of the object.
+        :rtype: str
+        """
         return f"{type(self).__name__}<{self.__name__}>"
 
 int_conv_data = collections.namedtuple("int_conv_data",
@@ -3009,6 +4617,52 @@ def find_internal_conversion(internals, targets,
                              index_mapping=None,
                              verbose=False,
                              missing_val='raise'):
+    """
+    **LLM Docstring**
+
+    Build a conversion from an available internal-coordinate set to requested target coordinates. It first reuses direct coordinates, then searches triangle and dihedron records, completion relations, and paired tetrahedra, returning conversion callables with provenance for each target.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param targets: Coordinates or atom sets whose supporting triangulation is requested.
+    :type targets: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param allow_completion: Whether missing intermediate coordinates may be reconstructed.
+    :type allow_completion: Any
+    :param return_conversions: Whether conversion objects and provenance are returned rather than only converted values.
+    :type return_conversions: Any
+    :param prep_conversions: Whether returned conversion specifications are wrapped as directly callable objects.
+    :type prep_conversions: Any
+    :param include_shapes: Whether shape records supporting each conversion are included in the result metadata.
+    :type include_shapes: Any
+    :param indices: Atom indices defining the coordinate, or a restricted search index set.
+    :type indices: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :param disallowed_conversions: Coordinate conversions that must not be used while searching for a target conversion.
+    :type disallowed_conversions: Any
+    :param update_triangles_and_dihedrons: Whether completed intermediate coordinates are inserted back into the working triangulation.
+    :type update_triangles_and_dihedrons: Any
+    :param return_completions: Whether conversions for newly reconstructed intermediate coordinates are returned.
+    :type return_completions: Any
+    :param allow_recursive_completions: Whether completing one coordinate may recursively request additional intermediate completions.
+    :type allow_recursive_completions: Any
+    :param allow_ambiguous_completions: Whether a missing intermediate may be accepted when more than one completion path exists.
+    :type allow_ambiguous_completions: Any
+    :param dihedral_intersections: Allowed overlap rules when combining multiple dihedron records for a conversion.
+    :type dihedral_intersections: Any
+    :param index_mapping: Optional mapping from canonical coordinate indices to columns in the supplied value array.
+    :type index_mapping: Any
+    :param verbose: Whether diagnostic information is emitted during the search.
+    :type verbose: Any
+    :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+    :type missing_val: Any
+    :return: Conversion objects or a combined callable that produces the requested target coordinates.
+    :rtype: Any
+    """
     smol = nput.is_int(targets[0])
     if smol: targets = [targets]
     if triangles_and_dihedrons is None:
@@ -3135,6 +4789,34 @@ def find_internal_conversion(internals, targets,
                                 key=a,
                                 base=v
                         ):
+                            """
+                            **LLM Docstring**
+
+                            Record a newly completed intermediate coordinate and its conversion so later target conversions can reuse it.
+
+                            :param og_dihed: Original dihedron record from which the recursive completion search began.
+                            :type og_dihed: Any
+                            :param k: Third local vertex or candidate dihedron key.
+                            :type k: Any
+                            :param disallowed_conversions: Coordinate conversions that must not be used while searching for a target conversion.
+                            :type disallowed_conversions: Any
+                            :param allow_completion: Whether missing intermediate coordinates may be reconstructed.
+                            :type allow_completion: Any
+                            :param raise_on_missing: Whether a failed recursive completion raises rather than returning the configured missing value.
+                            :type raise_on_missing: Any
+                            :param return_depth: Whether the recursion depth used to find a completion is included in the result.
+                            :type return_depth: Any
+                            :param cache: Optional mutable cache of triangulation or conversion results.
+                            :type cache: Any
+                            :param depth: Current recursive search depth.
+                            :type depth: Any
+                            :param key: Triangulation record key being validated.
+                            :type key: Any
+                            :param base: Existing triangulation data used as the starting point for adding new coordinates.
+                            :type base: Any
+                            :return: The value or updated object described above.
+                            :rtype: Any
+                            """
                             if allow_completion is True:
                                 allow_completion = 2
                             oc = tuple(key[x] for x in idx_data[k]['coord'])
@@ -3190,6 +4872,18 @@ def find_internal_conversion(internals, targets,
             if idx is not None:
                 if prep_conversions:
                     def select_internal_index(internal_list, idx=idx):
+                        """
+                        **LLM Docstring**
+
+                        Resolve a triangulation term to the corresponding source-internal or completed-coordinate index, including orientation sign where required.
+
+                        :param internal_list: Working list of source and completed internal coordinates used during recursive conversion search.
+                        :type internal_list: Any
+                        :param idx: Index of the coordinate or conversion entry selected from the working list.
+                        :type idx: Any
+                        :return: The value or updated object described above.
+                        :rtype: Any
+                        """
                         internal_list = np.asanyarray(internal_list)
                         if index_mapping is not None:
                             subconv = index_mapping[idx]
@@ -3225,6 +4919,22 @@ def find_internal_conversion(internals, targets,
                         raise ValueError(args)
                     args = {k:v for k,v in args.items() if v is not None}
                     def convert(internal_list, args=args, conv=conv,  **kwargs):
+                        """
+                        **LLM Docstring**
+
+                        Evaluate the selected direct, triangle, dihedron, paired-dihedron, or completion-based conversion and place the results in target-coordinate order.
+
+                        :param internal_list: Working list of source and completed internal coordinates used during recursive conversion search.
+                        :type internal_list: Any
+                        :param args: Additional positional values captured by the nested conversion wrapper.
+                        :type args: Any
+                        :param conv: Conversion specification to wrap.
+                        :type conv: Any
+                        :param kwargs: Additional options forwarded to the triangulation reduction or merge routine.
+                        :type kwargs: Any
+                        :return: The value or updated object described above.
+                        :rtype: Any
+                        """
                         internal_list = np.asanyarray(internal_list)
                         subargs = {}
                         for k, idx in args.items():
@@ -3260,6 +4970,22 @@ def find_internal_conversion(internals, targets,
                         if v is not None
                     }
                     def convert(internal_list, args=args, conv=conv, **kwargs):
+                        """
+                        **LLM Docstring**
+
+                        Evaluate the selected direct, triangle, dihedron, paired-dihedron, or completion-based conversion and place the results in target-coordinate order.
+
+                        :param internal_list: Working list of source and completed internal coordinates used during recursive conversion search.
+                        :type internal_list: Any
+                        :param args: Additional positional values captured by the nested conversion wrapper.
+                        :type args: Any
+                        :param conv: Conversion specification to wrap.
+                        :type conv: Any
+                        :param kwargs: Additional options forwarded to the triangulation reduction or merge routine.
+                        :type kwargs: Any
+                        :return: The value or updated object described above.
+                        :rtype: Any
+                        """
                         internal_list = np.asanyarray(internal_list)
                         subargs = {}
                         for k,(idx,s) in args.items():
@@ -3306,6 +5032,22 @@ def find_internal_conversion(internals, targets,
                         if v is not None
                     }
                     def convert(internal_list, args1=args1, args2=args2, conv=conv, **kwargs):
+                        """
+                        **LLM Docstring**
+
+                        Evaluate the selected direct, triangle, dihedron, paired-dihedron, or completion-based conversion and place the results in target-coordinate order.
+
+                        :param internal_list: Working list of source and completed internal coordinates used during recursive conversion search.
+                        :type internal_list: Any
+                        :param args: Additional positional values captured by the nested conversion wrapper.
+                        :type args: Any
+                        :param conv: Conversion specification to wrap.
+                        :type conv: Any
+                        :param kwargs: Additional options forwarded to the triangulation reduction or merge routine.
+                        :type kwargs: Any
+                        :return: The value or updated object described above.
+                        :rtype: Any
+                        """
                         internal_list = np.asanyarray(internal_list)
                         subargs1 = {}
                         for k, (idx, s) in args1.items():
@@ -3361,6 +5103,22 @@ def find_internal_conversion(internals, targets,
             convert = conversions
         else:
             def convert(internal_spec, order=None, conversions=conversions, **kwargs):
+                """
+                **LLM Docstring**
+
+                Evaluate the selected direct, triangle, dihedron, paired-dihedron, or completion-based conversion and place the results in target-coordinate order.
+
+                :param internal_list: Working list of source and completed internal coordinates used during recursive conversion search.
+                :type internal_list: Any
+                :param args: Additional positional values captured by the nested conversion wrapper.
+                :type args: Any
+                :param conv: Conversion specification to wrap.
+                :type conv: Any
+                :param kwargs: Additional options forwarded to the triangulation reduction or merge routine.
+                :type kwargs: Any
+                :return: The value or updated object described above.
+                :rtype: Any
+                """
                 convs = [
                     c(internal_spec)
                     for c in conversions
@@ -3384,12 +5142,30 @@ def find_internal_conversion(internals, targets,
         res = res[0]
     return res
 def _enumerate_dists(internals):
+    """
+    **LLM Docstring**
+
+    Return the canonical set of explicit distance pairs present in an internal-coordinate list.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :return: An iterator yielding the candidates described above.
+    :rtype: Iterator
+    """
     for coord in internals:
         for c in itertools.combinations(coord, 2):
             yield canonicalize_internal(c)
 
 _dihed_check_sets = []
 def _get_dihedron_checks():
+    """
+    **LLM Docstring**
+
+    Return cached atom-position combinations used to test whether a tetrahedron can attach a new atom to an existing Z-matrix tree.
+
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     if len(_dihed_check_sets) == 0:
         base = ('Tb', 'a', 'b', 'c', 'X', 'Y')
         for p in itertools.permutations([0, 1, 2, 3]):
@@ -3404,12 +5180,36 @@ def _get_dihedron_checks():
 
 _dihedron_index_props = {}
 def _get_dihedron_index_props():
+    """
+    **LLM Docstring**
+
+    Return cached lookup data describing the root, attachment, and new-atom positions for each dihedron attachment permutation.
+
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     if len(_dihedron_index_props) == 0:
         for k,v in nput.dihedron_property_specifiers().items():
             _dihedron_index_props[v["coord"]] = v
     return _dihedron_index_props
 
 def _dihedron_completable(k, dihed_data, known_atom_graph, max_comps=5):
+    """
+    **LLM Docstring**
+
+    Test whether a dihedron record has a permutation whose attachment atoms are already connected and whose remaining atom can be introduced, subject to a maximum number of disconnected components.
+
+    :param k: Third local vertex or candidate dihedron key.
+    :type k: Any
+    :param dihed_data: Dihedron triangulation record being tested.
+    :type dihed_data: Any
+    :param known_atom_graph: Connectivity graph of atoms already placed in the partial Z-matrix.
+    :type known_atom_graph: Any
+    :param max_comps: Maximum disconnected components allowed after attachment.
+    :type max_comps: Any
+    :return: Whether the tested condition is satisfied.
+    :rtype: bool
+    """
     if nput.dihedron_is_complete(dihed_data):
         return True
     else:
@@ -3438,6 +5238,24 @@ def _dihedron_completable(k, dihed_data, known_atom_graph, max_comps=5):
         return False
 
 def _get_matching_dihedrals(a, dihedral_set, internals, *, check_complete=False, d_prop_cache=[None]):
+    """
+    **LLM Docstring**
+
+    Find dihedron records containing a specified atom, optionally requiring each record to be complete, and return their matching attachment permutations.
+
+    :param a: Atom whose containing coordinate or attachment is being sought.
+    :type a: Any
+    :param dihedral_set: Available dihedron records.
+    :type dihedral_set: Any
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param check_complete: Whether a candidate shape or distance set must be fully populated before acceptance.
+    :type check_complete: Any
+    :param d_prop_cache: Cache of dihedron attachment properties.
+    :type d_prop_cache: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     dihed_choices = []
     dihed_props = d_prop_cache[0]
     if dihed_props is None:
@@ -3465,6 +5283,20 @@ def _get_matching_dihedrals(a, dihedral_set, internals, *, check_complete=False,
                         dihed_choices.append(k)
     return dihed_choices
 def enumarate_zmatrix_roots_from_triangles(atoms, tris, connectivity_graph):
+    """
+    **LLM Docstring**
+
+    Enumerate three-atom Z-matrix roots from complete triangles whose atoms satisfy the connectivity graph, yielding root orderings and the triangle record supporting each root.
+
+    :param atoms: Atoms to include or place.
+    :type atoms: Any
+    :param tris: Triangle triangulation records.
+    :type tris: Any
+    :param connectivity_graph: Graph restricting admissible root and attachment orderings.
+    :type connectivity_graph: Any
+    :return: An iterator yielding the candidates described above.
+    :rtype: Iterator
+    """
     combs = list(itertools.combinations(atoms, 3))
     combs = combs[:1] + sorted(combs[1:],
                                key=lambda x: np.max([len(connectivity_graph[k]) for k in x]),
@@ -3505,6 +5337,20 @@ def enumarate_zmatrix_roots_from_triangles(atoms, tris, connectivity_graph):
             ] # if only 4 we can't actually connect to anything else
             yield groups
 def construct_atom_connection_graph_from_triangulation(internals, tris, dihedrons):
+    """
+    **LLM Docstring**
+
+    Build an atom adjacency graph from explicit distances and from edges implied by triangle and dihedron records, and return lookup maps from atoms or edges to supporting triangulation records.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param tris: Triangle triangulation records.
+    :type tris: Any
+    :param dihedrons: Available dihedron triangulation records.
+    :type dihedrons: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     #TODO: support passing t2 and d2 directly
     t2 = {k:t for k,t in tris.items() if nput.triangle_is_complete(t)}
     d2 = {k:d for k,d in dihedrons.items() if nput.dihedron_is_complete(d)}
@@ -3578,6 +5424,24 @@ def construct_atom_connection_graph_from_triangulation(internals, tris, dihedron
 
     return known_atom_graph, complete_dihedrals
 def _check_populated_dihedral_complete(k, dihed_data, known_atoms, choice, *, cached_data=[None]):
+    """
+    **LLM Docstring**
+
+    Check whether a candidate dihedron attachment has all required populated terms for the chosen atom ordering, caching invariant lookup information.
+
+    :param k: Third local vertex or candidate dihedron key.
+    :type k: Any
+    :param dihed_data: Dihedron triangulation record being tested.
+    :type dihed_data: Any
+    :param known_atoms: Atoms already placed in the current partial ordering.
+    :type known_atoms: Any
+    :param choice: Candidate attachment permutation.
+    :type choice: Any
+    :param cached_data: Reusable attachment-position data cached across repeated completeness checks.
+    :type cached_data: Any
+    :return: Whether the tested condition is satisfied.
+    :rtype: bool
+    """
     idx_data = cached_data[0]
     if idx_data is None:
         idx_data = nput.dihedron_property_specifiers()
@@ -3603,6 +5467,28 @@ def _grow_dihedral_trees(root, atoms,
                          incomplete_dihedrals=None,
                          internals=None,
                          *, traversal='dfs'):
+    """
+    **LLM Docstring**
+
+    Recursively extend a Z-matrix atom ordering from a three-atom root by attaching atoms through compatible complete dihedrons, tracking used records, connectivity, branch limits, and optional filters.
+
+    :param root: Three-atom root ordering for Z-matrix growth.
+    :type root: Any
+    :param atoms: Atoms to include or place.
+    :type atoms: Any
+    :param top_dihedral_choices: Primary dihedron attachments available from the current tree frontier.
+    :type top_dihedral_choices: Any
+    :param secondary_dihedral_choices: Fallback dihedron attachments considered when primary choices cannot extend the tree.
+    :type secondary_dihedral_choices: Any
+    :param incomplete_dihedrals: Dihedron records retained for later completion but not currently usable for attachment.
+    :type incomplete_dihedrals: Any
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param traversal: Current ordered atom traversal and its supporting attachment records.
+    :type traversal: Any
+    :return: An iterator yielding the candidates described above.
+    :rtype: Iterator
+    """
     #TODO: consider caching these for a given root ordering...
     visited = frozenset(root)
     queue = collections.deque([
@@ -3704,6 +5590,18 @@ def get_fragments_from_internals(
         internals,
         triangles_and_dihedrons=None
 ):
+    """
+    **LLM Docstring**
+
+    Construct the bond graph implied by internal coordinates and return its connected atom fragments, with optional atom inclusion and triangulation-derived edges.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     if triangles_and_dihedrons is None:
         triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
 
@@ -3726,6 +5624,30 @@ def enumerate_zmatrices_from_internals(internals,
                                        max_ordering_passes=1,
                                        **conversion_options
                                        ):
+    """
+    **LLM Docstring**
+
+    Enumerate Z-matrix index arrays compatible with an internal-coordinate set. It builds triangulation and connectivity data, chooses triangle roots, grows valid dihedral attachment trees, filters duplicates or user-rejected candidates, and can return supporting conversion metadata.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :param atoms: Atoms to include or place.
+    :type atoms: Any
+    :param ordering: Optional preferred atom ordering used to seed or constrain Z-matrix enumeration.
+    :type ordering: Any
+    :param graph: Connectivity graph used to test distance inference.
+    :type graph: Any
+    :param build_conversion: Whether each enumerated Z-matrix is accompanied by a conversion from the source internals.
+    :type build_conversion: Any
+    :param max_ordering_passes: Maximum number of attempts to extend or revise a candidate atom ordering.
+    :type max_ordering_passes: Any
+    :param conversion_options: Options forwarded when constructing conversions for enumerated Z-matrices.
+    :type conversion_options: Any
+    :return: An iterator over compatible Z-matrix index arrays, optionally paired with supporting metadata.
+    :rtype: Iterator
+    """
     from .ZMatrices import extract_zmatrix_internals
 
     if triangles_and_dihedrons is None:
@@ -3782,6 +5704,18 @@ def enumerate_zmatrices_from_internals(internals,
             #     d3_filts[a] = _get_matching_dihedrals(a, d3, internals, check_complete=False)
 
         def _filter(p, v):
+            """
+            **LLM Docstring**
+
+            Apply the user-supplied candidate filter to a partial or complete atom ordering while preserving candidates when no filter is supplied.
+
+            :param p: Candidate atom ordering passed to the enumeration filter.
+            :type p: Any
+            :param v: Metadata associated with the candidate ordering passed to the filter.
+            :type v: Any
+            :return: The value or updated object described above.
+            :rtype: Any
+            """
             p_set = {pp[0] for pp in p}
             for i in v[1:]:
                 if i > 0 and i not in p_set:
@@ -4014,6 +5948,34 @@ def get_internal_distance_conversion(
         prep_conversions=True,
         cache=None
 ):
+    """
+    **LLM Docstring**
+
+    Return a callable that transforms internal-coordinate values into the pair distances required by their triangulation, along with optional conversion metadata.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :param dist_set: Optional known canonical distance set.
+    :type dist_set: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param allow_completion: Whether missing intermediate coordinates may be reconstructed.
+    :type allow_completion: Any
+    :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+    :type missing_val: Any
+    :param include_shapes: Whether shape records supporting each conversion are included in the result metadata.
+    :type include_shapes: Any
+    :param return_conversions: Whether conversion objects and provenance are returned rather than only converted values.
+    :type return_conversions: Any
+    :param prep_conversions: Whether returned conversion specifications are wrapped as directly callable objects.
+    :type prep_conversions: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     if dist_set is None:
         dist_set = list(sorted(set(_enumerate_dists(internals)))) # remove dupes, sort
     if cache is None: cache = {}
@@ -4035,6 +5997,22 @@ def get_internal_cartesian_conversion(
         canonicalize=True,
         missing_val='raise'
 ):
+    """
+    **LLM Docstring**
+
+    Construct a converter from internal-coordinate values to Cartesian geometries by composing internal-to-distance conversion with distance-geometry embedding.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :param canonicalize: Whether to put coordinates in canonical orientation before comparison or storage.
+    :type canonicalize: Any
+    :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+    :type missing_val: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     #TODO: add direct conversion through Z-matrix if can be enumerated
     dists, dist_conv = get_internal_distance_conversion(internals,
                                                         triangles_and_dihedrons=triangles_and_dihedrons,
@@ -4046,6 +6024,16 @@ def get_internal_cartesian_conversion(
     n = int(n)
     rows, cols = np.triu_indices(n, k=1)
     def convert(internals):
+        """
+        **LLM Docstring**
+
+        Convert one internal-coordinate array to distances, embed those distances in Cartesian space, and apply optional reference alignment or embedding settings.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         internals = np.asanyarray(internals)
         base_shape = internals.shape[:-1]
         internal_dists = dist_conv(internals)
@@ -4060,6 +6048,20 @@ def get_internal_cartesian_conversion(
     return convert
 
 def validate_internals(internals, triangles_and_dihedrons=None, raise_on_failure=True):
+    """
+    **LLM Docstring**
+
+    Validate that an internal-coordinate set can produce a complete, consistent triangulation and optionally raise an exception containing the unresolved coordinates.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :param raise_on_failure: Whether unresolved triangulation or conversion terms raise an exception.
+    :type raise_on_failure: Any
+    :return: Whether the coordinate set passes triangulation validation.
+    :rtype: bool
+    """
     # detect whether or not they may be interconverted freely
     if triangles_and_dihedrons is None:
         if isinstance(internals, RADInternalCoordinateSet):
@@ -4086,6 +6088,26 @@ def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None,
                             dist_set=None,
                             return_conversions=False,
                             complete_graph=False):
+    """
+    **LLM Docstring**
+
+    Build an `EdgeGraph` from explicit and triangulation-implied bond distances, optionally including isolated atoms and returning supporting edge metadata.
+
+    :param internals: Available internal-coordinate specifications or their numerical values.
+    :type internals: Any
+    :param atoms: Atoms to include or place.
+    :type atoms: Any
+    :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    :type triangles_and_dihedrons: Any
+    :param dist_set: Optional known canonical distance set.
+    :type dist_set: Any
+    :param return_conversions: Whether conversion objects and provenance are returned rather than only converted values.
+    :type return_conversions: Any
+    :param complete_graph: Whether the bond graph should be completed with all triangulation-implied edges.
+    :type complete_graph: Any
+    :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+    :rtype: Any
+    """
     if complete_graph:
         if dist_set is None:
             if atoms is None:
@@ -4112,6 +6134,20 @@ def get_internal_bond_graph(internals, atoms=None, triangles_and_dihedrons=None,
         return graph
 
 def _update_cache_based_on_dists(extra_dists, cache, inverse_triangulation):
+    """
+    **LLM Docstring**
+
+    Add newly known distances to a conversion cache and update inverse triangulation lookups that depend on those pairs.
+
+    :param extra_dists: Newly available pair distances.
+    :type extra_dists: Any
+    :param cache: Optional mutable cache of triangulation or conversion results.
+    :type cache: Any
+    :param inverse_triangulation: Lookup from pair distances to triangulation records that depend on them.
+    :type inverse_triangulation: Any
+    :return: The value or updated object described above.
+    :rtype: Any
+    """
     # invalidate cache information for `dihedron_property_function`
     # from `find_internal_conversion`
     conversion_cache = cache.setdefault('disallowed_conversions', {})
@@ -4124,6 +6160,20 @@ def _update_cache_based_on_dists(extra_dists, cache, inverse_triangulation):
 
 class NonredundantInternalsChecker:
     def __init__(self, base_internals, natoms, dist_set=None):
+        """
+        **LLM Docstring**
+
+        Initialize a mutable nonredundancy checker from base coordinates, atom count, and an optional precomputed distance set, including rigidity and conversion caches.
+
+        :param base_internals: Coordinates already accepted by the nonredundancy checker.
+        :type base_internals: Any
+        :param natoms: Number of atoms in the system.
+        :type natoms: Any
+        :param dist_set: Optional known canonical distance set.
+        :type dist_set: Any
+        :return: None.
+        :rtype: None
+        """
         self.graph = InternalCoordinateGraph(base_internals, atoms=natoms)
         self.natoms = natoms
         if dist_set is None:
@@ -4137,11 +6187,29 @@ class NonredundantInternalsChecker:
 
     @property
     def dists(self):
+        """
+        **LLM Docstring**
+
+        Return the current canonical distance set represented by the accepted coordinates.
+
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         if self._all_dists is None:
             checks = self.graph.find_conversions(self.dist_set, find_unreachable=False)
             self._all_dists = tuple(d for d,c in zip(self.dist_set, checks) if c is not None)
         return self._all_dists
     def check_rigidty(self, dists):
+        """
+        **LLM Docstring**
+
+        Test whether a proposed distance graph is minimally rigid for the checker’s atom count using the configured rigidity criterion.
+
+        :param dists: Candidate or current pair-distance set.
+        :type dists: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         rigid, (_, local_rank), stress = uniquely_rigid(
             dists, 3, natoms=self.natoms,
             return_components=True,
@@ -4151,6 +6219,16 @@ class NonredundantInternalsChecker:
 
     @classmethod
     def from_initial_internals(cls, internals):
+        """
+        **LLM Docstring**
+
+        Construct a checker from an existing coordinate list after deriving its atoms, distance set, and initial rigidity/conversion state.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         dist_pos = [n for n, i in enumerate(internals) if len(i) == 2]
         coords = [internals[n] for n in dist_pos]
 
@@ -4173,6 +6251,20 @@ class NonredundantInternalsChecker:
 
     @classmethod
     def check_trilateratable_distance(self, i, j, dists):
+        """
+        **LLM Docstring**
+
+        Determine whether a new distance can be inferred by trilateration from already known distances to sufficiently many common reference atoms.
+
+        :param i: An atom or flattened-coordinate index, depending on the helper.
+        :type i: Any
+        :param j: Second local vertex or coordinate index.
+        :type j: Any
+        :param dists: Candidate or current pair-distance set.
+        :type dists: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         # if we have at least 3 shared distances we can figure this out...
         neighbors_i = set()
         neighbors_j = set()
@@ -4193,6 +6285,24 @@ class NonredundantInternalsChecker:
                                     allow_recursive_completions=False,
                                     filter_by_new=True
                                     ):
+        """
+        **LLM Docstring**
+
+        Determine whether all pair distances introduced by candidate coordinates are already known or reconstructable from the current graph and triangulation cache.
+
+        :param new_coords: Candidate coordinates whose distances are tested for convertibility.
+        :type new_coords: Any
+        :param dists: Candidate or current pair-distance set.
+        :type dists: Any
+        :param graph: Connectivity graph used to test distance inference.
+        :type graph: Any
+        :param allow_recursive_completions: Whether completing one coordinate may recursively request additional intermediate completions.
+        :type allow_recursive_completions: Any
+        :param filter_by_new: Whether conversion-cache updates are restricted to records affected by newly added coordinates.
+        :type filter_by_new: Any
+        :return: Whether the tested condition is satisfied.
+        :rtype: bool
+        """
         main_checks = np.full(len(dists), False)
         for n,(i,j) in enumerate(dists):
             check = self.check_trilateratable_distance(i, j, self.dists)
@@ -4214,6 +6324,20 @@ class NonredundantInternalsChecker:
         return main_checks
 
     def add_internal(self, c, keep_bonds=True, keep_angles=True):
+        """
+        **LLM Docstring**
+
+        Attempt to add one coordinate without introducing redundant constraints. It updates known distances and rigidity state only when the coordinate contributes an independent bond, angle, or dihedral relation, with options to preserve prerequisite bonds and angles.
+
+        :param c: Third atom in the local triangle or tetrahedron.
+        :type c: Any
+        :param keep_bonds: Whether prerequisite bond distances should be retained when accepting a higher-order coordinate.
+        :type keep_bonds: Any
+        :param keep_angles: Whether prerequisite angles should be retained when accepting a dihedral.
+        :type keep_angles: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         # if self._local_rank is None:
         rigid, local_rank, stress_rank = self.check_rigidty(self.dists)
         self._local_rank = local_rank
@@ -4276,6 +6400,20 @@ class InternalCoordinateGraph:
     __slots__ = ['internals', 'atoms', 'triangulation',
                  '_completion_cache', '_conversions', '_unreachable', '_expanded_internals', '_tri_cache']
     def __init__(self, internals, atoms=None, triangles_and_dihedrons=None):
+        """
+        **LLM Docstring**
+
+        Initialize a mutable graph of internal coordinates, derive its triangulation and bond graph, and create caches for target conversions, expanded coordinates, and completed intermediates.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :param atoms: Atoms to include or place.
+        :type atoms: Any
+        :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+        :type triangles_and_dihedrons: Any
+        :return: None.
+        :rtype: None
+        """
         self.internals = internals
         if atoms is None:
             atoms = max(max(i) for i in internals) + 1
@@ -4293,8 +6431,30 @@ class InternalCoordinateGraph:
         # coordinates that need an update, and then if those need an upd
 
     def get_target_triangulation(self, internals, target):
+        """
+        **LLM Docstring**
+
+        Return the subset of the current triangulation needed to support a target coordinate.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :param target: Target coordinate whose supporting records are requested.
+        :type target: Any
+        :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+        :rtype: Any
+        """
         return get_core_triangulation(internals, target, cache=self._tri_cache)
     def enumerate_matching_dihedrons(self, target_coord):
+        """
+        **LLM Docstring**
+
+        Yield dihedron records and permutations that contain the target coordinate’s atoms in a usable arrangement.
+
+        :param target_coord: Coordinate for which matching dihedrons are sought.
+        :type target_coord: Any
+        :return: An iterator yielding the candidates described above.
+        :rtype: Iterator
+        """
         if self._expanded_internals is None:
             tri = self.triangulation
         else:
@@ -4315,6 +6475,16 @@ class InternalCoordinateGraph:
                 if pos[-1] < pos[0]: pos = reversed(pos)
                 yield tuple(pos), i, d
     def _get_expanded_internals(self, update_triangulation=True):
+        """
+        **LLM Docstring**
+
+        Return the current coordinates plus intermediate coordinates completed by triangulation, optionally refreshing the triangulation first.
+
+        :param update_triangulation: Whether to refresh triangulation data before using expanded coordinates or conversions.
+        :type update_triangulation: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if self._expanded_internals is None:
             ints = list(itut.delete_duplicates(
                 canonicalize_internal(k) for k in (
@@ -4343,6 +6513,18 @@ class InternalCoordinateGraph:
             self._expanded_internals = (ints, tri, dihedral_intersections)
         return self._expanded_internals
     def _update_conversions(self, new, update_triangulation=True):
+        """
+        **LLM Docstring**
+
+        Update cached target conversions after coordinates change, invalidating conversions that depend on removed data and resolving conversions enabled by newly added data.
+
+        :param new: Coordinates newly added to the graph.
+        :type new: Any
+        :param update_triangulation: Whether to refresh triangulation data before using expanded coordinates or conversions.
+        :type update_triangulation: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         self._conversions.update(new)
         if self._expanded_internals is not None:
             old_ints, old_tri, cur_int = self._expanded_internals
@@ -4393,6 +6575,36 @@ class InternalCoordinateGraph:
                          depth=0,
                          max_depth=5,
                          **etc):
+        """
+        **LLM Docstring**
+
+        Find or construct conversions from the graph’s current coordinates to one or more target coordinates, reusing cached direct, triangle, dihedron, paired-dihedron, and completion conversions where possible.
+
+        :param target_internals: Coordinates for which conversions are requested from the mutable graph.
+        :type target_internals: Any
+        :param unconvertable_atoms: Atoms that may not participate in inferred or completed conversion paths.
+        :type unconvertable_atoms: Any
+        :param allow_recursive_completions: Whether completing one coordinate may recursively request additional intermediate completions.
+        :type allow_recursive_completions: Any
+        :param allow_ambiguous_completions: Whether a missing intermediate may be accepted when more than one completion path exists.
+        :type allow_ambiguous_completions: Any
+        :param find_unreachable: Whether the search also identifies targets that cannot be reached from current coordinates.
+        :type find_unreachable: Any
+        :param verbose: Whether diagnostic information is emitted during the search.
+        :type verbose: Any
+        :param create_single: Whether a single requested target is returned as one callable instead of a list.
+        :type create_single: Any
+        :param missing_val: Value to return for a missing coordinate, or `"raise"` to raise.
+        :type missing_val: Any
+        :param depth: Current recursive search depth.
+        :type depth: Any
+        :param max_depth: Maximum recursive completion depth before the target is declared unreachable.
+        :type max_depth: Any
+        :param etc: Additional conversion-search options forwarded to nested searches.
+        :type etc: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         initial_set = target_internals
 
         target_internals = [
@@ -4517,6 +6729,22 @@ class InternalCoordinateGraph:
         if create_single:
             if any(c is None for c in conversions): return None
             def convert(internal_spec, order=None, conversions=conversions, **kwargs):
+                """
+                **LLM Docstring**
+
+                Evaluate the resolved graph conversions and assemble target values in the requested order, applying stored orientation signs and completion dependencies.
+
+                :param internal_spec: Coordinate specification associated with a cached graph conversion.
+                :type internal_spec: Any
+                :param order: Highest derivative order to compute.
+                :type order: Any
+                :param conversions: Conversion objects associated with the cached target coordinates.
+                :type conversions: Any
+                :param kwargs: Additional options forwarded to the triangulation reduction or merge routine.
+                :type kwargs: Any
+                :return: The value or updated object described above.
+                :rtype: Any
+                """
                 convs = [
                     c(internal_spec)
                     for c in conversions
@@ -4538,6 +6766,16 @@ class InternalCoordinateGraph:
             return conversions
 
     def _make_conversion(self, conv):
+        """
+        **LLM Docstring**
+
+        Wrap a conversion specification as a callable that first computes any required intermediate completions.
+
+        :param conv: Conversion specification to wrap.
+        :type conv: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         if isinstance(conv, InternalCoordinateConversion) or conv is None:
             return conv
         coord_keys, kl, unconverted_k, possible_convs = conv
@@ -4551,6 +6789,18 @@ class InternalCoordinateGraph:
             raise Exception(completions)
 
         def convert(internal_values, completions=completions):
+            """
+            **LLM Docstring**
+
+            Evaluate prerequisite completion conversions, append those values to the input vector, and then evaluate the requested target conversion.
+
+            :param internal_values: Numerical values of the source internal coordinates.
+            :type internal_values: Any
+            :param completions: Intermediate conversion callables required before the target conversion.
+            :type completions: Any
+            :return: The value or updated object described above.
+            :rtype: Any
+            """
             base_args = [
                 f(internal_values) for f in completions
             ]
@@ -4567,6 +6817,18 @@ class InternalCoordinateGraph:
     def get_bond_graph(self,
                        dist_set=None,
                        return_conversions=True):
+            """
+            **LLM Docstring**
+
+            Return the bond graph implied by the graph’s current coordinates and triangulation, optionally rebuilding it or including metadata.
+
+            :param dist_set: Optional known canonical distance set.
+            :type dist_set: Any
+            :param return_conversions: Whether conversion objects and provenance are returned rather than only converted values.
+            :type return_conversions: Any
+            :return: The requested coordinate, graph, triangulation, derivative, or conversion data described above.
+            :rtype: Any
+            """
             atoms = self.atoms
             if nput.is_int(atoms):
                 atoms = np.arange(atoms)
@@ -4602,6 +6864,18 @@ class InternalCoordinateGraph:
 
     class GraphCheckpoint:
         def __init__(self, g, reset=True):
+            """
+            **LLM Docstring**
+
+            Capture the graph object and whether its mutable coordinate, triangulation, and conversion state should be restored when leaving the checkpoint.
+
+            :param g: Graph whose state is checkpointed.
+            :type g: Any
+            :param reset: Whether graph state is restored on context exit.
+            :type reset: Any
+            :return: None.
+            :rtype: None
+            """
             self.graph = g
             self.reset = reset
             self._internals = None
@@ -4610,6 +6884,14 @@ class InternalCoordinateGraph:
             self._unreachable = None
             self._exp_int = None
         def __enter__(self):
+            """
+            **LLM Docstring**
+
+            Snapshot the graph’s mutable state and return the graph for temporary edits inside a context manager.
+
+            :return: The checkpointed internal-coordinate graph.
+            :rtype: InternalCoordinateGraph
+            """
             self._internals = self.graph.internals.copy()
             self._triangulation = tuple(t.copy() for t in self.graph.triangulation)
             self._conversions = self.graph._conversions.copy()
@@ -4617,6 +6899,20 @@ class InternalCoordinateGraph:
             self._exp_int = self.graph._expanded_internals
             return self
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            **LLM Docstring**
+
+            Restore the saved graph state when reset is enabled, regardless of whether the context exits normally or through an exception.
+
+            :param exc_type: Exception type raised in the checkpointed block, if any.
+            :type exc_type: Any
+            :param exc_val: Exception value raised in the checkpointed block, if any.
+            :type exc_val: Any
+            :param exc_tb: Exception traceback raised in the checkpointed block, if any.
+            :type exc_tb: Any
+            :return: `None`; exceptions are not suppressed.
+            :rtype: None
+            """
             if self.reset:
                 self.graph.internals = self._internals
                 self.graph.triangulation = self._triangulation
@@ -4625,9 +6921,27 @@ class InternalCoordinateGraph:
                 self.graph._expanded_internals = self._exp_int
 
     def checkpoint(self):
+        """
+        **LLM Docstring**
+
+        Return a context manager for making temporary changes to the internal-coordinate graph.
+
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         return self.GraphCheckpoint(self)
 
     def add_internals(self, internals):
+        """
+        **LLM Docstring**
+
+        Add coordinates to the graph, update triangulation and bond data, and refresh conversion caches for targets that become directly or indirectly available.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         # update triangulation
         # determine which distances could have been impacted by this change
         # check if any of those are completable
@@ -4702,4 +7016,16 @@ class InternalCoordinateGraph:
         return newly_reachable
 
     def remove_internals(self, internals):
+        """
+        **LLM Docstring**
+
+        A non-implemented stub for future development.
+
+        Remove coordinates from the graph, rebuild affected triangulation data, and invalidate cached conversions that depended on the removed coordinates.
+
+        :param internals: Available internal-coordinate specifications or their numerical values.
+        :type internals: Any
+        :return: The value or updated object described above.
+        :rtype: Any
+        """
         raise NotImplementedError("need to cache more information to remove an element")

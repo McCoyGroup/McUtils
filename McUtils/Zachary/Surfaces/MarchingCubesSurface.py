@@ -1,4 +1,3 @@
-
 __all__ = [
     'marching_cubes'
 ]
@@ -341,6 +340,25 @@ CORNER_OFFSETS = [
 # Core algorithm
 # ---------------------------------------------------------------------------
 def _interp(isovalue, p1, v1, p2, v2, zero_threshold=1e-10):
+    """
+    **LLM Docstring**
+
+    Linearly interpolate the point on an edge where the field crosses the isovalue,
+    falling back to the midpoint when the two endpoint values are nearly equal.
+
+    :param isovalue: the isosurface value
+    :type isovalue: float
+    :param p1: the first edge endpoint
+    :param v1: the field value at the first endpoint
+    :type v1: float
+    :param p2: the second edge endpoint
+    :param v2: the field value at the second endpoint
+    :type v2: float
+    :param zero_threshold: the endpoint-value difference below which the midpoint is used
+    :type zero_threshold: float
+    :return: the interpolated crossing point
+    :rtype: np.ndarray
+    """
     if abs(v2 - v1) < zero_threshold:
         t = 0.5
     else:
@@ -356,6 +374,32 @@ def _get_edge_vertex(
         isovalue,
         position_tables,
         edge_cache):
+    """
+    **LLM Docstring**
+
+    Return the vertex index for the isosurface crossing on a given cube edge,
+    creating (and caching) the vertex the first time that edge is seen.
+
+    :param ix: the cube's x index
+    :type ix: int
+    :param iy: the cube's y index
+    :type iy: int
+    :param iz: the cube's z index
+    :type iz: int
+    :param edge_idx: the local edge index (0-11)
+    :type edge_idx: int
+    :param grid: the scalar field
+    :type grid: np.ndarray
+    :param verts: the running vertex list (appended to)
+    :type verts: list
+    :param isovalue: the isosurface value
+    :type isovalue: float
+    :param position_tables: the per-axis world coordinate tables
+    :param edge_cache: the `(ix,iy,iz,edge) -> vertex_index` cache
+    :type edge_cache: dict
+    :return: the vertex index
+    :rtype: int
+    """
     key = (ix, iy, iz, edge_idx)
     if key in edge_cache:
         return edge_cache[key]
