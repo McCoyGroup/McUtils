@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader">OrcaHessReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca.py#L17)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca.py#L17?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca.py#L16)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca.py#L16?message=Update%20Docs)]
 </div>
 
 
@@ -29,9 +29,16 @@ OrcaCoords: OrcaCoords
 __init__(self, file, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca.py#L19)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca.py#L19?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca.py#L18)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca.py#L18?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Open an ORCA `.hess` file for stream reading.
+  - `file`: `str`
+    > the `.hess` file
+  - `kwargs`: `Any`
+    > extra arguments for the stream reader
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.get_special_handlers" class="docs-object-method">&nbsp;</a> 
@@ -40,9 +47,14 @@ __init__(self, file, **kwargs):
 get_special_handlers(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L40?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the mapping of block tags that need a dedicated parser to that parser.
+  - `:returns`: `dict`
+    > the tag-to-handler mapping
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.handle_orca_block" class="docs-object-method">&nbsp;</a> 
@@ -51,9 +63,20 @@ get_special_handlers(cls):
 handle_orca_block(cls, tag, data: str): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L54)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L54?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Dispatch a `.hess` block to the appropriate parser, choosing by tag: a special
+handler, a typed matrix/array parser, or a size-based guess between a scalar,
+array, and matrix.
+  - `tag`: `str`
+    > the block tag
+  - `data`: `str`
+    > the block text
+  - `:returns`: `Any`
+    > the parsed block
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.parse_matrix" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +85,21 @@ handle_orca_block(cls, tag, data: str):
 parse_matrix(cls, data, col_blocks=5, data_pattern=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L67)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L67?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L97?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse an ORCA block-formatted matrix (a header giving the dimensions followed by
+column-blocked numeric data) into a dense array.
+  - `data`: `str`
+    > the block text
+  - `col_blocks`: `int`
+    > number of columns per printed block
+  - `data_pattern`: `object | None`
+    > the numeric pattern to match (defaults to ORCA's `E`-number)
+  - `:returns`: `np.ndarray`
+    > the parsed matrix
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.parse_array" class="docs-object-method">&nbsp;</a> 
@@ -73,9 +108,19 @@ parse_matrix(cls, data, col_blocks=5, data_pattern=None):
 parse_array(cls, data, data_pattern=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L99)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L99?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L145)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L145?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse an ORCA block whose header gives a length followed by that many numeric
+rows, flattening single-column results.
+  - `data`: `str`
+    > the block text
+  - `data_pattern`: `object | None`
+    > the numeric pattern to match (defaults to ORCA's `E`-number)
+  - `:returns`: `np.ndarray`
+    > the parsed array
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.parse_atoms" class="docs-object-method">&nbsp;</a> 
@@ -84,9 +129,16 @@ parse_array(cls, data, data_pattern=None):
 parse_atoms(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L171)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L171?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the atoms block into element labels, masses, and coordinates.
+  - `data`: `str`
+    > the block text
+  - `:returns`: `OrcaHessReader.OrcaCoords`
+    > the parsed `(atoms, mass, coords)`
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.get_next_block" class="docs-object-method">&nbsp;</a> 
@@ -94,9 +146,15 @@ parse_atoms(cls, data):
 get_next_block(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L191?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Read the next `$tag ... ` block from the file, returning its tag and body (or
+`None` at end of file).
+  - `:returns`: `tuple | None`
+    > `(tag, body)` or `None`
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Orca.OrcaHessReader.parse" class="docs-object-method">&nbsp;</a> 
@@ -104,9 +162,19 @@ get_next_block(self):
 parse(self, tags=None, excludes=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L206)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.py#L206?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the `.hess` file into a dict of tag to parsed block, optionally restricting
+to (or excluding) specific tags.
+  - `tags`: `Iterable[str] | None`
+    > tags to include (all if omitted)
+  - `excludes`: `Iterable[str] | None`
+    > tags to exclude
+  - `:returns`: `dict`
+    > the parsed blocks keyed by tag
  </div>
 </div>
 
@@ -160,7 +228,7 @@ parse(self, tags=None, excludes=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/Orca/OrcaHessReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca.py#L17?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Orca.py#L16?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

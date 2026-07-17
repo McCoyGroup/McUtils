@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser">CIFParser</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L116)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L116?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,18 @@ custom_handlers: dict
 __init__(self, file, fields=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L78)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L78?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L130?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Open a CIF file for line-by-line reading.
+  - `file`: `str`
+    > the CIF file
+  - `fields`: `Iterable[str] | None`
+    > the fields to restrict parsing to (all if omitted)
+  - `kw`: `Any`
+    > extra arguments for the line reader
 
 
 <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser.check_tag" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +45,25 @@ __init__(self, file, fields=None, **kw):
 check_tag(self, line: str, depth: int = 0, active_tag=None, label: str = None, history: list[str] = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L81)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L81?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L144)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L144?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Classify a CIF line for the line-by-line reader: block starts (`data_`, `loop_`,
+`_key`), comments (`#`), block ends (`#END`), and loop boundaries.
+  - `line`: `str`
+    > the current line
+  - `depth`: `int`
+    > the current nesting depth
+  - `active_tag`: `Any`
+    > the currently active block tag
+  - `label`: `str | None`
+    > the current block label
+  - `history`: `list[str] | None`
+    > the lines seen so far in the current block
+  - `:returns`: `object`
+    > the reader tag (and any label/data), or `None` to accumulate the line
 
 
 <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser.get_block_handlers" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +71,15 @@ check_tag(self, line: str, depth: int = 0, active_tag=None, label: str = None, h
 get_block_handlers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L108)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L108?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L189)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L189?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the mapping of CIF field name to the handler that converts its raw text
+into a typed value (floats, ints, or symmetry arrays).
+  - `:returns`: `dict`
+    > the field-to-handler mapping
 
 
 <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser.resolve_handler" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +87,17 @@ get_block_handlers(self):
 resolve_handler(self, label: 'str|None'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L253)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L253?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Pick the handler for a field, falling back to the integer handler for fields
+whose names end in `_num`/`_number`.
+  - `label`: `str | None`
+    > the field name
+  - `:returns`: `Callable | None`
+    > the handler, or `None`
 
 
 <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser.handle_block" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +105,24 @@ resolve_handler(self, label: 'str|None'):
 handle_block(self, label: 'str|None', block_data, join=True, depth=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L146)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L146?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L271?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert a parsed CIF block into typed data: apply a field handler when there is
+one, join text otherwise, and for unlabeled `loop_` blocks split the leading key
+lines from the value rows into per-key lists.
+  - `label`: `str | None`
+    > the block label (or `None` for a loop block)
+  - `block_data`: `list | str`
+    > the accumulated block lines
+  - `join`: `bool`
+    > join multi-line text values
+  - `depth`: `int`
+    > the current nesting depth
+  - `:returns`: `Any`
+    > the parsed block data
 
 
 <a id="McUtils.ExternalPrograms.Parsers.CIFParser.CIFParser.parse" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +130,17 @@ handle_block(self, label: 'str|None', block_data, join=True, depth=0):
 parse(self, target_fields=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L176)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L176?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.py#L319?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the CIF file into a list of block dicts, optionally restricting to a set of
+target fields.
+  - `target_fields`: `Iterable[str] | None`
+    > the fields to keep (all if omitted)
+  - `:returns`: `list`
+    > the parsed blocks
  </div>
 </div>
 
@@ -132,7 +194,7 @@ parse(self, target_fields=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/CIFParser/CIFParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L64?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/CIFParser.py#L116?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

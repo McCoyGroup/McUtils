@@ -1,14 +1,29 @@
 # <a id="McUtils.ExternalPrograms.Pysisyphus.prep_pysis_images">prep_pysis_images</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L711)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L711?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Pysisyphus.py#L1431)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L1431?message=Update%20Docs)]
 </div>
 
 ```python
 prep_pysis_images(atoms, geometry, coord_type='cartesian', coord_kwargs=None, **opts): 
 ```
+**LLM Docstring**
 
-
+Build Pysisyphus `Geometry` objects from atoms and one or more coordinate sets,
+forming a shared redundant-internal-coordinate union across the endpoints when a
+non-Cartesian coordinate type is requested.
+  - `atoms`: `Sequence[str]`
+    > the element symbols
+  - `geometry`: `np.ndarray`
+    > one geometry (2D) or several (3D)
+  - `coord_type`: `str`
+    > the coordinate type (`'cartesian'`, `'redund'`, `'tric'`, ...)
+  - `coord_kwargs`: `dict | None`
+    > extra coordinate-system options
+  - `opts`: `Any`
+    > extra `Geometry` options
+  - `:returns`: `object | list`
+    > the geometry (or list of geometries)
 
 
 
@@ -59,7 +74,7 @@ prep_pysis_images(atoms, geometry, coord_type='cartesian', coord_kwargs=None, **
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Pysisyphus/prep_pysis_images.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Pysisyphus/prep_pysis_images.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L711?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Pysisyphus.py#L1431?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

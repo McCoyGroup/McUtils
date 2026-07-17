@@ -1,14 +1,32 @@
 # <a id="McUtils.ExternalPrograms.ASE.ASECalculator">ASECalculator</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE.py#L610)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE.py#L610?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/ASE.py#L996)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE.py#L996?message=Update%20Docs)]
 </div>
 
 ```python
 ASECalculator(energy_evaluator, charge_evaluator=None, dipole_evaluator=None, analytic_derivative_order=None, charge_derivative_order=None, dipole_derivative_order=None, **kwargs): 
 ```
+**LLM Docstring**
 
-
+Build an ASE-compatible calculator that evaluates energies (and optionally
+charges/dipoles) from the supplied McUtils evaluators.
+  - `energy_evaluator`: `Callable`
+    > the energy-evaluation callable
+  - `charge_evaluator`: `Callable | None`
+    > an optional charge evaluator
+  - `dipole_evaluator`: `Callable | None`
+    > an optional dipole evaluator
+  - `analytic_derivative_order`: `int | None`
+    > highest analytic energy-derivative order
+  - `charge_derivative_order`: `int | None`
+    > highest analytic charge-derivative order
+  - `dipole_derivative_order`: `int | None`
+    > highest analytic dipole-derivative order
+  - `kwargs`: `Any`
+    > extra options for the calculator
+  - `:returns`: `ASETermCalculator`
+    > the ASE calculator
 
 
 
@@ -59,7 +77,7 @@ ASECalculator(energy_evaluator, charge_evaluator=None, dipole_evaluator=None, an
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/ASE/ASECalculator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/ASE/ASECalculator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE.py#L610?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/ASE.py#L996?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

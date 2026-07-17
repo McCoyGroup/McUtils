@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser">CRESTParser</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest.py#L112)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest.py#L112?message=Update%20Docs)]
 </div>
 
 
@@ -34,9 +34,28 @@ CRESTRotamers: CRESTRotamers
 __init__(self, parse_dir, opt_log_file=None, confgen_log_file=None, ensemble_energies_file=None, conformers_file=None, conformers_best_file=None, rotamers_file=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest.py#L69)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest.py#L69?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest.py#L121?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a parser over a CREST output directory, locating each of the standard
+output files (optimization log, confgen log, ensemble energies, conformers,
+best conformers, rotamers).
+  - `parse_dir`: `str`
+    > the CREST output directory
+  - `opt_log_file`: `str | None`
+    > override for the optimization-log file name
+  - `confgen_log_file`: `str | None`
+    > override for the confgen-log file name
+  - `ensemble_energies_file`: `str | None`
+    > override for the ensemble-energies file name
+  - `conformers_file`: `str | None`
+    > override for the conformers file name
+  - `conformers_best_file`: `str | None`
+    > override for the best-conformers file name
+  - `rotamers_file`: `str | None`
+    > override for the rotamers file name
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser.parse_optimized_structures" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +63,14 @@ __init__(self, parse_dir, opt_log_file=None, confgen_log_file=None, ensemble_ene
 parse_optimized_structures(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L158)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L158?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the optimization-log file into its sequence of structures.
+  - `:returns`: `list`
+    > the optimization structures
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser.parse_ensemble_enegies" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +78,14 @@ parse_optimized_structures(self):
 parse_ensemble_enegies(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L171)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L171?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Load the ensemble-energies file as a numeric array.
+  - `:returns`: `np.ndarray`
+    > the ensemble energies
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser.parse_conformers" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +93,16 @@ parse_ensemble_enegies(self):
 parse_conformers(self, conformers_file=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L183)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L183?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse a conformers XYZ file into atoms, per-conformer energies, and coordinates.
+  - `conformers_file`: `str | None`
+    > the conformers file (defaults to the located one)
+  - `:returns`: `CRESTParser.CRESTConformers`
+    > the parsed `(atoms, energies, coords)`
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser.parse_best_conformers" class="docs-object-method">&nbsp;</a> 
@@ -74,9 +110,14 @@ parse_conformers(self, conformers_file=None):
 parse_best_conformers(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L103)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L103?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L203?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the best-conformers XYZ file.
+  - `:returns`: `CRESTParser.CRESTConformers`
+    > the parsed `(atoms, energies, coords)`
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser.parse_rotamers" class="docs-object-method">&nbsp;</a> 
@@ -84,9 +125,16 @@ parse_best_conformers(self):
 parse_rotamers(self, rotamers_file=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L215)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L215?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse a rotamers XYZ file into atoms, energies, weights, and coordinates.
+  - `rotamers_file`: `str | None`
+    > the rotamers file (defaults to the located one)
+  - `:returns`: `CRESTParser.CRESTRotamers`
+    > the parsed `(atoms, energies, weights, coords)`
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Crest.CRESTParser.parse_log" class="docs-object-method">&nbsp;</a> 
@@ -94,9 +142,14 @@ parse_rotamers(self, rotamers_file=None):
 parse_log(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L235)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.py#L235?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the conformer-generation log file.
+  - `:returns`: `dict`
+    > the parsed log data
  </div>
 </div>
 
@@ -150,7 +203,7 @@ parse_log(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/Crest/CRESTParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest.py#L60?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Crest.py#L112?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleDerivatives">FchkDipoleDerivatives</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L333)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L333?message=Update%20Docs)]
 </div>
 
 Holder class for dipole derivatives coming out of an fchk file
@@ -24,9 +24,19 @@ Holder class for dipole derivatives coming out of an fchk file
 __init__(self, derivs, num_atoms=None, reader=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L335)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L335?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hold the flattened dipole-derivative data, optionally with the atom count (or a
+reader supplying it).
+  - `derivs`: `np.ndarray`
+    > the flattened dipole derivatives
+  - `num_atoms`: `int | None`
+    > the number of atoms (inferred lazily if omitted)
+  - `reader`: `object | None`
+    > a reader from which to pull the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleDerivatives.n" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +45,15 @@ __init__(self, derivs, num_atoms=None, reader=None):
 n(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L209)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L209?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L367)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L367?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The number of atoms, inferred from the data length (`3 * 3n` values) if not
+supplied.
+  - `:returns`: `int`
+    > the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleDerivatives.shape" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +62,14 @@ n(self):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L379)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L379?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The shape of the dipole-derivative array, `(3n, 3)`.
+  - `:returns`: `tuple[int, int]`
+    > the array shape
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleDerivatives.array" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +78,14 @@ shape(self):
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L215)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L215?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L390)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.py#L390?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The dipole derivatives reshaped to `(3n, 3)`.
+  - `:returns`: `np.ndarray`
+    > the dipole-derivative array
  </div>
 </div>
 
@@ -113,7 +139,7 @@ array(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleDerivatives.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L188?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L333?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

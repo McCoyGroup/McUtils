@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader">ElectronicStructureLogReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L9)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L9?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L8)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L8?message=Update%20Docs)]
 </div>
 
 Implements a stream based reader for a generic electronic structure .log file.
@@ -32,9 +32,15 @@ components_package: str
 load_components(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L21)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L21?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L20)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L20?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Import (and cache) the module registering this reader's parse components (the
+block tag/parser table), resolving a relative `components_package`.
+  - `:returns`: `module`
+    > the loaded components module
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.registered_components" class="docs-object-method">&nbsp;</a> 
@@ -43,9 +49,15 @@ load_components(cls):
 registered_components(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L37)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L37?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The mapping of component name to its block specification (tags, parser, mode),
+taken from the loaded components module.
+  - `:returns`: `dict`
+    > the registered components
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.default_keys" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +66,15 @@ registered_components(self):
 default_keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L49?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The default set of component keys to parse, taken from the loaded components
+module.
+  - `:returns`: `tuple`
+    > the default keys
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.default_ordering" class="docs-object-method">&nbsp;</a> 
@@ -65,9 +83,15 @@ default_keys(self):
 default_ordering(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L35)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L35?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L61)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L61?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The default parse ordering for the components, taken from the loaded components
+module.
+  - `:returns`: `dict`
+    > the ordering mapping
 
 
 <a id="McUtils.ExternalPrograms.Parsers.Parsers.ElectronicStructureLogReader.parse" class="docs-object-method">&nbsp;</a> 
@@ -75,8 +99,8 @@ default_ordering(self):
 parse(self, keys, num=None, reset=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.py#L74?message=Update%20Docs)]
 </div>
 The main function we'll actually use. Parses bits out of a .log file.
   - `keys`: `str or list(str)`
@@ -93,9 +117,19 @@ The main function we'll actually use. Parses bits out of a .log file.
 read_props(cls, file, keys): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L117)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L117?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L152?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convenience classmethod: open `file`, parse the requested keys, and return the
+result (unwrapped to the single value when one key is given).
+  - `file`: `str`
+    > the log file
+  - `keys`: `str | list[str]`
+    > the component key(s) to read
+  - `:returns`: `dict | Any`
+    > the parsed data
  </div>
 </div>
 
@@ -149,7 +183,7 @@ read_props(cls, file, keys):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/Parsers/ElectronicStructureLogReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L9?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/Parsers.py#L8?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

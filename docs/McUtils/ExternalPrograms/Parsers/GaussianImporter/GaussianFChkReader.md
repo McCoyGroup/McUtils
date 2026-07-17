@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianFChkReader">GaussianFChkReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L166?message=Update%20Docs)]
 </div>
 
 Implements a stream based reader for a Gaussian .fchk file. Pretty generall I think. Should be robust-ish.
@@ -32,9 +32,16 @@ fchk_re: Pattern
 __init__(self, file, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L164)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L164?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L177?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Open a Gaussian `.fchk` file for stream reading.
+  - `file`: `str`
+    > the `.fchk` file
+  - `kwargs`: `Any`
+    > extra arguments for the stream reader
 
 
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianFChkReader.read_header" class="docs-object-method">&nbsp;</a> 
@@ -42,8 +49,8 @@ __init__(self, file, **kwargs):
 read_header(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L191?message=Update%20Docs)]
 </div>
 Reads the header and skips the stream to where we want to be
   - `:returns`: `str`
@@ -55,8 +62,8 @@ Reads the header and skips the stream to where we want to be
 get_next_block_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L201?message=Update%20Docs)]
 </div>
 Pulls the tag of the next block, the type, the number of bytes it'll be,
 and if it's a single-line block it'll also spit back the block itself
@@ -69,8 +76,8 @@ and if it's a single-line block it'll also spit back the block itself
 get_block(self, name=None, dtype=None, byte_count=None, value=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L245)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L245?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L267)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L267?message=Update%20Docs)]
 </div>
 Pulls the next block by first pulling the block tag
   - `:returns`: `_`
@@ -82,8 +89,8 @@ Pulls the next block by first pulling the block tag
 skip_block(self, name=None, dtype=None, byte_count=None, value=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L272)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L272?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L294)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L294?message=Update%20Docs)]
 </div>
 Skips the next block
   - `:returns`: `_`
@@ -96,9 +103,15 @@ Skips the next block
 num_atoms(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L282)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L282?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L304)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L304?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The number of atoms in the file, parsed (and cached) from the `Number of atoms`
+block on first access.
+  - `:returns`: `int`
+    > the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianFChkReader.parse" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +119,22 @@ num_atoms(self):
 parse(self, keys=None, default='raise'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L287)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L287?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L318)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.py#L318?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parse the requested blocks out of the `.fchk` file (or every block when no keys
+are given), resolving common-name aliases and skipping unrequested blocks.
+
+Malformed blocks are skipped where possible; when a requested key can't be found,
+either raises or fills in `default` depending on the `default` argument.
+  - `keys`: `str | Iterable[str] | None`
+    > the block key(s) to read (all if omitted)
+  - `default`: `Any`
+    > value to use for missing keys, or `'raise'` to error
+  - `:returns`: `dict`
+    > the parsed blocks keyed by name
 
 
 <a id="McUtils.ExternalPrograms.Parsers.GaussianImporter.GaussianFChkReader.read_props" class="docs-object-method">&nbsp;</a> 
@@ -117,9 +143,19 @@ parse(self, keys=None, default='raise'):
 read_props(cls, file, keys): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L404)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L404?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convenience classmethod: open `file`, parse the requested keys, and return the
+result (unwrapped to the single value when one key is given).
+  - `file`: `str`
+    > the `.fchk` file
+  - `keys`: `str | list[str]`
+    > the block key(s) to read
+  - `:returns`: `dict | Any`
+    > the parsed data
  </div>
 </div>
 
@@ -173,7 +209,7 @@ read_props(cls, file, keys):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/GaussianImporter/GaussianFChkReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L153?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/GaussianImporter.py#L166?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

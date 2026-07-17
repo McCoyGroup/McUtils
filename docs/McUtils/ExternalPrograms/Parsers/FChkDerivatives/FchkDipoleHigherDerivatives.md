@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleHigherDerivatives">FchkDipoleHigherDerivatives</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L219)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L219?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L402)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L402?message=Update%20Docs)]
 </div>
 
 Holder class for dipole derivatives coming out of an fchk file
@@ -24,9 +24,21 @@ Holder class for dipole derivatives coming out of an fchk file
 __init__(self, derivs, num_atoms=None, num_modes=None, reader=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L221)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L221?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L404)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L404?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hold the flattened higher dipole-derivative data (numerical derivatives w.r.t.
+the modes of the Cartesian dipole derivatives), optionally with atom/mode counts.
+  - `derivs`: `np.ndarray`
+    > the flattened higher dipole derivatives
+  - `num_atoms`: `int | None`
+    > the number of atoms (inferred lazily if omitted)
+  - `num_modes`: `int | None`
+    > the number of modes (inferred lazily if omitted)
+  - `reader`: `object | None`
+    > a reader from which to pull the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleHigherDerivatives.num_modes" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +47,14 @@ __init__(self, derivs, num_atoms=None, num_modes=None, reader=None):
 num_modes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L249)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L249?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L447?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The number of modes, inferred from the data length if not supplied.
+  - `:returns`: `int`
+    > the mode count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleHigherDerivatives.n" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +63,14 @@ num_modes(self):
 n(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L254)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L254?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L460)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L460?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The number of atoms, inferred from the data length if not supplied.
+  - `:returns`: `int`
+    > the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleHigherDerivatives.shape" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +79,14 @@ n(self):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L262)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L262?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L476)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L476?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The shape of one derivative block, `(m, 3n, 3)`.
+  - `:returns`: `tuple[int, int, int]`
+    > the block shape
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleHigherDerivatives.second_deriv_array" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +95,14 @@ shape(self):
 second_deriv_array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L266)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L266?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L488)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L488?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The second dipole derivatives (`d^2 mu / dQ dx`) reshaped to `(m, 3n, 3)`.
+  - `:returns`: `np.ndarray`
+    > the second-derivative array
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkDipoleHigherDerivatives.third_deriv_array" class="docs-object-method">&nbsp;</a> 
@@ -79,9 +111,15 @@ second_deriv_array(self):
 third_deriv_array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L270)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L270?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.py#L500?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The third dipole derivatives (`d^3 mu / dQ^2 dx`) as a `(m, m, 3n, 3)` tensor,
+built from the diagonal blocks Gaussian provides.
+  - `:returns`: `np.ndarray`
+    > the third-derivative tensor
  </div>
 </div>
 
@@ -135,7 +173,7 @@ third_deriv_array(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkDipoleHigherDerivatives.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L219?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L402?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

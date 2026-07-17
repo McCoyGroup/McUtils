@@ -28,6 +28,16 @@ __init__(self, fcs, num_atoms=None, reader=None):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L20)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives.py#L20?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hold the flattened force-constant (lower-triangle) data, optionally with the atom
+count (or a reader that can supply it).
+  - `fcs`: `np.ndarray`
+    > the flattened lower-triangle force constants
+  - `num_atoms`: `int | None`
+    > the number of atoms (inferred lazily if omitted)
+  - `reader`: `object | None`
+    > a reader from which to pull the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkForceConstants.__len__" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +45,14 @@ __init__(self, fcs, num_atoms=None, reader=None):
 __len__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L43?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The length of the raw flattened force-constant data.
+  - `:returns`: `int`
+    > the number of stored values
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkForceConstants.n" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +61,14 @@ __len__(self):
 n(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L63?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The number of atoms, inferred from the data length if not supplied.
+  - `:returns`: `int`
+    > the atom count
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkForceConstants.shape" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +77,14 @@ n(self):
 shape(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L45)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L45?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L74)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L74?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The shape of the full force-constant matrix, `(3n, 3n)`.
+  - `:returns`: `tuple[int, int]`
+    > the matrix shape
 
 
 <a id="McUtils.ExternalPrograms.Parsers.FChkDerivatives.FchkForceConstants.array" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +93,15 @@ shape(self):
 array(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L60)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L60?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L97)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Parsers/FChkDerivatives/FchkForceConstants.py#L97?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The full, symmetrized `(3n, 3n)` force-constant matrix reconstructed from the
+lower-triangle data.
+  - `:returns`: `np.ndarray`
+    > the force-constant matrix
  </div>
 </div>
 

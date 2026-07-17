@@ -90,6 +90,16 @@ read_props(cls, file, keys):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L138)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L138?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convenience classmethod: open `file`, parse the requested keys, and return the
+result (unwrapped to the single value when one key is given).
+  - `file`: `str`
+    > the Gaussian `.log` file
+  - `keys`: `str | list[str]`
+    > the component key(s) to read
+  - `:returns`: `dict | Any`
+    > the parsed data
  </div>
 </div>
 
