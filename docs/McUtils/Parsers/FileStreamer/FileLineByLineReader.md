@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.FileLineByLineReader">FileLineByLineReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L2137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L2137?message=Update%20Docs)]
 </div>
 
 Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
@@ -24,9 +24,32 @@ Represents a file from which we'll stream blocks of data by finding tags and par
 __init__(self, file, mode='r', binary=False, encoding='utf-8', ignore_comments=False, max_nesting_depth=-1, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L2141)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L2141?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a line-oriented parser over a file-backed search stream with configured binary, encoding, comment, and nesting behavior.
+  - `file`: `object`
+    > a filesystem path or open file object
+
+  - `mode`: `object`
+    > the file open mode or parser multiplicity mode
+
+  - `binary`: `object`
+    > whether stream values should remain bytes
+
+  - `encoding`: `object`
+    > the text encoding used to convert between bytes and strings
+
+  - `ignore_comments`: `object`
+    > whether comment-tagged lines are discarded
+
+  - `max_nesting_depth`: `object`
+    > the maximum recursive block depth, with a negative value meaning unlimited
+
+  - `kw`: `object`
+    > extra keyword arguments forwarded to the underlying stream constructor
  </div>
 </div>
 
@@ -80,7 +103,7 @@ __init__(self, file, mode='r', binary=False, encoding='utf-8', ignore_comments=F
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/FileLineByLineReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileLineByLineReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1124?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L2137?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

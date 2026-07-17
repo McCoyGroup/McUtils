@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.StringStreamReader">StringStreamReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L914)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L914?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1739)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1739?message=Update%20Docs)]
 </div>
 
 Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
@@ -24,9 +24,14 @@ Represents a string from which we'll stream blocks of data by finding tags and p
 __init__(self, string): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L918)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L918?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1743)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1743?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap a string in `StringSearchStream` and initialize tagged-block parsing over it.
+  - `string`: `object`
+    > the source string or byte sequence wrapped by the reader
  </div>
 </div>
 
@@ -80,7 +85,7 @@ __init__(self, string):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/StringStreamReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/StringStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L914?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1739?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

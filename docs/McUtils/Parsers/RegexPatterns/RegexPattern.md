@@ -70,9 +70,17 @@ __init__(self, pat, name=None, children=None, parents=None, dtype=None, repetiti
 pat(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L199?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return or replace the primitive pattern/wrapper used by this node; setting it invalidates all compiled caches.
+  - `pat`: `object`
+    > a literal regex fragment or callable wrapper
+
+  - `:returns`: `object`
+    > return or replace the primitive pattern/wrapper used by this node; setting it invalidates all compiled caches.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.children" class="docs-object-method">&nbsp;</a> 
@@ -81,8 +89,8 @@ pat(self):
 children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L189)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L189?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L228)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L228?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[RegexPattern]`
@@ -95,8 +103,8 @@ children(self):
 child_count(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L236)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L236?message=Update%20Docs)]
 </div>
 
   - `:returns`: `int`
@@ -109,8 +117,8 @@ child_count(self):
 child_map(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L205?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L244)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L244?message=Update%20Docs)]
 </div>
 Returns the map to subregexes for named regex components
   - `:returns`: `Dict[str, RegexPattern]`
@@ -123,8 +131,8 @@ Returns the map to subregexes for named regex components
 parents(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L255?message=Update%20Docs)]
 </div>
 
   - `:returns`: `tuple[RegexPattern]`
@@ -137,8 +145,8 @@ parents(self):
 joiner(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L224)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L224?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L263)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L263?message=Update%20Docs)]
 </div>
 
   - `:returns`: `str`
@@ -151,8 +159,8 @@ joiner(self):
 join_function(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L237)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L237?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L287)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L287?message=Update%20Docs)]
 </div>
 
   - `:returns`: `function`
@@ -165,8 +173,8 @@ join_function(self):
 suffix(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L250)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L250?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L311)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L311?message=Update%20Docs)]
 </div>
 
   - `:returns`: `str | RegexPattern`
@@ -179,8 +187,8 @@ suffix(self):
 prefix(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L262)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L262?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L334)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L334?message=Update%20Docs)]
 </div>
 
   - `:returns`: `str | RegexPattern`
@@ -193,8 +201,8 @@ prefix(self):
 dtype(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L357)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L357?message=Update%20Docs)]
 </div>
 Returns the StructuredType for the matched object
 
@@ -216,9 +224,14 @@ ever get called.
 is_repeating(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L329)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L329?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L412)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L412?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Report whether repetition metadata is stored as a `(minimum, maximum)` tuple.
+  - `:returns`: `bool`
+    > `True` when the condition described above holds; otherwise `False`.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.capturing" class="docs-object-method">&nbsp;</a> 
@@ -227,9 +240,17 @@ is_repeating(self):
 capturing(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L332)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L332?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L423)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L423?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Report whether this node captures directly, including the implicit case where a repeating node contains capturing descendants.
+  - `cap`: `object`
+    > whether this node captures directly
+
+  - `:returns`: `bool`
+    > `True` when the condition described above holds; otherwise `False`.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.get_capturing_groups" class="docs-object-method">&nbsp;</a> 
@@ -237,8 +258,8 @@ capturing(self):
 get_capturing_groups(self, allow_inners=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L339)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L339?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L452)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L452?message=Update%20Docs)]
 </div>
 We walk down the tree to find the children with capturing groups in them and
 then find the outermost RegexPattern for those unless allow_inners is on in which case we pull them all
@@ -250,8 +271,8 @@ then find the outermost RegexPattern for those unless allow_inners is on in whic
 captures(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L356)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L356?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L469)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L469?message=Update%20Docs)]
 </div>
 Subtly different from capturing n that it will tell us if we need to use the group in post-processing, essentially
   - `:returns`: `_`
@@ -264,8 +285,8 @@ Subtly different from capturing n that it will tell us if we need to use the gro
 capturing_groups(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L365)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L365?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L478)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L478?message=Update%20Docs)]
 </div>
 Returns the capturing children for the pattern
   - `:returns`: `_`
@@ -278,8 +299,8 @@ Returns the capturing children for the pattern
 named_groups(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L384)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L384?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L497)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L497?message=Update%20Docs)]
 </div>
 Returns the named children for the pattern
   - `:returns`: `_`
@@ -291,8 +312,8 @@ Returns the named children for the pattern
 combine(self, other, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L417)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L417?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L530)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L530?message=Update%20Docs)]
 </div>
 Combines self and other
   - `other`: `RegexPattern | str`
@@ -306,8 +327,8 @@ Combines self and other
 wrap(self, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L439)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L439?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L610)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L610?message=Update%20Docs)]
 </div>
 Applies wrapper function
 
@@ -317,9 +338,32 @@ Applies wrapper function
 build(self, joiner=None, prefix=None, suffix=None, recompile=True, no_captures=False, verbose=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L453)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L453?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L641)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L641?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Recursively build the regex text for this node, suppressing inner captures when an outer node captures, applying prefix/joiner/suffix and wrapper functions, and caching the normal capturing form.
+  - `joiner`: `object`
+    > text or a pattern inserted between children
+
+  - `prefix`: `object`
+    > text or a pattern prepended to this node
+
+  - `suffix`: `object`
+    > text or a pattern appended to this node
+
+  - `recompile`: `object`
+    > whether to rebuild instead of reusing cached regex text
+
+  - `no_captures`: `object`
+    > whether captures are suppressed throughout this build
+
+  - `verbose`: `object`
+    > whether to print intermediate regex construction details
+
+  - `:returns`: `str`
+    > The regex source or textual representation constructed by the operation.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.compiled" class="docs-object-method">&nbsp;</a> 
@@ -328,9 +372,14 @@ build(self, joiner=None, prefix=None, suffix=None, recompile=True, no_captures=F
 compiled(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L532)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L532?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L746)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L746?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compile and cache the regex string returned by `build`.
+  - `:returns`: `object`
+    > The cached compiled regular-expression object.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.add_parent" class="docs-object-method">&nbsp;</a> 
@@ -338,9 +387,17 @@ compiled(self):
 add_parent(self, parent): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L538)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L538?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L760)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L760?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Register an ancestor that must be invalidated when this node changes.
+  - `parent`: `object`
+    > the parent reader or regex node
+
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.remove_parent" class="docs-object-method">&nbsp;</a> 
@@ -348,9 +405,17 @@ add_parent(self, parent):
 remove_parent(self, parent): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L540)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L540?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L773)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L773?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Remove a previously registered ancestor.
+  - `parent`: `object`
+    > the parent reader or regex node
+
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.add_child" class="docs-object-method">&nbsp;</a> 
@@ -358,9 +423,17 @@ remove_parent(self, parent):
 add_child(self, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L543)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L543?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L787)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L787?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Append one child, update named/capturing-descendant flags, and invalidate this node and its ancestors.
+  - `child`: `object`
+    > the child pattern to add or remove
+
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.add_children" class="docs-object-method">&nbsp;</a> 
@@ -368,9 +441,17 @@ add_child(self, child):
 add_children(self, children): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L549)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L549?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L804)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L804?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Append several children, merge their named/capturing-descendant flags, and invalidate caches.
+  - `children`: `object`
+    > child patterns combined by this node
+
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.remove_child" class="docs-object-method">&nbsp;</a> 
@@ -378,9 +459,17 @@ add_children(self, children):
 remove_child(self, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L555)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L555?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L821)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L821?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Remove one child, recompute descendant flags from the remaining children, and invalidate caches.
+  - `child`: `object`
+    > the child pattern to add or remove
+
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.insert_child" class="docs-object-method">&nbsp;</a> 
@@ -388,9 +477,20 @@ remove_child(self, child):
 insert_child(self, index, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L561)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L561?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L838)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L838?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Insert a child at a specific position and invalidate cached pattern state.
+  - `index`: `object`
+    > the insertion position
+
+  - `child`: `object`
+    > the child pattern to add or remove
+
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.invalidate_cache" class="docs-object-method">&nbsp;</a> 
@@ -398,9 +498,14 @@ insert_child(self, index, child):
 invalidate_cache(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L566)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L566?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L857)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L857?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Clear built-string, compiled-regex, and capturing-group caches, then recursively invalidate all parents.
+  - `:returns`: `None`
+    > None.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.__copy__" class="docs-object-method">&nbsp;</a> 
@@ -408,9 +513,14 @@ invalidate_cache(self):
 __copy__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L581)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L581?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L880)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L880?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Make a shallow node copy with an independent child list, no parents, and no built-pattern cache.
+  - `:returns`: `object`
+    > An independent shallow copy of the regex node.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.__add__" class="docs-object-method">&nbsp;</a> 
@@ -418,8 +528,8 @@ __copy__(self):
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L591)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L591?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L898)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L898?message=Update%20Docs)]
 </div>
 Combines self and other
   - `other`: `RegexPattern`
@@ -433,8 +543,8 @@ Combines self and other
 __radd__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L607)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L607?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L925)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L925?message=Update%20Docs)]
 </div>
 Combines self and other
   - `other`: `RegexPattern`
@@ -448,8 +558,8 @@ Combines self and other
 __call__(self, other, *args, name=None, dtype=None, repetitions=None, key=None, joiner=None, join_function=None, wrap_function=None, suffix=None, prefix=None, multiline=None, parser=None, handler=None, capturing=None, default=None, allow_inner_captures=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L623)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L623?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L952)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L952?message=Update%20Docs)]
 </div>
 Wraps self around other
   - `other`: `RegexPattern`
@@ -463,9 +573,14 @@ Wraps self around other
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L695)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L695?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1024)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1024?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a diagnostic representation containing the key, child count, and primitive pattern.
+  - `:returns`: `str`
+    > The regex source or textual representation constructed by the operation.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.__str__" class="docs-object-method">&nbsp;</a> 
@@ -473,9 +588,14 @@ __repr__(self):
 __str__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L702)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L702?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1039)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1039?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build and return the regex source string.
+  - `:returns`: `str`
+    > The regex source or textual representation constructed by the operation.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.__getitem__" class="docs-object-method">&nbsp;</a> 
@@ -483,9 +603,17 @@ __str__(self):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L706)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L706?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1051)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1051?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Look up a directly named child by its key.
+  - `item`: `object`
+    > the child key or array index/slice being accessed
+
+  - `:returns`: `object`
+    > The named child or populated array portion selected by the index.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.match" class="docs-object-method">&nbsp;</a> 
@@ -493,9 +621,20 @@ __getitem__(self, item):
 match(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L710)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L710?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1066)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1066?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Match the compiled pattern only at the beginning of the input.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > match the compiled pattern only at the beginning of the input.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.fullmatch" class="docs-object-method">&nbsp;</a> 
@@ -503,9 +642,20 @@ match(self, txt, *args):
 fullmatch(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L712)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L712?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1082)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1082?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Require the compiled pattern to match the complete input.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > require the compiled pattern to match the complete input.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.search" class="docs-object-method">&nbsp;</a> 
@@ -513,9 +663,20 @@ fullmatch(self, txt, *args):
 search(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L714)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L714?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1098)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1098?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Find the first occurrence of the compiled pattern in the input.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > find the first occurrence of the compiled pattern in the input.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.findall" class="docs-object-method">&nbsp;</a> 
@@ -523,9 +684,20 @@ search(self, txt, *args):
 findall(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L716)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L716?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1114?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return all non-overlapping matches of the compiled pattern.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > return all non-overlapping matches of the compiled pattern.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.finditer" class="docs-object-method">&nbsp;</a> 
@@ -533,9 +705,20 @@ findall(self, txt, *args):
 finditer(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L718)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L718?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1130)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1130?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Iterate over match objects for all non-overlapping matches.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > An iterator yielding the records described above.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.sub" class="docs-object-method">&nbsp;</a> 
@@ -543,9 +726,23 @@ finditer(self, txt, *args):
 sub(self, rep, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L720)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L720?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1146)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1146?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Replace matches using `re.sub`.
+  - `rep`: `object`
+    > the replacement string or callable
+
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > replace matches using `re.sub`.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.subn" class="docs-object-method">&nbsp;</a> 
@@ -553,9 +750,23 @@ sub(self, rep, txt, *args):
 subn(self, rep, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L722)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L722?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1165)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1165?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Replace matches and return both the resulting text and replacement count.
+  - `rep`: `object`
+    > the replacement string or callable
+
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > replace matches and return both the resulting text and replacement count.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.replace" class="docs-object-method">&nbsp;</a> 
@@ -563,9 +774,23 @@ subn(self, rep, txt, *args):
 replace(self, txt, replacement, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L724)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L724?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1184)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1184?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Replace matches with a supplied replacement string or callable.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `replacement`: `object`
+    > the replacement string or callable
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > replace matches with a supplied replacement string or callable.
 
 
 <a id="McUtils.Parsers.RegexPatterns.RegexPattern.remove" class="docs-object-method">&nbsp;</a> 
@@ -573,9 +798,20 @@ replace(self, txt, replacement, *args):
 remove(self, txt, *args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L726)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L726?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1203)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/RegexPatterns/RegexPattern.py#L1203?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Delete every match by replacing it with an empty string.
+  - `txt`: `object`
+    > the input text or text block to parse
+
+  - `args`: `tuple`
+    > positional arguments forwarded to the wrapped callable
+
+  - `:returns`: `object`
+    > delete every match by replacing it with an empty string.
  </div>
 </div>
 

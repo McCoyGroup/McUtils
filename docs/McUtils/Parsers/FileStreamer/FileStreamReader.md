@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.FileStreamReader">FileStreamReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L907)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L907?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1715)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1715?message=Update%20Docs)]
 </div>
 
 Represents a file from which we'll stream blocks of data by finding tags and parsing what's between them
@@ -24,9 +24,23 @@ Represents a file from which we'll stream blocks of data by finding tags and par
 __init__(self, file, mode='r', encoding='utf-8', **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L911)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L911?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1719)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1719?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap a path or file object in `FileSearchStream` and initialize tagged-block parsing over it.
+  - `file`: `object`
+    > a filesystem path or open file object
+
+  - `mode`: `object`
+    > the file open mode or parser multiplicity mode
+
+  - `encoding`: `object`
+    > the text encoding used to convert between bytes and strings
+
+  - `kw`: `object`
+    > extra keyword arguments forwarded to the underlying stream constructor
  </div>
 </div>
 
@@ -80,7 +94,7 @@ __init__(self, file, mode='r', encoding='utf-8', **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/FileStreamReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileStreamReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L907?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1715?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

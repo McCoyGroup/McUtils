@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.FileStreamerTag">FileStreamerTag</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L929)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L929?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1776)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1776?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,29 @@
 __init__(self, tag_alternatives=None, follow_ups=None, offset=None, direction='forward', skip_tag=True, seek=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L930)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L930?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1777)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1777?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize one or more alternative delimiters plus optional follow-up delimiters, offset, direction, skip, and seek behavior into a tag specification.
+  - `tag_alternatives`: `object`
+    > one delimiter or a collection of alternative delimiters
+
+  - `follow_ups`: `object`
+    > additional delimiters that must be located in sequence after the first tag
+
+  - `offset`: `object`
+    > an additional cursor displacement applied after a match
+
+  - `direction`: `object`
+    > the direction in which delimiters are searched
+
+  - `skip_tag`: `object`
+    > whether the returned position should lie after the matched delimiter
+
+  - `seek`: `object`
+    > whether finding a delimiter should move the stream cursor
 
 
 <a id="McUtils.Parsers.FileStreamer.FileStreamerTag.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +54,14 @@ __init__(self, tag_alternatives=None, follow_ups=None, offset=None, direction='f
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamerTag.py#L949)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamerTag.py#L949?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamerTag.py#L1819)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamerTag.py#L1819?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Show the configured tag alternatives and the skip/seek flags.
+  - `:returns`: `str`
+    > The regex source or textual representation constructed by the operation.
  </div>
 </div>
 
@@ -90,7 +115,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/FileStreamerTag.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileStreamerTag.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L929?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1776?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

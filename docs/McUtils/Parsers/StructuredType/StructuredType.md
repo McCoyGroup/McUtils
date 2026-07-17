@@ -30,6 +30,23 @@ __init__(self, base_type, shape=None, is_alternative=False, is_optional=False, d
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType.py#L18)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType.py#L18?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a primitive, shaped primitive, alternative, optional, or compound dtype specification and choose an explicit or inferred missing-value sentinel.
+  - `base_type`: `object`
+    > the primitive or compound type specification
+
+  - `shape`: `object`
+    > the required or inferred array shape
+
+  - `is_alternative`: `object`
+    > whether the specification represents alternative accepted types
+
+  - `is_optional`: `object`
+    > whether missing values are allowed
+
+  - `default_value`: `object`
+    > the value used for optional or unmatched data
 
 
 <a id="McUtils.Parsers.StructuredType.StructuredType.is_simple" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +55,14 @@ __init__(self, base_type, shape=None, is_alternative=False, is_optional=False, d
 is_simple(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L57)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L57?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L85?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Report whether the specification is an unqualified primitive type (or `None`) rather than an optional, alternative, or compound structure.
+  - `:returns`: `bool`
+    > `True` when the condition described above holds; otherwise `False`.
 
 
 <a id="McUtils.Parsers.StructuredType.StructuredType.add_types" class="docs-object-method">&nbsp;</a> 
@@ -48,8 +70,8 @@ is_simple(self):
 add_types(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L63)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L63?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L99)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L99?message=Update%20Docs)]
 </div>
 Constructs a new type by treating the two objects as siblings, that is if they can be merged due to type and
 shape similarity they will be, otherwise a non-nesting structure will be constructed from them
@@ -66,9 +88,17 @@ We'll also want a nesting version of this I'm guessing, which probably we hook i
 __add__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L172?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Combine sibling type specifications using `add_types`.
+  - `other`: `object`
+    > the pattern or type combined with this object
+
+  - `:returns`: `object`
+    > combine sibling type specifications using `add_types`.
 
 
 <a id="McUtils.Parsers.StructuredType.StructuredType.compound_types" class="docs-object-method">&nbsp;</a> 
@@ -76,8 +106,8 @@ __add__(self, other):
 compound_types(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L186?message=Update%20Docs)]
 </div>
 Creates a structured type where rather than merging types they simply compound onto one another
   - `other`: `Any`
@@ -91,9 +121,17 @@ Creates a structured type where rather than merging types they simply compound o
 __call__(self, other): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L195?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Request nested type composition through `compound_types`, which is currently unimplemented.
+  - `other`: `object`
+    > the pattern or type combined with this object
+
+  - `:returns`: `object`
+    > request nested type composition through `compound_types`, which is currently unimplemented.
 
 
 <a id="McUtils.Parsers.StructuredType.StructuredType.repeat" class="docs-object-method">&nbsp;</a> 
@@ -101,8 +139,8 @@ __call__(self, other):
 repeat(self, n=None, m=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L152)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L152?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L210?message=Update%20Docs)]
 </div>
 Returns a new version of the type, but with the appropriate shape for being repeated n-to-m times
   - `n`: `Any`
@@ -118,8 +156,8 @@ Returns a new version of the type, but with the appropriate shape for being repe
 drop_axis(self, axis=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L233)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L233?message=Update%20Docs)]
 </div>
 Returns a new version of the type, but with the appropriate shape for dropping an axis
   - `axis`: `int`
@@ -133,8 +171,8 @@ Returns a new version of the type, but with the appropriate shape for dropping a
 extend_shape(self, base_shape): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L255?message=Update%20Docs)]
 </div>
 Extends the shape of the type such that base_shape precedes the existing shape
   - `base_shape`: `Any`
@@ -148,9 +186,14 @@ Extends the shape of the type such that base_shape precedes the existing shape
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L235)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L235?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/StructuredType/StructuredType.py#L307)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/StructuredType/StructuredType.py#L307?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Show the represented dtype and shape.
+  - `:returns`: `str`
+    > The regex source or textual representation constructed by the operation.
  </div>
 </div>
 

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.StringLineByLineReader">StringLineByLineReader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L2175)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L2175?message=Update%20Docs)]
 </div>
 
 Represents a string from which we'll stream blocks of data by finding tags and parsing what's between them
@@ -24,9 +24,20 @@ Represents a string from which we'll stream blocks of data by finding tags and p
 __init__(self, string, ignore_comments=False, max_nesting_depth=-1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L1140)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1140?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L2179)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L2179?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a text-mode line parser over an in-memory string.
+  - `string`: `object`
+    > the source string or byte sequence wrapped by the reader
+
+  - `ignore_comments`: `object`
+    > whether comment-tagged lines are discarded
+
+  - `max_nesting_depth`: `object`
+    > the maximum recursive block depth, with a negative value meaning unlimited
  </div>
 </div>
 
@@ -80,7 +91,7 @@ __init__(self, string, ignore_comments=False, max_nesting_depth=-1):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/StringLineByLineReader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L1136?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L2175?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
