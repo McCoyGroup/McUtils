@@ -20,6 +20,17 @@ import subprocess
 from pathlib import Path
 
 def brew_prefix_for_arch(pkg):
+    """
+    **LLM Docstring**
+
+    Locate a Homebrew package prefix by probing architecture-preferred Homebrew installations.
+
+    :param pkg: Homebrew package name
+    :type pkg: Any
+
+    :return: the first successful `brew --prefix` result, or `None`
+    :rtype: str | None
+    """
     machine = platform.machine()  # 'arm64' or 'x86_64'
     candidates = ["/opt/homebrew", "/usr/local"] if machine == "arm64" else ["/usr/local", "/opt/homebrew"]
     for prefix in candidates:
@@ -160,6 +171,89 @@ class FFILoader:
                  recompile=False,
                  debug_level=False
                  ):
+        """
+        **LLM Docstring**
+
+        Configure compilation and loading of the FFI extension, including NumPy, libffi, OpenMP, macro, and linker settings.
+
+        :param name: extension module name
+        :type name: Any
+
+        :param src: source root
+        :type src: Any
+
+        :param src_ext: source subdirectory name
+        :type src_ext: Any
+
+        :param load_path: locations searched for an existing extension
+        :type load_path: Any
+
+        :param description: package description
+        :type description: Any
+
+        :param version: package version
+        :type version: Any
+
+        :param include_dirs: additional include directories
+        :type include_dirs: Any
+
+        :param linked_libs: additional linked libraries
+        :type linked_libs: Any
+
+        :param runtime_dirs: runtime library directories
+        :type runtime_dirs: Any
+
+        :param macros: compiler macro definitions
+        :type macros: Any
+
+        :param source_files: extension source files
+        :type source_files: Any
+
+        :param build_script: optional custom build script
+        :type build_script: Any
+
+        :param requires_make: whether helper libraries require a make step
+        :type requires_make: Any
+
+        :param out_dir: output directory
+        :type out_dir: Any
+
+        :param cleanup_build: whether build products are removed
+        :type cleanup_build: Any
+
+        :param pointer_name: stored legacy pointer attribute
+        :type pointer_name: Any
+
+        :param build_kwargs: additional `CLoader` arguments
+        :type build_kwargs: Any
+
+        :param nodebug: whether to define `_NODEBUG`
+        :type nodebug: Any
+
+        :param threaded: whether OpenMP support is enabled
+        :type threaded: Any
+
+        :param manage_threading_flags: whether platform OpenMP flags are added
+        :type manage_threading_flags: Any
+
+        :param manage_libffi_flags: whether libffi paths are discovered
+        :type manage_libffi_flags: Any
+
+        :param extra_compile_args: additional compiler flags
+        :type extra_compile_args: Any
+
+        :param extra_link_args: additional linker flags
+        :type extra_link_args: Any
+
+        :param recompile: whether to force recompilation
+        :type recompile: Any
+
+        :param debug_level: debug selector used by the wrapped module
+        :type debug_level: Any
+
+        :return: nothing; creates the configured `CLoader`
+        :rtype: None
+        """
         # if python_potential is False:
 
         if include_dirs is None:
@@ -251,6 +345,14 @@ class FFILoader:
 
     @classmethod
     def _check_install_lib_ffi(cls):
+        """
+        **LLM Docstring**
+
+        Ensure a bundled `libffi` source directory exists, downloading the latest release when absent.
+
+        :return: the bundled libffi target directory
+        :rtype: str
+        """
         targ = os.path.join(cls.libs_folder, 'libffi')
         if not os.path.exists(targ):
             from ...ExternalPrograms import GitHubReleaseManager
@@ -264,11 +366,27 @@ class FFILoader:
 
     @property
     def lib(self):
+        """
+        **LLM Docstring**
+
+        Load and cache the compiled extension module.
+
+        :return: the loaded Python extension
+        :rtype: module
+        """
         if self._lib is None:
             self._lib = self.c_loader.load()
         return self._lib
     @property
     def caller_api_version(self):
+        """
+        **LLM Docstring**
+
+        Detect the extension calling API from the presence of `_FFIModule`.
+
+        :return: `2` for capsule-based modules, otherwise `1`
+        :rtype: int
+        """
         if hasattr(self.lib, "_FFIModule"): # currently how we're dispatching
             return 2
         else:
