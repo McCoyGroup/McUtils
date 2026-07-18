@@ -4,6 +4,22 @@ try:
 except ModuleNotFoundError:
     class Extension:
         def __init__(self, *args, **kwargs):
+            """
+            **LLM Docstring**
+
+            Raise an informative error when `distutils.Extension` is unavailable.
+
+            This fallback constructor is defined only on Python installations where importing `distutils.core` failed.
+
+            :param args: unused positional arguments
+            :type args: tuple
+
+            :param kwargs: unused keyword arguments
+            :type kwargs: dict
+
+            :return: this constructor never returns normally
+            :rtype: None
+            """
             raise ImportError("the FFI framework uses `distutils`, which has since been removed")
 
 __all__ = [
@@ -37,6 +53,76 @@ class CLoader:
                  cleanup_build=True,
                  recompile=False
                  ):
+        """
+        **LLM Docstring**
+
+        Configure discovery, compilation, linking, and cleanup for a C++ extension module.
+
+        If `lib_dir` is omitted, `lib_name` must name an existing directory, whose basename becomes the extension name.
+
+        :param lib_name: extension module name or, when `lib_dir` is omitted, its project directory
+        :type lib_name: str
+
+        :param lib_dir: project root containing source and auxiliary-library directories
+        :type lib_dir: str | None
+
+        :param load_path: directories searched for an already-built extension
+        :type load_path: Iterable[str] | None
+
+        :param src_ext: source-directory name relative to `lib_dir`
+        :type src_ext: str
+
+        :param libs_ext: auxiliary-library directory name relative to `lib_dir`
+        :type libs_ext: str
+
+        :param description: package description passed to the build system
+        :type description: str
+
+        :param version: package version passed to the build system
+        :type version: str
+
+        :param include_dirs: header/library search directories
+        :type include_dirs: Iterable[str] | None
+
+        :param runtime_dirs: runtime library search directories
+        :type runtime_dirs: Iterable[str] | None
+
+        :param linked_libs: library names supplied to the linker
+        :type linked_libs: Iterable[str] | None
+
+        :param macros: preprocessor macro definitions
+        :type macros: Iterable[tuple] | None
+
+        :param extra_link_args: additional linker arguments
+        :type extra_link_args: Iterable[str] | None
+
+        :param extra_compile_args: additional compiler arguments
+        :type extra_compile_args: Iterable[str] | None
+
+        :param extra_objects: prebuilt object files to link
+        :type extra_objects: Iterable[str] | None
+
+        :param source_files: C/C++ source files; defaults to `<lib_name>.cpp`
+        :type source_files: Iterable[str] | None
+
+        :param build_script: custom build script or command specification
+        :type build_script: str | dict | None
+
+        :param requires_make: whether and how auxiliary libraries should be built
+        :type requires_make: bool | str | dict
+
+        :param out_dir: directory receiving the finished extension
+        :type out_dir: str | None
+
+        :param cleanup_build: whether to remove the temporary build directory
+        :type cleanup_build: bool
+
+        :param recompile: whether to bypass discovery and force recompilation
+        :type recompile: bool
+
+        :return: no value is returned
+        :rtype: None
+        """
         if lib_dir is None:
             if os.path.isdir(lib_name):
                 lib_dir = lib_name
@@ -69,6 +155,16 @@ class CLoader:
         self._lib = None
 
     def load(self):
+        """
+        **LLM Docstring**
+
+        Find or compile the configured extension and import it.
+
+        The loaded module is cached on the loader. During import, the extension directory is temporarily inserted at the front of `sys.path`.
+
+        :return: loaded extension module
+        :rtype: types.ModuleType
+        """
         if self._lib is None:
             ext = None if self.recompile else self.find_extension()
             if ext is None:
@@ -115,9 +211,25 @@ class CLoader:
 
     @property
     def src_dir(self):
+        """
+        **LLM Docstring**
+
+        Return the configured source directory.
+
+        :return: `lib_dir/src_ext`
+        :rtype: str
+        """
         return os.path.join(self.lib_dir, self.src_ext)
     @property
     def lib_lib_dir(self):
+        """
+        **LLM Docstring**
+
+        Return the configured auxiliary-library directory.
+
+        :return: `lib_dir/libs_ext`
+        :rtype: str
+        """
         return os.path.join(self.lib_dir, self.libs_ext)
 
     def get_extension(self):
@@ -161,6 +273,19 @@ class CLoader:
         return module
 
     def configure_make_command(self, make_file):
+        """
+        **LLM Docstring**
+
+        Translate a make configuration dictionary into compiler and linker command argument lists.
+
+        Creates the build directory, derives object-file paths, prefixes compiler/linker flags, and appends a platform-specific shared-library suffix. The read `python_dir` entry is not otherwise used.
+
+        :param make_file: build configuration containing at least `python_dir`, `compiler`, and `linker`
+        :type make_file: dict
+
+        :return: one compile command per source followed by one link command
+        :rtype: list[list[str]]
+        """
 
         python_dir = make_file["python_dir"]
         compiler = make_file["compiler"]
@@ -303,6 +428,16 @@ class CLoader:
         return lib_files
 
     def build_lib(self):
+        """
+        **LLM Docstring**
+
+        Build the extension in its source directory.
+
+        Runs a custom build when configured, otherwise invokes `distutils.setup` with `build_ext --inplace`. On macOS it also rewrites dependent library install names to use `@rpath`.
+
+        :return: no value is returned
+        :rtype: None
+        """
 
         curdir = os.getcwd()
 
@@ -404,6 +539,16 @@ class CLoader:
         return self.locate_library(name, roots, extensions, library_types=library_types)
 
     def cleanup(self):
+        """
+        **LLM Docstring**
+
+        Move the built extension to its output directory and optionally remove build artifacts.
+
+        The implementation locates the built library, replaces any existing target, and renames the library into place. The build-directory test uses `os.path.isdir` without calling it, so cleanup is attempted whenever `cleanup_build` is true.
+
+        :return: target extension path, or `None` if no built library was found
+        :rtype: str | None
+        """
         # Locate the library and copy it out (if it exists)
 
         built, target, ext = self.locate_lib()

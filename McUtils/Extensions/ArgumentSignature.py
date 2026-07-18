@@ -35,31 +35,120 @@ class ArgumentType(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def ctypes_type(self):
+        """
+        **LLM Docstring**
+
+        Return the `ctypes` representation used for foreign-function calls.
+
+        Subclasses must implement this abstract property.
+
+        :return: the `ctypes` representation used for foreign-function calls
+        :rtype: type | None
+        """
         raise NotImplementedError()
     @property
     @abc.abstractmethod
     def cpp_type(self):
+        """
+        **LLM Docstring**
+
+        Return the C/C++ spelling for this argument type.
+
+        Subclasses must implement this abstract property.
+
+        :return: the C/C++ spelling for this argument type
+        :rtype: str
+        """
         raise NotImplementedError()
     @property
     @abc.abstractmethod
     def types(self):
+        """
+        **LLM Docstring**
+
+        Return the accepted Python runtime types.
+
+        Subclasses must implement this abstract property.
+
+        :return: the accepted Python runtime types
+        :rtype: tuple[type, ...]
+        """
         raise NotImplementedError()
     @property
     @abc.abstractmethod
     def dtypes(self):
+        """
+        **LLM Docstring**
+
+        Return the accepted NumPy data types.
+
+        Subclasses must implement this abstract property.
+
+        :return: the accepted NumPy data types
+        :rtype: tuple[np.dtype, ...]
+        """
         raise NotImplementedError()
     @property
     @abc.abstractmethod
     def typechar(self):
+        """
+        **LLM Docstring**
+
+        Return the Python C-API format character for this type.
+
+        Subclasses must implement this abstract property.
+
+        :return: the Python C-API format character for this type
+        :rtype: str
+        """
         raise NotImplementedError()
     @abc.abstractmethod
     def isinstance(self, arg):
+        """
+        **LLM Docstring**
+
+        Test whether a value is already compatible with this argument type.
+
+        Subclasses must implement this abstract operation.
+
+        :param arg: value to inspect or convert
+        :type arg: Any
+
+        :return: whether a value is already compatible with this argument type
+        :rtype: bool
+        """
         raise NotImplementedError()
     @abc.abstractmethod
     def cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Convert a Python value to the corresponding Python-side representation.
+
+        Subclasses must implement this abstract operation.
+
+        :param arg: value to inspect or convert
+        :type arg: Any
+
+        :return: converted a Python value to the corresponding Python-side representation
+        :rtype: Any
+        """
         raise NotImplementedError()
     @abc.abstractmethod
     def c_cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Convert a Python value to the object passed through `ctypes`.
+
+        Subclasses must implement this abstract operation.
+
+        :param arg: value to inspect or convert
+        :type arg: Any
+
+        :return: converted a Python value to the object passed through `ctypes`
+        :rtype: Any
+        """
         raise NotImplementedError()
 class PrimitiveType(ArgumentType):
     """
@@ -111,30 +200,121 @@ class PrimitiveType(ArgumentType):
 
     @property
     def name(self):
+        """
+        **LLM Docstring**
+
+        Return the descriptive type name.
+
+        :return: the descriptive type name
+        :rtype: str
+        """
         return self._name
     @property
     def ctypes_type(self):
+        """
+        **LLM Docstring**
+
+        Return the stored `ctypes` type specification.
+
+        :return: the stored `ctypes` type specification
+        :rtype: type | None
+        """
         return self._ctypes_spec
     @property
     def cpp_type(self):
+        """
+        **LLM Docstring**
+
+        Return the stored C/C++ type spelling.
+
+        :return: the stored C/C++ type spelling
+        :rtype: str
+        """
         return self._cpp_spec
     @property
     def types(self):
+        """
+        **LLM Docstring**
+
+        Return the accepted Python types.
+
+        :return: the accepted Python types
+        :rtype: tuple[type, ...]
+        """
         return self._types
     @property
     def dtypes(self):
+        """
+        **LLM Docstring**
+
+        Return the accepted NumPy dtypes.
+
+        :return: the accepted NumPy dtypes
+        :rtype: tuple[np.dtype, ...]
+        """
         return self._dtypes
     @property
     def typechar(self):
+        """
+        **LLM Docstring**
+
+        Return the stored Python C-API format character.
+
+        :return: the stored Python C-API format character
+        :rtype: str
+        """
         return self._capi_spec
     def isinstance(self, arg):
+        """
+        **LLM Docstring**
+
+        Test whether a value belongs to one of the configured Python types.
+
+        :param arg: value to test
+        :type arg: Any
+
+        :return: `True` when `arg` is an instance of an accepted type
+        :rtype: bool
+        """
         return isinstance(arg, self._types)
     def cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Cast a value with the first configured Python type.
+
+        :param arg: value to convert
+        :type arg: Any
+
+        :return: Python-side converted value
+        :rtype: Any
+        """
         return self._types[0](arg)
     def c_cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Cast a value to the configured `ctypes` scalar.
+
+        The value is first converted with `cast`.
+
+        :param arg: value to convert
+        :type arg: Any
+
+        :return: `ctypes` scalar instance
+        :rtype: Any
+        """
         return self.ctypes_type(self.cast(arg))
         # return self._types[0](arg)
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a concise representation containing the wrapper class and primitive name.
+
+        :return: representation string
+        :rtype: str
+        """
         return "{}({})".format(
             type(self).__name__,
             self.name
@@ -147,34 +327,132 @@ class ArrayType(ArgumentType):
     Other flavors might come, but given the use case, it's unlikely.
     """
     def __init__(self, base_type, shape=None, ctypes_spec=None):
+        """
+        **LLM Docstring**
+
+        Create an array argument type around a primitive base type.
+
+        :param base_type: element type used for dtype checks and conversion
+        :type base_type: ArgumentType
+
+        :param shape: stored optional shape metadata; it is not enforced by current methods
+        :type shape: tuple[int, ...] | None
+
+        :param ctypes_spec: optional precomputed `ctypes` array specification
+        :type ctypes_spec: Any | None
+
+        :return: no value is returned
+        :rtype: None
+        """
         self.base = base_type
         self.shape = shape
         self._ctypes_spec = ctypes_spec
 
     @property
     def ctypes_type(self):
+        """
+        **LLM Docstring**
+
+        Return or lazily create a C-contiguous NumPy `ndpointer` specification.
+
+        :return: or lazily create a C-contiguous NumPy `ndpointer` specification
+        :rtype: Any
+        """
         if self._ctypes_spec is None:
             self._ctypes_spec = npctypes.ndpointer(self.base.ctypes_type, flags="C_CONTIGUOUS")
         return self._ctypes_spec
     @property
     def cpp_type(self):
+        """
+        **LLM Docstring**
+
+        Return the pointer-like C/C++ type string formed from the cached `ctypes` specification.
+
+        :return: the pointer-like C/C++ type string formed from the cached `ctypes` specification
+        :rtype: str
+        """
         return "*"+self._ctypes_spec
     @property
     def types(self):
+        """
+        **LLM Docstring**
+
+        Return the accepted Python container type, `numpy.ndarray`.
+
+        :return: the accepted Python container type, `numpy.ndarray`
+        :rtype: tuple[type, ...]
+        """
         return (np.ndarray,)
     @property
     def dtypes(self):
+        """
+        **LLM Docstring**
+
+        Return the element dtypes accepted by the base type.
+
+        :return: the element dtypes accepted by the base type
+        :rtype: tuple[np.dtype, ...]
+        """
         return self.base.dtypes
     @property
     def typechar(self):
+        """
+        **LLM Docstring**
+
+        Return the Python C-API format character of the base type.
+
+        :return: the Python C-API format character of the base type
+        :rtype: str
+        """
         return self.base.typechar
     def isinstance(self, arg):
+        """
+        **LLM Docstring**
+
+        Test whether a value is a NumPy array with an accepted base dtype.
+
+        :param arg: value to test
+        :type arg: Any
+
+        :return: compatibility flag
+        :rtype: bool
+        """
         return isinstance(arg, self.types) and arg.dtype in self.base.dtypes
     def cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Convert a value to an array using the first accepted base dtype.
+
+        :param arg: array-like value
+        :type arg: Any
+
+        :return: converted NumPy array
+        :rtype: np.ndarray
+        """
         return np.asanyarray(arg).astype(self.base.dtypes[0])
     def c_cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Convert a value to a C-contiguous NumPy array of the required dtype.
+
+        :param arg: array-like value
+        :type arg: Any
+
+        :return: contiguous converted array
+        :rtype: np.ndarray
+        """
         return np.ascontiguousarray(self.cast(arg))
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a concise representation containing the array wrapper and base type.
+
+        :return: representation string
+        :rtype: str
+        """
         return "{}({})".format(
             type(self).__name__,
             self.base
@@ -194,30 +472,111 @@ class PointerType(ArgumentType):
 
     @property
     def ctypes_type(self):
+        """
+        **LLM Docstring**
+
+        Return or lazily create a `ctypes.POINTER` to the base type.
+
+        :return: or lazily create a `ctypes.POINTER` to the base type
+        :rtype: Any
+        """
         if self._ctypes_spec is None:
             self._ctypes_spec = ctypes.POINTER(self.base.ctypes_type)
         return self._ctypes_spec
 
     @property
     def cpp_type(self):
+        """
+        **LLM Docstring**
+
+        Return the pointer-like C/C++ type string formed from the cached `ctypes` specification.
+
+        :return: the pointer-like C/C++ type string formed from the cached `ctypes` specification
+        :rtype: str
+        """
         return "*"+self._ctypes_spec
     @property
     def types(self):
+        """
+        **LLM Docstring**
+
+        Return the Python types accepted by the base type.
+
+        :return: the Python types accepted by the base type
+        :rtype: tuple[type, ...]
+        """
         return self.base.types
     @property
     def dtypes(self):
+        """
+        **LLM Docstring**
+
+        Return the NumPy dtypes accepted by the base type.
+
+        :return: the NumPy dtypes accepted by the base type
+        :rtype: tuple[np.dtype, ...]
+        """
         return self.base.dtypes
     @property
     def typechar(self):
+        """
+        **LLM Docstring**
+
+        Return the Python C-API format character of the base type.
+
+        :return: the Python C-API format character of the base type
+        :rtype: str
+        """
         return self.base.typechar
     def isinstance(self, arg):
+        """
+        **LLM Docstring**
+
+        Delegate compatibility testing to the base type.
+
+        :param arg: value to test
+        :type arg: Any
+
+        :return: compatibility flag
+        :rtype: bool
+        """
         return self.base.isinstance(arg)
     def cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Delegate Python-side conversion to the base type.
+
+        :param arg: value to convert
+        :type arg: Any
+
+        :return: converted base value
+        :rtype: Any
+        """
         return self.base.cast(arg)
     def c_cast(self, arg):
+        """
+        **LLM Docstring**
+
+        Convert a value with the base type and return a `ctypes.byref` pointer to it.
+
+        :param arg: value to convert
+        :type arg: Any
+
+        :return: by-reference `ctypes` object
+        :rtype: Any
+        """
         # we might need to cast arg first...
         return ctypes.byref(self.base.c_cast(arg))
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a concise representation containing the pointer wrapper and base type.
+
+        :return: representation string
+        :rtype: str
+        """
         return "{}({})".format(
             type(self).__name__,
             self.base
@@ -372,6 +731,16 @@ class Argument:
     _typestrs = None
     @classmethod
     def _prep_typesets(cls):
+        """
+        **LLM Docstring**
+
+        Populate class-level lookup tables for Python types and C/C++ type strings.
+
+        Existing mappings are preserved by only initializing when either cache is missing.
+
+        :return: no value is returned
+        :rtype: None
+        """
         if cls._typesets is None or cls._typestrs is None:
             cls._typesets = {}
             cls._typestrs = {}
@@ -383,11 +752,35 @@ class Argument:
                     cls._typestrs[at.cpp_type] = at
     @classmethod
     def infer_type_type(cls, type_key):
+        """
+        **LLM Docstring**
+
+        Look up an argument type from a Python type object.
+
+        :param type_key: Python type to resolve
+        :type type_key: type
+
+        :return: matching registered argument type, or `None`
+        :rtype: ArgumentType | None
+        """
         cls._prep_typesets()
         return cls._typesets.get(type_key, None)
 
     @classmethod
     def infer_type_str(cls, argstr):
+        """
+        **LLM Docstring**
+
+        Resolve an argument type from a string specification.
+
+        Checks registered mappings first, then attempts the module's pointer-pattern branch. That branch constructs an `ArrayType`; malformed or unmatched strings return `None`.
+
+        :param argstr: type spelling to resolve
+        :type argstr: str
+
+        :return: resolved argument type or `None`
+        :rtype: ArgumentType | None
+        """
         cls._prep_typesets()
         type = None
         if argstr in cls._typesets:
@@ -410,25 +803,84 @@ class Argument:
         raise NotImplementedError("...")
 
     def prep_value(self, val):
+        """
+        **LLM Docstring**
+
+        Convert a value to the C-call representation required by this argument.
+
+        :param val: Python value to prepare
+        :type val: Any
+
+        :return: converted value
+        :rtype: Any
+        """
         return self.dtype.c_cast(val)
 
     def is_pointer(self):
+        """
+        **LLM Docstring**
+
+        Test whether this argument uses a `PointerType`.
+
+        :return: pointer-type flag
+        :rtype: bool
+        """
         return isinstance(self.dtype, PointerType)
     def is_array(self):
+        """
+        **LLM Docstring**
+
+        Test whether this argument uses an `ArrayType`.
+
+        :return: array-type flag
+        :rtype: bool
+        """
         return isinstance(self.dtype, ArrayType)
     @property
     def dtypes(self):
+        """
+        **LLM Docstring**
+
+        Return the NumPy dtypes accepted by this argument type.
+
+        :return: accepted dtypes
+        :rtype: tuple[np.dtype, ...]
+        """
         return self.dtype.dtypes
     @property
     def typechar(self):
+        """
+        **LLM Docstring**
+
+        Return the Python C-API format character for this argument type.
+
+        :return: format character
+        :rtype: str
+        """
         return self.dtype.typechar
     @property
     def cpp_signature(self):
+        """
+        **LLM Docstring**
+
+        Format this argument as a C/C++ declaration fragment.
+
+        :return: string of the form `<type> <name>`
+        :rtype: str
+        """
         return "{} {}".format(
             self.dtype.cpp_type,
             self.name
         )
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation containing the argument name and resolved type.
+
+        :return: representation string
+        :rtype: str
+        """
         return "{}('{}', {})".format(
             type(self).__name__,
             self.name,
@@ -461,6 +913,28 @@ class FunctionSignature:
 
     @classmethod
     def construct(cls, name, defaults=None, return_type=None, **args):
+        """
+        **LLM Docstring**
+
+        Construct a signature from keyword argument type specifications.
+
+        Keyword insertion order determines positional argument order.
+
+        :param name: function name
+        :type name: str
+
+        :param defaults: default values keyed by argument name
+        :type defaults: dict | None
+
+        :param return_type: return type specification accepted by `Argument.infer_type`
+        :type return_type: Any | None
+
+        :param args: argument names mapped to type specifications
+        :type args: dict[str, Any]
+
+        :return: new function signature
+        :rtype: FunctionSignature
+        """
         return FunctionSignature(
             name,
             *(Argument(k, v) for k, v in args.items()),
@@ -493,22 +967,62 @@ class FunctionSignature:
 
     @property
     def args(self):
+        """
+        **LLM Docstring**
+
+        Return the immutable argument sequence.
+
+        :return: the immutable argument sequence
+        :rtype: tuple[Argument, ...]
+        """
         return self._arguments
     @property
     def return_argtype(self):
+        """
+        **LLM Docstring**
+
+        Return the resolved return `ArgumentType`.
+
+        :return: the resolved return `ArgumentType`
+        :rtype: ArgumentType | None
+        """
         return self._ret_type
     @property
     def return_type(self):
+        """
+        **LLM Docstring**
+
+        Return the `ctypes` return type used to configure a foreign function.
+
+        :return: the `ctypes` return type used to configure a foreign function
+        :rtype: type | None
+        """
         res = self._ret_type
         if res is not None:
             res = res.ctypes_type
         return res
     @property
     def arg_types(self):
+        """
+        **LLM Docstring**
+
+        Return the ordered `ctypes` types for all arguments.
+
+        :return: the ordered `ctypes` types for all arguments
+        :rtype: list[type]
+        """
         return [a.dtype.ctypes_type for a in self.args]
 
     @property
     def cpp_signature(self):
+        """
+        **LLM Docstring**
+
+        Format the complete C/C++-style function signature.
+
+        :return: Format the complete C/C++-style function signature
+        :rtype: str
+        """
         return "{} {}({})".format(
             "void" if self.return_type is None else self.return_type,
             self.name,
@@ -516,6 +1030,25 @@ class FunctionSignature:
         )
 
     def populate_kwargs(self, args, kwargs, defaults=None):
+        """
+        **LLM Docstring**
+
+        Merge positional and keyword arguments and fill missing entries from defaults.
+
+        Explicit `defaults` override signature-level defaults, which override each `Argument.default`. Duplicate positional/keyword assignments raise `ValueError`; unresolved arguments remain mapped to `None`.
+
+        :param args: positional values paired with signature arguments
+        :type args: Iterable[Any]
+
+        :param kwargs: explicit keyword values
+        :type kwargs: Mapping[str, Any]
+
+        :param defaults: per-call fallback defaults
+        :type defaults: Mapping[str, Any] | None
+
+        :return: complete argument-name mapping
+        :rtype: dict[str, Any]
+        """
         kwlist = {}
         for base, val in zip(self.args, args):
             kwlist[base.name] = val
@@ -537,6 +1070,25 @@ class FunctionSignature:
         return kwlist
 
     def prep_args(self, args, kwargs, defaults=None):
+        """
+        **LLM Docstring**
+
+        Prepare arguments in signature order for a foreign-function call.
+
+        When `args` is not `None`, positional and keyword values are first normalized with `populate_kwargs`; each value is then converted by its `Argument.prep_value` method.
+
+        :param args: positional values, or `None` when `kwargs` is already populated
+        :type args: Iterable[Any] | None
+
+        :param kwargs: argument values keyed by name
+        :type kwargs: Mapping[str, Any]
+
+        :param defaults: per-call fallback defaults
+        :type defaults: Mapping[str, Any] | None
+
+        :return: ordered converted arguments
+        :rtype: list[Any]
+        """
         if args is not None: # easy way to say no prep needed...
             kwargs = self.populate_kwargs(args, kwargs, defaults=defaults)
 
@@ -549,6 +1101,14 @@ class FunctionSignature:
         return final_args
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation showing the function name, arguments, and return type.
+
+        :return: representation string
+        :rtype: str
+        """
         return "{}({}({})->{})".format(
             type(self).__name__,
             self.name,
