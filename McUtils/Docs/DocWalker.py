@@ -41,6 +41,13 @@ class DocSpec(ObjectSpec):
     )
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Formats the object specification using its concrete class name and base representation.
+        :return: the diagnostic representation
+        :rtype: str
+        """
         return '{}({})'.format(
             type(self).__name__,
             super().__repr__()
@@ -63,6 +70,16 @@ class TestsExtractor(TemplateResourceExtractor):
         base = super().path_extension(handler)
         return [base, os.path.split(base)[1]]
     def load(self, handler:TemplateHandler):
+        """
+        **LLM Docstring**
+
+        Loads a test resource and wraps nonempty source in an `ExamplesParser`.
+
+        :param handler: the documentation handler whose test resource is requested
+        :type handler: TemplateHandler
+        :return: the parsed tests, or `None` when no resource is found
+        :rtype: ExamplesParser | None
+        """
         res = super().load(handler)
         if res is not None:
             res = ExamplesParser(res)
@@ -70,12 +87,30 @@ class TestsExtractor(TemplateResourceExtractor):
 
 class TestExamplesFormatter:
     def __init__(self, parser):
+        """
+        **LLM Docstring**
+
+        Initializes the formatter from an existing parser or raw test source.
+
+        :param parser: the parser or Python test source
+        :type parser: ExamplesParser | str
+        """
         if isinstance(parser, str):
             parser = ExamplesParser(parser)
         self.parser = parser
 
     @classmethod
     def from_file(cls, tests_file):
+        """
+        **LLM Docstring**
+
+        Creates an examples formatter from a test file.
+
+        :param tests_file: the file to read
+        :type tests_file: str | os.PathLike
+        :return: the initialized formatter
+        :rtype: TestExamplesFormatter
+        """
         with open(tests_file) as f:
             return cls(f.read())
 
@@ -112,6 +147,25 @@ class DocTemplateOps(MarkdownOps):
 
 class InteractiveTemplateEngine(TemplateInterfaceEngine):
     def __init__(self, templates:TemplateInterfaceList=None, ignore_missing=False, formatter_class=None, ignore_paths=()):
+        """
+        **LLM Docstring**
+
+        Initializes the interactive documentation engine and its default object templates.
+
+        A unique namespace ID is created for Jupyter variables, and the root display pane is initialized lazily.
+
+        :param templates: custom templates or `None` for the six browser methods
+        :type templates: TemplateInterfaceList | None
+
+        :param ignore_missing: whether missing template values should be tolerated
+        :type ignore_missing: bool
+
+        :param formatter_class: an optional formatter class
+        :type formatter_class: type | None
+
+        :param ignore_paths: template paths to ignore
+        :type ignore_paths: Iterable[str]
+        """
         if templates is None:
             templates = {
                 'index.md':self.index_browser,
@@ -130,12 +184,37 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                          )
 
     def clean_params(self, params):
+        """
+        **LLM Docstring**
+
+        Removes fields whose values are `None` or empty strings.
+
+        :param params: the fields to filter
+        :type params: Mapping[Any, Any]
+        :return: the nonempty fields
+        :rtype: dict
+        """
         return {
             k: v for k, v in
             params.items()
             if not (v is None or isinstance(v, str) and len(v) == 0)
         }
     def prep_pars(self, writer, pars):
+        """
+        **LLM Docstring**
+
+        Converts named documentation sections into JHTML heading/content pairs.
+
+        `Details` and `Examples` are rendered as Markdown, while `Related` is converted to interactive links.
+
+        :param writer: the writer used to resolve related links
+        :type writer: DocTemplateHandler
+
+        :param pars: section labels and values
+        :type pars: Mapping[str, Any]
+        :return: a mapping suitable for an `Opener`
+        :rtype: dict
+        """
         from ..Jupyter import JHTML
 
         return {
@@ -148,6 +227,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                 for k, v in pars.items()
         }
     def format_parameters_table(self, parameters):
+        """
+        **LLM Docstring**
+
+        Renders parsed parameter metadata as a vertical JHTML flex container.
+
+        :param parameters: parameter names with type and description fields
+        :type parameters: Mapping[str, Mapping[str, str]]
+        :return: the parameter display
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex
 
         return Flex(
@@ -164,6 +253,19 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
             direction='column'
         )
     def format_props_table(self, writer, props):
+        """
+        **LLM Docstring**
+
+        Renders class property names and runtime type names as a vertical flex container.
+
+        :param writer: unused writer compatibility argument
+        :type writer: DocTemplateHandler
+
+        :param props: property-name/value pairs
+        :type props: Iterable[tuple[str, Any]]
+        :return: the property display
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex
 
         return Flex(
@@ -175,10 +277,35 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         )
 
     def format_related_links(self, writer, related):
+        """
+        **LLM Docstring**
+
+        Builds interactive links that resolve and display related objects on demand.
+
+        :param writer: the writer used for relative-object resolution
+        :type writer: DocTemplateHandler
+
+        :param related: a comma-separated list of related identifiers
+        :type related: str
+        :return: a JHTML list of link buttons
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, LinkButton, Var
 
         _cache = set()
         def _get_docs(x):
+            """
+            **LLM Docstring**
+
+            Resolves one related identifier and renders it through the current engine.
+
+            Resolved objects are placed in a local debounce set, although repeated objects are still rendered.
+
+            :param x: the related identifier
+            :type x: str
+            :return: the rendered documentation or a formatted traceback on failure
+            :rtype: Any
+            """
             try:
                 o = writer.resolve_relative_obj(x.strip())
                 if o not in _cache:
@@ -206,6 +333,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                       _self=None,
                       **kw
                       ):
+        """
+        **LLM Docstring**
+
+        Builds the interactive root index and initializes the shared display pane on first use.
+
+        :param kw: template fields consumed according to the method signature
+        :type kw: Any
+        :return: the rendered JHTML/Flex component
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex, Opener, VariableDisplay
         body = [
                 JHTML.Markdown(description),
@@ -238,6 +375,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                        _self=None,
                        **kw
                        ):
+        """
+        **LLM Docstring**
+
+        Builds an interactive module view with lazily loaded member documentation.
+
+        :param kw: template fields consumed according to the method signature
+        :type kw: Any
+        :return: the rendered JHTML/Flex component
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex, Opener, CardOpener, Button, LinkButton, VariableDisplay, Var
 
         body = [
@@ -302,6 +449,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                       _self=None,
                       **_
                       ):
+        """
+        **LLM Docstring**
+
+        Builds an interactive class view containing properties, parameters, methods, and optional sections.
+
+        :param kw: template fields consumed according to the method signature
+        :type kw: Any
+        :return: the rendered JHTML/Flex component
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex, Opener, LinkButton
 
         body = [
@@ -345,6 +502,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                        details=None,
                        **_
                        ):
+        """
+        **LLM Docstring**
+
+        Builds a collapsible interactive method view with syntax-styled signature and parsed documentation.
+
+        :param kw: template fields consumed according to the method signature
+        :type kw: Any
+        :return: the rendered JHTML/Flex component
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex, Opener
 
         header = JHTML.Pre(JHTML.Code(
@@ -397,6 +564,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                        _self=None,
                        **_
                        ):
+        """
+        **LLM Docstring**
+
+        Builds an interactive fallback view for a general documented object.
+
+        :param kw: template fields consumed according to the method signature
+        :type kw: Any
+        :return: the rendered JHTML/Flex component
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex, Opener
 
         return Flex(
@@ -432,6 +609,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                          details=None,
                          **_
                          ):
+        """
+        **LLM Docstring**
+
+        Builds an interactive function view with signature, parameter metadata, and optional sections.
+
+        :param kw: template fields consumed according to the method signature
+        :type kw: Any
+        :return: the rendered JHTML/Flex component
+        :rtype: Any
+        """
         from ..Jupyter import JHTML, Flex, Opener
 
         return Flex(
@@ -480,6 +667,38 @@ class DocTemplateHandler(TemplateHandler):
                  walker:'TemplateWalker'=None,
                  **extra_fields
                  ):
+        """
+        **LLM Docstring**
+
+        Initializes a documentation template handler and inherits defaults from its walker when needed.
+
+        :param obj: the object being documented
+        :type obj: Any
+
+        :param out: the output target
+        :type out: str | None
+
+        :param engine: the rendering engine
+        :type engine: TemplateEngine | None
+
+        :param root: the documentation root
+        :type root: str | None
+
+        :param examples_loader: the examples resource loader
+        :type examples_loader: ExamplesExtractor | None
+
+        :param tests_loader: the tests resource loader
+        :type tests_loader: TestsExtractor | None
+
+        :param include_line_numbers: whether source-line lookup is enabled
+        :type include_line_numbers: bool
+
+        :param walker: the owning walker; a `DocWalker` is created when omitted
+        :type walker: TemplateWalker | None
+
+        :param extra_fields: additional template fields
+        :type extra_fields: Any
+        """
 
         if walker is None:
             walker = DocWalker()
@@ -492,10 +711,26 @@ class DocTemplateHandler(TemplateHandler):
         super().__init__(obj, out=out, engine=engine, root=root, walker=walker, **extra_fields)
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Formats the handler with its class and resolved identifier.
+        :return: the diagnostic representation
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}('{self.identifier}')"
 
     def get_lineno(self):
+        """
+        **LLM Docstring**
+
+        Finds the one-based source line for the handled object when line numbers are enabled.
+
+        Descriptors are unwrapped to their getter or underlying function; ordinary instances are mapped to their type.
+        :return: the source line, or an empty string when lookup fails or is disabled
+        :rtype: int | str
+        """
         # try:
         if self.include_line_numbers:
             obj = self.obj
@@ -603,8 +838,24 @@ class DocTemplateHandler(TemplateHandler):
         return inspect.cleandoc("\n".join(description)).strip(), param_map, extra_fields
 
     def load_examples(self):
+        """
+        **LLM Docstring**
+
+        Loads examples through the configured examples extractor.
+        :return: the loaded examples, or `None` without a loader
+        :rtype: Any | None
+        """
         return self.examples_loader.load(self) if self.examples_loader is not None else None
     def load_tests(self):
+        """
+        **LLM Docstring**
+
+        Loads and formats tests, falling back to matching tests inherited from the parent handler.
+
+        A nonempty parser is also stored as `parent_tests` for descendant handlers.
+        :return: template parameters for matching tests, or `None`
+        :rtype: dict | None
+        """
         tests = self.tests_loader.load(self) if self.tests_loader is not None else None
         if tests is None:
             parent_tests = self.resolve_key('parent_tests')
@@ -617,6 +868,16 @@ class DocTemplateHandler(TemplateHandler):
 
 class DocObjectTemplateHandler(DocTemplateHandler):
     def get_package_and_url(self, include_url_base=True):
+        """
+        **LLM Docstring**
+
+        Normalizes package source URLs so package `__init__.py` paths point to the package module path.
+
+        :param include_url_base: whether the base implementation should include its URL prefix
+        :type include_url_base: bool
+        :return: the package name and adjusted file URL
+        :rtype: tuple[str, str]
+        """
         pkg, file_url=super().get_package_and_url(include_url_base=include_url_base)
         try:
             base_url, ext = file_url.rsplit("/", 1)
@@ -632,8 +893,24 @@ class DocObjectTemplateHandler(DocTemplateHandler):
         return pkg, file_url
 
     def load_examples(self):
+        """
+        **LLM Docstring**
+
+        Loads examples through the configured examples extractor.
+        :return: the loaded examples, or `None` without a loader
+        :rtype: Any | None
+        """
         return self.examples_loader.load(self) if self.examples_loader is not None else None
     def load_tests(self):
+        """
+        **LLM Docstring**
+
+        Loads and formats tests, falling back to matching tests inherited from the parent handler.
+
+        A nonempty parser is also stored as `parent_tests` for descendant handlers.
+        :return: template parameters for matching tests, or `None`
+        :rtype: dict | None
+        """
         tests = self.tests_loader.load(self) if self.tests_loader is not None else None
         if tests is None:
             parent_tests = self.resolve_key('parent_tests')
@@ -651,6 +928,20 @@ class ModuleWriter(DocTemplateHandler):
     """
     template = 'module.md'
     def __init__(self, obj, is_package_root=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Initializes a module writer, importing string module names and detecting package roots.
+
+        :param obj: the module object or import name
+        :type obj: types.ModuleType | str
+
+        :param is_package_root: whether the module is a package root; inferred from `__init__.py` when omitted
+        :type is_package_root: bool | None
+
+        :param kwargs: additional handler options
+        :type kwargs: Any
+        """
         if isinstance(obj, str):
             obj = importlib.import_module(obj)
         if is_package_root is None:
@@ -724,6 +1015,16 @@ class ModuleWriter(DocTemplateHandler):
 
     @classmethod
     def get_members(cls, mod):
+        """
+        **LLM Docstring**
+
+        Returns the module names explicitly exported through `__all__`.
+
+        :param mod: the module being documented
+        :type mod: types.ModuleType
+        :return: the exported names, or an empty list
+        :rtype: Iterable[str]
+        """
         return (mod.__all__ if hasattr(mod, '__all__') else [])
 
 class ClassWriter(DocObjectTemplateHandler):
@@ -779,6 +1080,19 @@ class ClassWriter(DocObjectTemplateHandler):
         return props, methods
 
     def format_prop(self, k, o):
+        """
+        **LLM Docstring**
+
+        Formats a property name and the concrete type name of its value.
+
+        :param k: the property name
+        :type k: str
+
+        :param o: the property value
+        :type o: Any
+        :return: the formatted property description
+        :rtype: str
+        """
         return '{}: {}'.format(k, type(o).__name__)
 
     def get_template_params(self, function_writer=None):
@@ -822,9 +1136,28 @@ class FunctionWriter(DocObjectTemplateHandler):
     template = 'function.md'
 
     def get_signature(self):
+        """
+        **LLM Docstring**
+
+        Obtains the inspectable call signature of the handled function.
+        :return: the stringified signature
+        :rtype: str
+        """
         return str(inspect.signature(self.obj))
 
     def get_template_params(self, **kwargs):
+        """
+        **LLM Docstring**
+
+        Collects function metadata, parsed docstring fields, examples, tests, and source location for rendering.
+
+        Object memory addresses in default-value representations are normalized to the text `instance`.
+
+        :param kwargs: unused compatibility options
+        :type kwargs: Any
+        :return: the function template parameters
+        :rtype: dict
+        """
         f = self.obj  # type: types.FunctionType
         ident = self.identifier
         signature = self.get_signature()
@@ -855,6 +1188,18 @@ class MethodWriter(FunctionWriter):
     template = 'method.md'
 
     def get_template_params(self, **kwargs):
+        """
+        **LLM Docstring**
+
+        Collects method template parameters after unwrapping class, static, and property descriptors.
+
+        The original descriptor is restored even if metadata extraction fails.
+
+        :param kwargs: options forwarded to the function writer
+        :type kwargs: Any
+        :return: the method template parameters including decorator text
+        :rtype: dict
+        """
         meth = self.obj
         try:
             if isinstance(meth, (classmethod, staticmethod, property, types.MethodDescriptorType)):
@@ -878,6 +1223,13 @@ class MethodWriter(FunctionWriter):
         return params
 
     def get_signature(self):
+        """
+        **LLM Docstring**
+
+        Returns the handled method signature, falling back to `(self)` for non-inspectable properties.
+        :return: the stringified method signature
+        :rtype: str
+        """
         try:
             signature = str(inspect.signature(self.obj))
         except TypeError:  # dies on properties
@@ -886,6 +1238,13 @@ class MethodWriter(FunctionWriter):
 
     @property
     def identifier(self):
+        """
+        **LLM Docstring**
+
+        Resolves the method identifier, constructing property identifiers from their parent class.
+        :return: the fully qualified method identifier
+        :rtype: str
+        """
         if isinstance(self.obj, property):
             return self.get_identifier(self.resolve_parent(check_tree=False)) + "." + self.get_name()
         else:
@@ -905,6 +1264,13 @@ class ObjectWriter(DocObjectTemplateHandler):
 
     @property
     def identifier(self):
+        """
+        **LLM Docstring**
+
+        Builds a fallback identifier for a general object and drops the enclosing class component.
+        :return: the normalized object identifier
+        :rtype: str
+        """
         try:
             qualname = self.obj.__qualname__
         except AttributeError:
@@ -927,6 +1293,15 @@ class ObjectWriter(DocObjectTemplateHandler):
         )
 
     def get_template_params(self):
+        """
+        **LLM Docstring**
+
+        Collects fallback object metadata from its docstring, type, examples, and source line.
+
+        Objects without `__doc__` are described as instances of their concrete type.
+        :return: the object template parameters
+        :rtype: dict
+        """
 
         try:
             doc = self.obj.__doc__
@@ -962,13 +1337,44 @@ class IndexWriter(DocTemplateHandler):
     template = 'index.md'
 
     def __init__(self, *args, description=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Initializes an index writer with a default documentation heading when no description is supplied.
+
+        :param args: positional handler arguments
+        :type args: Any
+
+        :param description: the index description or heading
+        :type description: str | None
+
+        :param kwargs: additional handler options
+        :type kwargs: Any
+        """
         super().__init__(*args, **kwargs)
         self.description = description if description is not None else "# Documentation"
 
     def get_identifier(cls, o):
+        """
+        **LLM Docstring**
+
+        Returns the fixed identifier used for documentation indexes.
+
+        :param o: unused indexed object
+        :type o: Any
+        :return: `"index"`
+        :rtype: str
+        """
         return 'index'
 
     def get_file_paths(self):
+        """
+        **LLM Docstring**
+
+        Normalizes written file paths relative to the configured documentation root.
+        :return: normalized string paths and unchanged non-string entries
+        :rtype: list
+        """
         rl = len(os.path.split(self.root)) if self.root is not None else 0
         fs = [
             "/".join(os.path.split(f)[rl - 1:])
@@ -977,6 +1383,13 @@ class IndexWriter(DocTemplateHandler):
         ]
         return fs
     def get_index_files(self):
+        """
+        **LLM Docstring**
+
+        Converts string paths into `[stem, path]` index entries.
+        :return: the index entry list
+        :rtype: list
+        """
         return [
             [os.path.splitext(os.path.basename(f))[0], f] if isinstance(f, str) else f
             for f in self.get_file_paths()
@@ -988,6 +1401,13 @@ class IndexWriter(DocTemplateHandler):
     #     )
 
     def get_template_params(self):
+        """
+        **LLM Docstring**
+
+        Parses the index description and assembles index entries and examples for rendering.
+        :return: the index template parameters
+        :rtype: dict
+        """
         descr, _, fields = self.parse_doc(self.description if self.description is not None else '')
         return dict({
             'index_files': self.get_index_files(),
@@ -1040,26 +1460,84 @@ class DocWalker(TemplateWalker):
         super().__init__(engine, out=out, **extra_fields)
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Formats the walker with its active template engine.
+        :return: the diagnostic representation
+        :rtype: str
+        """
         cls = type(self)
         return f"{cls.__name__}({self.engine})"
 
     def get_engine(self, locator):
+        """
+        **LLM Docstring**
+
+        Resolves the configured template engine.
+
+        Non-engine locators are wrapped in a Markdown `TemplateEngine` using `*.md` templates.
+
+        :param locator: an existing engine, template locator, or `None` for the interactive engine
+        :type locator: TemplateEngine | Any | None
+        :return: the active engine
+        :rtype: TemplateEngine
+        """
         if locator is None:
             locator = InteractiveTemplateEngine()
         elif not isinstance(locator, TemplateEngine):
             locator = TemplateEngine(locator, template_pattern="*.md", formatter_class=MarkdownTemplateFormatter)
         return locator
     def get_examples_loader(self, examples_directory):
+        """
+        **LLM Docstring**
+
+        Normalizes an examples directory into an `ExamplesExtractor`.
+
+        :param examples_directory: the loader or resource root
+        :type examples_directory: ExamplesExtractor | str | None
+        :return: the normalized loader, or `None`
+        :rtype: ExamplesExtractor | None
+        """
         examples_loader = examples_directory
         if examples_loader is not None and not isinstance(examples_loader, ExamplesExtractor):
             examples_loader = ExamplesExtractor(examples_loader)
         return examples_loader
     def get_tests_loader(self, tests_directory):
+        """
+        **LLM Docstring**
+
+        Normalizes a tests directory into a `TestsExtractor`.
+
+        :param tests_directory: the loader or resource root
+        :type tests_directory: TestsExtractor | str | None
+        :return: the normalized loader, or `None`
+        :rtype: TestsExtractor | None
+        """
         tests_loader = tests_directory
         if tests_loader is not None and not isinstance(tests_loader, TestsExtractor):
             tests_loader = TestsExtractor(tests_loader)
         return tests_loader
     def get_handler(self, *args, examples_loader=None, tests_loader=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Creates a handler while injecting the walker's default examples and tests loaders.
+
+        :param args: positional arguments forwarded to the base walker
+        :type args: Any
+
+        :param examples_loader: an optional per-handler examples-loader override
+        :type examples_loader: ExamplesExtractor | None
+
+        :param tests_loader: an optional per-handler tests-loader override
+        :type tests_loader: TestsExtractor | None
+
+        :param kwargs: additional handler options
+        :type kwargs: Any
+        :return: the selected template handler
+        :rtype: TemplateHandler
+        """
         return super().get_handler(
             *args,
             examples_loader=self.examples_loader if examples_loader is None else examples_loader,
@@ -1068,6 +1546,30 @@ class DocWalker(TemplateWalker):
         )
 
     def visit_root(self, o, tests_directory=None, examples_directory=None, verbose=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Visits one root specification while temporarily applying root-specific test and example directories.
+
+        The previous loaders are restored in a `finally` block.
+
+        :param o: the root object or mapping specification
+        :type o: Any
+
+        :param tests_directory: an optional tests-loader root
+        :type tests_directory: Any | None
+
+        :param examples_directory: an optional examples-loader root
+        :type examples_directory: Any | None
+
+        :param verbose: whether to print progress; defaults to the walker setting
+        :type verbose: bool | None
+
+        :param kwargs: options forwarded to the base root visitor
+        :type kwargs: Any
+        :return: the documentation produced by the base walker
+        :rtype: Any
+        """
         if verbose is None:
             verbose = self.verbose
         if verbose:
@@ -1091,6 +1593,13 @@ class DocWalker(TemplateWalker):
 
     @mixedmethod
     def _ipython_pinfo_(cls):
+        """
+        **LLM Docstring**
+
+        Displays documentation for the class or instance through `jdoc` when IPython requests rich object information.
+        :return: the Jupyter documentation component
+        :rtype: Any
+        """
         return jdoc(cls)
 
 
