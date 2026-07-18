@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.ModuleWriter">ModuleWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L923)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L923?message=Update%20Docs)]
 </div>
 
 A writer targeted to a module object. Just needs to write the Module metadata.
@@ -27,9 +27,20 @@ DROP_MODULE_NAMES: bool
 __init__(self, obj, is_package_root=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L653)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L653?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L930)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L930?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initializes a module writer, importing string module names and detecting package roots.
+  - `obj`: `types.ModuleType | str`
+    > the module object or import name
+
+  - `is_package_root`: `bool | None`
+    > whether the module is a package root; inferred from `__init__.py` when omitted
+
+  - `kwargs`: `Any`
+    > additional handler options
 
 
 <a id="McUtils.Docs.DocWalker.ModuleWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
@@ -37,8 +48,8 @@ __init__(self, obj, is_package_root=None, **kwargs):
 get_template_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ModuleWriter.py#L661)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ModuleWriter.py#L661?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ModuleWriter.py#L952)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ModuleWriter.py#L952?message=Update%20Docs)]
 </div>
 Provides module specific parameters
   - `:returns`: `_`
@@ -51,9 +62,16 @@ Provides module specific parameters
 get_members(cls, mod): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L725)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L725?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1016)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1016?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Returns the module names explicitly exported through `__all__`.
+  - `mod`: `types.ModuleType`
+    > the module being documented
+  - `:returns`: `Iterable[str]`
+    > the exported names, or an empty list
  </div>
 </div>
 
@@ -108,7 +126,7 @@ get_members(cls, mod):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/ModuleWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/ModuleWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L646?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L923?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

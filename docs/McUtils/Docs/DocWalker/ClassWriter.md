@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.ClassWriter">ClassWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L729)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L729?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1030)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1030?message=Update%20Docs)]
 </div>
 
 A writer targeted to a class
@@ -26,8 +26,8 @@ template: str
 load_methods(self, function_writer=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ClassWriter.py#L737)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ClassWriter.py#L737?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ClassWriter.py#L1038)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ClassWriter.py#L1038?message=Update%20Docs)]
 </div>
 Loads the methods supported by the class
   - `function_writer`: `Any`
@@ -41,9 +41,19 @@ Loads the methods supported by the class
 format_prop(self, k, o): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ClassWriter.py#L781)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ClassWriter.py#L781?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ClassWriter.py#L1082)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ClassWriter.py#L1082?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Formats a property name and the concrete type name of its value.
+  - `k`: `str`
+    > the property name
+
+  - `o`: `Any`
+    > the property value
+  - `:returns`: `str`
+    > the formatted property description
 
 
 <a id="McUtils.Docs.DocWalker.ClassWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
@@ -51,8 +61,8 @@ format_prop(self, k, o):
 get_template_params(self, function_writer=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ClassWriter.py#L784)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ClassWriter.py#L784?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ClassWriter.py#L1098)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ClassWriter.py#L1098?message=Update%20Docs)]
 </div>
 
   - `function_writer`: `Any`
@@ -113,7 +123,7 @@ get_template_params(self, function_writer=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/ClassWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/ClassWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L729?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1030?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

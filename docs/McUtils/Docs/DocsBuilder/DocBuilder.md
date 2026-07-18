@@ -56,6 +56,18 @@ get_template_locator(self, template_directory, use_repo_templates=False):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L66)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L66?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Builds the resource search path used to locate documentation templates.
+
+Bundled paths are rooted beside this module. When repository templates are enabled, `repo_templates` is searched before `templates`.
+  - `template_directory`: `None | str | Iterable[str] | ResourceLocator`
+    > an optional custom template directory or existing locator
+
+  - `use_repo_templates`: `bool`
+    > whether repository-specific templates should be searched before the defaults
+  - `:returns`: `ResourceLocator`
+    > an existing locator unchanged, or a locator combining custom and bundled template directories
 
 
 <a id="McUtils.Docs.DocsBuilder.DocBuilder.load_config" class="docs-object-method">&nbsp;</a> 
@@ -63,8 +75,8 @@ get_template_locator(self, template_directory, use_repo_templates=False):
 load_config(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L87)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L87?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L102)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L102?message=Update%20Docs)]
 </div>
 Loads the config file to be used and fills in template parameters
   - `:returns`: `_`
@@ -76,8 +88,8 @@ Loads the config file to be used and fills in template parameters
 create_layout(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L126?message=Update%20Docs)]
 </div>
 Creates the documentation layout that will be expanded upon by
 a `DocWalker`
@@ -90,8 +102,8 @@ a `DocWalker`
 load_walker(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L160)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L160?message=Update%20Docs)]
 </div>
 Loads the `DocWalker` used to write docs.
 A hook that can be overriden to sub in different walkers.
@@ -104,8 +116,8 @@ A hook that can be overriden to sub in different walkers.
 build(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L162)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L162?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocsBuilder/DocBuilder.py#L177?message=Update%20Docs)]
 </div>
 Writes documentation layout to `self.target`
   - `:returns`: `_`

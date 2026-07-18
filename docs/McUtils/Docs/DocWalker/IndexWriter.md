@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.IndexWriter">IndexWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L953)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L953?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1328)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1328?message=Update%20Docs)]
 </div>
 
 Writes an index file with all of the
@@ -28,9 +28,20 @@ template: str
 __init__(self, *args, description=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L964)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L964?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1339)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1339?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Initializes an index writer with a default documentation heading when no description is supplied.
+  - `args`: `Any`
+    > positional handler arguments
+
+  - `description`: `str | None`
+    > the index description or heading
+
+  - `kwargs`: `Any`
+    > additional handler options
 
 
 <a id="McUtils.Docs.DocWalker.IndexWriter.get_identifier" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +49,16 @@ __init__(self, *args, description=None, **kwargs):
 get_identifier(cls, o): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L968)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L968?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L1357)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L1357?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Returns the fixed identifier used for documentation indexes.
+  - `o`: `Any`
+    > unused indexed object
+  - `:returns`: `str`
+    > `"index"`
 
 
 <a id="McUtils.Docs.DocWalker.IndexWriter.get_file_paths" class="docs-object-method">&nbsp;</a> 
@@ -48,9 +66,14 @@ get_identifier(cls, o):
 get_file_paths(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L971)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L971?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L1370)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L1370?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalizes written file paths relative to the configured documentation root.
+  - `:returns`: `list`
+    > normalized string paths and unchanged non-string entries
 
 
 <a id="McUtils.Docs.DocWalker.IndexWriter.get_index_files" class="docs-object-method">&nbsp;</a> 
@@ -58,9 +81,14 @@ get_file_paths(self):
 get_index_files(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L979)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L979?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L1385)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L1385?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Converts string paths into `[stem, path]` index entries.
+  - `:returns`: `list`
+    > the index entry list
 
 
 <a id="McUtils.Docs.DocWalker.IndexWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +96,14 @@ get_index_files(self):
 get_template_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L990)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L990?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/IndexWriter.py#L1403)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/IndexWriter.py#L1403?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Parses the index description and assembles index entries and examples for rendering.
+  - `:returns`: `dict`
+    > the index template parameters
  </div>
 </div>
 
@@ -125,7 +158,7 @@ get_template_params(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/IndexWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/IndexWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L953?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1328?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

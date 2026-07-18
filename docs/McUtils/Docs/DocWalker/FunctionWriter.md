@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.FunctionWriter">FunctionWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L814)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L814?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1128?message=Update%20Docs)]
 </div>
 
 Writer to dump functions to file
@@ -26,9 +26,14 @@ template: str
 get_signature(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L824)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L824?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L1138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L1138?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Obtains the inspectable call signature of the handled function.
+  - `:returns`: `str`
+    > the stringified signature
 
 
 <a id="McUtils.Docs.DocWalker.FunctionWriter.get_template_params" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +41,18 @@ get_signature(self):
 get_template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L827)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L827?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/FunctionWriter.py#L1148)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/FunctionWriter.py#L1148?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collects function metadata, parsed docstring fields, examples, tests, and source location for rendering.
+
+Object memory addresses in default-value representations are normalized to the text `instance`.
+  - `kwargs`: `Any`
+    > unused compatibility options
+  - `:returns`: `dict`
+    > the function template parameters
  </div>
 </div>
 
@@ -93,7 +107,7 @@ get_template_params(self, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/FunctionWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/FunctionWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L814?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1128?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.MethodWriter">MethodWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L849)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L849?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1182?message=Update%20Docs)]
 </div>
 
 Writes class methods to file
@@ -27,9 +27,18 @@ template: str
 get_template_params(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L857)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L857?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L1190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L1190?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collects method template parameters after unwrapping class, static, and property descriptors.
+
+The original descriptor is restored even if metadata extraction fails.
+  - `kwargs`: `Any`
+    > options forwarded to the function writer
+  - `:returns`: `dict`
+    > the method template parameters including decorator text
 
 
 <a id="McUtils.Docs.DocWalker.MethodWriter.get_signature" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +46,14 @@ get_template_params(self, **kwargs):
 get_signature(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L880)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L880?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L1225)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L1225?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Returns the handled method signature, falling back to `(self)` for non-inspectable properties.
+  - `:returns`: `str`
+    > the stringified method signature
 
 
 <a id="McUtils.Docs.DocWalker.MethodWriter.identifier" class="docs-object-method">&nbsp;</a> 
@@ -48,9 +62,14 @@ get_signature(self):
 identifier(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L887)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L887?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/MethodWriter.py#L1239)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/MethodWriter.py#L1239?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolves the method identifier, constructing property identifiers from their parent class.
+  - `:returns`: `str`
+    > the fully qualified method identifier
  </div>
 </div>
 
@@ -104,7 +123,7 @@ identifier(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/MethodWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/MethodWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L849?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1182?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

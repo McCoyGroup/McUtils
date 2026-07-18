@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.DocWalker.ObjectWriter">ObjectWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L894)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L894?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker.py#L1253)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1253?message=Update%20Docs)]
 </div>
 
 Writes general objects to file.
@@ -29,9 +29,14 @@ template: str
 identifier(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L906)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L906?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L1265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L1265?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Builds a fallback identifier for a general object and drops the enclosing class component.
+  - `:returns`: `str`
+    > the normalized object identifier
 
 
 <a id="McUtils.Docs.DocWalker.ObjectWriter.check_should_write" class="docs-object-method">&nbsp;</a> 
@@ -39,8 +44,8 @@ identifier(self):
 check_should_write(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L916)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L916?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L1282)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L1282?message=Update%20Docs)]
 </div>
 Determines whether the object really actually should be
 documented (quite permissive)
@@ -53,9 +58,16 @@ documented (quite permissive)
 get_template_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L929)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L929?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/DocWalker/ObjectWriter.py#L1295)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker/ObjectWriter.py#L1295?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collects fallback object metadata from its docstring, type, examples, and source line.
+
+Objects without `__doc__` are described as instances of their concrete type.
+  - `:returns`: `dict`
+    > the object template parameters
  </div>
 </div>
 
@@ -110,7 +122,7 @@ get_template_params(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/DocWalker/ObjectWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/DocWalker/ObjectWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L894?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/DocWalker.py#L1253?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
