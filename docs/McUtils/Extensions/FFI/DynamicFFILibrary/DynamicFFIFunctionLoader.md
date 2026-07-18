@@ -29,6 +29,14 @@ configure(cls, **compile_args):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L19)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L19?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Merge compiler options into the process-wide dynamic FFI loader configuration.
+  - `compile_args`: `dict[str, Any]`
+    > compiler and loader options
+
+  - `:returns`: `None`
+    > nothing; updates the shared configuration
 
 
 <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFIFunctionLoader.load" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +45,14 @@ configure(cls, **compile_args):
 load(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L22)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L22?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L33)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L33?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compile or load and cache the bundled dynamic FFI support module.
+  - `:returns`: `FFIModule`
+    > the singleton caller module
  </div>
 </div>
 

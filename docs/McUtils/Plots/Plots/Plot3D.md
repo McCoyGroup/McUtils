@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.Plot3D">Plot3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1636)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1636?message=Update%20Docs)]
 </div>
 
 A base class for 3D plots
@@ -30,8 +30,8 @@ plot_classes: dict
 __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1180)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1180?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1643)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1643?message=Update%20Docs)]
 </div>
 
   - `params`: `Any`
@@ -57,9 +57,19 @@ __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None
 plot(self, *params, **plot_style): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1249)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1249?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1739)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1739?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Plot the data on the 3-D axes and store the result, initializing the figure on
+the first call.
+  - `params`: `Any`
+    > the plot arguments
+  - `plot_style`: `Any`
+    > the styling options (merged with the defaults)
+  - `:returns`: `_`
+    > the backend graphics object
 
 
 <a id="McUtils.Plots.Plots.Plot3D.add_colorbar" class="docs-object-method">&nbsp;</a> 
@@ -67,9 +77,16 @@ plot(self, *params, **plot_style):
 add_colorbar(self, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1255)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1255?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1755)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1755?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Add a colorbar to the 3-D plot (deferring until the figure is initialized).
+  - `kw`: `Any`
+    > options for the colorbar
+  - `:returns`: `_`
+    > the colorbar (once initialized)
 
 
 <a id="McUtils.Plots.Plots.Plot3D.resolve_method" class="docs-object-method">&nbsp;</a> 
@@ -78,9 +95,16 @@ add_colorbar(self, **kw):
 resolve_method(cls, mpl_name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1263)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1263?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1771)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1771?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Look up the registered 3-D plot class for a backend method name.
+  - `mpl_name`: `str`
+    > the method/class name
+  - `:returns`: `type`
+    > the plot class
 
 
 <a id="McUtils.Plots.Plots.Plot3D.register" class="docs-object-method">&nbsp;</a> 
@@ -89,9 +113,17 @@ resolve_method(cls, mpl_name):
 register(cls, plot_class): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1269)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1269?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1787)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1787?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Register a 3-D plot class in the registry, keyed by its backend method name (or
+class name if already registered). Usable as a decorator.
+  - `plot_class`: `type`
+    > the plot class to register
+  - `:returns`: `type`
+    > the registered class
  </div>
 </div>
 
@@ -145,7 +177,7 @@ register(cls, plot_class):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/Plot3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/Plot3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1173?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1636?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

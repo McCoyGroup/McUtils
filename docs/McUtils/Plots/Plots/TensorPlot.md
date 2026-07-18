@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.TensorPlot">TensorPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L944)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L944?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1310)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1310?message=Update%20Docs)]
 </div>
 
 Plots slices of a tensor as a grid
@@ -24,9 +24,35 @@ Plots slices of a tensor as a grid
 __init__(self, tensor, nrows=None, ncols=None, plot_style=None, colorbar=None, figure=None, axes=None, subplot_kw=None, method='imshow', plot_class=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L948)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L948?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1314)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1314?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Plot the 2-D slices of a higher-rank tensor as a grid of array plots, inferring
+the grid shape from the tensor's leading dimensions.
+  - `tensor`: `np.ndarray`
+    > the tensor to plot
+  - `nrows`: `int | None`
+    > the number of rows (inferred if omitted)
+  - `ncols`: `int | None`
+    > the number of columns (inferred if omitted)
+  - `plot_style`: `dict | None`
+    > styling options for each slice
+  - `colorbar`: `Any`
+    > whether/how to add colorbars
+  - `figure`: `Any`
+    > an existing figure to draw into
+  - `axes`: `Any`
+    > existing axes to draw into
+  - `subplot_kw`: `dict | None`
+    > subplot construction options
+  - `method`: `str`
+    > the backend method for each slice
+  - `plot_class`: `Any`
+    > a custom per-slice plot class/factory
+  - `opts`: `Any`
+    > options forwarded to each slice plot
  </div>
 </div>
 
@@ -80,7 +106,7 @@ __init__(self, tensor, nrows=None, ncols=None, plot_style=None, colorbar=None, f
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/TensorPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/TensorPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L944?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1310?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

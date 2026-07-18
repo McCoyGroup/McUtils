@@ -34,6 +34,13 @@ ctypes_type(self):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L35)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L35?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the `ctypes` representation used for foreign-function calls.
+
+Subclasses must implement this abstract property.
+  - `:returns`: `type | None`
+    > the `ctypes` representation used for foreign-function calls
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.cpp_type" class="docs-object-method">&nbsp;</a> 
@@ -42,9 +49,16 @@ ctypes_type(self):
 cpp_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L39)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L39?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L49)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L49?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the C/C++ spelling for this argument type.
+
+Subclasses must implement this abstract property.
+  - `:returns`: `str`
+    > the C/C++ spelling for this argument type
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.types" class="docs-object-method">&nbsp;</a> 
@@ -53,9 +67,16 @@ cpp_type(self):
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L43)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L43?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L63)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L63?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the accepted Python runtime types.
+
+Subclasses must implement this abstract property.
+  - `:returns`: `tuple[type, ...]`
+    > the accepted Python runtime types
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.dtypes" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +85,16 @@ types(self):
 dtypes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L77)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L77?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the accepted NumPy data types.
+
+Subclasses must implement this abstract property.
+  - `:returns`: `tuple[np.dtype, ...]`
+    > the accepted NumPy data types
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.typechar" class="docs-object-method">&nbsp;</a> 
@@ -75,9 +103,16 @@ dtypes(self):
 typechar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L51)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L51?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L91?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the Python C-API format character for this type.
+
+Subclasses must implement this abstract property.
+  - `:returns`: `str`
+    > the Python C-API format character for this type
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.isinstance" class="docs-object-method">&nbsp;</a> 
@@ -85,9 +120,19 @@ typechar(self):
 isinstance(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L55)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L55?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L105)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L105?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether a value is already compatible with this argument type.
+
+Subclasses must implement this abstract operation.
+  - `arg`: `Any`
+    > value to inspect or convert
+
+  - `:returns`: `bool`
+    > whether a value is already compatible with this argument type
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.cast" class="docs-object-method">&nbsp;</a> 
@@ -95,9 +140,19 @@ isinstance(self, arg):
 cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L58)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L58?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L121?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert a Python value to the corresponding Python-side representation.
+
+Subclasses must implement this abstract operation.
+  - `arg`: `Any`
+    > value to inspect or convert
+
+  - `:returns`: `Any`
+    > converted a Python value to the corresponding Python-side representation
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArgumentType.c_cast" class="docs-object-method">&nbsp;</a> 
@@ -105,9 +160,19 @@ cast(self, arg):
 c_cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L61)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L61?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArgumentType.py#L137?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert a Python value to the object passed through `ctypes`.
+
+Subclasses must implement this abstract operation.
+  - `arg`: `Any`
+    > value to inspect or convert
+
+  - `:returns`: `Any`
+    > converted a Python value to the object passed through `ctypes`
  </div>
 </div>
 

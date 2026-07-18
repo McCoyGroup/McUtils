@@ -1,14 +1,20 @@
 # <a id="McUtils.Plots.Plots.resolve_plotter">resolve_plotter</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1364)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1364?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1905)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1905?message=Update%20Docs)]
 </div>
 
 ```python
 resolve_plotter(tag): 
 ```
+**LLM Docstring**
 
-
+Resolve a plot-type tag to its plot class, searching the 2-D and 3-D registries
+by key (case-insensitively) and then by backend method name.
+  - `tag`: `str | type`
+    > the plot-type name (or an already-resolved class)
+  - `:returns`: `type | None`
+    > the plot class (or `None`)
 
 
 
@@ -59,7 +65,7 @@ resolve_plotter(tag):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/resolve_plotter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/resolve_plotter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1364?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1905?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

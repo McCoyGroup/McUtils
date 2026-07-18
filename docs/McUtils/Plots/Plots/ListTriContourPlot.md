@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.ListTriContourPlot">ListTriContourPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1154)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1154?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1597)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1597?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,18 @@
 __init__(self, *params, interpolate=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1600)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1600?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a triangulated contour plot from scattered points.
+  - `params`: `Any`
+    > the scattered point data
+  - `interpolate`: `bool`
+    > interpolate onto a mesh
+  - `opts`: `Any`
+    > plot options
  </div>
 </div>
 
@@ -80,7 +89,7 @@ __init__(self, *params, interpolate=True, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ListTriContourPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ListTriContourPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1154?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1597?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

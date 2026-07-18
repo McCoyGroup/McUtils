@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Graphics.Graphics">Graphics</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L909)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L909?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L1309)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L1309?message=Update%20Docs)]
 </div>
 
 
@@ -32,9 +32,58 @@ inset_options: dict
 set_options(self, axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, **parent_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L946)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L946?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1346)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1346?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set the plot's styling and layout options (labels, legend, frame, ticks, range,
+scale, padding, spacings, background, colorbar, etc.), resolving defaults and
+applying each non-`None` value.
+  - `axes_labels`: `Any`
+    > the axis labels
+  - `plot_label`: `Any`
+    > the plot title
+  - `style_list`: `Any`
+    > the per-series style cycle
+  - `plot_range`: `Any`
+    > the plotted data range
+  - `plot_legend`: `Any`
+    > the legend (or legend spec)
+  - `legend_style`: `Any`
+    > legend styling
+  - `frame`: `Any`
+    > which frame edges to draw
+  - `frame_style`: `Any`
+    > frame styling
+  - `ticks`: `Any`
+    > the tick specification
+  - `scale`: `Any`
+    > the axis scaling
+  - `padding`: `Any`
+    > the figure padding
+  - `spacings`: `Any`
+    > the panel spacings
+  - `ticks_style`: `Any`
+    > tick styling
+  - `ticks_label_style`: `Any`
+    > tick-label styling
+  - `image_size`: `Any`
+    > the image size
+  - `axes_bbox`: `Any`
+    > the axes bounding box
+  - `aspect_ratio`: `Any`
+    > the aspect ratio
+  - `background`: `Any`
+    > the background color
+  - `colorbar`: `Any`
+    > the colorbar spec
+  - `prolog`: `Any`
+    > prolog primitives
+  - `epilog`: `Any`
+    > epilog primitives
+  - `parent_opts`: `Any`
+    > options forwarded to the base class
 
 
 <a id="McUtils.Plots.Graphics.Graphics.get_plot_label_padding" class="docs-object-method">&nbsp;</a> 
@@ -42,9 +91,17 @@ set_options(self, axes_labels=None, plot_label=None, style_list=None, plot_range
 get_plot_label_padding(self, plot_label): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1005)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1005?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1435)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1435?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the extra padding needed to fit a plot label (top padding when a label is
+present).
+  - `plot_label`: `Any`
+    > the plot label (or `None`)
+  - `:returns`: `list`
+    > the `((left, right), (bottom, top))` padding contribution
 
 
 <a id="McUtils.Plots.Graphics.Graphics.get_axes_label_padding" class="docs-object-method">&nbsp;</a> 
@@ -52,9 +109,17 @@ get_plot_label_padding(self, plot_label):
 get_axes_label_padding(self, axes_labels): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1011)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1011?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1451)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1451?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the extra padding needed to fit the axis labels (left/bottom padding for
+the y/x labels).
+  - `axes_labels`: `Any`
+    > the axis labels (or `None`)
+  - `:returns`: `list`
+    > the `((left, right), (bottom, top))` padding contribution
 
 
 <a id="McUtils.Plots.Graphics.Graphics.resolve_default_padding" class="docs-object-method">&nbsp;</a> 
@@ -62,9 +127,19 @@ get_axes_label_padding(self, axes_labels):
 resolve_default_padding(self, padding, modifications=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1022)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1022?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1472)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1472?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve the final padding by filling unset sides from the default style and
+adding the supplied label-padding modifications.
+  - `padding`: `Any`
+    > the requested padding (or `None`)
+  - `modifications`: `list | None`
+    > per-side padding contributions to add
+  - `:returns`: `tuple`
+    > the resolved `((left, right), (bottom, top))` padding
 
 
 <a id="McUtils.Plots.Graphics.Graphics.artists" class="docs-object-method">&nbsp;</a> 
@@ -73,9 +148,14 @@ resolve_default_padding(self, padding, modifications=None):
 artists(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1072)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1072?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1534)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1534?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plot's artist objects (empty for the base `Graphics`).
+  - `:returns`: `list`
+    > the artists
 
 
 <a id="McUtils.Plots.Graphics.Graphics.plot_label" class="docs-object-method">&nbsp;</a> 
@@ -84,9 +164,15 @@ artists(self):
 plot_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1077)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1077?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1547)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1547?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plot title/label. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the plot label value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.style_list" class="docs-object-method">&nbsp;</a> 
@@ -95,9 +181,15 @@ plot_label(self):
 style_list(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1086)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1086?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1572)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1572?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The per-series style cycle (shared with the parent). Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the style list value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.plot_legend" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +198,15 @@ style_list(self):
 plot_legend(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1094)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1094?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1596)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1596?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plot legend (or legend spec). Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the plot legend value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.legend_style" class="docs-object-method">&nbsp;</a> 
@@ -117,9 +215,15 @@ plot_legend(self):
 legend_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1102)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1102?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1620)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1620?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The legend styling options. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the legend style value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.axes_labels" class="docs-object-method">&nbsp;</a> 
@@ -128,9 +232,15 @@ legend_style(self):
 axes_labels(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1644)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1644?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The per-axis labels. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the axes labels value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.frame" class="docs-object-method">&nbsp;</a> 
@@ -139,9 +249,15 @@ axes_labels(self):
 frame(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1118)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1118?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1668)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1668?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Which frame (spine) edges are drawn. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the frame value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.frame_style" class="docs-object-method">&nbsp;</a> 
@@ -150,9 +266,15 @@ frame(self):
 frame_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1692)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1692?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The frame styling options. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the frame style value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.plot_range" class="docs-object-method">&nbsp;</a> 
@@ -161,9 +283,15 @@ frame_style(self):
 plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1716)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1716?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plotted data range per axis. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the plot range value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.ticks" class="docs-object-method">&nbsp;</a> 
@@ -172,9 +300,15 @@ plot_range(self):
 ticks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1142)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1142?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1740)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1740?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tick locations/specification. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the ticks value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.ticks_style" class="docs-object-method">&nbsp;</a> 
@@ -183,9 +317,15 @@ ticks(self):
 ticks_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1764)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1764?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tick styling options. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the ticks style value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.ticks_label_style" class="docs-object-method">&nbsp;</a> 
@@ -194,9 +334,15 @@ ticks_style(self):
 ticks_label_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1158)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1158?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1788)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1788?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tick-label styling options. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the tick-label style value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.scale" class="docs-object-method">&nbsp;</a> 
@@ -205,9 +351,15 @@ ticks_label_style(self):
 scale(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1166)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1166?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1812)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1812?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The axis scaling (e.g. linear/log). Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the scale value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.axes_bbox" class="docs-object-method">&nbsp;</a> 
@@ -216,9 +368,15 @@ scale(self):
 axes_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1174)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1174?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1836)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1836?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The axes bounding box within the figure. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the axes bbox value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.aspect_ratio" class="docs-object-method">&nbsp;</a> 
@@ -227,9 +385,15 @@ axes_bbox(self):
 aspect_ratio(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1860)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1860?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The axes aspect ratio. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the aspect ratio value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.image_size" class="docs-object-method">&nbsp;</a> 
@@ -238,9 +402,15 @@ aspect_ratio(self):
 image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1884)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1884?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The figure image size in pixels. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the image size value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.figure_label" class="docs-object-method">&nbsp;</a> 
@@ -249,9 +419,15 @@ image_size(self):
 figure_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1908)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1908?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The overall figure label. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the figure label value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.padding" class="docs-object-method">&nbsp;</a> 
@@ -260,9 +436,15 @@ figure_label(self):
 padding(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1206)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1206?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1932)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1932?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The figure padding on each side. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the padding value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.padding_left" class="docs-object-method">&nbsp;</a> 
@@ -271,9 +453,15 @@ padding(self):
 padding_left(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1213)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1213?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1955)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1955?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The left figure padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the left padding value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.padding_right" class="docs-object-method">&nbsp;</a> 
@@ -282,9 +470,15 @@ padding_left(self):
 padding_right(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1220)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1220?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1978)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1978?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The right figure padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the right padding value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.padding_top" class="docs-object-method">&nbsp;</a> 
@@ -293,9 +487,15 @@ padding_right(self):
 padding_top(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1227)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1227?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2001)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2001?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The top figure padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the top padding value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.padding_bottom" class="docs-object-method">&nbsp;</a> 
@@ -304,9 +504,15 @@ padding_top(self):
 padding_bottom(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2024)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2024?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The bottom figure padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the bottom padding value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.spacings" class="docs-object-method">&nbsp;</a> 
@@ -315,9 +521,15 @@ padding_bottom(self):
 spacings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1242)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1242?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2048)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2048?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The inter-panel spacings. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the spacings value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.background" class="docs-object-method">&nbsp;</a> 
@@ -326,9 +538,15 @@ spacings(self):
 background(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1250)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1250?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2072)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2072?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The figure background color. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the background value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.colorbar" class="docs-object-method">&nbsp;</a> 
@@ -337,9 +555,15 @@ background(self):
 colorbar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1258)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1258?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2096)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2096?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The colorbar specification. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the colorbar value
 
 
 <a id="McUtils.Plots.Graphics.Graphics.get_padding_offsets" class="docs-object-method">&nbsp;</a> 
@@ -347,9 +571,15 @@ colorbar(self):
 get_padding_offsets(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1280)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1280?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2143?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compute the padding, expressed in plot-data coordinates, on each side of the
+axes (from the pixel padding and the plot range).
+  - `:returns`: `list`
+    > the `((left, right), (bottom, top))` data-coordinate offsets
 
 
 <a id="McUtils.Plots.Graphics.Graphics.get_bbox" class="docs-object-method">&nbsp;</a> 
@@ -357,9 +587,15 @@ get_padding_offsets(self):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1294)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1294?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2166?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the effective bounding box (in plot-data coordinates) of the total space
+the figure occupies, including padding.
+  - `:returns`: `list`
+    > the `[(min_x, min_y), (max_x, max_y)]` bbox
 
 
 <a id="McUtils.Plots.Graphics.Graphics.create_inset" class="docs-object-method">&nbsp;</a> 
@@ -367,9 +603,23 @@ get_bbox(self):
 create_inset(self, bbox, coordinates='absolute', graphics_class=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L1312)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L1312?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/Graphics.py#L2193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/Graphics.py#L2193?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create an inset within this plot, converting an absolute-data-coordinate bbox
+into frame-scaled coordinates first.
+  - `bbox`: `Any`
+    > the inset bounding box
+  - `coordinates`: `str`
+    > `'absolute'` (data coordinates) or `'scaled'`
+  - `graphics_class`: `Any`
+    > the inset class (defaults to `Graphics`)
+  - `opts`: `Any`
+    > options for the inset
+  - `:returns`: `Graphics`
+    > the inset graphics object
  </div>
 </div>
 
@@ -450,7 +700,7 @@ other plotting functions, such as `Plot` or `ContourPlot` to create a
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Graphics/Graphics.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Graphics/Graphics.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L909?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L1309?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

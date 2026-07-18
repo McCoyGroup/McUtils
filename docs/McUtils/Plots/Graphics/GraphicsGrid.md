@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Graphics.GraphicsGrid">GraphicsGrid</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L1467)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L1467?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L2481)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2481?message=Update%20Docs)]
 </div>
 
 A class for easily building sophisticated multi-panel figures.
@@ -32,9 +32,38 @@ GraphicsStack: GraphicsStack
 __init__(self, *args, nrows=None, ncols=None, graphics_class=<class 'McUtils.Plots.Graphics.Graphics'>, figure=None, axes=None, subplot_kw=None, subimage_size=(310, 310), subimage_aspect_ratio='auto', padding=None, spacings=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L1481)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L1481?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L2495)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2495?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a multi-panel figure grid, inferring the shape from any supplied graphics,
+sizing the figure from the sub-image size/padding/spacings, and populating the
+panels.
+  - `args`: `Any`
+    > an optional nested list of graphics to place in the grid
+  - `nrows`: `int | None`
+    > the number of rows
+  - `ncols`: `int | None`
+    > the number of columns
+  - `graphics_class`: `Any`
+    > the class used for each panel
+  - `figure`: `Any`
+    > an existing figure to draw into
+  - `axes`: `Any`
+    > existing axes to draw into
+  - `subplot_kw`: `dict | None`
+    > subplot construction options
+  - `subimage_size`: `Any`
+    > the per-panel image size
+  - `subimage_aspect_ratio`: `Any`
+    > the per-panel aspect ratio
+  - `padding`: `Any`
+    > the grid padding
+  - `spacings`: `Any`
+    > the inter-panel spacings
+  - `opts`: `Any`
+    > extra options
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.initialize_figure_and_axes" class="docs-object-method">&nbsp;</a> 
@@ -42,8 +71,8 @@ __init__(self, *args, nrows=None, ncols=None, graphics_class=<class 'McUtils.Plo
 initialize_figure_and_axes(self, figure, axes, *, nrows=None, ncols=None, graphics_class=None, fig_kw=None, subplot_kw=None, padding=None, spacings=None, subimage_size=None, subimage_aspect_ratio=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1610)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1610?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2751)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2751?message=Update%20Docs)]
 </div>
 Initializes the subplots for the Graphics object
   - `figure`: `Any`
@@ -63,9 +92,25 @@ Initializes the subplots for the Graphics object
 set_options(self, padding=None, spacings=None, background=None, colorbar=None, figure_label=None, **parent_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1704)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1704?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2845)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2845?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set the grid-level options (figure label, padding, spacings, background,
+colorbar) on top of the base options, recomputing the image size.
+  - `padding`: `Any`
+    > the grid padding
+  - `spacings`: `Any`
+    > the inter-panel spacings
+  - `background`: `Any`
+    > the background color
+  - `colorbar`: `Any`
+    > the colorbar spec
+  - `figure_label`: `Any`
+    > the overall figure label
+  - `parent_opts`: `Any`
+    > options forwarded to the base class
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.__iter__" class="docs-object-method">&nbsp;</a> 
@@ -73,9 +118,14 @@ set_options(self, padding=None, spacings=None, background=None, colorbar=None, f
 __iter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1728)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1728?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2882)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2882?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Iterate over the grid's panels.
+  - `:returns`: `_`
+    > the panel iterator
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.__getitem__" class="docs-object-method">&nbsp;</a> 
@@ -83,9 +133,16 @@ __iter__(self):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1730)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1730?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2891)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2891?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Get a panel by `(row, col)` (or a flat index).
+  - `item`: `Any`
+    > the index
+  - `:returns`: `GraphicsBase`
+    > the panel
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.__setitem__" class="docs-object-method">&nbsp;</a> 
@@ -93,9 +150,17 @@ __getitem__(self, item):
 __setitem__(self, item, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1737)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1737?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2907)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2907?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Place a graphics object into a panel by `(row, col)` (or flat index), re-hosting
+it onto the grid's figure.
+  - `item`: `Any`
+    > the index
+  - `val`: `Any`
+    > the graphics object (or raw value)
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.set_image" class="docs-object-method">&nbsp;</a> 
@@ -103,9 +168,21 @@ __setitem__(self, item, val):
 set_image(self, pos, val, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1750)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1750?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2929)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2929?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Place a graphics object into the panel at `pos`, re-hosting it onto the grid's
+figure with the given options.
+  - `pos`: `Any`
+    > the panel position
+  - `val`: `GraphicsBase`
+    > the graphics object
+  - `opts`: `Any`
+    > options forwarded to the re-hosting
+  - `:returns`: `GraphicsBase`
+    > the placed panel
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.calc_image_size" class="docs-object-method">&nbsp;</a> 
@@ -113,9 +190,15 @@ set_image(self, pos, val, **opts):
 calc_image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1756)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1756?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2948)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2948?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compute the grid's overall image size from the panels' sizes, the inter-panel
+spacings, and the padding.
+  - `:returns`: `tuple`
+    > the `(width, height)` image size
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.image_size" class="docs-object-method">&nbsp;</a> 
@@ -124,9 +207,14 @@ calc_image_size(self):
 image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1783)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1783?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2984)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2984?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid's overall image size (recomputed from the panels on access).
+  - `:returns`: `tuple`
+    > the `(width, height)` image size
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.figure_label" class="docs-object-method">&nbsp;</a> 
@@ -135,9 +223,15 @@ image_size(self):
 figure_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1793)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1793?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3010)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3010?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The overall figure label. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the figure label value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.padding" class="docs-object-method">&nbsp;</a> 
@@ -146,9 +240,15 @@ figure_label(self):
 padding(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1799)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1799?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3032)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3032?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid's outer padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the padding value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.padding_left" class="docs-object-method">&nbsp;</a> 
@@ -157,9 +257,15 @@ padding(self):
 padding_left(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1805)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1805?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3054)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3054?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid's left padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the left padding value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.padding_right" class="docs-object-method">&nbsp;</a> 
@@ -168,9 +274,15 @@ padding_left(self):
 padding_right(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1811)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1811?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3076)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3076?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid's right padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the right padding value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.padding_top" class="docs-object-method">&nbsp;</a> 
@@ -179,9 +291,15 @@ padding_right(self):
 padding_top(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1817)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1817?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3098)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3098?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid's top padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the top padding value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.padding_bottom" class="docs-object-method">&nbsp;</a> 
@@ -190,9 +308,15 @@ padding_top(self):
 padding_bottom(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1823)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1823?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3120?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid's bottom padding. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the bottom padding value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.spacings" class="docs-object-method">&nbsp;</a> 
@@ -201,9 +325,15 @@ padding_bottom(self):
 spacings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1830)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1830?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3143)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3143?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The inter-panel spacings. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the spacings value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.background" class="docs-object-method">&nbsp;</a> 
@@ -212,9 +342,15 @@ spacings(self):
 background(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1837)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1837?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3166?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid background color. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the background value
 
 
 <a id="McUtils.Plots.Graphics.GraphicsGrid.colorbar" class="docs-object-method">&nbsp;</a> 
@@ -223,9 +359,15 @@ background(self):
 colorbar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1844)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L1844?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3189)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3189?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The grid colorbar specification. Getter/setter delegate to the property manager (the setter also records
+the change for copying).
+  - `:returns`: `_`
+    > the colorbar value
  </div>
 </div>
 
@@ -307,7 +449,7 @@ main.colorbar = {"graphics": main[0, 1].graphics}
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Graphics/GraphicsGrid.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Graphics/GraphicsGrid.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L1467?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2481?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

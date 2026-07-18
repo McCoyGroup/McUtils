@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.Module.FFIArgument">FFIArgument</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L201?message=Update%20Docs)]
 </div>
 
 An argument spec for data to be passed to an FFIMethod
@@ -24,9 +24,29 @@ An argument spec for data to be passed to an FFIMethod
 __init__(self, name=None, dtype=None, shape=None, container_type=None, value=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L206)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L206?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create an FFI argument specification and normalize its data and container types.
+  - `name`: `Any`
+    > argument name
+
+  - `dtype`: `Any`
+    > FFI type descriptor accepted by `infer_dtype`
+
+  - `shape`: `Any`
+    > declared argument shape; defaults to `()`
+
+  - `container_type`: `Any`
+    > container representation accepted by `infer_ctype`
+
+  - `value`: `Any`
+    > unused compatibility parameter
+
+  - `:returns`: `None`
+    > nothing; initializes the argument metadata
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIArgument.infer_dtype" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +55,17 @@ __init__(self, name=None, dtype=None, shape=None, container_type=None, value=Non
 infer_dtype(cls, dtype): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L242)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L242?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize an enum, integer code, string, NumPy dtype, or mapped Python type to `FFIType`.
+  - `dtype`: `Any`
+    > type descriptor to normalize
+
+  - `:returns`: `FFIType`
+    > the resolved FFI type
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIArgument.infer_ctype" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +74,17 @@ infer_dtype(cls, dtype):
 infer_ctype(cls, container_type): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L274)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L274?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a container-type enum, name, or numeric value to `FFIContainerType`.
+  - `container_type`: `Any`
+    > container representation descriptor
+
+  - `:returns`: `FFIContainerType`
+    > the resolved container type
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIArgument.from_arg_sig" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +93,17 @@ infer_ctype(cls, container_type):
 from_arg_sig(cls, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L215)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L215?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L293?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an FFI argument from an `ArgumentSignature.Argument`-like object.
+  - `arg`: `Any`
+    > argument exposing `name`, `typechar`, `is_pointer()`, and `is_array()`
+
+  - `:returns`: `FFIArgument`
+    > an argument marked `Raw` for pointer/array signatures and `Untyped` otherwise
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIArgument.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -67,9 +111,14 @@ from_arg_sig(cls, arg):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L314)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L314?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a constructor-style representation of the argument metadata.
+  - `:returns`: `str`
+    > the formatted argument representation
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIArgument.cast" class="docs-object-method">&nbsp;</a> 
@@ -77,8 +126,8 @@ __repr__(self):
 cast(self, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L233)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L233?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L330)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIArgument.py#L330?message=Update%20Docs)]
 </div>
 
   - `val`: `Any`
@@ -138,7 +187,7 @@ cast(self, val):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIArgument.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIArgument.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L168?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L201?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

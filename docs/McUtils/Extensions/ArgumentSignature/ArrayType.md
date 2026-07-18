@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.ArgumentSignature.ArrayType">ArrayType</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L323)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L323?message=Update%20Docs)]
 </div>
 
 Extends the basic `ArgumentType` spec to handle array types of possibly fixed size.
@@ -26,9 +26,23 @@ Other flavors might come, but given the use case, it's unlikely.
 __init__(self, base_type, shape=None, ctypes_spec=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L149)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L149?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature.py#L329)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L329?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create an array argument type around a primitive base type.
+  - `base_type`: `ArgumentType`
+    > element type used for dtype checks and conversion
+
+  - `shape`: `tuple[int, ...] | None`
+    > stored optional shape metadata; it is not enforced by current methods
+
+  - `ctypes_spec`: `Any | None`
+    > optional precomputed `ctypes` array specification
+
+  - `:returns`: `None`
+    > no value is returned
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.ctypes_type" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +51,14 @@ __init__(self, base_type, shape=None, ctypes_spec=None):
 ctypes_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L154)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L154?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L351)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L351?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return or lazily create a C-contiguous NumPy `ndpointer` specification.
+  - `:returns`: `Any`
+    > or lazily create a C-contiguous NumPy `ndpointer` specification
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.cpp_type" class="docs-object-method">&nbsp;</a> 
@@ -48,9 +67,14 @@ ctypes_type(self):
 cpp_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L159)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L159?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L364)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L364?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the pointer-like C/C++ type string formed from the cached `ctypes` specification.
+  - `:returns`: `str`
+    > the pointer-like C/C++ type string formed from the cached `ctypes` specification
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.types" class="docs-object-method">&nbsp;</a> 
@@ -59,9 +83,14 @@ cpp_type(self):
 types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L162)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L162?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L375)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L375?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the accepted Python container type, `numpy.ndarray`.
+  - `:returns`: `tuple[type, ...]`
+    > the accepted Python container type, `numpy.ndarray`
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.dtypes" class="docs-object-method">&nbsp;</a> 
@@ -70,9 +99,14 @@ types(self):
 dtypes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L165)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L165?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L386)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L386?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the element dtypes accepted by the base type.
+  - `:returns`: `tuple[np.dtype, ...]`
+    > the element dtypes accepted by the base type
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.typechar" class="docs-object-method">&nbsp;</a> 
@@ -81,9 +115,14 @@ dtypes(self):
 typechar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L168)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L168?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L397)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L397?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the Python C-API format character of the base type.
+  - `:returns`: `str`
+    > the Python C-API format character of the base type
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.isinstance" class="docs-object-method">&nbsp;</a> 
@@ -91,9 +130,17 @@ typechar(self):
 isinstance(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L408)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L408?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether a value is a NumPy array with an accepted base dtype.
+  - `arg`: `Any`
+    > value to test
+
+  - `:returns`: `bool`
+    > compatibility flag
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.cast" class="docs-object-method">&nbsp;</a> 
@@ -101,9 +148,17 @@ isinstance(self, arg):
 cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L421)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L421?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert a value to an array using the first accepted base dtype.
+  - `arg`: `Any`
+    > array-like value
+
+  - `:returns`: `np.ndarray`
+    > converted NumPy array
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.c_cast" class="docs-object-method">&nbsp;</a> 
@@ -111,9 +166,17 @@ cast(self, arg):
 c_cast(self, arg): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L434)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L434?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Convert a value to a C-contiguous NumPy array of the required dtype.
+  - `arg`: `Any`
+    > array-like value
+
+  - `:returns`: `np.ndarray`
+    > contiguous converted array
 
 
 <a id="McUtils.Extensions.ArgumentSignature.ArrayType.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -121,9 +184,14 @@ c_cast(self, arg):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L177)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L177?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature/ArrayType.py#L447?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a concise representation containing the array wrapper and base type.
+  - `:returns`: `str`
+    > representation string
  </div>
 </div>
 
@@ -177,7 +245,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/ArgumentSignature/ArrayType.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/ArgumentSignature/ArrayType.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L143?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/ArgumentSignature.py#L323?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

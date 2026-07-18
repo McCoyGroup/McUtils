@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.Module.FFIMethod">FFIMethod</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L334)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L334?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L539)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L539?message=Update%20Docs)]
 </div>
 
 Represents a C++ method callable through the plzffi interface
@@ -24,9 +24,29 @@ Represents a C++ method callable through the plzffi interface
 __init__(self, name=None, arguments=None, rtype=None, vectorized=None, module=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L339)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L339?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module.py#L544)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L544?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Construct a callable method specification and bind each argument dictionary to `FFIArgument`.
+  - `name`: `Any`
+    > method name
+
+  - `arguments`: `Any`
+    > argument specifications
+
+  - `rtype`: `Any`
+    > numeric FFI return-type code
+
+  - `vectorized`: `Any`
+    > whether the method returns vectorized output
+
+  - `module`: `Any`
+    > module used to dispatch calls
+
+  - `:returns`: `None`
+    > nothing; initializes the method metadata
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.bind_module" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +54,17 @@ __init__(self, name=None, arguments=None, rtype=None, vectorized=None, module=No
 bind_module(self, mod): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L346)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L346?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L574)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L574?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Attach the module that will execute this method.
+  - `mod`: `Any`
+    > FFI module wrapper
+
+  - `:returns`: `None`
+    > nothing; updates `self.mod`
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.arg_names" class="docs-object-method">&nbsp;</a> 
@@ -45,9 +73,14 @@ bind_module(self, mod):
 arg_names(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L349)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L349?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L588)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L588?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return argument names in declaration order.
+  - `:returns`: `tuple[str, ...]`
+    > the method argument names
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.collect_args_from_list" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +89,26 @@ arg_names(self):
 collect_args_from_list(cls, arg_list, *args, excluded_args=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L353)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L353?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L600)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L600?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Match positional and keyword values to argument specifications, cast them, and reject missing required arguments.
+  - `arg_list`: `Any`
+    > ordered argument specifications
+
+  - `excluded_args`: `Any`
+    > argument names to omit from required-value checks
+
+  - `args`: `tuple[Any, ...]`
+    > positional argument values
+
+  - `kwargs`: `dict[str, Any]`
+    > keyword argument values
+
+  - `:returns`: `collections.OrderedDict[str, FFIParameter]`
+    > cast parameters in supplied order
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.collect_args" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +116,23 @@ collect_args_from_list(cls, arg_list, *args, excluded_args=None, **kwargs):
 collect_args(self, *args, excluded_args=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L384)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L384?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L651)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L651?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collect and cast values using this method's declared arguments.
+  - `excluded_args`: `Any`
+    > argument names to omit
+
+  - `args`: `tuple[Any, ...]`
+    > positional argument values
+
+  - `kwargs`: `dict[str, Any]`
+    > keyword argument values
+
+  - `:returns`: `collections.OrderedDict[str, FFIParameter]`
+    > the prepared parameter mapping
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.from_signature" class="docs-object-method">&nbsp;</a> 
@@ -77,9 +141,20 @@ collect_args(self, *args, excluded_args=None, **kwargs):
 from_signature(cls, sig, module=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L387)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L387?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L671)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L671?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a method specification from the four-part native signature tuple.
+  - `sig`: `Any`
+    > `(name, arguments, return_type, vectorized)` signature tuple
+
+  - `module`: `Any`
+    > optional module to bind
+
+  - `:returns`: `FFIMethod`
+    > the reconstructed method specification
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.call" class="docs-object-method">&nbsp;</a> 
@@ -87,9 +162,23 @@ from_signature(cls, sig, module=None):
 call(self, *args, debug=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L398)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L398?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L696)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L696?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collect arguments and dispatch a non-threaded call through the bound module.
+  - `debug`: `Any`
+    > debug level selector passed to the module
+
+  - `args`: `tuple[Any, ...]`
+    > positional argument values
+
+  - `kwargs`: `dict[str, Any]`
+    > keyword argument values
+
+  - `:returns`: `Any`
+    > the native method result
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.call_threaded" class="docs-object-method">&nbsp;</a> 
@@ -97,9 +186,29 @@ call(self, *args, debug=False, **kwargs):
 call_threaded(self, *args, threading_var=None, threading_mode='serial', debug=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L401)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L401?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L716)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L716?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Collect arguments and dispatch through the module's threaded call path.
+  - `threading_var`: `Any`
+    > argument name used to partition work
+
+  - `threading_mode`: `Any`
+    > threading backend name or mode
+
+  - `debug`: `Any`
+    > debug level selector
+
+  - `args`: `tuple[Any, ...]`
+    > positional argument values
+
+  - `kwargs`: `dict[str, Any]`
+    > keyword argument values
+
+  - `:returns`: `Any`
+    > the threaded native method result
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.__call__" class="docs-object-method">&nbsp;</a> 
@@ -107,9 +216,29 @@ call_threaded(self, *args, threading_var=None, threading_mode='serial', debug=Fa
 __call__(self, *args, threading_var=None, threading_mode='serial', debug=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L404)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L404?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L742)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L742?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Dispatch serially unless a threading variable or non-serial threading mode is requested.
+  - `threading_var`: `Any`
+    > optional partitioning argument name
+
+  - `threading_mode`: `Any`
+    > threading backend or `serial`
+
+  - `debug`: `Any`
+    > debug level selector
+
+  - `args`: `tuple[Any, ...]`
+    > positional argument values
+
+  - `kwargs`: `dict[str, Any]`
+    > keyword argument values
+
+  - `:returns`: `Any`
+    > the native method result
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIMethod.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -117,9 +246,14 @@ __call__(self, *args, threading_var=None, threading_mode='serial', debug=False, 
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L772)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module/FFIMethod.py#L772?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a representation of the method name, argument specs, and scalar or vectorized return type.
+  - `:returns`: `str`
+    > the formatted method representation
  </div>
 </div>
 
@@ -173,7 +307,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/Module/FFIMethod.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/Module/FFIMethod.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L334?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/Module.py#L539?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

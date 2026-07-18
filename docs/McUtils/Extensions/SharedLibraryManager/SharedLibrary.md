@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.SharedLibraryManager.SharedLibrary">SharedLibrary</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager.py#L191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager.py#L398)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L398?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,20 @@ method_type: SharedLibraryFunction
 __init__(self, library, **functions): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager.py#L194)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L194?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager.py#L401)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L401?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a shared-library facade and optionally register functions from configuration dictionaries.
+  - `library`: `str | ctypes.CDLL | SharedLibraryLoader`
+    > library path, handle, or loader
+
+  - `functions`: `dict[str, dict]`
+    > registration options keyed by exposed attribute name
+
+  - `:returns`: `None`
+    > no value is returned
 
 
 <a id="McUtils.Extensions.SharedLibraryManager.SharedLibrary.register" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +47,37 @@ __init__(self, library, **functions):
 register(self, tag, name=None, docstring=None, defaults=None, return_handler=None, prep_args=None, **params): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L205?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L426)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L426?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Register and return a callable wrapper for one library function.
+
+The exposed `tag` may differ from the native function `name`; remaining keyword parameters define the `FunctionSignature` arguments.
+  - `tag`: `str`
+    > lookup name stored in the facade
+
+  - `name`: `str | None`
+    > native symbol name, defaulting to `tag`
+
+  - `docstring`: `str | None`
+    > optional function documentation
+
+  - `defaults`: `dict | None`
+    > argument defaults
+
+  - `return_handler`: `Callable | None`
+    > raw-result postprocessor
+
+  - `prep_args`: `Callable | None`
+    > keyword-argument preprocessing callback
+
+  - `params`: `dict[str, Any]`
+    > argument names mapped to type specifications
+
+  - `:returns`: `SharedLibraryFunction`
+    > registered function wrapper
 
 
 <a id="McUtils.Extensions.SharedLibraryManager.SharedLibrary.get_function" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +85,17 @@ register(self, tag, name=None, docstring=None, defaults=None, return_handler=Non
 get_function(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L219)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L219?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L471)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L471?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Retrieve a registered function wrapper by tag.
+  - `item`: `str`
+    > registered function tag
+
+  - `:returns`: `SharedLibraryFunction`
+    > registered wrapper
 
 
 <a id="McUtils.Extensions.SharedLibraryManager.SharedLibrary.__getattr__" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +103,17 @@ get_function(self, item):
 __getattr__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L488)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L488?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve missing attributes as registered function tags.
+  - `item`: `str`
+    > attribute name
+
+  - `:returns`: `SharedLibraryFunction`
+    > registered wrapper
 
 
 <a id="McUtils.Extensions.SharedLibraryManager.SharedLibrary.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +121,16 @@ __getattr__(self, item):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L228)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L228?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L502)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager/SharedLibrary.py#L502?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a representation of the library facade.
+
+The current formatting expression passes a generator to `str.format` without a placeholder and therefore does not list the registered signatures.
+  - `:returns`: `str`
+    > representation string
  </div>
 </div>
 
@@ -122,7 +184,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/SharedLibraryManager/SharedLibrary.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L191?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/SharedLibraryManager.py#L398?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

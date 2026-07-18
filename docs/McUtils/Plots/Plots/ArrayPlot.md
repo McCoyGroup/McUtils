@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.ArrayPlot">ArrayPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L913)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L913?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1255?message=Update%20Docs)]
 </div>
 
 Plots an array as an image
@@ -27,9 +27,26 @@ known_styles: set
 __init__(self, *params, plot_style=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L921)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L921?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1263)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1263?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an image plot of a 2-D array (via `imshow`).
+  - `params`: `Any`
+    > empty, or the array to plot
+  - `plot_style`: `dict | None`
+    > styling options
+  - `colorbar`: `Any`
+    > whether/how to add a colorbar
+  - `figure`: `Any`
+    > an existing figure to draw into
+  - `axes`: `Any`
+    > existing axes to draw into
+  - `subplot_kw`: `dict | None`
+    > subplot construction options
+  - `opts`: `Any`
+    > options forwarded to `Graphics`
  </div>
 </div>
 
@@ -83,7 +100,7 @@ __init__(self, *params, plot_style=None, colorbar=None, figure=None, axes=None, 
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ArrayPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ArrayPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L913?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1255?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

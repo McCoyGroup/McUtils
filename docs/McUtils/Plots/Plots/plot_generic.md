@@ -1,14 +1,31 @@
 # <a id="McUtils.Plots.Plots.plot_generic">plot_generic</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1377)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1377?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1929)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1929?message=Update%20Docs)]
 </div>
 
 ```python
 plot_generic(*, x, type='plot', y=None, z=None, func=None, **kwargs): 
 ```
+**LLM Docstring**
 
-
+Build a plot of the resolved type from `x`/`y`/`z`/`func` inputs, assembling the
+positional arguments appropriately for function plots, `(x, y)` data, and
+`(x, y, z)` data.
+  - `x`: `Any`
+    > the x data
+  - `type`: `str`
+    > the plot-type tag
+  - `y`: `Any`
+    > the y data
+  - `z`: `Any`
+    > the z data
+  - `func`: `Callable | None`
+    > a function to plot
+  - `kwargs`: `Any`
+    > options forwarded to the plot class
+  - `:returns`: `_`
+    > the plot
 
 
 
@@ -59,7 +76,7 @@ plot_generic(*, x, type='plot', y=None, z=None, func=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/plot_generic.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/plot_generic.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1377?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1929?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

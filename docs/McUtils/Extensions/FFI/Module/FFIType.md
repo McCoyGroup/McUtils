@@ -67,6 +67,14 @@ type_data(cls, val):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L112)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L112?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the registered format string and Python/NumPy type for an FFI enum value.
+  - `val`: `Any`
+    > FFI type member or raw enum value to resolve
+
+  - `:returns`: `tuple[str, type | None]`
+    > the `(format_code, Python_type)` pair stored in the enum type map
 
 
 <a id="McUtils.Extensions.FFI.Module.FFIType.resolve_ffi_type" class="docs-object-method">&nbsp;</a> 
@@ -75,9 +83,17 @@ type_data(cls, val):
 resolve_ffi_type(cls, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L131)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L131?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve a format code, dtype name, or Python/NumPy type to an `FFIType` member.
+  - `val`: `Any`
+    > reverse-map key such as a format character, dtype name, or Python type
+
+  - `:returns`: `FFIType`
+    > the matching FFI type; raises `KeyError` when no reverse mapping exists
 
 
 <a id="enum.Enum.__new__" class="docs-object-method">&nbsp;</a> 

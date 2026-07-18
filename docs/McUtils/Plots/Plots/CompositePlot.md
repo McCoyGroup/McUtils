@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.CompositePlot">CompositePlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L466)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L466?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L669)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L669?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,20 @@
 __init__(self, main, other, *rest, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L467)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L467?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L670)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L670?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hold several plots to be merged onto a shared figure.
+  - `main`: `Any`
+    > the first plot
+  - `other`: `Any`
+    > the second plot
+  - `rest`: `Any`
+    > additional plots
+  - `kwargs`: `Any`
+    > options applied when merging
 
 
 <a id="McUtils.Plots.Plots.CompositePlot.merge" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +45,17 @@ __init__(self, main, other, *rest, **kwargs):
 merge(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L470)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L470?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L683)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L683?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Merge the held plots onto a shared new figure (re-hosting each onto the first's
+figure).
+  - `kwargs`: `Any`
+    > options for the shared figure
+  - `:returns`: `Graphics`
+    > the merged base plot
 
 
 <a id="McUtils.Plots.Plots.CompositePlot.show" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +63,14 @@ merge(self, **kwargs):
 show(self, interactive=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L475)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L475?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/CompositePlot.py#L698)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/CompositePlot.py#L698?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Merge the plots and display the result.
+  - `interactive`: `bool`
+    > show interactively
  </div>
 </div>
 
@@ -100,7 +124,7 @@ show(self, interactive=True):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/CompositePlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/CompositePlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L466?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L669?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

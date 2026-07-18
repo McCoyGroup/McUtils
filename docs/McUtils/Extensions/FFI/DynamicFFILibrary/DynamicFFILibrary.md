@@ -1,8 +1,8 @@
 ## <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary">DynamicFFILibrary</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L136)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L136?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L268)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L268?message=Update%20Docs)]
 </div>
 
 Directly analogous to a regular shared library but it uses
@@ -27,9 +27,23 @@ method_type: DynamicFFIFunction
 __init__(self, library, compiler_options=None, **functions): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L275)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L275?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create a dynamic FFI library and retain optional compiler configuration for lazy application.
+  - `library`: `Any`
+    > library path or loader
+
+  - `compiler_options`: `Any`
+    > options applied before the first function lookup
+
+  - `functions`: `dict[str, Any]`
+    > registered function definitions
+
+  - `:returns`: `None`
+    > nothing; initializes the library
 
 
 <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.get_function" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +51,17 @@ __init__(self, library, compiler_options=None, **functions):
 get_function(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L302)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.py#L302?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Apply compiler options once on first access, then retrieve a registered function.
+  - `item`: `Any`
+    > registered function tag
+
+  - `:returns`: `DynamicFFIFunction`
+    > the requested function
 
 
 <a id="McUtils.Extensions.FFI.DynamicFFILibrary.DynamicFFILibrary.configure_loader" class="docs-object-method">&nbsp;</a> 
@@ -48,9 +70,17 @@ get_function(self, item):
 configure_loader(cls, **compile_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L159)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L159?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L319?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Forward compile options to the singleton dynamic FFI loader.
+  - `compile_opts`: `dict[str, Any]`
+    > compiler and loader options
+
+  - `:returns`: `None`
+    > nothing; updates global loader configuration
  </div>
 </div>
 
@@ -104,7 +134,7 @@ configure_loader(cls, **compile_opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Extensions/FFI/DynamicFFILibrary/DynamicFFILibrary.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L136?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Extensions/FFI/DynamicFFILibrary.py#L268?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
