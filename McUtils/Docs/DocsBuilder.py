@@ -64,6 +64,21 @@ class DocBuilder:
     default_template_extension = 'templates'
     default_repo_extension = 'repo_templates'
     def get_template_locator(self, template_directory, use_repo_templates=False):
+        """
+        **LLM Docstring**
+
+        Builds the resource search path used to locate documentation templates.
+
+        Bundled paths are rooted beside this module. When repository templates are enabled, `repo_templates` is searched before `templates`.
+
+        :param template_directory: an optional custom template directory or existing locator
+        :type template_directory: None | str | Iterable[str] | ResourceLocator
+
+        :param use_repo_templates: whether repository-specific templates should be searched before the defaults
+        :type use_repo_templates: bool
+        :return: an existing locator unchanged, or a locator combining custom and bundled template directories
+        :rtype: ResourceLocator
+        """
         if not isinstance(template_directory, ResourceLocator):
             template_extension = [self.default_template_extension]
             if use_repo_templates:

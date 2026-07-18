@@ -58,6 +58,19 @@ def _fetch_finx_asset(kind, name):
 
 
 def _bake_finx_assets(extra_css="", include_js=True):
+    """
+    **LLM Docstring**
+
+    Builds JHTML style and script elements containing the configured finx assets.
+
+    :param extra_css: additional CSS appended after the bundled styles
+    :type extra_css: str
+
+    :param include_js: whether to include jQuery and the finx JavaScript assets
+    :type include_js: bool
+    :return: style elements and, optionally, script elements
+    :rtype: list
+    """
     css = "\n".join(_fetch_finx_asset("css", f) for f in _FINX_CSS_FILES)
     css += "\n" + extra_css
     elems = [JHTML.Style(css)]
@@ -85,6 +98,23 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
     """
 
     def __init__(self, templates=None, ignore_missing=False, formatter_class=None, ignore_paths=()):
+        """
+        **LLM Docstring**
+
+        Initializes the static documentation engine with callable templates for each documentation object type.
+
+        :param templates: custom template handlers; defaults to the six browser methods
+        :type templates: Mapping[str, Callable] | None
+
+        :param ignore_missing: whether missing template fields should be ignored
+        :type ignore_missing: bool
+
+        :param formatter_class: an optional formatter class passed to the base engine
+        :type formatter_class: type | None
+
+        :param ignore_paths: template paths to ignore
+        :type ignore_paths: Iterable[str]
+        """
         if templates is None:
             templates = {
                 'index.md': self.index_browser,
@@ -105,18 +135,48 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
 
     @staticmethod
     def md(text):
+        """
+        **LLM Docstring**
+
+        Converts nonempty Markdown text to a JHTML Markdown element.
+
+        :param text: the text to render
+        :type text: str | None
+        :return: a Markdown element, or an empty span for falsey input
+        :rtype: Any
+        """
         if not text:
             return JHTML.Span()
         return JHTML.Markdown(text)
 
     @classmethod
     def clean_params(cls, params):
+        """
+        **LLM Docstring**
+
+        Removes fields whose values are `None` or empty strings.
+
+        :param params: the fields to filter
+        :type params: Mapping[Any, Any]
+        :return: a dictionary containing only nonempty values
+        :rtype: dict
+        """
         return {
             k: v for k, v in params.items()
             if not (v is None or (isinstance(v, str) and len(v) == 0))
         }
 
     def params_table(self, parameters):
+        """
+        **LLM Docstring**
+
+        Renders parsed parameter metadata as a documentation list.
+
+        :param parameters: parameter names with type and description fields
+        :type parameters: Mapping[str, Mapping[str, str]] | None
+        :return: a JHTML list, or an empty span when no parameters are supplied
+        :rtype: Any
+        """
         if not parameters:
             return JHTML.Span()
         items = [
@@ -131,6 +191,16 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
         return JHTML.List(items, cls='docs-params')
 
     def extra_sections(self, **fields):
+        """
+        **LLM Docstring**
+
+        Renders nonempty named fields as native `<details>` sections.
+
+        :param fields: section labels mapped to Markdown content
+        :type fields: Any
+        :return: the generated details elements
+        :rtype: list
+        """
         return [
             JHTML.Details(
                 JHTML.Summary(label),
@@ -141,6 +211,22 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
         ]
 
     def code_block(self, decorator, name, signature):
+        """
+        **LLM Docstring**
+
+        Renders a compact Python function signature block.
+
+        :param decorator: decorator text prepended to the function definition
+        :type decorator: str | None
+
+        :param name: the function name
+        :type name: str
+
+        :param signature: the parenthesized signature
+        :type signature: str
+        :return: a highlighted JHTML preformatted block
+        :rtype: Any
+        """
         return JHTML.Pre(
             JHTML.Code((decorator or "") + "def " + name + signature + ":"),
             cls='highlight'
@@ -150,6 +236,34 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
 
     def index_browser(self, index_files=None, details=None, related=None,
                        description=None, examples=None, _self=None, **kw):
+        """
+        **LLM Docstring**
+
+        Renders an index page from its description, child index entries, and optional sections
+
+        :param index_files: rendered index entries
+        :type index_files: Iterable[Any] | None
+
+        :param details: details Markdown
+        :type details: str | None
+
+        :param related: related-object Markdown
+        :type related: str | None
+
+        :param description: index description
+        :type description: str | None
+
+        :param examples: examples Markdown
+        :type examples: str | None
+
+        :param _self: the active template handler
+        :type _self: Any | None
+
+        :param kw: unused template fields
+        :type kw: Any
+        :return: a JHTML index container
+        :rtype: Any
+        """
         return JHTML.Div(
             JHTML.Div(self.md(description), cls='docs-index-description'),
             *(index_files or []),
@@ -159,6 +273,46 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
     def module_browser(self, members=None, name=None, id=None, details=None,
                         related=None, description=None, examples=None,
                         tests=None, lineno=None, _self=None, **kw):
+        """
+        **LLM Docstring**
+
+        Renders a module section with expandable output for each documented member
+
+        :param members: member identifiers
+        :type members: Mapping[str, Any] | None
+
+        :param name: module name
+        :type name: str | None
+
+        :param id: anchor identifier
+        :type id: str | None
+
+        :param details: details Markdown
+        :type details: str | None
+
+        :param related: related-object Markdown
+        :type related: str | None
+
+        :param description: module description
+        :type description: str | None
+
+        :param examples: examples Markdown
+        :type examples: str | None
+
+        :param tests: test/example data
+        :type tests: Any | None
+
+        :param lineno: source line metadata
+        :type lineno: int | str | None
+
+        :param _self: the active template handler
+        :type _self: Any
+
+        :param kw: unused template fields
+        :type kw: Any
+        :return: a JHTML module section
+        :rtype: Any
+        """
         member_elems = []
         for k in (members or {}):
             entry = _self.tree.get(k)
@@ -184,6 +338,55 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
                        lineno=None, parameters=None, props=None, description=None,
                        methods=None, examples=None, tests=None, details=None,
                        _self=None, **_):
+        """
+        **LLM Docstring**
+
+        Renders a class section containing description, properties, parameters, and handled methods
+
+        :param id: anchor identifier
+        :type id: str | None
+
+        :param name: class name
+        :type name: str | None
+
+        :param related: related-object Markdown
+        :type related: str | None
+
+        :param out_file: unused output-file metadata
+        :type out_file: str | None
+
+        :param lineno: source line metadata
+        :type lineno: int | str | None
+
+        :param parameters: parsed parameter metadata
+        :type parameters: Mapping[str, Any] | None
+
+        :param props: public property metadata
+        :type props: Iterable[tuple[str, Any]] | None
+
+        :param description: class description
+        :type description: str | None
+
+        :param methods: method handlers
+        :type methods: Iterable[Any] | None
+
+        :param examples: examples Markdown
+        :type examples: str | None
+
+        :param tests: unused test metadata
+        :type tests: Any | None
+
+        :param details: details Markdown
+        :type details: str | None
+
+        :param _self: the active handler
+        :type _self: Any | None
+
+        :param _: unused template fields
+        :type _: Any
+        :return: a JHTML class section
+        :rtype: Any
+        """
         body = [JHTML.SubHeading(JHTML.Anchor(name, id=id))]
         if description:
             body.append(self.md(description))
@@ -207,6 +410,55 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
                         related=None, out_file=None, lineno=None, parameters=None,
                         props=None, description=None, examples=None, tests=None,
                         details=None, **_):
+        """
+        **LLM Docstring**
+
+        Renders a method as a collapsible details element with signature and documentation
+
+        :param id: anchor identifier
+        :type id: str | None
+
+        :param name: method name
+        :type name: str
+
+        :param decorator: decorator text
+        :type decorator: str | None
+
+        :param signature: method signature
+        :type signature: str
+
+        :param related: unused related metadata
+        :type related: str | None
+
+        :param out_file: unused output metadata
+        :type out_file: str | None
+
+        :param lineno: source line metadata
+        :type lineno: int | str | None
+
+        :param parameters: parsed parameters
+        :type parameters: Mapping[str, Any] | None
+
+        :param props: unused property metadata
+        :type props: Any | None
+
+        :param description: method description
+        :type description: str | None
+
+        :param examples: examples Markdown
+        :type examples: str | None
+
+        :param tests: unused test metadata
+        :type tests: Any | None
+
+        :param details: details Markdown
+        :type details: str | None
+
+        :param _: unused template fields
+        :type _: Any
+        :return: a JHTML details element
+        :rtype: Any
+        """
         body = [self.code_block(decorator, name, signature)]
         if description and description.strip():
             body.append(self.md(description))
@@ -222,6 +474,55 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
                         lineno=None, parameters=None, props=None, description=None,
                         methods=None, examples=None, tests=None, details=None,
                         _self=None, **_):
+        """
+        **LLM Docstring**
+
+        Renders a generic object section with its runtime type and optional documentation sections
+
+        :param id: anchor identifier
+        :type id: str | None
+
+        :param name: object name
+        :type name: str
+
+        :param related: unused related metadata
+        :type related: str | None
+
+        :param out_file: unused output metadata
+        :type out_file: str | None
+
+        :param lineno: source line metadata
+        :type lineno: int | str | None
+
+        :param parameters: unused parameter metadata
+        :type parameters: Any | None
+
+        :param props: unused property metadata
+        :type props: Any | None
+
+        :param description: object description
+        :type description: str | None
+
+        :param methods: unused method metadata
+        :type methods: Any | None
+
+        :param examples: examples Markdown
+        :type examples: str | None
+
+        :param tests: unused test metadata
+        :type tests: Any | None
+
+        :param details: details Markdown
+        :type details: str | None
+
+        :param _self: the active handler containing the object
+        :type _self: Any
+
+        :param _: unused template fields
+        :type _: Any
+        :return: a JHTML object section
+        :rtype: Any
+        """
         return JHTML.Section(
             JHTML.SubsubHeading(JHTML.Anchor(name, id=id), " ", JHTML.Code(type(_self.obj).__name__)),
             self.md(description),
@@ -233,6 +534,55 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
                           related=None, out_file=None, lineno=None, parameters=None,
                           props=None, description=None, examples=None, tests=None,
                           details=None, **_):
+        """
+        **LLM Docstring**
+
+        Renders a function section containing its signature, description, parameters, and optional sections
+
+        :param id: anchor identifier
+        :type id: str | None
+
+        :param name: function name
+        :type name: str
+
+        :param decorator: decorator text
+        :type decorator: str | None
+
+        :param signature: function signature
+        :type signature: str
+
+        :param related: unused related metadata
+        :type related: str | None
+
+        :param out_file: unused output metadata
+        :type out_file: str | None
+
+        :param lineno: source line metadata
+        :type lineno: int | str | None
+
+        :param parameters: parsed parameters
+        :type parameters: Mapping[str, Any] | None
+
+        :param props: unused property metadata
+        :type props: Any | None
+
+        :param description: function description
+        :type description: str | None
+
+        :param examples: examples Markdown
+        :type examples: str | None
+
+        :param tests: unused test metadata
+        :type tests: Any | None
+
+        :param details: details Markdown
+        :type details: str | None
+
+        :param _: unused template fields
+        :type _: Any
+        :return: a JHTML function section
+        :rtype: Any
+        """
         body = [self.code_block(decorator, name, signature)]
         if description and description.strip():
             body.append(self.md(description))
@@ -283,6 +633,18 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
     # real gate (blacklist_packages) so we drop the stdlib-path guess here.
     old_check = TemplateHandler.check_should_write
     def _check_should_write(self):
+        """
+        **LLM Docstring**
+
+        Checks only the documentation blacklist when deciding whether an object should be written.
+
+        This local replacement intentionally omits the base handler's standard-library path heuristic.
+
+        :param self: the handler being checked
+        :type self: TemplateHandler
+        :return: whether the top-level package is not blacklisted
+        :rtype: bool
+        """
         base = self.identifier.split(".", 1)[0]
         return base not in self.blacklist_packages
     TemplateHandler.check_should_write = _check_should_write
