@@ -31,6 +31,19 @@ __all__ = [
 #
 # region function application
 def _apply_f(f, grid):
+    """
+    **LLM Docstring**
+
+    Evaluate a function on a grid, falling back to `np.vectorize` if a direct call
+    fails.
+
+    :param f: the function to evaluate
+    :type f: Callable
+    :param grid: the input grid
+    :type grid: np.ndarray
+    :return: the function values
+    :rtype: np.ndarray
+    """
     try:
         vals = f(grid)
     except:
@@ -39,6 +52,25 @@ def _apply_f(f, grid):
     return vals
 
 def _semi_adaptive_sample_func(f, xmin, xmax, npts=150, max_refines=10, der_cut=10**5):
+    """
+    **LLM Docstring**
+
+    Sample a 1-D function over `[xmin, xmax]`, refining the grid (doubling the point
+    count) until the finite-difference derivative stays below a cutoff or the refine
+    limit is hit.
+
+    :param f: the function to sample
+    :type f: Callable
+    :param xmin: the lower bound
+    :param xmax: the upper bound
+    :param npts: the initial number of points
+    :type npts: int
+    :param max_refines: the maximum number of refinements
+    :type max_refines: int
+    :param der_cut: the derivative-magnitude cutoff
+    :return: `(grid, values, npts, refines)`
+    :rtype: tuple
+    """
 
     refines = 0
     der_good = False
@@ -63,6 +95,26 @@ def _semi_adaptive_sample_func(f, xmin, xmax, npts=150, max_refines=10, der_cut=
     return grid, vals, npts, refines
 
 def _semi_adaptive_sample_func2(f, xmin, xmax, ymin, ymax, npts=15, max_refines=10, der_cut=10**5):
+    """
+    **LLM Docstring**
+
+    Sample a 2-D function over a rectangle, refining the mesh until the
+    finite-difference derivative stays below a cutoff or the refine limit is hit.
+
+    :param f: the function to sample
+    :type f: Callable
+    :param xmin: the x lower bound
+    :param xmax: the x upper bound
+    :param ymin: the y lower bound
+    :param ymax: the y upper bound
+    :param npts: the initial per-axis point count
+    :type npts: int
+    :param max_refines: the maximum number of refinements
+    :type max_refines: int
+    :param der_cut: the derivative-magnitude cutoff
+    :return: `(grid, values, npts, refines)`
+    :rtype: tuple
+    """
     from ..Zachary import finite_difference
 
     refines = 0
@@ -95,6 +147,18 @@ def _semi_adaptive_sample_func2(f, xmin, xmax, ymin, ymax, npts=15, max_refines=
 #
 # region plot data prep
 def _interp2DData(gpts, **opts):
+    """
+    **LLM Docstring**
+
+    Interpolate scattered `(x, y, z)` points onto a regular 2-D mesh via
+    `scipy.interpolate.griddata`.
+
+    :param gpts: the `(n, 3)` scattered points
+    :type gpts: np.ndarray
+    :param opts: options forwarded to `griddata`
+    :return: `(xmesh, ymesh, values)`
+    :rtype: tuple
+    """
     from scipy.interpolate import griddata
 
     x = np.sort(gpts[:, 0])
@@ -124,6 +188,17 @@ def _interp2DData(gpts, **opts):
     return xmesh, ymesh, vals.T
 
 def _get_2D_plotdata(func, xrange):
+    """
+    **LLM Docstring**
+
+    Resolve 2-D plot inputs into `(xrange, values)`, handling sympy expressions,
+    explicit `(x, y)` arrays, sampled ranges, and adaptive sampling of a callable.
+
+    :param func: a callable, sympy expression, or the x data
+    :param xrange: the x range/values (or the y data)
+    :return: `(xrange, values)`
+    :rtype: tuple
+    """
     if hasattr(func, 'subs'):
         from sympy import lambdify
         sym, xrange = xrange
@@ -145,6 +220,18 @@ def _get_2D_plotdata(func, xrange):
     return xrange, fvalues
 
 def _get_3D_plotdata(func, xrange, yrange):
+    """
+    **LLM Docstring**
+
+    Resolve 3-D plot inputs into `(xrange, yrange, values)`, handling explicit
+    arrays, meshed ranges, and adaptive sampling of a callable.
+
+    :param func: a callable or the x data
+    :param xrange: the x range/values
+    :param yrange: the y range/values
+    :return: `(xrange, yrange, values)`
+    :rtype: tuple
+    """
     if not callable(func):
         fvalues = yrange
         yrange = xrange
@@ -279,6 +366,19 @@ class Plot(Graphics):
     }
     @classmethod
     def filter_options(cls, opts, allowed=None):
+        """
+        **LLM Docstring**
+
+        Return the subset of options recognized by this plot type (its known styles and
+        keys, or an explicit allowed set).
+
+        :param opts: the options to filter
+        :type opts: dict
+        :param allowed: an explicit allowed-key set
+        :type allowed: set | None
+        :return: the filtered options
+        :rtype: dict
+        """
         new = {}
         if allowed is None:
             allowed = cls.known_styles | cls.known_keys
@@ -286,6 +386,15 @@ class Plot(Graphics):
                 new[k] = opts[k]
         return new
     def _check_opts(self, opts):
+        """
+        **LLM Docstring**
+
+        Raise if any option keys aren't among this plot's known styles or keys.
+
+        :param opts: the options to check
+        :type opts: dict
+        :raises ValueError: for unknown option keys
+        """
         diff = opts.keys() - (self.known_styles | self.known_keys)
         if len(diff) > 0:
             raise ValueError("unknown options for {}: {}".format(
@@ -293,17 +402,61 @@ class Plot(Graphics):
             ))
 
     def _initialize(self):
+        """
+        **LLM Docstring**
+
+        Mark the plot initialized and apply its (non-style) figure options.
+        """
         self._initialized = True
         self.set_options(**self.plot_opts)
 
     def _get_plot_data(self, func, xrange):
+        """
+        **LLM Docstring**
+
+        Resolve the plot's positional arguments into the `(xrange, values)` the plot
+        method expects.
+
+        :param func: a callable or the x data
+        :param xrange: the x range/values
+        :return: the resolved plot data
+        :rtype: tuple
+        """
         xrange, fvalues = _get_2D_plotdata(func, xrange)
         return xrange, fvalues
 
     def _plot_data(self, *data, **plot_style):
+        """
+        **LLM Docstring**
+
+        Call the backend plot method on the resolved plot data.
+
+        :param data: the positional plot arguments
+        :param plot_style: the styling options
+        :return: the backend graphics object
+        """
         return self._method(*self._get_plot_data(*data), **plot_style)
 
     def prep_styles(self, c=None, edgecolors=None, facecolors=None, cmap=None, prep_colors=False, color_value_rescaling=True, **styles):
+        """
+        **LLM Docstring**
+
+        Normalize color-related styling: when a colormap is supplied and color values are
+        numeric, rescale them and map them through the colormap (into `c`, `facecolors`,
+        or `edgecolors`), returning the cleaned style dict.
+
+        :param c: the point colors/values
+        :param edgecolors: the edge colors/values
+        :param facecolors: the face colors/values
+        :param cmap: the colormap (name, dict spec, or callable)
+        :param prep_colors: actually map numeric values through the colormap
+        :type prep_colors: bool
+        :param color_value_rescaling: rescale numeric color values before mapping
+        :type color_value_rescaling: bool
+        :param styles: the remaining styling options
+        :return: the prepared style dict
+        :rtype: dict
+        """
         if (
                 prep_colors
                 and cmap is not None
@@ -372,6 +525,14 @@ class Plot(Graphics):
         return self.graphics
     @property
     def artists(self):
+        """
+        **LLM Docstring**
+
+        The backend artist objects produced by the plot (as a list).
+
+        :return: the artists
+        :rtype: list | None
+        """
         if self.graphics is None or isinstance(self.graphics, list):
             return self.graphics
         else:
@@ -435,6 +596,15 @@ class Plot(Graphics):
             return super().add_colorbar(graphics=graphics, **kw)
 
     def set_graphics_properties(self, *which, **kw):
+        """
+        **LLM Docstring**
+
+        Set backend properties on the plot's artists (all of them, or the selected
+        indices).
+
+        :param which: the artist indices to modify (all if empty)
+        :param kw: the properties to set
+        """
         if isinstance(self.graphics, tuple):
             for n,g in enumerate(self.graphics):
                 if len(which) == 0 or n in which:
@@ -445,17 +615,50 @@ class Plot(Graphics):
 
     @classmethod
     def merge(cls, main, other, *rest, **kwargs):
+        """
+        **LLM Docstring**
+
+        Combine this plot with others into a `CompositePlot`.
+
+        :param main: the first plot
+        :param other: the second plot
+        :param rest: additional plots
+        :param kwargs: options for the composite
+        :return: the composite plot
+        :rtype: CompositePlot
+        """
         return CompositePlot(main, other, *rest, **kwargs)
 
     plot_classes = {}
     @classmethod
     def resolve_method(cls, mpl_name):
+        """
+        **LLM Docstring**
+
+        Look up the registered plot class for a backend method name.
+
+        :param mpl_name: the method/class name
+        :type mpl_name: str
+        :return: the plot class
+        :rtype: type
+        """
         return cls.plot_classes[mpl_name]
     # @classmethod
     # def merge_plots(cls, *plots, **styles):
     #     ...
     @classmethod
     def register(cls, plot_class):
+        """
+        **LLM Docstring**
+
+        Register a plot class in the class registry, keyed by its backend method name (or
+        class name if the method is already registered). Usable as a decorator.
+
+        :param plot_class: the plot class to register
+        :type plot_class: type
+        :return: the registered class
+        :rtype: type
+        """
         if plot_class.method in cls.plot_classes:
             cls.plot_classes[plot_class.__name__] = plot_class
         else:
@@ -465,18 +668,51 @@ Plot.register(Plot)
 
 class CompositePlot:
     def __init__(self, main, other, *rest, **kwargs):
+        """
+        **LLM Docstring**
+
+        Hold several plots to be merged onto a shared figure.
+
+        :param main: the first plot
+        :param other: the second plot
+        :param rest: additional plots
+        :param kwargs: options applied when merging
+        """
         self.kwargs = kwargs
         self.plots = [main, other, *rest]
     def merge(self, **kwargs):
+        """
+        **LLM Docstring**
+
+        Merge the held plots onto a shared new figure (re-hosting each onto the first's
+        figure).
+
+        :param kwargs: options for the shared figure
+        :return: the merged base plot
+        :rtype: Graphics
+        """
         base = self.plots[0].change_figure(None, **kwargs)
         for p in self.plots[1:]:
             p.change_figure(base)
         return base
     def show(self, interactive=True):
+        """
+        **LLM Docstring**
+
+        Merge the plots and display the result.
+
+        :param interactive: show interactively
+        :type interactive: bool
+        """
         self._ref = self.merge(interactive=interactive, **self.kwargs)
         # self._ref.pyplot.mpl_connect()
         self._ref.show()
     def _ipython_display_(self):
+        """
+        **LLM Docstring**
+
+        Display the composite plot in IPython.
+        """
         self.show()
 
 @Plot.register
@@ -502,6 +738,24 @@ class ScatterPlot(Plot):
     method = "scatter"
 
     def prep_styles(self, cmap=None, c=None, facecolors=None, edgecolors=None, filled=None, prep_colors=False, **etc):
+        """
+        **LLM Docstring**
+
+        Resolve scatter-specific color handling (filled vs open markers, moving colors
+        between `c`/`facecolors`/`edgecolors`) before delegating to the base style prep.
+
+        :param cmap: the colormap
+        :param c: the point colors/values
+        :param facecolors: the face colors
+        :param edgecolors: the edge colors
+        :param filled: draw filled (vs open) markers
+        :type filled: bool | None
+        :param prep_colors: map numeric values through the colormap
+        :type prep_colors: bool
+        :param etc: the remaining styling options
+        :return: the prepared style dict
+        :rtype: dict
+        """
         if filled:
             if c is None and facecolors is None:
                 c = edgecolors
@@ -534,6 +788,15 @@ class ListScatterPlot(ScatterPlot):
     Plots a bunch of (x, y) points using the `scatter` method.
     """
     def __init__(self, griddata, **opts):
+        """
+        **LLM Docstring**
+
+        Build a scatter plot from an `(n, 2)` array of `(x, y)` points.
+
+        :param griddata: the points
+        :type griddata: np.ndarray
+        :param opts: plot options
+        """
         super().__init__(griddata[:, 0], griddata[:, 1], **opts)
 
 @Plot.register
@@ -548,6 +811,15 @@ class ErrorBarPlot(Plot):
 class ListErrorBarPlot(ErrorBarPlot):
     """A Plot that pulls the errorbar data from a list"""
     def __init__(self, griddata, **opts):
+        """
+        **LLM Docstring**
+
+        Build an error-bar plot from an `(n, 2)` array of `(x, y)` points.
+
+        :param griddata: the points
+        :type griddata: np.ndarray
+        :param opts: plot options
+        """
         super().__init__(griddata[:, 0], griddata[:, 1], **opts)
 
 @Plot.register
@@ -601,6 +873,15 @@ class StickPlot(Plot):
 class ListStickPlot(StickPlot):
     """A Plot object that plots sticks from a list"""
     def __init__(self, griddata, **opts):
+        """
+        **LLM Docstring**
+
+        Build a stick (stem) plot from an `(n, 2)` array of `(x, y)` points.
+
+        :param griddata: the points
+        :type griddata: np.ndarray
+        :param opts: plot options
+        """
         super().__init__(griddata[:, 0], griddata[:, 1], **opts)
 
 @Plot.register
@@ -666,10 +947,30 @@ class VerticalLinePlot(Plot):
     known_styles = {'ymin', 'ymax', 'colors', 'linestyles', 'label', 'data'} | Plot.line_params
     method = 'vlines'
     def _get_plot_data(self, x, y=1.0):
+        """
+        **LLM Docstring**
+
+        Resolve the data for vertical lines at x positions `x` spanning `y` (expanding a
+        scalar `y` to `[0, y]`).
+
+        :param x: the x positions
+        :param y: the line extent (scalar or `[ymin, ymax]`)
+        :return: `(x, y)`
+        :rtype: tuple
+        """
         if isinstance(y, (int, float)):
             y = [0, y]
         return (x, y)
     def _plot_data(self, *data, **plot_style):
+        """
+        **LLM Docstring**
+
+        Draw the vertical lines via the backend `vlines` method.
+
+        :param data: the resolved `(x, y)` data
+        :param plot_style: the styling options
+        :return: the backend graphics object
+        """
         x, y = data
         return self._method(x, *y, **plot_style)
 @Plot.register
@@ -680,6 +981,17 @@ class HorizontalLinePlot(Plot):
     known_styles = {'xmin', 'xmax', 'colors', 'linestyles', 'label', 'data'} | Plot.line_params
     method = 'hlines'
     def _get_plot_data(self, y, x=None):
+        """
+        **LLM Docstring**
+
+        Resolve the data for horizontal lines at y positions `y` spanning `x` (swapping
+        args and expanding a scalar extent to `[0, x]`).
+
+        :param y: the y positions
+        :param x: the line extent (scalar or `[xmin, xmax]`)
+        :return: `(x, y)`
+        :rtype: tuple
+        """
         if x is not None:
             x, y = y, x
         else:
@@ -688,6 +1000,15 @@ class HorizontalLinePlot(Plot):
             x = [0, x]
         return (x, y)
     def _plot_data(self, *data, **plot_style):
+        """
+        **LLM Docstring**
+
+        Draw the horizontal lines via the backend `hlines` method.
+
+        :param data: the resolved `(x, y)` data
+        :param plot_style: the styling options
+        :return: the backend graphics object
+        """
         x, y = data
         return self._method(y, *x, **plot_style)
 #     known_styles = {'xmin', 'xmax', 'colors', 'linestyles', 'label', 'data'}
@@ -803,6 +1124,15 @@ class DataPlot(Plot):
                          **opts
                          )
     def _get_plot_data(self, data):
+        """
+        **LLM Docstring**
+
+        Pass the data array straight through to the plot method.
+
+        :param data: the data to plot
+        :return: the data as a one-tuple
+        :rtype: tuple
+        """
         return data,
 
 @Plot.register
@@ -896,6 +1226,18 @@ class VectorFieldPlot(Plot):
     Makes a plot of some 2D vector field with center points and arrows
     """
     def _get_plot_data(self, x, y, u, v):
+        """
+        **LLM Docstring**
+
+        Pass the `(x, y, u, v)` vector-field data through to the plot method.
+
+        :param x: the x positions
+        :param y: the y positions
+        :param u: the x components
+        :param v: the y components
+        :return: `(x, y, u, v)`
+        :rtype: tuple
+        """
         return (x, y, u, v)
 
 @Plot.register
@@ -923,6 +1265,21 @@ class ArrayPlot(DataPlot):
                  figure=None, axes=None, subplot_kw=None,
                  **opts
                  ):
+        """
+        **LLM Docstring**
+
+        Build an image plot of a 2-D array (via `imshow`).
+
+        :param params: empty, or the array to plot
+        :param plot_style: styling options
+        :type plot_style: dict | None
+        :param colorbar: whether/how to add a colorbar
+        :param figure: an existing figure to draw into
+        :param axes: existing axes to draw into
+        :param subplot_kw: subplot construction options
+        :type subplot_kw: dict | None
+        :param opts: options forwarded to `Graphics`
+        """
         super().__init__(*params,
                          plot_style=plot_style,
                          colorbar=colorbar, figure=figure,
@@ -930,6 +1287,15 @@ class ArrayPlot(DataPlot):
                          **opts
                          )
     def _get_plot_data(self, data):
+        """
+        **LLM Docstring**
+
+        Pass the array through to the plot method, densifying a sparse array first.
+
+        :param data: the array (or sparse array)
+        :return: the array as a one-tuple
+        :rtype: tuple
+        """
         if hasattr(data, 'toarray'):
             data = data.toarray()
         return data,
@@ -952,6 +1318,30 @@ class TensorPlot(GraphicsGrid):
                  method='imshow', plot_class=None,
                  **opts
                  ):
+        """
+        **LLM Docstring**
+
+        Plot the 2-D slices of a higher-rank tensor as a grid of array plots, inferring
+        the grid shape from the tensor's leading dimensions.
+
+        :param tensor: the tensor to plot
+        :type tensor: np.ndarray
+        :param nrows: the number of rows (inferred if omitted)
+        :type nrows: int | None
+        :param ncols: the number of columns (inferred if omitted)
+        :type ncols: int | None
+        :param plot_style: styling options for each slice
+        :type plot_style: dict | None
+        :param colorbar: whether/how to add colorbars
+        :param figure: an existing figure to draw into
+        :param axes: existing axes to draw into
+        :param subplot_kw: subplot construction options
+        :type subplot_kw: dict | None
+        :param method: the backend method for each slice
+        :type method: str
+        :param plot_class: a custom per-slice plot class/factory
+        :param opts: options forwarded to each slice plot
+        """
         from operator import mul
         from functools import reduce
         tensor_shape = tensor.shape
@@ -1037,6 +1427,18 @@ class Plot2D(Plot):
                          **opts
                          )
     def _get_plot_data(self, func, xrange, yrange):
+        """
+        **LLM Docstring**
+
+        Resolve the `(func, xrange, yrange)` inputs into gridded `(x, y, z)` data for a
+        2-D-axes plot of 3-D data.
+
+        :param func: a callable or the x data
+        :param xrange: the x range/values
+        :param yrange: the y range/values
+        :return: `(x, y, z)`
+        :rtype: tuple
+        """
         return _get_3D_plotdata(func, xrange, yrange)
 @Plot.register
 class ContourPlot(Plot2D):
@@ -1064,6 +1466,15 @@ class TriPlot(Plot2D):
 class ListTriPlot(Plot2D):
     """A Plot that pulls the triangulation data from a list"""
     def __init__(self, griddata, **opts):
+        """
+        **LLM Docstring**
+
+        Build a triangulation plot from an `(n, 2)` array of points.
+
+        :param griddata: the points
+        :type griddata: np.ndarray
+        :param opts: plot options
+        """
         super().__init__(griddata[:, 0], griddata[:, 1], **opts)
 @Plot.register
 class TriDensityPlot(Plot2D):
@@ -1126,6 +1537,18 @@ class ListPlot2D(Plot2D):
                          )
 
     def _get_plot_data(self, *griddata, interpolate=None):
+        """
+        **LLM Docstring**
+
+        Resolve scattered `(x, y, z)` points into gridded data, interpolating onto a mesh
+        when the data is given as a single point array.
+
+        :param griddata: the `(x, y, z)` arrays or a single point array
+        :param interpolate: interpolate a point array onto a mesh (defaults to the instance setting)
+        :type interpolate: bool | None
+        :return: `(x, y, z)`
+        :rtype: tuple
+        """
         if interpolate is None:
             interpolate = self.interpolate
         if len(griddata) == 3:
@@ -1143,24 +1566,64 @@ class ListPlot2D(Plot2D):
 class ListContourPlot(ContourPlot):
     _get_plot_data = ListPlot2D._get_plot_data
     def __init__(self,*params, interpolate=True, **opts):
+        """
+        **LLM Docstring**
+
+        Build a contour plot from scattered points, interpolating them onto a mesh.
+
+        :param params: the scattered point data
+        :param interpolate: interpolate onto a mesh
+        :type interpolate: bool
+        :param opts: plot options
+        """
         self.interpolate = interpolate
         super().__init__(*params, **opts)
 @Plot.register
 class ListDensityPlot(DensityPlot):
     _get_plot_data = ListPlot2D._get_plot_data
     def __init__(self,*params, interpolate=True, **opts):
+        """
+        **LLM Docstring**
+
+        Build a density plot from scattered points, interpolating them onto a mesh.
+
+        :param params: the scattered point data
+        :param interpolate: interpolate onto a mesh
+        :type interpolate: bool
+        :param opts: plot options
+        """
         self.interpolate = interpolate
         super().__init__(*params, **opts)
 @Plot.register
 class ListTriContourPlot(TriContourPlot):
     _get_plot_data = ListPlot2D._get_plot_data
     def __init__(self,*params, interpolate=True, **opts):
+        """
+        **LLM Docstring**
+
+        Build a triangulated contour plot from scattered points.
+
+        :param params: the scattered point data
+        :param interpolate: interpolate onto a mesh
+        :type interpolate: bool
+        :param opts: plot options
+        """
         self.interpolate = interpolate
         super().__init__(*params, **opts)
 @Plot.register
 class ListTriDensityPlot(TriDensityPlot):
     _get_plot_data = ListPlot2D._get_plot_data
     def __init__(self,*params, interpolate=True, **opts):
+        """
+        **LLM Docstring**
+
+        Build a triangulated density plot from scattered points.
+
+        :param params: the scattered point data
+        :param interpolate: interpolate onto a mesh
+        :type interpolate: bool
+        :param opts: plot options
+        """
         self.interpolate = interpolate
         super().__init__(*params, **opts)
 
@@ -1233,6 +1696,12 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
             self.plot(*params)
 
     def _initialize(self):
+        """
+        **LLM Docstring**
+
+        Mark the 3-D plot initialized, apply its figure options, and add a colorbar if
+        one was requested.
+        """
         self._initialized = True
         self.set_options(**self.plot_opts)
         if self.colorbar:
@@ -1241,18 +1710,57 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
             self.add_colorbar(**self.colorbar)
 
     def _get_plot_data(self, func, xrange, yrange):
+        """
+        **LLM Docstring**
+
+        Resolve the `(func, xrange, yrange)` inputs into gridded `(x, y, z)` data for a
+        3-D-axes plot.
+
+        :param func: a callable or the x data
+        :param xrange: the x range/values
+        :param yrange: the y range/values
+        :return: `(x, y, z)`
+        :rtype: tuple
+        """
         return _get_3D_plotdata(func, xrange, yrange)
 
     def _plot_data(self, *data, **plot_style):
+        """
+        **LLM Docstring**
+
+        Call the backend 3-D plot method on the resolved plot data.
+
+        :param data: the positional plot arguments
+        :param plot_style: the styling options
+        :return: the backend graphics object
+        """
         return self._method(*self._get_plot_data(*data), **plot_style)
 
     def plot(self, *params, **plot_style):
+        """
+        **LLM Docstring**
+
+        Plot the data on the 3-D axes and store the result, initializing the figure on
+        the first call.
+
+        :param params: the plot arguments
+        :param plot_style: the styling options (merged with the defaults)
+        :return: the backend graphics object
+        """
         plot_style = dict(self.plot_style, **plot_style)
         self.graphics = self._plot_data(*params, **plot_style)
         if not self._initialized:
             self._initialize()
         return self.graphics
     def add_colorbar(self, **kw):
+        """
+        **LLM Docstring**
+
+        Add a colorbar to the 3-D plot (deferring until the figure is initialized).
+
+        :param kw: options for the colorbar
+        :return: the colorbar (once initialized)
+        """
         if self._initialized:
             fig:GraphicsFigure = self.figure
             ax:GraphicsAxes = self.axes
@@ -1262,12 +1770,33 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
     plot_classes = {}
     @classmethod
     def resolve_method(cls, mpl_name):
+        """
+        **LLM Docstring**
+
+        Look up the registered 3-D plot class for a backend method name.
+
+        :param mpl_name: the method/class name
+        :type mpl_name: str
+        :return: the plot class
+        :rtype: type
+        """
         return cls.plot_classes[mpl_name]
     # @classmethod
     # def merge_plots(cls, *plots, **styles):
     #     ...
     @classmethod
     def register(cls, plot_class):
+        """
+        **LLM Docstring**
+
+        Register a 3-D plot class in the registry, keyed by its backend method name (or
+        class name if already registered). Usable as a decorator.
+
+        :param plot_class: the plot class to register
+        :type plot_class: type
+        :return: the registered class
+        :rtype: type
+        """
         if plot_class.method in cls.plot_classes:
             cls.plot_classes[plot_class.__name__] = plot_class
         else:
@@ -1340,6 +1869,18 @@ class ListPlot3D(Plot3D):
                          )
 
     def _get_plot_data(self, *griddata, interpolate=None):
+        """
+        **LLM Docstring**
+
+        Resolve scattered `(x, y, z)` points into 3-D plot data, interpolating onto a
+        mesh when the data is a single point array.
+
+        :param griddata: the `(x, y, z)` arrays or a single point array
+        :param interpolate: interpolate a point array onto a mesh (defaults to the instance setting)
+        :type interpolate: bool | None
+        :return: `(x, y, z)`
+        :rtype: tuple
+        """
         if interpolate is None:
             interpolate = self.interpolate
         if len(griddata) == 3:
@@ -1362,6 +1903,17 @@ class ListTriPlot3D(ListPlot3D):
     default_plot_style = {}
 
 def resolve_plotter(tag):
+    """
+    **LLM Docstring**
+
+    Resolve a plot-type tag to its plot class, searching the 2-D and 3-D registries
+    by key (case-insensitively) and then by backend method name.
+
+    :param tag: the plot-type name (or an already-resolved class)
+    :type tag: str | type
+    :return: the plot class (or `None`)
+    :rtype: type | None
+    """
     if isinstance(tag, str):
         plotter = Plot.plot_classes.get(tag,Plot3D.plot_classes.get(tag))
         if plotter is None:
@@ -1375,6 +1927,24 @@ def resolve_plotter(tag):
     else:
         return tag
 def plot_generic(*, x, type='plot', y=None, z=None, func=None, **kwargs):
+    """
+    **LLM Docstring**
+
+    Build a plot of the resolved type from `x`/`y`/`z`/`func` inputs, assembling the
+    positional arguments appropriately for function plots, `(x, y)` data, and
+    `(x, y, z)` data.
+
+    :param x: the x data
+    :param type: the plot-type tag
+    :type type: str
+    :param y: the y data
+    :param z: the z data
+    :param func: a function to plot
+    :type func: Callable | None
+    :param kwargs: options forwarded to the plot class
+    :return: the plot
+    :raises ValueError: for an unknown type or missing required inputs
+    """
     plotter = resolve_plotter(type)
     if plotter is None:
         raise ValueError(f"unknown plot type {plotter}")
@@ -1405,6 +1975,29 @@ def plot_multi(
         common_settings=None,
         **global_settings
 ):
+    """
+    **LLM Docstring**
+
+    Build several plots onto a shared figure from a sequence of plot specs, layering
+    common settings, per-type styles, and global settings, and expanding any
+    list-valued `func` into multiple curves.
+
+    :param plot_specs: the per-plot specification dicts
+    :param figure: an existing figure to draw onto
+    :param plot_type_styles: per-plot-type default styles
+    :type plot_type_styles: dict | None
+    :param default_type: the default plot type
+    :type default_type: str
+    :param x: shared x data
+    :param y: shared y data
+    :param z: shared z data
+    :param func: shared function(s) to plot
+    :param common_settings: settings shared across all plots
+    :type common_settings: dict | None
+    :param global_settings: settings applied only to the first (figure-creating) plot
+    :return: the shared figure
+    :rtype: Graphics
+    """
     if plot_type_styles is None:
         plot_type_styles = {}
     if common_settings is None:

@@ -111,6 +111,17 @@ class FFIType(enum.Enum):
 
     @classmethod
     def type_data(cls, val):
+        """
+        **LLM Docstring**
+
+        Return the registered format string and Python/NumPy type for an FFI enum value.
+
+        :param val: FFI type member or raw enum value to resolve
+        :type val: Any
+
+        :return: the `(format_code, Python_type)` pair stored in the enum type map
+        :rtype: tuple[str, type | None]
+        """
         mapp = cls._type_map.value
         if isinstance(val, cls):
             val = val.value
@@ -119,6 +130,17 @@ class FFIType(enum.Enum):
     _rev_map = {}
     @classmethod
     def resolve_ffi_type(cls, val):
+        """
+        **LLM Docstring**
+
+        Resolve a format code, dtype name, or Python/NumPy type to an `FFIType` member.
+
+        :param val: reverse-map key such as a format character, dtype name, or Python type
+        :type val: Any
+
+        :return: the matching FFI type; raises `KeyError` when no reverse mapping exists
+        :rtype: FFIType
+        """
         mapp = cls._rev_map.value
         if len(mapp) == 0: # initialize reverse map
             for k,v in cls._type_map.value.items():
@@ -153,6 +175,17 @@ class FFISpec:
     __fields__ = []
 
     def __init__(self, **kwargs):
+        """
+        **LLM Docstring**
+
+        Validate keyword fields against the concrete specification class's required `__fields__` list.
+
+        :param kwargs: field values supplied for the specification
+        :type kwargs: dict[str, Any]
+
+        :return: nothing; raises `ValueError` for missing, `None`, or unexpected fields
+        :rtype: None
+        """
         for k in self.__fields__:
             if k not in kwargs or kwargs[k] is None:
                 raise ValueError("{} got no value for required parameter {}".format(
@@ -171,6 +204,29 @@ class FFIArgument(FFISpec):
     """
     __fields__ = ["name", "dtype", "shape", "container_type"]
     def __init__(self, name=None, dtype=None, shape=None, container_type=None, value=None):
+        """
+        **LLM Docstring**
+
+        Create an FFI argument specification and normalize its data and container types.
+
+        :param name: argument name
+        :type name: Any
+
+        :param dtype: FFI type descriptor accepted by `infer_dtype`
+        :type dtype: Any
+
+        :param shape: declared argument shape; defaults to `()`
+        :type shape: Any
+
+        :param container_type: container representation accepted by `infer_ctype`
+        :type container_type: Any
+
+        :param value: unused compatibility parameter
+        :type value: Any
+
+        :return: nothing; initializes the argument metadata
+        :rtype: None
+        """
         if shape is None:
             shape = ()
         if container_type is None:
@@ -185,6 +241,17 @@ class FFIArgument(FFISpec):
     }
     @classmethod
     def infer_dtype(cls, dtype):
+        """
+        **LLM Docstring**
+
+        Normalize an enum, integer code, string, NumPy dtype, or mapped Python type to `FFIType`.
+
+        :param dtype: type descriptor to normalize
+        :type dtype: Any
+
+        :return: the resolved FFI type
+        :rtype: FFIType
+        """
         if dtype is None:
             raise ValueError("can't infer dtype for value `None`")
         if isinstance(dtype, FFIType):
@@ -206,6 +273,17 @@ class FFIArgument(FFISpec):
             # raise ValueError("can't infer FFIType for {}".format(dtype))
     @classmethod
     def infer_ctype(cls, container_type):
+        """
+        **LLM Docstring**
+
+        Normalize a container-type enum, name, or numeric value to `FFIContainerType`.
+
+        :param container_type: container representation descriptor
+        :type container_type: Any
+
+        :return: the resolved container type
+        :rtype: FFIContainerType
+        """
         if isinstance(container_type, FFIContainerType):
             return container_type
         elif isinstance(container_type, str):
@@ -214,6 +292,17 @@ class FFIArgument(FFISpec):
             return FFIContainerType(container_type)
     @classmethod
     def from_arg_sig(cls, arg):
+        """
+        **LLM Docstring**
+
+        Build an FFI argument from an `ArgumentSignature.Argument`-like object.
+
+        :param arg: argument exposing `name`, `typechar`, `is_pointer()`, and `is_array()`
+        :type arg: Any
+
+        :return: an argument marked `Raw` for pointer/array signatures and `Untyped` otherwise
+        :rtype: FFIArgument
+        """
         #arg is an ArgumentSignature.Argument but I need to do a more serious
         # refactor later so I won't import that module yet
         return cls(
@@ -223,6 +312,14 @@ class FFIArgument(FFISpec):
             container_type=FFIContainerType.Raw if (arg.is_pointer() or arg.is_array()) else None
         )
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a constructor-style representation of the argument metadata.
+
+        :return: the formatted argument representation
+        :rtype: str
+        """
         return "{}('{}', {}, {}, {})".format(
             type(self).__name__,
             self.arg_name,
@@ -259,27 +356,81 @@ class FFIParameter:
     Just an FFIArgument + associated value
     """
     def __init__(self, arg, val):
+        """
+        **LLM Docstring**
+
+        Associate a concrete value with an `FFIArgument` specification.
+
+        :param arg: argument specification
+        :type arg: Any
+
+        :param val: value supplied for the argument
+        :type val: Any
+
+        :return: nothing; stores the argument and value
+        :rtype: None
+        """
         if not isinstance(arg, FFIArgument):
             raise TypeError("{}: arg is expected to be an FFIArgument")
         self.arg = arg
         self.val = val
     @property
     def arg_name(self):
+        """
+        **LLM Docstring**
+
+        Expose the underlying argument name.
+
+        :return: the argument name
+        :rtype: str
+        """
         return self.arg.arg_name
     @property
     def arg_type(self):
+        """
+        **LLM Docstring**
+
+        Expose the normalized FFI data type.
+
+        :return: the argument type
+        :rtype: FFIType
+        """
         return self.arg.arg_type
     @property
     def arg_shape(self):
+        """
+        **LLM Docstring**
+
+        Return the declared shape, substituting the value's array shape when the declaration is empty or contains zero.
+
+        :return: the effective argument shape
+        :rtype: tuple
+        """
         argshp = self.arg.arg_shape
         if isinstance(self.val, np.ndarray) and (0 in argshp or len(argshp) == 0):
             argshp = self.val.shape # gotta be a numpy value
         return argshp
     @property
     def container_type(self):
+        """
+        **LLM Docstring**
+
+        Expose the argument container representation.
+
+        :return: the container type
+        :rtype: FFIContainerType
+        """
         return self.arg.container_type
     @property
     def arg_value(self):
+        """
+        **LLM Docstring**
+
+        Return the argument value, converting sequence-like pointer/vector inputs to contiguous NumPy arrays in place.
+
+        :return: the prepared argument value
+        :rtype: Any
+        """
         if (
                 len(self.arg_shape) > 0
                 or
@@ -294,6 +445,14 @@ class FFIParameter:
             # self.val = val
         return self.val
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation containing the parameter name, type, shape, and prepared value.
+
+        :return: the formatted parameter representation
+        :rtype: str
+        """
         return "{}({}, {}, {})->{}".format(
             type(self).__name__,
             self.arg_name,
@@ -307,13 +466,40 @@ class FFIParameters:
 
     """
     def __init__(self, dats):
+        """
+        **LLM Docstring**
+
+        Wrap a parameter collection and defer materializing its iterable and name map.
+
+        :param dats: mapping or iterable of `FFIParameter` objects
+        :type dats: Any
+
+        :return: nothing; stores the collection
+        :rtype: None
+        """
         self.dats = dats
         self._params = None
         self._map = None
     def __iter__(self):
+        """
+        **LLM Docstring**
+
+        Iterate over the materialized FFI parameters.
+
+        :return: an iterator over `ffi_parameters`
+        :rtype: iterator
+        """
         return iter(self.ffi_parameters)
     @property
     def ffi_parameters(self):
+        """
+        **LLM Docstring**
+
+        Materialize and cache the parameter sequence, using mapping values when initialized from a mapping.
+
+        :return: the cached parameter collection
+        :rtype: Iterable[FFIParameter]
+        """
         if self._params is None:
             if isinstance(self.dats, (dict, collections.OrderedDict)):
                 dat = tuple(self.dats.values())
@@ -323,12 +509,31 @@ class FFIParameters:
         return self._params
     @property
     def ffi_map(self):
+        """
+        **LLM Docstring**
+
+        Build and cache a mapping from argument names to parameter objects.
+
+        :return: the parameter lookup map
+        :rtype: dict[str, FFIParameter]
+        """
         if self._map is None:
             self._map = {}
             for p in self.ffi_parameters:
                 self._map[p.arg_name] = p
         return self._map
     def __getitem__(self, item):
+        """
+        **LLM Docstring**
+
+        Return the prepared value for a named parameter.
+
+        :param item: argument name
+        :type item: Any
+
+        :return: the named parameter's `arg_value`
+        :rtype: Any
+        """
         return self.ffi_map[item].arg_value
 
 class FFIMethod(FFISpec):
@@ -337,6 +542,29 @@ class FFIMethod(FFISpec):
     """
     __fields__ = ["name", "arguments", "rtype", "vectorized"]
     def __init__(self, name=None, arguments=None, rtype=None, vectorized=None, module=None):
+        """
+        **LLM Docstring**
+
+        Construct a callable method specification and bind each argument dictionary to `FFIArgument`.
+
+        :param name: method name
+        :type name: Any
+
+        :param arguments: argument specifications
+        :type arguments: Any
+
+        :param rtype: numeric FFI return-type code
+        :type rtype: Any
+
+        :param vectorized: whether the method returns vectorized output
+        :type vectorized: Any
+
+        :param module: module used to dispatch calls
+        :type module: Any
+
+        :return: nothing; initializes the method metadata
+        :rtype: None
+        """
         super().__init__(name=name, arguments=arguments, rtype=rtype, vectorized=vectorized)
         self.name = name
         self.args = [FFIArgument(**x) if not isinstance(x, FFIArgument) else x for x in arguments]
@@ -344,14 +572,53 @@ class FFIMethod(FFISpec):
         self.vectorized = vectorized
         self.mod = module #type: None | FFIModule
     def bind_module(self, mod):
+        """
+        **LLM Docstring**
+
+        Attach the module that will execute this method.
+
+        :param mod: FFI module wrapper
+        :type mod: Any
+
+        :return: nothing; updates `self.mod`
+        :rtype: None
+        """
         self.mod = mod #type: FFIModule
 
     @property
     def arg_names(self):
+        """
+        **LLM Docstring**
+
+        Return argument names in declaration order.
+
+        :return: the method argument names
+        :rtype: tuple[str, ...]
+        """
         return tuple(x.arg_name for x in self.args)
 
     @classmethod
     def collect_args_from_list(cls, arg_list, *args, excluded_args=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Match positional and keyword values to argument specifications, cast them, and reject missing required arguments.
+
+        :param arg_list: ordered argument specifications
+        :type arg_list: Any
+
+        :param excluded_args: argument names to omit from required-value checks
+        :type excluded_args: Any
+
+        :param args: positional argument values
+        :type args: tuple[Any, ...]
+
+        :param kwargs: keyword argument values
+        :type kwargs: dict[str, Any]
+
+        :return: cast parameters in supplied order
+        :rtype: collections.OrderedDict[str, FFIParameter]
+        """
         arg_dict = collections.OrderedDict()
 
         req_dict = collections.OrderedDict(
@@ -382,10 +649,41 @@ class FFIMethod(FFISpec):
         return arg_dict
 
     def collect_args(self, *args, excluded_args=None, **kwargs):
+        """
+        **LLM Docstring**
+
+        Collect and cast values using this method's declared arguments.
+
+        :param excluded_args: argument names to omit
+        :type excluded_args: Any
+
+        :param args: positional argument values
+        :type args: tuple[Any, ...]
+
+        :param kwargs: keyword argument values
+        :type kwargs: dict[str, Any]
+
+        :return: the prepared parameter mapping
+        :rtype: collections.OrderedDict[str, FFIParameter]
+        """
         return self.collect_args_from_list(self.args, *args, excluded_args=excluded_args, **kwargs)
 
     @classmethod
     def from_signature(cls, sig, module=None):
+        """
+        **LLM Docstring**
+
+        Create a method specification from the four-part native signature tuple.
+
+        :param sig: `(name, arguments, return_type, vectorized)` signature tuple
+        :type sig: Any
+
+        :param module: optional module to bind
+        :type module: Any
+
+        :return: the reconstructed method specification
+        :rtype: FFIMethod
+        """
         name, args, ret, vec = sig
         return cls(
             name=name,
@@ -396,12 +694,75 @@ class FFIMethod(FFISpec):
         )
 
     def call(self, *args, debug=False, **kwargs):
+        """
+        **LLM Docstring**
+
+        Collect arguments and dispatch a non-threaded call through the bound module.
+
+        :param debug: debug level selector passed to the module
+        :type debug: Any
+
+        :param args: positional argument values
+        :type args: tuple[Any, ...]
+
+        :param kwargs: keyword argument values
+        :type kwargs: dict[str, Any]
+
+        :return: the native method result
+        :rtype: Any
+        """
         fack = self.collect_args(*args, **kwargs)
         return self.mod.call_method(self.name, fack, debug=debug)
     def call_threaded(self, *args, threading_var=None, threading_mode="serial", debug=False, **kwargs):
+        """
+        **LLM Docstring**
+
+        Collect arguments and dispatch through the module's threaded call path.
+
+        :param threading_var: argument name used to partition work
+        :type threading_var: Any
+
+        :param threading_mode: threading backend name or mode
+        :type threading_mode: Any
+
+        :param debug: debug level selector
+        :type debug: Any
+
+        :param args: positional argument values
+        :type args: tuple[Any, ...]
+
+        :param kwargs: keyword argument values
+        :type kwargs: dict[str, Any]
+
+        :return: the threaded native method result
+        :rtype: Any
+        """
         fack = self.collect_args(*args, **kwargs)
         return self.mod.call_method_threaded(self.name, fack, threading_var, mode=threading_mode, debug=debug)
     def __call__(self, *args, threading_var=None, threading_mode="serial", debug=False, **kwargs):
+        """
+        **LLM Docstring**
+
+        Dispatch serially unless a threading variable or non-serial threading mode is requested.
+
+        :param threading_var: optional partitioning argument name
+        :type threading_var: Any
+
+        :param threading_mode: threading backend or `serial`
+        :type threading_mode: Any
+
+        :param debug: debug level selector
+        :type debug: Any
+
+        :param args: positional argument values
+        :type args: tuple[Any, ...]
+
+        :param kwargs: keyword argument values
+        :type kwargs: dict[str, Any]
+
+        :return: the native method result
+        :rtype: Any
+        """
         fack = self.collect_args(*args, **kwargs)
         if threading_var is None and (threading_mode is None or threading_mode=='serial'):
             return self.mod.call_method(self.name, fack, debug=debug)
@@ -409,6 +770,14 @@ class FFIMethod(FFISpec):
             return self.mod.call_method_threaded(self.name, fack, threading_var, mode=threading_mode, debug=debug)
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation of the method name, argument specs, and scalar or vectorized return type.
+
+        :return: the formatted method representation
+        :rtype: str
+        """
         return "{}('{}', {})=>{}".format(
             type(self).__name__,
             self.name,
@@ -423,6 +792,23 @@ class FFIModule(FFISpec):
     """
     __fields__ = ["name", "methods"]
     def __init__(self, name=None, methods=None, module=None):
+        """
+        **LLM Docstring**
+
+        Construct an FFI module wrapper, normalize method dictionaries, and bind every method back to this module.
+
+        :param name: module name
+        :type name: Any
+
+        :param methods: method specifications
+        :type methods: Any
+
+        :param module: underlying Python extension module
+        :type module: Any
+
+        :return: nothing; initializes the module wrapper
+        :rtype: None
+        """
         super().__init__(name=name, methods=methods)
         self.name = name
         self.methods = [FFIMethod(**x) if not isinstance(x, FFIMethod) else x for x in methods]
@@ -432,6 +818,14 @@ class FFIModule(FFISpec):
 
     @property
     def captup(self):
+        """
+        **LLM Docstring**
+
+        Return the extension module's `_FFIModule` capsule.
+
+        :return: the native module capsule
+        :rtype: object
+        """
         return self.mod._FFIModule
 
     @classmethod
@@ -444,6 +838,38 @@ class FFIModule(FFISpec):
                  debug_level=False,
                  **compile_kwargs
                  ):
+        """
+        **LLM Docstring**
+
+        Compile or load an FFI extension through `FFILoader` and return its wrapped call object.
+
+        :param name: library/module name
+        :type name: Any
+
+        :param src: source directory
+        :type src: Any
+
+        :param threaded: optional threaded-build override
+        :type threaded: Any
+
+        :param extra_compile_args: additional compiler arguments
+        :type extra_compile_args: Any
+
+        :param extra_link_args: additional linker arguments
+        :type extra_link_args: Any
+
+        :param linked_libs: additional libraries
+        :type linked_libs: Any
+
+        :param debug_level: debug setting for the wrapper
+        :type debug_level: Any
+
+        :param compile_kwargs: other `FFILoader` options
+        :type compile_kwargs: dict[str, Any]
+
+        :return: the loaded module wrapper
+        :rtype: FFIModule
+        """
         from .Loader import FFILoader
         if threaded is not None: # use the default
             compile_kwargs['threaded'] = threaded
@@ -458,6 +884,20 @@ class FFIModule(FFISpec):
 
     @classmethod
     def from_signature(cls, sig, module=None):
+        """
+        **LLM Docstring**
+
+        Create a module wrapper from a native `(name, methods)` signature.
+
+        :param sig: module signature tuple
+        :type sig: Any
+
+        :param module: underlying extension module
+        :type module: Any
+
+        :return: the reconstructed wrapper
+        :rtype: FFIModule
+        """
         name, meths = sig
         return cls(
             name=name,
@@ -466,6 +906,17 @@ class FFIModule(FFISpec):
         )
     @classmethod
     def get_debug_level(cls, debug):
+        """
+        **LLM Docstring**
+
+        Convert booleans, enum names, enum values, and numeric values to the integer native debug level.
+
+        :param debug: debug selector
+        :type debug: Any
+
+        :return: the numeric debug level
+        :rtype: int | float
+        """
         if debug is False:
             debug = DebugLevels.Quiet
         elif debug is True:
@@ -479,14 +930,47 @@ class FFIModule(FFISpec):
         return debug
     @classmethod
     def from_module(cls, module, debug=False):
+        """
+        **LLM Docstring**
+
+        Query an extension module for its FFI signature and wrap it.
+
+        :param module: extension exposing `get_signature` and `_FFIModule`
+        :type module: Any
+
+        :param debug: debug selector used while requesting the signature
+        :type debug: Any
+
+        :return: the module wrapper
+        :rtype: FFIModule
+        """
         sig = module.get_signature(module._FFIModule, cls.get_debug_level(debug))
         return cls.from_signature(sig, module=module)
 
     @property
     def method_names(self):
+        """
+        **LLM Docstring**
+
+        Return method names in declaration order.
+
+        :return: the available method names
+        :rtype: tuple[str, ...]
+        """
         return tuple(x.name for x in self.methods)
 
     def get_method(self, name):
+        """
+        **LLM Docstring**
+
+        Look up a method by name.
+
+        :param name: method name
+        :type name: Any
+
+        :return: the matching method; raises `AttributeError` when absent
+        :rtype: FFIMethod
+        """
         # print(self.method_names)
         try:
             idx = self.method_names.index(name)
@@ -542,9 +1026,28 @@ class FFIModule(FFISpec):
         return self.mod.call_method_threaded(self.captup, name, params, thread_var, mode, self.get_debug_level(debug))
 
     def __getattr__(self, item):
+        """
+        **LLM Docstring**
+
+        Resolve unknown attributes as FFI methods.
+
+        :param item: requested method name
+        :type item: Any
+
+        :return: the matching method
+        :rtype: FFIMethod
+        """
         return self.get_method(item)
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation containing the module name and available method names.
+
+        :return: the formatted module representation
+        :rtype: str
+        """
         return "{}('{}', methods={})".format(
             type(self).__name__,
             self.name,
