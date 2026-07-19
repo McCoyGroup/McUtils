@@ -82,6 +82,196 @@ class StubSummaryBuilder:
     DATA_SIDECAR_THRESHOLD = 400  # rendered length above which we externalize
                                    # a literal assignment instead of dropping it
 
+    # ------------------------------------------------------------------
+    # Output file/directory names -- tweak these to change the on-disk
+    # layout without touching any generation logic.
+    # ------------------------------------------------------------------
+    SUMMARIES_DIRNAME = "summaries"
+    INDEX_FILENAME = "index.md"
+    LLM_README_FILENAME = "LLM.md"
+    INIT_FILENAME = "__init__.py"
+    PACKAGE_SUMMARY_FILENAME_TEMPLATE = "{package_name}.md"
+    SIDECAR_MODULE_NAME = "_registry_data"
+    SIDECAR_JSON_FILENAME = SIDECAR_MODULE_NAME + ".json"
+    SIDECAR_LOADER_FILENAME = SIDECAR_MODULE_NAME + ".py"
+    SIDECAR_LOADER_FUNC_NAME = "_load_registry_data"
+
+    # ------------------------------------------------------------------
+    # String templates -- everything written into stubs, summaries, and
+    # docs, plus warning/error text. All use str.format() placeholders;
+    # tweak wording here without touching the generation logic that
+    # fills them in.
+    # ------------------------------------------------------------------
+    TRUNCATION_MARKER = "*(truncated — see stub for full docstring)*"
+
+    ENUM_ACCESS_NOTE_TEMPLATE = (
+        "Real access pattern: {cname}.<MemberName> (this is an "
+        "enum with {n_members} members, e.g. {cname}.{member_name} "
+        "== {member_value}). Collapsed into a dict below "
+        "purely for compactness -- do not index it as a dict in real code:"
+    )
+    CLASS_ATTR_ACCESS_NOTE_TEMPLATE = (
+        "Real access pattern: {cname}.<AttrName> ({n_members} class "
+        "attributes, e.g. {cname}.{member_name} == "
+        "{member_value}). Collapsed into a dict below "
+        "purely for compactness -- do not index it as a dict in real code:"
+    )
+    MODULE_SCALAR_ACCESS_NOTE_TEMPLATE = (
+        "Real access pattern: bare module-level names (e.g. "
+        "{member_name} == {member_value}), not a "
+        "dict lookup. {n_members} names collapsed below purely for "
+        "compactness:"
+    )
+
+    EXTERNALIZED_DATA_NOTE_TEMPLATE = (
+        "{name} data externalized to {sidecar_json_filename} ({key_description})"
+    )
+    OMITTED_DATA_NOTE_TEMPLATE = (
+        "{name} data omitted from this build ({key_description})"
+    )
+
+    DESCRIBE_DICT_SMALL_TEMPLATE = "{n} keys: {keys!r}"
+    DESCRIBE_DICT_LARGE_TEMPLATE = "{n} keys, first {max_listed}: {sample!r} ... and {remaining} more"
+    DESCRIBE_LIST_SMALL_TEMPLATE = "{n} items: {items!r}"
+    DESCRIBE_LIST_LARGE_TEMPLATE = "{n} items of type {elem_type}, first {sample_n}: {sample!r} ... and {remaining} more"
+    DESCRIBE_SCALAR_TEMPLATE = "a single {type_name} value"
+
+    SIDECAR_LOADER_TEMPLATE = (
+        '"""Auto-generated loader for data externalized from stubbed '
+        'modules (see StubSummaryBuilder.py)."""\n'
+        "import json, os\n"
+        "_DATA_PATH = os.path.join(os.path.dirname(__file__), {sidecar_json_filename!r})\n"
+        "with open(_DATA_PATH, 'r', encoding='utf-8') as _f:\n"
+        "    _DATA = json.load(_f)\n\n"
+        "def {loader_func_name}(key):\n"
+        "    return _DATA[key]\n"
+    )
+
+    INDEX_HEADER_TEMPLATE = "# {root_module_name} -- stub/summary index\n"
+    INDEX_INTRO_TEMPLATE = (
+        "Read this file first to find the right package, then open that "
+        "package's summary for its classes/functions, then the stub file "
+        "only when you need the exact calling convention.\n"
+    )
+    INDEX_ENTRY_TEMPLATE = (
+        "- **{pkg_name}** -- summary: `{rel_summary}` "
+        "({n_sections} modules) | stubs: `{rel_stub}` "
+        "({stub_bytes:,} bytes, {pct:.0f}% of source)"
+    )
+
+    SIDECAR_PRESENT_NOTE_TEMPLATE = (
+        "The real values live in `{sidecar_json_filename}` at the root of "
+        "this directory (see `{sidecar_loader_filename}` for the loader "
+        "function each affected stub imports)."
+    )
+    SIDECAR_ABSENT_NOTE = (
+        "The real values are NOT included anywhere in this directory "
+        "at all -- only their keys/shape. If you need an actual value, "
+        "say so rather than guessing one."
+    )
+
+    LLM_README_TEMPLATE = """# {root} -- how to use this directory
+
+This is a **compressed, LLM-oriented reference** for the `{root}` codebase,
+generated from its real source. It is NOT the library itself: nothing here
+is meant to be imported or run as the real package. Use it to find out what
+exists and how to call it correctly, then write code against the real
+`{root}` package -- not against this directory.
+
+## Read in this order
+
+1. **`summaries/index.md`** -- one line per top-level package: what it's
+   for, how many modules it has, and where its summary/stubs live. Start
+   here to pick the right package.
+2. **`summaries/<package>.md`** -- every public class/function/method in
+   that package, with its exact call signature (parameter names and
+   defaults, no type annotations) and a short one-line purpose. This is
+   usually enough to write a correct call or import.
+3. **`{root}/<package>/<module>.py`** -- the full stub for one module:
+   real signatures, real docstrings (see caveats below), nothing
+   abbreviated further. Open this when the summary line isn't enough --
+   you need the full docstring, an edge case, or something the summary
+   truncated.
+
+Do not skip straight to step 3 for everything -- the summaries exist so you
+usually don't have to.
+
+## What's real vs. placeholder in the stub files
+
+- **Signatures** (parameter names, defaults, `*args`/`**kwargs`) are exact
+  copies of the real source.
+- **Docstrings** are the real docstrings. Class docstrings are capped at
+  their first paragraph (truncated ones are marked -- see "Compression
+  tricks" below); everything else is complete.
+- **Function/method bodies are placeholders** (`...`). They carry no
+  information about real behavior, return values, or edge cases -- never
+  infer runtime behavior from a stub body. The docstring is the only
+  source of behavioral information here; if it doesn't say, this
+  directory doesn't know either.
+- **`__all__`** (however it's constructed in the real source -- plain
+  assignment, `+=` accumulation, etc.) is preserved exactly, so each
+  stubbed module's real export list is accurate.
+
+## Compression tricks -- how to read them correctly
+
+These exist purely to cut size; none of them drop information, but
+misreading the compact form as the real API would be actively wrong:
+
+- **Enum-style / flat constant runs.** A class with many one-line members
+  (e.g. an `enum.Enum` with dozens of values) is collapsed into a single
+  `_MEMBERS = {{...}}` dict, immediately preceded by a comment stating the
+  REAL access pattern, e.g. `SomeEnum.Primary`, not
+  `SomeEnum._MEMBERS['Primary']`. **Always follow that comment's stated
+  access pattern** -- the dict is a compact data table, not the calling
+  convention.
+- **Large literal data** (big lookup tables, constant dictionaries). When
+  a top-level literal is large, its value is replaced with a comment
+  describing its keys/shape (e.g. `1069 keys: ['Hydrogen1', 'Hydrogen2', ...]`)
+  so you know what's queryable without the full payload inflating this
+  directory. {sidecar_note}
+- **Truncated class docstrings** end with the marker
+  `{truncation_marker}`. There is genuinely more
+  text in the real source that isn't reproduced anywhere in this
+  directory -- if the missing part matters, say you don't have it rather
+  than guessing at what follows.
+
+## Freshness
+
+This is a point-in-time snapshot. It can drift out of date relative to the
+real `{root}` source. If you need current, authoritative behavior (not
+just "does this function/class exist and roughly how do I call it"),
+verify against the real source rather than treating this directory as
+ground truth.
+"""
+
+    SUMMARY_HEADER_TEMPLATE = "{n_packages} top-level packages processed under {out_dir!r}."
+    SUMMARY_SOURCE_LINE_TEMPLATE = "  source:     {n:,} bytes"
+    SUMMARY_STUB_LINE_TEMPLATE = "  stubs:      {n:,} bytes ({pct:.1f}% of source)"
+    SUMMARY_SUMMARY_LINE_TEMPLATE = "  summaries:  {n:,} bytes ({pct:.1f}% of source)"
+    SUMMARY_SIDECAR_LINE_TEMPLATE = "  sidecar:    {n:,} bytes"
+
+    SYNTAX_ERROR_WARNING_TEMPLATE = "[WARN] syntax error, copying as-is: {rel_path}: {error}"
+    IMPORT_FALLBACK_INFO_TEMPLATE = (
+        "[INFO] real import of {root_module_name!r} failed ({error}); "
+        "falling back to static __all__ parsing."
+    )
+
+    NO_PACKAGES_DISCOVERED_ERROR = (
+        "No packages discovered yet -- call discover_top_level_packages(root_module_name) "
+        "first, or pass root_module_name to generate()."
+    )
+    PACKAGE_NOT_FOUND_ERROR_TEMPLATE = (
+        "{package_name!r} not found among discovered top-level packages: {available}"
+    )
+    NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE = (
+        "No top-level packages discovered for {root_module_name!r} -- "
+        "check that its __init__.py defines/builds __all__."
+    )
+    ROOT_DIR_NOT_FOUND_ERROR = (
+        "Could not locate the root module's source directory -- "
+        "set root_src_dir explicitly."
+    )
+
     def __init__(self, root_src_dir=None, out_dir="stubs",
                  max_doc_len=800, min_words=5, write_sidecar_file=False,
                  verbose=False):
@@ -142,26 +332,20 @@ class StubSummaryBuilder:
                         base_strs = [ast.unparse(b) for b in bases]
                         is_enum = any("enum" in b.lower() or "flag" in b.lower() for b in base_strs)
                         if is_enum:
-                            note = (
-                                f"Real access pattern: {cname}.<MemberName> (this is an "
-                                f"enum with {len(run)} members, e.g. {cname}.{run[0].targets[0].id} "
-                                f"== {ast.unparse(run[0].value)}). Collapsed into a dict below "
-                                f"purely for compactness -- do not index it as a dict in real code:"
-                            )
+                            note = self.ENUM_ACCESS_NOTE_TEMPLATE.format(
+                                cname=cname, n_members=len(run),
+                                member_name=run[0].targets[0].id,
+                                member_value=ast.unparse(run[0].value))
                         else:
-                            note = (
-                                f"Real access pattern: {cname}.<AttrName> ({len(run)} class "
-                                f"attributes, e.g. {cname}.{run[0].targets[0].id} == "
-                                f"{ast.unparse(run[0].value)}). Collapsed into a dict below "
-                                f"purely for compactness -- do not index it as a dict in real code:"
-                            )
+                            note = self.CLASS_ATTR_ACCESS_NOTE_TEMPLATE.format(
+                                cname=cname, n_members=len(run),
+                                member_name=run[0].targets[0].id,
+                                member_value=ast.unparse(run[0].value))
                     else:
-                        note = (
-                            f"Real access pattern: bare module-level names (e.g. "
-                            f"{run[0].targets[0].id} == {ast.unparse(run[0].value)}), not a "
-                            f"dict lookup. {len(run)} names collapsed below purely for "
-                            f"compactness:"
-                        )
+                        note = self.MODULE_SCALAR_ACCESS_NOTE_TEMPLATE.format(
+                            member_name=run[0].targets[0].id,
+                            member_value=ast.unparse(run[0].value),
+                            n_members=len(run))
                     out.append(ast.Expr(value=ast.Constant(value=note)))
                     out.append(ast.Assign(
                         targets=[ast.Name(id="_MEMBERS", ctx=ast.Store())],
@@ -191,18 +375,21 @@ class StubSummaryBuilder:
         if isinstance(value, dict):
             keys = list(value.keys())
             if len(keys) <= max_listed:
-                return f"{len(keys)} keys: {keys!r}"
+                return self.DESCRIBE_DICT_SMALL_TEMPLATE.format(n=len(keys), keys=keys)
             sample = keys[:max_listed]
-            return f"{len(keys)} keys, first {max_listed}: {sample!r} ... and {len(keys) - max_listed} more"
+            return self.DESCRIBE_DICT_LARGE_TEMPLATE.format(
+                n=len(keys), max_listed=max_listed, sample=sample,
+                remaining=len(keys) - max_listed)
         elif isinstance(value, (list, tuple)):
             n = len(value)
             if n <= max_listed:
-                return f"{n} items: {list(value)!r}"
+                return self.DESCRIBE_LIST_SMALL_TEMPLATE.format(n=n, items=list(value))
             sample = value[:5]
             elem_type = type(value[0]).__name__ if value else "unknown"
-            return f"{n} items of type {elem_type}, first 5: {list(sample)!r} ... and {n - 5} more"
+            return self.DESCRIBE_LIST_LARGE_TEMPLATE.format(
+                n=n, elem_type=elem_type, sample_n=5, sample=list(sample), remaining=n - 5)
         else:
-            return f"a single {type(value).__name__} value"
+            return self.DESCRIBE_SCALAR_TEMPLATE.format(type_name=type(value).__name__)
 
     def externalize_large_literal(self, node, module_key):
         if not isinstance(node, ast.Assign) or len(node.targets) != 1 \
@@ -227,11 +414,14 @@ class StubSummaryBuilder:
         self.sidecar[data_key] = value
 
         if self.write_sidecar_file:
-            note = f"{name} data externalized to _registry_data.json ({self._describe_keys(value)})"
+            note = self.EXTERNALIZED_DATA_NOTE_TEMPLATE.format(
+                name=name, sidecar_json_filename=self.SIDECAR_JSON_FILENAME,
+                key_description=self._describe_keys(value))
             return [ast.Expr(value=ast.Constant(value=note)),
-                    ast.parse(f"{name} = _load_registry_data({data_key!r})").body[0]]
+                    ast.parse(f"{name} = {self.SIDECAR_LOADER_FUNC_NAME}({data_key!r})").body[0]]
         else:
-            note = f"{name} data omitted from this build ({self._describe_keys(value)})"
+            note = self.OMITTED_DATA_NOTE_TEMPLATE.format(
+                name=name, key_description=self._describe_keys(value))
             return [ast.Expr(value=ast.Constant(value=note))]
 
     def is_simple_assign(self, node, max_len=120):
@@ -301,7 +491,7 @@ class StubSummaryBuilder:
         if rel_path is not None:
             norm = rel_path.replace(os.sep, "/")
             parts = norm.split("/")
-            if parts and parts[-1] == "__init__.py":
+            if parts and parts[-1] == self.INIT_FILENAME:
                 parts = parts[:-1]
             elif parts and parts[-1].endswith(".py"):
                 parts[-1] = parts[-1][:-3]
@@ -428,7 +618,8 @@ class StubSummaryBuilder:
 
         if used_sidecar:
             new_body.insert(start, ast.ImportFrom(
-                module="_registry_data", names=[ast.alias(name="_load_registry_data")], level=0))
+                module=self.SIDECAR_MODULE_NAME,
+                names=[ast.alias(name=self.SIDECAR_LOADER_FUNC_NAME)], level=0))
 
         tree.body = new_body
         ast.fix_missing_locations(tree)
@@ -459,7 +650,8 @@ class StubSummaryBuilder:
                     try:
                         stubbed = self.stub_module(source, rel_path, dynamic_all=dynamic_all)
                     except SyntaxError as e:
-                        print(f"[WARN] syntax error, copying as-is: {rel_path}: {e}", file=sys.stderr)
+                        print(self.SYNTAX_ERROR_WARNING_TEMPLATE.format(rel_path=rel_path, error=e),
+                              file=sys.stderr)
                         stubbed = source
 
                 with open(out_path, "w", encoding="utf-8") as f:
@@ -471,22 +663,15 @@ class StubSummaryBuilder:
     def write_sidecar_files(self):
         if not self.sidecar or not self.write_sidecar_file:
             return 0
-        data_path = os.path.join(self.out_dir, "_registry_data.json")
+        data_path = os.path.join(self.out_dir, self.SIDECAR_JSON_FILENAME)
         with open(data_path, "w", encoding="utf-8") as f:
             json.dump(self.sidecar, f, separators=(",", ":"))
 
-        loader_path = os.path.join(self.out_dir, "_registry_data.py")
+        loader_path = os.path.join(self.out_dir, self.SIDECAR_LOADER_FILENAME)
         with open(loader_path, "w", encoding="utf-8") as f:
-            f.write(
-                '"""Auto-generated loader for data externalized from stubbed '
-                'modules (see StubSummaryBuilder.py)."""\n'
-                "import json, os\n"
-                "_DATA_PATH = os.path.join(os.path.dirname(__file__), '_registry_data.json')\n"
-                "with open(_DATA_PATH, 'r', encoding='utf-8') as _f:\n"
-                "    _DATA = json.load(_f)\n\n"
-                "def _load_registry_data(key):\n"
-                "    return _DATA[key]\n"
-            )
+            f.write(self.SIDECAR_LOADER_TEMPLATE.format(
+                sidecar_json_filename=self.SIDECAR_JSON_FILENAME,
+                loader_func_name=self.SIDECAR_LOADER_FUNC_NAME))
         return os.path.getsize(data_path)
 
     # ==================================================================
@@ -604,7 +789,7 @@ class StubSummaryBuilder:
             for doc_line in doc_text.split("\n"):
                 lines.append(f"{indent}  > {doc_line}".rstrip())
             if truncated:
-                lines.append(f"{indent}  > *(truncated — see stub for full docstring)*")
+                lines.append(f"{indent}  > {self.TRUNCATION_MARKER}")
 
         for child in node.body:
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -716,24 +901,22 @@ class StubSummaryBuilder:
                     all_names = list(getattr(module, "__all__", []) or [])
                     resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
                 except (ImportError,AttributeError) as e:
-                    print(f"[INFO] real import of {root_module_name!r} failed ({e}); "
-                          f"falling back to static __all__ parsing.", file=sys.stderr)
+                    print(self.IMPORT_FALLBACK_INFO_TEMPLATE.format(
+                        root_module_name=root_module_name, error=e), file=sys.stderr)
 
         if resolved_root_dir is None:
-            raise ValueError(
-                "Could not locate the root module's source directory -- "
-                "set root_src_dir explicitly.")
+            raise ValueError(self.ROOT_DIR_NOT_FOUND_ERROR)
 
         dynamic = all_names is not None
         if not dynamic:
-            init_path = os.path.join(resolved_root_dir, "__init__.py")
+            init_path = os.path.join(resolved_root_dir, self.INIT_FILENAME)
             all_names = self._static_all_from_init(init_path) or []
 
         discovered = {}
         for name in all_names:
             pkg_dir = os.path.join(resolved_root_dir, name)
             pkg_file = os.path.join(resolved_root_dir, f"{name}.py")
-            if os.path.isdir(pkg_dir) and os.path.isfile(os.path.join(pkg_dir, "__init__.py")):
+            if os.path.isdir(pkg_dir) and os.path.isfile(os.path.join(pkg_dir, self.INIT_FILENAME)):
                 discovered[name] = pkg_dir
             elif os.path.isfile(pkg_file):
                 discovered[name] = pkg_file
@@ -770,20 +953,18 @@ class StubSummaryBuilder:
             module_data = self._current_module
         with module_data:
             if not self.packages:
-                raise ValueError(
-                    "No packages discovered yet -- call discover_top_level_packages(root_module_name) "
-                    "first, or pass root_module_name to generate().")
+                raise ValueError(self.NO_PACKAGES_DISCOVERED_ERROR)
             if package_name not in self.packages:
-                raise KeyError(
-                    f"{package_name!r} not found among discovered top-level packages: "
-                    f"{sorted(self.packages)}")
+                raise KeyError(self.PACKAGE_NOT_FOUND_ERROR_TEMPLATE.format(
+                    package_name=package_name, available=sorted(self.packages)))
 
             pkg_src_path = self.packages[package_name]
-            summaries_dir = os.path.join(self.out_dir, "summaries")
+            summaries_dir = os.path.join(self.out_dir, self.SUMMARIES_DIRNAME)
             os.makedirs(summaries_dir, exist_ok=True)
 
             pkg_stub_out = os.path.join(self.out_dir, self.root_module_name, package_name)
-            pkg_summary_out = os.path.join(summaries_dir, f"{package_name}.md")
+            pkg_summary_out = os.path.join(
+                summaries_dir, self.PACKAGE_SUMMARY_FILENAME_TEMPLATE.format(package_name=package_name))
 
             if os.path.isdir(pkg_src_path):
                 stats = self.stub_package(pkg_src_path, pkg_stub_out, package_name=package_name)
@@ -817,9 +998,8 @@ class StubSummaryBuilder:
         root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
         with self.ModuleData(self, root_module_name, root_dir, packages, dyanmic_mode):
             if not self.packages:
-                raise ValueError(
-                    f"No top-level packages discovered for {root_module_name!r} -- "
-                    f"check that its __init__.py defines/builds __all__.")
+                raise ValueError(self.NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE.format(
+                    root_module_name=root_module_name))
 
             for package_name in sorted(self.packages):
                 info = self.generate(package_name)
@@ -840,89 +1020,16 @@ class StubSummaryBuilder:
         root = self.root_module_name or "this package"
 
         sidecar_note = (
-            "The real values live in `_registry_data.json` at the root of "
-            "this directory (see `_registry_data.py` for the loader "
-            "function each affected stub imports)."
+            self.SIDECAR_PRESENT_NOTE_TEMPLATE.format(
+                sidecar_json_filename=self.SIDECAR_JSON_FILENAME,
+                sidecar_loader_filename=self.SIDECAR_LOADER_FILENAME)
             if self.write_sidecar_file else
-            "The real values are NOT included anywhere in this directory "
-            "at all -- only their keys/shape. If you need an actual value, "
-            "say so rather than guessing one."
+            self.SIDECAR_ABSENT_NOTE
         )
 
-        content = f"""# {root} -- how to use this directory
-
-This is a **compressed, LLM-oriented reference** for the `{root}` codebase,
-generated from its real source. It is NOT the library itself: nothing here
-is meant to be imported or run as the real package. Use it to find out what
-exists and how to call it correctly, then write code against the real
-`{root}` package -- not against this directory.
-
-## Read in this order
-
-1. **`summaries/index.md`** -- one line per top-level package: what it's
-   for, how many modules it has, and where its summary/stubs live. Start
-   here to pick the right package.
-2. **`summaries/<package>.md`** -- every public class/function/method in
-   that package, with its exact call signature (parameter names and
-   defaults, no type annotations) and a short one-line purpose. This is
-   usually enough to write a correct call or import.
-3. **`{root}/<package>/<module>.py`** -- the full stub for one module:
-   real signatures, real docstrings (see caveats below), nothing
-   abbreviated further. Open this when the summary line isn't enough --
-   you need the full docstring, an edge case, or something the summary
-   truncated.
-
-Do not skip straight to step 3 for everything -- the summaries exist so you
-usually don't have to.
-
-## What's real vs. placeholder in the stub files
-
-- **Signatures** (parameter names, defaults, `*args`/`**kwargs`) are exact
-  copies of the real source.
-- **Docstrings** are the real docstrings. Class docstrings are capped at
-  their first paragraph (truncated ones are marked -- see "Compression
-  tricks" below); everything else is complete.
-- **Function/method bodies are placeholders** (`...`). They carry no
-  information about real behavior, return values, or edge cases -- never
-  infer runtime behavior from a stub body. The docstring is the only
-  source of behavioral information here; if it doesn't say, this
-  directory doesn't know either.
-- **`__all__`** (however it's constructed in the real source -- plain
-  assignment, `+=` accumulation, etc.) is preserved exactly, so each
-  stubbed module's real export list is accurate.
-
-## Compression tricks -- how to read them correctly
-
-These exist purely to cut size; none of them drop information, but
-misreading the compact form as the real API would be actively wrong:
-
-- **Enum-style / flat constant runs.** A class with many one-line members
-  (e.g. an `enum.Enum` with dozens of values) is collapsed into a single
-  `_MEMBERS = {{...}}` dict, immediately preceded by a comment stating the
-  REAL access pattern, e.g. `SomeEnum.Primary`, not
-  `SomeEnum._MEMBERS['Primary']`. **Always follow that comment's stated
-  access pattern** -- the dict is a compact data table, not the calling
-  convention.
-- **Large literal data** (big lookup tables, constant dictionaries). When
-  a top-level literal is large, its value is replaced with a comment
-  describing its keys/shape (e.g. `1069 keys: ['Hydrogen1', 'Hydrogen2', ...]`)
-  so you know what's queryable without the full payload inflating this
-  directory. {sidecar_note}
-- **Truncated class docstrings** end with the marker
-  `*(truncated — see stub for full docstring)*`. There is genuinely more
-  text in the real source that isn't reproduced anywhere in this
-  directory -- if the missing part matters, say you don't have it rather
-  than guessing at what follows.
-
-## Freshness
-
-This is a point-in-time snapshot. It can drift out of date relative to the
-real `{root}` source. If you need current, authoritative behavior (not
-just "does this function/class exist and roughly how do I call it"),
-verify against the real source rather than treating this directory as
-ground truth.
-"""
-        with open(os.path.join(self.out_dir, "LLM.md"), "w", encoding="utf-8") as f:
+        content = self.LLM_README_TEMPLATE.format(
+            root=root, sidecar_note=sidecar_note, truncation_marker=self.TRUNCATION_MARKER)
+        with open(os.path.join(self.out_dir, self.LLM_README_FILENAME), "w", encoding="utf-8") as f:
             f.write(content)
 
 
@@ -935,13 +1042,15 @@ ground truth.
         total_stub = sum(r["stub_bytes"] for r in self.report.values())
         total_summary = sum(r["summary_bytes"] for r in self.report.values())
         if self.verbose:
-            print(f"{len(self.report)} top-level packages processed under {self.out_dir!r}.")
+            print(self.SUMMARY_HEADER_TEMPLATE.format(n_packages=len(self.report), out_dir=self.out_dir))
             if total_orig:
-                print(f"  source:     {total_orig:,} bytes")
-                print(f"  stubs:      {total_stub:,} bytes ({100 * total_stub / total_orig:.1f}% of source)")
-                print(f"  summaries:  {total_summary:,} bytes ({100 * total_summary / total_orig:.1f}% of source)")
+                print(self.SUMMARY_SOURCE_LINE_TEMPLATE.format(n=total_orig))
+                print(self.SUMMARY_STUB_LINE_TEMPLATE.format(
+                    n=total_stub, pct=100 * total_stub / total_orig))
+                print(self.SUMMARY_SUMMARY_LINE_TEMPLATE.format(
+                    n=total_summary, pct=100 * total_summary / total_orig))
             if self.write_sidecar_file:
-                print(f"  sidecar:    {sidecar_size:,} bytes")
+                print(self.SUMMARY_SIDECAR_LINE_TEMPLATE.format(n=sidecar_size))
         summary = {
             'original_size': total_orig,
             'stub_size': total_stub,
@@ -951,24 +1060,21 @@ ground truth.
         return summary
 
     def write_index(self):
-        summaries_dir = os.path.join(self.out_dir, "summaries")
+        summaries_dir = os.path.join(self.out_dir, self.SUMMARIES_DIRNAME)
         os.makedirs(summaries_dir, exist_ok=True)
         lines = [
-            f"# {self.root_module_name} -- stub/summary index\n",
-            "Read this file first to find the right package, then open that "
-            "package's summary for its classes/functions, then the stub file "
-            "only when you need the exact calling convention.\n",
+            self.INDEX_HEADER_TEMPLATE.format(root_module_name=self.root_module_name),
+            self.INDEX_INTRO_TEMPLATE,
         ]
         for pkg_name, info in sorted(self.report.items()):
             rel_summary = os.path.relpath(info["summary_file"], self.out_dir)
             rel_stub = os.path.relpath(info["stub_dir"], self.out_dir)
             pct = (100 * info["stub_bytes"] / info["orig_bytes"]) if info["orig_bytes"] else 0
-            lines.append(
-                f"- **{pkg_name}** -- summary: `{rel_summary}` "
-                f"({info['n_summary_sections']} modules) | stubs: `{rel_stub}` "
-                f"({info['stub_bytes']:,} bytes, {pct:.0f}% of source)"
-            )
-        with open(os.path.join(summaries_dir, "index.md"), "w", encoding="utf-8") as f:
+            lines.append(self.INDEX_ENTRY_TEMPLATE.format(
+                pkg_name=pkg_name, rel_summary=rel_summary,
+                n_sections=info["n_summary_sections"], rel_stub=rel_stub,
+                stub_bytes=info["stub_bytes"], pct=pct))
+        with open(os.path.join(summaries_dir, self.INDEX_FILENAME), "w", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
 
 # def main():
