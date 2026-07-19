@@ -1,11 +1,23 @@
 import sys, os
 import tempfile as tf, io
+import contextlib
 
 __all__ = [
     "StreamRedirect",
     "OutputRedirect",
-    "DefaultDirectory"
+    "DefaultDirectory",
+    "temporary_sys_path_insert"
 ]
+
+
+@contextlib.contextmanager
+def temporary_sys_path_insert(path):
+    path = os.fspath(path)
+    try:
+        sys.path.insert(0, path)
+        yield
+    finally:
+        sys.path.remove(path)
 
 class StreamRedirect:
     def __init__(self, logger, base_stream=None, line_join=True, strip_empty=True):
