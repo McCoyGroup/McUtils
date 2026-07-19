@@ -97,6 +97,22 @@ def Factorial(n):
 
 
 def _sieve_core(ints, k, max_its):
+    """
+    **LLM Docstring**
+
+    Repeatedly divide selected integers by a candidate factor and count its multiplicity.
+
+    The input array is modified in place. At each iteration, only entries still divisible by `k` remain selected, so `counts[i]` records how many factors of `k` were removed from `ints[i]`, up to `max_its`.
+
+    :param ints: flattened integer values to reduce in place
+    :type ints: numpy.ndarray
+    :param k: candidate factor to remove
+    :type k: int
+    :param max_its: maximum number of division passes
+    :type max_its: int
+    :return: the reduced integer array and the per-entry factor counts
+    :rtype: tuple[numpy.ndarray, numpy.ndarray]
+    """
     sel = np.arange(ints.shape[0])
     counts = np.zeros(ints.shape[0], dtype=int)
     for i in range(max_its):
@@ -109,6 +125,22 @@ def _sieve_core(ints, k, max_its):
         ints[sel,] //= k
     return ints, counts
 def prime_sieve(ints, k, max_its=None):
+    """
+    **LLM Docstring**
+
+    Remove repeated factors of `k` from one or more integers.
+
+    Scalar inputs are temporarily promoted to length-one arrays and converted back before returning. When `max_its` is omitted, the function derives an upper bound from `log(max(ints)) / log(k)`.
+
+    :param ints: scalar or array of integers to factor by `k`
+    :type ints: int | array-like
+    :param k: factor to divide out repeatedly
+    :type k: int
+    :param max_its: optional cap on the number of divisions
+    :type max_its: int | None
+    :return: a pair containing the residual integers and multiplicities of `k`, with the input shape preserved
+    :rtype: tuple[int | numpy.ndarray, int | numpy.ndarray]
+    """
     ints = np.asanyarray(ints, dtype=int)
     smol = ints.ndim == 0
     if smol: ints = ints[np.newaxis]
@@ -130,9 +162,33 @@ def prime_sieve(ints, k, max_its=None):
 
 
 def _prime_check(p2, prev_primes):
+    """
+    **LLM Docstring**
+
+    Test whether a candidate is indivisible by all supplied prior primes.
+
+    :param p2: candidate integer
+    :type p2: int
+    :param prev_primes: previously generated prime divisors to test
+    :type prev_primes: iterable[int]
+    :return: `True` when no supplied prime divides `p2`
+    :rtype: bool
+    """
     return all(p2%pp > 0 for pp in prev_primes)
 
 def prime_iter(primes=None):
+    """
+    **LLM Docstring**
+
+    Yield progressively longer lists of prime numbers.
+
+    The generator first yields prefixes of the provided seed list. It then searches odd candidates between the current largest prime and twice that value, accepting the first candidate not divisible by the existing primes other than `2`. Each yield is the full prime list accumulated so far.
+
+    :param primes: optional initial ordered prime sequence
+    :type primes: iterable[int] | None
+    :return: an iterator yielding cumulative prime lists
+    :rtype: collections.abc.Iterator[list[int]]
+    """
     # we will very rarely exhaust these...
     if primes is None:
         primes = [2, 3, 5, 7, 11, 13, 17]
@@ -152,6 +208,22 @@ def prime_iter(primes=None):
 
 
 def prime_list(n, base_primes=[], piter=prime_iter()):
+    """
+    **LLM Docstring**
+
+    Return the first `n` primes using a shared incremental cache.
+
+    The default `base_primes` list and `piter` generator are intentionally persistent across calls. The cache is extended until the iterator yields more than `n` entries, then the first `n` values are returned.
+
+    :param n: number of primes requested
+    :type n: int
+    :param base_primes: mutable cache populated in place
+    :type base_primes: list[int]
+    :param piter: cumulative prime-list iterator used to extend the cache
+    :type piter: collections.abc.Iterator[list[int]]
+    :return: the first `n` cached primes
+    :rtype: list[int]
+    """
     # gives a list up to the nth prime
     if n > len(base_primes):
         for p_list in piter:
@@ -161,6 +233,20 @@ def prime_list(n, base_primes=[], piter=prime_iter()):
     return base_primes[:n]
 
 def prime_factorize(ints, primes=None):
+    """
+    **LLM Docstring**
+
+    Compute prime-exponent arrays for one or more positive integers.
+
+    The function repeatedly applies `_sieve_core` to entries whose residual value exceeds `1`. It accepts either an iterator of individual primes or an iterator of cumulative prime lists, as produced by `prime_iter`. The returned count list contains one array per tested prime and preserves the original input shape.
+
+    :param ints: positive integer scalar or array to factor
+    :type ints: int | array-like
+    :param primes: optional prime or cumulative-prime iterator
+    :type primes: iterable[int | list[int]] | None
+    :return: the generated prime array and a list of exponent arrays for those primes
+    :rtype: tuple[numpy.ndarray, list[int | numpy.ndarray]]
+    """
     ints = np.array(ints, dtype=int)
     smol = ints.ndim == 0
     if smol: ints = ints[np.newaxis]
@@ -204,6 +290,22 @@ def prime_factorize(ints, primes=None):
 
 
 def stable_factorial_ratio(num_terms, denom_terms, counts=None):
+    """
+    **LLM Docstring**
+
+    Evaluate a ratio of products using prime exponents.
+
+    Without precomputed `counts`, numerator and denominator terms are deduplicated, factorized, and weighted by their multiplicities. The two prime-count vectors are padded to equal length, subtracted, and exponentiated. Negative exponents trigger floating-point evaluation. Despite its name, the inputs are treated as explicit multiplicative terms rather than factorial arguments.
+
+    :param num_terms: factors in the numerator
+    :type num_terms: array-like
+    :param denom_terms: factors in the denominator
+    :type denom_terms: array-like
+    :param counts: optional pair of precomputed numerator and denominator prime-exponent arrays; when supplied, `num_terms` and `denom_terms` are treated as the corresponding prime lists
+    :type counts: tuple[array-like, array-like] | None
+    :return: product of the aligned primes raised to the net exponent vector
+    :rtype: int | float | numpy.number
+    """
     if counts is None:
         num_terms, num_counts = np.unique(num_terms, return_counts=True)
         num_terms, counts_num = prime_factorize(num_terms)

@@ -20,6 +20,20 @@ class GraphicsPropertyManager:
     """
 
     def __init__(self, graphics, figure, axes, managed=False):
+        """
+        **LLM Docstring**
+
+        Set up the property manager that backs a `Graphics` object's styling/layout
+        properties, holding references to the graphics, figure, and axes and initializing
+        the cached property values.
+
+        :param graphics: the owning graphics object
+        :type graphics: GraphicsBase
+        :param figure: the backend figure
+        :param axes: the backend axes
+        :param managed: whether an external manager owns the layout (e.g. a grid panel)
+        :type managed: bool
+        """
         self.graphics = graphics
         self.managed = managed # if there's an external manager
         self.figure = figure
@@ -47,9 +61,27 @@ class GraphicsPropertyManager:
 
     @property
     def figure_label(self):
+        """
+        **LLM Docstring**
+
+        The overall figure label. The getter returns the cached value (reading it from the backend axes when
+        unset); the setter caches it and pushes it to the backend axes (unwrapping any
+        `Styled` value).
+
+        :return: the figure label
+        """
         return self._figure_label
     @figure_label.setter
     def figure_label(self, label):
+        """
+        **LLM Docstring**
+
+        The overall figure label. The getter returns the cached value (reading it from the backend axes when
+        unset); the setter caches it and pushes it to the backend axes (unwrapping any
+        `Styled` value).
+
+        :return: the figure label
+        """
         self._figure_label = label
         if not self.managed:
             if label is None:
@@ -61,9 +93,27 @@ class GraphicsPropertyManager:
 
     @property
     def plot_label(self):
+        """
+        **LLM Docstring**
+
+        The plot title/label. The getter returns the cached value (reading it from the backend axes when
+        unset); the setter caches it and pushes it to the backend axes (unwrapping any
+        `Styled` value).
+
+        :return: the plot label
+        """
         return self._plot_label
     @plot_label.setter
     def plot_label(self, label):
+        """
+        **LLM Docstring**
+
+        The plot title/label. The getter returns the cached value (reading it from the backend axes when
+        unset); the setter caches it and pushes it to the backend axes (unwrapping any
+        `Styled` value).
+
+        :return: the plot label
+        """
         self._plot_label = label
         if label is None:
             self.axes.set_plot_label("")
@@ -77,9 +127,25 @@ class GraphicsPropertyManager:
 
     @property
     def style_list(self):
+        """
+        **LLM Docstring**
+
+        The per-series style cycle. The getter returns the cached styles; the setter
+        merges in new styles and pushes them to the backend axes when anything changed.
+
+        :return: the style cycle
+        """
         return self._style_lists
     @style_list.setter
     def style_list(self, props):
+        """
+        **LLM Docstring**
+
+        The per-series style cycle. The getter returns the cached styles; the setter
+        merges in new styles and pushes them to the backend axes when anything changed.
+
+        :return: the style cycle
+        """
         if props is not None:
             updated = False
             if self._style_lists is None:
@@ -100,9 +166,27 @@ class GraphicsPropertyManager:
     # set plot legend
     @property
     def plot_legend(self):
+        """
+        **LLM Docstring**
+
+        The plot legend. The setter coerces legend-like values into a `PlotLegend`
+        (accepting `True` to keep an inferred legend).
+
+        :return: the legend
+        :raises NotImplementedError: for the unsupported inferred-legend path
+        """
         return self._plot_legend
     @plot_legend.setter
     def plot_legend(self, legend):
+        """
+        **LLM Docstring**
+
+        The plot legend. The setter coerces legend-like values into a `PlotLegend`
+        (accepting `True` to keep an inferred legend).
+
+        :return: the legend
+        :raises NotImplementedError: for the unsupported inferred-legend path
+        """
         self._plot_legend = legend
 
         if PlotLegend.could_be_legend(legend):
@@ -131,9 +215,27 @@ class GraphicsPropertyManager:
 
     @property
     def legend_style(self):
+        """
+        **LLM Docstring**
+
+        The legend styling options. The getter returns the cached value (reading it from the backend axes when
+        unset); the setter caches it and pushes it to the backend axes (unwrapping any
+        `Styled` value).
+
+        :return: the legend style
+        """
         return self._legend_style
     @legend_style.setter
     def legend_style(self, style):
+        """
+        **LLM Docstring**
+
+        The legend styling options. The getter returns the cached value (reading it from the backend axes when
+        unset); the setter caches it and pushes it to the backend axes (unwrapping any
+        `Styled` value).
+
+        :return: the legend style
+        """
         self._legend_style = style
 
 
@@ -148,9 +250,25 @@ class GraphicsPropertyManager:
     # set axes labels
     @property
     def axes_labels(self):
+        """
+        **LLM Docstring**
+
+        The `(x, y)` axis labels. The setter fills the missing side from the cached
+        labels and pushes each to the backend axes (unwrapping `Styled` values).
+
+        :return: the axis labels
+        """
         return self._axes_labels
     @axes_labels.setter
     def axes_labels(self, labels):
+        """
+        **LLM Docstring**
+
+        The `(x, y)` axis labels. The setter fills the missing side from the cached
+        labels and pushes each to the backend axes (unwrapping `Styled` values).
+
+        :return: the axis labels
+        """
         if self._axes_labels is None:
             self._axes_labels = (self.axes.get_xlabel(), self.axes.get_ylabel())
         try:
@@ -181,6 +299,15 @@ class GraphicsPropertyManager:
     # set plot ranges
     @property
     def plot_range(self):
+        """
+        **LLM Docstring**
+
+        The plotted `(x, y)` data range. The getter reads (and sorts) the backend limits
+        when unset; the setter caches the range and pushes each axis's limits (unwrapping
+        `Styled` values).
+
+        :return: the plot range
+        """
         if self._plot_range is None:
             xl = self.axes.get_xlim()
             yl = self.axes.get_ylim()
@@ -194,6 +321,15 @@ class GraphicsPropertyManager:
         return pr
     @plot_range.setter
     def plot_range(self, ranges):
+        """
+        **LLM Docstring**
+
+        The plotted `(x, y)` data range. The getter reads (and sorts) the backend limits
+        when unset; the setter caches the range and pushes each axis's limits (unwrapping
+        `Styled` values).
+
+        :return: the plot range
+        """
         if self._plot_range is None:
             self._plot_range = (self.axes.get_xlim(), self.axes.get_ylim())
         try:
@@ -224,6 +360,13 @@ class GraphicsPropertyManager:
 
     @property
     def absolute_plot_range(self):
+        """
+        **LLM Docstring**
+
+        The plot range with any unset axis filled in from the backend limits.
+
+        :return: the absolute plot range
+        """
         a, b = self.plot_range
         if a is None:
             a = self.axes.get_xlim()
@@ -234,12 +377,36 @@ class GraphicsPropertyManager:
     # set plot ticks
     @property
     def ticks(self):
+        """
+        **LLM Docstring**
+
+        The tick specification. The getter returns the cached value; the setter applies
+        the x/y tick specs via the tick-setting helpers.
+
+        :return: the tick specification
+        """
         return self._ticks
     def _set_ticks(self, x,
                    *,
                    set_ticks, set_locator, set_minor_locator,
                    set_formatter, set_minor_formatter,
                    **opts):
+        """
+        **LLM Docstring**
+
+        Apply a tick specification to one axis, dispatching on the spec type (a
+        `Styled` value, a locator, `'auto'`, a fixed list, a `(locations, labels)` or
+        `(locator, minor)` pair, or a spacing number) to the appropriate locator and
+        formatter, and handling minor ticks and labels.
+
+        :param x: the tick specification
+        :param set_ticks: the backend tick-setter
+        :param set_locator: the backend major-locator setter
+        :param set_minor_locator: the backend minor-locator setter
+        :param set_formatter: the backend major-formatter setter
+        :param set_minor_formatter: the backend minor-formatter setter
+        :param opts: extra tick options (`minor`, `labels`, `minor_labels`, ...)
+        """
         #TODO: make this backend independent
         ticks = self.axes.TicksManager()
         inherit_opts = dict(
@@ -336,6 +503,15 @@ class GraphicsPropertyManager:
         elif x is not None:
             set_ticks(x, **opts)
     def _set_xticks(self, x, **opts):
+        """
+        **LLM Docstring**
+
+        Apply a tick specification to the x-axis (via `_set_ticks` with the x-axis
+        setters).
+
+        :param x: the tick specification
+        :param opts: extra tick options
+        """
         return self._set_ticks(x,
                                set_ticks=self.axes.set_xticks,
                                set_locator=self.axes.xaxis.set_major_locator,
@@ -346,6 +522,15 @@ class GraphicsPropertyManager:
                                )
 
     def _set_yticks(self, y, **opts):
+        """
+        **LLM Docstring**
+
+        Apply a tick specification to the y-axis (via `_set_ticks` with the y-axis
+        setters).
+
+        :param y: the tick specification
+        :param opts: extra tick options
+        """
         return self._set_ticks(y,
                                set_ticks=self.axes.set_yticks,
                                set_locator=self.axes.yaxis.set_major_locator,
@@ -358,6 +543,14 @@ class GraphicsPropertyManager:
 
     @ticks.setter
     def ticks(self, ticks):
+        """
+        **LLM Docstring**
+
+        The tick specification. The getter returns the cached value; the setter applies
+        the x/y tick specs via the tick-setting helpers.
+
+        :return: the tick specification
+        """
         if self._ticks is None:
             self._ticks = (self.axes.get_xticks(), self.axes.get_yticks())
         try:
@@ -385,9 +578,25 @@ class GraphicsPropertyManager:
 
     @property
     def ticks_style(self):
+        """
+        **LLM Docstring**
+
+        The tick styling. The getter returns the cached value; the setter applies the
+        x/y tick styles to the backend axes.
+
+        :return: the tick styling
+        """
         return self._ticks_style
     @ticks_style.setter
     def ticks_style(self, ticks_style):
+        """
+        **LLM Docstring**
+
+        The tick styling. The getter returns the cached value; the setter applies the
+        x/y tick styles to the backend axes.
+
+        :return: the tick styling
+        """
         if self._ticks_style is None:
             self._ticks_style = (None,) * 2
         if isinstance(ticks_style, dict):
@@ -415,9 +624,25 @@ class GraphicsPropertyManager:
             )
     @property
     def frame_style(self):
+        """
+        **LLM Docstring**
+
+        The frame (spine) styling. The getter returns the cached value; the setter
+        applies it to the backend axes.
+
+        :return: the frame styling
+        """
         return self._frame_style
     @frame_style.setter
     def frame_style(self, f_style):
+        """
+        **LLM Docstring**
+
+        The frame (spine) styling. The getter returns the cached value; the setter
+        applies it to the backend axes.
+
+        :return: the frame styling
+        """
         if self._frame_style is None:
             self._frame_style = ((None, None), (None, None))
         if isinstance(f_style, dict):
@@ -452,6 +677,17 @@ class GraphicsPropertyManager:
     ticks_label_style_remapping={'fontsize':'size', 'fontcolor':'color'}
     @classmethod
     def clean_tick_label_styles(cls, k):
+        """
+        **LLM Docstring**
+
+        Normalize a tick-label style key: strip/add the `label` prefix as appropriate and
+        apply the style-name remapping.
+
+        :param k: the style key
+        :type k: str
+        :return: the normalized key
+        :rtype: str
+        """
         if k.startswith('label'):
             k = k[5:]
         if k in cls.ticks_label_base_styles:
@@ -461,9 +697,25 @@ class GraphicsPropertyManager:
 
     @property
     def ticks_label_style(self):
+        """
+        **LLM Docstring**
+
+        The tick-label styling. The getter returns the cached value; the setter applies
+        the cleaned label styles to the backend axes.
+
+        :return: the tick-label styling
+        """
         return self._ticks_label_style
     @ticks_label_style.setter
     def ticks_label_style(self, ticks_style):
+        """
+        **LLM Docstring**
+
+        The tick-label styling. The getter returns the cached value; the setter applies
+        the cleaned label styles to the backend axes.
+
+        :return: the tick-label styling
+        """
         if self._ticks_label_style is None:
             self._ticks_label_style = (None,) * 2
         try:
@@ -483,9 +735,25 @@ class GraphicsPropertyManager:
 
     @property
     def aspect_ratio(self):
+        """
+        **LLM Docstring**
+
+        The axes aspect ratio. The getter returns the cached value; the setter pushes it
+        to the backend axes (accepting a `(value, opts)` pair).
+
+        :return: the aspect ratio
+        """
         return self._aspect_ratio
     @aspect_ratio.setter
     def aspect_ratio(self, ar):
+        """
+        **LLM Docstring**
+
+        The axes aspect ratio. The getter returns the cached value; the setter pushes it
+        to the backend axes (accepting a `(value, opts)` pair).
+
+        :return: the aspect ratio
+        """
         if dev.is_atomic(ar):
             self.axes.set_aspect_ratio(ar)
         else:
@@ -493,6 +761,15 @@ class GraphicsPropertyManager:
         self._aspect_ratio = ar
 
     def _compute_inset_imagesize(self):
+        """
+        **LLM Docstring**
+
+        Compute the effective image size: for a managed/inset axes, the axes bbox plus
+        padding; otherwise the figure size scaled from inches to pixels.
+
+        :return: the `(width, height)` image size
+        :rtype: tuple
+        """
         if self.managed or self.graphics.inset:
             bbox = self.axes.get_bbox()
             ((alx, aby), (arx, aty)) = bbox
@@ -503,6 +780,15 @@ class GraphicsPropertyManager:
     # set size
     @property
     def image_size(self):
+        """
+        **LLM Docstring**
+
+        The figure image size in pixels. The getter resolves `'auto'` to the computed
+        inset size; the setter caches the size (filling a missing dimension from the
+        aspect ratio) and resizes the backend figure (in inches) unless managed/inset.
+
+        :return: the image size
+        """
         # im_size = self._image_size
         # if isinstance(self._image_size, (int, float)):
         #     im_size =
@@ -512,6 +798,15 @@ class GraphicsPropertyManager:
             return self._image_size
     @image_size.setter
     def image_size(self, wh):
+        """
+        **LLM Docstring**
+
+        The figure image size in pixels. The getter resolves `'auto'` to the computed
+        inset size; the setter caches the size (filling a missing dimension from the
+        aspect ratio) and resizes the backend figure (in inches) unless managed/inset.
+
+        :return: the image size
+        """
         if isinstance(wh, str) and wh == 'auto':
             self._image_size = wh
         else:
@@ -553,16 +848,40 @@ class GraphicsPropertyManager:
                 self.figure.set_size_inches(wi, hi)
     @property
     def axes_bbox(self):
+        """
+        **LLM Docstring**
+
+        The axes bounding box. The getter reads it from the backend axes; the setter
+        pushes a new bbox.
+
+        :return: the axes bbox
+        """
         return self.axes.get_bbox()
         # return bbox
     @axes_bbox.setter
     def axes_bbox(self, bbox):
+        """
+        **LLM Docstring**
+
+        The axes bounding box. The getter reads it from the backend axes; the setter
+        pushes a new bbox.
+
+        :return: the axes bbox
+        """
         if bbox is not None:
             self.axes.set_bbox(bbox)
 
     # set background color
     @property
     def background(self):
+        """
+        **LLM Docstring**
+
+        The background/face color. The getter returns the cached value; the setter
+        applies it to the backend axes (and figure).
+
+        :return: the background color
+        """
         if self._background is None:
             if self.graphics.inset:
                 self._background = self.axes.get_facecolor()
@@ -572,6 +891,14 @@ class GraphicsPropertyManager:
         return self._background
     @background.setter
     def background(self, bg):
+        """
+        **LLM Docstring**
+
+        The background/face color. The getter returns the cached value; the setter
+        applies it to the backend axes (and figure).
+
+        :return: the background color
+        """
         self._background = bg
         if not self.managed and not self.graphics.inset:
             self.figure.set_facecolor(bg)
@@ -580,9 +907,25 @@ class GraphicsPropertyManager:
     # set show_frame
     @property
     def frame(self):
+        """
+        **LLM Docstring**
+
+        Which frame (spine) edges are drawn. The getter returns the cached value; the
+        setter applies the visibility spec to the backend axes.
+
+        :return: the frame visibility
+        """
         return self._frame
     @frame.setter
     def frame(self, fr):
+        """
+        **LLM Docstring**
+
+        Which frame (spine) edges are drawn. The getter returns the cached value; the
+        setter applies the visibility spec to the backend axes.
+
+        :return: the frame visibility
+        """
         self._frame = fr
         if fr is True or fr is False:
             self.axes.set_frame_visible(fr)
@@ -602,9 +945,25 @@ class GraphicsPropertyManager:
 
     @property
     def scale(self):
+        """
+        **LLM Docstring**
+
+        The per-axis scaling (e.g. linear/log). The getter returns the cached value; the
+        setter applies the x/y scales to the backend axes.
+
+        :return: the axis scaling
+        """
         return self._scale
     @scale.setter
     def scale(self, scales):
+        """
+        **LLM Docstring**
+
+        The per-axis scaling (e.g. linear/log). The getter returns the cached value; the
+        setter applies the x/y scales to the backend axes.
+
+        :return: the axis scaling
+        """
         if self._scale is None:
             self._scale = (self.axes.get_xscale(), self.axes.get_yscale())
         try:
@@ -631,12 +990,28 @@ class GraphicsPropertyManager:
 
     @property
     def padding(self):
+        """
+        **LLM Docstring**
+
+        The figure padding on each side. The getter returns the cached value; the setter
+        caches it and pushes it to the backend.
+
+        :return: the padding
+        """
         if self.managed or self.graphics.inset:
             return self.axes.get_padding()
         else:
             return self._padding
     @padding.setter
     def padding(self, padding):
+        """
+        **LLM Docstring**
+
+        The figure padding on each side. The getter returns the cached value; the setter
+        caches it and pushes it to the backend.
+
+        :return: the padding
+        """
         try:
             w, h = padding
         except (ValueError, TypeError):
@@ -669,45 +1044,127 @@ class GraphicsPropertyManager:
             ])
     @property
     def padding_left(self):
+        """
+        **LLM Docstring**
+
+        The left figure padding. The getter returns the cached value; the setter updates
+        just the left component of the padding.
+
+        :return: the left padding
+        """
         return self._padding[0][0]
     @padding_left.setter
     def padding_left(self, p):
+        """
+        **LLM Docstring**
+
+        The left figure padding. The getter returns the cached value; the setter updates
+        just the left component of the padding.
+
+        :return: the left padding
+        """
         wx, wy = self._padding[0]
         hx, hy = self._padding[1]
         self.padding = ((p, wy), (hx, hy))
     @property
     def padding_right(self):
+        """
+        **LLM Docstring**
+
+        The right figure padding. The getter returns the cached value; the setter updates
+        just the right component of the padding.
+
+        :return: the right padding
+        """
         return self._padding[0][1]
     @padding_right.setter
     def padding_right(self, p):
+        """
+        **LLM Docstring**
+
+        The right figure padding. The getter returns the cached value; the setter updates
+        just the right component of the padding.
+
+        :return: the right padding
+        """
         wx, wy = self._padding[0]
         hx, hy = self._padding[1]
         self.padding = ((wx, p), (hx, hy))
     @property
     def padding_top(self):
+        """
+        **LLM Docstring**
+
+        The top figure padding. The getter returns the cached value; the setter updates
+        just the top component of the padding.
+
+        :return: the top padding
+        """
         return self._padding[1][1]
     @padding_top.setter
     def padding_top(self, p):
+        """
+        **LLM Docstring**
+
+        The top figure padding. The getter returns the cached value; the setter updates
+        just the top component of the padding.
+
+        :return: the top padding
+        """
         wx, wy = self._padding[0]
         hx, hy = self._padding[1]
         self.padding = ((wx, wy), (hx, p))
     @property
     def padding_bottom(self):
+        """
+        **LLM Docstring**
+
+        The bottom figure padding. The getter returns the cached value; the setter updates
+        just the bottom component of the padding.
+
+        :return: the bottom padding
+        """
         return self._padding[1][0]
     @padding_bottom.setter
     def padding_bottom(self, p):
+        """
+        **LLM Docstring**
+
+        The bottom figure padding. The getter returns the cached value; the setter updates
+        just the bottom component of the padding.
+
+        :return: the bottom padding
+        """
         wx, wy = self._padding[0]
         hx, hy = self._padding[1]
         self.padding = ((wx, wy), (p, hy))
 
     @property
     def spacings(self):
+        """
+        **LLM Docstring**
+
+        The inter-panel spacings. The getter returns `[0, 0]` for a managed/inset axes,
+        else the cached value; the setter converts fractional spacings to absolute sizes
+        (from the panel bboxes) and pushes them to the figure.
+
+        :return: the spacings
+        """
         if self.managed or self.graphics.inset:
             return [0, 0]
         else:
             return self._spacings
     @spacings.setter
     def spacings(self, spacings):
+        """
+        **LLM Docstring**
+
+        The inter-panel spacings. The getter returns `[0, 0]` for a managed/inset axes,
+        else the cached value; the setter converts fractional spacings to absolute sizes
+        (from the panel bboxes) and pushes them to the figure.
+
+        :return: the spacings
+        """
         if not (self.managed or self.graphics.inset):
             try:
                 w, h = spacings
@@ -746,9 +1203,25 @@ class GraphicsPropertyManager:
 
     @property
     def colorbar(self):
+        """
+        **LLM Docstring**
+
+        The colorbar specification. The getter returns the cached value; the setter
+        records it and adds a colorbar to the graphics (from `True` or an options dict).
+
+        :return: the colorbar spec
+        """
         return self._colorbar
     @colorbar.setter
     def colorbar(self, c):
+        """
+        **LLM Docstring**
+
+        The colorbar specification. The getter returns the cached value; the setter
+        records it and adds a colorbar to the graphics (from `True` or an options dict).
+
+        :return: the colorbar spec
+        """
         self._colorbar = c
         # if self._cbar_obj is not None:
         #     self.graphics.remove(self._cbar_obj)
@@ -763,15 +1236,44 @@ class GraphicsPropertyManager:
 
 class GraphicsPropertyManager3D(GraphicsPropertyManager):
     def __init__(self, graphics, figure, axes, managed=False):
+        """
+        **LLM Docstring**
+
+        Set up the 3D property manager, adding the cached view-settings and box-ratios
+        values.
+
+        :param graphics: the owning graphics object
+        :type graphics: GraphicsBase
+        :param figure: the backend figure
+        :param axes: the backend 3D axes
+        :param managed: whether an external manager owns the layout
+        :type managed: bool
+        """
         super().__init__(graphics, figure, axes, managed=managed)
         self._view_settings = None
         self._box_ratios = None
 
     @property
     def axes_labels(self):
+        """
+        **LLM Docstring**
+
+        The `(x, y, z)` axis labels. The setter fills missing sides from the cached
+        labels and pushes each to the backend 3D axes (unwrapping `Styled` values).
+
+        :return: the axis labels
+        """
         return self._axes_labels
     @axes_labels.setter
     def axes_labels(self, labels):
+        """
+        **LLM Docstring**
+
+        The `(x, y, z)` axis labels. The setter fills missing sides from the cached
+        labels and pushes each to the backend 3D axes (unwrapping `Styled` values).
+
+        :return: the axis labels
+        """
         if self._axes_labels is None:
             self._axes_labels = (self.axes.get_xlabel(), self.axes.get_ylabel(), self.axes.get_zlabel())
         try:
@@ -812,11 +1314,29 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def box_ratios(self):
+        """
+        **LLM Docstring**
+
+        The 3D box aspect ratios. The getter reads them from the backend when unset; the
+        setter resolves `'auto'` from the plot range and pushes the ratios to the backend
+        axes.
+
+        :return: the box aspect ratios
+        """
         if self._box_ratios is None:
             self._box_ratios = self.axes.get_box_aspect()
         return self._box_ratios
     @box_ratios.setter
     def box_ratios(self, br):
+        """
+        **LLM Docstring**
+
+        The 3D box aspect ratios. The getter reads them from the backend when unset; the
+        setter resolves `'auto'` from the plot range and pushes the ratios to the backend
+        axes.
+
+        :return: the box aspect ratios
+        """
         self._box_ratios = br
         if dev.str_is(br, 'auto'):
             (x, X), (y, Y), (z, Z) = self.plot_range
@@ -828,20 +1348,58 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def projection_type(self):
+        """
+        **LLM Docstring**
+
+        The 3D projection type, read from / written to the backend axes.
+
+        :return: the projection type
+        """
         return self.axes.get_projection_type()
     @projection_type.setter
     def projection_type(self, ptype):
+        """
+        **LLM Docstring**
+
+        The 3D projection type, read from / written to the backend axes.
+
+        :return: the projection type
+        """
         self.axes.set_projection_type(ptype)
 
     @property
     def autoscale(self):
+        """
+        **LLM Docstring**
+
+        The 3D autoscale setting, read from / written to the backend axes.
+
+        :return: the autoscale setting
+        """
         return self.axes.get_autoscale()
     @autoscale.setter
     def autoscale(self, autoscale):
+        """
+        **LLM Docstring**
+
+        The 3D autoscale setting, read from / written to the backend axes.
+
+        :return: the autoscale setting
+        """
         self.axes.set_autoscale(autoscale)
 
     @property
     def plot_range(self):
+        """
+        **LLM Docstring**
+
+        The plotted `(x, y, z)` data range. The getter reads the backend limits when
+        unset; the setter fills missing axes from the cache and pushes each axis's limits
+        (unwrapping `Styled` values).
+
+        :return: the plot range
+        :raises ValueError: for a malformed range specification
+        """
         if self._plot_range is None:
             pr = (self.axes.get_xlim(), self.axes.get_ylim(), self.axes.get_zlim())
         else:
@@ -849,6 +1407,16 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
         return pr
     @plot_range.setter
     def plot_range(self, ranges):
+        """
+        **LLM Docstring**
+
+        The plotted `(x, y, z)` data range. The getter reads the backend limits when
+        unset; the setter fills missing axes from the cache and pushes each axis's limits
+        (unwrapping `Styled` values).
+
+        :return: the plot range
+        :raises ValueError: for a malformed range specification
+        """
         if self._plot_range is None:
             self._plot_range = (self.axes.get_xlim(), self.axes.get_ylim(), self.axes.get_zlim())
         elif len(self._plot_range) == 2:
@@ -887,6 +1455,13 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def absolute_plot_range(self):
+        """
+        **LLM Docstring**
+
+        The 3D plot range with any unset axis filled in from the backend limits.
+
+        :return: the absolute plot range
+        """
         a, b = self.plot_range
         if a is None:
             a = self.axes.get_xlim()
@@ -894,6 +1469,15 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
             b = self.axes.get_ylim()
         return a, b
     def _set_zticks(self, z, **opts):
+        """
+        **LLM Docstring**
+
+        Apply a tick specification to the z-axis (via `_set_ticks` with the z-axis
+        setters).
+
+        :param z: the tick specification
+        :param opts: extra tick options
+        """
         return self._set_ticks(z,
                                set_ticks=self.axes.set_zticks,
                                set_locator=self.axes.zaxis.set_major_locator,
@@ -905,9 +1489,25 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def frame(self):
+        """
+        **LLM Docstring**
+
+        Which 3D frame edges are drawn. The getter returns the cached value; the setter
+        applies the visibility spec to the backend 3D axes.
+
+        :return: the frame visibility
+        """
         return self._frame
     @frame.setter
     def frame(self, fr):
+        """
+        **LLM Docstring**
+
+        Which 3D frame edges are drawn. The getter returns the cached value; the setter
+        applies the visibility spec to the backend 3D axes.
+
+        :return: the frame visibility
+        """
         self._frame = fr
         if fr is True or fr is False:
             self.axes.set_frame_visible(fr)
@@ -931,9 +1531,25 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def frame_style(self):
+        """
+        **LLM Docstring**
+
+        The 3D frame styling. The getter returns the cached value; the setter applies it
+        to the backend 3D axes.
+
+        :return: the frame styling
+        """
         return self._frame_style
     @frame_style.setter
     def frame_style(self, f_style):
+        """
+        **LLM Docstring**
+
+        The 3D frame styling. The getter returns the cached value; the setter applies it
+        to the backend 3D axes.
+
+        :return: the frame styling
+        """
         if self._frame_style is None:
             self._frame_style = ((None, None), (None, None), (None, None))
         if isinstance(f_style, dict):
@@ -969,9 +1585,25 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def ticks(self):
+        """
+        **LLM Docstring**
+
+        The 3D tick specification. The getter returns the cached value; the setter applies
+        the x/y/z tick specs.
+
+        :return: the tick specification
+        """
         return self._ticks
     @ticks.setter
     def ticks(self, ticks):
+        """
+        **LLM Docstring**
+
+        The 3D tick specification. The getter returns the cached value; the setter applies
+        the x/y/z tick specs.
+
+        :return: the tick specification
+        """
         if self._ticks is None:
             self._ticks = (self.axes.get_xticks(), self.axes.get_yticks(), self.axes.get_zticks())
         if ticks is not None:
@@ -988,9 +1620,25 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def ticks_style(self):
+        """
+        **LLM Docstring**
+
+        The 3D tick styling. The getter returns the cached value; the setter applies the
+        x/y/z tick styles to the backend axes.
+
+        :return: the tick styling
+        """
         return self._ticks_style
     @ticks_style.setter
     def ticks_style(self, ticks_style):
+        """
+        **LLM Docstring**
+
+        The 3D tick styling. The getter returns the cached value; the setter applies the
+        x/y/z tick styles to the backend axes.
+
+        :return: the tick styling
+        """
         if self._ticks_style is None:
             self._ticks_style = (None,)*3
         try:
@@ -1013,7 +1661,21 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
 
     @property
     def view_settings(self):
+        """
+        **LLM Docstring**
+
+        The 3D camera/view settings, read from / written to the backend axes.
+
+        :return: the view settings
+        """
         return self.axes.get_view_settings()
     @view_settings.setter
     def view_settings(self, value):
+        """
+        **LLM Docstring**
+
+        The 3D camera/view settings, read from / written to the backend axes.
+
+        :return: the view settings
+        """
         self.axes.set_view_settings(**value)

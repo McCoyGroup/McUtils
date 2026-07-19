@@ -3,7 +3,7 @@ A growing package of assorted functionality that finds use across many different
 provide a single unified interface for doing certain types of projects.
 
 All of the McUtils packages stand mostly on their own, but there will be little calls into one another here and there,
-especially pieces using `Numputils`
+especially pieces using `Numputils` or `Devutils`
 
 The more scientifically-focused `Psience` package makes significant use of `McUtils` as do various packages that have
 been written over the years.
@@ -39,6 +39,12 @@ from . import Parallelizers
 __all__ += ["Parallelizers"]
 from . import Devutils
 __all__ += ["Devutils"]
+from . import Combinatorics
+__all__ += ["Combinatorics"]
+from . import Graphs
+__all__ += ["Graphs"]
+from . import Iterators
+__all__ += ["Iterators"]
 from . import Docs
 __all__ += ["Docs"]
 from . import Misc

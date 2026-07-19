@@ -47,24 +47,81 @@ class X3DObject(metaclass=abc.ABCMeta):
     id: str
     @abc.abstractmethod
     def to_x3d(self) -> X3DHTML.X3DElement:
+        """
+        **LLM Docstring**
+
+        Abstract: render this object to its X3D DOM element.
+
+        :return: the X3D element
+        """
         ...
 
     def get_interpolated_attributes(self):
+        """
+        **LLM Docstring**
+
+        Return the object's attributes used when building animation frames (its X3D element's attrs).
+
+        :return: the attribute dict
+        :rtype: dict
+        """
         return self.to_x3d().attrs
     def get_children(self):
+        """
+        **LLM Docstring**
+
+        Return the object's child objects (none by default).
+
+        :return: the children
+        :rtype: list
+        """
         return []
 
     @classmethod
     def get_new_id(cls):
+        """
+        **LLM Docstring**
+
+        Generate a fresh unique id for a new object.
+
+        :return: the id
+        :rtype: str
+        """
         return str(uuid.uuid4())[:6]
 
     def resolve_prop_attr(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Map a property name to the X3D attribute name it animates (identity by default).
+
+        :param prop_name: the property name
+        :return: the attribute name
+        """
         return prop_name
     def prep_animation_values(self, prop_name, values):
+        """
+        **LLM Docstring**
+
+        Normalize a property's per-frame animation values (e.g. defaulting `transparency` gaps to 0).
+
+        :param prop_name: the property name
+        :param values: the per-frame values
+        :return: the normalized values
+        """
         if prop_name == 'transparency':
             values = [v if v is not None else 0 for v in values]
         return values
     def get_prop_node_id(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Return the id of the DOM node that carries a given animated property (this object by default).
+
+        :param prop_name: the property name
+        :return: the node id
+        :rtype: str
+        """
         return self.id
 
 class X3D(X3DObject):
@@ -74,6 +131,14 @@ class X3D(X3DObject):
     )
     @classmethod
     def get_new_id(cls):
+        """
+        **LLM Docstring**
+
+        Generate a fresh `x3d-`-prefixed id.
+
+        :return: the id
+        :rtype: str
+        """
         return "x3d-" + str(uuid.uuid4())[:6]
     def __init__(self, *children, id=None, dynamic_loading=True,
                  x3dom_path=None,
@@ -86,6 +151,32 @@ class X3D(X3DObject):
                  preload_scripts=None,
                  onload_scripts=None,
                  **opts):
+        """
+        **LLM Docstring**
+
+        Set up the top-level X3D scene container: its children, size, resource paths, and
+        the optional export/record/view-settings UI and MathJax/loader scripting.
+
+        :param children: the scene's child objects
+        :param id: the DOM id (auto-generated if omitted)
+        :param dynamic_loading: load the X3DOM runtime dynamically
+        :type dynamic_loading: bool
+        :param x3dom_path: an override path/URL for the X3DOM JS
+        :param x3dom_css_path: an override path/URL for the X3DOM CSS
+        :param include_mathjax: include MathJax for text rendering
+        :type include_mathjax: bool
+        :param recording_options: options for the screen recorder
+        :type recording_options: dict | None
+        :param include_export_button: include the image-export button
+        :type include_export_button: bool
+        :param include_record_button: include the screen-record button
+        :type include_record_button: bool
+        :param include_view_settings_button: include the view-settings button
+        :type include_view_settings_button: bool
+        :param preload_scripts: scripts to run before the scene loads
+        :param onload_scripts: scripts to run once the scene loads
+        :param opts: extra scene options (e.g. width/height)
+        """
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
@@ -121,6 +212,16 @@ class X3D(X3DObject):
 
     @classmethod
     def get_export_script(self, id):
+        """
+        **LLM Docstring**
+
+        Build the JavaScript that exports the scene canvas to a PNG and triggers a download.
+
+        :param id: the scene DOM id
+        :type id: str
+        :return: the export script
+        :rtype: str
+        """
         return f"""
 (function(){{
   let link = document.createElement('a');
@@ -133,6 +234,16 @@ class X3D(X3DObject):
 
     @classmethod
     def get_view_settings_script(self, id):
+        """
+        **LLM Docstring**
+
+        Build the JavaScript that reads the current view matrix and writes it into the view-matrix output field.
+
+        :param id: the scene DOM id
+        :type id: str
+        :return: the script
+        :rtype: str
+        """
         return f"""
     (function(){{
         let fig = document.getElementById('{id}');
@@ -151,6 +262,16 @@ class X3D(X3DObject):
 
     @classmethod
     def parse_view_matrix(cls, vs):
+        """
+        **LLM Docstring**
+
+        Convert a serialized X3DOM view matrix into `{position, orientation}` viewpoint
+        options (inverting the matrix and extracting the rotation angle/axis).
+
+        :param vs: the view matrix (JSON string or array)
+        :return: the viewpoint options
+        :rtype: dict
+        """
         import json
         if isinstance(vs, str):
             vs = json.loads(vs)
@@ -163,6 +284,22 @@ class X3D(X3DObject):
 
     @classmethod
     def get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'):
+        """
+        **LLM Docstring**
+
+        Build the JavaScript that records the scene canvas to a video and triggers a download.
+
+        :param id: the scene DOM id
+        :type id: str
+        :param polling_rate: the capture frame rate
+        :type polling_rate: int
+        :param recording_duration: the recording length in seconds
+        :type recording_duration: float
+        :param video_format: the recording MIME type
+        :type video_format: str
+        :return: the recording script
+        :rtype: str
+        """
         return f"""
     (function(){{
         let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
@@ -201,6 +338,16 @@ class X3D(X3DObject):
            """
     @classmethod
     def set_animation_duration_script(self, id):
+        """
+        **LLM Docstring**
+
+        Build the JavaScript that reads the duration input and stores it on the canvas.
+
+        :param id: the scene DOM id
+        :type id: str
+        :return: the script
+        :rtype: str
+        """
         return f"""
     (function(){{
         let canvas = document.getElementById('{id}').getElementsByTagName('canvas')[0];
@@ -212,6 +359,18 @@ class X3D(X3DObject):
 
     @classmethod
     def _create_loader_fragment(cls, i, s):
+        """
+        **LLM Docstring**
+
+        Build a JavaScript fragment that dynamically injects a preload/onload script or
+        library (handling variable capture/restore around the load).
+
+        :param i: the fragment index
+        :type i: int
+        :param s: the loader spec (a `{lib: callback}` dict, a raw string, or an element)
+        :return: the loader fragment
+        :rtype: str
+        """
         if isinstance(s, dict):
             lib, callback = list(s.items())[0]
             if not isinstance(lib, str):
@@ -257,6 +416,22 @@ document.head.append(frag{i});
                   include_record_button=None,
                   include_view_settings_button=None
                   ):
+        """
+        **LLM Docstring**
+
+        Render the scene to an interactive X3DOM widget (cached), wiring up the loader
+        scripts and any export/record/view-settings UI.
+
+        :param dynamic_loading: load the runtime dynamically
+        :type dynamic_loading: bool | None
+        :param include_export_button: include the export button
+        :type include_export_button: bool | None
+        :param include_record_button: include the record button
+        :type include_record_button: bool | None
+        :param include_view_settings_button: include the view-settings button
+        :type include_view_settings_button: bool | None
+        :return: the widget
+        """
         if self._widg is not None:
             return self._widg
         id = self.id
@@ -385,6 +560,23 @@ document.head.append(frag{i});
                 include_export_button=None,
                 include_record_button=None,
                 **header_info):
+        """
+        **LLM Docstring**
+
+        Wrap the scene widget in a full HTML document (with the X3DOM CSS/JS in the head).
+
+        :param base_elems: extra body elements
+        :param header_elems: extra head elements
+        :type header_elems: list | None
+        :param dynamic_loading: load the runtime dynamically
+        :type dynamic_loading: bool
+        :param include_export_button: include the export button
+        :type include_export_button: bool | None
+        :param include_record_button: include the record button
+        :type include_record_button: bool | None
+        :param header_info: extra head attributes
+        :return: the HTML document
+        """
         id = self.id
         x3d_embed = self.to_widget(
             dynamic_loading=dynamic_loading,
@@ -407,10 +599,30 @@ document.head.append(frag{i});
         )
 
     def _ipython_display_(self):
+        """
+        **LLM Docstring**
+
+        Display the scene widget in IPython.
+        """
         return self.to_widget()._ipython_display_()
     def get_mime_bundle(self):
+        """
+        **LLM Docstring**
+
+        Return the scene widget's MIME bundle for rich display.
+
+        :return: the MIME bundle
+        :rtype: dict
+        """
         return self.to_widget().get_mime_bundle()
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the scene to its `<x3d>` DOM element, formatting the size and rendering each child.
+
+        :return: the X3D element
+        """
         base_opts = dict(self.defaults, **self.opts)
         for k in ['width', 'height']:
             if k in base_opts:
@@ -423,14 +635,35 @@ document.head.append(frag{i});
             **base_opts
         )
     def display(self):
+        """
+        **LLM Docstring**
+
+        Display the scene widget.
+        """
         return self.to_widget().display()
 
     def show(self):
+        """
+        **LLM Docstring**
+
+        Display the scene, enabling dynamic loading when in a Jupyter environment.
+        """
         from ..Jupyter.JHTML import JupyterAPIs
         dynamic_loading = JupyterAPIs().in_jupyter_environment()
         self.to_widget(dynamic_loading=dynamic_loading).display()
 
     def dump(self, file, write_html=True, **opts):
+        """
+        **LLM Docstring**
+
+        Write the scene to a file, as full HTML or as bare X3D.
+
+        :param file: the destination file
+        :param write_html: write full HTML (vs bare X3D)
+        :type write_html: bool
+        :param opts: extra write options
+        :return: the write result
+        """
         if write_html:
             html = self.to_html()
         else:
@@ -438,6 +671,14 @@ document.head.append(frag{i});
         return html.write(file, **opts)
 
     def get_children(self):
+        """
+        **LLM Docstring**
+
+        Return the scene's child objects.
+
+        :return: the children
+        :rtype: list
+        """
         return self.children
 
 class X3DOptionsSet(X3DObject):
@@ -445,6 +686,16 @@ class X3DOptionsSet(X3DObject):
 
     @classmethod
     def parse_color(cls, color):
+        """
+        **LLM Docstring**
+
+        Parse a color specification into `(color, transparency)`, resolving named colors /
+        hex codes into normalized `[0, 1]` components and splitting off an alpha channel.
+
+        :param color: the color specification
+        :return: `(color_components, transparency_or_None)`
+        :rtype: tuple
+        """
         if isinstance(color, (list, tuple, np.ndarray)) and all(isinstance(c, str) for c in color):
             color = " ".join(color)
         if isinstance(color, str):
@@ -479,8 +730,24 @@ class X3DOptionsSet(X3DObject):
 
     @classmethod
     def get_new_id(cls):
+        """
+        **LLM Docstring**
+
+        Generate a fresh `x3d-opts-`-prefixed id.
+
+        :return: the id
+        :rtype: str
+        """
         return "x3d-opts-" + str(uuid.uuid4())[:6]
     def __init__(self, id=None, **attrs):
+        """
+        **LLM Docstring**
+
+        Hold a set of X3D node attributes under an id.
+
+        :param id: the node id (auto-generated if omitted)
+        :param attrs: the node attributes
+        """
         if id is None:
             id = self.get_new_id()
         self.id = id
@@ -489,8 +756,27 @@ class X3DOptionsSet(X3DObject):
     conversion_map = {}
     @classmethod
     def prop_keys(cls):
+        """
+        **LLM Docstring**
+
+        Return the set of valid property keys (declared props plus conversion-map aliases).
+
+        :return: the valid keys
+        :rtype: set
+        """
         return (cls.__props__ | cls.conversion_map.keys())
     def prep_attrs(self, attrs:dict):
+        """
+        **LLM Docstring**
+
+        Canonicalize the node attributes (applying the conversion-map aliases and attaching the id), validating against the declared props.
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        :raises ValueError: for invalid attribute keys
+        """
         attrs = {
             self.conversion_map.get(k, k):v
             for k,v in attrs.items()
@@ -504,9 +790,26 @@ class X3DOptionsSet(X3DObject):
 
     @classmethod
     def resolve_prop_attr(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Map a property name to its X3D attribute name via the conversion map.
+
+        :param prop_name: the property name
+        :return: the attribute name
+        """
         return self.conversion_map.get(prop_name, prop_name)
 
     def get_prop_node_id(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Return the node id carrying a given property (this node).
+
+        :param prop_name: the property name
+        :return: the node id
+        :rtype: str
+        """
         return self.id
 
 class X3DMaterial(X3DOptionsSet):
@@ -526,6 +829,16 @@ class X3DMaterial(X3DOptionsSet):
         "specularity": "specularColor"
     }
     def prep_attrs(self, attrs:dict):
+        """
+        **LLM Docstring**
+
+        Canonicalize the material attributes (resolving the color into components/transparency) before rendering.
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        """
         if attrs.get('color') is not None:
             new_attrs = attrs.copy()
             color, transparency = self.parse_color(attrs['color'])
@@ -536,6 +849,13 @@ class X3DMaterial(X3DOptionsSet):
             new_attrs = attrs
         return super().prep_attrs(new_attrs)
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the material to its X3D DOM element.
+
+        :return: the X3D element
+        """
         return X3DHTML.Material(**self.prep_attrs(self.attrs))
 
 class X3DTexture(X3DOptionsSet):
@@ -571,6 +891,16 @@ class X3DTexture(X3DOptionsSet):
     movie_types = ['.mp4', '.webm']
     @classmethod
     def infer_texture_type(self, ats):
+        """
+        **LLM Docstring**
+
+        Infer the texture type (pixel/image/movie) from the supplied attributes.
+
+        :param ats: the texture attributes
+        :type ats: dict
+        :return: the texture type name
+        :rtype: str
+        """
         if "image" in ats:
             return "pixel"
         elif "loop" in ats or any(ats['url'].endswith(mt) for mt in self.movie_types):
@@ -578,6 +908,13 @@ class X3DTexture(X3DOptionsSet):
         else:
             return "image"
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the texture to its X3D DOM element, dispatching on the (inferred) texture type.
+
+        :return: the X3D element
+        """
         ats = self.prep_attrs(self.attrs)
         texture_type = ats.pop('texture_type', None)
         if texture_type is None:
@@ -605,8 +942,26 @@ class X3DAppearance(X3DOptionsSet):
     }
     @classmethod
     def get_new_id(cls):
+        """
+        **LLM Docstring**
+
+        Generate a fresh appearance id.
+
+        :return: the id
+        :rtype: str
+        """
         return "x3d-appearance-" + str(uuid.uuid4())[:6]
     def prep_attrs(self, attrs:dict):
+        """
+        **LLM Docstring**
+
+        Canonicalize the appearance attributes, splitting the material/texture/line/point sub-properties out into their own nodes.
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        """
         material_keys = attrs.keys() & X3DMaterial.prop_keys()
         line_keys = attrs.keys() & X3DLineProperties.prop_keys()
         point_keys = attrs.keys() & X3DPointProperties.prop_keys()
@@ -629,6 +984,13 @@ class X3DAppearance(X3DOptionsSet):
 
         return base_attrs
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the appearance to its X3D DOM element (with its material/texture/line/point child nodes).
+
+        :return: the X3D element
+        """
         base_attrs = self.prep_attrs(self.attrs)
 
         comps = []
@@ -670,6 +1032,14 @@ class X3DAppearance(X3DOptionsSet):
 
     @classmethod
     def resolve_prop_attr(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Map a property name to the appearance sub-node attribute it animates.
+
+        :param prop_name: the property name
+        :return: the attribute name
+        """
         if prop_name in X3DAppearance.prop_keys():
             return self.conversion_map.get(prop_name, prop_name)
         elif prop_name in X3DLineProperties.prop_keys():
@@ -682,6 +1052,15 @@ class X3DAppearance(X3DOptionsSet):
             raise ValueError(f"property {prop_name} not known")
 
     def get_prop_node_id(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Return the id of the appearance sub-node (material/texture/...) carrying a property.
+
+        :param prop_name: the property name
+        :return: the node id
+        :rtype: str
+        """
         if prop_name in X3DAppearance.prop_keys():
             return self.id
         elif prop_name in X3DLineProperties.prop_keys():
@@ -705,11 +1084,28 @@ class X3DLineProperties(X3DOptionsSet):
         "line_thickness":"linewidth"
     }
     def prep_attrs(self, attrs:dict):
+        """
+        **LLM Docstring**
+
+        Canonicalize the line-properties attributes (resolving the color into components/transparency) before rendering.
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        """
         attrs = super().prep_attrs(attrs)
         attrs['linewidthScaleFactor'] = attrs.get('linewidthScaleFactor', '1')
         attrs['containerField'] = attrs.get('containerField', 'lineProperties')
         return attrs
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the line properties to its X3D DOM element.
+
+        :return: the X3D element
+        """
         return X3DHTML.LineProperties(**self.prep_attrs(self.attrs))
 
 class X3DPointProperties(X3DOptionsSet):
@@ -723,6 +1119,16 @@ class X3DPointProperties(X3DOptionsSet):
         "point_size":"pointSizeScaleFactor"
     }
     def prep_attrs(self, attrs:dict):
+        """
+        **LLM Docstring**
+
+        Canonicalize the point-properties attributes (resolving the color into components/transparency) before rendering.
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        """
         attrs = super().prep_attrs(attrs)
         attrs['containerField'] = attrs.get('containerField', 'pointProperties')
         attrs['pointSizeMaxValue'] = str(
@@ -734,6 +1140,13 @@ class X3DPointProperties(X3DOptionsSet):
         )
         return attrs
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the point properties to its X3D DOM element.
+
+        :return: the X3D element
+        """
         return X3DHTML.PointProperties(**self.prep_attrs(self.attrs))
 
 class X3DPrimitive(X3DObject):
@@ -741,8 +1154,25 @@ class X3DPrimitive(X3DObject):
     tag_class = None
     @classmethod
     def get_new_id(cls):
+        """
+        **LLM Docstring**
+
+        Generate a fresh `x3d-obj-`-prefixed id.
+
+        :return: the id
+        :rtype: str
+        """
         return "x3d-obj-" + str(uuid.uuid4())[:6]
     def __init__(self, *children, id=None, **opts):
+        """
+        **LLM Docstring**
+
+        Set up a primitive holding its child objects and options (under an id).
+
+        :param children: the child objects
+        :param id: the primitive id (auto-generated if omitted)
+        :param opts: the primitive options
+        """
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
             children = children[0]
         self.children = children
@@ -752,11 +1182,37 @@ class X3DPrimitive(X3DObject):
         self.opts = opts
     @property
     def id(self):
+        """
+        **LLM Docstring**
+
+        The primitive's id.
+
+        :return: the id
+        :rtype: str
+        """
         return self.opts['id']
     @id.setter
     def id(self, new_id):
+        """
+        **LLM Docstring**
+
+        The primitive's id.
+
+        :return: the id
+        :rtype: str
+        """
         self.opts['id'] = new_id
     def split_opts(self, opts:dict):
+        """
+        **LLM Docstring**
+
+        Split options into the non-appearance options and the material/appearance/line/point options.
+
+        :param opts: the options
+        :type opts: dict
+        :return: `(object_opts, appearance_opts)`
+        :rtype: tuple
+        """
         material_keys = opts.keys() & (
             X3DMaterial.prop_keys()
             | X3DAppearance.prop_keys()
@@ -766,11 +1222,27 @@ class X3DPrimitive(X3DObject):
         rem_keys = opts.keys() - material_keys
         return {k:opts[k] for k in rem_keys}, {k:opts[k] for k in material_keys}
     def get_appearance(self, appearance_options):
+        """
+        **LLM Docstring**
+
+        Build the appearance node from the appearance options (or `None` if there are none).
+
+        :param appearance_options: the appearance options
+        :type appearance_options: dict
+        :return: the appearance element (or `None`)
+        """
         if len(appearance_options) > 0:
             return X3DAppearance(id=self.id+"-appearance", **appearance_options).to_x3d()
         else:
             return None
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the primitive to its X3D DOM element, wrapping its children and appearance under the tag/wrapper classes.
+
+        :return: the X3D element
+        """
         obj_opts, appearance_opts = self.split_opts(self.opts)
         kids = [k.to_x3d() if hasattr(k, 'to_x3d') else k for k in self.children]
         appearance = self.get_appearance(appearance_opts)
@@ -791,6 +1263,14 @@ class X3DPrimitive(X3DObject):
 
     @classmethod
     def resolve_prop_attr(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Map a property name to its attribute, routing appearance properties through the appearance node.
+
+        :param prop_name: the property name
+        :return: the attribute name
+        """
         if prop_name in (
                 X3DMaterial.prop_keys()
                 | X3DAppearance.prop_keys()
@@ -803,6 +1283,15 @@ class X3DPrimitive(X3DObject):
             return prop_name
 
     def get_prop_node_id(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Return the node id carrying a property, routing appearance properties to the appearance node.
+
+        :param prop_name: the property name
+        :return: the node id
+        :rtype: str
+        """
         if prop_name in (
             X3DMaterial.prop_keys()
             | X3DAppearance.prop_keys()
@@ -814,6 +1303,14 @@ class X3DPrimitive(X3DObject):
             return self.id
 
     def get_children(self):
+        """
+        **LLM Docstring**
+
+        Return the primitive's child objects.
+
+        :return: the children
+        :rtype: list
+        """
         return self.children
 
 class X3DScene(X3DPrimitive):
@@ -821,6 +1318,16 @@ class X3DScene(X3DPrimitive):
     default_viewpoint = {'viewAll':True}
     children: list
     def __init__(self, *children:X3DPrimitive, background=None, viewpoint=None, **opts):
+        """
+        **LLM Docstring**
+
+        Set up a scene primitive with an optional background and viewpoint.
+
+        :param children: the scene's child primitives
+        :param background: the background specification
+        :param viewpoint: the viewpoint specification
+        :param opts: extra scene options
+        """
         if viewpoint is None:
             viewpoint = self.default_viewpoint
         elif viewpoint is False:
@@ -844,6 +1351,17 @@ class X3DScene(X3DPrimitive):
                           view_matrix=None,
                           view_position=None,
                           **etc):
+        """
+        **LLM Docstring**
+
+        Build viewpoint settings (position/orientation/etc.) from a flexible view
+        specification.
+
+        :param args: positional view arguments
+        :param kwargs: view options
+        :return: the viewpoint settings
+        :rtype: dict
+        """
         # CO = coords0[1] - coords0[0]
         # OH = coords0[5] - coords0[1]
         if view_matrix is None:
@@ -922,6 +1440,16 @@ class X3DBackground(X3DOptionsSet):
         "color": "skyColor"
     }
     def prep_attrs(self, attrs: dict):
+        """
+        **LLM Docstring**
+
+        Canonicalize the background attributes (resolving the color into components/transparency) before rendering.
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        """
         attrs = super().prep_attrs(attrs)
         color = attrs.get('skyColor', None)
         if color is not None:
@@ -932,26 +1460,77 @@ class X3DBackground(X3DOptionsSet):
         return attrs
 
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the background to its X3D DOM element.
+
+        :return: the X3D element
+        """
         return X3DHTML.Background(**self.prep_attrs(self.attrs))
 
 class X3DCoordinate(X3DPrimitive):
     wrapper_class = X3DHTML.Coordinate
     def __init__(self, points, id=None, **etc):
+        """
+        **LLM Docstring**
+
+        Hold a set of coordinate points as an X3D coordinate node.
+
+        :param points: the coordinate points
+        :param id: the node id
+        :param etc: extra options
+        """
         super().__init__(point=self.prep_points(points), id=id, **etc)
     @classmethod
     def prep_points(cls, points):
+        """
+        **LLM Docstring**
+
+        Normalize coordinate points into the X3D point format.
+
+        :param points: the points
+        :return: the prepared points
+        """
         return " ".join(np.asanyarray(np.round(points, 4)).flatten().astype(str))
 
 class X3DColor(X3DPrimitive):
     wrapper_class = X3DHTML.Color
     def __init__(self, colors, id=None, **etc):
+        """
+        **LLM Docstring**
+
+        Hold a set of per-vertex colors as an X3D color node.
+
+        :param colors: the colors
+        :param id: the node id
+        :param etc: extra options
+        """
         super().__init__(color_list=colors, id=id, **etc)
     def split_opts(self, opts:dict):
+        """
+        **LLM Docstring**
+
+        Split options for the color node (colors aren't material properties).
+
+        :param opts: the options
+        :type opts: dict
+        :return: `(object_opts, appearance_opts)`
+        :rtype: tuple
+        """
         base_opts, appearance_opts = super().split_opts(opts)
         base_opts['color'] = self.prep_color(base_opts.pop('color_list'))
         return base_opts, appearance_opts
     @classmethod
     def prep_color(cls, points):
+        """
+        **LLM Docstring**
+
+        Normalize color values into the X3D color format.
+
+        :param points: the colors
+        :return: the prepared colors
+        """
         if isinstance(points, str):
             points = X3DOptionsSet.parse_color(points)[0]
         elif isinstance(points[0], str):
@@ -967,15 +1546,50 @@ class X3DSwitch(X3DPrimitive):
 class X3DGeometryObject(X3DPrimitive):
     wrapper_class = X3DHTML.Shape
     def __init__(self, *args, id=None, **opts):
+        """
+        **LLM Docstring**
+
+        Set up a geometry object, splitting the material options out and preparing the geometry options.
+
+        :param args: the geometry-defining arguments
+        :param id: the object id
+        :param opts: the geometry and material options
+        """
         geom_opts, self.material_opts = self.split_opts(opts)
         self.geometry_opts = self.prep_geometry_opts(*args, **geom_opts)
         super().__init__(id=id)
     def get_interpolated_attributes(self):
+        """
+        **LLM Docstring**
+
+        Return the geometry plus material attributes used for animation.
+
+        :return: the attributes
+        :rtype: dict
+        """
         return dict(self.geometry_opts, **self.material_opts)
     @abc.abstractmethod
     def prep_geometry_opts(self, *args, **opts) -> dict:
+        """
+        **LLM Docstring**
+
+        Abstract: build the geometry options for this shape from its defining arguments.
+
+        :param args: the shape arguments
+        :param opts: extra options
+        :return: the geometry options
+        :rtype: dict
+        """
         ...
     def create_tag_object(self, **core_opts):
+        """
+        **LLM Docstring**
+
+        Build the core geometry tag element from the core options.
+
+        :param core_opts: the core geometry options
+        :return: the geometry element
+        """
         return self.tag_class(**core_opts)
     def create_object(self,
                       translation=None,
@@ -985,6 +1599,23 @@ class X3DGeometryObject(X3DPrimitive):
                       up_vector=None,
                       bbox_center=None,
                       **core_opts):
+        """
+        **LLM Docstring**
+
+        Build the geometry element together with its transform (translation/rotation/
+        scale), computing the rotation needed to align the shape's up-vector with a
+        supplied normal.
+
+        :param translation: the translation
+        :param rotation: the base rotation (axis-angle)
+        :param scale: the scale
+        :param normal: a normal to orient the shape toward
+        :param up_vector: the shape's reference up-vector
+        :param bbox_center: the bounding-box center
+        :param core_opts: the core geometry options
+        :return: `(geometry_element, transform_dict_or_None)`
+        :rtype: tuple
+        """
         core_opts['id'] = core_opts.get('id', self.id)
         base_obj = self.create_tag_object(**core_opts)
         tf = {}
@@ -1018,6 +1649,16 @@ class X3DGeometryObject(X3DPrimitive):
         # base_obj = X3DHTML.Transform(base_obj, translation=translation, rotation=rotation, scale=scale)
         return base_obj, tf
     def get_rotation(self, axis, up_vector=None):
+        """
+        **LLM Docstring**
+
+        Compute the axis-angle rotation that aligns an up-vector with a target axis (and the axis norm).
+
+        :param axis: the target axis
+        :param up_vector: the reference up-vector
+        :return: `(axis_angle_rotation, axis_norm)`
+        :rtype: tuple
+        """
         if up_vector is None:
             up_vector = [0, 1, 0]
         angs, crosses, norms = nput.vec_angles(up_vector, axis, return_crosses=True, return_norms=True)
@@ -1028,11 +1669,27 @@ class X3DGeometryObject(X3DPrimitive):
 
     transform_props = ("translation", "rotation", "scale", "bboxcenter")
     def get_prop_node_id(self, prop_name):
+        """
+        **LLM Docstring**
+
+        Return the node id carrying a property, routing transform properties to the transform node.
+
+        :param prop_name: the property name
+        :return: the node id
+        :rtype: str
+        """
         if prop_name in self.transform_props:
             return self.id + "-transform"
         else:
             return self.id
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render the geometry to its X3D DOM element, wrapping it in its appearance and transform.
+
+        :return: the X3D element
+        """
         # obj_opts, material_opts = self.split_opts(self.opts)
         # kids = [k.to_x3d() for k in self.children]
         core, tf = self.create_object(**self.geometry_opts)
@@ -1046,10 +1703,39 @@ class X3DGeometryObject(X3DPrimitive):
 class X3DGeometryGroup(X3DGeometryObject):
     @abc.abstractmethod
     def prep_geometry_opts(self, *args, **opts) -> list[dict]:
+        """
+        **LLM Docstring**
+
+        Abstract: build a list of per-instance geometry option dicts for this (possibly batched) shape.
+
+        :param args: the shape arguments
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         ...
     def get_interpolated_attributes(self):
+        """
+        **LLM Docstring**
+
+        Return the first instance's geometry plus material attributes used for animation.
+
+        :return: the attributes
+        :rtype: dict
+        """
         return dict(self.geometry_opts[0], **self.material_opts)
     def prep_vecs(self, vecs, nstruct=None):
+        """
+        **LLM Docstring**
+
+        Broadcast a vector (or `None`) across `nstruct` instances.
+
+        :param vecs: the vector(s) (or `None`)
+        :param nstruct: the number of instances
+        :type nstruct: int | None
+        :return: the per-instance vectors
+        :rtype: np.ndarray | list
+        """
         if vecs is None:
             return [None] * nstruct
         else:
@@ -1060,6 +1746,17 @@ class X3DGeometryGroup(X3DGeometryObject):
                 vecs = np.broadcast_to(vecs, (nstruct, vecs.shape[-1]))
         return vecs
     def prep_mats(self, mats, nstruct=None):
+        """
+        **LLM Docstring**
+
+        Broadcast a matrix (or `None`) across `nstruct` instances.
+
+        :param mats: the matrix/matrices (or `None`)
+        :param nstruct: the number of instances
+        :type nstruct: int | None
+        :return: the per-instance matrices
+        :rtype: np.ndarray | list
+        """
         if mats is None:
             return [None] * nstruct
         else:
@@ -1070,6 +1767,17 @@ class X3DGeometryGroup(X3DGeometryObject):
                 mats = np.broadcast_to(mats, (nstruct,) + mats.shape[-2:])
             return mats
     def prep_const(self, const, nstruct):
+        """
+        **LLM Docstring**
+
+        Broadcast a scalar constant (or `None`) across `nstruct` instances.
+
+        :param const: the constant (or `None`)
+        :param nstruct: the number of instances
+        :type nstruct: int
+        :return: the per-instance constants
+        :rtype: np.ndarray | list
+        """
         if const is None:
             return [None] * nstruct
         else:
@@ -1079,6 +1787,13 @@ class X3DGeometryGroup(X3DGeometryObject):
             const = np.broadcast_to(const, (nstruct,))
             return const
     def to_x3d(self):
+        """
+        **LLM Docstring**
+
+        Render every instance to its X3D element (wrapped in appearance/transform), grouping them under a single group node.
+
+        :return: the X3D element
+        """
         kids = [self.create_object(**g) for g in self.geometry_opts]
         appearance = self.get_appearance(self.material_opts)
         objs = []
@@ -1104,6 +1819,17 @@ class X3DSphere(X3DGeometryGroup):
     tag_class = X3DHTML.Sphere
 
     def prep_geometry_opts(self, centers, radius=1, **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for spheres at the given centers.
+
+        :param centers: the sphere centers
+        :param radius: the sphere radius/radii
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         centers = self.prep_vecs(centers)
         rads = self.prep_const(radius, centers.shape[0])
         return [{"translation":c, "radius":r, **opts} for c,r in zip(centers, rads)]
@@ -1112,6 +1838,19 @@ class X3DBox(X3DGeometryGroup):
     tag_class = X3DHTML.Box
 
     def prep_geometry_opts(self, starts, ends, normal=None, rotation=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for boxes spanning the given corner pairs.
+
+        :param starts: the min corners
+        :param ends: the max corners
+        :param normal: a normal to orient the boxes toward
+        :param rotation: a base rotation
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         starts = self.prep_vecs(starts)
         ends = self.prep_vecs(ends)
         if normal is None:
@@ -1137,6 +1876,18 @@ class X3DCylinder(X3DGeometryGroup):
     tag_class = X3DHTML.Cylinder
 
     def prep_geometry_opts(self, starts, ends, radius=1, **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for cylinders between the given endpoints.
+
+        :param starts: the start points
+        :param ends: the end points
+        :param radius: the cylinder radius/radii
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         starts = self.prep_vecs(starts)
         ends = self.prep_vecs(ends)
         radius = self.prep_const(radius, starts.shape[0])
@@ -1153,6 +1904,19 @@ class X3DCone(X3DGeometryGroup):
     tag_class = X3DHTML.Cone
 
     def prep_geometry_opts(self, starts, ends, radius=1, top_radius=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for cones (or truncated cones) between the given endpoints.
+
+        :param starts: the base points
+        :param ends: the apex points
+        :param radius: the base radius/radii
+        :param top_radius: the top radius (for truncated cones)
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         starts = self.prep_vecs(starts)
         ends = self.prep_vecs(ends)
         radius = self.prep_const(radius, starts.shape[0])
@@ -1182,6 +1946,14 @@ class X3DArrow(X3DGroup):
                  cylinder_class=None,
                  arrowhead_class=None,
                  **opts):
+        """
+        **LLM Docstring**
+
+        Build an arrow (a cylinder shaft plus a cone head) between two endpoints.
+
+        :param args: the arrow-defining arguments (endpoints, etc.)
+        :param opts: styling and geometry options
+        """
         if arrowhead_class is None:
             arrowhead_class = self.arrowhead_class
         if cylinder_class is None:
@@ -1220,6 +1992,15 @@ class X3DCappedCylinder(X3DGroup):
                  cap_offset=0,
                  use_caps=(True, True),
                  **opts):
+        """
+        **LLM Docstring**
+
+        Build a capped cylinder (a cylinder plus end-cap spheres/disks) between two
+        endpoints.
+
+        :param args: the cylinder-defining arguments
+        :param opts: styling and geometry options
+        """
         if cap_class is None:
             cap_class = self.cap_class
         if cylinder_class is None:
@@ -1246,6 +2027,19 @@ class X3DText(X3DGeometryGroup):
     tag_class = X3DHTML.Text
 
     def __init__(self, *args, billboard=True, solid=None, billboard_opts=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a text geometry, optionally billboarded to face the camera.
+
+        :param args: the text-defining arguments
+        :param billboard: face the camera
+        :type billboard: bool
+        :param solid: render single-sided
+        :param billboard_opts: options for the billboard
+        :type billboard_opts: dict | None
+        :param opts: extra options
+        """
         if solid is None:
             solid = bool(billboard)
         if billboard:
@@ -1254,11 +2048,35 @@ class X3DText(X3DGeometryGroup):
             self.wrapper_class = lambda *x,**y:X3DHTML.Billboard(X3DHTML.Shape(*x, **y), **billboard_opts)
         super().__init__(*args, solid=solid, **opts)
     def create_tag_object(self, font_style=None, **core_opts):
+        """
+        **LLM Docstring**
+
+        Build the text geometry tag with its font style.
+
+        :param font_style: the font styling
+        :type font_style: dict | None
+        :param core_opts: the core geometry options
+        :return: the text element
+        """
         body = []
         if font_style is not None:
             body.append(font_style)
         return self.tag_class(body, **core_opts)
     def prep_geometry_opts(self, centers, text, font_style=None, rotation=None, normal=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for text labels at the given centers.
+
+        :param centers: the label positions
+        :param text: the label text
+        :param font_style: the font styling
+        :param rotation: a base rotation
+        :param normal: a normal to orient the text toward
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         centers = self.prep_vecs(centers)
         rotation = self.prep_vecs(rotation, len(centers))
         normal = self.prep_vecs(normal, len(centers))
@@ -1289,6 +2107,18 @@ class X3DTorus(X3DGeometryGroup):
                            normal=None, rotation=None, scale=None,
                            angle=None,
                            **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for tori at the given centers.
+
+        :param centers: the torus centers
+        :param radius: the outer radius/radii
+        :param inner_radius: the inner (tube) radius
+        :param opts: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         if angle is not None and angle < 0:
             if rotation is None:
                 rotation = [0, 0, 1, 0]
@@ -1320,11 +2150,31 @@ class X3DTorus(X3DGeometryGroup):
 class X3DCoordinatesWrapper(X3DGeometryGroup):
     tag_class: X3DHTML.X3DElement
     def create_tag_object(self, *, point, color=None, **etc):
+        """
+        **LLM Docstring**
+
+        Build the geometry tag wrapping a coordinate (and optional color) node.
+
+        :param point: the coordinate points
+        :param color: the per-vertex colors
+        :param etc: extra options
+        :return: the geometry element
+        """
         body = [X3DCoordinate(point, id=self.id+"-coord").to_x3d()]
         if color is not None:
             body.append(X3DColor(color, id=self.id+'-color').to_x3d())
         return self.tag_class(body, **etc)
     def prep_geometry_opts(self, point, **etc):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for a coordinate-backed geometry.
+
+        :param point: the coordinate points
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         return [
             dict({"translation":"0,0,0", "point":point}, **etc)
         ]
@@ -1332,6 +2182,17 @@ class X3DCoordinatesWrapper(X3DGeometryGroup):
 class X3DVertexCoordinatesWrapper(X3DCoordinatesWrapper):
     tag_class: X3DHTML.X3DElement
     def prep_geometry_opts(self, point, vertex_colors=None, **etc):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for a vertex-coordinate geometry with optional per-vertex colors.
+
+        :param point: the vertex points
+        :param vertex_colors: the per-vertex colors
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         base_dict = super().prep_geometry_opts(point, **etc)
         if vertex_colors is not None:
             if isinstance(vertex_colors[0], str) or nput.is_numeric(vertex_colors[0][0]):
@@ -1346,6 +2207,18 @@ class X3DVertexCoordinatesWrapper(X3DCoordinatesWrapper):
 
 class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
     def prep_geometry_opts(self, point, indices, vertex_colors=None, **etc):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for an indexed-coordinate geometry.
+
+        :param point: the coordinate points
+        :param indices: the connectivity indices
+        :param vertex_colors: the per-vertex colors
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         base_dict = dict(
                 {
                     'index': " ".join(np.asanyarray(indices).flatten().astype(int).astype(str))
@@ -1359,6 +2232,18 @@ class X3DIndexedCoordinatesWrapper(X3DCoordinatesWrapper):
 
 class X3DGeometry2DGroup(X3DGeometryGroup):
     def __init__(self, *args, billboard=False, billboard_opts=None, **opts):
+        """
+        **LLM Docstring**
+
+        Set up a 2D geometry group, optionally billboarded to face the camera.
+
+        :param args: the geometry-defining arguments
+        :param billboard: face the camera
+        :type billboard: bool
+        :param billboard_opts: billboard options
+        :type billboard_opts: dict | None
+        :param opts: extra options
+        """
         if billboard:
             if billboard_opts is None:
                 billboard_opts = {'axisOfRotation':'0 0 0'}
@@ -1366,12 +2251,30 @@ class X3DGeometry2DGroup(X3DGeometryGroup):
         super().__init__(*args, **opts)
     @classmethod
     def prep_2d_coords(cls, coords):
+        """
+        **LLM Docstring**
+
+        Normalize coordinates into the 2D geometry point format.
+
+        :param coords: the coordinates
+        :return: the prepared 2D coordinates
+        """
         coords = np.asanyarray(coords)
         coords = coords.reshape(-1, coords.shape[-1])
         if coords.shape[-1] == 2:
             coords = np.pad(coords, [[0, 0], [0, 1]])
         return coords
     def prep_geometry_opts(self, center, **etc):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for a 2D geometry at the given center.
+
+        :param center: the geometry center
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         center = self.prep_2d_coords(center)
         return [
             {
@@ -1384,6 +2287,19 @@ class X3DGeometry2DGroup(X3DGeometryGroup):
 class X3DRectangle2D(X3DGeometry2DGroup):
     tag_class = X3DHTML.Rectangle2D
     def prep_geometry_opts(self, left_endpoints, right_endpoints, normal=None, rotation=None, **etc):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for 2D rectangles spanning the given endpoint pairs.
+
+        :param left_endpoints: the min corners
+        :param right_endpoints: the max corners
+        :param normal: a normal to orient toward
+        :param rotation: a base rotation
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         left_endpoints = self.prep_2d_coords(left_endpoints)
         right_endpoints = self.prep_2d_coords(right_endpoints)
         center = (left_endpoints + right_endpoints ) / 2
@@ -1415,6 +2331,17 @@ class X3DCircle2D(X3DGeometry2DGroup):
                            normal=None, rotation=None, scale=None,
                            angle=None,
                            **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for 2D circles at the given centers.
+
+        :param centers: the circle centers
+        :param radius: the radius/radii
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         centers = self.prep_vecs(centers)
         normal = self.prep_vecs(normal, centers.shape[0])
         if angle is not None and angle < 0:
@@ -1449,6 +2376,18 @@ class X3DDisk2D(X3DGeometry2DGroup):
                            normal=None, rotation=None, scale=None,
                            angle=None,
                            **opts):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for 2D disks (or annuli) at the given centers.
+
+        :param centers: the disk centers
+        :param radius: the outer radius/radii
+        :param inner_radius: the inner radius (for annuli)
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         centers = self.prep_vecs(centers)
         normal = self.prep_vecs(normal, centers.shape[0])
         if angle is not None and angle < 0:
@@ -1490,6 +2429,17 @@ class X3DIndexedTriangleSet(X3DIndexedCoordinatesWrapper):
 class X3DIndexedLineSet(X3DIndexedCoordinatesWrapper):
     tag_class = X3DHTML.IndexedLineSet
     def prep_geometry_opts(self, point, indices, **etc):
+        """
+        **LLM Docstring**
+
+        Build the per-instance geometry options for an indexed line set.
+
+        :param point: the coordinate points
+        :param indices: the line connectivity indices
+        :param etc: extra options
+        :return: the per-instance geometry options
+        :rtype: list
+        """
         opts = super().prep_geometry_opts(point, indices, **etc)
         opts[0]['coordIndex'] = opts[0].pop('index')
         return opts
@@ -1501,6 +2451,22 @@ class X3DIndexedFaceSet(X3DIndexedCoordinatesWrapper):
 class X3DGenericAnimator(X3DGroup):
     def __init__(self, *animation_data, id=None, animation_duration=2, running=True, slider=False,
                  **opts):
+        """
+        **LLM Docstring**
+
+        Build an animator group: the animated objects, a time clock/sequencer, the
+        per-property interpolators/sequencers, and an optional frame slider.
+
+        :param animation_data: the animation data (interpreted by the subclass)
+        :param id: the animator id (auto-generated if omitted)
+        :param animation_duration: the loop duration in seconds
+        :type animation_duration: float
+        :param running: start the animation running
+        :type running: bool
+        :param slider: include a frame slider
+        :type slider: bool
+        :param opts: extra options
+        """
         self.uuid = str(uuid.uuid4())
         if id is None:
             id = f"animation-{self.uuid}"
@@ -1528,10 +2494,37 @@ class X3DGenericAnimator(X3DGroup):
     @classmethod
     @abc.abstractmethod
     def get_animation_objects(cls, animation_data, id) -> tuple[list[X3DObject], dict, int]:
+        """
+        **LLM Docstring**
+
+        Abstract: build the `(objects, per-property attribute sets, frame count)` for the animation.
+
+        :param animation_data: the animation data
+        :param id: the animator id
+        :return: `(objects, attribute_sets, nframes)`
+        :rtype: tuple
+        """
         ...
 
     @classmethod
     def build_animator_group(cls, attribute_sets, nframes, *, uuid, running=True, animation_duration=2):
+        """
+        **LLM Docstring**
+
+        Build the animation driver nodes: a time sensor, an integer sequencer keyed to the
+        frames, the routing between them, and the per-property animation controls.
+
+        :param attribute_sets: the per-object property attribute sets
+        :param nframes: the number of frames
+        :type nframes: int
+        :param uuid: the animation uuid
+        :param running: start running
+        :type running: bool
+        :param animation_duration: the loop duration in seconds
+        :type animation_duration: float
+        :return: the driver nodes
+        :rtype: list
+        """
         key_frames = np.linspace(0, 1, nframes+1)[:-1]
         base = [
             X3DHTML.TimeSensor(id=f'animation-clock-{uuid}', cycleInterval=animation_duration, loop=True,
@@ -1555,6 +2548,16 @@ class X3DGenericAnimator(X3DGroup):
 
     @classmethod
     def resolve_control_type(cls, name, values):
+        """
+        **LLM Docstring**
+
+        Decide whether a property animates by discrete indexing or by interpolation (from its value sequence).
+
+        :param name: the property name
+        :param values: the per-frame values
+        :return: `'indexed'` or `'interpolated'`
+        :rtype: str
+        """
         if np.all(values == np.arange(1, len(values)+1)):
             return 'indexed'
         else:
@@ -1568,6 +2571,19 @@ class X3DGenericAnimator(X3DGroup):
     }
     @classmethod
     def resolve_interpolator_type(cls, name, values):
+        """
+        **LLM Docstring**
+
+        Determine the X3D interpolator class (and frame count) for a property from its
+        name and the shape/type of its values.
+
+        :param name: the property name
+        :type name: str
+        :param values: the per-frame values
+        :return: `(interpolator_class, nframes)`
+        :rtype: tuple
+        :raises ValueError: if the interpolator can't be determined
+        """
         nl = name.lower()
         for k,t in cls.interpolator_map.items():
             if any(kl in nl for kl in k):
@@ -1615,6 +2631,16 @@ class X3DGenericAnimator(X3DGroup):
                                           id,
                                           clockId,
                                           targetId):
+        """
+        **LLM Docstring**
+
+        Build a `requestAnimationFrame`-driven JavaScript interpolator for animating a
+        per-vertex color array (which X3DOM can't interpolate natively).
+
+        :param args: the interpolator-defining arguments
+        :param kwargs: interpolator options
+        :return: the interpolator nodes/scripts
+        """
         key = np.asanyarray(key).tolist()
         keyValue = np.asanyarray(keyValue).tolist()
 
@@ -1702,6 +2728,15 @@ class X3DGenericAnimator(X3DGroup):
                                      id,
                                      clockId,
                                      targetId):
+        """
+        **LLM Docstring**
+
+        Build the color-array interpolator for animating per-vertex colors across frames.
+
+        :param args: the interpolator-defining arguments
+        :param kwargs: interpolator options
+        :return: the interpolator nodes
+        """
         color_driver_id = id
         driver = X3DHTML.CoordinateInterpolator(key=key, keyValue=keyValue,
                                                 id=color_driver_id,
@@ -1751,6 +2786,22 @@ requestAnimationFrame(tick)
 
     @classmethod
     def prep_interpolator(cls, interpolator_type, name, values, nframes, id, clock_id):
+        """
+        **LLM Docstring**
+
+        Build the interpolator node (and its routing) for one animated property, keyed to
+        the frames and wired to the target node.
+
+        :param interpolator_type: the interpolator class
+        :param name: the property name
+        :param values: the per-frame values
+        :param nframes: the number of frames
+        :type nframes: int
+        :param id: the target node id
+        :param clock_id: the animation clock id
+        :return: the interpolator nodes
+        :rtype: list
+        """
         target_id = id
         convert_values = True
         if interpolator_type == X3DHTML.ColorInterpolator:
@@ -1787,6 +2838,21 @@ requestAnimationFrame(tick)
 
     @classmethod
     def create_animation_control(cls, name, *, id, uuid, type=None, values=None, interpolator_type=None):
+        """
+        **LLM Docstring**
+
+        Build the animation control (a sequencer or interpolator, plus routing) for one
+        property, choosing indexed vs interpolated animation.
+
+        :param name: the property name
+        :param id: the target node id
+        :param uuid: the animation uuid
+        :param type: the control type (inferred if omitted)
+        :param values: the per-frame values
+        :param interpolator_type: an explicit interpolator class
+        :return: the control nodes
+        :rtype: list
+        """
         if values is None:
             if type is None:
                 raise ValueError("`values` or `type` must be passed")
@@ -1828,6 +2894,17 @@ requestAnimationFrame(tick)
 class X3DListAnimator(X3DGenericAnimator):
     @classmethod
     def get_animation_objects(self, frames, id):
+        """
+        **LLM Docstring**
+
+        Build a frame-switching animation: wrap the frames in an X3D `Switch` and animate
+        its `whichChoice` by discrete index.
+
+        :param frames: the per-frame objects
+        :param id: the animator id
+        :return: `(objects, attribute_sets, nframes)`
+        :rtype: tuple
+        """
         anim_frames = X3DSwitch(
                 *frames,
                 id=id+"-switch",
@@ -1844,6 +2921,20 @@ class X3DListAnimator(X3DGenericAnimator):
 class X3DInterpolatingAnimator(X3DGenericAnimator):
     @classmethod
     def get_animation_objects(cls, object_attr_sets:dict[X3DObject, dict], id):
+        """
+        **LLM Docstring**
+
+        Build an interpolating animation from a mapping of objects to their per-property
+        frame values, validating a consistent frame count and resolving each property's
+        target node.
+
+        :param object_attr_sets: the `{object: {property: per_frame_values}}` mapping
+        :type object_attr_sets: dict
+        :param id: the animator id
+        :return: `(objects, attribute_sets, nframes)`
+        :rtype: tuple
+        :raises ValueError: if the properties have mismatched frame counts
+        """
         if isinstance(object_attr_sets, tuple) and len(object_attr_sets) == 1:
             object_attr_sets = object_attr_sets[0]
         objects = []
@@ -1871,6 +2962,19 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
 
     @classmethod
     def frame_diffs(cls, ref:X3DObject|X3DHTML.X3DElement, test:X3DObject|X3DHTML.X3DElement, *rest:X3DObject|X3DHTML.X3DElement):
+        """
+        **LLM Docstring**
+
+        Walk several X3D object trees in parallel and find which nodes/attributes differ
+        across frames, separating the static nodes from the per-node attribute changes.
+
+        :param ref: the reference (first-frame) tree
+        :param test: the second-frame tree
+        :param rest: the remaining frames' trees
+        :return: `(static_nodes, {node: per_frame_attribute_values})`
+        :rtype: tuple
+        :raises ValueError: if the trees have mismatched structure
+        """
         statics = []
         changes = {}
         queue = collections.deque([(ref, test) + rest])
@@ -1942,6 +3046,17 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
 
     @classmethod
     def from_frames(cls, frames:list[X3DObject|X3DHTML.X3DElement], **opts):
+        """
+        **LLM Docstring**
+
+        Build an interpolating animation from a list of frame trees by diffing them:
+        static content is kept as-is and only the changing attributes are animated.
+
+        :param frames: the per-frame object trees
+        :type frames: list
+        :param opts: options for the animator
+        :return: the animation (or the single frame if nothing changes)
+        """
         static_objects, interpolated_objects = cls.frame_diffs(*frames)
         if len(interpolated_objects) == 0:
             return frames[0]

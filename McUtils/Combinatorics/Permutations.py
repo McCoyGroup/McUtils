@@ -32,6 +32,15 @@ __all__ = [
 _infer_dtype = infer_int_dtype
 
 def _infer_nearest_pos_neg_dtype(og_dtype):
+    """
+    **LLM Docstring**
+
+    Return the smallest signed integer dtype that can hold the (positive) values of an
+    unsigned dtype, so negatives can be represented.
+
+    :param og_dtype: the original dtype
+    :return: the nearest signed dtype
+    """
     if og_dtype == np.uint8:
         return np.int16
     elif og_dtype == np.uint16:
@@ -44,6 +53,17 @@ def _infer_nearest_pos_neg_dtype(og_dtype):
         return og_dtype
 
 def _as_pos_neg_dtype(ar):
+    """
+    **LLM Docstring**
+
+    Cast an array to a signed dtype capable of holding negatives (via
+    `_infer_nearest_pos_neg_dtype`), returning it unchanged if already signed.
+
+    :param ar: the array
+    :type ar: np.ndarray
+    :return: the (possibly recast) array
+    :rtype: np.ndarray
+    """
     dt = _infer_nearest_pos_neg_dtype(ar.dtype)
     if dt != ar.dtype:
         return ar.astype(dt)
@@ -53,11 +73,36 @@ def _as_pos_neg_dtype(ar):
 # _infer_dtype = _infer_dtype#lambda why: 'int64' # makes my life a little easier right now...
 
 def _smaller_counts(perms, i):
+    """
+    **LLM Docstring**
+
+    For each row, count how many entries after position `i` are smaller than the entry
+    at `i` (the Lehmer-code digit for that position).
+
+    :param perms: the permutations, shape `(nperms, ndim)`
+    :type perms: np.ndarray
+    :param i: the position
+    :type i: int
+    :return: the per-row counts
+    :rtype: np.ndarray
+    """
     return np.sum(
         perms[:, i+1:] < perms[:, (i,)],
         axis=1
     )
 def lehmer_encode(perms, dtype=None):
+    """
+    **LLM Docstring**
+
+    Encode permutations as their Lehmer-code integers (a factorial-base ranking),
+    choosing an integer or object dtype large enough for the factorials.
+
+    :param perms: the permutations, shape `(..., ndim)`
+    :type perms: np.ndarray
+    :param dtype: the output dtype (inferred if omitted)
+    :return: the Lehmer codes, shape `(...,)`
+    :rtype: np.ndarray
+    """
     perms = np.asanyarray(perms)
     base_shape = perms.shape[:-1]
     ndim = perms.shape[-1]
@@ -74,6 +119,20 @@ def lehmer_encode(perms, dtype=None):
     ]
     return np.sum(code_counts, axis=0).reshape(base_shape)
 def lehmer_decode(ndim, codes, dtype=None):
+    """
+    **LLM Docstring**
+
+    Decode Lehmer-code integers back into their permutations (the inverse of
+    `lehmer_encode`).
+
+    :param ndim: the permutation length
+    :type ndim: int
+    :param codes: the Lehmer codes
+    :type codes: np.ndarray
+    :param dtype: the output dtype
+    :return: the permutations, shape `(..., ndim)`
+    :rtype: np.ndarray
+    """
     codes = np.asanyarray(codes)
     base_shape = codes.shape
     codes = codes.reshape(-1,)
@@ -111,6 +170,13 @@ def lehmer_decode(ndim, codes, dtype=None):
 class IntegerPartitioner:
 
     def __init__(self):
+        """
+        **LLM Docstring**
+
+        Singleton class: instantiation is disallowed (use the classmethods).
+
+        :raises NotImplementedError: always
+        """
         raise NotImplementedError('{} is a singleton class'.format(
             type(self).__name__
         ))
@@ -118,6 +184,21 @@ class IntegerPartitioner:
     _partition_counts = None
     @classmethod
     def _manage_counts_array(cls, n, M, l):
+        """
+        **LLM Docstring**
+
+        Ensure the cached 3-D partition-count table is at least `(n, M, l)` in size,
+        growing it (over-allocating by 2x to amortize) along whichever axes are too small.
+
+        :param n: the required integer size
+        :type n: int
+        :param M: the required max-part size
+        :type M: int
+        :param l: the required max-length size
+        :type l: int
+        :return: whether the table was grown
+        :rtype: bool
+        """
         grew = False
         if cls._partition_counts is None:
             grew = True
@@ -516,6 +597,18 @@ class UniqueSubsets:
 
     @classmethod
     def num_unique_subsets(cls, k, partition):
+        """
+        **LLM Docstring**
+
+        Count the number of ways to split `k` symbols into ordered blocks of the given
+        sizes (a product of binomial coefficients).
+
+        :param k: the total number of symbols
+        :type k: int
+        :param partition: the block sizes
+        :return: the number of unique subset-splittings
+        :rtype: int
+        """
         cs = np.cumsum([0] + list(partition))
         return np.prod([
             math.comb(k - s, n)
@@ -524,6 +617,17 @@ class UniqueSubsets:
 
     @classmethod
     def unique_subsets(cls, partition):
+        """
+        **LLM Docstring**
+
+        Enumerate every way to partition `sum(partition)` symbols into ordered blocks of
+        the given sizes, returning them as rows of a storage array (built breadth-first
+        via a work queue).
+
+        :param partition: the block sizes
+        :return: the enumerated subset-splittings
+        :rtype: np.ndarray
+        """
         if len(partition) == 1:
             return np.array([np.arange(partition[0])])
         else:
@@ -594,6 +698,16 @@ class UniquePermutations:
     where we don't want to instantiate a permutations object for every partition
     """
     def __init__(self, partition):
+        """
+        **LLM Docstring**
+
+        Set up the unique-permutation generator for a multiset partition, sorting the
+        partition into descending order (recording the sorting/inverse) and computing the
+        distinct values and their multiplicities.
+
+        :param partition: the multiset (the values to permute)
+        :type partition: np.ndarray
+        """
         partition = np.asanyarray(partition)
         self.sorting = np.flip(np.argsort(partition))
         if np.equal(self.sorting, np.arange(len(partition))).all():
@@ -610,6 +724,18 @@ class UniquePermutations:
 
     @classmethod
     def get_permutation_class_counts(cls, partition, sort_by_counts=False):
+        """
+        **LLM Docstring**
+
+        Return the distinct values of a partition and their multiplicities, sorted by
+        value (descending) or by count.
+
+        :param partition: the multiset partition
+        :param sort_by_counts: sort by multiplicity rather than by value
+        :type sort_by_counts: bool
+        :return: `(values, counts)`
+        :rtype: tuple
+        """
         v, c = np.unique(partition, return_counts=True)
         if sort_by_counts:
             s = np.argsort(c)
@@ -635,6 +761,16 @@ class UniquePermutations:
     _binoms = None
     @classmethod
     def get_binoms(cls, n):
+        """
+        **LLM Docstring**
+
+        Return the cached `Binomial` table, (re)building it if it isn't large enough for
+        `n`.
+
+        :param n: the required size
+        :type n: int
+        :return: the binomial table
+        """
         from .Sequences import Binomial
         if cls._binoms is None or cls._binoms.shape[0] < n:
             cls._binoms = Binomial(n)
@@ -1249,6 +1385,28 @@ class UniquePermutations:
     @staticmethod
     @jit(nopython=True, cache=True)
     def _fill_permutations_from_indices(perms, indices, counts, classes, dim, num_permutations, block_size):
+        """
+        **LLM Docstring**
+
+        Fill a block of permutations directly from their (sorted) unique-permutation
+        indices, walking a factorial-base tree per block and reusing shared prefixes
+        (numba-parallel over blocks).
+
+        :param perms: the output permutation array (filled in place)
+        :type perms: np.ndarray
+        :param indices: the permutation indices to fill
+        :type indices: np.ndarray
+        :param counts: the per-class multiplicities
+        :type counts: np.ndarray
+        :param classes: the distinct values
+        :type classes: np.ndarray
+        :param dim: the permutation length
+        :type dim: int
+        :param num_permutations: the total number of unique permutations
+        :type num_permutations: int
+        :param block_size: the per-block chunk size
+        :type block_size: int
+        """
 
         # we make a constant-time lookup for what a value maps to in
         # terms of position in the counts array
@@ -1416,6 +1574,19 @@ class UniquePermutations:
 
     @classmethod
     def get_standard_permutation(cls, counts, classes):
+        """
+        **LLM Docstring**
+
+        Build the canonical (sorted, descending) representative permutation for a set of
+        class counts.
+
+        :param counts: the per-class multiplicities
+        :type counts: np.ndarray
+        :param classes: the distinct values
+        :type classes: np.ndarray
+        :return: the standard permutation
+        :rtype: np.ndarray
+        """
         return np.concatenate(
                                 [np.full(counts[l], classes[l], dtype=classes.dtype) for l in range(len(counts)) if counts[l] > 0]
                             )
@@ -1424,6 +1595,25 @@ class UniquePermutations:
     @staticmethod
     @jit(nopython=True, cache=True)
     def _walk_perm_generator(counts, dim, num_permutations, indices, include_positions):
+        """
+        **LLM Docstring**
+
+        Generate the unique permutations at a set of indices by walking the factorial-base
+        permutation tree, backtracking to the shared prefix between successive indices.
+
+        :param counts: the per-class multiplicities
+        :type counts: np.ndarray
+        :param dim: the permutation length
+        :type dim: int
+        :param num_permutations: the total number of unique permutations
+        :type num_permutations: int
+        :param indices: the indices to generate
+        :type indices: np.ndarray
+        :param include_positions: also yield the per-class position map
+        :type include_positions: bool
+        :return: a generator over the permutations
+        :rtype: Iterator
+        """
 
         tree_data = np.zeros((dim, 2), dtype=np.int64)
         depth = 0  # where we're currently writing
@@ -1767,6 +1957,19 @@ class IntegerPartitioner2D:
     partition_data = {}
     @classmethod
     def _enumerate_subtrees(self, new_boxes, new_balls, step):
+        """
+        **LLM Docstring**
+
+        Enumerate the subtrees for distributing `new_balls` into `new_boxes` after taking
+        one step, sorting the balls (and undoing the sort on the results) and dropping
+        exhausted (zero-count) balls.
+
+        :param new_boxes: the remaining box capacities
+        :param new_balls: the remaining ball counts
+        :param step: the step taken to reach this node
+        :return: the enumerated subtrees
+        :rtype: list
+        """
         subtrees = []
         m = len(new_balls)
         perm = np.argsort(-new_balls)  # TODO: don't need a full argsort when just modifiying one spot...
@@ -1821,6 +2024,21 @@ class IntegerPartitioner2D:
 
     @classmethod
     def get_partitions(cls, boxes, balls):
+        """
+        **LLM Docstring**
+
+        Enumerate all ways to distribute `balls` into `boxes` (a 2-D integer partition /
+        contingency-table enumeration), sorting both descending and undoing the sort on
+        the result.
+
+        :param boxes: the box capacities
+        :type boxes: np.ndarray
+        :param balls: the ball counts
+        :type balls: np.ndarray
+        :return: the enumerated distributions
+        :rtype: np.ndarray
+        :raises ValueError: if the ball and box totals differ
+        """
         boxes = np.asanyarray(boxes)
         balls = np.asanyarray(balls)
 
@@ -1852,6 +2070,16 @@ class UniquePartitions:
     Takes partitions of a set of ints with ordering
     """
     def __init__(self, partition):
+        """
+        **LLM Docstring**
+
+        Set up the unique-partition generator for a multiset, precomputing its unique
+        permutations and the per-value "follower" table used to enumerate ordered
+        splittings.
+
+        :param partition: the multiset to partition
+        :type partition: np.ndarray
+        """
         partition = np.asanyarray(partition)
         self.part = partition
         self.perms = UniquePermutations(np.sort(partition)).permutations()
@@ -1874,6 +2102,32 @@ class UniquePartitions:
                          return_indices=None, split_indices=None,
                          return_inverse=False, split_inverse=None
                          ):
+        """
+        **LLM Docstring**
+
+        Enumerate the ways to split a partition into blocks of the given sizes, optionally
+        returning the partitions, the selection indices, and/or the inverse mapping, and
+        optionally deduplicating and splitting the result per block.
+
+        :param partition: the multiset to split
+        :type partition: np.ndarray
+        :param sizes: the block sizes
+        :type sizes: np.ndarray
+        :param take_unique: deduplicate the splittings
+        :type take_unique: bool
+        :param split: split the result per block
+        :type split: bool
+        :param return_partitions: return the partition values
+        :type return_partitions: bool
+        :param return_indices: return the selection indices
+        :type return_indices: bool | None
+        :param split_indices: split the indices per block
+        :param return_inverse: return the inverse mapping
+        :type return_inverse: bool
+        :param split_inverse: split the inverse per block
+        :return: the requested partitions/indices/inverse
+        :raises ValueError: if nothing is requested or the options are inconsistent
+        """
         if not return_partitions and not return_indices and not return_inverse:
             raise ValueError("need to return _something_")
         if not return_partitions and take_unique:
@@ -1992,6 +2246,28 @@ class UniquePartitions:
                    return_partitions=True,
                    return_indices=False, split_indices=None,
                    return_inverse=False, split_inverse=None):
+        """
+        **LLM Docstring**
+
+        Enumerate the ways to split this multiset into blocks of the given sizes (a
+        front-end to `_take_partitions`).
+
+        :param sizes: the block sizes (must sum to the partition length)
+        :param take_unique: deduplicate the splittings
+        :type take_unique: bool
+        :param split: split the result per block
+        :type split: bool
+        :param return_partitions: return the partition values
+        :type return_partitions: bool
+        :param return_indices: return the selection indices
+        :type return_indices: bool
+        :param split_indices: split the indices per block
+        :param return_inverse: return the inverse mapping
+        :type return_inverse: bool
+        :param split_inverse: split the inverse per block
+        :return: the requested partitions/indices/inverse
+        :raises ValueError: if the sizes don't sum to the partition length
+        """
         if np.sum(sizes) != len(self.part):
             raise ValueError("sum of sizes must be length of partition")
         sizes = np.asanyarray(sizes).astype(int)
@@ -2039,6 +2315,18 @@ class IntegerPartitionPermutations:
     Provides tools for working with permutations of a given integer partition
     """
     def __init__(self, num, dim=None):
+        """
+        **LLM Docstring**
+
+        Set up the space of all permutations of every integer partition of `num`
+        (optionally padded to a fixed dimension), precomputing each partition's class
+        counts.
+
+        :param num: the integer being partitioned
+        :type num: int
+        :param dim: the (padded) permutation length (defaults to `num`)
+        :type dim: int | None
+        """
         self.int = num
         if dim is None:
             dim = num
@@ -2067,6 +2355,14 @@ class IntegerPartitionPermutations:
 
     @property
     def num_elements(self):
+        """
+        **LLM Docstring**
+
+        The total number of partition permutations in the space.
+
+        :return: the number of elements
+        :rtype: int
+        """
         return self._num_terms
 
     def get_partition_permutations(self, return_indices=False, dtype=None, flatten=False):
@@ -2307,11 +2603,30 @@ class IntegerPartitionPermutations:
         return cats
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation showing the integer, dimension, and element count.
+
+        :return: the representation
+        :rtype: str
+        """
         return "{}({}, dim={}, nels={})".format(type(self).__name__, self.int, self.dim, self.num_elements)
 
 class EmptyIntegerPartitionPermutations(IntegerPartitionPermutations):
 
     def __init__(self, num, dim=None):
+        """
+        **LLM Docstring**
+
+        Set up the degenerate partition-permutation space for `num == 0` (a single
+        all-zero permutation).
+
+        :param num: the integer (zero)
+        :type num: int
+        :param dim: the permutation length
+        :type dim: int | None
+        """
         self.int = num
         if dim is None:
             dim = 1
@@ -2418,6 +2733,14 @@ class SymmetricGroupGenerator:
         self._cumtotals = np.array([0])
 
     def __repr__(self):
+        """
+        **LLM Docstring**
+
+        Return a representation showing the dimension.
+
+        :return: the representation
+        :rtype: str
+        """
         return "{}({})".format(type(self).__name__, self.dim)
 
     def _get_partition_perms(self, iterable, ignore_negatives=False):
@@ -2455,6 +2778,14 @@ class SymmetricGroupGenerator:
         return t1, t2
 
     def load_to_size(self, size):
+        """
+        **LLM Docstring**
+
+        Generate partition permutations until the cumulative element count covers `size`.
+
+        :param size: the target cumulative size
+        :type size: int
+        """
         while self._cumtotals[-1] < size:
             # fills stuff up until we have everything covered
             self._get_partition_perms([1+len(self._partition_permutations)*2])
@@ -2477,6 +2808,15 @@ class SymmetricGroupGenerator:
             perms = np.concatenate([np.concatenate(x, axis=0) for x in perms], axis=0)
         return perms
     def num_terms(self, n):
+        """
+        **LLM Docstring**
+
+        Return the number of partition permutations at each requested integer sum.
+
+        :param n: the integer sum(s)
+        :return: the per-sum element counts
+        :rtype: list
+        """
         if isinstance(n, (int, np.integer)):
             n = [n]
         partitioners, _ = self._get_partition_perms(n)
@@ -2610,6 +2950,15 @@ class SymmetricGroupGenerator:
 
     class direct_sum_filter:
         def __init__(self, perms, inds):
+            """
+            **LLM Docstring**
+
+            Hold a filter over permutations for the direct-sum construction, indexing the
+            allowed indices by their permutation sum for fast pre-screening.
+
+            :param perms: the filter permutations (or `None`)
+            :param inds: the allowed indices
+            """
 
             self.perms = perms
             self.inds = unique(inds)[0]
@@ -2626,6 +2975,16 @@ class SymmetricGroupGenerator:
 
         @classmethod
         def from_perms(cls, parent, filter_perms):
+            """
+            **LLM Docstring**
+
+            Build a filter from a set of permutations, resolving them to indices via the
+            parent generator.
+
+            :param parent: the owning generator
+            :param filter_perms: the filter permutations
+            :return: the filter
+            """
 
             filter_perms = filter_perms
             filter_inds = parent.to_indices(filter_perms)
@@ -2634,11 +2993,29 @@ class SymmetricGroupGenerator:
 
         @classmethod
         def from_inds(cls, inds):
+            """
+            **LLM Docstring**
+
+            Build a filter directly from a set of indices (no permutations).
+
+            :param inds: the allowed indices
+            :return: the filter
+            """
 
             return cls(None, inds)
 
         @classmethod
         def from_data(cls, parent, filter_perms):
+            """
+            **LLM Docstring**
+
+            Build a filter from flexible input (an existing filter, permutations, indices, or
+            a `(perms, inds)` pair), inferring the structure.
+
+            :param parent: the owning generator
+            :param filter_perms: the filter data
+            :return: the filter (or `None`)
+            """
 
             if filter_perms is None or isinstance(filter_perms, cls):
                 return filter_perms
@@ -2689,6 +3066,19 @@ class SymmetricGroupGenerator:
     @staticmethod
     @jit(nopython=True, cache=True)
     def _get_filter_mask(new_rep_perm, cls_inds, can_be_negative, class_negs):
+        """
+        **LLM Docstring**
+
+        Build a boolean mask over a class's indices that drops entries which would produce
+        a negative in one of the positions that can go negative.
+
+        :param new_rep_perm: the candidate representative permutations
+        :param cls_inds: the class indices
+        :param can_be_negative: the positions that may go negative
+        :param class_negs: the per-position negative-index sets
+        :return: the keep mask
+        :rtype: np.ndarray
+        """
         # if we run into negatives we need to mask them out
         not_negs = np.full(len(cls_inds), True)#, dtype=bool)
         for j in can_be_negative:
@@ -2699,6 +3089,21 @@ class SymmetricGroupGenerator:
     @staticmethod
     @jit(nopython=True, cache=True)
     def _filter_negs_by_comp(comp, not_negs, idx, idx_starts, mask, perm_counts, start, end):
+        """
+        **LLM Docstring**
+
+        Apply a negative-filtering mask to the storage mask and decrement the affected
+        per-permutation counts.
+
+        :param comp: the surviving indices
+        :param not_negs: the keep mask
+        :param idx: the class index
+        :param idx_starts: the per-block storage offsets
+        :param mask: the storage mask (modified in place)
+        :param perm_counts: the per-permutation counts (modified in place)
+        :param start: the block start
+        :param end: the block end
+        """
         not_sel = np.where(np.logical_not(not_negs))[0]
         mask_inds = np.reshape(
             np.expand_dims(not_sel, 1) +
@@ -2718,6 +3123,28 @@ class SymmetricGroupGenerator:
                                 mask, can_be_negative,
                                 full_rep_changes, changed_positions
                                 ):
+        """
+        **LLM Docstring**
+
+        Filter out the permutations in a class that would introduce negatives, updating
+        the storage mask and counts accordingly.
+
+        :param i: the class position
+        :param idx: the class index
+        :param idx_starts: the per-block storage offsets
+        :param perms: the source permutations
+        :param new_rep_perm: the candidate representative permutations
+        :param storage: the permutation storage
+        :param ndim: the permutation length
+        :param cls_inds: the per-class index sets
+        :param class_negs: the per-position negative-index sets
+        :param perm_counts: the per-permutation counts (modified in place)
+        :param cum_counts: the cumulative counts
+        :param mask: the storage mask (modified in place)
+        :param can_be_negative: the positions that may go negative
+        :param full_rep_changes: the representative-change bookkeeping
+        :param changed_positions: the changed positions
+        """
         # if we run into negatives we need to mask them out
         if len(can_be_negative[i]) == 0:
             not_negs = np.full(len(cls_inds[i]), True)
@@ -2752,6 +3179,17 @@ class SymmetricGroupGenerator:
 
     @staticmethod
     def _get_standard_perms(perms):
+        """
+        **LLM Docstring**
+
+        Compute each permutation's class counts and its canonical (standard) representative
+        permutation.
+
+        :param perms: the permutations
+        :type perms: np.ndarray
+        :return: `(class_count_data, standard_representative_perms)`
+        :rtype: tuple
+        """
         classes_count_data = [
             UniquePermutations.get_permutation_class_counts(p) for p in perms
         ]
@@ -2765,6 +3203,25 @@ class SymmetricGroupGenerator:
     def _process_cached_index_blocks(cls, storage, cache, paritioners, indices,
                                     filter, mask, perm_counts, merged_sums,
                                     inds_dtype=None, full_basis=None):
+        """
+        **LLM Docstring**
+
+        Process the cached blocks of representative permutations produced during the
+        direct-sum walk, resolving each block's permutations to indices (with the
+        appropriate partition offsets) and writing them into storage.
+
+        :param storage: the permutation storage
+        :param cache: the per-class cached block data
+        :type cache: dict
+        :param paritioners: the partition permutation generators
+        :param indices: the output index array
+        :param filter: the direct-sum filter
+        :param mask: the storage mask
+        :param perm_counts: the per-permutation counts
+        :param merged_sums: the merged permutation sums
+        :param inds_dtype: the index dtype
+        :param full_basis: an optional full basis to resolve against
+        """
         for k, block_dat in cache.items():
             classes_count_data = [np.array(x) for x in k]
             standard_rep_perms = block_dat['standards']
@@ -2822,10 +3279,33 @@ class SymmetricGroupGenerator:
 
     @classmethod
     def changed_index_number(cls, idx, radix):
+        """
+        **LLM Docstring**
+
+        Encode a set of changed positions as a single mixed-radix integer (a canonical id
+        for which positions changed).
+
+        :param idx: the changed positions
+        :param radix: the radix (dimension)
+        :type radix: int
+        :return: the encoded number
+        :rtype: int
+        """
         if len(idx) == 0: return 0
         return np.ravel_multi_index(np.sort(idx)+1, [radix+1]*len(idx))
     @classmethod
     def _compute_changed_index_numbers(cls, mask):
+        """
+        **LLM Docstring**
+
+        Encode each row's set of changed positions (from a boolean mask) as a mixed-radix
+        integer id.
+
+        :param mask: the per-row changed-position mask
+        :type mask: np.ndarray
+        :return: the per-row encoded numbers
+        :rtype: np.ndarray
+        """
         if not mask.any():
             return np.zeros(len(mask))
         radix = len(mask[0])
@@ -3146,6 +3626,18 @@ class SymmetricGroupGenerator:
         return ret
 
     def _get_direct_sum_rule_groups(self, rules, dim, dtype):
+        """
+        **LLM Docstring**
+
+        Pad and group the direct-sum rules by their class-count structure (first by
+        length, then by counts) so matching rules can be applied together.
+
+        :param rules: the direct-sum rules
+        :param dim: the permutation length
+        :type dim: int
+        :param dtype: the rule dtype
+        :return: the grouped rule data
+        """
         # first up we pad the rules
         rules = [
             np.concatenate([np.array(r, dtype=dtype), np.zeros(dim - len(r), dtype=dtype)]) if len(
@@ -3316,6 +3808,15 @@ class SymmetricGroupGenerator:
                     exc, ind = filter_perms
                     ind = np.sort(ind)
                     def filter_x(x):
+                        """
+                        **LLM Docstring**
+
+                        Inner helper: apply the active direct-sum filter to a batch of generated
+                        permutations/indices, returning the surviving subset.
+
+                        :param x: the generated permutations/indices
+                        :return: the filtered subset
+                        """
                         good_perms = find(ind, x.flatten(), missing_val=-1)[0] > -1
                         return x[good_perms,]
                     new_perms = [filter_x(x) for x in new_perms]
@@ -3734,6 +4235,18 @@ class CompleteSymmetricGroupSpace:
 
     permutation_dtype = 'int8' # if we need to go up beyond dim 256 we're fucked anyway
     def __init__(self, dim, memory_constrained=False):
+        """
+        **LLM Docstring**
+
+        Set up the complete symmetric-group space of a given dimension, backed by a
+        `SymmetricGroupGenerator` and a contracted (byte-packed) permutation dtype for
+        fast lookups.
+
+        :param dim: the permutation length
+        :type dim: int
+        :param memory_constrained: avoid materializing the full basis (compute on demand)
+        :type memory_constrained: bool
+        """
         self.generator = SymmetricGroupGenerator(dim)
         self._basis = None
         self._basis_sorting = None
@@ -3742,13 +4255,48 @@ class CompleteSymmetricGroupSpace:
 
     @property
     def dim(self):
+        """
+        **LLM Docstring**
+
+        The permutation length.
+
+        :return: the dimension
+        :rtype: int
+        """
         return self.generator.dim
 
     def __getstate__(self):
+        """
+        **LLM Docstring**
+
+        Return the picklable state (just the dimension; the basis is regenerated).
+
+        :return: the state dict
+        :rtype: dict
+        """
         return {'dim':self.dim}
     def __setstate__(self, state):
+        """
+        **LLM Docstring**
+
+        Rebuild the space from its pickled state (reinitializing from the dimension).
+
+        :param state: the state dict
+        :type state: dict
+        """
         self.__init__(state['dim'])
     def _contract_dtype(self, perms):
+        """
+        **LLM Docstring**
+
+        Byte-pack permutations into the space's contracted lookup dtype (inferring it on
+        first use).
+
+        :param perms: the permutations
+        :type perms: np.ndarray
+        :return: the contracted permutations
+        :rtype: np.ndarray
+        """
         if self._contracted_dtype is not None and perms.dtype == self._contracted_dtype:
             return perms
         else:
@@ -3759,6 +4307,17 @@ class CompleteSymmetricGroupSpace:
                 return new
 
     def load_to_size(self, size):
+        """
+        **LLM Docstring**
+
+        Materialize the basis until it holds at least `size` permutations (a no-op when
+        memory-constrained).
+
+        :param size: the target basis size
+        :type size: int
+        :return: `True` if memory-constrained (nothing loaded)
+        :rtype: bool | None
+        """
         if self.memory_constrained:
             return True
         cur_basis_size = -1 if self._basis is None else len(self._basis)
@@ -3782,10 +4341,33 @@ class CompleteSymmetricGroupSpace:
                     self._contracted_basis = self._contract_dtype(self._basis)
 
     def load_to_sum(self, max_sum):
+        """
+        **LLM Docstring**
+
+        Materialize the basis to cover every permutation with sum up to `max_sum`.
+
+        :param max_sum: the maximum permutation sum
+        :type max_sum: int
+        """
         _, offset = self.generator._get_partition_perms([max_sum + 1])
         self.load_to_size(offset[0])
 
     def take(self, item, uncoerce=False, max_size=None):
+        """
+        **LLM Docstring**
+
+        Return the permutation(s) at the given index/indices, loading the basis as needed
+        (or generating them directly when memory-constrained), optionally un-packing the
+        contracted dtype.
+
+        :param item: the index or indices
+        :param uncoerce: un-pack the contracted dtype back to the original
+        :type uncoerce: bool
+        :param max_size: an explicit max index to load to
+        :type max_size: int | None
+        :return: the permutation(s)
+        :rtype: np.ndarray
+        """
         if self.memory_constrained:
             return self.generator.from_indices(item)
         if isinstance(item, (int, np.integer)):
@@ -3812,6 +4394,15 @@ class CompleteSymmetricGroupSpace:
         return res
 
     def __getitem__(self, item):
+        """
+        **LLM Docstring**
+
+        Return the permutation(s) at the given index/indices (delegates to `take`).
+
+        :param item: the index or indices
+        :return: the permutation(s)
+        :rtype: np.ndarray
+        """
         return self.take(item)
 
     def find(self, perms,
@@ -3819,6 +4410,23 @@ class CompleteSymmetricGroupSpace:
              max_sum=None,
              search_space_sorting=None
              ):
+        """
+        **LLM Docstring**
+
+        Return the indices of the given permutations in the space, pre-screening by
+        permutation sum and using the contracted-dtype sorted basis for fast lookup (or
+        the generator directly when memory-constrained).
+
+        :param perms: the permutations to locate
+        :type perms: np.ndarray
+        :param check_sums: pre-screen (and load) by permutation sum
+        :type check_sums: bool
+        :param max_sum: an explicit max sum to load to
+        :type max_sum: int | None
+        :param search_space_sorting: a precomputed basis sorting to reuse
+        :return: the indices
+        :rtype: np.ndarray
+        """
         if self.memory_constrained:
             return self.generator.to_indices(perms)
 
@@ -3872,24 +4480,53 @@ class LatticePathGenerator:
 
     @property
     def subtrees(self):
+        """
+        **LLM Docstring**
+
+        The per-depth lattice-path subtrees (position-tracking), generated lazily.
+
+        :return: the subtrees
+        """
         if self._subtrees is None:
             self._subtrees = self.generate_tree(self.steps, max_len=self.max_len)
         return self._subtrees
 
     @property
     def tree(self):
+        """
+        **LLM Docstring**
+
+        The final (full-depth) lattice-path tree with positions, generated lazily.
+
+        :return: the tree
+        """
         if self._subtrees is None:
             self._subtrees = self.generate_tree(self.steps, max_len=self.max_len)
         return self._subtrees[-1]
 
     @property
     def subrules(self):
+        """
+        **LLM Docstring**
+
+        The per-depth lattice-path rule trees (without position tracking), generated
+        lazily.
+
+        :return: the rule subtrees
+        """
         if self._rule_trees is None:
             self._rule_trees = self.generate_tree(self.steps, track_positions=False, max_len=self.max_len)
         return self._rule_trees
 
     @property
     def rules(self):
+        """
+        **LLM Docstring**
+
+        The final (full-depth) lattice-path rule tree, generated lazily.
+
+        :return: the rule tree
+        """
         if self._rule_trees is None:
             self._rule_trees = self.generate_tree(self.steps, track_positions=False, max_len=self.max_len)
         return self._rule_trees[-1]
@@ -4011,6 +4648,16 @@ class LatticePathGenerator:
         return new_trees
 
     def find_paths(self, end_spots):
+        """
+        **LLM Docstring**
+
+        Return the starting steps of every lattice path that reaches one of the given end
+        positions.
+
+        :param end_spots: the target end position(s)
+        :return: the qualifying starting steps
+        :rtype: list
+        """
         # to start we just populate the entire tree and find the steps that took us
         # to `end_spot`
         if len(end_spots) == 0 or isinstance(end_spots[0], (int, np.integer)):
