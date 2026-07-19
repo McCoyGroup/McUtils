@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Sphere">Sphere</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L125)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L125?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L279)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L279?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,20 @@
 __init__(self, position=(0, 0, 0), radius=1, sphere_points=48, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L126)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L126?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L280)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L280?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a `Sphere` primitive.
+  - `position`: `Any`
+    > the sphere center
+  - `radius`: `Any`
+    > the sphere radius
+  - `sphere_points`: `int`
+    > the tessellation resolution
+  - `opts`: `Any`
+    > extra styling options
 
 
 <a id="McUtils.Plots.Primitives.Sphere.get_bbox" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +45,12 @@ __init__(self, position=(0, 0, 0), radius=1, sphere_points=48, **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Sphere.py#L131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Sphere.py#L131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Sphere.py#L296)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Sphere.py#L296?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Not implemented: this primitive has no bounding-box computation.
 
 
 <a id="McUtils.Plots.Primitives.Sphere.plot" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +58,22 @@ get_bbox(self):
 plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Sphere.py#L134)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Sphere.py#L134?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Sphere.py#L306)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Sphere.py#L306?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Draw the primitive onto the axes via `axes.draw_sphere`.
+  - `axes`: `Any`
+    > the axes (or graphics) to draw onto
+  - `args`: `Any`
+    > extra positional arguments
+  - `graphics`: `Any`
+    > the owning graphics object
+  - `kwargs`: `Any`
+    > extra styling options
+  - `:returns`: `_`
+    > the drawn backend object
  </div>
 </div>
 
@@ -100,7 +127,7 @@ plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Sphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Sphere.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L125?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L279?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

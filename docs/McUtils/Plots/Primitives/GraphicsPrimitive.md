@@ -46,6 +46,11 @@ get_bbox(self):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/GraphicsPrimitive.py#L42)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/GraphicsPrimitive.py#L42?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: return the primitive's bounding box.
+  - `:returns`: `_`
+    > the bounding box
  </div>
 </div>
 

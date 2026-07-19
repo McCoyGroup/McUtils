@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Arrow">Arrow</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L99)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L99?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L199?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,18 @@
 __init__(self, pos1, pos2, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L200)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L200?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a `Arrow` primitive.
+  - `pos1`: `Any`
+    > the arrow start point
+  - `pos2`: `Any`
+    > the arrow end point
+  - `opts`: `Any`
+    > extra styling options
 
 
 <a id="McUtils.Plots.Primitives.Arrow.get_bbox" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +43,14 @@ __init__(self, pos1, pos2, **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L213?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the primitive's bounding box enclosing its endpoints.
+  - `:returns`: `list`
+    > the `[(min_x, min_y), (max_x, max_y)]` bounding box
 
 
 <a id="McUtils.Plots.Primitives.Arrow.plot" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +58,22 @@ get_bbox(self):
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Arrow.py#L224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Arrow.py#L224?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Draw the primitive onto the axes via `axes.draw_arrow`.
+  - `axes`: `Any`
+    > the axes (or graphics) to draw onto
+  - `args`: `Any`
+    > extra positional arguments
+  - `graphics`: `Any`
+    > the owning graphics object
+  - `kwargs`: `Any`
+    > extra styling options
+  - `:returns`: `_`
+    > the drawn backend object
  </div>
 </div>
 
@@ -100,7 +127,7 @@ plot(self, axes, *args, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Arrow.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Arrow.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L99?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L199?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Cylinder">Cylinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L364)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L364?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,22 @@
 __init__(self, p1, p2, radius, circle_points=32, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L154)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L154?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L365?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a `Cylinder` primitive.
+  - `p1`: `Any`
+    > the start point
+  - `p2`: `Any`
+    > the end point
+  - `radius`: `Any`
+    > the cylinder radius
+  - `circle_points`: `int`
+    > the number of points around the cross-section
+  - `opts`: `Any`
+    > extra styling options
 
 
 <a id="McUtils.Plots.Primitives.Cylinder.get_bbox" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +47,12 @@ __init__(self, p1, p2, radius, circle_points=32, **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L161)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L161?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L384)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L384?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Not implemented: this primitive has no bounding-box computation.
 
 
 <a id="McUtils.Plots.Primitives.Cylinder.plot" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +60,22 @@ get_bbox(self):
 plot(self, axes, *args, circle_points=None, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L164)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L164?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Cylinder.py#L394)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Cylinder.py#L394?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Draw the primitive onto the axes via `axes.draw_cylinder` (or a `VTKCylinder` when drawing into a VTK window).
+  - `axes`: `Any`
+    > the axes (or graphics) to draw onto
+  - `args`: `Any`
+    > extra positional arguments
+  - `graphics`: `Any`
+    > the owning graphics object
+  - `kwargs`: `Any`
+    > extra styling options
+  - `:returns`: `_`
+    > the drawn backend object
  </div>
 </div>
 
@@ -100,7 +129,7 @@ plot(self, axes, *args, circle_points=None, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Cylinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Cylinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L153?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L364?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

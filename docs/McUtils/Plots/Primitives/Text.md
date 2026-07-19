@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Text">Text</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L83)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L83?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L154?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,20 @@
 __init__(self, txt, pos, bbox=((1, 1), (1, 1)), **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L84)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L84?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L155?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a `Text` primitive.
+  - `txt`: `Any`
+    > the text string
+  - `pos`: `Any`
+    > the text position
+  - `bbox`: `Any`
+    > the per-side padding box around the text
+  - `opts`: `Any`
+    > extra styling options
 
 
 <a id="McUtils.Plots.Primitives.Text.get_bbox" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +45,14 @@ __init__(self, txt, pos, bbox=((1, 1), (1, 1)), **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Text.py#L89)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Text.py#L89?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Text.py#L170)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Text.py#L170?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the primitive's bounding box (the padded box around the text).
+  - `:returns`: `list`
+    > the `[(min_x, min_y), (max_x, max_y)]` bounding box
 
 
 <a id="McUtils.Plots.Primitives.Text.plot" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +60,22 @@ get_bbox(self):
 plot(self, axes, *args, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Text.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Text.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Text.py#L183)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Text.py#L183?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Draw the primitive onto the axes via `axes.draw_text`.
+  - `axes`: `Any`
+    > the axes (or graphics) to draw onto
+  - `args`: `Any`
+    > extra positional arguments
+  - `graphics`: `Any`
+    > the owning graphics object
+  - `kwargs`: `Any`
+    > extra styling options
+  - `:returns`: `_`
+    > the drawn backend object
  </div>
 </div>
 
@@ -100,7 +129,7 @@ plot(self, axes, *args, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Text.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Text.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L83?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L154?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

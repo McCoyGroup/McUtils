@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Primitives.Triangle">Triangle</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L187)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L187?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L454)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L454?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,16 @@
 __init__(self, pts, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives.py#L455)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L455?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a `Triangle` primitive.
+  - `pts`: `Any`
+    > the triangle vertices
+  - `opts`: `Any`
+    > extra styling options
 
 
 <a id="McUtils.Plots.Primitives.Triangle.get_bbox" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +41,12 @@ __init__(self, pts, **opts):
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Triangle.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Triangle.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Triangle.py#L467)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Triangle.py#L467?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Not implemented: this primitive has no bounding-box computation.
 
 
 <a id="McUtils.Plots.Primitives.Triangle.plot" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +54,22 @@ get_bbox(self):
 plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Triangle.py#L195)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Triangle.py#L195?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Primitives/Triangle.py#L477)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives/Triangle.py#L477?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Draw the primitive onto the axes via `axes.draw_triangle`.
+  - `axes`: `Any`
+    > the axes (or graphics) to draw onto
+  - `args`: `Any`
+    > extra positional arguments
+  - `graphics`: `Any`
+    > the owning graphics object
+  - `kwargs`: `Any`
+    > extra styling options
+  - `:returns`: `_`
+    > the drawn backend object
  </div>
 </div>
 
@@ -100,7 +123,7 @@ plot(self, axes, *args, sphere_points=None, graphics=None, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Primitives/Triangle.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Primitives/Triangle.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L187?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Primitives.py#L454?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
