@@ -109,6 +109,9 @@ class StubSummaryBuilder:
     @property
     def report(self):
         return self._current_module.report
+    @property
+    def dynamic_mode(self):
+        return self._current_module.dynamic_mode
 
     # ==================================================================
     # Section 1: stub generation
@@ -272,6 +275,63 @@ class StubSummaryBuilder:
                 return True  # e.g. __all__.append(...), __all__.extend(...)
         return False
 
+    def _is_all_only_import(self, node):
+        """True for `from .X import __all__` / `from .X import __all__ as
+        _all` -- an import whose ONLY purpose is __all__-construction
+        bookkeeping (as opposed to `from .X import *`, which actually
+        brings real names into the namespace and must always be kept
+        regardless of dynamic/static mode)."""
+        return (isinstance(node, ast.ImportFrom) and len(node.names) == 1
+                and node.names[0].name == "__all__")
+
+    def _bake_all_node(self, names):
+        """Build a single `__all__ = [...]` literal assignment from an
+        already-resolved list of names."""
+        return ast.Assign(
+            targets=[ast.Name(id="__all__", ctx=ast.Store())],
+            value=ast.List(elts=[ast.Constant(value=str(n)) for n in names], ctx=ast.Load()))
+
+    def _dotted_module_name(self, package_name, rel_path=None):
+        """Map a stub's (package_name, rel_path-within-that-package) back
+        to the real dotted import path, e.g. ("Data", "CommonData.py")
+        -> "McUtils.Data.CommonData", ("Data", "__init__.py") ->
+        "McUtils.Data", (package_name, None) -> "McUtils.Data" (the
+        package itself, e.g. when it's stubbed from a single .py file)."""
+        parts = []
+        if rel_path is not None:
+            norm = rel_path.replace(os.sep, "/")
+            parts = norm.split("/")
+            if parts and parts[-1] == "__init__.py":
+                parts = parts[:-1]
+            elif parts and parts[-1].endswith(".py"):
+                parts[-1] = parts[-1][:-3]
+        dotted_parts = [self.root_module_name, package_name] + parts
+        return ".".join(p for p in dotted_parts if p)
+
+    def resolve_dynamic_all(self, package_name, rel_path=None):
+        """If we're in dynamic_mode (the root module was really
+        importable), try to import this specific module and return its
+        real, fully-resolved `__all__` as a plain list -- so the stub
+        can bake in the exact final result instead of copying the
+        source's accumulation logic. Returns None if dynamic_mode is
+        off, the module can't be imported, or it has no __all__."""
+        if not self.dynamic_mode:
+            return None
+        dotted = self._dotted_module_name(package_name, rel_path)
+        try:
+            module = importlib.import_module(dotted)
+        except Exception:
+            return None
+        real_all = getattr(module, "__all__", None)
+        if real_all is None:
+            # if self.verbose:
+            #     print(f"failed to resolve `{dotted}.__all__`")
+            return None
+        try:
+            return [str(n) for n in real_all]
+        except ImportError:
+            return None
+
     def stub_function(self, node):
         docstring = ast.get_docstring(node, clean=False)
         new_body = []
@@ -312,7 +372,7 @@ class StubSummaryBuilder:
         node.body = new_body
         return node
 
-    def stub_module(self, source, module_key):
+    def stub_module(self, source, module_key, dynamic_all=None):
         tree = ast.parse(source)
         new_body = []
 
@@ -325,12 +385,25 @@ class StubSummaryBuilder:
         body = tree.body[start:]
         body = self.collapse_scalar_assign_runs(body)
         used_sidecar = False
+        all_baked = False
 
         for node in body:
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
+            if self._is_all_only_import(node):
+                if dynamic_all is not None:
+                    if not all_baked:
+                        new_body.append(self._bake_all_node(dynamic_all))
+                        all_baked = True
+                    continue  # drop - redundant now that __all__ is baked in
+                new_body.append(node)  # static mode: needed for correctness
+            elif isinstance(node, (ast.Import, ast.ImportFrom)):
                 new_body.append(node)
             elif self.is_all_operation(node):
-                new_body.append(node)
+                if dynamic_all is not None:
+                    if not all_baked:
+                        new_body.append(self._bake_all_node(dynamic_all))
+                        all_baked = True
+                    continue  # drop - replaced by the single baked literal above
+                new_body.append(node)  # static mode: preserve verbatim for correctness
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 new_body.append(self.stub_function(node))
             elif isinstance(node, ast.ClassDef):
@@ -353,7 +426,7 @@ class StubSummaryBuilder:
         ast.fix_missing_locations(tree)
         return ast.unparse(tree)
 
-    def stub_package(self, src_dir, out_dir, keep_full=None):
+    def stub_package(self, src_dir, out_dir, package_name=None, keep_full=None):
         keep_full = set(keep_full or [])
         stats = []
 
@@ -373,8 +446,10 @@ class StubSummaryBuilder:
                 if rel_path in keep_full:
                     stubbed = source
                 else:
+                    dynamic_all = (self.resolve_dynamic_all(package_name, rel_path)
+                                   if package_name is not None else None)
                     try:
-                        stubbed = self.stub_module(source, rel_path)
+                        stubbed = self.stub_module(source, rel_path, dynamic_all=dynamic_all)
                     except SyntaxError as e:
                         print(f"[WARN] syntax error, copying as-is: {rel_path}: {e}", file=sys.stderr)
                         stubbed = source
@@ -615,7 +690,7 @@ class StubSummaryBuilder:
                     pass
         return all_list
 
-    def discover_top_level_packages(self, root_module_name, src_dir=None):
+    def discover_top_level_packages(self, root_module_name, try_dynamic=True, src_dir=None):
         if src_dir is None:
             src_dir = self.root_src_dir
         resolved_root_dir = src_dir
@@ -626,21 +701,23 @@ class StubSummaryBuilder:
         else:
             src_dir = os.path.dirname(src_dir)
 
-        with dev.temporary_sys_path_insert(src_dir):
-            try:
-                module = importlib.import_module(root_module_name)
-                all_names = list(getattr(module, "__all__", []) or [])
-                resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
-            except (ImportError,AttributeError) as e:
-                print(f"[INFO] real import of {root_module_name!r} failed ({e}); "
-                      f"falling back to static __all__ parsing.", file=sys.stderr)
+        if try_dynamic:
+            with dev.temporary_sys_path_insert(src_dir):
+                try:
+                    module = importlib.import_module(root_module_name)
+                    all_names = list(getattr(module, "__all__", []) or [])
+                    resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
+                except (ImportError,AttributeError) as e:
+                    print(f"[INFO] real import of {root_module_name!r} failed ({e}); "
+                          f"falling back to static __all__ parsing.", file=sys.stderr)
 
         if resolved_root_dir is None:
             raise ValueError(
                 "Could not locate the root module's source directory -- "
                 "set root_src_dir explicitly.")
 
-        if all_names is None:
+        dynamic = all_names is not None
+        if not dynamic:
             init_path = os.path.join(resolved_root_dir, "__init__.py")
             all_names = self._static_all_from_init(init_path) or []
 
@@ -653,14 +730,14 @@ class StubSummaryBuilder:
             elif os.path.isfile(pkg_file):
                 discovered[name] = pkg_file
 
-        return resolved_root_dir, discovered
+        return resolved_root_dir, discovered, dynamic
 
     # ==================================================================
     # Section 4: orchestration
     # ==================================================================
 
     class ModuleData:
-        def __init__(self, parent, module_name, module_dir, packages):
+        def __init__(self, parent, module_name, module_dir, packages, dynamic_mode):
             self.parent = parent
             # populated by discover_top_level_packages()
             self.root_module_name, self.resolved_root_dir, self.packages = module_name, module_dir, packages
@@ -668,6 +745,7 @@ class StubSummaryBuilder:
             # accumulated across generate() calls
             self.sidecar = {}
             self.report = {}
+            self.dynamic_mode = dynamic_mode
 
         def __enter__(self):
             self.parent._module_stack.append(self.parent._current_module)
@@ -678,8 +756,8 @@ class StubSummaryBuilder:
 
     def generate(self, package_name, root_module_name=None, update_current=False):
         if update_current or self._current_module is None:
-            root_dir, packages = self.discover_top_level_packages(root_module_name)
-            module_data = self.ModuleData(self, package_name, root_dir, packages)
+            root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
+            module_data = self.ModuleData(self, package_name, root_dir, packages, dyanmic_mode)
         else:
             module_data = self._current_module
         with module_data:
@@ -700,13 +778,14 @@ class StubSummaryBuilder:
             pkg_summary_out = os.path.join(summaries_dir, f"{package_name}.md")
 
             if os.path.isdir(pkg_src_path):
-                stats = self.stub_package(pkg_src_path, pkg_stub_out)
+                stats = self.stub_package(pkg_src_path, pkg_stub_out, package_name=package_name)
             else:
                 os.makedirs(pkg_stub_out, exist_ok=True)
                 with open(pkg_src_path, "r", encoding="utf-8", errors="replace") as f:
                     source = f.read()
                 out_file = os.path.join(pkg_stub_out, os.path.basename(pkg_src_path))
-                stubbed = self.stub_module(source, package_name)
+                dynamic_all = self.resolve_dynamic_all(package_name, rel_path=None)
+                stubbed = self.stub_module(source, package_name, dynamic_all=dynamic_all)
                 with open(out_file, "w", encoding="utf-8") as f:
                     f.write(stubbed)
                 stats = [(os.path.basename(pkg_src_path), len(source), len(stubbed))]
@@ -727,8 +806,8 @@ class StubSummaryBuilder:
         return info
 
     def generate_all(self, root_module_name):
-        root_dir, packages = self.discover_top_level_packages(root_module_name)
-        with self.ModuleData(self, root_module_name, root_dir, packages):
+        root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
+        with self.ModuleData(self, root_module_name, root_dir, packages, dyanmic_mode):
             if not self.packages:
                 raise ValueError(
                     f"No top-level packages discovered for {root_module_name!r} -- "
