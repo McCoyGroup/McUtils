@@ -109,6 +109,9 @@ class StubSummaryBuilder:
     @property
     def report(self):
         return self._current_module.report
+    @property
+    def dynamic_mode(self):
+        return self._current_module.dynamic_mode
 
     # ==================================================================
     # Section 1: stub generation
@@ -272,6 +275,71 @@ class StubSummaryBuilder:
                 return True  # e.g. __all__.append(...), __all__.extend(...)
         return False
 
+    def _is_all_only_import(self, node):
+        """True for `from .X import __all__` / `from .X import __all__ as
+        _all` -- an import whose ONLY purpose is __all__-construction
+        bookkeeping (as opposed to `from .X import *`, which actually
+        brings real names into the namespace and must always be kept
+        regardless of dynamic/static mode)."""
+        return (isinstance(node, ast.ImportFrom) and len(node.names) == 1
+                and node.names[0].name == "__all__")
+
+    def _bake_all_node(self, names):
+        """Build a single `__all__ = [...]` literal assignment from an
+        already-resolved list of names."""
+        return ast.Assign(
+            targets=[ast.Name(id="__all__", ctx=ast.Store())],
+            value=ast.List(elts=[ast.Constant(value=str(n)) for n in names], ctx=ast.Load()))
+
+    def _dotted_module_name(self, package_name, rel_path=None):
+        """Map a stub's (package_name, rel_path-within-that-package) back
+        to the real dotted import path, e.g. ("Data", "CommonData.py")
+        -> "McUtils.Data.CommonData", ("Data", "__init__.py") ->
+        "McUtils.Data", (package_name, None) -> "McUtils.Data" (the
+        package itself, e.g. when it's stubbed from a single .py file)."""
+        parts = []
+        if rel_path is not None:
+            norm = rel_path.replace(os.sep, "/")
+            parts = norm.split("/")
+            if parts and parts[-1] == "__init__.py":
+                parts = parts[:-1]
+            elif parts and parts[-1].endswith(".py"):
+                parts[-1] = parts[-1][:-3]
+        dotted_parts = [self.root_module_name, package_name] + parts
+        return ".".join(p for p in dotted_parts if p)
+
+    def resolve_dynamic_all(self, package_name, rel_path=None):
+        """If we're in dynamic_mode (the root module was really
+        importable), look up this specific module's real, fully-resolved
+        `__all__` -- so the stub can bake in the exact final result
+        instead of copying the source's accumulation logic.
+
+        Deliberately a PASSIVE `sys.modules` lookup, not a forcing
+        `importlib.import_module` call: the one real import already done
+        in `discover_top_level_packages` naturally cascades and loads
+        every submodule the package actually uses (via its own `from .X
+        import *` chains). We only bake __all__ for modules that showed
+        up in memory as a result of that -- we never trigger an
+        additional import of our own, so we can't accidentally force-load
+        (and pay the cost/risk of) some module the package itself never
+        needed. Returns None if dynamic_mode is off, the module was
+        never loaded, or it has no __all__ -- the stub then falls back
+        to preserving whatever __all__ operations exist in its own
+        source, verbatim."""
+        if not self.dynamic_mode:
+            return None
+        dotted = self._dotted_module_name(package_name, rel_path)
+        module = sys.modules.get(dotted)
+        if module is None:
+            return None
+        real_all = getattr(module, "__all__", None)
+        if real_all is None:
+            # if self.verbose:
+            #     print(f"failed to resolve `{dotted}.__all__`")
+            return None
+        else:
+            return [str(n) for n in real_all]
+
     def stub_function(self, node):
         docstring = ast.get_docstring(node, clean=False)
         new_body = []
@@ -312,7 +380,7 @@ class StubSummaryBuilder:
         node.body = new_body
         return node
 
-    def stub_module(self, source, module_key):
+    def stub_module(self, source, module_key, dynamic_all=None):
         tree = ast.parse(source)
         new_body = []
 
@@ -325,12 +393,25 @@ class StubSummaryBuilder:
         body = tree.body[start:]
         body = self.collapse_scalar_assign_runs(body)
         used_sidecar = False
+        all_baked = False
 
         for node in body:
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
+            if self._is_all_only_import(node):
+                if dynamic_all is not None:
+                    if not all_baked:
+                        new_body.append(self._bake_all_node(dynamic_all))
+                        all_baked = True
+                    continue  # drop - redundant now that __all__ is baked in
+                new_body.append(node)  # static mode: needed for correctness
+            elif isinstance(node, (ast.Import, ast.ImportFrom)):
                 new_body.append(node)
             elif self.is_all_operation(node):
-                new_body.append(node)
+                if dynamic_all is not None:
+                    if not all_baked:
+                        new_body.append(self._bake_all_node(dynamic_all))
+                        all_baked = True
+                    continue  # drop - replaced by the single baked literal above
+                new_body.append(node)  # static mode: preserve verbatim for correctness
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 new_body.append(self.stub_function(node))
             elif isinstance(node, ast.ClassDef):
@@ -353,7 +434,7 @@ class StubSummaryBuilder:
         ast.fix_missing_locations(tree)
         return ast.unparse(tree)
 
-    def stub_package(self, src_dir, out_dir, keep_full=None):
+    def stub_package(self, src_dir, out_dir, package_name=None, keep_full=None):
         keep_full = set(keep_full or [])
         stats = []
 
@@ -373,8 +454,10 @@ class StubSummaryBuilder:
                 if rel_path in keep_full:
                     stubbed = source
                 else:
+                    dynamic_all = (self.resolve_dynamic_all(package_name, rel_path)
+                                   if package_name is not None else None)
                     try:
-                        stubbed = self.stub_module(source, rel_path)
+                        stubbed = self.stub_module(source, rel_path, dynamic_all=dynamic_all)
                     except SyntaxError as e:
                         print(f"[WARN] syntax error, copying as-is: {rel_path}: {e}", file=sys.stderr)
                         stubbed = source
@@ -615,7 +698,7 @@ class StubSummaryBuilder:
                     pass
         return all_list
 
-    def discover_top_level_packages(self, root_module_name, src_dir=None):
+    def discover_top_level_packages(self, root_module_name, try_dynamic=True, src_dir=None):
         if src_dir is None:
             src_dir = self.root_src_dir
         resolved_root_dir = src_dir
@@ -626,21 +709,23 @@ class StubSummaryBuilder:
         else:
             src_dir = os.path.dirname(src_dir)
 
-        with dev.temporary_sys_path_insert(src_dir):
-            try:
-                module = importlib.import_module(root_module_name)
-                all_names = list(getattr(module, "__all__", []) or [])
-                resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
-            except (ImportError,AttributeError) as e:
-                print(f"[INFO] real import of {root_module_name!r} failed ({e}); "
-                      f"falling back to static __all__ parsing.", file=sys.stderr)
+        if try_dynamic:
+            with dev.temporary_sys_path_insert(src_dir):
+                try:
+                    module = importlib.import_module(root_module_name)
+                    all_names = list(getattr(module, "__all__", []) or [])
+                    resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
+                except (ImportError,AttributeError) as e:
+                    print(f"[INFO] real import of {root_module_name!r} failed ({e}); "
+                          f"falling back to static __all__ parsing.", file=sys.stderr)
 
         if resolved_root_dir is None:
             raise ValueError(
                 "Could not locate the root module's source directory -- "
                 "set root_src_dir explicitly.")
 
-        if all_names is None:
+        dynamic = all_names is not None
+        if not dynamic:
             init_path = os.path.join(resolved_root_dir, "__init__.py")
             all_names = self._static_all_from_init(init_path) or []
 
@@ -653,14 +738,14 @@ class StubSummaryBuilder:
             elif os.path.isfile(pkg_file):
                 discovered[name] = pkg_file
 
-        return resolved_root_dir, discovered
+        return resolved_root_dir, discovered, dynamic
 
     # ==================================================================
     # Section 4: orchestration
     # ==================================================================
 
     class ModuleData:
-        def __init__(self, parent, module_name, module_dir, packages):
+        def __init__(self, parent, module_name, module_dir, packages, dynamic_mode):
             self.parent = parent
             # populated by discover_top_level_packages()
             self.root_module_name, self.resolved_root_dir, self.packages = module_name, module_dir, packages
@@ -668,6 +753,7 @@ class StubSummaryBuilder:
             # accumulated across generate() calls
             self.sidecar = {}
             self.report = {}
+            self.dynamic_mode = dynamic_mode
 
         def __enter__(self):
             self.parent._module_stack.append(self.parent._current_module)
@@ -678,8 +764,8 @@ class StubSummaryBuilder:
 
     def generate(self, package_name, root_module_name=None, update_current=False):
         if update_current or self._current_module is None:
-            root_dir, packages = self.discover_top_level_packages(root_module_name)
-            module_data = self.ModuleData(self, package_name, root_dir, packages)
+            root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
+            module_data = self.ModuleData(self, package_name, root_dir, packages, dyanmic_mode)
         else:
             module_data = self._current_module
         with module_data:
@@ -700,13 +786,14 @@ class StubSummaryBuilder:
             pkg_summary_out = os.path.join(summaries_dir, f"{package_name}.md")
 
             if os.path.isdir(pkg_src_path):
-                stats = self.stub_package(pkg_src_path, pkg_stub_out)
+                stats = self.stub_package(pkg_src_path, pkg_stub_out, package_name=package_name)
             else:
                 os.makedirs(pkg_stub_out, exist_ok=True)
                 with open(pkg_src_path, "r", encoding="utf-8", errors="replace") as f:
                     source = f.read()
                 out_file = os.path.join(pkg_stub_out, os.path.basename(pkg_src_path))
-                stubbed = self.stub_module(source, package_name)
+                dynamic_all = self.resolve_dynamic_all(package_name, rel_path=None)
+                stubbed = self.stub_module(source, package_name, dynamic_all=dynamic_all)
                 with open(out_file, "w", encoding="utf-8") as f:
                     f.write(stubbed)
                 stats = [(os.path.basename(pkg_src_path), len(source), len(stubbed))]
@@ -727,8 +814,8 @@ class StubSummaryBuilder:
         return info
 
     def generate_all(self, root_module_name):
-        root_dir, packages = self.discover_top_level_packages(root_module_name)
-        with self.ModuleData(self, root_module_name, root_dir, packages):
+        root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
+        with self.ModuleData(self, root_module_name, root_dir, packages, dyanmic_mode):
             if not self.packages:
                 raise ValueError(
                     f"No top-level packages discovered for {root_module_name!r} -- "
@@ -741,9 +828,108 @@ class StubSummaryBuilder:
             info = self.report
         return info, summary
 
+    def write_llm_readme(self):
+        """Write LLM.md at the root of out_dir: an operating manual for
+        an LLM consuming this directory -- navigation order, what's real
+        vs. placeholder, and how to correctly read each of the lossy-
+        looking-but-actually-lossless compression tricks used in the
+        stubs (enum/constant-run collapsing, externalized data). This
+        matters because misreading those tricks (e.g. treating a
+        collapsed `_MEMBERS` dict as the real access pattern) would
+        actively mislead an LLM rather than just under-inform it."""
+        root = self.root_module_name or "this package"
+
+        sidecar_note = (
+            "The real values live in `_registry_data.json` at the root of "
+            "this directory (see `_registry_data.py` for the loader "
+            "function each affected stub imports)."
+            if self.write_sidecar_file else
+            "The real values are NOT included anywhere in this directory "
+            "at all -- only their keys/shape. If you need an actual value, "
+            "say so rather than guessing one."
+        )
+
+        content = f"""# {root} -- how to use this directory
+
+This is a **compressed, LLM-oriented reference** for the `{root}` codebase,
+generated from its real source. It is NOT the library itself: nothing here
+is meant to be imported or run as the real package. Use it to find out what
+exists and how to call it correctly, then write code against the real
+`{root}` package -- not against this directory.
+
+## Read in this order
+
+1. **`summaries/index.md`** -- one line per top-level package: what it's
+   for, how many modules it has, and where its summary/stubs live. Start
+   here to pick the right package.
+2. **`summaries/<package>.md`** -- every public class/function/method in
+   that package, with its exact call signature (parameter names and
+   defaults, no type annotations) and a short one-line purpose. This is
+   usually enough to write a correct call or import.
+3. **`{root}/<package>/<module>.py`** -- the full stub for one module:
+   real signatures, real docstrings (see caveats below), nothing
+   abbreviated further. Open this when the summary line isn't enough --
+   you need the full docstring, an edge case, or something the summary
+   truncated.
+
+Do not skip straight to step 3 for everything -- the summaries exist so you
+usually don't have to.
+
+## What's real vs. placeholder in the stub files
+
+- **Signatures** (parameter names, defaults, `*args`/`**kwargs`) are exact
+  copies of the real source.
+- **Docstrings** are the real docstrings. Class docstrings are capped at
+  their first paragraph (truncated ones are marked -- see "Compression
+  tricks" below); everything else is complete.
+- **Function/method bodies are placeholders** (`...`). They carry no
+  information about real behavior, return values, or edge cases -- never
+  infer runtime behavior from a stub body. The docstring is the only
+  source of behavioral information here; if it doesn't say, this
+  directory doesn't know either.
+- **`__all__`** (however it's constructed in the real source -- plain
+  assignment, `+=` accumulation, etc.) is preserved exactly, so each
+  stubbed module's real export list is accurate.
+
+## Compression tricks -- how to read them correctly
+
+These exist purely to cut size; none of them drop information, but
+misreading the compact form as the real API would be actively wrong:
+
+- **Enum-style / flat constant runs.** A class with many one-line members
+  (e.g. an `enum.Enum` with dozens of values) is collapsed into a single
+  `_MEMBERS = {{...}}` dict, immediately preceded by a comment stating the
+  REAL access pattern, e.g. `SomeEnum.Primary`, not
+  `SomeEnum._MEMBERS['Primary']`. **Always follow that comment's stated
+  access pattern** -- the dict is a compact data table, not the calling
+  convention.
+- **Large literal data** (big lookup tables, constant dictionaries). When
+  a top-level literal is large, its value is replaced with a comment
+  describing its keys/shape (e.g. `1069 keys: ['Hydrogen1', 'Hydrogen2', ...]`)
+  so you know what's queryable without the full payload inflating this
+  directory. {sidecar_note}
+- **Truncated class docstrings** end with the marker
+  `*(truncated — see stub for full docstring)*`. There is genuinely more
+  text in the real source that isn't reproduced anywhere in this
+  directory -- if the missing part matters, say you don't have it rather
+  than guessing at what follows.
+
+## Freshness
+
+This is a point-in-time snapshot. It can drift out of date relative to the
+real `{root}` source. If you need current, authoritative behavior (not
+just "does this function/class exist and roughly how do I call it"),
+verify against the real source rather than treating this directory as
+ground truth.
+"""
+        with open(os.path.join(self.out_dir, "LLM.md"), "w", encoding="utf-8") as f:
+            f.write(content)
+
+
     def finalize(self):
         sidecar_size = self.write_sidecar_files()
         self.write_index()
+        self.write_llm_readme()
 
         total_orig = sum(r["orig_bytes"] for r in self.report.values())
         total_stub = sum(r["stub_bytes"] for r in self.report.values())
