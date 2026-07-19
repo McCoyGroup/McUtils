@@ -248,6 +248,30 @@ class StubSummaryBuilder:
             return False
         return len(rendered) < max_len
 
+    def is_all_operation(self, node):
+        """True for any statement that assigns to, augments, or mutates
+        `__all__` -- `__all__ = [...]`, `__all__ += [...]`,
+        `__all__: list = [...]`, `__all__.append(...)`,
+        `__all__.extend(...)`, etc. These must ALWAYS be kept verbatim
+        and in their original relative order in the stub: dropping any
+        one of them (as AugAssign lines silently were before this
+        check existed) leaves `__all__` wrong at import time, which
+        breaks the source tree for anything that relies on it --
+        including this tool's own `discover_top_level_packages`."""
+        target = None
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+        elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
+            target = node.target
+        if isinstance(target, ast.Name) and target.id == "__all__":
+            return True
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+            func = node.value.func
+            if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name) \
+                    and func.value.id == "__all__":
+                return True  # e.g. __all__.append(...), __all__.extend(...)
+        return False
+
     def stub_function(self, node):
         docstring = ast.get_docstring(node, clean=False)
         new_body = []
@@ -276,6 +300,8 @@ class StubSummaryBuilder:
                 new_body.append(self.stub_function(child))
             elif isinstance(child, ast.ClassDef):
                 new_body.append(self.stub_class(child))
+            elif self.is_all_operation(child):
+                new_body.append(child)
             elif self.is_simple_assign(child):
                 new_body.append(child)
             elif self.is_collapsed_registry(child):
@@ -302,6 +328,8 @@ class StubSummaryBuilder:
 
         for node in body:
             if isinstance(node, (ast.Import, ast.ImportFrom)):
+                new_body.append(node)
+            elif self.is_all_operation(node):
                 new_body.append(node)
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 new_body.append(self.stub_function(node))
