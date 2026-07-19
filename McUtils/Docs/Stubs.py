@@ -310,27 +310,35 @@ class StubSummaryBuilder:
 
     def resolve_dynamic_all(self, package_name, rel_path=None):
         """If we're in dynamic_mode (the root module was really
-        importable), try to import this specific module and return its
-        real, fully-resolved `__all__` as a plain list -- so the stub
-        can bake in the exact final result instead of copying the
-        source's accumulation logic. Returns None if dynamic_mode is
-        off, the module can't be imported, or it has no __all__."""
+        importable), look up this specific module's real, fully-resolved
+        `__all__` -- so the stub can bake in the exact final result
+        instead of copying the source's accumulation logic.
+
+        Deliberately a PASSIVE `sys.modules` lookup, not a forcing
+        `importlib.import_module` call: the one real import already done
+        in `discover_top_level_packages` naturally cascades and loads
+        every submodule the package actually uses (via its own `from .X
+        import *` chains). We only bake __all__ for modules that showed
+        up in memory as a result of that -- we never trigger an
+        additional import of our own, so we can't accidentally force-load
+        (and pay the cost/risk of) some module the package itself never
+        needed. Returns None if dynamic_mode is off, the module was
+        never loaded, or it has no __all__ -- the stub then falls back
+        to preserving whatever __all__ operations exist in its own
+        source, verbatim."""
         if not self.dynamic_mode:
             return None
         dotted = self._dotted_module_name(package_name, rel_path)
-        try:
-            module = importlib.import_module(dotted)
-        except Exception:
+        module = sys.modules.get(dotted)
+        if module is None:
             return None
         real_all = getattr(module, "__all__", None)
         if real_all is None:
             # if self.verbose:
             #     print(f"failed to resolve `{dotted}.__all__`")
             return None
-        try:
+        else:
             return [str(n) for n in real_all]
-        except ImportError:
-            return None
 
     def stub_function(self, node):
         docstring = ast.get_docstring(node, clean=False)
@@ -820,9 +828,108 @@ class StubSummaryBuilder:
             info = self.report
         return info, summary
 
+    def write_llm_readme(self):
+        """Write LLM.md at the root of out_dir: an operating manual for
+        an LLM consuming this directory -- navigation order, what's real
+        vs. placeholder, and how to correctly read each of the lossy-
+        looking-but-actually-lossless compression tricks used in the
+        stubs (enum/constant-run collapsing, externalized data). This
+        matters because misreading those tricks (e.g. treating a
+        collapsed `_MEMBERS` dict as the real access pattern) would
+        actively mislead an LLM rather than just under-inform it."""
+        root = self.root_module_name or "this package"
+
+        sidecar_note = (
+            "The real values live in `_registry_data.json` at the root of "
+            "this directory (see `_registry_data.py` for the loader "
+            "function each affected stub imports)."
+            if self.write_sidecar_file else
+            "The real values are NOT included anywhere in this directory "
+            "at all -- only their keys/shape. If you need an actual value, "
+            "say so rather than guessing one."
+        )
+
+        content = f"""# {root} -- how to use this directory
+
+This is a **compressed, LLM-oriented reference** for the `{root}` codebase,
+generated from its real source. It is NOT the library itself: nothing here
+is meant to be imported or run as the real package. Use it to find out what
+exists and how to call it correctly, then write code against the real
+`{root}` package -- not against this directory.
+
+## Read in this order
+
+1. **`summaries/index.md`** -- one line per top-level package: what it's
+   for, how many modules it has, and where its summary/stubs live. Start
+   here to pick the right package.
+2. **`summaries/<package>.md`** -- every public class/function/method in
+   that package, with its exact call signature (parameter names and
+   defaults, no type annotations) and a short one-line purpose. This is
+   usually enough to write a correct call or import.
+3. **`{root}/<package>/<module>.py`** -- the full stub for one module:
+   real signatures, real docstrings (see caveats below), nothing
+   abbreviated further. Open this when the summary line isn't enough --
+   you need the full docstring, an edge case, or something the summary
+   truncated.
+
+Do not skip straight to step 3 for everything -- the summaries exist so you
+usually don't have to.
+
+## What's real vs. placeholder in the stub files
+
+- **Signatures** (parameter names, defaults, `*args`/`**kwargs`) are exact
+  copies of the real source.
+- **Docstrings** are the real docstrings. Class docstrings are capped at
+  their first paragraph (truncated ones are marked -- see "Compression
+  tricks" below); everything else is complete.
+- **Function/method bodies are placeholders** (`...`). They carry no
+  information about real behavior, return values, or edge cases -- never
+  infer runtime behavior from a stub body. The docstring is the only
+  source of behavioral information here; if it doesn't say, this
+  directory doesn't know either.
+- **`__all__`** (however it's constructed in the real source -- plain
+  assignment, `+=` accumulation, etc.) is preserved exactly, so each
+  stubbed module's real export list is accurate.
+
+## Compression tricks -- how to read them correctly
+
+These exist purely to cut size; none of them drop information, but
+misreading the compact form as the real API would be actively wrong:
+
+- **Enum-style / flat constant runs.** A class with many one-line members
+  (e.g. an `enum.Enum` with dozens of values) is collapsed into a single
+  `_MEMBERS = {{...}}` dict, immediately preceded by a comment stating the
+  REAL access pattern, e.g. `SomeEnum.Primary`, not
+  `SomeEnum._MEMBERS['Primary']`. **Always follow that comment's stated
+  access pattern** -- the dict is a compact data table, not the calling
+  convention.
+- **Large literal data** (big lookup tables, constant dictionaries). When
+  a top-level literal is large, its value is replaced with a comment
+  describing its keys/shape (e.g. `1069 keys: ['Hydrogen1', 'Hydrogen2', ...]`)
+  so you know what's queryable without the full payload inflating this
+  directory. {sidecar_note}
+- **Truncated class docstrings** end with the marker
+  `*(truncated — see stub for full docstring)*`. There is genuinely more
+  text in the real source that isn't reproduced anywhere in this
+  directory -- if the missing part matters, say you don't have it rather
+  than guessing at what follows.
+
+## Freshness
+
+This is a point-in-time snapshot. It can drift out of date relative to the
+real `{root}` source. If you need current, authoritative behavior (not
+just "does this function/class exist and roughly how do I call it"),
+verify against the real source rather than treating this directory as
+ground truth.
+"""
+        with open(os.path.join(self.out_dir, "LLM.md"), "w", encoding="utf-8") as f:
+            f.write(content)
+
+
     def finalize(self):
         sidecar_size = self.write_sidecar_files()
         self.write_index()
+        self.write_llm_readme()
 
         total_orig = sum(r["orig_bytes"] for r in self.report.values())
         total_stub = sum(r["stub_bytes"] for r in self.report.values())
