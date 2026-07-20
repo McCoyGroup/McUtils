@@ -1417,6 +1417,7 @@ class SphereUnionSurface:
                           grid_samples=20,
                           probe_radius=None,
                           probe_type='sas',
+                          bbox=None,
                           **surface_opts):
         """
         **LLM Docstring**
@@ -1477,11 +1478,16 @@ class SphereUnionSurface:
         elif method == 'isosurface':
             from .MarchingCubesSurface import marching_cubes
             surface_function = self.get_surface_function(probe_radius=probe_radius, probe_type=probe_type)
-            bbox = self.get_bbox()
-            if probe_radius is not None:
-                bbox[0] -= probe_radius
-                bbox[1] += probe_radius
-            bbox = bbox * bbox_scaling
+            if bbox is None:
+                bbox = self.get_bbox()
+                if probe_radius is not None:
+                    if probe_type == 'ses':
+                        bbox[0] -= 3 * probe_radius
+                        bbox[1] += 3 * probe_radius
+                    else:
+                        bbox[0] -= probe_radius
+                        bbox[1] += probe_radius
+                bbox = bbox * bbox_scaling
             (mx, my, mz), (MX, MY, MZ) = bbox
             if nput.is_int(grid_samples):
                 grid_samples = [grid_samples] * 3
