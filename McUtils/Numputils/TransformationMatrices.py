@@ -426,20 +426,23 @@ def youla_skew_decomp(A):
     n = len(A)
     s, T = sp.linalg.schur(A)
 
-    l = np.diag(s, 1)
+    l_full = np.diag(s, 1)
+    # no fixed axis; blocks are the contiguous pair
     if n % 2 == 0:
-        start = 0
-        end = n
-    else:  # manage padding for odd dimension
-        if abs(l[0]) < 1e-7:
-            start = 1
-            end = n
-        else:
-            start = 0
-            end = n - 1
-    l = l[start:end-1:2]
+        l = l_full[0:n - 1:2]
+        return youla_matrix(l, n), T
+    else:
+        # the fixed (all-zero) axis can land anywhere i
+        # just at position 0 or n-1 -- locate it direct
+        row_norms = np.max(np.abs(s), axis=-1)
+        axis_pos = int(np.argmin(row_norms))
 
-    return youla_matrix(l, n, axis_pos=0 if start == 0 else n), T
+        # blocks before the fixed axis: (0,1), (2,3), ..., (axis_pos-2, axis_pos-1)
+        before = l_full[0:axis_pos - 1:2] if axis_pos >= 2 else l_full[:0]
+        # blocks after the fixed axis: (axis_pos+1,axis_pos+2), ..., (n-2,n-1)
+        after = l_full[axis_pos + 1:n - 1:2]
+        l = np.concatenate([before, after])
+        return youla_matrix(l, n, axis_pos=axis_pos), T
 
 def youla_skew_matrix(l, n, axis_pos=0):
     """

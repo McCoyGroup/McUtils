@@ -36,7 +36,7 @@ import McUtils.Numputils as nput
 import McUtils.Plots as plt
 
 
-class PlotsTests(unittest.TestCase):
+class ClaudePlotsTests(unittest.TestCase):
     """
     Exercises the `McUtils.Plots` plotting classes: the 1D `Plot` family,
     the 2D `Plot2D`/`ArrayPlot` family, the 3D `Plot3D` family, layout via
