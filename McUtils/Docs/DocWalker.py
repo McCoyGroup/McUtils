@@ -824,7 +824,7 @@ class DocTemplateHandler(TemplateHandler):
                             extra_fields[name] = []
             else:
                 if active_tag is None:
-                    description.append(line.strip())
+                    description.append(line)
                 else:
                     if active_tag in param_map:
                         param_map[active_tag]['description'].append(line)
