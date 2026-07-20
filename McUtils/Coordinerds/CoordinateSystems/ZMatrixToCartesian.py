@@ -98,15 +98,14 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
         if ordering.shape[-1] > 3:
             atom_ordering = ordering[:, :, 0]
             ordering = ordering[:, 1:, 1:]
+            # TODO: figure out what else I changed that required this...
+            reord = np.argsort(atom_ordering, axis=-1)
+            ordering = np.array([
+                r[o]
+                for o, r in zip(ordering, reord)
+            ])
         else:
             atom_ordering = None
-
-        #TODO: figure out what else I changed that required this...
-        reord = np.argsort(atom_ordering, axis=-1)
-        ordering = np.array([
-            r[o]
-            for o, r in zip(ordering, reord)
-        ])
 
         total_points = np.zeros((sysnum, coordnum+1, 3))
         if return_derivs:
