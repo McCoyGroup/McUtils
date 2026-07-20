@@ -18,11 +18,6 @@ on `Numputils` and `Devutils`—but most can be used independently. McUtils also
 provides much of the lower-level infrastructure used by
 [`Psience`](https://github.com/McCoyGroup/Psience).
 
-- [Documentation](https://mccoygroup.github.io/McUtils/)
-- [Source](https://github.com/McCoyGroup/McUtils)
-- [Issue tracker](https://github.com/McCoyGroup/McUtils/issues)
-- [PyPI](https://pypi.org/project/mccoygroup-mcutils/)
-
 ### Installation & Requirements
 
 The easiest way to install is via `pip`, as
@@ -45,15 +40,21 @@ and activate like
 . mcenv/bin/activate
 ```
 
-or to use it in a [container](https://www.docker.com/) or [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or some other place where we can control the environment.
+the most up-to-date development version can be installed with
 
-It is also possible to install from source like
-
-```lang-shell
-git clone https://github.com/McCoyGroup/McUtils.git
+```bash
+python -m pip install git+https://github.com/McCoyGroup/McUtils.git
 ```
 
-but in this case you will need to make sure the library is on the path yourself and all of the dependencies are installed.
+or to use it in a [container](https://www.docker.com/) or [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or some other place where we can control the environment.
+
+The core required dependencies are `numpy`, `scipy`, `h5py`, `numba`, and `matplotlib`.
+
+Some integrations have additional dependencies, mainly `jupyter`, `ipywidgets`,
+`rdkit`, `ase`, and `mpi4py`
+
+#### Jupyter Integrations
+
 If you want to get all of the nice `JHTML` features for working in Jupyter, you'll then need to run
 
 ```python
@@ -63,50 +64,7 @@ JHTML.load()
 
 and then reload the browser window when prompted.
 
-#### Development installation
-
-Install the released package from PyPI:
-
-```bash
-python -m pip install mccoygroup-mcutils
-```
-
-McUtils requires Python 3.9 or newer. Its core scientific dependencies include
-NumPy, SciPy, h5py, Numba, and Matplotlib.
-A virtual environment is recommended:
-
-```bash
-python -m venv mcenv
-source mcenv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install mccoygroup-mcutils
-```
-
-To install the current development version:
-
-```bash
-python -m pip install  git+https://github.com/McCoyGroup/McUtils.git
-```
-
-Some integrations have additional dependencies, such as Jupyter, `ipywidgets`,
-RDKit, ASE, Open Babel, or MPI. Install these only when you need the
-corresponding package. 
-
-To initialize the richer `JHTML` notebook support, run:
-
-```python
-from McUtils.Jupyter import JHTML
-
-JHTML.load()
-```
-
-Reload the browser window if prompted.
-
 ## Package guide
-
-The examples below emphasize the most reused APIs within each package, measured
-by incoming package-local dependency edges in `stubs/dependency_graph.json`.
-Packages not represented in that graph use their primary exported interface.
 
 ### Scientific and numerical tools
 
