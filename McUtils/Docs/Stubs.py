@@ -31,6 +31,7 @@ import os
 import sys
 
 from .. import Devutils as dev
+from ..Formatters import TemplateHandler
 
 __all__ = [
     "StubSummaryBuilder"
@@ -95,6 +96,18 @@ class StubSummaryBuilder:
     SIDECAR_JSON_FILENAME = SIDECAR_MODULE_NAME + ".json"
     SIDECAR_LOADER_FILENAME = SIDECAR_MODULE_NAME + ".py"
     SIDECAR_LOADER_FUNC_NAME = "_load_registry_data"
+    DEPENDENCY_GRAPH_FILENAME = "dependency_graph.json"
+
+    # ------------------------------------------------------------------
+    # Dependency-graph blacklist -- top-level package names excluded from
+    # dependency_graph.json as noise (stdlib + a handful of ubiquitous
+    # third-party packages). `self.dependency_blacklist` (set in
+    # __init__ from this default) is a per-instance copy, so it can be
+    # tweaked per-run without touching the class default.
+    # ------------------------------------------------------------------
+    STDLIB_BLACKLIST_PACKAGES = frozenset(getattr(sys, "stdlib_module_names", ())) | frozenset({"builtins"})
+    COMMON_THIRD_PARTY_BLACKLIST_PACKAGES = frozenset(TemplateHandler.blacklist_packages)
+    DEFAULT_DEPENDENCY_BLACKLIST = STDLIB_BLACKLIST_PACKAGES | COMMON_THIRD_PARTY_BLACKLIST_PACKAGES
 
     # ------------------------------------------------------------------
     # String templates -- everything written into stubs, summaries, and
@@ -170,6 +183,18 @@ class StubSummaryBuilder:
         "say so rather than guessing one."
     )
 
+    DEPENDENCY_GRAPH_NOTE_TEMPLATE = (
+        "`{dependency_graph_filename}` (at the root of this directory) maps which "
+        "packages, classes, methods, and functions depend on which others -- both "
+        "within `{root}` and on external packages (stdlib and a handful of very "
+        "common third-party packages are excluded as noise). Use it to trace "
+        "connections between parts of the codebase before writing an example that "
+        "spans more than one package, or to find everything that uses a "
+        "particular class or method. Resolution is best-effort static analysis, "
+        "refined by live introspection where possible -- treat it as a strong "
+        "hint, not a guarantee, especially for dynamic or conditional imports."
+    )
+
     LLM_README_TEMPLATE = """# {root} -- how to use this directory
 
 This is a **compressed, LLM-oriented reference** for the `{root}` codebase,
@@ -235,6 +260,10 @@ misreading the compact form as the real API would be actively wrong:
   directory -- if the missing part matters, say you don't have it rather
   than guessing at what follows.
 
+## Cross-package dependencies
+
+{dependency_graph_note}
+
 ## Freshness
 
 This is a point-in-time snapshot. It can drift out of date relative to the
@@ -283,6 +312,7 @@ ground truth.
         self._module_stack = []
         self._current_module = None
         self.verbose = verbose
+        self.dependency_blacklist = set(self.DEFAULT_DEPENDENCY_BLACKLIST)
 
     @property
     def root_module_name(self):
@@ -302,6 +332,9 @@ ground truth.
     @property
     def dynamic_mode(self):
         return self._current_module.dynamic_mode
+    @property
+    def dependency_graph(self):
+        return self._current_module.dependency_graph
 
     # ==================================================================
     # Section 1: stub generation
@@ -530,6 +563,179 @@ ground truth.
         else:
             return [str(n) for n in real_all]
 
+    # ------------------------------------------------------------------
+    # Dependency graph: which packages/classes/methods/functions depend
+    # on which others. Must run against the ORIGINAL (pre-stub) source,
+    # since function/method bodies -- where actual usage lives -- get
+    # replaced with `...` by stub_function/stub_class.
+    # ------------------------------------------------------------------
+
+    def _flatten_attribute_chain(self, node):
+        """For `a.b.c`, return ('a', ['b', 'c']). Returns (None, []) if
+        the chain doesn't bottom out in a plain Name (e.g. it starts
+        with a call or subscript)."""
+        attrs = []
+        while isinstance(node, ast.Attribute):
+            attrs.append(node.attr)
+            node = node.value
+        if isinstance(node, ast.Name):
+            attrs.reverse()
+            return node.id, attrs
+        return None, []
+
+    def _dep_top_level_label(self, origin):
+        """The blacklist-checkable label for a resolved dotted origin:
+        the sibling top-level package name for internal (root_module_name-
+        prefixed) origins (e.g. 'McUtils.Numputils.VectorOps.norm' ->
+        'Numputils'), or the external package name otherwise (e.g.
+        'numpy.linalg.norm' -> 'numpy')."""
+        parts = origin.split(".") if origin else []
+        if not parts:
+            return origin
+        if parts[0] == self.root_module_name and len(parts) > 1:
+            return parts[1]
+        return parts[0]
+
+    def _build_static_import_map(self, tree, current_package_dotted):
+        """Map local names bound by import statements to a best-guess
+        fully-qualified dotted origin, purely from the import statement
+        text (relative imports resolved using current_package_dotted).
+        Wildcard imports (`from .X import *`) can't be resolved this way
+        -- individual names they bind are only recoverable via live
+        introspection (see resolve_name in record_module_dependencies)."""
+        import_map = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    local = alias.asname or alias.name.split(".")[0]
+                    import_map[local] = alias.name
+            elif isinstance(node, ast.ImportFrom):
+                if node.level and node.level > 0:
+                    base_parts = current_package_dotted.split(".")
+                    if node.level > 1:
+                        trim = node.level - 1
+                        base_parts = base_parts[:-trim] if trim < len(base_parts) else []
+                    base = ".".join(p for p in ([*base_parts, node.module] if node.module else base_parts) if p)
+                else:
+                    base = node.module or ""
+                for alias in node.names:
+                    if alias.name == "*":
+                        continue  # unresolvable statically
+                    local = alias.asname or alias.name
+                    import_map[local] = f"{base}.{alias.name}" if base else alias.name
+        return import_map
+
+    def record_module_dependencies(self, source, package_name, rel_path=None):
+        """Parse the ORIGINAL (pre-stub) source of one module and record,
+        into self.dependency_graph, which packages/classes/methods/
+        functions it references from other packages. Prefers live
+        introspection (when dynamic_mode has the module loaded, via the
+        same passive sys.modules lookup used for __all__ baking) over
+        the static import map, since live introspection correctly
+        resolves re-export chains like `from .X import *` that static
+        parsing can't attribute to individual names. Silently returns
+        (records nothing) on a syntax error -- dependency tracking is a
+        best-effort bonus, not something that should block stubbing."""
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            return
+
+        dotted = self._dotted_module_name(package_name, rel_path)
+        is_init = (rel_path is not None
+                   and rel_path.replace(os.sep, "/").split("/")[-1] == self.INIT_FILENAME)
+        current_package_dotted = dotted if is_init else (
+            dotted.rsplit(".", 1)[0] if "." in dotted else dotted)
+
+        loaded_module = sys.modules.get(dotted) if self.dynamic_mode else None
+        import_map = self._build_static_import_map(tree, current_package_dotted)
+
+        def resolve_name(name):
+            if loaded_module is not None:
+                obj = getattr(loaded_module, name, None)
+                if obj is not None:
+                    mod = getattr(obj, "__module__", None)
+                    qual = getattr(obj, "__qualname__", None)
+                    if mod:
+                        return f"{mod}.{qual}" if qual else mod
+                    if hasattr(obj, "__file__") and hasattr(obj, "__name__"):
+                        return obj.__name__  # it's itself a module, e.g. `np`
+            return import_map.get(name)
+
+        def is_wanted(origin):
+            return bool(origin) and self._dep_top_level_label(origin) not in self.dependency_blacklist
+
+        def collect_deps(node):
+            deps = set()
+            for sub in ast.walk(node):
+                if isinstance(sub, ast.Attribute):
+                    root, attrs = self._flatten_attribute_chain(sub)
+                    if root is None:
+                        continue
+                    origin = resolve_name(root)
+                    if origin and is_wanted(origin):
+                        deps.add(".".join([origin] + attrs) if attrs else origin)
+                elif isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Load):
+                    origin = resolve_name(sub.id)
+                    if origin and is_wanted(origin):
+                        deps.add(origin)
+            return deps
+
+        module_deps = set()
+        entities = self.dependency_graph["entities"]
+
+        def record_entity(dotted_name, kind, deps):
+            if not deps:
+                return
+            entry = entities.setdefault(dotted_name, {"kind": kind, "depends_on": set()})
+            entry["depends_on"] |= deps
+            module_deps.update(deps)
+
+        def record_class(node, prefix):
+            class_dotted = f"{prefix}.{node.name}"
+            own_body = [n for n in node.body
+                        if not isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+            class_deps = set()
+            for base in node.bases:
+                class_deps |= collect_deps(base)
+            for n in own_body:
+                class_deps |= collect_deps(n)
+            record_entity(class_dotted, "class", class_deps)
+
+            for child in node.body:
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    record_entity(f"{class_dotted}.{child.name}", "method", collect_deps(child))
+                elif isinstance(child, ast.ClassDef):
+                    record_class(child, class_dotted)
+
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef):
+                record_class(node, dotted)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                record_entity(f"{dotted}.{node.name}", "function", collect_deps(node))
+
+        if module_deps:
+            pkg_bucket = self.dependency_graph["packages"].setdefault(package_name, set())
+            pkg_bucket.update(
+                label for d in module_deps
+                if (label := self._dep_top_level_label(d)) != package_name)
+
+    def write_dependency_graph(self):
+        """Write dependency_graph.json at the root of out_dir. See
+        record_module_dependencies for how entries are determined."""
+        packages_out = {
+            pkg: sorted(deps) for pkg, deps in self.dependency_graph["packages"].items()
+        }
+        entities_out = {
+            name: {"kind": info["kind"], "depends_on": sorted(info["depends_on"])}
+            for name, info in self.dependency_graph["entities"].items()
+        }
+        payload = {"packages": packages_out, "entities": entities_out}
+        path = os.path.join(self.out_dir, self.DEPENDENCY_GRAPH_FILENAME)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, sort_keys=True)
+        return os.path.getsize(path)
+
     def stub_function(self, node):
         docstring = ast.get_docstring(node, clean=False)
         new_body = []
@@ -647,6 +853,8 @@ ground truth.
                 else:
                     dynamic_all = (self.resolve_dynamic_all(package_name, rel_path)
                                    if package_name is not None else None)
+                    if package_name is not None:
+                        self.record_module_dependencies(source, package_name, rel_path)
                     try:
                         stubbed = self.stub_module(source, rel_path, dynamic_all=dynamic_all)
                     except SyntaxError as e:
@@ -937,6 +1145,7 @@ ground truth.
             self.sidecar = {}
             self.report = {}
             self.dynamic_mode = dynamic_mode
+            self.dependency_graph = {"packages": {}, "entities": {}}
 
         def __enter__(self):
             self.parent._module_stack.append(self.parent._current_module)
@@ -974,6 +1183,7 @@ ground truth.
                     source = f.read()
                 out_file = os.path.join(pkg_stub_out, os.path.basename(pkg_src_path))
                 dynamic_all = self.resolve_dynamic_all(package_name, rel_path=None)
+                self.record_module_dependencies(source, package_name, rel_path=None)
                 stubbed = self.stub_module(source, package_name, dynamic_all=dynamic_all)
                 with open(out_file, "w", encoding="utf-8") as f:
                     f.write(stubbed)
@@ -1027,8 +1237,12 @@ ground truth.
             self.SIDECAR_ABSENT_NOTE
         )
 
+        dependency_graph_note = self.DEPENDENCY_GRAPH_NOTE_TEMPLATE.format(
+            dependency_graph_filename=self.DEPENDENCY_GRAPH_FILENAME, root=root)
+
         content = self.LLM_README_TEMPLATE.format(
-            root=root, sidecar_note=sidecar_note, truncation_marker=self.TRUNCATION_MARKER)
+            root=root, sidecar_note=sidecar_note, truncation_marker=self.TRUNCATION_MARKER,
+            dependency_graph_note=dependency_graph_note)
         with open(os.path.join(self.out_dir, self.LLM_README_FILENAME), "w", encoding="utf-8") as f:
             f.write(content)
 
@@ -1036,6 +1250,7 @@ ground truth.
     def finalize(self):
         sidecar_size = self.write_sidecar_files()
         self.write_index()
+        dependency_graph_size = self.write_dependency_graph()
         self.write_llm_readme()
 
         total_orig = sum(r["orig_bytes"] for r in self.report.values())
@@ -1055,7 +1270,8 @@ ground truth.
             'original_size': total_orig,
             'stub_size': total_stub,
             'sidecar_size': sidecar_size,
-            'summary_size': total_summary
+            'summary_size': total_summary,
+            'dependency_graph_size': dependency_graph_size,
         }
         return summary
 

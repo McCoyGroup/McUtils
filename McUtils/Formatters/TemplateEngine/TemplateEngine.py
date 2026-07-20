@@ -1746,6 +1746,14 @@ class TemplateHandler(ObjectHandler):
 
     blacklist_packages = {
         'numpy', 'scipy', 'matplotlib',
+        # chemistry
+        "ase", "rdkit", "numba",  "mpi4py", "h5py", "pysisyphus", "sympy",
+        # jupyter
+        "plotly", "IPython", "ipykernel", "ipywidgets", "ipyevents",
+        "cycler", "traitlets", "nglview",
+        "nbformat", "nbformat", "markdown",
+        # misc,
+        "orjson",
         # top 100 packages on PyPI
         'aiobotocore', 'aiohappyeyeballs', 'aiohttp',
         'aiosignal', 'annotated_doc', 'annotated_types', 'anyio',
