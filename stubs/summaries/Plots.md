@@ -1,0 +1,2901 @@
+### `Backends.py` — For now, just a super simple Enum of supported backends
+  - **class `AxisManager`**
+    - `__init__(tick_getter, tick_setter, tick_locator, minor_tick_locator, tick_formatter, minor_tick_formatter)`
+  - **class `XAxisManager`** (AxisManager)
+    - `get_xticks()` — **LLM Docstring**
+    - `set_xticks(ticks, **kwargs)` — **LLM Docstring**
+  - **class `YAxisManager`** (AxisManager)
+    - `get_yticks()` — **LLM Docstring**
+    - `set_yticks(ticks, **kwargs)` — **LLM Docstring**
+  - **class `ZAxisManager`** (AxisManager)
+    - `get_zticks()` — **LLM Docstring**
+    - `set_zticks(ticks, **kwargs)` — **LLM Docstring**
+  - **class `GraphicsAxes`**
+    > A wrapper to provide a canonical form for matplotlib.axes.Axes
+    > so that other backends can plug in cleanly
+    - `__init__()`
+    - `get_xaxis_manager()` — Build the x-axis tick manager for this axes.
+    - `get_yaxis_manager()` — Build the y-axis tick manager for this axes.
+    - **class `TicksManager`**
+      - **class `Locator`**
+      - **class `FixedLocator`** (Locator)
+        - `__init__(locs, **opts)`
+    - `canonicalize_opts(opts)` — Normalize construction options into the backend's canonical form.
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure.
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure.
+    - `prep_show()` — **LLM Docstring**
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it.
+    - `get_plot_label()` — **LLM Docstring**
+    - `set_plot_label(val, **style)` — **LLM Docstring**
+    - `get_style_list()` — **LLM Docstring**
+    - `set_style_list(props)` — **LLM Docstring**
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn.
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn.
+    - `get_frame_style()` — **LLM Docstring**
+    - `set_frame_style(frame_spec)` — **LLM Docstring**
+    - `get_xlabel()` — **LLM Docstring**
+    - `set_xlabel(val, **style)` — **LLM Docstring**
+    - `get_ylabel()` — **LLM Docstring**
+    - `set_ylabel(val, **style)` — **LLM Docstring**
+    - `get_xlim()` — **LLM Docstring**
+    - `set_xlim(val, **opts)` — :param val: the `(min, max)` limits
+    - `get_ylim()` — **LLM Docstring**
+    - `set_ylim(val, **opts)` — :param val: the `(min, max)` limits
+    - `get_xticks()` — **LLM Docstring**
+    - `set_xticks(val, **opts)` — **LLM Docstring**
+    - `get_yticks()` — **LLM Docstring**
+    - `set_yticks(val, **opts)` — **LLM Docstring**
+    - `get_xtick_style()` — **LLM Docstring**
+    - `set_xtick_style(**opts)` — **LLM Docstring**
+    - `get_ytick_style()` — **LLM Docstring**
+    - `set_ytick_style(**opts)` — **LLM Docstring**
+    - `set_aspect_ratio(ar)` — **LLM Docstring**
+    - `get_bbox()` — **LLM Docstring**
+    - `set_bbox(bbox)` — **LLM Docstring**
+    - `get_facecolor()` — **LLM Docstring**
+    - `set_facecolor(fg)` — **LLM Docstring**
+    - `get_padding()` — **LLM Docstring**
+    - `legend(**opts)` — **LLM Docstring**
+    - `get_graphics_properties(obj, property=None)` — Get backend properties of a drawn graphics object.
+    - `set_graphics_properties(obj, **props)` — Set backend properties on a drawn graphics object.
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points.
+    - `draw_point(points, **styles)` — Draw a point (as a small disk) at the given position(s).
+    - `draw_disk(points, **styles)` — Draw a filled disk at the given position(s).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points.
+    - `draw_triangle(points, **styles)` — Draw a triangle from the given points.
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points.
+    - `draw_arrow(points, **styles)` — Draw an arrow from the given points.
+    - `draw_text(points, vals, **styles)` — Draw text at the given position(s).
+    - `draw_path(commands, **styles)` — Draw a path from a sequence of drawing commands.
+  - **class `GraphicsAxes3D`** (GraphicsAxes)
+    - `__init__()`
+    - `get_zlim()` — **LLM Docstring**
+    - `set_zlim(val, **opts)` — :param val: the `(min, max)` limits
+    - `get_zticks()` — **LLM Docstring**
+    - `set_zticks(val, **opts)` — **LLM Docstring**
+    - `get_ztick_style()` — **LLM Docstring**
+    - `set_ztick_style(**opts)` — **LLM Docstring**
+    - `set_projection_type(proj_type, **kwargs)` — **LLM Docstring**
+    - `get_projection_type()` — **LLM Docstring**
+    - `get_autoscale()` — **LLM Docstring**
+    - `set_autoscale(autoscale)` — **LLM Docstring**
+    - `get_view_settings()` — **LLM Docstring**
+    - `set_view_settings(**ops)` — **LLM Docstring**
+    - `draw_sphere(points, rads, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii.
+    - `draw_cylinder(start, end, rad, circle_points=48, **opts)` — Draw a cylinder between two endpoints.
+    - `draw_box(start, end, **opts)` — Draw an axis-aligned box between two corners.
+  - **class `GraphicsFigure`**
+    > A wrapper to provide a canonical form for matplotlib.figure.Figure
+    > so that other backends can plug in cleanly
+    - `__init__(axes=None)`
+    - `construct(**kw)` — Construct a figure of this backend type.
+    - `canonicalize_opts(opts)` — Normalize construction options into the backend's canonical form.
+    - `create_axes(rows, cols, spans, **kw)` — Create a new axes within the figure at the given grid position.
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box.
+    - `create_colorbar(graphics, axes, norm=None, cmap=None, **kw)` — Create a colorbar for a mappable on the given axes.
+    - `add_axes(ax)` — Add an existing axes object to the figure.
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure.
+    - `close(*, backend)` — **LLM Docstring**
+    - `get_bboxes()` — Return the bounding boxes of the figure's axes.
+    - `prep_show()` — **LLM Docstring**
+    - `get_size_inches()` — Return the figure size in inches.
+    - `set_size_inches(w, h)` — Set the figure size in inches.
+    - `set_extents(extents)` — **LLM Docstring**
+    - `get_facecolor()` — **LLM Docstring**
+    - `set_facecolor(fg)` — **LLM Docstring**
+    - `savefig(file, **opts)` — Save the figure to a file.
+    - `animate_frames(frames, **animation_opts)` — **LLM Docstring**
+    - `to_html()` — **LLM Docstring**
+    - `to_widget(**opts)` — Render the figure as an interactive widget.
+    - `get_mime_bundle()` — Return the figure's MIME bundle for rich display.
+    - `tight_layout()` — Tighten the figure layout to remove excess whitespace.
+  - **class `GraphicsBackend`**
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend.
+    - `create_axes(figure, *args, **kwargs)` — Create a new axes within the figure at the given grid position.
+    - `create_inset(figure, *args, **kw)` — Create an inset axes at the given bounding box.
+    - `close_figure(figure)` — Close a figure via the backend.
+    - `remove_axes(axes)` — Remove an axes via the backend.
+    - `clear_figure(figure)` — Clear a figure via the backend.
+    - `clear_axes(axes)` — Clear an axes via the backend.
+    - `get_interactive_status()` — Return whether interactive mode is on.
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `show_figure(figure, reshow=None)` — Display a figure via the backend.
+    - `to_widget(figure)` — Render the figure as an interactive widget.
+    - `get_available_themes()` — Return the themes available for this backend.
+    - **class `ThemeContextManager`**
+      - `__init__(theme_parents, theme_spec)`
+      - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form.
+    - `theme_context(theme_parents, spec)` — Return a context manager that applies a theme for this backend.
+    - **class `DefaultBackends`** (enum.Enum)
+      > Real access pattern: DefaultBackends.<MemberName> (this is an enum with 11 members, e.g. DefaultBackends.MPL == 'matplotlib'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+    - `get_default_backends()` — Return the mapping of default backend names to their backend classes.
+    - `lookup(backend, opts=None)` — Resolve a backend (name or instance) to an instantiated backend object,
+  - **class `MPLManager`**
+    > Real access pattern: MPLManager.<AttrName> (9 class attributes, e.g. MPLManager._plt == None). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+    - `plt_api()` — Lazily import and cache `matplotlib.pyplot`, returning the module.
+    - `mpl_api()` — Lazily import and cache the top-level `matplotlib` module, returning it.
+    - `color_api()` — Lazily import and cache `matplotlib.colors`, returning the module.
+    - `patch_api()` — Lazily import and cache `matplotlib.patches`, returning the module.
+    - `path_api()` — Lazily import and cache `matplotlib.path`, returning the module.
+    - `collections_api()` — Lazily import and cache `matplotlib.collections`, returning the module.
+    - `widgets_api()` — Lazily import and cache `matplotlib.widgets`, returning the module.
+    - `animations_api()` — Lazily import and cache `matplotlib.animation`, returning the module.
+    - `draw_if_interactive(*args, **kwargs)` — No-op override of matplotlib's interactive-draw hook (used to suppress automatic
+    - `magic_backend(backend)` — Set the matplotlib backend via the IPython `%matplotlib` magic when running in a
+    - `figure_settings(figure)` — Context helper that captures and adjusts matplotlib's global backend/interactivity
+    - `mpl_disconnect(graphics)` — Detach a figure from matplotlib's global figure manager (`Gcf`) when using an
+    - `mpl_connect(graphics)` — Register a figure with matplotlib's global figure manager (`Gcf`) under an inline
+    - `jupyter_show(close=None, block=None)` — Show all figures as SVG/PNG payloads sent to the IPython clients.
+  - **class `MPLAxes`** (GraphicsAxes)
+    - `__init__(mpl_axes_object, **opts)`
+    - **class `TicksManager`**
+      - `__init__()`
+      - `Locator()` — Return matplotlib's `Locator` locator base class.
+      - `FixedLocator()` — **LLM Docstring**
+      - `AutoLocator()` — **LLM Docstring**
+      - `AutoMinorLocator()` — **LLM Docstring**
+      - `MultipleLocator()` — **LLM Docstring**
+      - `StrMethodFormatter()` — **LLM Docstring**
+      - `NullFormatter()` — **LLM Docstring**
+      - `FixedFormatter()` — **LLM Docstring**
+      - `ScalarFormatter()` — **LLM Docstring**
+    - `clear(*, backend=None)` — Clear the drawn content from this axes/figure (matplotlib backend).
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (matplotlib backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (matplotlib backend).
+    - `get_plot_label()` — Return the plot title/label (matplotlib backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (matplotlib backend).
+    - `get_style_list()` — Return the per-series style cycle (matplotlib backend).
+    - `set_style_list(props)` — Set the per-series style cycle (matplotlib backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (matplotlib backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (matplotlib backend).
+    - `get_frame_style()` — Return the frame (spine) styling (matplotlib backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (matplotlib backend).
+    - `get_xlabel()` — Return the x-axis label (matplotlib backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (matplotlib backend).
+    - `get_ylabel()` — Return the y-axis label (matplotlib backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (matplotlib backend).
+    - `get_xlim()` — Return the x-axis limits (matplotlib backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (matplotlib backend).
+    - `get_ylim()` — Return the y-axis limits (matplotlib backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (matplotlib backend).
+    - `get_xticks()` — Return the x-axis tick locations (matplotlib backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (matplotlib backend).
+    - `get_yticks()` — Return the y-axis tick locations (matplotlib backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (matplotlib backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (matplotlib backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (matplotlib backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (matplotlib backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (matplotlib backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (matplotlib backend).
+    - `get_bbox()` — Return the axes bounding box (matplotlib backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (matplotlib backend).
+    - `get_facecolor()` — Return the background/face color (matplotlib backend).
+    - `set_facecolor(fg)` — Set the background/face color (matplotlib backend).
+    - `get_padding()` — Return the axes padding (matplotlib backend).
+    - `legend(**opts)` — Draw the axes legend (matplotlib backend).
+    - `get_graphics_properties(obj, property=None)` — Get backend properties of a drawn graphics object (matplotlib backend).
+    - `set_graphics_properties(obj, **props)` — Set backend properties on a drawn graphics object (matplotlib backend).
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (matplotlib backend).
+    - `draw_disk(points, radius=None, s=None, **styles)` — Draw a filled disk at the given position(s) (matplotlib backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (matplotlib backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (matplotlib backend).
+    - `draw_arrow(points, **styles)` — Draw an arrow from the given points (matplotlib backend).
+    - `draw_text(points, vals, **styles)` — Draw text at the given position(s) (matplotlib backend).
+    - `svg_to_mpl_path(path, target_bbox=None, base_height=None, y_flip=False)` — Convert an SVG-style path (a sequence of `(command, args)` drawing operations)
+    - `draw_path(commands, **styles)` — Draw a path from a sequence of drawing commands (matplotlib backend).
+  - **class `MPLAxes3D`** (MPLAxes)
+    - `__init__(mpl_axes_object, **opts)`
+    - `set_projection_type(proj_type, **kwargs)` — Set the 3D projection type (matplotlib backend).
+    - `get_projection_type()` — Return the 3D projection type (matplotlib backend).
+    - `get_autoscale()` — Return the autoscale setting (matplotlib backend).
+    - `set_autoscale(autoscale)` — Set the autoscale setting (matplotlib backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (matplotlib backend).
+    - `get_zlim()` — Return the z-axis limits (matplotlib backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (matplotlib backend).
+    - `get_zticks()` — Return the z-axis tick locations (matplotlib backend).
+    - `set_zticks(val, **opts)` — Set the z-axis tick locations (matplotlib backend).
+    - `get_ztick_style()` — Return the z-axis tick styling (matplotlib backend).
+    - `set_ztick_style(**opts)` — Set the z-axis tick styling (matplotlib backend).
+    - `get_box_aspect()` — Return the 3D box aspect ratios (matplotlib backend).
+    - `set_box_aspect(br, **kwargs)` — Set the 3D box aspect ratios (matplotlib backend).
+    - `get_view_settings()` — Return the 3D camera/view settings (matplotlib backend).
+    - `set_view_settings(elev=None, azim=None, roll=None, vertical_axis=None, dist=None, up_vector=None, right_vector=None, view_vector=None, view_distance=None, view_matrix=None, **values)` — Set the 3D camera/view settings (matplotlib backend).
+    - `prep_show()` — Prepare the axes/figure for display (matplotlib backend).
+    - `draw_sphere(center, radius, sphere_points=48, rendering='standard', s=None, box_scalings=None, edgecolors=None, edge_color=None, lw=None, edge_width=0.01, glow=None, color='white', plotter='scatter', depth_shading_range=(-1, 1), depth_shading_targets=(-0.5, 0.5), depth_shrink_range=None, depth_shrink_targets=None, **opts)` — Draw a sphere (or spheres) at the given center(s) with the given radii (matplotlib backend).
+    - `draw_cylinder(start, end, rad, circle_points=48, rendering=None, box_scalings=None, edge_color=None, color='black', glow=None, segments=1, segment_overdraw=0.05, edge_width=0.01, lw=None, depth_shading_range=(-1, 1), depth_shading_targets=(-0.5, 0.5), color_cycle=False, capstyle='butt', plotter='plot', **opts)` — Draw a cylinder between two endpoints (matplotlib backend).
+    - `draw_disk(centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None, theta1=None, theta2=None, rendering='flat', box_scalings=None, line_color=None, line_thickness=None, color=None, glow=None, lw=None, **styles)` — Draw a filled disk at the given position(s) (matplotlib backend).
+    - `draw_line(points, rendering='flat', box_scalings=None, line_thickness=None, lw=None, s=None, edgecolors=None, **styles)` — Draw a line/polyline through the given points (matplotlib backend).
+    - `draw_arrow(points, radius=None, rendering=None, segments=8, box_scalings=None, lw=None, **styles)` — Draw an arrow from the given points (matplotlib backend).
+    - `draw_text(points, vals, billboard=True, normal=None, rendering='flat', box_scalings=None, zdir=None, **styles)` — Draw text at the given position(s) (matplotlib backend).
+    - `draw_box(start, end, **opts)` — Draw an axis-aligned box between two corners (matplotlib backend).
+  - **class `MPLFigure`** (GraphicsFigure)
+    - `__init__(mpl_figure_object, display_format=None, **opts)`
+    - `create_axes(rows, cols, spans, **kw)` — Create a new axes within the figure at the given grid position (matplotlib backend).
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (matplotlib backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (matplotlib backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `create_colorbar(graphics, axes, norm=None, cmap=None, **kw)` — Create a colorbar for a mappable on the given axes (matplotlib backend).
+    - `get_figure_label()` — Return the overall figure label (matplotlib backend).
+    - `set_figure_label(val, **style)` — Set the overall figure label (matplotlib backend).
+    - `get_size_inches()` — Return the figure size in inches (matplotlib backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (matplotlib backend).
+    - `set_extents(extents)` — Set the figure's coordinate extents (matplotlib backend).
+    - `set_figure_spacings(spacing)` — Set the inter-panel spacings (matplotlib backend).
+    - `get_facecolor()` — Return the background/face color (matplotlib backend).
+    - `set_facecolor(fg)` — Set the background/face color (matplotlib backend).
+    - `savefig(file, facecolor=None, **opts)` — Save the figure to a file (matplotlib backend).
+    - `animate_frames(frames, export_html=True, **animation_opts)` — Animate a sequence of frames (matplotlib backend).
+    - `to_html(format=None)` — Render the figure to HTML (matplotlib backend).
+    - `to_data_url()` — Render the figure to a base64-encoded PNG `data:` URL.
+    - `to_svg()` — Render the figure to an SVG string.
+    - `to_widget(format=None, autoclose=True)` — Render the figure as an interactive widget (matplotlib backend).
+    - `get_mime_bundle()` — Return the figure's MIME bundle for rich display (matplotlib backend).
+    - `tight_layout()` — Tighten the figure layout to remove excess whitespace (matplotlib backend).
+  - **class `MPLBackend`** (GraphicsBackend)
+    - `plt()` — **LLM Docstring**
+    - `mpl()` — **LLM Docstring**
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
+    - `show_all()` — **LLM Docstring**
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `__init__(theme_parents, theme_spec)`
+      - `canonicalize_theme_opts(theme_parents, theme_opts)` — Normalize theme options into the backend's canonical form (matplotlib backend).
+    - `show_figure(graphics, autoclose=True, reshow=None)` — Display a figure via the backend (matplotlib backend).
+    - `to_widget(figure, autoclose=True)` — Render the figure as an interactive widget (matplotlib backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (matplotlib backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (matplotlib backend).
+  - **class `MPLFigure3D`** (MPLFigure)
+    - `create_axes(rows, cols, spans, projection='3d', **kw)` — Create a new axes within the figure at the given grid position (matplotlib backend).
+  - **class `MPLBackend3D`** (MPLBackend)
+    - `create_figure(*args, subplot_kw=None, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
+  - **class `PlotlyAxes`** (GraphicsAxes)
+    - `__init__(elements=None, xaxis=None, yaxis=None, annotations=None, **opts)`
+    - `clear(*, backend=None)` — Clear the drawn content from this axes/figure (Plotly backend).
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (Plotly backend).
+    - `prep_elems()` — Return the axes' trace elements for figure assembly.
+    - `prep_annotations()` — Return the axes' annotations for figure assembly.
+    - `prep_opts()` — Return the axes' layout options, dropping `None`-valued per-axis sub-options.
+    - `get_plot_label()` — Return the plot title/label (Plotly backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (Plotly backend).
+    - `get_style_list()` — Return the per-series style cycle (Plotly backend).
+    - `set_style_list(props)` — Set the per-series style cycle (Plotly backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (Plotly backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (Plotly backend).
+    - `get_frame_style()` — Return the frame (spine) styling (Plotly backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (Plotly backend).
+    - `get_xlabel()` — Return the x-axis label (Plotly backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (Plotly backend).
+    - `get_ylabel()` — Return the y-axis label (Plotly backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (Plotly backend).
+    - `get_plot_range()` — Return the plotted data range (Plotly backend).
+    - `get_xlim()` — Return the x-axis limits (Plotly backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (Plotly backend).
+    - `get_ylim()` — Return the y-axis limits (Plotly backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (Plotly backend).
+    - `get_xticks()` — Return the x-axis tick locations (Plotly backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (Plotly backend).
+    - `get_yticks()` — Return the y-axis tick locations (Plotly backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (Plotly backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (Plotly backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (Plotly backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (Plotly backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (Plotly backend).
+    - `get_aspect_ratio()` — Return the axes aspect ratio (Plotly backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (Plotly backend).
+    - `get_bbox()` — Return the axes bounding box (Plotly backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (Plotly backend).
+    - `plot(x, y, line=None, type='scatter', mode='lines', **opts)` — Add a line trace to the axes (a Plotly `scatter` trace in `lines` mode).
+    - `scatter(x, y, line=None, type='scatter', mode='markers', **opts)` — Add a marker (scatter) trace to the axes.
+    - `text(text, x, y, line=None, type='scatter', mode='text', textposition='middle center', color=None, textfont=None, **opts)` — Add a text trace to the axes, assembling the text-font options.
+    - `get_plotter(method, **opts)` — Resolve a plotting-method name to the backend callable that draws it (Plotly backend).
+    - `get_facecolor()` — Return the background/face color (Plotly backend).
+    - `set_facecolor(fg)` — Set the background/face color (Plotly backend).
+    - `get_padding()` — Return the axes padding (Plotly backend).
+    - `legend(show=True, **opts)` — Draw the axes legend (Plotly backend).
+    - `get_graphics_properties(obj, property=None)` — Get backend properties of a drawn graphics object (Plotly backend).
+    - `set_graphics_properties(obj, **props)` — Set backend properties on a drawn graphics object (Plotly backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (Plotly backend).
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (Plotly backend).
+    - `draw_path(commands, **styles)` — Draw a path from a sequence of drawing commands (Plotly backend).
+    - `draw_disk(points, radius=None, s=None, **styles)` — Draw a filled disk at the given position(s) (Plotly backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (Plotly backend).
+    - `annotation(points, **opts)` — Add an annotation (optionally an arrow annotation) to the axes.
+    - `draw_arrow(points, color=None, width=None, size=None, head=None, **styles)` — Draw an arrow from the given points (Plotly backend).
+    - `draw_text(points, vals, **styles)` — Draw text at the given position(s) (Plotly backend).
+  - **class `PlotlyFigure`** (GraphicsFigure)
+    - `__init__(axes=None, layout=None, export_format=None, width=500, height=500, figsize=None, id=None, include_save_buttons=False, **opts)`
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (Plotly backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (Plotly backend).
+    - `create_axes(**kw)` — Create a new axes within the figure at the given grid position (Plotly backend).
+    - `construct(**kw)` — Construct a figure of this backend type (Plotly backend).
+    - `get_size_inches()` — Return the figure size in inches (Plotly backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (Plotly backend).
+    - `set_extents(extents)` — Set the figure's coordinate extents (Plotly backend).
+    - `get_facecolor()` — Return the background/face color (Plotly backend).
+    - `set_facecolor(fg)` — Set the background/face color (Plotly backend).
+    - `savefig(file, facecolor=None, **opts)` — Save the figure to a file (Plotly backend).
+    - `prep_dict()` — Assemble the full Plotly figure dict from the axes' traces, annotations, and
+    - `to_plotly()` — Build a `plotly.graph_objects.Figure` from the assembled figure dict.
+    - `get_core_body(html)` — Extract the contents of the `<body>` from a Plotly HTML export.
+    - `set_plotly_script_id(html, id)` — Insert the figure's id into the last `<script>` tag of a Plotly HTML export.
+    - `configure_mathjax(html, id)` — Inject a MathJax configuration/loader script into a Plotly HTML export.
+    - `postprocess_plotly_html(html)` — Post-process a Plotly HTML export: tag the script, optionally strip to the core
+    - `to_html()` — Render the figure to HTML (Plotly backend).
+    - `to_svg()` — Render the figure to an SVG string.
+    - `get_export_script(id, format='svg')` — Build the JavaScript that exports the figure canvas to an image and triggers a
+    - `set_export_format_script(id)` — Build the JavaScript that reads the export-format selector and stores it on the
+    - `get_record_screen_script(id, polling_rate=30, recording_duration=2, video_format='video/webm')` — Build the JavaScript that records the figure canvas to a video and triggers a
+    - `set_animation_duration_script(id)` — Build the JavaScript that reads the duration input and stores it on the canvas.
+    - `to_widget(format=None, autoclose=True)` — Render the figure as an interactive widget (Plotly backend).
+    - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (Plotly backend).
+  - **class `PlotlyBackend`** (GraphicsBackend)
+    - `create_figure(*args, template=None, **kwargs)` — Create a new figure (and its initial axes) for this backend (Plotly backend).
+    - `prep_color(v)` — Parse a color string and re-encode it as a Plotly-compatible RGB(A) code.
+    - `remap_property(name, value, context=None)` — Recursively translate a canonical style property (and value) into Plotly
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_opts)` — Normalize theme options into the backend's canonical form (Plotly backend).
+      - `get_axes_theme()` — Return the axes theme (Plotly backend).
+      - `prep_spec()` — Assemble the Plotly layout template (and leftover properties) from the theme
+      - `current_theme()` — Return the current theme (Plotly backend).
+    - `show_figure(graphics, reshow=None)` — Display a figure via the backend (Plotly backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (Plotly backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (Plotly backend).
+  - **class `PlotlyAxes3D`** (PlotlyAxes)
+    - `__init__(elements=None, *, zaxis=None, **opts)`
+    - `get_zaxis_manager()` — Build the z-axis tick manager for this axes (Plotly backend).
+    - `set_projection_type(proj_type, **kwargs)` — Set the 3D projection type (Plotly backend).
+    - `get_projection_type()` — Return the 3D projection type (Plotly backend).
+    - `get_autoscale()` — Return the autoscale setting (Plotly backend).
+    - `set_autoscale(autoscale)` — Set the autoscale setting (Plotly backend).
+    - `get_box_aspect()` — Return the 3D box aspect ratios (Plotly backend).
+    - `set_box_aspect(br, **kwargs)` — Set the 3D box aspect ratios (Plotly backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (Plotly backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (Plotly backend).
+    - `get_frame_style()` — Return the frame (spine) styling (Plotly backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (Plotly backend).
+    - `get_plot_range()` — Return the plotted data range (Plotly backend).
+    - `get_zlabel()` — Return the z-axis label (Plotly backend).
+    - `set_zlabel(val, **style)` — Set the z-axis label (Plotly backend).
+    - `get_zlim()` — Return the z-axis limits (Plotly backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (Plotly backend).
+    - `get_zticks()` — Return the z-axis tick locations (Plotly backend).
+    - `set_zticks(val, **opts)` — Set the z-axis tick locations (Plotly backend).
+    - `get_ztick_style()` — Return the z-axis tick styling (Plotly backend).
+    - `set_ztick_style(**opts)` — Set the z-axis tick styling (Plotly backend).
+    - `get_view_settings()` — Return the 3D camera/view settings (Plotly backend).
+    - `set_view_settings(up=None, eye=None, center=None, vertical_axis=None, up_vector=None, right_vector=None, view_vector=None, view_distance=None, view_matrix=None, view_center=None)` — Set the 3D camera/view settings (Plotly backend).
+    - `plot(x, y, z, line=None, type='scatter3d', **opts)` — Add a 3D line trace to the axes (a Plotly `scatter3d` trace).
+    - `scatter(x, y, z, line=None, type='scatter3d', marker=None, edge_color=None, size=None, line_width=None, **opts)` — Add a 3D marker (scatter) trace to the axes.
+    - `text(text, x, y, z, line=None, type='scatter3d', **opts)` — Add a 3D text trace to the axes.
+    - `mesh(verts, indices=None, type='mesh3d', **opts)` — Add a 3D mesh (`mesh3d`) trace to the axes from vertices and triangle indices.
+    - `draw_poly(points, flatshading=True, **styles)` — Draw a filled polygon from the given points (Plotly backend).
+    - `draw_sphere(center, radius, sphere_points=48, rendering='flat', s=None, box_scalings=None, edgecolors=None, edge_color=None, lw=None, edge_width=0.01, glow=None, color='white', default_view_distance='auto', **opts)` — Draw a sphere (or spheres) at the given center(s) with the given radii (Plotly backend).
+    - `draw_cylinder(start, end, rad, circle_points=48, rendering='flat', box_scalings=None, edge_color=None, color='black', glow=None, segments=1, segment_overdraw=0, edge_width=0.01, lw=None, color_cycle=False, layer='above', default_view_distance='auto', **opts)` — Draw a cylinder between two endpoints (Plotly backend).
+    - `draw_disk(centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None, theta1=None, theta2=None, rendering='flat', box_scalings=None, line_color=None, line_thickness=None, color=None, glow=None, lw=None, **styles)` — Draw a filled disk at the given position(s) (Plotly backend).
+    - `draw_text(points, vals, billboard=True, normal=None, rendering='flat', box_scalings=None, zdir=None, **styles)` — Draw text at the given position(s) (Plotly backend).
+    - `draw_rect(points, rotation=None, normal=None, **styles)` — Draw a rectangle from the given points (Plotly backend).
+    - `draw_line(points, line_thickness=None, width=None, s=None, edgecolors=None, box_scalings=None, **styles)` — Draw a line/polyline through the given points (Plotly backend).
+    - `draw_mesh(points, i=None, j=None, k=None, type='mesh3d', **styles)` — Draw a 3D mesh from vertices and per-triangle vertex indices.
+    - `draw_arrow(points, radius, width=None, arrowhead=None, arrowhead_scaling=1.2, arrowhead_points=None, normal=None, rendering='flat', box_scalings=None, **styles)` — Draw an arrow from the given points (Plotly backend).
+  - **class `PlotlyFigure3D`** (PlotlyFigure)
+  - **class `PlotlyBackend3D`** (PlotlyBackend)
+    - **class `ThemeContextManager`** (PlotlyBackend.ThemeContextManager)
+      - `get_axes_theme()` — Return the axes theme (Plotly backend).
+  - **class `GraphicsRegionAxes`** (GraphicsAxes)
+    - `__init__(figure_region)`
+    - `renormalize(pos, og_reg, final_reg=None)` — Rescale a position from an original range into `[0, 1]` (and optionally on into a
+    - `normalize_positions(pos)` — Map data-coordinate positions into the axes' figure region (per axis).
+  - **class `SVGAxes`** (GraphicsAxes)
+    - `__init__(base_fig=None, label_text=None, frame=None, prop_cycle=None)`
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (SVG backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (SVG backend).
+    - `prep_show()` — Prepare the axes/figure for display (SVG backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (SVG backend).
+    - `get_plot_label()` — Return the plot title/label (SVG backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (SVG backend).
+    - `get_style_list()` — Return the per-series style cycle (SVG backend).
+    - `set_style_list(props)` — Set the per-series style cycle (SVG backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (SVG backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (SVG backend).
+    - `get_frame_style()` — Return the frame (spine) styling (SVG backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (SVG backend).
+    - `get_xlabel()` — Return the x-axis label (SVG backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (SVG backend).
+    - `get_ylabel()` — Return the y-axis label (SVG backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (SVG backend).
+    - `get_limit(axis)` — Return the axis limits from the SVG figure's view box (computing it if needed).
+    - `set_limit(axis, lims)` — Set one axis's limits in the SVG figure's view box.
+    - `get_xlim()` — Return the x-axis limits (SVG backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (SVG backend).
+    - `get_ylim()` — Return the y-axis limits (SVG backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (SVG backend).
+    - `get_xticks()` — Return the x-axis tick locations (SVG backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (SVG backend).
+    - `get_yticks()` — Return the y-axis tick locations (SVG backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (SVG backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (SVG backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (SVG backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (SVG backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (SVG backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (SVG backend).
+    - `get_bbox()` — Return the axes bounding box (SVG backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (SVG backend).
+    - `get_facecolor()` — Return the background/face color (SVG backend).
+    - `set_facecolor(fg)` — Set the background/face color (SVG backend).
+    - `get_padding()` — Return the axes padding (SVG backend).
+    - `set_padding(padding)` — Set the axes padding (SVG backend).
+    - `legend(**opts)` — Draw the axes legend (SVG backend).
+    - `get_graphics_properties(obj, property=None)` — Get backend properties of a drawn graphics object (SVG backend).
+    - `set_graphics_properties(obj, **props)` — Set backend properties on a drawn graphics object (SVG backend).
+    - `prep_styles(styles)` — Normalize SVG styling: resolve a `glow` option into a color and remap style names.
+    - `draw_line(points, stroke=None, line_color=None, color=None, **styles)` — Draw a line/polyline through the given points (SVG backend).
+    - `draw_point(points, **styles)` — Draw a point (as a small disk) at the given position(s) (SVG backend).
+    - `draw_disk(points, *, radius, **styles)` — Draw a filled disk at the given position(s) (SVG backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (SVG backend).
+    - `draw_triangle(points, **styles)` — Draw a triangle from the given points (SVG backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (SVG backend).
+    - `draw_arrow(points, arrowhead=None, marker=None, **styles)` — Draw an arrow from the given points (SVG backend).
+    - `filter_font_options(styles)` — Split styling options into font options (remapped to their SVG names) and the
+    - `draw_text(points, vals, use_path=False, invert=False, anchor=None, plot_range=None, font_size_scaling=13, **styles)` — Draw text at the given position(s) (SVG backend).
+    - `draw_path(commands, use_polyline=False, **styles)` — Draw a path from a sequence of drawing commands (SVG backend).
+  - **class `SVGFigure`** (GraphicsFigure)
+    - `__init__(axes=None, layout=None, figsize=None, flip_y=True, **kwargs)`
+    - `create_axes(rows, cols, spans, **kw)` — Create a new axes within the figure at the given grid position (SVG backend).
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (SVG backend).
+    - `create_colorbar(graphics, axes, norm=None, cmap=None, **kw)` — Create a colorbar for a mappable on the given axes (SVG backend).
+    - `add_axes(ax)` — Add an existing axes object to the figure (SVG backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (SVG backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `get_size_inches()` — Return the figure size in inches (SVG backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (SVG backend).
+    - `set_extents(extents)` — Set the figure's coordinate extents (SVG backend).
+    - `get_facecolor()` — Return the background/face color (SVG backend).
+    - `set_facecolor(fg)` — Set the background/face color (SVG backend).
+    - `savefig(file, **opts)` — Save the figure to a file (SVG backend).
+    - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (SVG backend).
+    - `to_html()` — Render the figure to HTML (SVG backend).
+    - `prep_args(opts)` — Merge the figure's default styling with per-call options.
+    - `to_svg_figure(**opts)` — Assemble the figure's axes into a single HTML `Div` of SVGs (applying the y-flip
+    - `to_svg()` — Render the whole figure to a combined SVG string.
+    - `to_widget(**opts)` — Render the figure as an interactive widget (SVG backend).
+    - `get_mime_bundle()` — Return the figure's MIME bundle for rich display (SVG backend).
+  - **class `SVGBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (SVG backend).
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (SVG backend).
+    - `show_figure(graphics, reshow=None)` — Display a figure via the backend (SVG backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (SVG backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (SVG backend).
+  - **class `SVGAxes3D`** (SVGAxes)
+    - `__init__(base_fig=None, **opts)`
+    - `get_zaxis_manager()` — Build the z-axis tick manager for this axes (SVG backend).
+    - `get_zlim()` — Return the z-axis limits (SVG backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (SVG backend).
+    - `get_zticks()` — Return the z-axis tick locations (SVG backend).
+    - `set_zticks(val, **opts)` — Set the z-axis tick locations (SVG backend).
+    - `get_ztick_style()` — Return the z-axis tick styling (SVG backend).
+    - `set_ztick_style(**opts)` — Set the z-axis tick styling (SVG backend).
+    - `set_projection_type(proj_type, **kwargs)` — Set the 3D projection type (SVG backend).
+    - `get_projection_type()` — Return the 3D projection type (SVG backend).
+    - `get_autoscale()` — Return the autoscale setting (SVG backend).
+    - `set_autoscale(autoscale)` — Set the autoscale setting (SVG backend).
+    - `get_view_settings()` — Return the 3D camera/view settings (SVG backend).
+    - `set_view_settings(**ops)` — Set the 3D camera/view settings (SVG backend).
+    - `embedding_matrix(rotation, normal)` — Build the view/embedding matrix that projects 3D points onto the SVG plane from a
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (SVG backend).
+    - `draw_disk(points, *, radius, angle=None, normal=None, uv_axes=None, offset_angle=None, span_angle=None, **styles)` — Draw a filled disk at the given position(s) (SVG backend).
+    - `draw_rect(points, rotation=None, normal=None, **styles)` — Draw a rectangle from the given points (SVG backend).
+    - `draw_sphere(points, rads, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii (SVG backend).
+    - `draw_cylinder(start, end, rad, **styles)` — Draw a cylinder between two endpoints (SVG backend).
+    - `draw_box(start, end, **styles)` — Draw an axis-aligned box between two corners (SVG backend).
+    - `draw_text(points, vals, projected=False, use_path=False, flip_y=True, **styles)` — Draw text at the given position(s) (SVG backend).
+  - **class `SVGFigure3D`** (SVGFigure)
+  - **class `SVGBackend3D`** (SVGBackend)
+  - **class `VTKAxes`** (GraphicsRegionAxes)
+    - `__init__(figure_region, figure)`
+    - `canonicalize_opts(opts)` — Normalize construction options into the backend's canonical form (VTK backend).
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (VTK backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (VTK backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (VTK backend).
+    - `get_plot_label()` — Return the plot title/label (VTK backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (VTK backend).
+    - `get_style_list()` — Return the per-series style cycle (VTK backend).
+    - `set_style_list(props)` — Set the per-series style cycle (VTK backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (VTK backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (VTK backend).
+    - `get_frame_style()` — Return the frame (spine) styling (VTK backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (VTK backend).
+    - `get_xlabel()` — Return the x-axis label (VTK backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (VTK backend).
+    - `get_ylabel()` — Return the y-axis label (VTK backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (VTK backend).
+    - `get_xlim()` — Return the x-axis limits (VTK backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (VTK backend).
+    - `get_ylim()` — Return the y-axis limits (VTK backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (VTK backend).
+    - `get_zlim()` — Return the z-axis limits (VTK backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (VTK backend).
+    - `get_xticks()` — Return the x-axis tick locations (VTK backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (VTK backend).
+    - `get_yticks()` — Return the y-axis tick locations (VTK backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (VTK backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (VTK backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (VTK backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (VTK backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (VTK backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (VTK backend).
+    - `get_bbox()` — Return the axes bounding box (VTK backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (VTK backend).
+    - `get_facecolor()` — Return the background/face color (VTK backend).
+    - `set_facecolor(fg)` — Set the background/face color (VTK backend).
+    - `get_padding()` — Return the axes padding (VTK backend).
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (VTK backend).
+    - `draw_disk(points, **styles)` — Draw a filled disk at the given position(s) (VTK backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (VTK backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (VTK backend).
+    - `draw_arrow(points, **styles)` — Draw an arrow from the given points (VTK backend).
+    - `draw_text(points, vals, **styles)` — Draw text at the given position(s) (VTK backend).
+    - `draw_sphere(points, rads, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii (VTK backend).
+    - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (VTK backend).
+  - **class `VTKFigure`** (GraphicsFigure)
+    - `__init__(vtk_window, **opts)`
+    - `create_axes(rows, cols, spans, **kw)` — Create a new axes within the figure at the given grid position (VTK backend).
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (VTK backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (VTK backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `get_bboxes()` — Return the bounding boxes of the figure's axes (VTK backend).
+    - `get_size_inches()` — Return the figure size in inches (VTK backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (VTK backend).
+    - `savefig(file, **opts)` — Save the figure to a file (VTK backend).
+  - **class `VTKBackend`** (GraphicsBackend)
+  - **class `VPythonWrapper`**
+    - `vpythonify(arg)` — Coerce a value into a VPython object, wrapping list/array vectors as VPython
+    - `vpython_color(color)` — Coerce a color (name or RGB) into a VPython color vector.
+  - **class `VPythonCanvasWrapper`** (VPythonWrapper)
+    - `__init__(canvas)`
+    - `remove(*, backend=None)` — Tear down (remove) this axes from its figure (VPython backend).
+    - `clear(*, backend=None)` — Clear the drawn content from this axes/figure (VPython backend).
+    - `width()` — **LLM Docstring**
+    - `width(width)` — **LLM Docstring**
+    - `height()` — **LLM Docstring**
+    - `height(height)` — **LLM Docstring**
+    - `title()` — **LLM Docstring**
+    - `title(title)` — **LLM Docstring**
+    - `axis()` — Return the axis object/handle (VPython backend).
+    - `axis(axis)` — Return the axis object/handle (VPython backend).
+    - `up()` — Return the camera up-vector (VPython backend).
+    - `up(up)` — Return the camera up-vector (VPython backend).
+    - `background()` — Return the background color (VPython backend).
+    - `background(background)` — Return the background color (VPython backend).
+    - `primitive(name, *args, color=None, **opts)` — Create a VPython primitive on the canvas by name, coercing the arguments and
+    - `box(left_corner, right_corner, **styles)` — Draw a box between two corners.
+    - `curve(points, **styles)` — Draw a curve through the given points.
+    - `cylinder(start, end, rad, **styles)` — Draw a cylinder between two endpoints (deriving the axis and length from them).
+    - `arrow(points, **styles)` — Draw an arrow at/through the given points.
+    - `label(pos, text, **styles)` — Draw a text label at a position.
+    - `sphere(points, rads, **styles)` — Draw a sphere at the given center(s) with the given radii.
+  - **class `VPythonGraphWrapper`** (VPythonWrapper)
+    - `__init__(graph)`
+    - `title()` — **LLM Docstring**
+    - `title(title)` — **LLM Docstring**
+    - `xtitle()` — Return the x-axis title (VPython backend).
+    - `xtitle(xtitle)` — Return the x-axis title (VPython backend).
+    - `ytitle()` — Return the y-axis title (VPython backend).
+    - `ytitle(ytitle)` — Return the y-axis title (VPython backend).
+    - `background()` — Return the background color (VPython backend).
+    - `background(background)` — Return the background color (VPython backend).
+    - `foreground()` — Return the foreground color (VPython backend).
+    - `foreground(foreground)` — Return the foreground color (VPython backend).
+    - `xmin()` — Return the x lower bound (VPython backend).
+    - `xmin(xmin)` — Return the x lower bound (VPython backend).
+    - `xmax()` — Return the x upper bound (VPython backend).
+    - `xmax(xmax)` — Return the x upper bound (VPython backend).
+    - `ymin()` — Return the y lower bound (VPython backend).
+    - `ymin(ymin)` — Return the y lower bound (VPython backend).
+    - `ymax()` — Return the y upper bound (VPython backend).
+    - `ymax(ymax)` — Return the y upper bound (VPython backend).
+    - `width()` — **LLM Docstring**
+    - `width(width)` — **LLM Docstring**
+    - `height()` — **LLM Docstring**
+    - `height(height)` — **LLM Docstring**
+    - `remove(*, backend=None)` — Tear down (remove) this axes from its figure (VPython backend).
+    - `clear(*, backend=None)` — Clear the drawn content from this axes/figure (VPython backend).
+    - `plot(x, y, color=None, marker_color=None, dot_color=None, **styles)` — Add a line series to the graph (via VPython `gcurve`).
+    - `scatter(x, y, color=None, marker_color=None, dot_color=None, **styles)` — Add a scatter series to the graph (via VPython `gdots`).
+    - `vbars(x, y, color=None, marker_color=None, dot_color=None, **styles)` — Add a vertical-bar series to the graph (via VPython `gvbars`).
+    - `hbars(x, y, color=None, marker_color=None, dot_color=None, **styles)` — Add a horizontal-bar series to the graph (via VPython `ghbars`).
+  - **class `VPythonAxes`** (GraphicsAxes)
+    - `__init__(graph)`
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (VPython backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (VPython backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (VPython backend).
+    - `get_plot_label()` — Return the plot title/label (VPython backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (VPython backend).
+    - `get_style_list()` — Return the per-series style cycle (VPython backend).
+    - `set_style_list(props)` — Set the per-series style cycle (VPython backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (VPython backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (VPython backend).
+    - `get_frame_style()` — Return the frame (spine) styling (VPython backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (VPython backend).
+    - `get_xlabel()` — Return the x-axis label (VPython backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (VPython backend).
+    - `get_ylabel()` — Return the y-axis label (VPython backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (VPython backend).
+    - `get_xlim()` — Return the x-axis limits (VPython backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (VPython backend).
+    - `get_ylim()` — Return the y-axis limits (VPython backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (VPython backend).
+    - `get_xticks()` — Return the x-axis tick locations (VPython backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (VPython backend).
+    - `get_yticks()` — Return the y-axis tick locations (VPython backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (VPython backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (VPython backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (VPython backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (VPython backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (VPython backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (VPython backend).
+    - `get_bbox()` — Return the axes bounding box (VPython backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (VPython backend).
+    - `get_facecolor()` — Return the background/face color (VPython backend).
+    - `set_facecolor(fg)` — Set the background/face color (VPython backend).
+    - `get_padding()` — Return the axes padding (VPython backend).
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (VPython backend).
+    - `draw_disk(points, color=None, edge_color=None, radius=1, edgecolors=None, s=None, **styles)` — Draw a filled disk at the given position(s) (VPython backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (VPython backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (VPython backend).
+    - `draw_arrow(points, color=None, **styles)` — Draw an arrow from the given points (VPython backend).
+    - `draw_text(points, vals, color=None, **styles)` — Draw text at the given position(s) (VPython backend).
+    - `draw_sphere(points, rads, color=None, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii (VPython backend).
+    - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (VPython backend).
+  - **class `VPythonFigure`** (GraphicsFigure)
+    - `__init__(vpython_graph, **opts)`
+    - `construct(**kw)` — Construct a figure of this backend type (VPython backend).
+    - `create_axes(rows=1, cols=1, spans=1, **kw)` — Create a new axes within the figure at the given grid position (VPython backend).
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (VPython backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (VPython backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `get_size_inches()` — Return the figure size in inches (VPython backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (VPython backend).
+    - `get_facecolor()` — Return the background/face color (VPython backend).
+    - `set_facecolor(fg)` — Set the background/face color (VPython backend).
+    - `savefig(file, **opts)` — Save the figure to a file (VPython backend).
+  - **class `VPythonBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (VPython backend).
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (VPython backend).
+    - `show_figure(graphics, reshow=None)` — Display a figure via the backend (VPython backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (VPython backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (VPython backend).
+  - **class `VPythonAxes3D`** (GraphicsAxes3D)
+    - `__init__(canvas)`
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (VPython backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (VPython backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (VPython backend).
+    - `get_plot_label()` — Return the plot title/label (VPython backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (VPython backend).
+    - `get_style_list()` — Return the per-series style cycle (VPython backend).
+    - `set_style_list(props)` — Set the per-series style cycle (VPython backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (VPython backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (VPython backend).
+    - `get_frame_style()` — Return the frame (spine) styling (VPython backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (VPython backend).
+    - `get_xlabel()` — Return the x-axis label (VPython backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (VPython backend).
+    - `get_ylabel()` — Return the y-axis label (VPython backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (VPython backend).
+    - `get_xlim()` — Return the x-axis limits (VPython backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (VPython backend).
+    - `get_ylim()` — Return the y-axis limits (VPython backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (VPython backend).
+    - `get_zlim()` — Return the z-axis limits (VPython backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (VPython backend).
+    - `get_xticks()` — Return the x-axis tick locations (VPython backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (VPython backend).
+    - `get_yticks()` — Return the y-axis tick locations (VPython backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (VPython backend).
+    - `get_zticks()` — Return the z-axis tick locations (VPython backend).
+    - `set_zticks(val, **opts)` — Set the z-axis tick locations (VPython backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (VPython backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (VPython backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (VPython backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (VPython backend).
+    - `get_ztick_style()` — Return the z-axis tick styling (VPython backend).
+    - `set_ztick_style(**opts)` — Set the z-axis tick styling (VPython backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (VPython backend).
+    - `get_bbox()` — Return the axes bounding box (VPython backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (VPython backend).
+    - `get_facecolor()` — Return the background/face color (VPython backend).
+    - `set_facecolor(fg)` — Set the background/face color (VPython backend).
+    - `get_padding()` — Return the axes padding (VPython backend).
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (VPython backend).
+    - `draw_disk(points, **styles)` — Draw a filled disk at the given position(s) (VPython backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (VPython backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (VPython backend).
+    - `draw_arrow(points, **styles)` — Draw an arrow from the given points (VPython backend).
+    - `draw_text(points, vals, **styles)` — Draw text at the given position(s) (VPython backend).
+    - `draw_sphere(points, rads, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii (VPython backend).
+    - `draw_cylinder(start, end, rad, **styles)` — Draw a cylinder between two endpoints (VPython backend).
+    - `draw_primitive(name, *args, **kwargs)` — Draw a named VPython primitive on the axes' canvas.
+  - **class `VPythonFigure3D`** (GraphicsFigure)
+    - `__init__(vpython_canvas, **opts)`
+    - `construct(**kw)` — Construct a figure of this backend type (VPython backend).
+    - `create_axes(rows=1, cols=1, spans=1, **kw)` — Create a new axes within the figure at the given grid position (VPython backend).
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (VPython backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (VPython backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `get_size_inches()` — Return the figure size in inches (VPython backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (VPython backend).
+    - `set_extents(extents)` — Set the figure's coordinate extents (VPython backend).
+    - `get_facecolor()` — Return the background/face color (VPython backend).
+    - `set_facecolor(fg)` — Set the background/face color (VPython backend).
+    - `savefig(file, **opts)` — Save the figure to a file (VPython backend).
+  - **class `VPythonBackend3D`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (VPython backend).
+    - **class `ThemeContextManager`** (VPythonBackend.ThemeContextManager)
+    - `show_figure(graphics, reshow=None)` — Display a figure via the backend (VPython backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (VPython backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (VPython backend).
+  - **class `X3DAxes`** (GraphicsAxes3D)
+    - `__init__(*children, title=None, background=None, include_mathjax=None, **opts)`
+    - `canonicalize_opts(opts)` — Normalize construction options into the backend's canonical form (X3D backend).
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (X3D backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (X3D backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (X3D backend).
+    - `get_plot_label()` — Return the plot title/label (X3D backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (X3D backend).
+    - `get_style_list()` — Return the per-series style cycle (X3D backend).
+    - `set_style_list(props)` — Set the per-series style cycle (X3D backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (X3D backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (X3D backend).
+    - `get_frame_style()` — Return the frame (spine) styling (X3D backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (X3D backend).
+    - `get_xlabel()` — Return the x-axis label (X3D backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (X3D backend).
+    - `get_ylabel()` — Return the y-axis label (X3D backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (X3D backend).
+    - `get_xlim()` — Return the x-axis limits (X3D backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (X3D backend).
+    - `get_ylim()` — Return the y-axis limits (X3D backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (X3D backend).
+    - `get_zlim()` — Return the z-axis limits (X3D backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (X3D backend).
+    - `get_xticks()` — Return the x-axis tick locations (X3D backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (X3D backend).
+    - `get_yticks()` — Return the y-axis tick locations (X3D backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (X3D backend).
+    - `get_zticks()` — Return the z-axis tick locations (X3D backend).
+    - `set_zticks(val, **opts)` — Set the z-axis tick locations (X3D backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (X3D backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (X3D backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (X3D backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (X3D backend).
+    - `get_ztick_style()` — Return the z-axis tick styling (X3D backend).
+    - `set_ztick_style(**opts)` — Set the z-axis tick styling (X3D backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (X3D backend).
+    - `get_bbox()` — Return the axes bounding box (X3D backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (X3D backend).
+    - `get_facecolor()` — Return the background/face color (X3D backend).
+    - `set_facecolor(fg)` — Set the background/face color (X3D backend).
+    - `get_padding()` — Return the axes padding (X3D backend).
+    - `get_view_settings()` — Return the 3D camera/view settings (X3D backend).
+    - `set_view_settings(**values)` — Set the 3D camera/view settings (X3D backend).
+    - `draw_line(points, indices=None, s=None, riffle=True, line_thickness=None, edgecolors=None, color=None, glow=None, line_style=None, dashing=None, connected=True, **styles)` — Draw a line/polyline through the given points (X3D backend).
+    - `draw_path(commands, **styles)` — Draw a path from a sequence of drawing commands (X3D backend).
+    - `draw_disk(points, radius=None, color=None, line_color=None, edgecolors=None, s=None, normal=None, line_thickness=None, innerRadius=None, outerRadius=None, uv_axes=None, uv_sign=None, angle=None, rotation=None, solid=None, **styles)` — Draw a filled disk at the given position(s) (X3D backend).
+    - `draw_arrow(points, **styles)` — Draw an arrow from the given points (X3D backend).
+    - `texture_svg(text, id, font_style=None, resolution=72)` — Build an SVG texture (as markup) rendering a text string, for use as an X3D
+    - `mathjax_load_script(text, id, resolution_upscaling=10, font_style=None)` — Build the JavaScript that renders a LaTeX string with MathJax and installs the
+    - `draw_text(points, vals, endpoint=None, allow_mathjax=True, line_height=10, char_width=None, char_width_scaling=1 / 30, font_style=None, **styles)` — Draw text at the given position(s) (X3D backend).
+    - `prep_uv(uv_axes, normal=None, uv_sign=None, rotation=None, angle=None)` — Compute the embedding rotation and angle that place a 2D primitive in 3D given
+    - `draw_rect(points, color=None, line_color=None, edgecolors=None, normal=None, line_thickness=None, innerRadius=None, outerRadius=None, uv_axes=None, uv_sign=None, angle=None, rotation=None, solid=None, cap_style='round', **styles)` — Draw a rectangle from the given points (X3D backend).
+    - `draw_point(points, color=None, glow=None, **styles)` — Draw a point (as a small disk) at the given position(s) (X3D backend).
+    - `draw_triangle(points, indices=None, **styles)` — Draw a triangle from the given points (X3D backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (X3D backend).
+    - `draw_sphere(centers, rads, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii (X3D backend).
+    - `draw_cylinder(starts, ends, rads, capped=False, **styles)` — Draw a cylinder between two endpoints (X3D backend).
+    - `draw_box(start, end, **opts)` — Draw an axis-aligned box between two corners (X3D backend).
+    - `prep_opts()` — Assemble the axes' options for X3D scene construction (folding in the background
+    - `to_x3d()` — Build the X3D scene from the axes' child primitives and options.
+  - **class `X3DFigure`** (GraphicsFigure)
+    - `__init__(width=640, height=500, background='white', figsize=None, profile='Immersive', version='3.3', dynamic_loading=None, include_export_button=None, include_record_button=None, include_view_settings_button=None, recording_options=None, id=None, **opts)`
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (X3D backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (X3D backend).
+    - `create_axes(rows=1, cols=1, spans=1, **kw)` — Create a new axes within the figure at the given grid position (X3D backend).
+    - `construct(**kw)` — Construct a figure of this backend type (X3D backend).
+    - `get_size_inches()` — Return the figure size in inches (X3D backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (X3D backend).
+    - `set_extents(extents)` — Set the figure's coordinate extents (X3D backend).
+    - `get_facecolor()` — Return the background/face color (X3D backend).
+    - `set_facecolor(fg)` — Set the background/face color (X3D backend).
+    - `savefig(file, format=None, **opts)` — Save the figure to a file (X3D backend).
+    - `prep_opts()` — Assemble the figure's options for X3D construction (size, profile/version,
+    - `to_x3d(**opts)` — Build the full X3D element from the figure's axes, resolving MathJax and onload
+    - `to_widget(**opts)` — Render the figure as an interactive widget (X3D backend).
+    - `to_html()` — Render the figure to HTML (X3D backend).
+    - `animate_frames(frames, mode=None, **animation_opts)` — Animate a sequence of frames (X3D backend).
+  - **class `X3DBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (X3D backend).
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (X3D backend).
+    - `show_figure(graphics, reshow=None)` — Display a figure via the backend (X3D backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (X3D backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (X3D backend).
+  - **class `SceneJSONAxes`** (GraphicsAxes3D)
+    - `__init__(*children, title=None, background=None, **opts)`
+    - `canonicalize_opts(opts)` — Normalize construction options into the backend's canonical form (SceneJSON backend).
+    - `remove(*, backend)` — Tear down (remove) this axes from its figure (SceneJSON backend).
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (SceneJSON backend).
+    - `get_plotter(method)` — Resolve a plotting-method name to the backend callable that draws it (SceneJSON backend).
+    - `get_plot_label()` — Return the plot title/label (SceneJSON backend).
+    - `set_plot_label(val, **style)` — Set the plot title/label (SceneJSON backend).
+    - `get_style_list()` — Return the per-series style cycle (SceneJSON backend).
+    - `set_style_list(props)` — Set the per-series style cycle (SceneJSON backend).
+    - `get_frame_visible()` — Return which frame (spine) edges are drawn (SceneJSON backend).
+    - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (SceneJSON backend).
+    - `get_frame_style()` — Return the frame (spine) styling (SceneJSON backend).
+    - `set_frame_style(frame_spec)` — Set the frame (spine) styling (SceneJSON backend).
+    - `get_xlabel()` — Return the x-axis label (SceneJSON backend).
+    - `set_xlabel(val, **style)` — Set the x-axis label (SceneJSON backend).
+    - `get_ylabel()` — Return the y-axis label (SceneJSON backend).
+    - `set_ylabel(val, **style)` — Set the y-axis label (SceneJSON backend).
+    - `get_xlim()` — Return the x-axis limits (SceneJSON backend).
+    - `set_xlim(val, **opts)` — Set the x-axis limits (SceneJSON backend).
+    - `get_ylim()` — Return the y-axis limits (SceneJSON backend).
+    - `set_ylim(val, **opts)` — Set the y-axis limits (SceneJSON backend).
+    - `get_zlim()` — Return the z-axis limits (SceneJSON backend).
+    - `set_zlim(val, **opts)` — Set the z-axis limits (SceneJSON backend).
+    - `get_xticks()` — Return the x-axis tick locations (SceneJSON backend).
+    - `set_xticks(val, **opts)` — Set the x-axis tick locations (SceneJSON backend).
+    - `get_yticks()` — Return the y-axis tick locations (SceneJSON backend).
+    - `set_yticks(val, **opts)` — Set the y-axis tick locations (SceneJSON backend).
+    - `get_zticks()` — Return the z-axis tick locations (SceneJSON backend).
+    - `set_zticks(val, **opts)` — Set the z-axis tick locations (SceneJSON backend).
+    - `get_xtick_style()` — Return the x-axis tick styling (SceneJSON backend).
+    - `set_xtick_style(**opts)` — Set the x-axis tick styling (SceneJSON backend).
+    - `get_ytick_style()` — Return the y-axis tick styling (SceneJSON backend).
+    - `set_ytick_style(**opts)` — Set the y-axis tick styling (SceneJSON backend).
+    - `get_ztick_style()` — Return the z-axis tick styling (SceneJSON backend).
+    - `set_ztick_style(**opts)` — Set the z-axis tick styling (SceneJSON backend).
+    - `set_aspect_ratio(ar)` — Set the axes aspect ratio (SceneJSON backend).
+    - `get_bbox()` — Return the axes bounding box (SceneJSON backend).
+    - `set_bbox(bbox)` — Set the axes bounding box (SceneJSON backend).
+    - `get_facecolor()` — Return the background/face color (SceneJSON backend).
+    - `set_facecolor(fg)` — Set the background/face color (SceneJSON backend).
+    - `get_padding()` — Return the axes padding (SceneJSON backend).
+    - `get_view_settings()` — Return the 3D camera/view settings (SceneJSON backend).
+    - `set_view_settings(**values)` — Set the 3D camera/view settings (SceneJSON backend).
+    - `draw_line(points, **styles)` — Draw a line/polyline through the given points (SceneJSON backend).
+    - `draw_disk(points, rads=1, **styles)` — Draw a filled disk at the given position(s) (SceneJSON backend).
+    - `draw_arrow(points, radius=0.1, **styles)` — Draw an arrow from the given points (SceneJSON backend).
+    - `draw_text(points, vals, **styles)` — Draw text at the given position(s) (SceneJSON backend).
+    - `draw_rect(points, **styles)` — Draw a rectangle from the given points (SceneJSON backend).
+    - `draw_poly(points, **styles)` — Draw a filled polygon from the given points (SceneJSON backend).
+    - `draw_sphere(centers, rads, **styles)` — Draw a sphere (or spheres) at the given center(s) with the given radii (SceneJSON backend).
+    - `draw_cylinder(starts, ends, rads, **styles)` — Draw a cylinder between two endpoints (SceneJSON backend).
+    - `to_json()` — Serialize the axes (its children and options) to the scene-JSON representation.
+  - **class `SceneJSONFigure`** (GraphicsFigure)
+    - `__init__(width=640, height=500, background='white', figsize=None, profile='Immersive', version='3.3', id=None, **opts)`
+    - `clear(*, backend)` — Clear the drawn content from this axes/figure (SceneJSON backend).
+    - `close(*, backend)` — **LLM Docstring**
+    - `create_inset(bbox, **kw)` — Create an inset axes at the given bounding box (SceneJSON backend).
+    - `create_axes(rows=1, cols=1, spans=1, **kw)` — Create a new axes within the figure at the given grid position (SceneJSON backend).
+    - `construct(**kw)` — Construct a figure of this backend type (SceneJSON backend).
+    - `get_size_inches()` — Return the figure size in inches (SceneJSON backend).
+    - `set_size_inches(w, h)` — Set the figure size in inches (SceneJSON backend).
+    - `set_extents(extents)` — Set the figure's coordinate extents (SceneJSON backend).
+    - `get_facecolor()` — Return the background/face color (SceneJSON backend).
+    - `set_facecolor(fg)` — Set the background/face color (SceneJSON backend).
+    - `savefig(file, format=None, **opts)` — Save the figure to a file (SceneJSON backend).
+    - `to_json(**opts)` — Serialize the whole figure (its axes and options) to the scene-JSON
+    - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (SceneJSON backend).
+  - **class `SceneJSONBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (SceneJSON backend).
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (SceneJSON backend).
+    - `show_figure(graphics, reshow=None)` — Display a figure via the backend (SceneJSON backend).
+    - `get_interactive_status()` — Return whether interactive mode is on (SceneJSON backend).
+    - `disable_interactivity()` — **LLM Docstring**
+    - `enable_interactivity()` — **LLM Docstring**
+    - `get_available_themes()` — Return the themes available for this backend (SceneJSON backend).
+
+### `Colors.py`
+  - **class `ColorPalette`**
+    - `__init__(colors, blend_spacings=None, lab_colors=None, color_space='rgb', cycle=False, return_color_codes=True)`
+    - `parse_color_string(name, include_named_alpha=False, return_padding=False)` — Parse a color string (named color, hex code, or matplotlib name) into an RGB(A)
+    - `prep_color_palette(colors, color_space='rgb', lab_colors=None)` — Normalize a palette's colors into hex color strings and their Lab values,
+    - `prep_color(base=None, palette=None, blending=None, index=None, lighten=None, saturate=None, modifier=None, shift=False, absolute=False, clip=True, color_space='rgb', modification_space='lab', return_color_code=True, cycle=None, alpha=None)` — Compose a color (or list of colors) from a base color or palette, optionally
+    - `set_alpha(b, alpha)` — Set the alpha channel on a color (hex code, named color, RGB array, or list of
+    - `resolve_color_palette(cmap_name)` — Resolve a named palette to its color data, falling back to discretizing a
+    - `is_colormap_like(cmap)` — Test whether an object is colormap-like (callable).
+    - `discretize_colormap(cmap, samples=10)` — Sample a colormap at evenly-spaced points to produce a discrete palette.
+    - `is_palette_list(colors)` — Test whether an object is a valid palette list (a list of color strings or
+    - `flip()` — Return a copy of the palette with its colors reversed.
+    - `get_colorblindness_test_url()` — Build a URL that previews the palette under color-blindness simulation.
+    - `blend(amount, modification_space='lab', rescale=False, clip=True, return_color_code=True)` — Interpolate the palette at one or more blend amounts, linearly interpolating in
+    - `as_colormap(levels=None, cmap_type='list', name=None, **opts)` — Build a matplotlib colormap (listed or interpolated) from the palette.
+    - `modify(modification_function, modification_space='lab', clip=True)` — Return a new palette with a modification function applied to its Lab colors.
+    - `lighten(percentage, modification_space='lab', shift=False, absolute=False, clip=True)` — Return a new palette lightened by the given amount.
+    - `color_normalize(color_list, color_space='rgb')` — Clip color values into the valid range for their color space.
+    - `color_rescale(color_list, color_space='rgb')` — Rescale color values out of their integer range (RGB by 255, XYZ by 100).
+    - `color_modify(color, modification_function, color_space='rgb', modification_space='lab', clip=True)` — Apply a modification function to a single color, converting into the modification
+    - `color_lighten(color, percentage, color_space='rgb', modification_space='lab', shift=False, absolute=False, clip=True)` — Lighten a color by scaling/shifting/setting its lightness channel in the
+    - `color_saturate(color, percentage, color_space='rgb', modification_space='hsv', shift=False, absolute=False, clip=True)` — Saturate a color by scaling/shifting/setting its saturation (chroma) in the
+    - `rgb_code(rgb, padding=2)` — Format an RGB value (or list of them) as a hex color code.
+    - `parse_rgb_code(code, padding=None, return_padding=False, num_channels=None)` — Parse a hex color code into an RGB(A) value, inferring the per-channel padding.
+    - `color_convert(color, original_space, target_space)` — Convert a color between two color spaces, routing through the intermediate spaces
+    - `xyz_to_rgb(x, y, z)` — Convert a color from CIE XYZ to sRGB.
+    - `rgb_to_xyz(r, g, b)` — Convert a color from sRGB to CIE XYZ.
+    - `rgb_to_hsl(r, g, b)` — Convert a color from RGB to HSL.
+    - `hsl_to_rgb(h, s, l)` — Convert a color from HSL to RGB.
+    - `rgb_to_hsv(r, g, b)` — Convert a color from RGB to HSV.
+    - `hsv_to_hsl(h, s, v)` — Convert a color from HSV to HSL.
+    - `hsv_to_rgb(h, s, v)` — Convert a color from HSV to RGB (via HSL).
+    - `xyz_to_lab(x, y, z, scaling=None)` — Convert a color from CIE XYZ to CIE Lab.
+    - `lab_to_xyz(l, a, b, scaling=None)` — Convert a color from CIE Lab to CIE XYZ.
+    - `lab_to_lch(l, a, b)` — Convert a color from CIE Lab to CIE LCh.
+    - `lch_to_lab(l, c, h)` — Convert a color from CIE LCh to CIE Lab.
+    - `rgb_to_lab(r, g, b, xyz_scaling=None)` — Convert a color from RGB to CIE Lab (via XYZ).
+    - `lab_to_rgb(l, a, b, xyz_scaling=None)` — Convert a color from CIE Lab to RGB (via XYZ).
+- `prep_color(base=None, palette=None, blending=None, index=None, lighten=None, saturate=None, modifier=None, shift=False, absolute=False, clip=True, color_space='rgb', modification_space='lab', return_color_code=True, alpha=None, cycle=None)` — Module-level shortcut for `ColorPalette.prep_color`: compose a color from a base
+
+### `Graphics.py` — Provides Graphics base classes that can be extended upon
+  - **class `GraphicsException`** (Exception)
+  - **class `FigureTreeManager`**
+    - `resolve_figure_graphics(fig)` — Return the `Graphics` object registered as the owner of a backend figure.
+    - `add_figure_graphics(fig, graphics)` — Register a `Graphics` object as the owner of a backend figure (the first one
+    - `remove_figure_mapping(fig)` — Drop the registration for a backend figure and its child graphics.
+    - `get_child_graphics(fig)` — Return the child `Graphics` objects registered against a backend figure.
+    - `resolve_axes_graphics(axes)` — Return the `Graphics` object registered as the owner of a backend axes (for
+    - `add_axes_graphics(axes, graphics)` — Register a `Graphics` object as the owner of a backend axes (for insets).
+    - `remove_axes_mapping(axes)` — Drop the registration for a backend axes and its child graphics.
+    - `get_axes_child_graphics(axes)` — Return the child `Graphics` objects registered against a backend axes.
+  - **class `GraphicsBase`**
+    > The base class for all things Graphics
+    > Defines the common parts of the interface
+    - `get_raw_attr(key)` — Read the stored (underscore-prefixed) value for an option, checking the object
+    - `__init__(*args, name=None, figure=None, tighten=False, axes=None, subplot_kw=None, parent=None, image_size=None, padding=None, aspect_ratio=None, interactive=None, reshowable=None, backend='matplotlib', backend_options=None, theme=None, prop_manager=GraphicsPropertyManager, theme_manager=ThemeManager, managed=None, strict=True, **opts)`
+    - `initialize_figure_and_axes(figure, axes, *args, **kw)` — Initializes the subplots for the Graphics object
+    - `parent()` — The owning graphics object for this figure/axes (self if this is the parent).
+    - `figure_parent()` — The graphics object that owns this object's backend figure.
+    - `inset()` — Whether this graphics object is an inset (its axes differ from the figure
+    - `children()` — The child graphics registered against this object's figure/axes (or `None` if
+    - `event_handlers()` — The bound event-handler data, if any.
+    - `animated()` — The animation specification for this figure.
+    - `bind_events(*handlers, **events)` — Bind interactive event handlers to the figure.
+    - `create_animation(*args, **opts)` — Create (and start) an animator for the figure from the given frame
+    - `animate_frames(frames, **opts)` — Prepare the figure and animate the supplied frames via the backend.
+    - `set_options(event_handlers=None, animated=None, prolog=None, epilog=None, strict=True, **opts)` — Sets options for the plot
+    - `prolog()` — The prolog graphics primitives drawn before the main content.
+    - `prolog(p)` — The prolog graphics primitives drawn before the main content.
+    - `epilog()` — The epilog graphics primitives drawn after the main content.
+    - `epilog(e)` — The epilog graphics primitives drawn after the main content.
+    - `opts()` — The current values of the tracked `opt_keys` options, as a dict.
+    - `copy(**kwargs)` — Creates a copy of the object with new axes and a new figure
+    - `change_figure(new, *init_args, figs=None, **init_kwargs)` — Creates a copy of the object with new axes and a new figure
+    - `prep_show()` — Prepare the whole figure tree (parent and children) for display.
+    - `show(reshow=None)` — Display the figure, preparing it first and (temporarily) enabling interactivity
+    - `close(force=False)` — Close the figure (or remove the inset axes), cleaning up the figure registration
+    - `clear()` — Clear the drawn content from the axes.
+    - `get_mime_bundle()` — Return the figure's MIME bundle (HTML or PNG) for rich display.
+    - `savefig(where, expanduser=True, format=None, **kw)` — :return: file it was saved to (I think...?)
+    - `to_png()` — Used by Jupyter and friends to make a version of the image that they can display, hence the extra '…
+    - `to_widget()` — Prepare the figure and return it as an interactive backend widget.
+    - `create_colorbar_axis(figure=None, size=(20, 200), tick_padding=40, origin=None, orientation='vertical', alignment=None)` — Create an inset axis positioned to hold a colorbar, expanding the figure padding
+    - `add_colorbar(graphics=None, norm=None, cmap=None, size=None, orientation='vertical', origin=None, tick_padding=40, colorbar_axes=None, cax=None, **kw)` — Add a colorbar to the figure, creating (and tracking) a dedicated colorbar axis
+    - `create_inset(bbox, coordinates='scaled', graphics_class=None, **opts)` — Create an inset graphics object within this figure, converting the bbox from the
+  - **class `Graphics`** (GraphicsBase)
+    - `set_options(axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, **parent_opts)` — Set the plot's styling and layout options (labels, legend, frame, ticks, range,
+    - `get_plot_label_padding(plot_label)` — Return the extra padding needed to fit a plot label (top padding when a label is
+    - `get_axes_label_padding(axes_labels)` — Return the extra padding needed to fit the axis labels (left/bottom padding for
+    - `resolve_default_padding(padding, modifications=None)` — Resolve the final padding by filling unset sides from the default style and
+    - `artists()` — The plot's artist objects (empty for the base `Graphics`).
+    - `plot_label()` — The plot title/label.
+    - `plot_label(value)` — The plot title/label.
+    - `style_list()` — The per-series style cycle (shared with the parent).
+    - `style_list(value)` — The per-series style cycle (shared with the parent).
+    - `plot_legend()` — The plot legend (or legend spec).
+    - `plot_legend(value)` — The plot legend (or legend spec).
+    - `legend_style()` — The legend styling options.
+    - `legend_style(value)` — The legend styling options.
+    - `axes_labels()` — The per-axis labels.
+    - `axes_labels(value)` — The per-axis labels.
+    - `frame()` — Which frame (spine) edges are drawn.
+    - `frame(value)` — Which frame (spine) edges are drawn.
+    - `frame_style()` — The frame styling options.
+    - `frame_style(value)` — The frame styling options.
+    - `plot_range()` — The plotted data range per axis.
+    - `plot_range(value)` — The plotted data range per axis.
+    - `ticks()` — The tick locations/specification.
+    - `ticks(value)` — The tick locations/specification.
+    - `ticks_style()` — The tick styling options.
+    - `ticks_style(value)` — The tick styling options.
+    - `ticks_label_style()` — The tick-label styling options.
+    - `ticks_label_style(value)` — The tick-label styling options.
+    - `scale()` — The axis scaling (e.g.
+    - `scale(value)` — The axis scaling (e.g.
+    - `axes_bbox()` — The axes bounding box within the figure.
+    - `axes_bbox(value)` — The axes bounding box within the figure.
+    - `aspect_ratio()` — The axes aspect ratio.
+    - `aspect_ratio(value)` — The axes aspect ratio.
+    - `image_size()` — The figure image size in pixels.
+    - `image_size(value)` — The figure image size in pixels.
+    - `figure_label()` — The overall figure label.
+    - `figure_label(value)` — The overall figure label.
+    - `padding()` — The figure padding on each side.
+    - `padding(value)` — The figure padding on each side.
+    - `padding_left()` — The left figure padding.
+    - `padding_left(value)` — The left figure padding.
+    - `padding_right()` — The right figure padding.
+    - `padding_right(value)` — The right figure padding.
+    - `padding_top()` — The top figure padding.
+    - `padding_top(value)` — The top figure padding.
+    - `padding_bottom()` — The bottom figure padding.
+    - `padding_bottom(value)` — The bottom figure padding.
+    - `spacings()` — The inter-panel spacings.
+    - `spacings(value)` — The inter-panel spacings.
+    - `background()` — The figure background color.
+    - `background(value)` — The figure background color.
+    - `colorbar()` — The colorbar specification.
+    - `colorbar(value)` — The colorbar specification.
+    - `get_padding_offsets()` — Compute the padding, expressed in plot-data coordinates, on each side of the
+    - `get_bbox()` — Return the effective bounding box (in plot-data coordinates) of the total space
+    - `create_inset(bbox, coordinates='absolute', graphics_class=None, **opts)` — Create an inset within this plot, converting an absolute-data-coordinate bbox
+  - **class `Graphics3D`** (Graphics)
+    - `__init__(*args, figure=None, axes=None, subplot_kw=None, event_handlers=None, animate=None, axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, ticks=None, scale=None, ticks_style=None, image_size=None, background=None, view_settings=None, box_ratios=None, projection_type=None, aspect_ratio=None, autoscale=None, backend='matplotlib3D', **kwargs)`
+    - `set_options(view_settings=None, box_ratios=None, projection_type=None, aspect_ratio=None, autoscale=None, **parent_opts)` — Set the 3D-specific options (view settings, box ratios, projection, autoscale,
+    - `box_ratios()` — The 3D box aspect ratios.
+    - `box_ratios(value)` — The 3D box aspect ratios.
+    - `autoscale()` — Whether the 3D axes autoscale.
+    - `autoscale(value)` — Whether the 3D axes autoscale.
+    - `projection_type()` — The 3D projection type.
+    - `projection_type(value)` — The 3D projection type.
+    - `view_settings()` — The 3D camera/view settings.
+    - `view_settings(value)` — The 3D camera/view settings.
+  - **class `GraphicsGrid`** (GraphicsBase)
+    > A class for easily building sophisticated multi-panel figures.
+    > Robustification work still needs to be done, but the core interface is there.
+    > Supports themes & direct, easy access to the panels, among other things.
+    > Builds off of `GraphicsBase`.
+    - `__init__(*args, nrows=None, ncols=None, graphics_class=Graphics, figure=None, axes=None, subplot_kw=None, subimage_size=(310, 310), subimage_aspect_ratio='auto', padding=None, spacings=None, **opts)`
+    - **class `GraphicsStack`**
+      - `__init__(parent, graphics)`
+      - `get_bboxes()` — **LLM Docstring**
+      - `get_bbox()` — Return the bounding box enclosing all panels.
+      - `get_padding()` — Compute the grid's outer padding from the panels' paddings.
+      - `set_facecolor(fg)` — No-op face-color setter (panels manage their own backgrounds).
+    - `initialize_figure_and_axes(figure, axes, *, nrows=None, ncols=None, graphics_class=None, fig_kw=None, subplot_kw=None, padding=None, spacings=None, subimage_size=None, subimage_aspect_ratio=None, **kw)` — Initializes the subplots for the Graphics object
+    - `set_options(padding=None, spacings=None, background=None, colorbar=None, figure_label=None, **parent_opts)` — Set the grid-level options (figure label, padding, spacings, background,
+    - `set_image(pos, val, **opts)` — Place a graphics object into the panel at `pos`, re-hosting it onto the grid's
+    - `calc_image_size()` — Compute the grid's overall image size from the panels' sizes, the inter-panel
+    - `image_size()` — The grid's overall image size (recomputed from the panels on access).
+    - `image_size(value)` — The grid's overall image size (recomputed from the panels on access).
+    - `figure_label()` — The overall figure label.
+    - `figure_label(value)` — The overall figure label.
+    - `padding()` — The grid's outer padding.
+    - `padding(value)` — The grid's outer padding.
+    - `padding_left()` — The grid's left padding.
+    - `padding_left(value)` — The grid's left padding.
+    - `padding_right()` — The grid's right padding.
+    - `padding_right(value)` — The grid's right padding.
+    - `padding_top()` — The grid's top padding.
+    - `padding_top(value)` — The grid's top padding.
+    - `padding_bottom()` — The grid's bottom padding.
+    - `padding_bottom(value)` — The grid's bottom padding.
+    - `spacings()` — The inter-panel spacings.
+    - `spacings(value)` — The inter-panel spacings.
+    - `background()` — The grid background color.
+    - `background(value)` — The grid background color.
+    - `colorbar()` — The grid colorbar specification.
+    - `colorbar(value)` — The grid colorbar specification.
+
+### `Image.py` — Provides hooks for viewing images, mostly through the Matplotlib Image interface
+  - **class `Image`** (ArrayPlot)
+    > Simple subclass of ArrayPlot that just turns off most of the unnecessary features
+    - `__init__(data, plot_range=None, image_size=None, **kwargs)`
+    - `from_file(file_name, format=None, **opts)`
+
+### `Interactive.py` — Convenience classes for hooking into the matplotlib animation framework
+  - **class `EventHandler`**
+    - `__init__(figure, on_click=None, on_release=None, on_draw=None, on_key_press=None, on_key_release=None, on_move=None, on_select=None, on_resize=None, on_scroll=None, on_figure_entered=None, on_figure_left=None, on_axes_entered=None, on_axes_left=None)`
+    - `bind(**handlers)`
+    - `handlers()`
+    - **class `Event`**
+      - `__init__(event_handler, handler, filter=None, update=True, name=None)`
+      - `data()`
+      - `handle_event(event)`
+    - `ButtonPressedEvent(handler, **kw)`
+    - `ButtonReleasedEvent(handler, **kw)`
+    - `DrawEvent(handler, **kw)`
+    - `KeyPressedEvent(handler, **kw)`
+    - `KeyReleasedEvent(handler, **kw)`
+    - `MoveEvent(handler, **kw)`
+    - `SelectEvent(handler, **kw)`
+    - `ScrollEvent(handler, **kw)`
+    - `FigureEnterEvent(handler, **kw)`
+    - `FigureLeaveEvent(handler, **kw)`
+    - `AxesEnterEvent(handler, **kw)`
+    - `AxesLeaveEvent(handler, **kw)`
+  - **class `Animator`**
+    - `__init__(figure, data_generator, plot_method=None, events=True, update=False, **anim_ops)`
+    - `active()`
+    - `active(val)`
+    - `start()`
+    - `stop()`
+    - `toggle()`
+    - `show()`
+    - `to_jshtml()` — Delegates to the underlying animation
+    - `to_html5_video()` — Delegates to the underlying animation
+    - `as_jupyter_animation(mode='javascript')` — Chains some stuff to make Jupyter animations work
+
+### `Plots.py` — Provides various types of plots and plotting utilities
+  - **class `Plot`** (Graphics)
+    > The base plotting class to interface into matplotlib or (someday 3D) VTK.
+    > In the future hopefully we'll be able to make a general-purpose `PlottingBackend` class that doesn't need to be `matplotlib` .
+    > Builds off of the `Graphics` class to make a unified and convenient interface to generating plots.
+    > Some sophisticated legwork unfortunately has to be done vis-a-vis tracking constructed lines and other plotting artefacts,
+    > since `matplotlib` is designed to infuriate.
+    - `__init__(*params, method=None, figure=None, axes=None, subplot_kw=None, plot_style=None, theme=None, display_format=None, **opts)`
+    - `filter_options(opts, allowed=None)` — Return the subset of options recognized by this plot type (its known styles and
+    - `prep_styles(c=None, edgecolors=None, facecolors=None, cmap=None, prep_colors=False, color_value_rescaling=True, **styles)` — Normalize color-related styling: when a colormap is supplied and color values are
+    - `plot(*params, insert_default_styles=True, **plot_style)` — Plots a set of data & stores the result
+    - `artists()` — The backend artist objects produced by the plot (as a list).
+    - `clear()` — Removes the plotted data
+    - `restyle(**plot_style)` — Replots the data with updated plot styling
+    - `data()` — The data that we plotted
+    - `plot_style()` — The styling options applied to the plot
+    - `add_colorbar(graphics=None, norm=None, **kw)` — Adds a colorbar to the plot
+    - `set_graphics_properties(*which, **kw)` — Set backend properties on the plot's artists (all of them, or the selected
+    - `merge(main, other, *rest, **kwargs)` — Combine this plot with others into a `CompositePlot`.
+    - `resolve_method(mpl_name)` — Look up the registered plot class for a backend method name.
+    - `register(plot_class)` — Register a plot class in the class registry, keyed by its backend method name (or
+  - **class `CompositePlot`**
+    - `__init__(main, other, *rest, **kwargs)`
+    - `merge(**kwargs)` — Merge the held plots onto a shared new figure (re-hosting each onto the first's
+    - `show(interactive=True)` — Merge the plots and display the result.
+  - **class `FilledPlot`** (Plot)
+    > Inherits from `Plot`.
+    > Plots a bunch of x values against a bunch of y values using the `scatter` method.
+  - **class `ScatterPlot`** (Plot)
+    > Inherits from `Plot`.
+    > Plots a bunch of x values against a bunch of y values using the `scatter` method.
+    - `prep_styles(cmap=None, c=None, facecolors=None, edgecolors=None, filled=None, prep_colors=False, **etc)` — Resolve scatter-specific color handling (filled vs open markers, moving colors
+  - **class `ListScatterPlot`** (ScatterPlot)
+    > Inherits from `Plot`.
+    > Plots a bunch of (x, y) points using the `scatter` method.
+    - `__init__(griddata, **opts)`
+  - **class `ErrorBarPlot`** (Plot)
+    > Inherits from `Plot`.
+    > Plots error bars using the `errorbar` method.
+  - **class `ListErrorBarPlot`** (ErrorBarPlot)
+    > A Plot that pulls the errorbar data from a list
+    - `__init__(griddata, **opts)`
+  - **class `StickPlot`** (Plot)
+    > A Plot object that plots sticks
+    - `plot(*params, insert_default_styles=True, **plot_style)` — Plots a set of data | stores the result
+  - **class `ListStickPlot`** (StickPlot)
+    > A Plot object that plots sticks from a list
+    - `__init__(griddata, **opts)`
+  - **class `DatePlot`** (Plot)
+  - **class `StepPlot`** (Plot)
+  - **class `LogLogPlot`** (Plot)
+  - **class `SemiLogXPlot`** (Plot)
+  - **class `SemilogYPlot`** (Plot)
+  - **class `HorizontalFilledPlot`** (Plot)
+  - **class `BarPlot`** (Plot)
+  - **class `HorizontalBarPlot`** (Plot)
+  - **class `EventPlot`** (Plot)
+  - **class `PiePlot`** (Plot)
+  - **class `StackPlot`** (Plot)
+  - **class `BrokenHorizontalBarPlot`** (Plot)
+  - **class `VerticalLinePlot`** (Plot)
+    > Plots a bunch of vertical lines
+  - **class `HorizontalLinePlot`** (Plot)
+    > Plots a bunch of vertical lines
+  - **class `PolygonPlot`** (Plot)
+  - **class `AxisHorizontalLinePlot`** (Plot)
+  - **class `AxisHorizontalSpanPlot`** (Plot)
+  - **class `AxisVerticalLinePlot`** (Plot)
+  - **class `AxisVeticalSpanPlot`** (Plot)
+  - **class `AxisLinePlot`** (Plot)
+  - **class `StairsPlot`** (Plot)
+  - **class `DataPlot`** (Plot)
+    > Makes a 2D plot of arbitrary data using a plot method that handles that data type
+    - `__init__(*params, plot_style=None, method=None, figure=None, axes=None, subplot_kw=None, colorbar=None, **opts)`
+  - **class `HistogramPlot`** (DataPlot)
+    > Makes a Histogram of data
+  - **class `HistogramPlot2D`** (DataPlot)
+    > Makes a 2D histogram of data
+  - **class `SpectrogramPlot`** (DataPlot)
+  - **class `AutocorrelationPlot`** (DataPlot)
+  - **class `AngleSpectrumPlot`** (DataPlot)
+  - **class `CoherencePlot`** (DataPlot)
+  - **class `CrossSpectralDensityPlot`** (DataPlot)
+  - **class `MagnitudeSpectrumPlot`** (DataPlot)
+  - **class `PhaseSpectrumPlot`** (DataPlot)
+  - **class `PowerSpectralDensityPlot`** (DataPlot)
+  - **class `CrossCorrelationPlot`** (DataPlot)
+  - **class `BoxPlot`** (DataPlot)
+  - **class `ViolinPlot`** (DataPlot)
+  - **class `BoxAndWhiskerPlot`** (DataPlot)
+  - **class `HexagonalHistogramPlot`** (DataPlot)
+  - **class `VectorFieldPlot`** (Plot)
+    > Makes a plot of some 2D vector field with center points and arrows
+  - **class `QuiverPlot`** (VectorFieldPlot)
+  - **class `StreamPlot`** (VectorFieldPlot)
+  - **class `ArrayPlot`** (DataPlot)
+    > Plots an array as an image
+    - `__init__(*params, plot_style=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts)`
+  - **class `MatrixPlot`** (ArrayPlot)
+  - **class `SparsityPlot`** (ArrayPlot)
+  - **class `TensorPlot`** (GraphicsGrid)
+    > Plots slices of a tensor as a grid
+    - `__init__(tensor, nrows=None, ncols=None, plot_style=None, colorbar=None, figure=None, axes=None, subplot_kw=None, method='imshow', plot_class=None, **opts)`
+  - **class `Plot2D`** (Plot)
+    > A base class for plots of 3D data but plotted on 2D axes
+    - `__init__(*params, plot_style=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts)`
+  - **class `ContourPlot`** (Plot2D)
+  - **class `ContourLinePlot`** (ContourPlot)
+  - **class `DensityPlot`** (Plot2D)
+  - **class `HeatmapPlot`** (Plot2D)
+  - **class `TriPlot`** (Plot2D)
+    > A Plot object that plots a triangulation bars
+  - **class `ListTriPlot`** (Plot2D)
+    > A Plot that pulls the triangulation data from a list
+    - `__init__(griddata, **opts)`
+  - **class `TriDensityPlot`** (Plot2D)
+  - **class `TriContourLinesPlot`** (Plot2D)
+  - **class `TriContourPlot`** (Plot2D)
+  - **class `ListPlot2D`** (Plot2D)
+    > Convenience class that handles the interpolation first
+    - `__init__(*params, plot_style=None, method='contour', colorbar=None, figure=None, axes=None, subplot_kw=None, interpolate=True, **opts)`
+  - **class `ListContourPlot`** (ContourPlot)
+    - `__init__(*params, interpolate=True, **opts)`
+  - **class `ListDensityPlot`** (DensityPlot)
+    - `__init__(*params, interpolate=True, **opts)`
+  - **class `ListTriContourPlot`** (TriContourPlot)
+    - `__init__(*params, interpolate=True, **opts)`
+  - **class `ListTriDensityPlot`** (TriDensityPlot)
+    - `__init__(*params, interpolate=True, **opts)`
+  - **class `Plot3D`** (Graphics3D)
+    > A base class for 3D plots
+    - `__init__(*params, plot_style=None, method=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts)`
+    - `plot(*params, **plot_style)` — Plot the data on the 3-D axes and store the result, initializing the figure on
+    - `add_colorbar(**kw)` — Add a colorbar to the 3-D plot (deferring until the figure is initialized).
+    - `resolve_method(mpl_name)` — Look up the registered 3-D plot class for a backend method name.
+    - `register(plot_class)` — Register a 3-D plot class in the registry, keyed by its backend method name (or
+  - **class `ScatterPlot3D`** (Plot3D)
+    > Creates a ScatterPlot of 3D data
+  - **class `WireframePlot3D`** (Plot3D)
+    > Creates a Wireframe mesh plot of 3D data
+  - **class `ContourPlot3D`** (Plot3D)
+    > Creates a 3D ContourPlot of 3D data
+  - **class `ListPlot3D`** (Plot3D)
+    > Convenience 3D plotting class that handles the interpolation first
+    - `__init__(*params, plot_style=None, method=None, colorbar=None, figure=None, axes=None, subplot_kw=None, interpolate=True, **opts)`
+  - **class `ListTriPlot3D`** (ListPlot3D)
+    > Creates a triangulated surface plot in 3D
+- `resolve_plotter(tag)` — Resolve a plot-type tag to its plot class, searching the 2-D and 3-D registries
+- `plot_generic(*, x, type='plot', y=None, z=None, func=None, **kwargs)` — Build a plot of the resolved type from `x`/`y`/`z`/`func` inputs, assembling the
+- `plot_multi(*plot_specs, figure=None, plot_type_styles=None, default_type='plot', x=None, y=None, z=None, func=None, common_settings=None, **global_settings)` — Build several plots onto a shared figure from a sequence of plot specs, layering
+
+### `Primitives.py` — Provides stuff like Disk, Sphere, etc.
+  - **class `GraphicsPrimitive`**
+    - `plot(axes, *args, graphics=None, **kwargs)` — The one method that needs to be implemented, which takes the graphics and actually puts stuff on it…
+    - `get_bbox()` — Abstract: return the primitive's bounding box.
+  - **class `Disk`** (GraphicsPrimitive)
+    - `__init__(position=(0, 0), radius=1, **opts)`
+    - `get_bbox()` — Return the primitive's bounding box (the square enclosing the disk).
+    - `plot(axes, *args, graphics=None, zdir=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_disk`.
+  - **class `Line`** (GraphicsPrimitive)
+    - `__init__(points, radius=0.1, **opts)`
+    - `points()` — **LLM Docstring**
+    - `get_bbox()` — Return the primitive's bounding box enclosing its points.
+    - `plot(axes, *args, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_line`.
+  - **class `Text`** (GraphicsPrimitive)
+    - `__init__(txt, pos, bbox=((1, 1), (1, 1)), **opts)`
+    - `get_bbox()` — Return the primitive's bounding box (the padded box around the text).
+    - `plot(axes, *args, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_text`.
+  - **class `Arrow`** (GraphicsPrimitive)
+    - `__init__(pos1, pos2, **opts)`
+    - `get_bbox()` — Return the primitive's bounding box enclosing its endpoints.
+    - `plot(axes, *args, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_arrow`.
+  - **class `Path`** (GraphicsPrimitive)
+    - `__init__(commands, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, **kwargs)` — Draw the primitive onto the axes via `axes.draw_path`.
+  - **class `Sphere`** (GraphicsPrimitive)
+    - `__init__(position=(0, 0, 0), radius=1, sphere_points=48, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, sphere_points=None, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_sphere`.
+  - **class `Cube`** (GraphicsPrimitive)
+    - `__init__(p1, p2, **opts)`
+    - `get_bbox()` — Return the primitive's bounding box (its two corners).
+    - `plot(axes, *args, circle_points=None, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_box`.
+  - **class `Cylinder`** (GraphicsPrimitive)
+    - `__init__(p1, p2, radius, circle_points=32, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, circle_points=None, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_cylinder` (or a `VTKCylinder` when drawing into a V…
+  - **class `Point`** (GraphicsPrimitive)
+    - `__init__(pts, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_point`.
+  - **class `Triangle`** (GraphicsPrimitive)
+    - `__init__(pts, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, sphere_points=None, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_triangle`.
+  - **class `Polygon`** (GraphicsPrimitive)
+    - `__init__(points, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, sphere_points=None, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_poly`.
+  - **class `Rectangle`** (GraphicsPrimitive)
+    - `__init__(pts, **opts)`
+    - `get_bbox()` — Not implemented: this primitive has no bounding-box computation.
+    - `plot(axes, *args, sphere_points=None, graphics=None, **kwargs)` — Draw the primitive onto the axes via `axes.draw_rect`.
+  - **class `Inset`** (GraphicsPrimitive)
+    - `__init__(prims, position, offset=(0.5, 0.5), dimensions=None, plot_range=None, **opts)`
+    - `plot_range()` — The inset's data range (computed from the sub-primitives when not set).
+    - `plot_range(pr)` — The inset's data range (computed from the sub-primitives when not set).
+    - `get_plot_range()` — Compute the inset's data range as the union of its sub-primitives' bounding
+    - `dimensions()` — The inset's `(width, height)`, derived from the data range (and filling in a
+    - `get_bbox(graphics=None, preserve_aspect=None)` — Compute the inset's bounding box in the parent's coordinates, optionally
+    - `get_axes(graphics, bbox=None, **opts)` — Create (and cache) the inset axes on the parent graphics for the given bounding
+    - `plot(axes, *args, graphics=None, **kwargs)` — Draw the inset: create its axes on the parent and render (or re-host) each
+
+### `Properties.py` — Handles all the nastiness of Matplotlib properties so that we can use a more classically python plo…
+  - **class `GraphicsPropertyManager`**
+    > Manages properties for Graphics objects so that concrete GraphicsBase instances don't need to duplicate code, but
+    > at the same time things that build off of GraphicsBase don't need to implement all of these properties
+    - `__init__(graphics, figure, axes, managed=False)`
+    - `figure_label()` — The overall figure label.
+    - `figure_label(label)` — The overall figure label.
+    - `plot_label()` — The plot title/label.
+    - `plot_label(label)` — The plot title/label.
+    - `style_list()` — The per-series style cycle.
+    - `style_list(props)` — The per-series style cycle.
+    - `plot_legend()` — The plot legend.
+    - `plot_legend(legend)` — The plot legend.
+    - `legend_style()` — The legend styling options.
+    - `legend_style(style)` — The legend styling options.
+    - `axes_labels()` — The `(x, y)` axis labels.
+    - `axes_labels(labels)` — The `(x, y)` axis labels.
+    - `plot_range()` — The plotted `(x, y)` data range.
+    - `plot_range(ranges)` — The plotted `(x, y)` data range.
+    - `absolute_plot_range()` — The plot range with any unset axis filled in from the backend limits.
+    - `ticks()` — The tick specification.
+    - `ticks(ticks)` — The tick specification.
+    - `ticks_style()` — The tick styling.
+    - `ticks_style(ticks_style)` — The tick styling.
+    - `frame_style()` — The frame (spine) styling.
+    - `frame_style(f_style)` — The frame (spine) styling.
+    - `clean_tick_label_styles(k)` — Normalize a tick-label style key: strip/add the `label` prefix as appropriate and
+    - `ticks_label_style()` — The tick-label styling.
+    - `ticks_label_style(ticks_style)` — The tick-label styling.
+    - `aspect_ratio()` — The axes aspect ratio.
+    - `aspect_ratio(ar)` — The axes aspect ratio.
+    - `image_size()` — The figure image size in pixels.
+    - `image_size(wh)` — The figure image size in pixels.
+    - `axes_bbox()` — The axes bounding box.
+    - `axes_bbox(bbox)` — The axes bounding box.
+    - `background()` — The background/face color.
+    - `background(bg)` — The background/face color.
+    - `frame()` — Which frame (spine) edges are drawn.
+    - `frame(fr)` — Which frame (spine) edges are drawn.
+    - `scale()` — The per-axis scaling (e.g.
+    - `scale(scales)` — The per-axis scaling (e.g.
+    - `padding()` — The figure padding on each side.
+    - `padding(padding)` — The figure padding on each side.
+    - `padding_left()` — The left figure padding.
+    - `padding_left(p)` — The left figure padding.
+    - `padding_right()` — The right figure padding.
+    - `padding_right(p)` — The right figure padding.
+    - `padding_top()` — The top figure padding.
+    - `padding_top(p)` — The top figure padding.
+    - `padding_bottom()` — The bottom figure padding.
+    - `padding_bottom(p)` — The bottom figure padding.
+    - `spacings()` — The inter-panel spacings.
+    - `spacings(spacings)` — The inter-panel spacings.
+    - `colorbar()` — The colorbar specification.
+    - `colorbar(c)` — The colorbar specification.
+  - **class `GraphicsPropertyManager3D`** (GraphicsPropertyManager)
+    - `__init__(graphics, figure, axes, managed=False)`
+    - `axes_labels()` — The `(x, y, z)` axis labels.
+    - `axes_labels(labels)` — The `(x, y, z)` axis labels.
+    - `box_ratios()` — The 3D box aspect ratios.
+    - `box_ratios(br)` — The 3D box aspect ratios.
+    - `projection_type()` — The 3D projection type, read from / written to the backend axes.
+    - `projection_type(ptype)` — The 3D projection type, read from / written to the backend axes.
+    - `autoscale()` — The 3D autoscale setting, read from / written to the backend axes.
+    - `autoscale(autoscale)` — The 3D autoscale setting, read from / written to the backend axes.
+    - `plot_range()` — The plotted `(x, y, z)` data range.
+    - `plot_range(ranges)` — The plotted `(x, y, z)` data range.
+    - `absolute_plot_range()` — The 3D plot range with any unset axis filled in from the backend limits.
+    - `frame()` — Which 3D frame edges are drawn.
+    - `frame(fr)` — Which 3D frame edges are drawn.
+    - `frame_style()` — The 3D frame styling.
+    - `frame_style(f_style)` — The 3D frame styling.
+    - `ticks()` — The 3D tick specification.
+    - `ticks(ticks)` — The 3D tick specification.
+    - `ticks_style()` — The 3D tick styling.
+    - `ticks_style(ticks_style)` — The 3D tick styling.
+    - `view_settings()` — The 3D camera/view settings, read from / written to the backend axes.
+    - `view_settings(value)` — The 3D camera/view settings, read from / written to the backend axes.
+
+### `SVG.py`
+  - **class `SVGBoundingBox`**
+    - `x2()`
+    - `y2()`
+    - `cx()`
+    - `cy()`
+    - `union(other)`
+    - `to_array()`
+  - **class `SVGTransform`**
+    - `__init__(m)`
+    - `identity()`
+    - `translate(tx, ty)`
+    - `scale(sx, sy)`
+    - `rotate(deg, shift=None)`
+    - `skew(deg_x, deg_y)`
+    - `apply(points)`
+    - `apply_bbox(bb)` — Transform all four corners then take the axis-aligned envelope.
+    - `from_str(s)` — Parse an SVG transform attribute string into a Transform.
+    - `matrix_to_commands(mat)`
+    - `to_str()`
+    - `from_commands(commands)`
+  - **class `SVGPrimitive`** (ABC)
+    - `__init__(*body, **attrs)`
+    - `get_attr(attr)`
+    - `set_attr(attr, val)`
+    - `split_attrs(attrs)`
+    - `to_svg()`
+    - `get_bbox()`
+  - **class `SVGRect`** (SVGPrimitive)
+    - `__init__(x, y, width, height, **kwargs)`
+    - `x()`
+    - `x(value)`
+    - `y()`
+    - `y(value)`
+    - `width()`
+    - `width(value)`
+    - `height()`
+    - `height(value)`
+  - **class `SVGCircle`** (SVGPrimitive)
+    - `__init__(cx, cy, r, **kwargs)`
+    - `cx()`
+    - `cx(value)`
+    - `cy()`
+    - `cy(value)`
+    - `r()`
+    - `r(value)`
+  - **class `SVGEllipse`** (SVGPrimitive)
+    - `__init__(cx, cy, rx, ry, **kwargs)`
+    - `cx()`
+    - `cx(value)`
+    - `cy()`
+    - `cy(value)`
+    - `rx()`
+    - `rx(value)`
+    - `ry()`
+    - `ry(value)`
+  - **class `SVGLine`** (SVGPrimitive)
+    - `__init__(x1, y1, x2, y2, **kwargs)`
+    - `x1()`
+    - `x1(value)`
+    - `y1()`
+    - `y1(value)`
+    - `x2()`
+    - `x2(value)`
+    - `y2()`
+    - `y2(value)`
+  - **class `SVGPolyline`** (SVGPrimitive)
+    - `__init__(points, **kwargs)`
+    - `points()`
+    - `points(value)`
+  - **class `SVGPolygon`** (SVGPrimitive)
+    - `__init__(points, **kwargs)`
+    - `points()`
+    - `points(value)`
+  - **class `SVGPath`** (SVGPrimitive)
+    - `__init__(d, **kwargs)`
+    - `parse_path(d)` — Return list of (command, [args]) tuples.
+    - `d()`
+    - `d(value)`
+    - `from_mpl(path, target_bbox=None, base_height=None, y_flip=True)`
+  - **class `SVGText`** (SVGPrimitive)
+    - `__init__(text, x, y, **kwargs)`
+    - `x()`
+    - `x(value)`
+    - `y()`
+    - `y(value)`
+    - `text()`
+    - `text(value)`
+  - **class `SVGFigure`**
+    - `__init__(elements=None, defs=None, view_box=None, preserve_aspect_ratio=None, **svg_kwargs)`
+    - `create_element(element_type, **kwargs)`
+    - `add_element(element_type, **kwargs)`
+    - `add_rect(**kwargs)`
+    - `add_circle(**kwargs)`
+    - `add_ellipse(**kwargs)`
+    - `add_line(**kwargs)`
+    - `add_polyline(**kwargs)`
+    - `add_polygon(**kwargs)`
+    - `add_path(**kwargs)`
+    - `add_text(**kwargs)`
+    - `compute_viewbox()`
+    - `add_def(id, *, tag, **opts)`
+    - `create_def(*, id, tag='marker', body=None, **opts)`
+    - `prep_element(e)`
+    - `prep_draw_els(bbox, compute_bbox=None)`
+    - `to_svg(compute_bbox=None, view_box=None, **opts)`
+  - **class `SVGPrimitive3D`**
+    - `prep_kwargs(projection_matrix)`
+    - `to_2d(projection_matrix)`
+    - `compare_primitive(prim, depth1, depth2)`
+    - `to_svg(projection_matrix)`
+  - **class `SVGPointsToShape3D`** (SVGPrimitive3D)
+    - `__init__(**kwargs)`
+    - `to_points()`
+    - `get_depth(points)`
+    - `prep_kwargs(projection_matrix, return_w=False, **extra)`
+  - **class `SVGPolygon3D`** (SVGPointsToShape3D)
+    - `__init__(points, **kwargs)`
+    - `to_points()`
+  - **class `SVGPolyline3D`** (SVGPointsToShape3D)
+    - `__init__(points, **kwargs)`
+    - `to_points()`
+  - **class `SVGLine3D`** (SVGPolyline3D)
+    - `__init__(x1, y1, z1, x2, y2, z2, **kwargs)`
+    - `x1()`
+    - `x1(value)`
+    - `y1()`
+    - `y1(value)`
+    - `z1()`
+    - `z1(value)`
+    - `x2()`
+    - `x2(value)`
+    - `y2()`
+    - `y2(value)`
+    - `z2()`
+    - `z2(value)`
+  - **class `SVGFlatPointsToShape3D`** (SVGPointsToShape3D)
+    - `__init__(normal=None, rotation=None, **kwargs)`
+    - `to_2d_points()`
+    - `get_rotation_matrix()`
+    - `to_points()`
+  - **class `SVGPolylike3D`** (SVGFlatPointsToShape3D)
+    - `__init__(wrapper=None, **kwargs)`
+    - `wrapper()`
+    - `wrapper(value)`
+  - **class `SVGRect3D`** (SVGPolylike3D)
+    - `__init__(x, y, z, width, height, **kwargs)`
+    - `to_2d_points()`
+  - **class `SVGCircle3D`** (SVGPolylike3D)
+    - `__init__(x, y, z, r, minor_radius=None, npoints=48, offset_angle=0, span_angle=2 * np.pi, **kwargs)`
+    - `to_2d_points()`
+  - **class `SVGEllipse3D`** (SVGCircle3D)
+    - `__init__(x, y, z, rx, ry, **kwargs)`
+    - `rx()`
+    - `rx(value)`
+    - `ry()`
+    - `ry(value)`
+  - **class `SVGNonPlanarPolylike3D`** (SVGPointsToShape3D)
+    - `__init__(points, wrapper=None, **kwargs)`
+    - `wrapper()`
+    - `wrapper(value)`
+    - `to_points()`
+  - **class `SVGPath3D`** (SVGNonPlanarPolylike3D)
+    - `__init__(d, rotation=None, normal=None, **kwargs)`
+    - `prep_points(commands, rotation=None, normal=None)`
+  - **class `SVGCylinder`** (SVGPointsToShape3D)
+    - `__init__(start, end, radius, wrapper=None, **kwargs)`
+    - `wrapper()`
+    - `wrapper(value)`
+    - `to_points()`
+    - `compare_primitive(prim, depth1, depth2)`
+    - `prep_kwargs(projection_matrix)`
+  - **class `SVGSphere`** (SVGPointsToShape3D)
+    - `__init__(center, radius, **kwargs)`
+    - `to_points()`
+    - `compare_primitive(prim, depth1, depth2)`
+    - `prep_kwargs(projection_matrix)`
+  - **class `SVGText3D`** (SVGPointsToShape3D)
+    - `__init__(text, x, y, z, overlay=True, **kwargs)`
+    - `to_points()`
+    - `prep_kwargs(projection_matrix)`
+    - `x()`
+    - `x(value)`
+    - `y()`
+    - `y(value)`
+    - `z()`
+    - `z(value)`
+  - **class `SVGFigure3D`** (SVGFigure)
+    - `__init__(elements=None, defs=None, view_matrix=None, perspective_matrix=None, world_matrix=None, view_position=None, view_center=None, up_vector=None, view_vector=None, right_vector=None, view_angle=None, aspect_ratio=None, view_distance=None, clip_distances=None, **kwargs)`
+    - `get_projection_matrix()`
+    - `get_projection_kwargs()`
+    - `set_projection_kwargs(render_matrix=None, **kwargs)`
+    - `create_element(element_type, **kwargs)`
+    - `add_cylinder(**kwargs)`
+    - `add_sphere(**kwargs)`
+    - `prep_element(e)`
+    - `compare_primitives(e1, e2)`
+    - `sort_draw_els(els)`
+    - `prep_draw_els(bbox, compute_bbox=None)`
+    - `compute_viewbox()`
+    - `to_svg(compute_bbox=None, view_box=None, **opts)`
+
+### `SceneJSON.py`
+  - **class `SceneJSON`**
+    > JSON interchange format to use with Mathematica
+    - **class `Primitive`**
+      - `__init__(tag, *children, **attrs)`
+      - `to_json()`
+      - `tostring(**opts)`
+      - `dump(file, **opts)`
+    - **class `TagElement`** (Primitive)
+      - `__init__(*children, **attrs)`
+    - **class `Graphics3D`** (TagElement)
+    - **class `Graphics`** (TagElement)
+    - **class `Animation`** (TagElement)
+    - **class `Scene`** (TagElement)
+    - **class `Circle`** (TagElement)
+    - **class `Line`** (TagElement)
+    - **class `Rectangle`** (TagElement)
+    - **class `Polygon`** (TagElement)
+    - **class `Disk`** (TagElement)
+    - **class `Cone`** (TagElement)
+    - **class `Sphere`** (TagElement)
+    - **class `Cuboid`** (TagElement)
+    - **class `Cylinder`** (TagElement)
+    - **class `Text`** (TagElement)
+
+### `Styling.py` — Defines a helper class Styled to make it easier to style plots and stuff and a ThemeManager to hand…
+  - **class `Styled`**
+    > Simple styling class
+    - `__init__(*str, **opts)`
+    - `could_be(data)` — Test whether a piece of data is a `(value, opts_dict)` pair that could be a
+    - `construct(data)` — Build a `Styled` from a `(value, opts_dict)` pair.
+  - **class `PlotLegend`** (list)
+    - `__init__(components, **styles)`
+    - `check_styles(styles)` — Raise if any style keys aren't among the known legend styles.
+    - `could_be_legend(bits)` — Test whether a value could be legend components (an iterable that isn't a bare
+    - `construct(bits)` — Build a `PlotLegend` from components (accepting an existing legend, a
+    - `construct_line_marker(lw=4, **opts)` — Build a line legend handle (a matplotlib `Line2D`).
+    - `construct_dot_marker(**opts)` — Build a dot/patch legend handle (a matplotlib `Patch`).
+    - `load_constructors()` — Return the mapping of marker names to their legend-handle constructors.
+    - `canonicalize_bit(marker='-', **opts)` — Build a single legend handle from a marker spec (resolving marker synonyms and
+  - **class `cycler`**
+    - `__init__(**style_cycles)`
+  - **class `ThemeManager`**
+    > Simple manager class for plugging into themes in a semi-background agnostic way
+    - `__init__(*theme_names, backend=None, graphics_styles=None, **extra_styles)`
+    - `from_spec(theme, backend=None)` — Build a `ThemeManager` (or a `NoThemeManager` for `None`) from a flexible theme
+    - `canonicalize_theme_props(props)` — Recursively normalize theme properties, expanding a `palette` entry into a color
+    - `theme()` — The resolved theme (names and styles) for this manager.
+    - `add_theme(theme_name, *base_theme, **extra_styles)` — Adds a theme to the extra themes dict.
+    - `resolve_theme(theme_name, *base_themes, **extra_styles)` — Resolves a theme so that it only uses strings for built-in styles
+    - `validate_theme(theme_names, theme_styless)` — Validate the theme names against the backend's supported themes, resolving each
+    - `backend_themes()` — The theme names supported by the backend.
+    - `theme_names()` — All available theme names (backend themes plus the registered extra themes).
+  - **class `NoThemeManager`**
+    > Does nothing but makes code consistent
+
+### `VTKInterface.py` — Provides an interface to VTK that implements all necessary components with a matplotlib compatible…
+  - **class `VTKObject`**
+    > A general wrapper for _any_ vtk object that provides a more pythonic interface and can be extended to be add     layers of functionality
+    > *(truncated — see stub for full docstring)*
+    - `__init__(obj)`
+    - `chain_to(src)`
+    - `color_tuple(c)`
+    - `get_prop(item)`
+    - `set_prop(item, val)`
+  - **class `VTKRenderer`** (VTKObject)
+    - `__init__()`
+  - **class `VTKRenderWindow`** (VTKObject)
+    - `__init__()`
+  - **class `VTKRenderWindowInteractor`** (VTKObject)
+    - `__init__()`
+  - **class `VTKActor`** (VTKObject)
+    - `__init__(actor='', name=None)`
+  - **class `VTKWrapper`**
+    > Provides something that *looks* like a lower-level actor but is not
+    > Requires a setter, getter, and a property object
+    - `__init__(get_val, set_val, prop)`
+    - `val()`
+    - `val(v)`
+  - **class `VTKTicks`**
+    - `__init__(major_ticks, minor_ticks)`
+  - **class `VTKAxis`**
+    - `__init__(lines, title, label)`
+    - `set_prop(c, v)`
+    - `get_prop(c)`
+  - **class `VTKCubeAxes`** (VTKActor)
+    - `__init__()`
+    - `x_axis()`
+    - `y_axis()`
+    - `z_axis()`
+    - `axes()`
+    - `color()`
+    - `color(colors)`
+  - **class `VTKWindow`**
+    > Handles all communication with a vtkRenderWindow object
+    > Creates a vtkRenderer and vtkRenderInteractor and the rest of it to manage this
+    - `__init__(title=None, legend=None, window=None, cube=None, use_axes=True, interactor=None, renderer=None, background='white', image_size=(640, 480), viewpoint=(5, 5, 5), focalpoint=(0, 0, 0), scale=(1, 1, 1))`
+    - `add_object(thing)`
+    - `remove_object(thing)`
+    - `clear()`
+    - `close()`
+    - `window()`
+    - `interactor()`
+    - `setup_interactor()`
+    - `renderer()`
+    - `setup_renderer()`
+    - `set_size(w, h)`
+    - `set_size_inches(wi, hi)`
+    - `get_size_inches()`
+    - `get_title()`
+    - `set_title(title)`
+    - `get_lims()`
+    - `get_xlim()`
+    - `set_xlim(x)`
+    - `get_ylim()`
+    - `set_ylim(y)`
+    - `get_zlim()`
+    - `set_zlim(z)`
+    - `get_xlabel()`
+    - `set_xlabel(lab, **ops)`
+    - `get_ylabel()`
+    - `set_ylabel(lab, **ops)`
+    - `get_zlabel()`
+    - `set_zlabel(lab, **ops)`
+    - `get_xticks()`
+    - `set_xticks(lab)`
+    - `get_yticks()`
+    - `set_yticks(lab)`
+    - `get_zticks()`
+    - `set_zticks(lab)`
+    - `set_model_matrix()`
+    - `get_xscale()`
+    - `set_xscale(lab)`
+    - `get_yscale()`
+    - `set_yscale(lab)`
+    - `get_zscale()`
+    - `set_zscale(lab)`
+    - `get_legend()`
+    - `set_legend(l)`
+    - `get_facecolor()`
+    - `set_facecolor(bg)`
+    - `camera()`
+    - `camera(cam)`
+    - `set_viewpoint(vp)`
+    - `set_focalpoint(fp)`
+    - `set_background(bg)`
+    - `show()`
+  - **class `VTKPrimitive`**
+    - `__init__(get_mapper, name, color=None, parent=None)`
+    - `actor()`
+    - `get_actor()`
+    - `get_mapper()`
+    - `plot(window)`
+  - **class `VTKGeometricPrimitive`** (VTKPrimitive)
+    - `__init__(source, name, **opts)`
+  - **class `VTKDisk`** (VTKGeometricPrimitive)
+    - `__init__(pos, rad, **opts)`
+  - **class `VTKLine`** (VTKGeometricPrimitive)
+    - `__init__(pt1, pt2, **opts)`
+  - **class `VTKCylinder`** (VTKGeometricPrimitive)
+    - `__init__(pt1, pt2, rad, cylinder_points=24, **opts)`
+  - **class `VTKSphere`** (VTKGeometricPrimitive)
+    - `__init__(pos, rad, theta_points=24, phi_points=24, **opts)`
+
+### `X3DInterface.py`
+  - **class `X3DObject`**
+    - `to_x3d()` — Abstract: render this object to its X3D DOM element.
+    - `get_interpolated_attributes()` — Return the object's attributes used when building animation frames (its X3D element's attrs).
+    - `get_children()` — Return the object's child objects (none by default).
+    - `get_new_id()` — Generate a fresh unique id for a new object.
+    - `resolve_prop_attr(prop_name)` — Map a property name to the X3D attribute name it animates (identity by default).
+    - `prep_animation_values(prop_name, values)` — Normalize a property's per-frame animation values (e.g.
+    - `get_prop_node_id(prop_name)` — Return the id of the DOM node that carries a given animated property (this object by default).
+  - **class `X3D`** (X3DObject)
+    - `get_new_id()` — **LLM Docstring**
+    - `__init__(*children, id=None, dynamic_loading=True, x3dom_path=None, x3dom_css_path=None, include_mathjax=False, recording_options=None, include_export_button=False, include_record_button=False, include_view_settings_button=False, preload_scripts=None, onload_scripts=None, **opts)`
+    - `get_export_script(id)` — Build the JavaScript that exports the scene canvas to a PNG and triggers a download.
+    - `get_view_settings_script(id)` — Build the JavaScript that reads the current view matrix and writes it into the view-matrix output f…
+    - `parse_view_matrix(vs)` — Convert a serialized X3DOM view matrix into `{position, orientation}` viewpoint
+    - `get_record_screen_script(id, polling_rate=30, recording_duration=2, video_format='video/webm')` — Build the JavaScript that records the scene canvas to a video and triggers a download.
+    - `set_animation_duration_script(id)` — Build the JavaScript that reads the duration input and stores it on the canvas.
+    - `to_widget(dynamic_loading=None, include_export_button=None, include_record_button=None, include_view_settings_button=None)` — Render the scene to an interactive X3DOM widget (cached), wiring up the loader
+    - `to_html(*base_elems, header_elems=None, dynamic_loading=False, include_export_button=None, include_record_button=None, **header_info)` — Wrap the scene widget in a full HTML document (with the X3DOM CSS/JS in the head).
+    - `get_mime_bundle()` — Return the scene widget's MIME bundle for rich display.
+    - `to_x3d()` — Render the scene to its `<x3d>` DOM element, formatting the size and rendering each child.
+    - `display()` — **LLM Docstring**
+    - `show()` — Display the scene, enabling dynamic loading when in a Jupyter environment.
+    - `dump(file, write_html=True, **opts)` — Write the scene to a file, as full HTML or as bare X3D.
+    - `get_children()` — **LLM Docstring**
+  - **class `X3DOptionsSet`** (X3DObject)
+    - `parse_color(color)` — Parse a color specification into `(color, transparency)`, resolving named colors /
+    - `get_new_id()` — **LLM Docstring**
+    - `__init__(id=None, **attrs)`
+    - `prop_keys()` — Return the set of valid property keys (declared props plus conversion-map aliases).
+    - `prep_attrs(attrs)` — Canonicalize the node attributes (applying the conversion-map aliases and attaching the id), valida…
+    - `resolve_prop_attr(prop_name)` — Map a property name to its X3D attribute name via the conversion map.
+    - `get_prop_node_id(prop_name)` — Return the node id carrying a given property (this node).
+  - **class `X3DMaterial`** (X3DOptionsSet)
+    - `prep_attrs(attrs)` — Canonicalize the material attributes (resolving the color into components/transparency) before rend…
+    - `to_x3d()` — Render the material to its X3D DOM element.
+  - **class `X3DTexture`** (X3DOptionsSet)
+    - `infer_texture_type(ats)` — Infer the texture type (pixel/image/movie) from the supplied attributes.
+    - `to_x3d()` — Render the texture to its X3D DOM element, dispatching on the (inferred) texture type.
+  - **class `X3DAppearance`** (X3DOptionsSet)
+    - `get_new_id()` — **LLM Docstring**
+    - `prep_attrs(attrs)` — Canonicalize the appearance attributes, splitting the material/texture/line/point sub-properties ou…
+    - `to_x3d()` — Render the appearance to its X3D DOM element (with its material/texture/line/point child nodes).
+    - `resolve_prop_attr(prop_name)` — Map a property name to the appearance sub-node attribute it animates.
+    - `get_prop_node_id(prop_name)` — Return the id of the appearance sub-node (material/texture/...) carrying a property.
+  - **class `X3DLineProperties`** (X3DOptionsSet)
+    - `prep_attrs(attrs)` — Canonicalize the line-properties attributes (resolving the color into components/transparency) befo…
+    - `to_x3d()` — Render the line properties to its X3D DOM element.
+  - **class `X3DPointProperties`** (X3DOptionsSet)
+    - `prep_attrs(attrs)` — Canonicalize the point-properties attributes (resolving the color into components/transparency) bef…
+    - `to_x3d()` — Render the point properties to its X3D DOM element.
+  - **class `X3DPrimitive`** (X3DObject)
+    - `get_new_id()` — **LLM Docstring**
+    - `__init__(*children, id=None, **opts)`
+    - `id()` — **LLM Docstring**
+    - `id(new_id)` — **LLM Docstring**
+    - `split_opts(opts)` — Split options into the non-appearance options and the material/appearance/line/point options.
+    - `get_appearance(appearance_options)` — Build the appearance node from the appearance options (or `None` if there are none).
+    - `to_x3d()` — Render the primitive to its X3D DOM element, wrapping its children and appearance under the tag/wra…
+    - `resolve_prop_attr(prop_name)` — Map a property name to its attribute, routing appearance properties through the appearance node.
+    - `get_prop_node_id(prop_name)` — Return the node id carrying a property, routing appearance properties to the appearance node.
+    - `get_children()` — **LLM Docstring**
+  - **class `X3DScene`** (X3DPrimitive)
+    - `__init__(*children, background=None, viewpoint=None, **opts)`
+    - `get_view_settings(up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc)` — Build viewpoint settings (position/orientation/etc.) from a flexible view
+  - **class `X3DBackground`** (X3DOptionsSet)
+    - `prep_attrs(attrs)` — Canonicalize the background attributes (resolving the color into components/transparency) before re…
+    - `to_x3d()` — Render the background to its X3D DOM element.
+  - **class `X3DCoordinate`** (X3DPrimitive)
+    - `__init__(points, id=None, **etc)`
+    - `prep_points(points)` — Normalize coordinate points into the X3D point format.
+  - **class `X3DColor`** (X3DPrimitive)
+    - `__init__(colors, id=None, **etc)`
+    - `split_opts(opts)` — Split options for the color node (colors aren't material properties).
+    - `prep_color(points)` — Normalize color values into the X3D color format.
+  - **class `X3DGroup`** (X3DPrimitive)
+  - **class `X3DSwitch`** (X3DPrimitive)
+  - **class `X3DGeometryObject`** (X3DPrimitive)
+    - `__init__(*args, id=None, **opts)`
+    - `get_interpolated_attributes()` — Return the geometry plus material attributes used for animation.
+    - `prep_geometry_opts(*args, **opts)` — Abstract: build the geometry options for this shape from its defining arguments.
+    - `create_tag_object(**core_opts)` — Build the core geometry tag element from the core options.
+    - `create_object(translation=None, rotation=None, scale=None, normal=None, up_vector=None, bbox_center=None, **core_opts)` — Build the geometry element together with its transform (translation/rotation/
+    - `get_rotation(axis, up_vector=None)` — Compute the axis-angle rotation that aligns an up-vector with a target axis (and the axis norm).
+    - `get_prop_node_id(prop_name)` — Return the node id carrying a property, routing transform properties to the transform node.
+    - `to_x3d()` — Render the geometry to its X3D DOM element, wrapping it in its appearance and transform.
+  - **class `X3DGeometryGroup`** (X3DGeometryObject)
+    - `prep_geometry_opts(*args, **opts)` — Abstract: build a list of per-instance geometry option dicts for this (possibly batched) shape.
+    - `get_interpolated_attributes()` — Return the first instance's geometry plus material attributes used for animation.
+    - `prep_vecs(vecs, nstruct=None)` — Broadcast a vector (or `None`) across `nstruct` instances.
+    - `prep_mats(mats, nstruct=None)` — Broadcast a matrix (or `None`) across `nstruct` instances.
+    - `prep_const(const, nstruct)` — Broadcast a scalar constant (or `None`) across `nstruct` instances.
+    - `to_x3d()` — Render every instance to its X3D element (wrapped in appearance/transform), grouping them under a s…
+  - **class `X3DSphere`** (X3DGeometryGroup)
+    - `prep_geometry_opts(centers, radius=1, **opts)` — Build the per-instance geometry options for spheres at the given centers.
+  - **class `X3DBox`** (X3DGeometryGroup)
+    - `prep_geometry_opts(starts, ends, normal=None, rotation=None, **opts)` — Build the per-instance geometry options for boxes spanning the given corner pairs.
+  - **class `X3DCylinder`** (X3DGeometryGroup)
+    - `prep_geometry_opts(starts, ends, radius=1, **opts)` — Build the per-instance geometry options for cylinders between the given endpoints.
+  - **class `X3DCone`** (X3DGeometryGroup)
+    - `prep_geometry_opts(starts, ends, radius=1, top_radius=None, **opts)` — Build the per-instance geometry options for cones (or truncated cones) between the given endpoints.
+  - **class `X3DArrow`** (X3DGroup)
+    - `__init__(starts, ends, radius=1, top_radius=None, arrowhead_radius=2, arrowhead_radius_mode='scaled', arrowhead_offset=0.3, arrowhead_offset_mode='scaled', cylinder_class=None, arrowhead_class=None, **opts)`
+  - **class `X3DCappedCylinder`** (X3DGroup)
+    - `__init__(starts, ends, radius=1, cylinder_class=None, cap_class=None, cap_offset=0, use_caps=(True, True), **opts)`
+  - **class `X3DText`** (X3DGeometryGroup)
+    - `__init__(*args, billboard=True, solid=None, billboard_opts=None, **opts)`
+    - `create_tag_object(font_style=None, **core_opts)` — Build the text geometry tag with its font style.
+    - `prep_geometry_opts(centers, text, font_style=None, rotation=None, normal=None, **opts)` — Build the per-instance geometry options for text labels at the given centers.
+  - **class `X3DTorus`** (X3DGeometryGroup)
+    - `prep_geometry_opts(centers, radius=1, inner_radius=None, normal=None, rotation=None, scale=None, angle=None, **opts)` — Build the per-instance geometry options for tori at the given centers.
+  - **class `X3DCoordinatesWrapper`** (X3DGeometryGroup)
+    - `create_tag_object(*, point, color=None, **etc)` — Build the geometry tag wrapping a coordinate (and optional color) node.
+    - `prep_geometry_opts(point, **etc)` — Build the per-instance geometry options for a coordinate-backed geometry.
+  - **class `X3DVertexCoordinatesWrapper`** (X3DCoordinatesWrapper)
+    - `prep_geometry_opts(point, vertex_colors=None, **etc)` — Build the per-instance geometry options for a vertex-coordinate geometry with optional per-vertex c…
+  - **class `X3DIndexedCoordinatesWrapper`** (X3DCoordinatesWrapper)
+    - `prep_geometry_opts(point, indices, vertex_colors=None, **etc)` — Build the per-instance geometry options for an indexed-coordinate geometry.
+  - **class `X3DGeometry2DGroup`** (X3DGeometryGroup)
+    - `__init__(*args, billboard=False, billboard_opts=None, **opts)`
+    - `prep_2d_coords(coords)` — Normalize coordinates into the 2D geometry point format.
+    - `prep_geometry_opts(center, **etc)` — Build the per-instance geometry options for a 2D geometry at the given center.
+  - **class `X3DRectangle2D`** (X3DGeometry2DGroup)
+    - `prep_geometry_opts(left_endpoints, right_endpoints, normal=None, rotation=None, **etc)` — Build the per-instance geometry options for 2D rectangles spanning the given endpoint pairs.
+  - **class `X3DCircle2D`** (X3DGeometry2DGroup)
+    - `prep_geometry_opts(centers, radius=1, normal=None, rotation=None, scale=None, angle=None, **opts)` — Build the per-instance geometry options for 2D circles at the given centers.
+  - **class `X3DDisk2D`** (X3DGeometry2DGroup)
+    - `prep_geometry_opts(centers, radius=1, inner_radius=None, normal=None, rotation=None, scale=None, angle=None, **opts)` — Build the per-instance geometry options for 2D disks (or annuli) at the given centers.
+  - **class `X3DPolyline2D`** (X3DGeometry2DGroup)
+  - **class `X3DPointSet`** (X3DVertexCoordinatesWrapper)
+  - **class `X3DLine`** (X3DCoordinatesWrapper)
+  - **class `X3DTriangleSet`** (X3DCoordinatesWrapper)
+  - **class `X3DIndexedTriangleSet`** (X3DIndexedCoordinatesWrapper)
+  - **class `X3DIndexedLineSet`** (X3DIndexedCoordinatesWrapper)
+    - `prep_geometry_opts(point, indices, **etc)` — Build the per-instance geometry options for an indexed line set.
+  - **class `X3DIndexedQuadSet`** (X3DIndexedCoordinatesWrapper)
+  - **class `X3DIndexedFaceSet`** (X3DIndexedCoordinatesWrapper)
+  - **class `X3DGenericAnimator`** (X3DGroup)
+    - `__init__(*animation_data, id=None, animation_duration=2, running=True, slider=False, **opts)`
+    - `get_animation_objects(animation_data, id)` — Abstract: build the `(objects, per-property attribute sets, frame count)` for the animation.
+    - `build_animator_group(attribute_sets, nframes, *, uuid, running=True, animation_duration=2)` — Build the animation driver nodes: a time sensor, an integer sequencer keyed to the
+    - `resolve_control_type(name, values)` — Decide whether a property animates by discrete indexing or by interpolation (from its value sequenc…
+    - `resolve_interpolator_type(name, values)` — Determine the X3D interpolator class (and frame count) for a property from its
+    - `get_color_array_interpolator(*, key, keyValue, id, clockId, targetId)` — Build the color-array interpolator for animating per-vertex colors across frames.
+    - `prep_interpolator(interpolator_type, name, values, nframes, id, clock_id)` — Build the interpolator node (and its routing) for one animated property, keyed to
+    - `create_animation_control(name, *, id, uuid, type=None, values=None, interpolator_type=None)` — Build the animation control (a sequencer or interpolator, plus routing) for one
+  - **class `X3DListAnimator`** (X3DGenericAnimator)
+    - `get_animation_objects(frames, id)` — Build a frame-switching animation: wrap the frames in an X3D `Switch` and animate
+  - **class `X3DInterpolatingAnimator`** (X3DGenericAnimator)
+    - `get_animation_objects(object_attr_sets, id)` — Build an interpolating animation from a mapping of objects to their per-property
+    - `frame_diffs(ref, test, *rest)` — Walk several X3D object trees in parallel and find which nodes/attributes differ
+    - `from_frames(frames, **opts)` — Build an interpolating animation from a list of frame trees by diffing them:
+
+### `.ipynb_checkpoints/Backends-checkpoint.py` — For now, just a super simple Enum of supported backends
+  - **class `AxisManager`**
+    - `__init__(tick_getter, tick_setter, tick_locator, minor_tick_locator, tick_formatter, minor_tick_formatter)`
+  - **class `XAxisManager`** (AxisManager)
+    - `get_xticks()`
+    - `set_xticks(ticks, **kwargs)`
+  - **class `YAxisManager`** (AxisManager)
+    - `get_yticks()`
+    - `set_yticks(ticks, **kwargs)`
+  - **class `ZAxisManager`** (AxisManager)
+    - `get_zticks()`
+    - `set_zticks(ticks, **kwargs)`
+  - **class `GraphicsAxes`**
+    > A wrapper to provide a canonical form for matplotlib.axes.Axes
+    > so that other backends can plug in cleanly
+    - `__init__()`
+    - `get_xaxis_manager()`
+    - `get_yaxis_manager()`
+    - **class `TicksManager`**
+      - **class `Locator`**
+      - **class `FixedLocator`** (Locator)
+        - `__init__(locs, **opts)`
+    - `canonicalize_opts(opts)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `prep_show()`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `legend(**opts)`
+    - `get_graphics_properties(obj, property=None)`
+    - `set_graphics_properties(obj, **props)`
+    - `draw_line(points, **styles)`
+    - `draw_point(points, **styles)`
+    - `draw_disk(points, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_triangle(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_arrow(points, **styles)`
+    - `draw_text(points, vals, **styles)`
+    - `draw_path(commands, **styles)`
+  - **class `GraphicsAxes3D`** (GraphicsAxes)
+    - `__init__()`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `set_projection_type(proj_type, **kwargs)`
+    - `get_projection_type()`
+    - `get_autoscale()`
+    - `set_autoscale(autoscale)`
+    - `get_view_settings()`
+    - `set_view_settings(**ops)`
+    - `draw_sphere(points, rads, **styles)`
+    - `draw_cylinder(start, end, rad, circle_points=48, **opts)`
+    - `draw_box(start, end, **opts)`
+  - **class `GraphicsFigure`**
+    > A wrapper to provide a canonical form for matplotlib.figure.Figure
+    > so that other backends can plug in cleanly
+    - `__init__(axes=None)`
+    - `construct(**kw)`
+    - `canonicalize_opts(opts)`
+    - `create_axes(rows, cols, spans, **kw)`
+    - `create_inset(bbox, **kw)`
+    - `create_colorbar(graphics, axes, norm=None, cmap=None, **kw)`
+    - `add_axes(ax)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `get_bboxes()`
+    - `prep_show()`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, **opts)`
+    - `animate_frames(frames, **animation_opts)`
+    - `to_html()`
+    - `to_widget(**opts)`
+    - `get_mime_bundle()`
+    - `tight_layout()`
+  - **class `GraphicsBackend`**
+    - `create_figure(*args, **kwargs)`
+    - `create_axes(figure, *args, **kwargs)`
+    - `create_inset(figure, *args, **kw)`
+    - `close_figure(figure)`
+    - `remove_axes(axes)`
+    - `clear_figure(figure)`
+    - `clear_axes(axes)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `show_figure(figure, reshow=None)`
+    - `to_widget(figure)`
+    - `get_available_themes()`
+    - **class `ThemeContextManager`**
+      - `__init__(theme_parents, theme_spec)`
+      - `canonicalize_theme_opts(theme_parents, theme_spec)`
+    - `theme_context(theme_parents, spec)`
+    - **class `DefaultBackends`** (enum.Enum)
+      > Real access pattern: DefaultBackends.<MemberName> (this is an enum with 11 members, e.g. DefaultBackends.MPL == 'matplotlib'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+    - `get_default_backends()`
+    - `lookup(backend, opts=None)`
+  - **class `MPLManager`**
+    > Real access pattern: MPLManager.<AttrName> (9 class attributes, e.g. MPLManager._plt == None). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+    - `plt_api()`
+    - `mpl_api()`
+    - `color_api()`
+    - `patch_api()`
+    - `path_api()`
+    - `collections_api()`
+    - `widgets_api()`
+    - `animations_api()`
+    - `draw_if_interactive(*args, **kwargs)`
+    - `magic_backend(backend)`
+    - `figure_settings(figure)`
+    - `mpl_disconnect(graphics)`
+    - `mpl_connect(graphics)`
+    - `jupyter_show(close=None, block=None)` — Show all figures as SVG/PNG payloads sent to the IPython clients.
+  - **class `MPLAxes`** (GraphicsAxes)
+    - `__init__(mpl_axes_object, **opts)`
+    - **class `TicksManager`**
+      - `__init__()`
+      - `Locator()`
+      - `FixedLocator()`
+    - `clear(*, backend=None)`
+    - `remove(*, backend)`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `legend(**opts)`
+    - `get_graphics_properties(obj, property=None)`
+    - `set_graphics_properties(obj, **props)`
+    - `draw_line(points, **styles)`
+    - `draw_disk(points, radius=None, s=None, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_arrow(points, **styles)`
+    - `draw_text(points, vals, **styles)`
+    - `svg_to_mpl_path(path, target_bbox=None, base_height=None, y_flip=False)`
+    - `draw_path(commands, **styles)`
+  - **class `MPLAxes3D`** (MPLAxes)
+    - `__init__(mpl_axes_object, **opts)`
+    - `set_projection_type(proj_type, **kwargs)`
+    - `get_projection_type()`
+    - `get_autoscale()`
+    - `set_autoscale(autoscale)`
+    - `set_frame_visible(frame_spec)`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `get_box_aspect()`
+    - `set_box_aspect(br, **kwargs)`
+    - `get_view_settings()`
+    - `set_view_settings(elev=None, azim=None, roll=None, vertical_axis=None, dist=None, up_vector=None, right_vector=None, view_vector=None, view_distance=None, view_matrix=None, **values)`
+    - `prep_show()`
+    - `draw_sphere(center, radius, sphere_points=48, rendering='standard', s=None, box_scalings=None, edgecolors=None, edge_color=None, lw=None, edge_width=0.01, glow=None, color='white', plotter='scatter', depth_shading_range=(-1, 1), depth_shading_targets=(-0.5, 0.5), depth_shrink_range=None, depth_shrink_targets=None, **opts)`
+    - `draw_cylinder(start, end, rad, circle_points=48, rendering=None, box_scalings=None, edge_color=None, color='black', glow=None, segments=1, segment_overdraw=0.05, edge_width=0.01, lw=None, depth_shading_range=(-1, 1), depth_shading_targets=(-0.5, 0.5), color_cycle=False, capstyle='butt', plotter='plot', **opts)`
+    - `draw_disk(centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None, theta1=None, theta2=None, rendering='flat', box_scalings=None, line_color=None, line_thickness=None, color=None, glow=None, lw=None, **styles)`
+    - `draw_line(points, rendering='flat', box_scalings=None, line_thickness=None, lw=None, s=None, edgecolors=None, **styles)`
+    - `draw_arrow(points, radius=None, rendering=None, segments=8, box_scalings=None, lw=None, **styles)`
+    - `draw_text(points, vals, billboard=True, normal=None, rendering='flat', box_scalings=None, zdir=None, **styles)`
+    - `draw_box(start, end, **opts)`
+  - **class `MPLFigure`** (GraphicsFigure)
+    - `__init__(mpl_figure_object, display_format=None, **opts)`
+    - `create_axes(rows, cols, spans, **kw)`
+    - `create_inset(bbox, **kw)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `create_colorbar(graphics, axes, norm=None, cmap=None, **kw)`
+    - `get_figure_label()`
+    - `set_figure_label(val, **style)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `set_figure_spacings(spacing)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, facecolor=None, **opts)`
+    - `animate_frames(frames, export_html=True, **animation_opts)`
+    - `to_html(format=None)`
+    - `to_data_url()`
+    - `to_svg()`
+    - `to_widget(format=None, autoclose=True)`
+    - `get_mime_bundle()`
+    - `tight_layout()`
+  - **class `MPLBackend`** (GraphicsBackend)
+    - `plt()`
+    - `mpl()`
+    - `create_figure(*args, **kwargs)`
+    - `show_all()`
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `__init__(theme_parents, theme_spec)`
+      - `canonicalize_theme_opts(theme_parents, theme_opts)`
+    - `show_figure(graphics, autoclose=True, reshow=None)`
+    - `to_widget(figure, autoclose=True)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`
+  - **class `MPLFigure3D`** (MPLFigure)
+    - `create_axes(rows, cols, spans, projection='3d', **kw)`
+  - **class `MPLBackend3D`** (MPLBackend)
+    - `create_figure(*args, subplot_kw=None, **kwargs)`
+  - **class `PlotlyAxes`** (GraphicsAxes)
+    - `__init__(elements=None, xaxis=None, yaxis=None, annotations=None, **opts)`
+    - `clear(*, backend=None)`
+    - `remove(*, backend)`
+    - `prep_elems()`
+    - `prep_annotations()`
+    - `prep_opts()`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_plot_range()`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `get_aspect_ratio()`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `plot(x, y, line=None, type='scatter', mode='lines', **opts)`
+    - `scatter(x, y, line=None, type='scatter', mode='markers', **opts)`
+    - `text(text, x, y, line=None, type='scatter', mode='text', textposition='middle center', color=None, textfont=None, **opts)`
+    - `get_plotter(method, **opts)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `legend(show=True, **opts)`
+    - `get_graphics_properties(obj, property=None)`
+    - `set_graphics_properties(obj, **props)`
+    - `draw_poly(points, **styles)`
+    - `draw_line(points, **styles)`
+    - `draw_path(commands, **styles)`
+    - `draw_disk(points, radius=None, s=None, **styles)`
+    - `draw_rect(points, **styles)`
+    - `annotation(points, **opts)`
+    - `draw_arrow(points, color=None, width=None, size=None, head=None, **styles)`
+    - `draw_text(points, vals, **styles)`
+  - **class `PlotlyFigure`** (GraphicsFigure)
+    - `__init__(axes=None, layout=None, export_format=None, width=500, height=500, figsize=None, id=None, include_save_buttons=False, **opts)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `create_inset(bbox, **kw)`
+    - `create_axes(**kw)`
+    - `construct(**kw)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, facecolor=None, **opts)`
+    - `prep_dict()`
+    - `to_plotly()`
+    - `get_core_body(html)`
+    - `set_plotly_script_id(html, id)`
+    - `configure_mathjax(html, id)`
+    - `postprocess_plotly_html(html)`
+    - `to_html()`
+    - `to_svg()`
+    - `get_export_script(id, format='svg')`
+    - `set_export_format_script(id)`
+    - `get_record_screen_script(id, polling_rate=30, recording_duration=2, video_format='video/webm')`
+    - `set_animation_duration_script(id)`
+    - `to_widget(format=None, autoclose=True)`
+    - `animate_frames(frames, **animation_opts)`
+  - **class `PlotlyBackend`** (GraphicsBackend)
+    - `create_figure(*args, template=None, **kwargs)`
+    - `prep_color(v)`
+    - `remap_property(name, value, context=None)`
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_opts)`
+      - `get_axes_theme()`
+      - `prep_spec()`
+      - `current_theme()`
+    - `show_figure(graphics, reshow=None)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`
+  - **class `PlotlyAxes3D`** (PlotlyAxes)
+    - `__init__(elements=None, *, zaxis=None, **opts)`
+    - `get_zaxis_manager()`
+    - `set_projection_type(proj_type, **kwargs)`
+    - `get_projection_type()`
+    - `get_autoscale()`
+    - `set_autoscale(autoscale)`
+    - `get_box_aspect()`
+    - `set_box_aspect(br, **kwargs)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_plot_range()`
+    - `get_zlabel()`
+    - `set_zlabel(val, **style)`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `get_view_settings()`
+    - `set_view_settings(up=None, eye=None, center=None, vertical_axis=None, up_vector=None, right_vector=None, view_vector=None, view_distance=None, view_matrix=None, view_center=None)`
+    - `plot(x, y, z, line=None, type='scatter3d', **opts)`
+    - `scatter(x, y, z, line=None, type='scatter3d', marker=None, edge_color=None, size=None, line_width=None, **opts)`
+    - `text(text, x, y, z, line=None, type='scatter3d', **opts)`
+    - `mesh(verts, indices=None, type='mesh3d', **opts)`
+    - `draw_poly(points, flatshading=True, **styles)`
+    - `draw_sphere(center, radius, sphere_points=48, rendering='flat', s=None, box_scalings=None, edgecolors=None, edge_color=None, lw=None, edge_width=0.01, glow=None, color='white', default_view_distance='auto', **opts)`
+    - `draw_cylinder(start, end, rad, circle_points=48, rendering='flat', box_scalings=None, edge_color=None, color='black', glow=None, segments=1, segment_overdraw=0, edge_width=0.01, lw=None, color_cycle=False, layer='above', default_view_distance='auto', **opts)`
+    - `draw_disk(centers, radius=None, angle=None, normal=None, uv_axes=None, zdir=None, theta1=None, theta2=None, rendering='flat', box_scalings=None, line_color=None, line_thickness=None, color=None, glow=None, lw=None, **styles)`
+    - `draw_text(points, vals, billboard=True, normal=None, rendering='flat', box_scalings=None, zdir=None, **styles)`
+    - `draw_rect(points, rotation=None, normal=None, **styles)`
+    - `draw_line(points, line_thickness=None, width=None, s=None, edgecolors=None, box_scalings=None, **styles)`
+    - `draw_mesh(points, i=None, j=None, k=None, type='mesh3d', **styles)`
+    - `draw_arrow(points, radius, width=None, arrowhead=None, arrowhead_scaling=1.2, arrowhead_points=None, normal=None, rendering='flat', box_scalings=None, **styles)`
+  - **class `PlotlyFigure3D`** (PlotlyFigure)
+  - **class `PlotlyBackend3D`** (PlotlyBackend)
+    - **class `ThemeContextManager`** (PlotlyBackend.ThemeContextManager)
+      - `get_axes_theme()`
+  - **class `GraphicsRegionAxes`** (GraphicsAxes)
+    - `__init__(figure_region)`
+    - `renormalize(pos, og_reg, final_reg=None)`
+    - `normalize_positions(pos)`
+  - **class `SVGAxes`** (GraphicsAxes)
+    - `__init__(base_fig=None, label_text=None, frame=None, prop_cycle=None)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `prep_show()`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_limit(axis)`
+    - `set_limit(axis, lims)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `set_padding(padding)`
+    - `legend(**opts)`
+    - `get_graphics_properties(obj, property=None)`
+    - `set_graphics_properties(obj, **props)`
+    - `prep_styles(styles)`
+    - `draw_line(points, **styles)`
+    - `draw_point(points, **styles)`
+    - `draw_disk(points, *, radius, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_triangle(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_arrow(points, arrowhead=None, marker=None, **styles)`
+    - `filter_font_options(styles)`
+    - `draw_text(points, vals, use_path=False, **styles)`
+    - `draw_path(commands, use_polyline=False, **styles)`
+  - **class `SVGFigure`** (GraphicsFigure)
+    - `__init__(axes=None, layout=None, figsize=None, flip_y=True, **kwargs)`
+    - `create_axes(rows, cols, spans, **kw)`
+    - `create_inset(bbox, **kw)`
+    - `create_colorbar(graphics, axes, norm=None, cmap=None, **kw)`
+    - `add_axes(ax)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, **opts)`
+    - `animate_frames(frames, **animation_opts)`
+    - `to_html()`
+    - `prep_args(opts)`
+    - `to_svg_figure(**opts)`
+    - `to_svg()`
+    - `to_widget(**opts)`
+    - `get_mime_bundle()`
+  - **class `SVGBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)`
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)`
+    - `show_figure(graphics, reshow=None)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`
+  - **class `SVGAxes3D`** (SVGAxes)
+    - `__init__(base_fig=None, **opts)`
+    - `get_zaxis_manager()`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `set_projection_type(proj_type, **kwargs)`
+    - `get_projection_type()`
+    - `get_autoscale()`
+    - `set_autoscale(autoscale)`
+    - `get_view_settings()`
+    - `set_view_settings(**ops)`
+    - `embedding_matrix(rotation, normal)`
+    - `draw_line(points, **styles)`
+    - `draw_disk(points, *, radius, angle=None, normal=None, uv_axes=None, offset_angle=None, span_angle=None, **styles)`
+    - `draw_rect(points, rotation=None, normal=None, **styles)`
+    - `draw_sphere(points, rads, **styles)`
+    - `draw_cylinder(start, end, rad, **styles)`
+    - `draw_box(start, end, **styles)`
+    - `draw_text(points, vals, projected=False, use_path=False, flip_y=True, **styles)`
+  - **class `SVGFigure3D`** (SVGFigure)
+  - **class `SVGBackend3D`** (SVGBackend)
+  - **class `VTKAxes`** (GraphicsRegionAxes)
+    - `__init__(figure_region, figure)`
+    - `canonicalize_opts(opts)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `draw_line(points, **styles)`
+    - `draw_disk(points, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_arrow(points, **styles)`
+    - `draw_text(points, vals, **styles)`
+    - `draw_sphere(points, rads, **styles)`
+    - `animate_frames(frames, **animation_opts)`
+  - **class `VTKFigure`** (GraphicsFigure)
+    - `__init__(vtk_window, **opts)`
+    - `create_axes(rows, cols, spans, **kw)`
+    - `create_inset(bbox, **kw)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `get_bboxes()`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `savefig(file, **opts)`
+  - **class `VTKBackend`** (GraphicsBackend)
+  - **class `VPythonWrapper`**
+    - `vpythonify(arg)`
+    - `vpython_color(color)`
+  - **class `VPythonCanvasWrapper`** (VPythonWrapper)
+    - `__init__(canvas)`
+    - `remove(*, backend=None)`
+    - `clear(*, backend=None)`
+    - `width()`
+    - `width(width)`
+    - `height()`
+    - `height(height)`
+    - `title()`
+    - `title(title)`
+    - `axis()`
+    - `axis(axis)`
+    - `up()`
+    - `up(up)`
+    - `background()`
+    - `background(background)`
+    - `primitive(name, *args, color=None, **opts)`
+    - `box(left_corner, right_corner, **styles)`
+    - `curve(points, **styles)`
+    - `cylinder(start, end, rad, **styles)`
+    - `arrow(points, **styles)`
+    - `label(pos, text, **styles)`
+    - `sphere(points, rads, **styles)`
+  - **class `VPythonGraphWrapper`** (VPythonWrapper)
+    - `__init__(graph)`
+    - `title()`
+    - `title(title)`
+    - `xtitle()`
+    - `xtitle(xtitle)`
+    - `ytitle()`
+    - `ytitle(ytitle)`
+    - `background()`
+    - `background(background)`
+    - `foreground()`
+    - `foreground(foreground)`
+    - `xmin()`
+    - `xmin(xmin)`
+    - `xmax()`
+    - `xmax(xmax)`
+    - `ymin()`
+    - `ymin(ymin)`
+    - `ymax()`
+    - `ymax(ymax)`
+    - `width()`
+    - `width(width)`
+    - `height()`
+    - `height(height)`
+    - `remove(*, backend=None)`
+    - `clear(*, backend=None)`
+    - `plot(x, y, color=None, marker_color=None, dot_color=None, **styles)`
+    - `scatter(x, y, color=None, marker_color=None, dot_color=None, **styles)`
+    - `vbars(x, y, color=None, marker_color=None, dot_color=None, **styles)`
+    - `hbars(x, y, color=None, marker_color=None, dot_color=None, **styles)`
+  - **class `VPythonAxes`** (GraphicsAxes)
+    - `__init__(graph)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `draw_line(points, **styles)`
+    - `draw_disk(points, color=None, edge_color=None, radius=1, edgecolors=None, s=None, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_arrow(points, color=None, **styles)`
+    - `draw_text(points, vals, color=None, **styles)`
+    - `draw_sphere(points, rads, color=None, **styles)`
+    - `animate_frames(frames, **animation_opts)`
+  - **class `VPythonFigure`** (GraphicsFigure)
+    - `__init__(vpython_graph, **opts)`
+    - `construct(**kw)`
+    - `create_axes(rows=1, cols=1, spans=1, **kw)`
+    - `create_inset(bbox, **kw)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, **opts)`
+  - **class `VPythonBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)`
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)`
+    - `show_figure(graphics, reshow=None)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`
+  - **class `VPythonAxes3D`** (GraphicsAxes3D)
+    - `__init__(canvas)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `draw_line(points, **styles)`
+    - `draw_disk(points, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_arrow(points, **styles)`
+    - `draw_text(points, vals, **styles)`
+    - `draw_sphere(points, rads, **styles)`
+    - `draw_cylinder(start, end, rad, **styles)`
+    - `draw_primitive(name, *args, **kwargs)`
+  - **class `VPythonFigure3D`** (GraphicsFigure)
+    - `__init__(vpython_canvas, **opts)`
+    - `construct(**kw)`
+    - `create_axes(rows=1, cols=1, spans=1, **kw)`
+    - `create_inset(bbox, **kw)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, **opts)`
+  - **class `VPythonBackend3D`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)`
+    - **class `ThemeContextManager`** (VPythonBackend.ThemeContextManager)
+    - `show_figure(graphics, reshow=None)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`
+  - **class `X3DAxes`** (GraphicsAxes3D)
+    - `__init__(*children, title=None, background=None, include_mathjax=None, **opts)`
+    - `canonicalize_opts(opts)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `get_view_settings()`
+    - `set_view_settings(**values)`
+    - `draw_line(points, indices=None, s=None, riffle=True, line_thickness=None, edgecolors=None, color=None, glow=None, line_style=None, dashing=None, connected=True, **styles)`
+    - `draw_path(commands, **styles)`
+    - `draw_disk(points, radius=None, color=None, line_color=None, edgecolors=None, s=None, normal=None, line_thickness=None, innerRadius=None, outerRadius=None, uv_axes=None, uv_sign=None, angle=None, rotation=None, solid=None, **styles)`
+    - `draw_arrow(points, **styles)`
+    - `texture_svg(text, id, font_style=None, resolution=72)`
+    - `mathjax_load_script(text, id, resolution_upscaling=10, font_style=None)`
+    - `draw_text(points, vals, endpoint=None, allow_mathjax=True, line_height=10, char_width=None, char_width_scaling=1 / 30, font_style=None, **styles)`
+    - `prep_uv(uv_axes, normal=None, uv_sign=None, rotation=None, angle=None)`
+    - `draw_rect(points, color=None, line_color=None, edgecolors=None, normal=None, line_thickness=None, innerRadius=None, outerRadius=None, uv_axes=None, uv_sign=None, angle=None, rotation=None, solid=None, cap_style='round', **styles)`
+    - `draw_point(points, color=None, glow=None, **styles)`
+    - `draw_triangle(points, indices=None, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_sphere(centers, rads, **styles)`
+    - `draw_cylinder(starts, ends, rads, capped=False, **styles)`
+    - `draw_box(start, end, **opts)`
+    - `prep_opts()`
+    - `to_x3d()`
+  - **class `X3DFigure`** (GraphicsFigure)
+    - `__init__(width=640, height=500, background='white', figsize=None, profile='Immersive', version='3.3', dynamic_loading=None, include_export_button=None, include_record_button=None, include_view_settings_button=None, recording_options=None, id=None, **opts)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `create_inset(bbox, **kw)`
+    - `create_axes(rows=1, cols=1, spans=1, **kw)`
+    - `construct(**kw)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, format=None, **opts)`
+    - `prep_opts()`
+    - `to_x3d(**opts)`
+    - `to_widget(**opts)`
+    - `to_html()`
+    - `animate_frames(frames, mode=None, **animation_opts)`
+  - **class `X3DBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)`
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)`
+    - `show_figure(graphics, reshow=None)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`
+  - **class `SceneJSONAxes`** (GraphicsAxes3D)
+    - `__init__(*children, title=None, background=None, **opts)`
+    - `canonicalize_opts(opts)`
+    - `remove(*, backend)`
+    - `clear(*, backend)`
+    - `get_plotter(method)`
+    - `get_plot_label()`
+    - `set_plot_label(val, **style)`
+    - `get_style_list()`
+    - `set_style_list(props)`
+    - `get_frame_visible()`
+    - `set_frame_visible(frame_spec)`
+    - `get_frame_style()`
+    - `set_frame_style(frame_spec)`
+    - `get_xlabel()`
+    - `set_xlabel(val, **style)`
+    - `get_ylabel()`
+    - `set_ylabel(val, **style)`
+    - `get_xlim()`
+    - `set_xlim(val, **opts)`
+    - `get_ylim()`
+    - `set_ylim(val, **opts)`
+    - `get_zlim()`
+    - `set_zlim(val, **opts)`
+    - `get_xticks()`
+    - `set_xticks(val, **opts)`
+    - `get_yticks()`
+    - `set_yticks(val, **opts)`
+    - `get_zticks()`
+    - `set_zticks(val, **opts)`
+    - `get_xtick_style()`
+    - `set_xtick_style(**opts)`
+    - `get_ytick_style()`
+    - `set_ytick_style(**opts)`
+    - `get_ztick_style()`
+    - `set_ztick_style(**opts)`
+    - `set_aspect_ratio(ar)`
+    - `get_bbox()`
+    - `set_bbox(bbox)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `get_padding()`
+    - `get_view_settings()`
+    - `set_view_settings(**values)`
+    - `draw_line(points, **styles)`
+    - `draw_disk(points, rads=1, **styles)`
+    - `draw_arrow(points, radius=0.1, **styles)`
+    - `draw_text(points, vals, **styles)`
+    - `draw_rect(points, **styles)`
+    - `draw_poly(points, **styles)`
+    - `draw_sphere(centers, rads, **styles)`
+    - `draw_cylinder(starts, ends, rads, **styles)`
+    - `to_json()`
+  - **class `SceneJSONFigure`** (GraphicsFigure)
+    - `__init__(width=640, height=500, background='white', figsize=None, profile='Immersive', version='3.3', id=None, **opts)`
+    - `clear(*, backend)`
+    - `close(*, backend)`
+    - `create_inset(bbox, **kw)`
+    - `create_axes(rows=1, cols=1, spans=1, **kw)`
+    - `construct(**kw)`
+    - `get_size_inches()`
+    - `set_size_inches(w, h)`
+    - `set_extents(extents)`
+    - `get_facecolor()`
+    - `set_facecolor(fg)`
+    - `savefig(file, format=None, **opts)`
+    - `to_json(**opts)`
+    - `animate_frames(frames, **animation_opts)`
+  - **class `SceneJSONBackend`** (GraphicsBackend)
+    - `create_figure(*args, **kwargs)`
+    - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
+      - `canonicalize_theme_opts(theme_parents, theme_spec)`
+    - `show_figure(graphics, reshow=None)`
+    - `get_interactive_status()`
+    - `disable_interactivity()`
+    - `enable_interactivity()`
+    - `get_available_themes()`

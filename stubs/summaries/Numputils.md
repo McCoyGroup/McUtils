@@ -1,0 +1,865 @@
+### `CoordOps.py`
+- `normalized_vec_deriv(v, dv)` — Derivative of a normalized vector w/r/t some unspecified coordinate
+- `normalized_vec_deriv2(v, dv1, dv2, d2v)` — Second derivative of a normalized vector w/r/t some unspecified coordinates
+- `rot_deriv(angle, axis, dAngle, dAxis)` — Gives a rotational derivative w/r/t some unspecified coordinate
+- `rot_deriv2(angle, axis, dAngle1, dAxis1, dAngle2, dAxis2, d2Angle, d2Axis)` — Gives a rotation matrix second derivative w/r/t some unspecified coordinate
+  - **class `_dumb_comps_wrapper`**
+    > Exists solely to prevent numpy from unpacking
+    - `__init__(comp)`
+- `cartesian_from_rad_derivatives(xa, xb, xc, r, a, d, i, ia, ib, ic, derivs, order=2, return_comps=False)` — Returns derivatives of the generated Cartesian coordinates with respect
+- `vec_norm_derivs(a, order=1, zero_thresh=None)` — Derivative of the norm of `a` with respect to its components
+- `vec_sin_cos_derivs(a, b, order=1, up_vectors=None, check_derivatives=False, zero_thresh=None)` — Derivative of `sin(a, b)` and `cos(a, b)` with respect to both vector components
+- `coord_deriv_mat(nats, coords, axes=None, base_shape=None)` — Build the `(3N, 3N)` selection matrix that has `1`s on the diagonal for the
+- `jacobian_mat_inds(ind_lists, axes=None)` — Construct the fancy-index tuples used to scatter per-atom displacement values
+- `jacobian_proj_inds(ind_lists, axes=None)` — Like `jacobian_mat_inds`, but for a *projected* (reduced-atom-block) Jacobian.
+- `fill_disp_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None)` — Scatter a set of `(atom_indices, value)` pairs into a displacement Jacobian,
+- `fill_proj_jacob_atom(mat, ind_val_pairs, base_shape=None, axes=None)` — Scatter `(atom_indices, block_index, value)` triples into a *projected*
+- `disp_deriv_mat(coords, i, j, at_list, axes=None)` — Build the derivative (Jacobian) of the displacement vector between atoms `i`
+- `prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True)` — Prepare the derivative expansion of the displacement vector `coords[j] -
+- `prep_expanded_mats_from_cache(expansion, i, j, at_list, root_dim=1, core_dim=0)` — Re-embed a cached derivative expansion that was computed on the minimal atom
+- `prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order, expand, fixed_atoms)` — Prepare the derivative expansion of the *normalized* displacement vector
+- `vec_angle_derivs(a, b, order=1, up_vectors=None, zero_thresh=None, return_comps=False)` — Returns the derivatives of the angle between `a` and `b` with respect to their components
+- `dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, cache=None, expanded_vectors=None, reproject=True, zero_thresh=None)` — Gives the derivative of the distance between i and j with respect to coords i and coords j
+- `angle_deriv(coords, i, j, k, *, order=1, method='expansion', cache=None, up_vector=None, l=None, angle_ordering='jik', fixed_atoms=None, expanded_vectors=None, reproject=True, zero_thresh=None)` — Gives the derivative of the angle between i, j, and k with respect to the Cartesians
+- `normal_deriv(coords, i, j, k, *, order=1, method='expansion', cache=None, up_vector=None, l=None, angle_ordering='jik', fixed_atoms=None, expanded_vectors=None, reproject=True, normalize=True)` — Gives the derivative of the angle between i, j, and k with respect to the Cartesians
+- `rock_deriv(coords, i, j, k, /, order=1, method='expansion', angle_ordering='ijk', cache=None, reproject=True, zero_thresh=None, fixed_atoms=None, expanded_vectors=None)` — Gives the derivative of the rocking motion (symmetric bend basically)
+- `dihed_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion', fixed_atoms=None, cache=None, reproject=True, expanded_vectors=None)` — Gives the derivative of the dihedral between i, j, k, and l with respect to the Cartesians
+- `book_deriv(coords, i, j, k, l, /, order=1, zero_thresh=None, method='expansion', fixed_atoms=None, cache=None, reproject=True, expanded_vectors=None)` — Analytic derivative expansion of a *book* angle (the angle between the two
+- `wag_deriv(coords, i, j, k, l=None, *, order=1, method='expansion', cache=None, reproject=True, fixed_atoms=None, expanded_vectors=None)` — Analytic derivative expansion of a *wag* coordinate for the `i`-`j`-`k` group
+- `plane_angle_deriv(coords, i, j, k, l, m, n, /, order=1, method='expansion', fixed_atoms=None, cache=None, reproject=True, expanded_vectors=None)` — Analytic derivative expansion of the angle between the plane defined by atoms
+- `oop_deriv(coords, i, j, k, l=None, *, order=1, method='expansion', fixed_atoms=None, cache=None, reproject=True, expanded_vectors=None)` — Analytic derivative expansion of an *out-of-plane* coordinate for the
+- `transrot_deriv(coords, *pos, order=1, masses=None, return_rot=True, return_frame=False, cache=None, reproject=True, axes=None, fixed_atoms=None)` — Derivative expansion of the translation (center of mass) and, optionally,
+- `com_dist_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, cache=None, reproject=True, fixed_atoms=None)` — Derivative expansion of the distance between the centers of mass of two atom
+- `moment_of_inertia_expansion_deriv(coords, *pos, order=1, masses=None, cache=None, reproject=True, fixed_atoms=None)` — Derivative expansion of the moments of inertia (eigenvalues) and principal
+- `orientation_deriv(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None, cache=None, reproject=True, return_frame=False, return_rot=True)` — Derivative expansion of the relative orientation coordinate between two atom
+- `dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None)` — Returns the full vectors that define the linearized version of a bond displacement
+- `angle_vec(coords, i, j, k, order=None, up_vector=None, l=None, method='expansion', angle_ordering='ijk', cache=None, reproject=True, fixed_atoms=None)` — Returns the full vectors that define the linearized version of an angle displacement
+- `rock_vec(coords, i, j, k, order=None, method='expansion', cache=None, reproject=True, angle_ordering='ijk', fixed_atoms=None)` — Returns the full vectors that define the linearized version of an angle displacement
+- `dihed_vec(coords, i, j, k, l, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None)` — Returns the full vectors that define the linearized version of a dihedral displacement
+- `book_vec(coords, i, j, k, l, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None)` — Returns the full vectors that define the linearized version of a dihedral displacement
+- `oop_vec(coords, i, j, k, l=None, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None)` — Returns the full vectors that define the linearized version of an oop displacement
+- `wag_vec(coords, i, j, k, l=None, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None)` — Returns the full vectors that define the linearized version of an oop displacement
+- `plane_angle_vec(coords, i, j, k, l, m, n, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None)` — Convenience wrapper returning the plane-angle derivative(s) as bare vectors.
+- `transrot_vecs(coords, *pos, order=None, masses=None, return_rot=True, cache=None, reproject=True, fixed_atoms=None)` — Convenience wrapper returning the translation/rotation derivative(s) as bare
+- `orientation_vecs(coords, frame_pos_1, frame_pos_2, *, order=None, masses=None, cache=None, reproject=True, fixed_atoms=None, return_rot=True)` — Convenience wrapper returning the orientation-coordinate derivative(s) as bare
+- `internal_conversion_specs(specs, angle_ordering='ijk', coord_type_dispatch=None, **opts)` — Normalize a list of coordinate specifications into `(function, indices,
+- `combine_coordinate_deriv_expansions(expansions, order=None, base_dim=0, base_transformation=None, reference_internals=None)` — Concatenate the per-coordinate derivative expansions into a single stacked
+- `internal_conversion_function(specs, base_transformation=None, reference_internals=None, use_cache=True, reproject=False, **opts)` — Build a reusable Cartesian-to-internal conversion function from a set of
+- `internal_coordinate_tensors(coords, specs, order=None, return_inverse=False, masses=None, fixed_atoms=None, fixed_cartesians=None, fixed_coords=None, remove_inverse_translation_rotation=True, **opts)` — Compute the internal coordinates for a geometry together with their forward
+- `prep_internal_derivatives(expansion, fixed_atoms=None, fixed_coords=None, fixed_cartesians=None)` — Zero out the requested constraints in a *forward* (internals-by-Cartesians)
+- `prep_inverse_derivatives(expansion, fixed_atoms=None, fixed_coords=None, fixed_cartesians=None)` — Zero out the requested constraints in an *inverse* (Cartesians-by-internals)
+- `inverse_internal_coordinate_tensors(expansion, coords=None, masses=None, order=None, mass_weighted=True, remove_translation_rotation=True, fixed_atoms=None, fixed_coords=None, fixed_cartesians=None)` — Invert a forward internals-by-Cartesians derivative expansion to obtain the
+- `rotation_expansion_from_axis_angle(coords, axis, order=1, *, angle=0.0, axis_order=0)` — Build the derivative expansion of coordinates rotated about a given axis, taken
+- `dist_expansion(coords, i, j, order=1, left_atoms=None, right_atoms=None, *, include_core=True, amount=0)` — Build the finite-displacement expansion of the coordinates associated with
+- `angle_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, include_core=True, angle=0, axis_order=0)` — Build the finite-rotation expansion of the coordinates associated with opening
+- `dihed_expansion(coords, i, j, k, l, order=1, left_atoms=None, right_atoms=None, *, include_core=True, angle=0, axis_order=0)` — Build the finite-rotation expansion of the coordinates associated with twisting
+- `oop_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, include_core=True, angle=0, axis_order=0)` — Build the finite-rotation expansion of the coordinates associated with an
+- `wag_expansion(coords, i, j, k, order=1, left_atoms=None, right_atoms=None, *, include_core=True, angle=0, axis_order=0)` — Build the finite-rotation expansion of the coordinates associated with a wag of
+- `transrot_expansion(coords, *pos, order=1, shift=None, rotation=None, masses=None, axes=None, extra_atoms=None, return_rot=True, return_frame=False)` — Build the finite-displacement expansion of the coordinates associated with
+- `orientation_expansion(coords, frame_pos_1, frame_pos_2, *, order=1, masses=None, fixed_atoms=None, cache=None, reproject=True, return_frame=False, left_extra_atoms=None, right_extra_atoms=None, shift=None, rotation=None, return_rot=True)` — Build the finite-displacement expansion of the relative orientation coordinate
+- `combine_coordinate_inverse_expansions(expansions, order=None, base_dim=None, base_transformation=None)` — Concatenate the per-coordinate *inverse* (Cartesians-by-internals) expansions
+  - **class `_inverse_coordinate_conversion_caller`**
+    - `__init__(conversion, target_internals, remove_translation_rotation=True, masses=None, order=1, gradient_function=None, gradient_scaling=None, fixed_atoms=None, fixed_coords=None)`
+    - `func(coords, mask)` — Objective function for the solve: the (summed) residual between the current
+    - `jacobian(coords, mask)` — Newton-style update direction for the solve: the internal-coordinate residual
+- `inverse_coordinate_solve(specs, target_internals, initial_cartesians, masses=None, remove_translation_rotation=True, order=None, solver_order=None, tol=0.001, max_iterations=15, max_displacement=0.5, gradient_function=None, gradient_scaling=0.1, method='gradient-descent', optimizer_parameters=None, line_search=False, damping_parameter=None, damping_exponent=None, restart_interval=None, raise_on_failure=False, return_internals=True, return_expansions=True, base_transformation=None, reference_internals=None, fixed_atoms=None, fixed_coords=None, angle_ordering='ijk')` — Solve for the Cartesian geometry that reproduces a target set of internal
+- `coordinate_projection_data(basis_mat, fixed_mat, inds, nonzero_cutoff=1e-08, masses=None, coords=None, project_transrot=False)` — Build the basis / complementary-basis / selection data used to project a set of
+- `dist_basis_mat(coords, i, j)` — Build the (unnormalized) coordinate basis matrix for a distance coordinate
+- `dist_basis(coords, i, j, **opts)` — Return the projection data for a distance coordinate between atoms `i` and `j`.
+- `fixed_angle_basis(coords, i, j, k)` — Build the fixed coordinate basis matrix for a bend coordinate on atoms `i`,
+- `angle_basis(coords, i, j, k, angle_ordering='ijk', **opts)` — Return the projection data for a bend coordinate on atoms `i`, `j`, `k`.
+- `fixed_dihed_basis(coords, i, j, k, l)` — Build the fixed coordinate basis matrix for a dihedral coordinate on atoms
+- `dihed_basis(coords, i, j, k, l, **opts)` — Return the projection data for a dihedral coordinate on atoms `i`, `j`, `k`,
+- `internal_basis_specs(specs, angle_ordering='ijk', **opts)` — Normalize coordinate specifications for *basis* construction.
+- `internal_basis(coords, specs, **opts)` — Build the internal-coordinate bases for a geometry from a set of coordinate
+- `metric_tensor(internals_by_cartesians, masses=None)` — Compute the internal-coordinate metric (Wilson G-style) tensor from an
+- `delocalized_internal_coordinate_transformation(internals_by_cartesians, untransformed_coordinates=None, masses=None, relocalize=False)` — Construct a set of delocalized (non-redundant) internal coordinates from a
+- `relocalize_coordinate_transformation(redund_tf, untransformed_coordinates=None)` — Rotate a redundant/delocalized coordinate transformation so that it aligns as
+- `transform_cartesian_derivatives(derivs, tfs, axes=None)` — Apply a Cartesian coordinate transformation to a set of Cartesian derivative
+
+### `CoordinateFrames.py`
+- `center_of_mass(coords, masses=None)` — Gets the center of mass for the coordinates
+- `inertia_tensors(coords, masses=None, mass_weighted=False, return_com=False)` — Computes the moment of intertia tensors for the walkers with coordinates coords (assumes all have t…
+- `inertial_frame_derivatives(coords, masses=None, sel=None, mass_weighted=True)` — Compute the first and second derivatives of the moment-of-inertia tensor with
+- `moments_of_inertia(coords, masses=None, force_rotation=True, return_com=False)` — Computes the moment of inertia tensor for the walkers with coordinates coords (assumes all have the…
+- `moments_of_inertia_expansion(coords, masses=None, order=1, force_rotation=True, mass_weighted=True)` — Compute the derivative expansion of the moments of inertia (eigenvalues) and
+- `translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True, ref=None, ref_masses=None, axes=None, align_with_frame=True, return_values=False, return_com=False, return_rot=True, return_principle_axes=False)` — Returns the eigenvectors corresponding to translations and rotations
+- `frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False)` — Build the projector that removes a set of frame (translation/rotation) modes
+- `translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False, orthonormal=True)` — Build the projector that removes overall translation and rotation from a
+- `remove_translation_rotations(expansion, coords, masses=None, mass_weighted=False)` — Apply the translation/rotation projector to every tensor in a derivative
+- `translation_rotation_invariant_transformation(coords, masses=None, mass_weighted=True, strip_embedding=True)` — Construct the transformation (and its inverse) into the space of internal,
+- `principle_axis_embedded_coords(coords, masses=None, sel=None)` — Returns coordinate embedded in the principle axis frame
+- `eckart_embedding(ref, coords, masses=None, sel=None, in_paf=False, planar_ref_tolerance=1e-06, proper_rotation=False, permutable_groups=None, reset_com=True, transform_coordinates=True)` — Compute the Eckart embedding that rotates a set of coordinates into maximal
+- `eckart_permutation(ref, coords, masses=None, sel=None, in_paf=False, prealign=False, planar_ref_tolerance=1e-06, proper_rotation=False, permutable_groups=None)` — Find, for each structure, the atom permutation that best matches a reference
+- `eckart_displacement_coords(coords, ref, masses=None, **embedding_parameters)` — Express Eckart-embedded coordinates in the reference's translation/rotation-
+- `eckart_rmsd(coords, ref, masses=None, embed=True, comparison_sel=None, embedding_sel=None, mass_weighted=False, return_diffs=False, averaged=False, total=False, **embedding_parameters)` — Compute the RMSD between a set of coordinates and a reference after Eckart
+- `incremental_eckart_rmsd(coords, refs=None, masses=None, mass_weighted=False, **embedding_parameters)` — Compute the cumulative Eckart RMSD along a sequence of geometries.
+
+### `EulerSystem.py` — Implements calculation of Euler angles, Euler matrices, etc
+- `zyz_mat(c, s)`
+- `zyz_angles(basis)`
+- `xyz_mat(c, s)`
+- `xyz_angles(basis)`
+- `xzy_mat(c, s)`
+- `xzy_angles(basis)`
+- `zyx_mat(c, s)`
+- `zyx_angles(basis)`
+- `euler_matrix(angles, ordering='xyz')` — Returns the Euler matrix for the specified angles
+- `euler_angles(basis, ordering='xyz')` — Calculates the Euler angles for the basis
+
+### `Geometry.py`
+- `law_of_cosines_cos(a, b, c)`
+- `law_of_sines_sin(a, b, A)`
+- `law_of_sines_dist(a, B, A)`
+- `law_of_cosines_dist(a, b, C)`
+- `tri_sss_area(a, b, c)`
+- `tri_sas_area(a, C, b)`
+- `tri_sss_to_sas(a, b, c)`
+- `tri_sss_to_ssa(a, b, c)`
+- `tri_sss_to_saa(a, b, c)`
+- `tri_sss_to_asa(a, b, c)`
+- `tri_sas_to_sss(a, C, b)`
+- `tri_sas_to_ssa(a, C, b)`
+- `tri_sas_to_saa(a, C, b)`
+- `tri_sas_to_asa(a, C, b)`
+  - **class `SSAWarning`** (UserWarning)
+- `tri_ssa_to_sas(a, b, A)`
+- `tri_ssa_to_saa(a, b, A)`
+- `tri_ssa_to_asa(a, b, A)`
+- `tri_ssa_to_sss(a, b, A)`
+- `tri_saa_to_ssa(a, B, A)`
+- `tri_saa_to_sas(a, B, A)`
+- `tri_saa_to_asa(a, B, A)`
+- `tri_saa_to_sss(a, B, A)`
+- `tri_asa_to_saa(C, a, B)`
+- `tri_asa_to_sas(C, a, B)`
+- `tri_asa_to_ssa(C, a, B)`
+- `tri_asa_to_sss(C, a, B)`
+- `law_of_cosines_cos_deriv(a_expansion, b_expansion, c_expansion, order, return_components=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, abinv_expansion=None, ab_expansion=None)`
+- `power_deriv(term, p, order)`
+- `square_deriv(term, order)`
+- `sqrt_deriv(term, order)`
+- `cos_deriv(term, order)`
+- `sin_deriv(term, order)`
+- `legendre_scaling(n)`
+- `legendre_integer_coefficients(n)`
+- `arcsin_deriv(term, order)`
+- `arccos_deriv(term, order)`
+- `tan_integer_coefficients(n)`
+- `tan_deriv(term, order)`
+- `cot_deriv(term, order)`
+- `arctan_deriv(term, order)`
+- `law_of_cosines_dist_deriv(a_expansion, b_expansion, C_expansion, order, return_components=False, a2_expansion=None, b2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, return_square=False)`
+- `law_of_sines_sin_deriv(a_expansion, b_expansion, A_expansion, order, return_components=False, sinA_expansion=None, binva_expansion=None, ainv_expansion=None)`
+- `law_of_sines_dist_deriv(a_expansion, B_expansion, A_expansion, order, return_components=False, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None)`
+- `tri_sss_to_sas_deriv(a_expansion, b_expansion, c_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, abinv_expansion=None, ab_expansion=None, cosC_expansion=None)`
+- `tri_sss_to_ssa_deriv(a_expansion, b_expansion, c_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, bcinv_expansion=None, bc_expansion=None, cosA_expansion=None)`
+- `tri_sss_to_saa_deriv(a_expansion, b_expansion, c_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, acinv_expansion=None, ac_expansion=None, bcinv_expansion=None, bc_expansion=None, cosA_expansion=None, cosB_expansion=None)`
+- `tri_sss_to_asa_deriv(a_expansion, b_expansion, c_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, abinv_expansion=None, ab_expansion=None, acinv_expansion=None, ac_expansion=None, cosB_expansion=None, cosC_expansion=None)`
+- `tri_sas_to_sss_deriv(a_expansion, C_expansion, b_expansion, order, return_components=False, a2_expansion=None, b2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, return_square=False)`
+- `tri_sas_to_ssa_deriv(a_expansion, b_expansion, C_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, bcinv_expansion=None, bc_expansion=None, cosA_expansion=None)`
+- `tri_sas_to_saa_deriv(a_expansion, b_expansion, C_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, acinv_expansion=None, ac_expansion=None, bcinv_expansion=None, bc_expansion=None, cosA_expansion=None, cosB_expansion=None)`
+- `tri_sas_to_asa_deriv(a_expansion, b_expansion, C_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, abinv_expansion=None, acinv_expansion=None, ac_expansion=None, cosB_expansion=None)`
+- `tri_ssa_to_sas_deriv(a_expansion, b_expansion, A_expansion, order, return_components=False, sinA_expansion=None, binva_expansion=None, ainv_expansion=None, B_expansion=None, sinB_expansion=None)`
+- `tri_ssa_to_saa_deriv(a_expansion, b_expansion, A_expansion, order, return_components=False, sinA_expansion=None, binva_expansion=None, ainv_expansion=None, B_expansion=None, sinB_expansion=None)`
+- `tri_ssa_to_asa_deriv(a_expansion, b_expansion, A_expansion, order, return_components=False, sinA_expansion=None, binva_expansion=None, ainv_expansion=None, B_expansion=None, sinB_expansion=None)`
+- `tri_ssa_to_sss_deriv(a_expansion, b_expansion, A_expansion, order, return_components=False, sinA_expansion=None, binva_expansion=None, ainv_expansion=None, B_expansion=None, sinB_expansion=None, a2_expansion=None, b2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None)`
+- `tri_saa_to_ssa_deriv(a_expansion, B_expansion, A_expansion, order, return_components=False, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None)`
+- `tri_saa_to_sas_deriv(a_expansion, B_expansion, A_expansion, order, return_components=False, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None)`
+- `tri_saa_to_asa_deriv(a_expansion, B_expansion, A_expansion, order)`
+- `tri_saa_to_sss_deriv(a_expansion, B_expansion, A_expansion, order, return_components=False, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None, a2_expansion=None, b2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, return_square=False)`
+- `tri_asa_to_saa_deriv(C_expansion, a_expansion, B_expansion, order)`
+- `tri_asa_to_sas_deriv(C_expansion, a_expansion, B_expansion, order, return_components=False, A_expansion=None, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None)`
+- `tri_asa_to_ssa_deriv(C_expansion, a_expansion, B_expansion, order, return_components=False, A_expansion=None, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None)`
+- `tri_asa_to_sss_deriv(C_expansion, a_expansion, B_expansion, order, return_components=False, A_expansion=None, sinBinvsinA_expansion=None, sinA_expansion=None, sinB_expansion=None, sinAinv_expansion=None, a2_expansion=None, b2_expansion=None, abcosC_expansion=None, ab_expansion=None, cosC_expansion=None, return_square=False)`
+  - **class `TriangleType`** (enum.Enum)
+- `triangle_converter(type1, type2)`
+- `triangle_convert(tri_spec, type1, type2, order=None, **kwargs)`
+- `triangle_area(tri_spec, type)`
+- `triangle_property_specifiers(base_specifier=None)`
+- `make_triangle(points=None, *, a=None, b=None, c=None, A=None, B=None, C=None)`
+- `make_symbolic_triangle(triangle=None, indices=None, positions=False, a=None, b=None, c=None, A=None, B=None, C=None)`
+- `triangle_is_complete(tri)`
+- `enumerate_triangle_completions(tdata)`
+- `triangle_modify(tdata, updates)`
+- `triangle_property(tdata, field_name, allow_completion=True)`
+- `triangle_completions_c(a, b, A, B, C, cache=None)`
+- `triangle_completions_C(a, b, c, A, B, cache=None)`
+  - **class `TriangleCoordinateType`** (enum.Enum)
+- `triangle_completions_trie(tdata, field_name, return_args=False, cache=None)`
+- `triangle_completions(field_name, return_trie=False, return_args=False, **triangle_values)`
+- `triangle_completion_paths(tdata, field_name, return_trie=False, indices=None, positions=False, return_args=False)`
+- `triangle_property_function(sample_tri, field_name, raise_on_missing=True)`
+- `dihedral_z_from_abcXYt(a, b, c, X, Y, tau, use_cos=False)` — a^2 + b^2 + c^2 - 2 (
+- `dihedral_z_from_abcXYt_deriv(a_expansion, b_expansion, c_expansion, X_expansion, Y_expansion, tau_expansion, order, return_components=False, return_square=False, cos_X_expansion=None, cos_Y_expansion=None, sin_X_expansion=None, sin_Y_expansion=None, cos_tau_expansion=None, a2_expansion=None, b2_expansion=None, c2_expansion=None, ab_cos_X_expansion=None, ab_expansion=None, bc_cos_Y_expansion=None, bc_expansion=None, ac_expansion=None, cos_X_cos_Y_expansion=None, sin_X_sin_Y_expansion=None)`
+- `dihedral_z_from_abcxYt(a, b, c, x, Y, tau, use_cos=False)`
+- `dihedral_z_from_abcxYt_deriv(a_expansion, b_expansion, c_expansion, x_expansion, Y_expansion, tau_expansion, order, return_components=False, return_square=False, cos_X_expansion=None, cos_Y_expansion=None, sin_X_expansion=None, sin_Y_expansion=None, cos_tau_expansion=None, a2_expansion=None, b2_expansion=None, c2_expansion=None, x2_expansion=None, ab_expansion=None, bc_cos_Y_expansion=None, bc_expansion=None, ac_expansion=None, cos_X_cos_Y_expansion=None, sin_X_sin_Y_expansion=None)`
+- `dihedral_z_from_abcxyt(a, b, c, x, y, tau, use_cos=False)`
+- `dihedral_z_from_abcxyt_deriv(a_expansion, b_expansion, c_expansion, x_expansion, y_expansion, tau_expansion, order, return_components=False, return_square=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, x2_expansion=None, y2_expansion=None, cos_tau_expansion=None, abplus_expansion=None, abminus_expansion=None, bcplus_expansion=None, bcminus_expansion=None, det_expansion=None)`
+- `dihedral_from_abcXYz(a, b, c, X, Y, r, use_cos=False)`
+- `dihedral_from_abcXYz_deriv(a_expansion, b_expansion, c_expansion, X_expansion, Y_expansion, r_expansion, order, return_components=False, return_cos=False, cos_X_expansion=None, cos_Y_expansion=None, sin_X_expansion=None, sin_Y_expansion=None, a2_expansion=None, b2_expansion=None, c2_expansion=None, r2_expansion=None, ab_cos_X_expansion=None, ab_expansion=None, bc_cos_Y_expansion=None, bc_expansion=None, ac_expansion=None, cos_X_cos_Y_expansion=None, sin_X_sin_Y_expansion=None)`
+- `dihedral_from_abcxYz(a, b, c, x, Y, r, use_cos=False)`
+- `dihedral_from_abcxYz_deriv(a_expansion, b_expansion, c_expansion, x_expansion, Y_expansion, r_expansion, order, return_components=False, return_cos=False, cos_X_expansion=None, cos_Y_expansion=None, sin_X_expansion=None, sin_Y_expansion=None, a2_expansion=None, b2_expansion=None, c2_expansion=None, x2_expansion=None, r2_expansion=None, ab_expansion=None, bc_cos_Y_expansion=None, bc_expansion=None, ac_expansion=None, cos_X_cos_Y_expansion=None, sin_X_sin_Y_expansion=None)`
+- `dihedral_from_abcxyz(a, b, c, x, y, r, use_cos=False)`
+- `dihedral_from_abcxyz_deriv(a_expansion, b_expansion, c_expansion, x_expansion, y_expansion, r_expansion, order, return_components=False, return_cos=False, a2_expansion=None, b2_expansion=None, c2_expansion=None, x2_expansion=None, y2_expansion=None, r2_expansion=None, abplus_expansion=None, abminus_expansion=None, bcplus_expansion=None, bcminus_expansion=None, det_expansion=None)`
+- `dihedral_from_XZC(X, Z, C, use_cos=False)` — cos of dihedral with three angles defining a pyramid,
+- `dihedral_Z_from_XtC(X, t, C, use_cos=False)`
+- `dihedral_Ta_from_abcXYt(a, b, c, X, Y, t)` — ArcTan[b Sin[X]-c (Cos[Y] Sin[X]+Cos[Tb] Cos[X] Sin[Y]),-c Sin[Tb] Sin[Y]]
+- `dihedral_z_from_ayXCt(a, y, X, C, t, use_cos=False, return_square=False)`
+- `dihedral_z_from_bAXYCt(b, A, X, Y, C, t, use_cos=False, return_square=False)`
+- `dihedral_from_ayXCz(a, y, X, C, z, use_cos=False)`
+- `dihedral_from_bAXYCz(b, A, X, Y, C, z, use_cos=False)`
+- `composed_dihedral(d_ijka, d_ijkb)`
+  - **class `DihedralSpecifierType`** (enum.Enum)
+- `dihedral_distance_converter(dihedral_type)`
+- `dihedral_distance(spec, dihedral_type, order=None, use_cos=False, **deriv_kwargs)`
+- `dihedral_from_distance_converter(dihedral_type)`
+- `dihedral_from_distance(spec, dihedral_type, order=None, use_cos=False, **deriv_kwargs)`
+- `dihedron_property_specifiers(base_specifier=None, use_cache=True)`
+- `make_dihedron(points=None, *, a=None, b=None, c=None, x=None, y=None, z=None, X=None, Y=None, A=None, B1=None, B2=None, C=None, Z=None, Z2=None, A3=None, Y3=None, C4=None, X4=None, Ta=None, Tb=None, Tc=None, Tx=None, Ty=None, Tz=None)`
+- `make_symbolic_dihedron(indices=None, positions=False, a=None, b=None, c=None, x=None, y=None, z=None, X=None, Y=None, A=None, B1=None, B2=None, C=None, Z=None, Z2=None, A3=None, Y3=None, C4=None, X4=None, Ta=None, Tb=None, Tc=None, Tx=None, Ty=None, Tz=None)`
+- `dihedron_triangle_1(dd)`
+- `dihedron_triangle_2(dd)`
+- `dihedron_triangle_3(dd)`
+- `dihedron_triangle_4(dd)`
+- `dihedron_triangle(dd, i)`
+- `dihedron_modify(dd, updates)`
+- `dihedron_property(ddata, field_name, allow_completion=True)`
+- `dihedral_Tb_completions_trie(b, a, x, y, c, A, X, Y, C, z, Z, Z2, A3, Y3, Ta, Tx, C4, X4, Tc, Ty, cache=None)` — args = [dd.b, dd.a, dd.x, dd.y, dd.c, dd.A, dd.X, dd.Y, dd.C, dd.z, dd.Z, dd.Z2]
+- `dihedral_b_completions_trie(a, x, A, X, B1, y, c, Y, C, B2, z, Y3, C4, A3, X4, Tz, cache=None)`
+- `dihedral_Z_completions_trie(X, C, Tb, z, a, y, A3, Y3, cache=None)`
+  - **class `DihedronCoordinateType`** (enum.Enum)
+- `dihedral_completions_trie(dd, field_name, return_args=True, cache=None)`
+- `dihedral_completions(field_name, return_trie=False, return_args=False, cache=None, **dihedron_values)`
+- `dihedral_completion_paths(dd, field_name, return_trie=False, indices=None, positions=False, return_args=False, cache=None)`
+- `dihedron_is_complete(dd)`
+- `enumerate_dihedron_completions(dd, priortize_dihedrals=True)`
+- `sorted_dihedron_completions(sample_dihed, field_name, *, conversion_specs=None, trie_expansions=None, cache=None)`
+- `dihedron_property_function(sample_dihed, field_name, disallowed_conversions=None, allow_completion=True, raise_on_missing=True, return_depth=False, completion_handler=None, allow_ambiguous_completions=False, depth=0, verbose=False, cache=None)`
+- `dihedron_pair_dihedral_angle_function(inds1, dihed1, inds2, dihed2, raise_on_missing=True, cache=None, allow_completion=False)`
+- `axis_rot_gen_deriv(angle, axis, angle_order, axis_order=0, moments_of_inertia=None, normalized=False)`
+- `angle_arc_parameters(u, v, normal=None, up_vector=(0, 0, 1))`
+- `arc_points(center, radius, offset_angle, span_angle, normal=None, angular_density=None, npoints=None, minor_radius=None)`
+- `arc_center_from_endpoints(start, end, rotation=None, normal=None, radius=None, check_radius=True, use_major_rotation=None, clockwise=None, return_angles=False)`
+- `arc_angles_from_endpoints(centers, starts, ends, rotation=None, uv_axes=None, use_major_rotation=None, clockwise=None)`
+- `arc_points_from_endpoints(start, end, rotation=None, normal=None, radius=None, check_radius=True, use_major_rotation=None, clockwise=None, return_arc=False, npoints=None, angular_density=None)`
+- `bezier_coeffs(n, t)`
+- `refine_curve(point_generator, t, *, max_arc_len, vals=None, max_subdivisions=3, sort_subdivisions=True)`
+- `parametric_curve_evaluate(evaluators_1d, t, return_points=False, max_arc_len=None, max_subdivisions=3, sort_subdivisions=True)`
+- `parametric_curvature(first_derivs_1d, second_derivs_1d, t, zero_thresh=1e-08)`
+- `bezier_eval(control_points, t, max_arc_len=None, max_subdivisions=3, return_points=None, sort_subdivisions=True, order=None)`
+- `bezier_solve(control_points)`
+- `bezier_curvature(control_points, t, **opts)`
+- `parameteric_spline_interpolate(knots, spacings='cumulative', **spline_kwargs)`
+- `parameteric_interpolation_curvature(interpolations, t, **opts)`
+- `polygon_normal(vertices, normalize=True)`
+- `winding_sign(u, v, axis1=0, axis2=1, return_component=False, zero_threshold=1e-08)`
+- `winding_number(points, polygon, axis1=0, axis2=1, zero_threshold=None)`
+- `point_in_triangle(p, a, b, c, diffs=None, windings=None, **winding_args)`
+- `is_polygon_ear(plane_points, indices, i, j, k, diffs=None, windings=None)`
+- `ear_clipping_triangulation(plane_points, indices, diffs=None, windings=None)`
+- `triangulate_polygon(vertices)`
+  - **class `PathElement`**
+    - `__init__(relative=False)`
+    - `resolve(element, *args, **opts)`
+    - `register(name, element=None, *, aliases=None)`
+    - `to_points(*, reference=None, start=None, samples=None, **ignored)`
+  - **class `LineElement`** (PathElement)
+    - `__init__(*points, accumulate=True, **kwargs)`
+    - `to_points(*, base_points=None, reference=None, start=None, samples=None, **ignored)`
+  - **class `OffsetLineElement`** (LineElement)
+    - `__init__(offsets, directions, **kwargs)`
+    - `prep_directions(dirs, ref=None)`
+    - `to_points(*, reference=None, start=None, samples=None)`
+  - **class `HorizontalLine`** (OffsetLineElement)
+    - `__init__(*ys, **kwargs)`
+  - **class `VerticalLine`** (OffsetLineElement)
+    - `__init__(*ys, **kwargs)`
+  - **class `DepthLine`** (OffsetLineElement)
+    - `__init__(*ys, **kwargs)`
+  - **class `BezierCurve`** (PathElement)
+    - `__init__(*points, **kwargs)`
+    - `get_knots(reference, *, last_control=None)`
+    - `to_points(*, reference=None, start=None, samples=None, max_arc_len=None, **opts)`
+  - **class `QuadraticBezierCurve`** (BezierCurve)
+  - **class `SmoothQuadraticBezierCurve`** (QuadraticBezierCurve)
+  - **class `CubicBezierCurve`** (BezierCurve)
+  - **class `SmoothCubicBezierCurve`** (CubicBezierCurve)
+  - **class `EndpointArcElement`** (PathElement)
+    - `__init__(endpoint, radii, rotation=None, normal=None, offset_angle=None, use_major_rotation=None, clockwise=None, check_radius=True, angular_density=None, **kwargs)`
+    - `to_points(*, reference=None, start=None, samples=None, **ignored)`
+  - **class `InterpElement`** (PathElement)
+    - `__init__(*points, spacings='cumulative', k=3, **kwargs)`
+    - `to_points(*, reference=None, start=None, max_arc_len=None, samples=None, **ignored)`
+  - **class `MoveReferenceElement`** (PathElement)
+    - `__init__(*target, **kwargs)`
+    - `to_points(*, reference=None, start=None, samples=None, **ignored)`
+  - **class `ClosePathElement`** (PathElement)
+    - `to_points(*, reference=None, start=None, samples=None, **ignored)`
+- `parametric_path_points(path_elements, return_segments=False)`
+- `tri_tri_intersect(t1, t2, eps=1e-09)` — Test whether two triangles in 3D intersect.
+- `triangle_plane_embedding(tris, zero_threshold=None)`
+- `check_triangle_plane_offsets(t1, t2, embeddings=None, zero_threshold=None, return_distances=False)`
+- `check_coplanar_triangle_intersection(t1, t2, embeddings=None, zero_threshold=None, return_crosses=False)`
+- `get_bounding_boxes(polys, concatentate=False)`
+- `check_interval_overlaps(bounds_1, bounds_2, include_endpoints=True, zero_threshold=None)`
+- `check_bbox_intersections(polys1, polys2, zero_threshold=None)`
+- `check_line_intersection(line_1, line_2, zero_threshold=None)`
+- `check_segment_intersection(p1, p2, p3, p4, zero_threshold=None)`
+- `check_segment_intersection_2d(p1, p2, p3, p4, axis1=0, axis2=1, zero_threshold=None)`
+- `check_triangle_intersection(tris1, tris2, embeddings=None, check_indices=None, check_direct_product=False, zero_threshold=None)`
+- `fibonacci_sphere(samples)`
+- `uv_mapping(uv)` — Map points on [0,1]^2 onto the unit sphere S^2 via the cylindrical
+
+### `Lebedev.py` — Lebedev quadrature grids for spheres and unions of spheres.
+- `lebedev_rule(order, exact=False, check_order=False, check_weights=False)` — Return (points, weights) for a Lebedev grid of the given order
+- `lebedev_grid(npts, use_degree=False, return_weights=False)` — Lebedev grid placed on one sphere; weights are surface-area weights.
+
+### `Misc.py`
+- `is_atomic(obj, types=None)` — Test whether an object is a scalar/atomic value (a number or string, or a
+- `is_numeric(obj, types=None)` — Test whether an object is a scalar numeric value (int or float, or a
+- `is_int(obj, types=None)` — Test whether an object is a scalar integer (Python or NumPy int, or a
+- `is_zero(obj, numeric_types=None)` — Test whether an object is a numeric scalar equal to zero.
+- `is_array_like(obj, valid_dtypes=None, ndim=None)` — Test whether an object is (or can be coerced into) a numeric-friendly array,
+- `is_numeric_array_like(obj, ndim=None)` — Test whether an object is (or coerces to) a numeric array of the given
+- `downcast_index_array(a, max_val)` — Cast an index array down to the smallest dtype that can hold `max_val`.
+- `recast_permutation(permutation_array)` — Down-cast a permutation array to the smallest dtype able to index its own
+- `recast_indices(indexing_array)` — Down-cast an indexing array to the smallest dtype able to hold its maximum
+- `infer_inds_dtype(max_size)` — Choose the smallest unsigned integer dtype that can represent a value up to
+- `infer_int_dtype(max_dim)` — Choose the smallest *signed* integer dtype that can represent dimensions up to
+- `flatten_dtype(ar, dtype=None)` — Extracted from the way NumPy treats unique
+- `unflatten_dtype(consolidated, orig_shape, orig_dtype, axis=None)` — Converts a coerced array back to a full array
+- `flatten_inds(A, *idx_blocks)` — Reshape an array by collapsing one or more contiguous axis blocks into single
+
+### `Optimization.py`
+- `lookup_method_name(method)` — Map a step-finder method name to its class.
+- `get_step_finder(spec, method=None, jacobian=None, hessian=None, **extra_init)` — Resolve a step-finder specification into a ready-to-call step-finder instance.
+- `iterative_step_minimize_step(step_predictor, guess, mask, tol, orthogonal_projector, orthogonal_projection_generator, region_constraints, unitary, max_displacement, max_displacement_norm, generate_rotation, prev_steps, max_gradient_error, termination_function, is_climbing)` — Take a single minimization step for the still-active members of a batch.
+- `iterative_step_minimize(guess, step_predictor, jacobian=None, hessian=None, *, method=None, unitary=False, generate_rotation=False, dtype='float64', orthogonal_directions=None, orthogonal_projection_generator=None, region_constraints=None, function=None, max_displacement=None, max_displacement_norm=None, oscillation_damping_factor=None, termination_function=None, prevent_oscillations=None, tol=1e-08, use_max_for_error=True, max_iterations=100, convergence_metric=None, track_best=False, return_trajectory=False, logger=None, log_guess=True)` — Minimize a function over a batch of starting guesses by repeatedly applying a
+- `scipy_minimize(coords, function, jacobian=None, hessian=None, optimizer_settings=None, unitary=True, orthogonal_projector=None, orthogonal_projection_generator=None, line_search=None, return_trajectory=False, method='bfgs', max_iterations=None, tol=1e-08, line_search_step=None, max_displacement=0.01, region_constraints=None, logger=None)` — Minimize a function with `scipy.optimize.minimize`, wired up for this module's
+- `iterative_chain_minimize(chain_guesses, step_predictors, jacobian=None, hessian=None, *, method=None, unitary=False, function=None, climb=None, climbing_nodes=None, climbing_node_identifier=None, generate_rotation=False, dtype='float64', orthogonal_directions=None, orthogonal_projection_generator=None, prevent_oscillations=None, region_constraints=None, convergence_metric=None, termination_function=None, reparametrizer=None, max_displacement=None, max_displacement_norm=None, tol=1e-08, max_iterations=100, use_max_for_error=True, periodic=False, reembed=None, embedding_options=None, fixed_images=None, return_trajectory=False, logger=None, log_guess=False)` — Minimize a chain of images (e.g.
+  - **class `Damper`**
+    - `__init__(damping_parameter=None, damping_exponent=None, restart_interval=10)`
+    - `get_damping_factor()` — Return the current damping factor, advancing (and periodically resetting) the
+  - **class `LineSearcher`**
+    > Adapted from scipy.optimize to handle multiple structures at once
+    - `__init__(func, min_alpha=0, **opts)`
+    - `check_scalar_converged(phi_vals, alphas, **opts)` — Abstract: test whether the line-search values satisfy the convergence criterion.
+    - `update_alphas(phi_vals, alphas, iteration, old_phi_vals, old_alphas_vals, mask, **opts)` — Abstract: propose new step lengths for the next line-search iteration.
+    - `get_default_alpha(am)` — Return the fallback step length used when the line search fails to converge.
+    - `scalar_search(scalar_func, guess_alpha, min_alpha=None, max_iterations=15, history_length=1, **opts)` — Run the 1-D line search: iteratively update step lengths until each member's
+    - `prep_search(initial_geom, search_dir, guess_alpha=1, **opts)` — Prepare the line search: build the initial step length, the option dict, and
+  - **class `ArmijoSearch`** (LineSearcher)
+    - `__init__(func, c1=0.0001, min_alpha=None, fixed_step_cutoff=1e-08, der_max=100.0, guess_alpha=1)`
+    - `prep_search(initial_geom, search_dir, *, initial_grad, min_alpha=None, **rest)` — Prepare the Armijo search: compute (and clip) the initial directional
+    - `check_scalar_converged(phi_vals, alphas, *, phi0, c1, derphi0, tol=None)` — Apply the Armijo sufficient-decrease test `phi(a) <= phi0 + c1 * a * derphi0`.
+    - `get_default_alpha(am, *, phi0, **etc)` — Return the fallback step length (scaled by the inverse baseline value) when the
+    - `update_alphas(phi_vals, alphas, iteration, old_phi_vals, old_alphas_vals, mask, *, phi0, c1, derphi0, zero_cutoff=1e-16)` — Propose the next Armijo step length by quadratic (first iteration) then cubic
+  - **class `_WolfeLineSearch`** (LineSearcher)
+    > Adapted from scipy.optimize
+    - `__init__(func, grad, **opts)`
+    - `prep_search(initial_geom, search_dir)` — Prepare the Wolfe search (not yet implemented).
+    - `check_scalar_converged(phi_vals, alphas, **opts)` — Wolfe convergence test (not yet implemented).
+  - **class `GradientDescentStepFinder`**
+    - `__init__(func, jacobian, damping_parameter=None, damping_exponent=None, line_search=True, restart_interval=10, logger=None)`
+  - **class `NetwonDirectHessianGenerator`**
+    - `__init__(func, jacobian, hessian, hess_mode='direct', line_search=True, damping_parameter=None, damping_exponent=None, restart_interval=10)`
+    - `wrap_hessian(func, mode)` — Wrap the Hessian function so it returns the (inverse) Hessian in the form the
+  - **class `NewtonStepFinder`**
+    - `__init__(func, jacobian=None, hessian=None, *, check_generator=True, logger=None, **generator_opts)`
+  - **class `QuasiNewtonStepFinder`**
+    - `__init__(func, jacobian, approximation_type='bfgs', logger=None, **generator_opts)`
+    - `get_hessian_approximations()` — Return the mapping from approximation name to Hessian-approximator class.
+    - `hessian_approximations()` — The mapping from approximation name to Hessian-approximator class.
+  - **class `QuasiNetwonHessianApproximator`**
+    - `__init__(func, jacobian, initial_beta=1, damping_parameter=None, damping_exponent=None, line_search=True, restart_interval=10, restart_hessian_norm=1e-12, approximation_mode='inverse')`
+    - `identities(guess, mask)` — Return (cached) identity matrices matching the active members' shape.
+    - `initialize_hessians(guess, mask)` — Return the initial (inverse) Hessian estimate (a scaled identity).
+    - `take_nonzero_norm_regions(norms, tensors, cutoff=None)` — Select the members whose supplied norms are all above a cutoff, returning their
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Abstract: compute the updated (inverse) Hessian from the gradient/step
+    - `get_jacobian_updates(guess, mask, gradient_modifer=None)` — Evaluate the current gradient and its difference from the previous gradient.
+    - `restart_hessian_approximation()` — Decide whether to reset the Hessian approximation (on a near-zero previous step
+  - **class `BFGSApproximator`** (QuasiNetwonHessianApproximator)
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Compute the BFGS (inverse) Hessian update from the gradient and step
+  - **class `DFPApproximator`** (QuasiNetwonHessianApproximator)
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Compute the DFP (Davidon-Fletcher-Powell) (inverse) Hessian update.
+  - **class `BroydenApproximator`** (QuasiNetwonHessianApproximator)
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Compute the (good) Broyden (inverse) Hessian update.
+  - **class `SR1Approximator`** (QuasiNetwonHessianApproximator)
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Compute the symmetric-rank-one (SR1) (inverse) Hessian update.
+  - **class `CompactQuasiNewtonApproximator`** (QuasiNetwonHessianApproximator)
+    - `get_direct_hessian_update_vector(H, dx, y)` — Abstract: the update vector for the direct (Hessian) form of a compact
+    - `get_inverse_hessian_update_vector(H, dx, y)` — Abstract: the update vector for the inverse form of a compact quasi-Newton
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Compute the compact quasi-Newton (inverse) Hessian update from a subclass-
+  - **class `PSBQuasiNewtonApproximator`** (CompactQuasiNewtonApproximator)
+    - `get_direct_hessian_update_vector(H, dx, y)` — Not supported: PSB only implements the inverse update.
+    - `get_inverse_hessian_update_vector(H, dx, y)` — The PSB (Powell symmetric Broyden) update vector, which is simply the step.
+  - **class `GreenstadtNewtonApproximator`** (CompactQuasiNewtonApproximator)
+    - `get_direct_hessian_update_vector(H, dx, y)` — The Greenstadt update vector for the direct form (the gradient difference).
+    - `get_inverse_hessian_update_vector(H, dx, y)` — Not supported: Greenstadt only implements the direct update.
+  - **class `WeightedQuasiNewtonApproximator`** (QuasiNetwonHessianApproximator)
+    - `__init__(func, jacobian, initial_beta=1, damping_parameter=None, damping_exponent=None, line_search=True, restart_interval=10, restart_hessian_norm=1e-05, approximation_mode='direct')`
+    - `get_direct_weights(jacobian_diffs, prev_steps, prev_hess)` — Abstract: the blending weights for the direct-form base updates.
+    - `get_inverse_weights(jacobian_diffs, prev_steps, prev_hess)` — Abstract: the blending weights for the inverse-form base updates.
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Compute a weighted average of the base approximators' Hessian updates.
+  - **class `BofillApproximator`** (WeightedQuasiNewtonApproximator)
+    - `get_direct_weights(jacobian_diffs, prev_steps, prev_hess)` — Not supported: the Bofill blend is only defined for the inverse form here.
+    - `get_psi(jacobian_diffs, prev_steps, prev_hess)` — Compute the Bofill mixing parameter psi (the SR1/PSB blend weight) from the
+    - `get_inverse_weights(jacobian_diffs, prev_steps, prev_hess)` — Return the Bofill blend weights `[psi, 1 - psi]` over its two base
+  - **class `SchelgelApproximator`** (BofillApproximator)
+    - `get_direct_weights(jacobian_diffs, prev_steps, prev_hess)` — Not supported: the Schlegel blend is only defined for the inverse form here.
+    - `get_psi(jacobian_diffs, prev_steps, prev_hess)` — Compute the Schlegel mixing parameter (the square root of the Bofill psi).
+    - `get_inverse_weights(jacobian_diffs, prev_steps, prev_hess)` — Return the Schlegel blend weights `[psi, 1 - psi]`.
+  - **class `ConjugateGradientStepFinder`**
+    - `__init__(func, jacobian, approximation_type='polak-ribiere', logger=None, **generator_opts)`
+    - `beta_approximations()` — Return the mapping from beta-formula name to its approximator class.
+  - **class `ConjugateGradientStepApproximator`**
+    - `__init__(func, jacobian, damping_parameter=None, damping_exponent=None, restart_interval=50, restart_parameter=0.9, line_search=True)`
+    - `get_beta(new_jacs, prev_jac, prev_step_dir)` — Abstract: compute the conjugate-gradient beta coefficient.
+    - `determine_restart(new_jacs, mask)` — Decide whether to restart the conjugate-gradient direction (on the first step or
+  - **class `FletcherReevesApproximator`** (ConjugateGradientStepApproximator)
+    - `get_beta(new_jacs, prev_jac, prev_step_dir)` — Compute the Fletcher-Reeves beta (ratio of current to previous squared gradient
+  - **class `PolakRibiereApproximator`** (ConjugateGradientStepApproximator)
+    - `get_beta(new_jacs, prev_jac, prev_step_dir)` — Compute the Polak-Ribiere beta (current gradient dotted with the gradient
+  - **class `EigenvalueFollowingStepFinder`**
+    - `__init__(func, jacobian, hessian, initial_beta=1, damping_parameter=None, damping_exponent=None, line_search=False, restart_interval=1, restart_hessian_norm=1e-05, hessian_approximator='bofill', approximation_mode='direct', target_mode=None, logger=None)`
+    - `identities(guess, mask)` — Return (cached) identity matrices matching the active members' shape.
+    - `initialize_hessians(guess, mask)` — Return the exact Hessian at the current point as the initial estimate.
+    - `get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)` — Update the Hessian estimate using the configured quasi-Newton approximator.
+    - `get_shift(evals, tf_new, target_mode)` — Choose the eigenvalue shift used to control the step, following the target mode
+    - `get_jacobian_updates(guess, mask, gradient_modifer=None)` — Evaluate the current gradient and its difference from the previous gradient.
+    - `restart_hessian_approximation()` — Decide whether to reset the Hessian approximation (on a near-zero previous
+  - **class `ChainMinimizingStepFinder`**
+    - `__init__(func, jacobian, hessian=None, step_finder='conjugate-gradient', logger=None, **opts)`
+    - `adjust_jacobian(jac, guess, mask, cur, prev, next)` — Hook to adjust the per-image gradient given its neighbours (identity by default).
+    - `adjust_hessian(hess, guess, mask, cur, prev, next)` — Hook to adjust the per-image Hessian given its neighbours (identity by default).
+    - `image_pairwise_contribution(guess, mask, cur, prev, next, order=0)` — Abstract: the inter-image (neighbour) contribution to the objective/gradient/
+    - `wrap_func(func)` — Wrap the per-image objective so it also includes the inter-image contribution.
+    - `wrap_jac(jac)` — Wrap the per-image gradient so it includes the adjusted base gradient plus the
+    - `wrap_hess(hess)` — Wrap the per-image Hessian so it includes the adjusted base Hessian plus the
+    - `climbing_node_step(guess, mask, gradient_modifer=None, projector=None)` — Abstract: the step for a climbing image (not implemented in the base class).
+  - **class `NudgedElasticBandStepFinder`** (ChainMinimizingStepFinder)
+    - `__init__(func, jacobian, hessian=None, spring_constants=0.1, distance_function=None, step_finder='gradient-descent', logger=None, **opts)`
+    - `get_dist(p1, p2)` — Return the Euclidean distance between two image geometries.
+    - `get_tangent(guess, mask, cur, prev, next)` — Compute the (normalized) NEB path tangent at an image, using the energy-weighted
+    - `adjust_jacobian(jac, guess, mask, cur, prev, next)` — Project the tangential component out of the per-image gradient (the NEB
+    - `climbing_node_step(guess, mask, gradient_modifer=None, projector=None)` — Take a climbing-image step: invert the tangential force component so the image
+    - `image_pairwise_contribution(guess, mask, cur, prev, next, order=0)` — Compute the NEB spring contribution to the objective/gradient/Hessian from the
+  - **class `AdjustedChainStepFinder`** (ChainMinimizingStepFinder)
+    - `__init__(pairwise_image_function, func, jacobian, hessian=None, logger=None, **opts)`
+    - `image_pairwise_contribution(guess, mask, cur, prev, next, order=0)` — Delegate the inter-image contribution to the supplied pairwise function.
+  - **class `ChainReparametrizer`**
+  - **class `InterpolatingReparametrizer`** (ChainReparametrizer)
+    - `__init__(interpolator_type)`
+- `jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-08)` — Maximize an objective over an orthogonal transformation by sweeping 2x2
+  - **class `LineSearchRotationGenerator`**
+    - `__init__(column_function, tol=1e-16, max_iterations=10)`
+    - `quadratic_opt(g0, g1, g2, f0, f1, f2)` — Return the vertex of the parabola through three `(angle, value)` samples (the
+  - **class `GradientDescentRotationGenerator`**
+    - `__init__(column_function, gradient, tol=1e-16, max_iterations=10, damping_parameter=0.9, damping_exponent=1.1, restart_interval=3)`
+  - **class `OperatorMatrixRotationGenerator`**
+    - `__init__(one_e_func, matrix_func)`
+- `displacement_localizing_rotation_generator(mat, col_i, col_j)` — Compute the optimal 2x2 Foster-Boys localizing rotation for a pair of
+- `polyfit_critical_points(x, y, fit_order=2, check_curvature=None, curvature_test=None)` — Fit a polynomial to `(x, y)` and return the critical points of the fit (roots of
+- `polyfit_maxima(x, y, fit_order=2)` — Fit a polynomial to `(x, y)` and return its maxima (critical points with negative
+- `polyfit_minima(x, y, fit_order=2)` — Fit a polynomial to `(x, y)` and return its minima (critical points with positive
+- `get_peak_fitting_region(energies, *, peak_energy_cutoff, min_nodes)` — Select the indices around the peak of an energy profile to use for a peak fit:
+- `peak_fit_maxiumum(x, y, *, fit_order=2, peak_cutoff, min_nodes=3)` — Estimate the location and height of a peak by fitting a polynomial to the points
+
+### `Options.py` — Defines options for different numerical things
+  - **class `OptionsContainer`**
+    > A singleton Options object that can be used to configure options for numerical stuff
+    - `zero_threshold()` — Threshold below which a numerical value is treated as zero.
+    - `zero_threshold(v)` — Threshold below which a numerical value is treated as zero.
+    - `norm_zero_threshold()` — Threshold below which a vector *norm* is treated as zero.
+    - `norm_zero_threshold(v)` — Threshold below which a vector *norm* is treated as zero.
+    - `zero_placeholder()` — Placeholder value substituted in place of a true zero (e.g.
+    - `zero_placeholder(v)` — Placeholder value substituted in place of a true zero (e.g.
+
+### `PermutationOps.py`
+- `permutation_sign(perm, check=True)` — Compute the sign (parity) of a permutation via a swap sort.
+- `levi_cevita_maps(k)` — Return the nonzero index tuples and their signs for the rank-`k` Levi-Civita
+- `levi_cevita_tensor(k, sparse=False)` — Build the rank-`k` Levi-Civita (permutation) tensor, dense or sparse.
+- `levi_cevita_dot(k, a, /, axes, shared=None)` — Contract the rank-`k` Levi-Civita tensor with an array along the given axes,
+- `normalize_commutators(commutator_string)` — Rewrite a nested commutator specification into a canonical sum of nested
+- `commutator_terms(commutator_strings)` — Expand a commutator specification into all signed operator-product terms.
+- `commutator_evaluate(commutator, expansion_terms, normalized=False, direct=None, recursive=False)` — Evaluate a nested operator commutator given the matrices for the individual
+- `permutation_cycles(perms, return_groups=False)` — Decompose permutations into their disjoint cycles.
+- `permutation_from_cycles(cycle)` — Reconstruct a permutation array from its cycle decomposition.
+- `compute_cycle_orders(perms)` — Compute the order (LCM-style product of cycle lengths) of each permutation.
+- `enumerate_permutations(perm, cycle_orders=None)` — Enumerate the cyclic powers of a permutation (the subgroup it generates).
+
+### `SetOps.py` — Provides customized set operations based off of the NumPy builtins
+- `argsort(ar)` — Stable argsort that supports multi-dimensional rows by coercing them to a
+- `unique(ar, return_index=False, return_inverse=False, return_counts=False, axis=0, sorting=None, minimal_dtype=False)` — A variant on np.unique with default support for `axis=0` and sorting
+- `unique1d(ar, return_index=False, return_inverse=False, return_counts=False, sorting=None, minimal_dtype=False)` — Find the unique elements of an array, ignoring shape.
+- `intersection(ar1, ar2, assume_unique=False, return_indices=False, sortings=None, union_sorting=None, minimal_dtype=False)` — Compute the intersection of two arrays, supporting multi-dimensional rows.
+- `intersect1d(ar1, ar2, assume_unique=False, return_indices=False, sortings=None, union_sorting=None, minimal_dtype=False)` — Find the intersection of two arrays.
+- `contained(ar1, ar2, assume_unique=False, invert=False, sortings=None, union_sorting=None, method=None)` — Test whether each element of `ar1` is also present in `ar2`.
+- `difference(ar1, ar2, assume_unique=False, sortings=None, method=None, union_sorting=None)` — Calculates set differences over any shape of array
+- `difference1d(ar1, ar2, assume_unique=False, sortings=None, method=None, union_sorting=None)` — Calculates set differences in 1D
+- `find1d(ar, to_find, sorting=None, search_space_sorting=None, return_search_space_sorting=False, check=True, minimal_dtype=False, missing_val='raise')` — Finds elements in an array and returns sorting
+- `find(ar, to_find, sorting=None, search_space_sorting=None, return_search_space_sorting=False, check=True, minimal_dtype=False, missing_val='raise')` — Finds elements in an array and returns sorting
+- `group_by_spec1d(keys, sorting=None, return_sizes=False)` — Compute the grouping specification for a set of 1D keys.
+- `group_by1d(ar, keys, sorting=None, return_sizes=False, return_indices=False)` — Splits an array by a keys
+- `grouping_info(keys, sorting=None, return_sizes=False)` — :return: group pairs & sorting info
+- `group_by(ar, keys, sorting=None, return_sizes=False, return_indices=False)` — :return: group pairs & sorting info
+- `group_indices(keys, sorting=None, return_sizes=None, return_indices=None)` — Group the positional indices `0..len(keys)-1` by their key values.
+- `split_by_regions1d(ar, regions, sortings=None, return_indices=False)` — :param regions:
+- `split_by_regions(ar, regions, sortings=None, return_indices=False)` — Splits an array up by edges defined by regions.
+  - **class `version_info`**
+    - `get_np_version()` — Return the installed NumPy version as a tuple of integers, caching the result
+- `from_iter_nd(iter, dtype, shape, like=None, **extra)` — Build an n-dimensional array from an iterator of rows, using the fast
+- `permutation_indices(n, r, dtype=int)` — Enumerate all length-`r` ordered permutations of `range(n)` as an index array.
+- `combination_indices(n, r, dtype=int)` — Enumerate all length-`r` combinations of `range(n)` as an index array.
+- `vector_ix(shape, inds, return_shape=False)` — Build the fancy-index tuple that addresses positions `inds` within an array of
+- `index_mask(shape, inds, complement=False)` — Build a boolean mask that is `True` at the given positions (or `False` there
+- `index_complement(shape, inds)` — Return the index tuple for all positions *not* in `inds` within `shape`.
+- `vector_take_ix(base_shape, inds, shared=None)` — Build the fancy-index tuple for a broadcasted `take` over a shared batch
+- `vector_take(arr, inds, shared=None, return_spec=False)` — A generalized array indexing that broadcasts properly across everything except for the specified "t…
+- `take_where_groups(arr, where, presorted=True, return_rows=False)` — Gather the values selected by a multi-axis `where` result and split them into
+- `fast_first_nonzero(arr, axis=-1)` — Find, for each row, the index of the first nonzero entry along an axis (or
+- `fast_first_zero(arr, axis=-1)` — Find, for each row, the index of the first zero entry along an axis (or `-1`
+- `partial_sort(array, k, return_order=False)` — Return the `k` smallest (or, for negative `k`, the `|k|` largest) elements of
+
+### `Sparse.py`
+  - **class `SparseArray`**
+    > Represents a generic sparse array format
+    > which can be subclassed to provide a concrete implementation
+    - `get_backends()` — Provides the set of backends to try by default
+    - `from_data(data, shape=None, dtype=None, target_backend=None, constructor=None, **kwargs)` — A wrapper so that we can dispatch to the best
+    - `from_diag(data, shape=None, dtype=None, **kwargs)` — A wrapper so that we can dispatch to the best
+    - `from_diagonal_data(diags, **kw)` — Constructs a sparse tensor from diagonal elements
+    - `shape()` — Provides the shape of the sparse array
+    - `ndim()` — Provides the number of dimensions in the array
+    - `to_state(serializer=None)` — Provides just the state that is needed to
+    - `from_state(state, serializer=None)` — Loads from the stored state
+    - `empty(shape, dtype=None, **kw)`
+    - `initialize_empty(shp, shape=None, **kw)` — Returns an empty SparseArray with the appropriate shape and dtype
+    - `block_data()` — Returns the vector of values and corresponding indices
+    - `block_inds()` — Returns indices for the stored values
+    - `transpose(axes)` — Returns a transposed version of the tensor
+    - `ascoo()` — Converts the tensor into a scipy COO matrix...
+    - `ascsr()` — Converts the tensor into a scipy CSR matrix...
+    - `asarray()` — Converts the tensor into a dense np.ndarray
+    - `reshape(newshape)` — Returns a reshaped version of the tensor
+    - `resize(newsize)` — Returns a resized version of the tensor
+    - `pad_right(newshape)` — Returns a right-padded version of the tensor
+    - `broadcast_to(shape)` — Returns a broadcasted version of the tensor
+    - `expand_and_broadcast_to(expansion, new_shape)` — Expands, then broadcasts (memory efficient)
+    - `expand_and_pad(expansion, padding)` — Expands, then pads (memory efficient)
+    - `get_expanded_shape(shape, axis)` — adapted from np.expand_dims
+    - `expand_dims(axis)` — adapted from np.expand_dims
+    - `moveaxis(start, end)` — Adapted from np.moveaxis
+    - `concatenate(*others, axis=0)` — Concatenates multiple SparseArrays along the specified axis
+    - `true_multiply(other)` — Multiplies self and other
+    - `multiply(other)` — Multiplies self and other but allows for broadcasting
+    - `dot(other)` — Takes a regular dot product of self and other
+    - `outer(other)` — Takes a tensor outer product of self and other
+    - `tensordot(other, axes=2)` — Takes the dot product of self and other along the specified axes
+    - **class `cacheing_manager`**
+      - `__init__(parent, enabled=True, clear=False)`
+    - `cache_options(enabled=True, clear=False)`
+    - `get_caching_status()` — Subclasses may want to cache things for performance, so we
+    - `enable_caches()` — Subclasses may want to cache things for performance, so we
+    - `disable_caches()` — Subclasses may want to cache things for performance, so we
+    - `clear_cache()` — Subclasses may want to cache things for performance, so we
+    - **class `initializer_list`** (list)
+      > A simple wrapping head that allows us
+      > to transfer ownership of initialization data to
+      > a `SparseArray` during initialization
+      - `__init__(*args)`
+  - **class `lowmem_csr`** (sp.csr_matrix)
+    - `__init__(arg1, shape=None, dtype=None, copy=False)`
+    - `eval_idx_type(indices, indptr, maxval)`
+  - **class `ScipySparseArray`** (SparseArray)
+    > Array class that generalize the regular `scipy.sparse.spmatrix`.
+    > Basically acts like a high-dimensional wrapper that manages the _shape_ of a standard `scipy.sparse_matrix`, since that is rigidly 2D.
+    > We always use a combo of an underlying CSR or CSC matrix & COO-like shape operations.
+    - `__init__(a, shape=None, layout=None, dtype=None, initialize=True, cache_block_data=None, logger=None, init_kwargs=None)`
+    - `coo_to_cs(shape, vals, ij_inds, memmap=False, assume_sorted=False)` — Reimplementation of scipy's internal "coo_tocsr" for memory-limited situations
+    - `to_state(serializer=None)` — Provides just the state that is needed to
+    - `from_state(state, serializer=None)`
+    - `initialize_empty(shape, dtype=None, layout=None, **kw)`
+    - `construct_sparse_from_val_inds(a, shape, fmt, cache_block_data=True, logger=None, assume_sorted=False)`
+    - `dtype()`
+    - `diag()`
+    - `from_diagonal_data(diags, shape=None, **kw)`
+    - `asarray()`
+    - `todense()`
+    - `ascoo()`
+    - `ascsr()`
+    - `ascsc()`
+    - `data()`
+    - `data(new)`
+    - `format_from_string(fmt)`
+    - `fmt()`
+    - `shape()`
+    - `ndim()`
+    - `non_zero_count()`
+    - `get_caching_status()`
+    - `enable_caches()` — Subclasses may want to cache things for performance, so we
+    - `disable_caches()` — Subclasses may want to cache things for performance, so we
+    - `clear_cache()`
+    - `clear_ravel_caches()`
+    - `set_ravel_cache_size(size)`
+    - `find()`
+    - `block_vals()`
+    - `block_vals(bv)`
+    - `block_inds()`
+    - `block_inds(bi)`
+    - `block_data()`
+    - `block_data(bd)`
+    - `transpose(transp)` — Transposes the array and returns a new one.
+    - `reshape_internal(shp)`
+    - `reshape(shp)` — Had to make this op not in-place because otherwise got scary errors...
+    - `pad_right(amounts)`
+    - `squeeze()`
+    - `resize(newsize)` — Returns a resized version of the tensor
+    - `concatenate_coo(*others, axis=0)`
+    - `concatenate_2d(*others, axis=0)`
+    - `concatenate(*others, axis=0)` — Concatenates multiple arrays along the specified axis
+    - `broadcast_values(new_shape, old_shape, vals, inds)` — to be a little bit more efficient
+    - `broadcast_to(shape)` — Broadcasts to shape
+    - `expand_and_broadcast_to(expansion, new_shape)`
+    - `expand_and_pad(expansion, padding)`
+    - `T()`
+    - `ascs(inplace=False)`
+    - `dot(b, reverse=False)`
+    - `outer(other)`
+    - `plus(other, inplace=False)`
+    - `floopy_flop()`
+    - `true_multiply(other)`
+    - `copy()`
+    - `savez(file, compressed=True)` — Saves a SparseArray to a file (must have the npz extension)
+    - `loadz(file)` — Loads a SparseArray from an npz file
+  - **class `TensorFlowSparseArray`** (SparseArray)
+    > Provides a SparseArray implementation that uses TensorFlow as the backend
+    - `__init__(data, dtype=None)`
+    - `shape()` — Provides the shape of the sparse array
+    - `to_state(serializer=None)` — Provides just the state that is needed to
+    - `from_state(state, serializer=None)` — Loads from the stored state
+    - `empty(shape, dtype=None, **kw)` — Returns an empty SparseArray with the appropriate shape and dtype
+    - `block_data()` — Returns the row and column indices and vector of
+    - `transpose(axes)` — Returns a transposed version of the tensor
+    - `ascoo()` — Converts the tensor into a scipy COO matrix...
+    - `ascsr()` — Converts the tensor into a scipy COO matrix...
+    - `reshape(newshape)` — Returns a reshaped version of the tensor
+    - `true_multiply(other)` — Multiplies self and other
+    - `dot(other)` — Takes a regular dot product of self and other
+- `sparse_tensordot(a, b, axes=2)` — Defines a version of tensordot that uses sparse arrays, adapted from the sparse package on PyPI
+
+### `TensorDerivatives.py`
+- `get_nca_shifts(order, k)` — Enumerate the derivative-axis placements for splitting `order` derivatives
+- `apply_nca_op(op, order, k, A_expansion, B_expansion, deriv_axis, a, b, contract, shared, identical, root_dim=2)` — Compute a single term of the order-`order` derivative of a binary tensor
+- `nca_op_order_deriv(op, order, A_expansion, B_expansion, deriv_axis, a, b, contract, shared, identical)` — Assemble the full order-`order` derivative of a binary operation by summing the
+- `nca_op_deriv(op, A_expansion, B_expansion, order, axes, contract, shared=None, identical=False)` — Compute the derivative expansion of a binary tensor operation (a contraction
+- `tensordot_deriv(A_expansion, B_expansion, order, axes=None, shared=None, identical=False)` — Compute the derivative expansion of a tensor contraction between two
+- `prep_prod_arrays(A_expansion, a_ax)` — Move the product axes to the end of each tensor in an expansion, accounting for
+- `pre_broadcast_prod(A_expansion, B_expansion, axes)` — Prepare two operand expansions for a broadcasted product by moving their
+- `tensorprod_deriv(A_expansion, B_expansion, order, axes=None, identical=False)` — Compute the derivative expansion of an outer/tensor product between two
+- `scalarprod_deriv(s_expansion, A_expansion, order, identical=False)` — Compute the derivative expansion of a scalar-times-tensor product.
+- `scalarfunc_deriv(scalar_func, arg_expansion, order)` — Compute the derivative expansion of applying a scalar function to a scalar
+- `shift_expansion(expansion, scalar)` — Add a constant to the value (zeroth-order) term of an expansion, leaving the
+- `scale_expansion(expansion, scalar)` — Multiply every term of an expansion by a scalar.
+- `add_expansions(*expansions, order=None)` — Add any number of expansions together term by term, zero-padding shorter
+- `subtract_expansions(a_expansion, b_expansion, order=None)` — Subtract one expansion from another term by term, zero-padding to the requested
+- `concatenate_expansions(a_expansion_or_expansion_list, b_expansion=None, concatenate_values=True)` — Concatenate expansions, either along the value axis or along the derivative
+- `inverse_transformation(forward_expansion, order, reverse_expansion=None, allow_pseudoinverse=False, nonzero_cutoff=None)` — Compute the derivative expansion of the inverse of a transformation from its
+- `renormalize_transformation(forward_transformation, reverse_transformation, nonzero_cutoff=None)` — Rescale a forward/reverse transformation pair so that the singular values of
+- `orthogonalize_transformations(transformation_pairs, order=None, orthonormalize=True, assume_prenormalized=True, first_order_projector=True, nonzero_cutoff=None, concatenate=True)` — Orthogonalize a sequence of forward/reverse transformation pairs against one
+- `kron_prod_derivs(A_expansion, B_expansion, order)` — Compute the derivative expansion of the Kronecker product of two matrix
+- `kron_sum_derivs(A_expansion, B_expansion, order)` — Compute the derivative expansion of the Kronecker sum `A ⊗ I + I ⊗ B` of two
+- `sylv_derivs(A_expansion, B_expansion, C_expansion, order, shared=None, ks_expansion=None, inv_expansion=None)` — Compute the derivative expansion of the solution `X` to the Sylvester equation
+- `matsqrt_deriv(A_expansion, order)` — Compute the derivative expansion of the (symmetric) matrix square root.
+- `matinv_deriv(A_expansion, order, base_expansion=None)` — Compute the derivative expansion of the matrix inverse.
+- `matdet_deriv(forward_expansion, order)` — Compute the derivative expansion of the matrix determinant.
+- `mateigh_deriv(mat_exp, order, *, diagonal_only=True, base_expansion=None)` — Compute the derivative expansion of the symmetric eigen-decomposition
+- `get_integer_partitions(o)` — Return the integer partitions of `o`, cached across calls.
+- `scalarinv_deriv(scalar_expansion, order)` — Compute the derivative expansion of the reciprocal `1 / scalar` of a scalar
+- `scalarpow_deriv(scalar_expansion, exp, order)` — Compute the derivative expansion of `scalar ** exp` for a scalar expansion.
+- `odd_fac(x)` — Return the product of the first odd numbers `1 * 3 * 5 * ...` up to the count
+- `vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=True)` — Compute the derivative expansions of both the norm and the unit vector of a
+- `vec_anglecos_deriv(A_expansion, B_expansion, order, unitized=False)` — Compute the derivative expansion of the cosine of the angle between two
+- `vec_cross_deriv(A_expansion, B_expansion, order)` — Compute the derivative expansion of the cross product of two vectors.
+- `vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *, component_vectors=None, up_vector_expansion=None, unit_expansions=None)` — Compute the derivative expansion of the signed cross-product-norm term used for
+- `is_expansion_like(expansion)` — Test whether an object looks like an expansion (a sequence of numeric arrays)
+- `vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_unit_vectors=True, planar=None, up_vector=None, component_vectors=None, unit_expansions=None, planar_threshold=None)` — Compute the derivative expansion of the sine of the angle between two vectors
+- `arctan_expansion_term(angle, order)` — Build the order-`order` derivative tensor of `arctan2` viewed as a function of
+- `vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None, component_vectors=None, unit_expansions=None, unitized=False, planar=None, planar_threshold=None)` — Compute the derivative expansion of the angle between two vectors.
+- `vec_normal_deriv(A_expansion, B_expansion, order, up_vector=None, component_vectors=None, unit_expansions=None, unitized=False, planar=None, planar_threshold=None, normalize=True)` — Compute the derivative expansion of the normal vector to two vectors (the
+- `vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order, B_norms=None, planar=None, planar_threshold=None, up_vector=None)` — Compute the derivative expansion of a dihedral angle from the three edge-vector
+- `vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, order, planar=None, planar_threshold=None)` — Compute the derivative expansion of the angle between two planes, each defined
+- `nca_partition_terms(partition)` — Computes the number of permutations for the non-commutative operation
+- `get_unique_permutations(perm_idx)` — Return the unique permutations of an index multiset (with their indices),
+- `get_nca_perm_iter(partition, identical=True)` — Generate the reduced set of symmetrizing permutations for an integer partition
+- `check_perm_sorting(block_counts, partition_inverse)` — Predicate testing whether a permutation respects the canonical ordering of a
+- `get_nca_perm_idx(partition, contract=True, identical=False)` — Build the permutation-index label list for an integer partition, marking which
+- `get_nca_symmetrizing_perms(partition, perm_idx=None, use_base_perms=True, filter_unique=False, contract=True, identical=False)` — Return the set of permutations (and any compensating scaling) used to symmetrize
+- `nca_symmetrize(tensor, partition, shared=None, identical=False, contract=True, use_base_perms=True, filter_unique=False, check_symmetry=False, reweight=None)` — Symmetrize a tensor over its derivative axes according to an integer
+- `nca_partition_dot(partition, A_expansion, B_expansion, axes=None, shared=None, identical=False, symmetrize=True)` — Contract the chain of first-operand derivative terms selected by an integer
+- `nca_partition_prod(partition, A_expansion, shared=None, symmetrize=True)` — Form the symmetrized outer product of the first-operand derivative terms
+- `tensor_reexpand(derivs, vals, order=None, axes=None)` — Re-express one derivative expansion through another via the Faà di Bruno chain
+- `optimizing_transformation(expansion, order)` — Build, order by order, the transformation that brings an expansion to a
+- `apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2)` — Evaluate a single partition term of a chained multi-operand tensor operation
+- `nca_multi_op_order_deriv(partition_generator, order, expansions, ops, shared, root_dim)` — Assemble the full order-`order` derivative of a chained multi-operand operation
+- `nca_canonicalize_multiops(expansion_op_pairs)` — Parse an alternating `(expansion, op, expansion, op, ..., expansion)` argument
+  - **class `caching_perm_generator`**
+    - `__init__(o)`
+    - `get_terms(order)` — Return the partition/permutation terms for a given derivative order, caching the
+- `get_term_generator(k)` — Return a `caching_perm_generator` for `k` operands, cached for small `k`.
+- `tensorops_deriv(*expansion_op_pairs, order, shared=None)` — Compute the derivative expansion of an arbitrary chain of tensor operations
+
+### `TransformationMatrices.py`
+- `rotation_matrix_2d(theta)` — Build a 2x2 rotation matrix (or a stack of them) for the given angle(s).
+- `rotation_matrix_basic(xyz, theta)` — rotation matrix about x, y, or z axis
+- `rotation_matrix_ER(axis, theta)` — Return the rotation matrix associated with counterclockwise rotation about
+- `rotation_matrix_ER_vec(axes, thetas)` — Vectorized version of basic ER
+- `rotation_matrix_align_vectors(vec1, vec2)` — Build the rotation matrix that rotates one (unit) vector onto another.
+- `rotation_matrix(axis, theta=None)` — :param theta: angle to rotate by (or Euler angles)
+- `skew_symmetric_matrix(upper_tri)` — Build a skew-symmetric matrix from the flattened entries of its strict upper
+- `extract_rotation_angle_axis(rot_mat, normalize=True)` — Extract the rotation angle and axis from a rotation matrix.
+- `extract_reflection_axis(reflection_mat)` — Extract the reflection axis (plane normal) from a reflection matrix.
+- `youla_skew_decomp(A)` — Compute the Youla decomposition of a skew-symmetric matrix.
+- `youla_skew_matrix(l, n, axis_pos=0)` — Build the canonical Youla skew-symmetric block matrix from a list of block
+- `youla_matrix(angles, n, axis_pos=0)` — Build the canonical block-diagonal rotation (Youla) matrix from a list of plane
+- `youla_angles(U, axis_pos=None)` — Read the plane rotation angles off the diagonal of a canonical Youla rotation
+- `rotation_matrix_skew(upper_tri, create_skew=True)` — Exponentiate a skew-symmetric generator into a rotation matrix via its Youla
+- `skew_from_rotation_matrix(rot_mat)` — Recover the skew-symmetric generator of a rotation matrix (its matrix
+- `rotation_matrix_from_angles_vectors(l, T)` — Rebuild a rotation matrix from Youla plane angles and the orthogonal frame that
+- `translation_matrix(shift)` — Build a 4x4 homogeneous translation matrix (or a stack) for the given shift(s).
+- `affine_matrix(tmat, shift)` — Creates an affine transformation matrix from a 3x3 transformation matrix or set of matrices and a s…
+- `view_matrix(up_vector, view_vector=(0, 0, 1), output_order=(2, 0, 1))` — Build a viewing (camera) frame from an up vector and a view direction.
+- `perspective_matrix(view_angle=None, aspect=None, near=None, far=None, view_distance=None)` — Build a 4x4 perspective-projection matrix from view-frustum parameters.
+- `world_matrix(bbox=None, view_position=None, rescale=True)` — Build the world/model 4x4 matrix that maps object coordinates into the view
+- `render_matrix(view_matrix=None, perspective_matrix=None, world_matrix=None, view_position=None, view_center=None, up_vector=None, view_vector=None, right_vector=None, view_angle=None, aspect_ratio=None, view_distance=None, clip_distances=None, bbox=None, rescale_world_coordinates=False, include_perspective=True)` — Assemble the full model-view-projection render matrix from a flexible set of
+- `render_points(points, render_matrix, camera_cull_threshold=1e-08, return_w=False)` — Project a set of points through a render matrix into (culled) screen
+- `rotation_normal_view_matrix(rotation, normal, output_order=('x', 'y', 'z'))` — Build a viewing frame from a plane normal and an in-plane rotation angle.
+- `reflection_matrix(axes)` — Build the reflection matrix that flips the subspace spanned by the given axes.
+- `permutation_matrix(perm)` — Build the permutation matrix (or stack) corresponding to a permutation array.
+- `find_coordinate_matching_permutation(coords, new_coords, return_row_ordering=False, tol=None)` — Find the permutation that best matches one set of coordinates to another by
+- `symmetry_permutation(coords, op, return_row_ordering=False, tol=None)` — Convert a symmetry operation into the atom permutation it induces on a set of
+- `apply_symmetries(coords, symmetry_elements, labels=None, tol=0.1)` — Grow a set of coordinates by repeatedly applying symmetry operations, keeping
+- `symmetry_reduce(coords, op, labels=None)` — Reduce a set of coordinates to one representative per symmetry orbit under a
+  - **class `TransformationTypes`** (enum.Enum)
+    > Real access pattern: TransformationTypes.<MemberName> (this is an enum with 6 members, e.g. TransformationTypes.Identity == 0). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+- `identify_cartesian_transformation_type(x, max_rotation_order=None)` — Classify each Cartesian transformation as identity, inversion, rotation,
+- `cartesian_transformation_from_data(scalings, types, axes, roots, orders)` — Rebuild Cartesian transformation matrices from the classification data
+
+### `TransformationTransformations.py`
+- `make_affine_matrix(mat, shift)` — :param mat:
+- `merge_transformation_matrix(transf, other)` — Merges two transformation matrices
+
+### `VectorOps.py` — A module of useful math for handling coordinate transformations and things
+- `vec_dots(vecs1, vecs2, axis=-1)` — Computes the pair-wise dot product of two lists of vecs using np.matmul
+- `vec_norms(vecs, axis=-1)` — :param vecs:
+- `points_from_distance_matrix(dist_mat, test_idx=None, target_dim=None, use_triu=False, zero_cutoff=1e-08)` — Reconstruct a set of point coordinates that reproduce a given pairwise
+- `distance_matrix(pts, axis=-1, axis2=None, return_triu=False, return_indices=False, return_diffs=False)` — Compute the matrix of pairwise distances between a set of points.
+- `unembedded_pts_rmsd(coords, ref, return_diffs=False, averaged=False, total=False)` — Compute the RMSD between a set of coordinates and a reference *without* first
+- `vec_apply_zero_threshold(vecs, zero_thresh=None, return_zeros=False)` — Applies a threshold to cast nearly-zero vectors to proper zero
+- `vec_handle_zero_norms(vecs, norms, axis=-1, zero_thresh=None)` — Tries to handle zero-threshold application to vectors
+- `vec_normalize(vecs, norms=None, axis=-1, zero_thresh=None, return_norms=False)` — :param vecs:
+- `vec_rescale(vecs, target_range=None, cur_range=None, midpoint=None, axis=-1, clip=False)` — Linearly rescale values from their current range onto a target range.
+- `vec_crosses(vecs1, vecs2, normalize=False, zero_thresh=None, axis=-1)` — Compute the cross products of two stacks of vectors, optionally normalizing the
+- `vec_cos(vectors1, vectors2, zero_thresh=None, axis=-1)` — Gets the cos of the angle between two vectors
+- `vec_sins(vectors1, vectors2, zero_thresh=None, axis=-1)` — Gets the sin of the angle between two vectors
+- `vec_angles(vectors1, vectors2, norms=None, up_vectors=None, zero_thresh=None, axis=-1, return_norms=False, return_crosses=True, return_cross_norms=False, check_zeros=True)` — Gets the angles and normals between two vectors
+- `bump_axes(a_ax, b_ax)` — Shift a set of `b` axis indices so they do not collide with the `a` axis
+- `riffle_axes(a_ax, b_ax)` — Interleave two axis-index lists into a collision-free ordering.
+- `vec_outer(a, b, axes=None, order=2)` — Provides the outer product of a and b in a vectorized way.
+- `diag_indices(block_shape, n, k=2)` — Build the fancy-index tuple that addresses the `k`-fold diagonal of a tensor of
+- `vec_tensordiag(obj, axis=-1, extra_dims=1)` — Embed an array onto the diagonal of a higher-rank tensor.
+- `block_array(blocks, ndim=2, padding=0)` — Collapse a nested block array into a single dense array by concatenating the
+- `vec_block_diag(mats, kroneckerize=True)` — Build block-diagonal matrices from a stack of matrices.
+- `identity_tensors(base_shape, ndim)` — Return a stack of identity matrices broadcast over a leading batch shape.
+- `block_broadcast_indices(base_pos, block_inds, block_size=None)` — Expand a set of base positions into flattened indices spanning a contiguous
+- `broadcast_constant(base_array, target_shape, pad_base=False)` — Broadcast a scalar or array up to a target shape.
+- `vec_tensordot(tensa, tensb, axes=2, shared=None)` — Defines a version of tensordot that uses matmul to operate over stacks of things
+- `vec_tdot(tensa, tensb, axes=((-1,), (1,)))` — Tensor dot but just along the final axes by default.
+- `semisparse_tensordot(sparse_data, a, /, axes, shared=None)` — Contract a sparse tensor (given as `(positions, values, shape)`) with a dense
+- `frac_powh(A, k, eigsys=None, pow=None, nonzero_cutoff=None)` — Raise a symmetric/Hermitian matrix to a fractional power via its eigen
+- `pts_norms(pts1, pts2, **opts)` — Provides the distance between the points
+- `pts_angles(pts1, pts2, pts3, **opts)` — Provides the vector normal to the plane of the three points
+- `pts_normals(pts1, pts2, pts3, normalize=True, **opts)` — Provides the vector normal to the plane of the three points
+- `vec_dihedrals(b1, b2, b3, crosses=None, norms=None, return_crosses=False)` — Provides the dihedral angle between pts4 and the plane of the other three vectors
+- `pts_dihedrals(pts1, pts2, pts3, pts4, crosses=None, norms=None, return_crosses=False, **opts)` — Provides the dihedral angle between pts4 and the plane of the other three vectors
+- `pts_book_angles(pts1, pts2, pts3, pts4, crosses=None, norms=None, return_crosses=False, **opts)` — Compute *book* angles from four sets of points.
+- `mat_vec_muls(mats, vecs)` — Pairwise multiplies mats and vecs
+- `one_pad_vecs(vecs)` — Append a trailing column of ones to a stack of vectors (the homogeneous-
+- `affine_multiply(mats, vecs)` — Multiplies affine mats and vecs
+- `cartesian_from_rad_transforms(centers, vecs1, vecs2, angles, dihedrals, return_comps=False, angle_sign=None)` — Builds a single set of affine transformation matrices to apply to the vecs1 to get a set of points
+- `cartesian_from_rad(xa, xb, xc, r, a, d, psi=False, return_comps=False)` — Constructs a Cartesian coordinate from a bond length, angle, and dihedral
+- `polar_to_cartesian_transforms(centers, vecs1, vecs2, azimuths, polars)` — Builds a single set of affine transformation matrices to apply to the vecs1 to get a set of points
+- `polar_to_cartesian(center, v, u, r, a, d)` — Constructs a Cartesian coordinate from a bond length, angle, and dihedral
+- `apply_by_coordinates(tf, points, reroll=None, ndim=1, **kwargs)` — Apply a transformation function that expects its inputs split into separate
+- `apply_by_structures(tf, points, ndim=1, **kwargs)` — Apply a transformation function to each structure in a batch individually.
+- `find_basis(mat, nonzero_cutoff=1e-08, method='svd')` — Find an orthonormal basis for the column space (range) of a matrix.
+- `projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False)` — Build the projection matrix onto the span of a basis.
+- `orthogonal_projection_matrix(basis, inverse=None, orthonormal=False, allow_pinv=False)` — Build the complementary projector that removes the span of a basis (`I - P`).
+- `project_onto(vecs, basis, ndim=None, orthonormal=False, inverse=None, allow_pinv=False)` — Project vectors onto the span of a basis.
+- `project_out(vecs, basis, ndim=None, orthonormal=False, inverse=None, allow_pinv=False)` — Project the span of a basis *out* of a set of vectors (keep the orthogonal
+- `fractional_power(A, pow, zero_cutoff=1e-08)` — Raise a symmetric matrix to an arbitrary (fractional) power, discarding
+- `unitarize_transformation(tf)` — Return the nearest unitary (orthogonal) matrix to a transformation, via its
+- `polar_decomposition(tf, order='scale-first')` — Compute the polar decomposition of a transformation into a symmetric
+- `maximum_similarity_transformation(basis, target, apply_transformation=True)` — Find the unitary transformation that best maps a basis onto a target (in the
+- `matrix_transform_from_eigs(evals, evecs, tf)` — Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
+- `symmetric_matrix_exp(mats)` — Matrix exponential of a symmetric matrix, computed by exponentiating its
+- `imaginary_symmetric_matrix_exp(mats)` — Real and imaginary parts of `exp(i A)` for a symmetric matrix `A`, obtained by
+- `symmetric_matrix_log(mats)` — Matrix logarithm of a symmetric matrix, computed by taking the log of its
+- `imaginary_symmetric_matrix_log(mats_real, mats_imag)` — Recover the symmetric generator `A` from the real and imaginary parts of
+- `sylvester_solve(A, B, C)` — Solve the Sylvester equation `A X + X B = C` for `X`.
+- `symmetrize_array(a, axes=None, symmetrization_mode='total', axes_block_ordering=None, mixed_block_symmetrize=False, restricted_diagonal=False, out=None)` — Symmetrize an array over one or more groups of axes.
+- `integer_exponent(ints, k, max_its=None)` — For each integer, factor out the largest power of `k` that divides it.
+
+### `GeometricTransformations/AffineTransform.py`
+  - **class `AffineTransform`** (TransformationFunction)
+    > A simple AffineTranform implementation of the TransformationFunction abstract base class
+    - `__init__(tmat, shift=None)`
+    - `transform()`
+    - `inverse()` — Returns the inverse of the transformation
+    - `shift()`
+    - `merge(other)` — :param other:
+    - `reverse()` — Inverts the matrix
+    - `operate(coords, shift=True)` — :param coords: the array of coordinates passed in
+
+### `GeometricTransformations/GeometricTransformation.py` — The coordinate mats class defines an architecture to mats coordinates
+  - **class `GeometricTransformation`**
+    > The GeometricTransformation class provides a simple, general way to represent a
+    > compound coordinate transformation.
+    > In general, it's basically just a wrapper chaining together a number of TransformationFunctions.
+    - `__init__(*transforms)`
+    - `is_affine()`
+    - `transformation_function()` — :return:
+    - `transforms()`
+    - `apply(coords, shift=True)`
+    - `condense_transforms()`
+    - `inverse()`
+    - `parse_transform(tf)` — Provides a way to "tag" a transformation
+
+### `GeometricTransformations/RotationTransform.py`
+  - **class `RotationTransform`** (AffineTransform)
+    > A simple AffineTransform implementation of the TransformationFunction abstract base class
+    > *(truncated — see stub for full docstring)*
+    - `__init__(theta, axis='z', center=None)`
+    - `reverse()`
+
+### `GeometricTransformations/ScalingTransform.py`
+  - **class `ScalingTransform`** (AffineTransform)
+    > A simple ScalingTransform from the basic AffineTransformation class
+    > *(truncated — see stub for full docstring)*
+    - `__init__(scalings)`
+
+### `GeometricTransformations/TransformationFunction.py`
+  - **class `TransformationFunction`**
+    > The TransformationFunction class is an abstract class
+    > It provides the scaffolding for representing a single transformation operation
+    - `__init__()`
+    - `inverse()` — Returns the inverse of the transformation
+    - `merge(other)` — Tries to merge with another TransformationFunction
+    - `operate(coords, shift=True)` — Operates on the coords.
+
+### `GeometricTransformations/TranslationTransform.py`
+  - **class `TranslationTransform`** (AffineTransform)
+    > A simple TranslationTransform from the basic AffineTransformation class
+    > *(truncated — see stub for full docstring)*
+    - `__init__(shift)`

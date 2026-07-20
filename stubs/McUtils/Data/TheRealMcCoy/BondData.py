@@ -1,0 +1,1 @@
+"""data data omitted from this build (44 keys, first 40: ['Ag', 'Al', 'As', 'B', 'Ba', 'Be', 'Bi', 'Br', 'C', 'Ca', 'Cd', 'Cl', 'Co', 'Cr', 'Cs', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'Hg', 'I', 'In', 'Ir', 'K', 'Li', 'Mg', 'Mn', 'Mo', 'N', 'Na', 'Ni', 'O', 'P', 'Pb', 'Pd', 'Ru', 'S', 'Se'] ... and 4 more)"""

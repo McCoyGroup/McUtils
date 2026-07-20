@@ -1,0 +1,2194 @@
+### `ImageTools.py`
+  - **class `DisplayImage`**
+    - `__init__(figure, format, plot_range=None, scaling_factor=None, splits=None, postdraw=None, include_save_buttons=False, id=None)`
+    - `split_string_by_segments(text, split_dict)`
+    - `add_classes(label, text)`
+    - `annotate_text(text, splits, annotation_map=None)`
+    - `postprocess(text)`
+    - `text()`
+    - `get_svg_script(id)`
+    - `get_png_from_svg_script(id)`
+    - `get_png_script(id)`
+    - `to_widget()`
+    - `show()`
+    - `save(file)`
+
+### `InteractiveTools.py` — Miscellaneous tools for interactive messing around in Jupyter environments
+  - **class `JupyterSessionManager`**
+    - `jupyter_env()`
+    - `jupyter_dirs()`
+    - `install_extension(extension_package, exec_prefix=None, extension_types=('nbextension', 'labextension'), overwrite=False)` — Attempts to do a basic installation for JupterLab
+    - `get_kernel_specs(root_dirs=None)`
+    - `prep_kernel_args(name, base_opts, new_opts)`
+    - `modify_kernel_spec(name, root_dirs=None, **opts)`
+    - `install_ipykernel(prefix)`
+  - **class `ModuleReloader`**
+    > Reloads a module & recursively descends its 'all' tree
+    > to make sure that all submodules are also reloaded
+    - `__init__(modspec)`
+    - `get_parents()` — Returns module parents
+    - `get_members()` — Returns module members
+    - `reload_member(member, stack=None, reloaded=None, blacklist=None, reload_parents=True, verbose=False, print_indent='')`
+    - `reload(stack=None, reloaded=None, blacklist=None, reload_parents=True, verbose=False, print_indent='')` — Recursively searches for modules to reload and then reloads them.
+    - `load_module(module)`
+    - `import_from(module, names, globs=None)`
+  - **class `NotebookExporter`**
+    - `__init__(name, src_dir=None, img_prefix=None, img_dir=None, output_dir=None, tag_filters=None)`
+    - `load_preprocessor()`
+    - `load_filters()`
+    - `load_nb()`
+    - `save_output_file(filename, body)`
+    - `export()`
+  - **class `ExamplesManager`**
+    - `__init__(root, data_path=None, examples_path=None, globs=None)`
+    - `test_data(*path)`
+    - `examples_data(*path)`
+    - `load_module(module, modify_relative_imports=True)`
+    - `import_from(module, names, modify_relative_imports=True, globs=None)`
+    - `parse_x3d_view_matrix(vs, view_all=True)`
+  - **class `NoLineWrapFormatter`**
+    - `__init__(*objs, white_space='pre', **opts)`
+    - `create_obj()`
+    - `to_widget()`
+  - **class `FormattedTable`** (NoLineWrapFormatter)
+    - `__init__(table_data, column_formats='8.3f', **format_opts)`
+  - **class `OutputCapture`**
+    - `__init__(handles=None, bind_global=True, file_handles=True, autoclose=None, save_output=True)`
+    - `get_handles(handles=None, file_handles=False)`
+    - `get_temp_stream()`
+  - **class `SlurmInterface`**
+    - `format_kwargs(kwargs)`
+    - `run(cmd, *args, **kwargs)`
+    - `parse_slurm_table(tab, headers=True, sep=None)`
+    - `sinfo(all=None, format=None, **kw)`
+    - `squeue(user=None, all=None, format=None, **kw)`
+- `patch_pinfo()`
+
+### `JSMol.py`
+  - **class `JSMol`**
+    - **class `Applet`** (HTML.Div)
+      - `load_applet_script(id, loader, include_script_interface=False, interface_target='', recording_options=None, target=None)`
+      - `__init__(*model_etc, width=500, height=500, animate=False, vibrate=False, load_script=None, suffix=None, id=None, dynamic_loading=None, include_script_interface=False, recording_options=None, create_applet_loader=None, style=None, autobond=False, **attrs)`
+      - `applet_target()`
+      - `prep_load_script()`
+      - `create_applet(model_file, include_script_interface=False)`
+      - `show()`
+
+### `MoleculeGraphics.py`
+  - **class `MoleculeGraphics`**
+    - `__init__(atoms, coords, bonds=None, displacements=None, displacement_range=(-1, 1), displacement_steps=5, name='Molecule', program='Python', comment='', metadata=None, **params)`
+    - `to_widget()`
+    - `show()`
+
+### `NBExporter.py`
+  - **class `MarkdownImageExtractor`** (ExtractOutputPreprocessor)
+    > Extracts all of the outputs from the notebook file.  The extracted
+    > outputs are returned in the 'resources' dictionary.
+    - `__init__(*args, prefix='', **kwargs)`
+    - `reencode_data(mime_type, data)`
+    - `save_attachement(filename, attachement, index, cell, resources, cell_index)`
+    - `preprocess_cell(cell, resources, cell_index)`
+
+### `NotebookTools.py`
+  - **class `NotebookReader`**
+    - `__init__(json_or_fp)`
+    - **class `NotebookCell`**
+      - `__init__(nb, cell_data)`
+      - `cell_type()`
+      - `cell_index()`
+      - `attachments()`
+      - `get_images()`
+      - `source()`
+      - `text()`
+      - `get_cell_header(data)`
+      - `cell_header()`
+      - `html()`
+      - `prep_attachments(nb, attachment_data)`
+    - `cell(data)`
+    - `get_mime_image_loader(img_type)`
+    - `get_mime_type_loader(mime_type)`
+    - **class `CellList`**
+      - `__init__(nb, cell_list)`
+      - `modify(cells=None, *, nb=None)`
+      - `filter_cells(filter)`
+      - `find_cells_by_type(pattern)`
+      - `find_cells_by_header(pattern)`
+      - `find_cells_with_attachments(pattern=None)`
+      - `prep_regex(pattern, flags=None)`
+    - `cell_list(cells=None)`
+    - `load_notebook(nb_js)`
+    - `get_notebook_name(nb_js=None)`
+    - `file_name()`
+    - `nb_json()`
+    - `get_notebook_files(directory='.')`
+    - `sort_by_evaluation_time(file_list, directory='.')`
+    - `active_notebook(directory='.')`
+
+### `ScriptRunner.py`
+  - **class `Sentinels`** (enum.Enum)
+  - **class `ScriptContext`**
+    - `__init__(objects, imports=None, script_dir=None, script_id=None, context_file=None, autodelete=None, path=None)`
+    - `get_dir()`
+    - `get_context_file(script_id)`
+    - `populate_context_file()`
+    - `load_context(context_file)`
+    - `path_loader_template(path)`
+    - `context_loader_template(context_file)`
+    - `chdir_template(dir)`
+    - `imports_template(imports)`
+    - `create_context_loader()`
+    - `extract_names(code)`
+    - `find_globals()`
+    - `from_script(script, modules=None, globs=None, objects=None, imports=None, script_dir=None, script_id=None, context_file=None, autodelete=None, path=None)`
+  - **class `ScriptRunner`**
+    - `__init__(context, script_name='script-', script_suffix='.py', python=None, autodelete=None)`
+    - `get_python(python)`
+    - **class `Result`**
+      - `__init__(script, process=None, thread=None)`
+      - `join(timeout=None)`
+      - `result()`
+    - `prep_script(script)`
+    - `run_script(script, dry_run=False, background=True, interactive=False)`
+    - `run(script, modules=None, globs=None, objects=None, imports=None, script_dir=None, script_id=None, context_file=None, autodelete=None, path=None, background=True, interactive=False, dry_run=False)`
+
+### `X3D.py`
+  - **class `X3DHTML`**
+    - `get_x3d_map()`
+    - **class `X3DElement`** (HTML.TagElement)
+      - `get_class_map_updates()`
+      - `convert_attrs(attrs)`
+    - **class `X3D`** (X3DElement)
+    - **class `Anchor`** (X3DElement)
+    - **class `Appearance`** (X3DElement)
+    - **class `Arc2D`** (X3DElement)
+    - **class `ArcClose2D`** (X3DElement)
+    - **class `AudioClip`** (X3DElement)
+    - **class `Background`** (X3DElement)
+    - **class `BallJoint`** (X3DElement)
+    - **class `Billboard`** (X3DElement)
+    - **class `BinaryGeometry`** (X3DElement)
+    - **class `BlendMode`** (X3DElement)
+    - **class `BlendedVolumeStyle`** (X3DElement)
+    - **class `Block`** (X3DElement)
+    - **class `BoundaryEnhancementVolumeStyle`** (X3DElement)
+    - **class `Box`** (X3DElement)
+    - **class `BufferAccessor`** (X3DElement)
+    - **class `BufferGeometry`** (X3DElement)
+    - **class `BufferView`** (X3DElement)
+    - **class `CADAssembly`** (X3DElement)
+    - **class `CADFace`** (X3DElement)
+    - **class `CADLayer`** (X3DElement)
+    - **class `CADPart`** (X3DElement)
+    - **class `CartoonVolumeStyle`** (X3DElement)
+    - **class `Circle2D`** (X3DElement)
+    - **class `ClipPlane`** (X3DElement)
+    - **class `CollidableShape`** (X3DElement)
+    - **class `Collision`** (X3DElement)
+    - **class `CollisionCollection`** (X3DElement)
+    - **class `CollisionSensor`** (X3DElement)
+    - **class `Color`** (X3DElement)
+    - **class `ColorChaser`** (X3DElement)
+    - **class `ColorDamper`** (X3DElement)
+    - **class `ColorInterpolator`** (X3DElement)
+    - **class `ColorMaskMode`** (X3DElement)
+    - **class `ColorRGBA`** (X3DElement)
+    - **class `CommonSurfaceShader`** (X3DElement)
+    - **class `ComposedCubeMapTexture`** (X3DElement)
+    - **class `ComposedShader`** (X3DElement)
+    - **class `ComposedTexture3D`** (X3DElement)
+    - **class `ComposedVolumeStyle`** (X3DElement)
+    - **class `Cone`** (X3DElement)
+    - **class `Coordinate`** (X3DElement)
+    - **class `CoordinateDamper`** (X3DElement)
+    - **class `CoordinateDouble`** (X3DElement)
+    - **class `CoordinateInterpolator`** (X3DElement)
+    - **class `Cylinder`** (X3DElement)
+    - **class `CylinderSensor`** (X3DElement)
+    - **class `DepthMode`** (X3DElement)
+    - **class `DirectionalLight`** (X3DElement)
+    - **class `Dish`** (X3DElement)
+    - **class `Disk2D`** (X3DElement)
+    - **class `DoubleAxisHingeJoint`** (X3DElement)
+    - **class `DynamicLOD`** (X3DElement)
+    - **class `EdgeEnhancementVolumeStyle`** (X3DElement)
+    - **class `ElevationGrid`** (X3DElement)
+    - **class `Environment`** (X3DElement)
+    - **class `Extrusion`** (X3DElement)
+    - **class `Script`** (X3DElement)
+    - **class `Field`** (X3DElement)
+    - **class `FloatVertexAttribute`** (X3DElement)
+    - **class `Fog`** (X3DElement)
+    - **class `FontStyle`** (X3DElement)
+      - **class `FSManager`** (HTML.TagElement.context)
+        - **class `FakeCSS`**
+          - `__init__(props)`
+        - `manage_styles(styles)`
+    - **class `GeneratedCubeMapTexture`** (X3DElement)
+    - **class `GeoCoordinate`** (X3DElement)
+    - **class `GeoElevationGrid`** (X3DElement)
+    - **class `GeoLOD`** (X3DElement)
+    - **class `GeoLocation`** (X3DElement)
+    - **class `GeoMetadata`** (X3DElement)
+    - **class `GeoOrigin`** (X3DElement)
+    - **class `GeoPositionInterpolator`** (X3DElement)
+    - **class `GeoTransform`** (X3DElement)
+    - **class `GeoViewpoint`** (X3DElement)
+    - **class `Group`** (X3DElement)
+    - **class `HAnimDisplacer`** (X3DElement)
+    - **class `HAnimHumanoid`** (X3DElement)
+    - **class `HAnimJoint`** (X3DElement)
+    - **class `HAnimSegment`** (X3DElement)
+    - **class `HAnimSite`** (X3DElement)
+    - **class `ImageTexture`** (X3DElement)
+    - **class `ImageTexture3D`** (X3DElement)
+    - **class `ImageTextureAtlas`** (X3DElement)
+    - **class `IndexedFaceSet`** (X3DElement)
+    - **class `IndexedLineSet`** (X3DElement)
+    - **class `IndexedQuadSet`** (X3DElement)
+    - **class `IndexedTriangleSet`** (X3DElement)
+    - **class `IndexedTriangleStripSet`** (X3DElement)
+    - **class `Inline`** (X3DElement)
+    - **class `IsoSurfaceVolumeData`** (X3DElement)
+    - **class `LOD`** (X3DElement)
+    - **class `LineProperties`** (X3DElement)
+    - **class `LineSet`** (X3DElement)
+    - **class `MPRPlane`** (X3DElement)
+    - **class `MPRVolumeStyle`** (X3DElement)
+    - **class `Material`** (X3DElement)
+    - **class `MatrixTextureTransform`** (X3DElement)
+    - **class `MatrixTransform`** (X3DElement)
+    - **class `Mesh`** (X3DElement)
+    - **class `MetadataBoolean`** (X3DElement)
+    - **class `MetadataDouble`** (X3DElement)
+    - **class `MetadataFloat`** (X3DElement)
+    - **class `MetadataInteger`** (X3DElement)
+    - **class `MetadataSet`** (X3DElement)
+    - **class `MetadataString`** (X3DElement)
+    - **class `MotorJoint`** (X3DElement)
+    - **class `MovieTexture`** (X3DElement)
+    - **class `MultiTexture`** (X3DElement)
+    - **class `MultiTextureCoordinate`** (X3DElement)
+    - **class `NavigationInfo`** (X3DElement)
+    - **class `NodeNameSpace`** (X3DElement)
+    - **class `Normal`** (X3DElement)
+    - **class `NormalInterpolator`** (X3DElement)
+    - **class `Nozzle`** (X3DElement)
+    - **class `OpacityMapVolumeStyle`** (X3DElement)
+    - **class `OrientationChaser`** (X3DElement)
+    - **class `OrientationDamper`** (X3DElement)
+    - **class `OrientationInterpolator`** (X3DElement)
+    - **class `OrthoViewpoint`** (X3DElement)
+    - **class `Param`** (X3DElement)
+    - **class `ParticleSet`** (X3DElement)
+    - **class `PhysicalEnvironmentLight`** (X3DElement)
+    - **class `PhysicalMaterial`** (X3DElement)
+    - **class `PixelTexture`** (X3DElement)
+    - **class `PixelTexture3D`** (X3DElement)
+    - **class `Plane`** (X3DElement)
+    - **class `PlaneSensor`** (X3DElement)
+    - **class `PointLight`** (X3DElement)
+    - **class `PointProperties`** (X3DElement)
+    - **class `PointSet`** (X3DElement)
+    - **class `Polyline2D`** (X3DElement)
+    - **class `Polypoint2D`** (X3DElement)
+    - **class `PopGeometry`** (X3DElement)
+    - **class `PopGeometryLevel`** (X3DElement)
+    - **class `PositionChaser`** (X3DElement)
+    - **class `PositionChaser2D`** (X3DElement)
+    - **class `PositionDamper`** (X3DElement)
+    - **class `PositionDamper2D`** (X3DElement)
+    - **class `PositionInterpolator`** (X3DElement)
+    - **class `PositionInterpolator2D`** (X3DElement)
+    - **class `ProjectionVolumeStyle`** (X3DElement)
+    - **class `Pyramid`** (X3DElement)
+    - **class `QuadSet`** (X3DElement)
+    - **class `RadarVolumeStyle`** (X3DElement)
+    - **class `Rectangle2D`** (X3DElement)
+    - **class `RectangularTorus`** (X3DElement)
+    - **class `RefinementTexture`** (X3DElement)
+    - **class `RemoteSelectionGroup`** (X3DElement)
+    - **class `RenderedTexture`** (X3DElement)
+    - **class `RigidBody`** (X3DElement)
+    - **class `RigidBodyCollection`** (X3DElement)
+    - **class `Route`** (X3DElement)
+    - **class `ScalarChaser`** (X3DElement)
+    - **class `ScalarDamper`** (X3DElement)
+    - **class `ScalarInterpolator`** (X3DElement)
+    - **class `Scene`** (X3DElement)
+    - **class `SegmentedVolumeData`** (X3DElement)
+    - **class `ShadedVolumeStyle`** (X3DElement)
+    - **class `ShaderPart`** (X3DElement)
+    - **class `Shape`** (X3DElement)
+    - **class `SilhouetteEnhancementVolumeStyle`** (X3DElement)
+    - **class `SingleAxisHingeJoint`** (X3DElement)
+    - **class `SliderJoint`** (X3DElement)
+    - **class `SlopedCylinder`** (X3DElement)
+    - **class `Snout`** (X3DElement)
+    - **class `SolidOfRevolution`** (X3DElement)
+    - **class `Sound`** (X3DElement)
+    - **class `Sphere`** (X3DElement)
+    - **class `SphereSegment`** (X3DElement)
+    - **class `SphereSensor`** (X3DElement)
+    - **class `SplinePositionInterpolator`** (X3DElement)
+    - **class `SpotLight`** (X3DElement)
+    - **class `StaticGroup`** (X3DElement)
+    - **class `StippleVolumeStyle`** (X3DElement)
+    - **class `SurfaceShaderTexture`** (X3DElement)
+    - **class `Switch`** (X3DElement)
+    - **class `TexCoordDamper2D`** (X3DElement)
+    - **class `Text`** (X3DElement)
+    - **class `Texture`** (X3DElement)
+    - **class `TextureCoordinate`** (X3DElement)
+    - **class `TextureCoordinate3D`** (X3DElement)
+    - **class `TextureCoordinateGenerator`** (X3DElement)
+    - **class `TextureProperties`** (X3DElement)
+    - **class `TextureTransform`** (X3DElement)
+    - **class `TextureTransform3D`** (X3DElement)
+    - **class `TextureTransformMatrix3D`** (X3DElement)
+    - **class `TimeSensor`** (X3DElement)
+    - **class `IntegerSequencer`** (X3DElement)
+    - **class `ToneMappedVolumeStyle`** (X3DElement)
+    - **class `Torus`** (X3DElement)
+    - **class `TouchSensor`** (X3DElement)
+    - **class `Transform`** (X3DElement)
+    - **class `TriangleSet`** (X3DElement)
+    - **class `TriangleSet2D`** (X3DElement)
+    - **class `TwoSidedMaterial`** (X3DElement)
+    - **class `Uniform`** (X3DElement)
+    - **class `UniversalJoint`** (X3DElement)
+    - **class `Viewfrustum`** (X3DElement)
+    - **class `Viewpoint`** (X3DElement)
+    - **class `VolumeData`** (X3DElement)
+    - **class `WorldInfo`** (X3DElement)
+    - **class `X3DAppearanceChildNode`** (X3DElement)
+    - **class `X3DAppearanceNode`** (X3DElement)
+    - **class `X3DBackgroundNode`** (X3DElement)
+    - **class `X3DBinaryContainerGeometryNode`** (X3DElement)
+    - **class `X3DBindableNode`** (X3DElement)
+    - **class `X3DBoundedObject`** (X3DElement)
+    - **class `X3DChaserNode`** (X3DElement)
+    - **class `X3DChildNode`** (X3DElement)
+    - **class `X3DColorNode`** (X3DElement)
+    - **class `X3DComposableVolumeRenderStyleNode`** (X3DElement)
+    - **class `X3DComposedGeometryNode`** (X3DElement)
+    - **class `X3DCoordinateNode`** (X3DElement)
+    - **class `X3DDamperNode`** (X3DElement)
+    - **class `X3DDragSensorNode`** (X3DElement)
+    - **class `X3DEnvironmentNode`** (X3DElement)
+    - **class `X3DEnvironmentTextureNode`** (X3DElement)
+    - **class `X3DFogNode`** (X3DElement)
+    - **class `X3DFollowerNode`** (X3DElement)
+    - **class `X3DFontStyleNode`** (X3DElement)
+    - **class `X3DGeometricPropertyNode`** (X3DElement)
+    - **class `X3DGeometryNode`** (X3DElement)
+    - **class `X3DGroupingNode`** (X3DElement)
+    - **class `X3DInfoNode`** (X3DElement)
+    - **class `X3DInterpolatorNode`** (X3DElement)
+    - **class `X3DLODNode`** (X3DElement)
+    - **class `X3DLightNode`** (X3DElement)
+    - **class `X3DMaterialNode`** (X3DElement)
+    - **class `X3DMetadataObject`** (X3DElement)
+    - **class `X3DNBodyCollidableNode`** (X3DElement)
+    - **class `X3DNavigationInfoNode`** (X3DElement)
+    - **class `X3DNode`** (X3DElement)
+    - **class `X3DPlanarGeometryNode`** (X3DElement)
+    - **class `X3DPointingDeviceSensorNode`** (X3DElement)
+    - **class `X3DRigidJointNode`** (X3DElement)
+    - **class `X3DSensorNode`** (X3DElement)
+    - **class `X3DShaderNode`** (X3DElement)
+    - **class `X3DShapeNode`** (X3DElement)
+    - **class `X3DSoundNode`** (X3DElement)
+    - **class `X3DSoundSourceNode`** (X3DElement)
+    - **class `X3DSpatialGeometryNode`** (X3DElement)
+    - **class `X3DTexture3DNode`** (X3DElement)
+    - **class `X3DTextureCoordinateNode`** (X3DElement)
+    - **class `X3DTextureNode`** (X3DElement)
+    - **class `X3DTextureTransformNode`** (X3DElement)
+    - **class `X3DTimeDependentNode`** (X3DElement)
+    - **class `X3DTouchSensorNode`** (X3DElement)
+    - **class `X3DTransformNode`** (X3DElement)
+    - **class `X3DVertexAttributeNode`** (X3DElement)
+    - **class `X3DViewpointNode`** (X3DElement)
+    - **class `X3DVolumeDataNode`** (X3DElement)
+    - **class `X3DVolumeRenderStyleNode`** (X3DElement)
+
+### `APIs/d3.py`
+  - **class `D3API`**
+    - `load(version='v5')`
+- `short_uuid(len=6)`
+  - **class `D3`**
+    > Provides a namespace for encapsultating various D3 object types
+    - **class `Frame`** (WrapperComponent)
+      > Provides a frame in which to run D3 commands + access to the D3 handles
+      - `__init__(*elems, version='v5', id=None, javascript_handles=None, dynamic=None, **attrs)`
+      - `canonicalize_element(e)`
+      - `call(commands, id=None, debug=False, **call_kwargs)`
+      - `props(props, id=None)`
+      - `select(id)`
+      - `attr(execute=True, id=None, **attrs)`
+      - `set_id(id, parent_id=None)`
+      - `append(shape, id=None, parent_id=None, debug=False, **attrs)`
+      - `insert(before_id, shape, id=None, parent_id=None, debug=False, **attrs)`
+      - `remove(id=None)`
+      - `transition(id=None)`
+      - **class `CallChain`**
+        - `__init__(frame, commands, id=None)`
+        - **class `call`**
+          - `__init__(parent, command)`
+        - `execute()`
+      - **class `Selection`**
+        - `__init__(frame, handle)`
+        - `call(commands)`
+        - `props(properties)`
+        - `transition()`
+    - `get_class_map()`
+    - **class `D3Element`** (HTML.XMLElement)
+      > Provides a hook into the XMLElement API to provide a model
+      > that can talk with `d3` through a `D3.Frame`
+      - `__init__(tag, *elems, frame=None, id=None, on_update=None, style=None, activator=None, **attrs)`
+      - `frame()`
+      - `frame(frame)`
+      - `set_frame(frame, parent_id=None)`
+      - `id()`
+      - `set_id(parent_id, overwrite=False)`
+      - `initialize(parent_id=None)`
+      - `initialize_children()`
+      - `to_d3()`
+      - `insert(where, child)`
+      - `set_elems(elems)`
+      - `reset_attributes(new_attrs, old_attrs)`
+      - `set_attribute(attr, new_value, old_value)`
+      - `insert_child(where, new_value)`
+      - `replace_child(where, old, new)`
+      - `reset_children(new_children, old_children)`
+    - **class `TagElement`** (D3Element)
+      - `__init__(*elems, frame=None, **attrs)`
+    - **class `A`** (TagElement)
+    - **class `Animate`** (TagElement)
+    - **class `AnimateMotion`** (TagElement)
+    - **class `AnimateTransform`** (TagElement)
+    - **class `Circle`** (TagElement)
+    - **class `ClipPath`** (TagElement)
+    - **class `Defs`** (TagElement)
+    - **class `Desc`** (TagElement)
+    - **class `Ellipse`** (TagElement)
+    - **class `FeBlend`** (TagElement)
+    - **class `FeColorMatrix`** (TagElement)
+    - **class `FeComponentTransfer`** (TagElement)
+    - **class `FeComposite`** (TagElement)
+    - **class `FeConvolveMatrix`** (TagElement)
+    - **class `FeDiffuseLighting`** (TagElement)
+    - **class `FeDisplacementMap`** (TagElement)
+    - **class `FeDistantLight`** (TagElement)
+    - **class `FeDropShadow`** (TagElement)
+    - **class `FeFlood`** (TagElement)
+    - **class `FeFuncA`** (TagElement)
+    - **class `FeFuncB`** (TagElement)
+    - **class `FeFuncG`** (TagElement)
+    - **class `FeFuncR`** (TagElement)
+    - **class `FeGaussianBlur`** (TagElement)
+    - **class `FeImage`** (TagElement)
+    - **class `FeMerge`** (TagElement)
+    - **class `FeMergeNode`** (TagElement)
+    - **class `FeMorphology`** (TagElement)
+    - **class `FeOffset`** (TagElement)
+    - **class `FePointLight`** (TagElement)
+    - **class `FeSpecularLighting`** (TagElement)
+    - **class `FeSpotLight`** (TagElement)
+    - **class `FeTile`** (TagElement)
+    - **class `FeTurbulence`** (TagElement)
+    - **class `Filter`** (TagElement)
+    - **class `ForeignObject`** (TagElement)
+    - **class `G`** (TagElement)
+    - **class `Hatch`** (TagElement)
+    - **class `HatchPath`** (TagElement)
+    - **class `Image`** (TagElement)
+    - **class `Line`** (TagElement)
+    - **class `LinearGradient`** (TagElement)
+    - **class `Marker`** (TagElement)
+    - **class `Mask`** (TagElement)
+    - **class `Metadata`** (TagElement)
+    - **class `MPath`** (TagElement)
+    - **class `Path`** (TagElement)
+    - **class `Pattern`** (TagElement)
+    - **class `Polygon`** (TagElement)
+    - **class `Polyline`** (TagElement)
+    - **class `RadialGradient`** (TagElement)
+    - **class `Rect`** (TagElement)
+    - **class `Script`** (TagElement)
+    - **class `Set`** (TagElement)
+    - **class `SolidColor`** (TagElement)
+    - **class `Stop`** (TagElement)
+    - **class `Style`** (TagElement)
+    - **class `SVG`** (TagElement)
+    - **class `Switch`** (TagElement)
+    - **class `Symbol`** (TagElement)
+    - **class `Text`** (TagElement)
+    - **class `TextPath`** (TagElement)
+    - **class `Title`** (TagElement)
+    - **class `Tspan`** (TagElement)
+    - **class `Use`** (TagElement)
+    - **class `View`** (TagElement)
+    - **class `Plots`**
+      > Helper namespace for wrapping matplotlib plots
+      - `use_as_backend()`
+      - `get_plot_object(figure)`
+      - `render_mpl(figure, mpl_objs)`
+      - `get_mpl_plot_bounds(figure)`
+      - `to_plot_coords(figure, data_points)`
+
+### `APIs/d3_backend.py`
+  - **class `RendererD3`** (RendererBase)
+    > A modification of the base matplotlib SVG renderer to plug into the D3 library work we've done
+    - `__init__(width, height, basename=None, image_dpi=72, *, metadata=None)`
+    - `open_group(s, gid=None)`
+    - `close_group(s)`
+    - `write_defs()`
+    - `option_image_nocomposite()`
+    - `draw_path(gc, path, transform, rgbFace=None)`
+    - `draw_markers(gc, marker_path, marker_trans, path, trans, rgbFace=None)`
+    - `draw_path_collection(gc, master_transform, paths, all_transforms, offsets, offset_trans, facecolors, edgecolors, linewidths, linestyles, antialiaseds, urls, offset_position)`
+    - `option_scale_image()`
+    - `get_image_magnification()`
+    - `draw_image(gc, x, y, im, transform=None)`
+    - `draw_text(gc, x, y, s, prop, angle, ismath=False, mtext=None)`
+    - `flipy()`
+    - `get_canvas_width_height()`
+    - `get_text_width_height_descent(s, prop, ismath)`
+    - `get_toplevel()`
+    - `insert_d3(root)` — viewBox='0 0 %s %s' % (str_width, str_height),
+  - **class `FigureManagerD3`** (FigureManagerBase)
+    > Manages a set of D3 canvases by providing a
+    - `__init__(canvas, num)`
+    - `show()`
+    - `full_screen_toggle()`
+    - `get_window_title()`
+    - `set_window_title(title)`
+    - `resize(width, height)`
+  - **class `FigureCanvasD3`** (FigureCanvasBase)
+    > The canvas the figure renders into.  Calls the draw and print fig
+    > methods, creates the renderers, etc.
+    > *(truncated — see stub for full docstring)*
+    - `__init__(figure=None, manager=None)`
+    - `draw(clear=False)` — Draw the figure using the renderer.
+    - `render_objects(figure, obj)`
+  - **class `_BackendD3`** (_Backend)
+
+### `APIs/ngl.py`
+  - **class `NGLAPI`**
+    - `load(version='v5')`
+
+### `Apps/Apps.py`
+  - **class `Manipulator`** (Card)
+    - `__init__(func, *controls, debounce=None, autoclear=True, namespace=None, **etc)`
+    - `canonicalize_control(settings, namespace=None)` — Normalize a control spec into a `Control`: pass existing controls through, else
+    - `initialize()` — Run the function once (with no event) to populate the output.
+  - **class `App`** (Component)
+    > Provides a framework for making Jupyter Apps with the
+    > elements built out in the Interfaces package
+    - `merge_themes(theme_1, theme_2)` — Recursively merge two theme dicts (the second overriding/extending the first).
+    - `__init__(body=None, header=None, footer=None, sidebar=None, toolbar=None, theme='primary', layout='grid', cls='app border', output=None, capture_output=None, vars=None, **attrs)`
+    - `body()` — The app's body component, constructed lazily (within the app context) from the
+    - `body(b)` — The app's body component, constructed lazily (within the app context) from the
+    - `header()` — The app's header component, constructed lazily (within the app context) from the
+    - `header(h)` — The app's header component, constructed lazily (within the app context) from the
+    - `sidebar()` — The app's sidebar component, constructed lazily (within the app context) from the
+    - `sidebar(s)` — The app's sidebar component, constructed lazily (within the app context) from the
+    - `toolbar()` — The app's toolbar component, constructed lazily (within the app context) from the
+    - `toolbar(t)` — The app's toolbar component, constructed lazily (within the app context) from the
+    - `footer()` — The app's footer component, constructed lazily (within the app context) from the
+    - `footer(f)` — The app's footer component, constructed lazily (within the app context) from the
+    - `prep_head_item(item)` — Coerce a `(label, callback)` head item into a `Button`.
+    - `construct_navbar_item(item)` — Coerce a navbar item spec into a component: a `(label, sub-items)` pair becomes a
+    - `construct_header(header, **opts)` — Build the header `Navbar` from its spec (a list, a `(spec, opts)` pair, or an
+    - `construct_footer(footer, **opts)` — Build the footer `Navbar` from its spec, theming it.
+    - `construct_sidebar_item(item)` — Coerce a sidebar item spec into an `Opener` (nesting sub-`Sidebar`s for grouped
+    - `construct_sidebar(sidebar, **opts)` — Build the `Sidebar` from its spec (a list, a `(spec, opts)` pair, or an `items`
+    - `construct_toolbar_item(item)` — Coerce a toolbar item spec (a control settings dict) into a `Control`.
+    - `construct_toolbar(toolbar, **opts)` — Build the toolbar from its spec, as a `Grid` (for a list of rows) or a `Div`,
+    - `wrap_body(fn, **styles)` — Wrap a function as a `FunctionDisplay` bound to the app's variables.
+    - `construct_body_item(item)` — Coerce a body item into a component: wrap functions as `FunctionDisplay`s and
+    - `construct_body(body)` — Build the body from its spec: a dict becomes `Tabs`, a list becomes a list of
+    - `construct_layout()` — Assemble the app's `Grid` layout from its header/sidebar/toolbar/body/output/footer
+    - `to_jhtml()` — Render the app to its JHTML element (via the constructed layout).
+  - **class `SettingsPane`** (App)
+    - `__init__(settings, cls=None, **opts)`
+
+### `Apps/Controls.py`
+  - **class `Control`** (Component)
+    - `__init__(var, namespace=None)`
+    - `to_widget(parent=None)` — Render the control to a widget, linking it to its variable and syncing the initial
+    - `set_value()` — Abstract: push the variable's value into the underlying widget.
+    - `get_value()` — Abstract: read the control's current value.
+    - `value()` — The control's current value.
+    - `value(v)` — The control's current value.
+    - `observe(fn, names=None)` — Observe changes on the underlying widget.
+    - `unobserve(fn, names=None)` — Remove a change observer from the underlying widget.
+    - `construct(var, control_type=None, field_type=None, value=None, **attrs)` — Construct a control of the appropriate type (inferred from the field type/value
+    - `infer_control(field_type=None, value=None, **ignored)` — Infer the control type from a field type or value (string→`StringField`,
+  - **class `ValueWidget`** (Control)
+    - `__init__(var, value=None, namespace=None)`
+    - `get_value()` — Read the value from the underlying widget (or the variable before construction),
+    - `set_value()` — Push the variable's value into the underlying widget.
+    - `update(e)` — Sync the variable from the widget's current value (a change handler).
+  - **class `InputField`** (ValueWidget)
+    - `__init__(var, value=None, tag='input', track_value=True, continuous_update=False, base_cls=None, cls=None, namespace=None, **attrs)`
+    - `to_jhtml()` — Render the input field to its JHTML element.
+  - **class `StringField`** (InputField)
+    - `__init__(var, type='text', **attrs)`
+  - **class `Slider`** (InputField)
+    - `__init__(var, type='range', value=None, range=None, **attrs)`
+    - `get_value()` — Read the slider value, coercing it to an int or float when possible.
+    - `set_value()` — Push the variable's value into the slider (as a string).
+  - **class `Checkbox`** (InputField)
+    - `__init__(var, type='checkbox', **attrs)`
+    - `get_value()` — Read the checkbox as a bool (from its `'true'`/`'false'` string).
+    - `set_value()` — Set the checkbox's `'true'`/`'false'` string from the variable's truthiness.
+  - **class `RadioButton`** (Checkbox)
+    - `__init__(var, type='radio', **attrs)`
+  - **class `Switch`** (Checkbox)
+    - `__init__(var, type='checkbox', role='switch', **attrs)`
+    - `get_value()` — Read the switch as a bool (from its inner checkbox).
+    - `set_value()` — Set the switch's inner checkbox from the variable's truthiness.
+    - `to_jhtml()` — Render the switch (wrapping the checkbox in a `form-switch` div).
+  - **class `TextArea`** (InputField)
+    - `__init__(var, tag='textarea', **attrs)`
+    - `to_jhtml()` — Render the text area to its JHTML element.
+  - **class `ChangeTracker`** (ValueWidget)
+    - `__init__(var, base=None, value=None, track_value=True, continuous_update=False, base_cls=None, cls=None, **attrs)`
+  - **class `Selector`** (ChangeTracker)
+    - `__init__(var, options=None, value=None, multiple=False, **attrs)`
+    - `multiple()` — Whether the selector allows multiple selections.
+    - `get_value()` — Read the selection, splitting the multi-select value into a list.
+    - `set_value()` — Push the variable's selection into the widget (joining a multi-select list).
+    - `canonicalize_options(options)` — Normalize the options into `(label, value)` pairs.
+    - `to_jhtml()` — Render the select element with its options.
+  - **class `VariableDisplay`** (Control)
+    - `__init__(var, value=None, pane=None, autoclear=True, namespace=None, **attrs)`
+    - `get_value()` — **LLM Docstring**
+    - `set_value()` — Render the variable's value into the output pane (clearing it when empty).
+    - `update(e)` — Re-render the display (a change handler).
+    - `to_jhtml()` — Render the display, populating the output pane.
+  - **class `FunctionDisplay`** (Component)
+    - `__init__(fn, vars, pane=None, autoclear=True, debounce=None, delay_time=0.1, namespace=None, **attrs)`
+    - `link_vars(*var)` — Link the display's update handler to every input variable (and to future
+    - `to_widget(parent=None)` — Render to a widget, linking the input variables on first construction (with a
+    - `observe(fn, names=None)` — Observe changes on the underlying widget.
+    - `unobserve(fn, names=None)` — **LLM Docstring**
+    - `update(event)` — Handle an input change: run the update immediately or schedule a debounced
+    - `to_jhtml()` — Render the display, running the function once to populate the pane.
+  - **class `ProgressBar`** (Control)
+    - `__init__(var, bar=None, **attrs)`
+    - `get_value()` — Return the variable's value, coercing empty/None to 0 and strings to ints.
+    - `set_value()` — Set the bar's width from the current percentage.
+    - `update(e)` — Re-render the bar (a change handler).
+    - `to_jhtml()` — **LLM Docstring**
+  - **class `MenuSelect`** (ValueWidget)
+    - `__init__(var, options, menu_type=None, **attrs)`
+    - `get_value()` — Return the value mapped to the currently active item.
+    - `set_value()` — Activate the menu item matching the variable's value.
+    - `update(e)` — Activate the item matching the current value (a change handler).
+    - `set_active(v)` — Activate the menu item whose mapped value equals `v`.
+    - `set_active_key(k)` — Activate the menu item with the given key, deactivating the previously active one.
+    - `onclick(e, i, v)` — Handle a menu-item click: set the variable and activate the item.
+    - `canonicalize_options(options)` — Normalize the menu options into item dicts (with ids and click handlers) and a
+    - `to_jhtml()` — Render the menu widget and activate the initial item.
+  - **class `DropdownSelect`** (ValueWidget)
+    - `__init__(var, options, name=None, menu_type=None, **attrs)`
+    - `get_value()` — Return the selected value (from the inner menu selector).
+    - `set_value()` — Sync the inner menu selector to the variable's value.
+    - `update(e)` — Update the inner menu selector (a change handler).
+    - `to_jhtml()` — Render the dropdown with its menu selector.
+
+### `Apps/Interfaces.py`
+  - **class `JHTMLConversionError`** (Exception)
+    > Represents an error in converting to JHTML
+    - `__init__(widgets, cause, tb, message='failed to convert to JHTML:\n{}')`
+    - `format_message(limit=10)` — Format the error message: the widget chain plus the (length-limited) underlying
+  - **class `WidgetInterface`**
+    > Provides the absolute minimum necessary for hooking
+    > an interface that creates an `ipywidget` into the
+    > Jupyter display runtime
+    - `to_widget()` — Abstract: render this interface to an `ipywidget`.
+    - `initialize()` — Hook run after display; overridable for post-display setup (no-op by default).
+    - `to_static_html(include_bootstrap=True, create_body=True)` — Render the interface to static HTML, optionally embedding the Bootstrap links and
+    - `display()` — Display the interface (guarded against re-entrant display calls).
+    - `get_mime_bundle()` — Return the widget's MIME bundle for rich display.
+  - **class `Component`** (WidgetInterface)
+    > Provides an abstract base class for an interface element
+    > to allow for the easy construction of interesting interfaces
+    - `__init__(dynamic=True, debug_pane=None, **attrs)`
+    - `attrs()` — The component's attributes (as an immutable mapping).
+    - `attrs(value)` — The component's attributes (as an immutable mapping).
+    - `get_attr(key)` — **LLM Docstring**
+    - `get_child(key)` — Get a child by key (unsupported on the base component).
+    - `set_attr(key, value)` — Set an attribute in the component's attribute dict.
+    - `update_widget_attr(key, value)` — Push an attribute change into the live widget cache.
+    - `set_child(which, new)` — Set a child (unsupported on the base component).
+    - `update_widget_child(key, value)` — Push a child change into the live widget cache.
+    - `del_attr(key)` — Delete an attribute from the attribute dict.
+    - `del_widget_attr(key)` — Delete an attribute from the live widget cache.
+    - `del_child(which)` — Delete a child (unsupported on the base component).
+    - `del_widget_child(key)` — Delete a child from the live widget cache.
+    - `insert(where, new)` — Insert a new child at a position, syncing the widget cache.
+    - `append(child)` — Append a child to the end.
+    - `insert_child(where, child)` — Insert a child (unsupported on the base component).
+    - `insert_widget_child(where, child)` — Insert a child into the live widget cache.
+    - `add_class(*cls)` — Add CSS class(es) to the component (and the live widget).
+    - `add_component_class(*cls)` — Add CSS class(es) to the component's stored attributes.
+    - `add_widget_class(*cls)` — Add CSS class(es) to the live widget.
+    - `remove_class(*cls)` — Remove CSS class(es) from the component (and the live widget).
+    - `remove_component_class(*cls)` — Remove CSS class(es) from the component's stored attributes.
+    - `remove_widget_class(*cls)` — Remove CSS class(es) from the live widget.
+    - `to_jhtml(parent=None)` — Abstract: render the component to its JHTML element.
+    - `to_widget(parent=None)` — Render the component to a widget (cached), registering the parent and wrapping any
+    - `mutate(fn)` — Apply a mutation function to the component and invalidate its cached widget.
+    - `invalidate_cache()` — Invalidate the cached widget (and propagate the invalidation to parents).
+  - **class `WrapperComponent`** (Component)
+    > Extends the base component interface to allow for the
+    > construction of interesting compound interfaces (using `JHTML.Compound`).
+    > Takes a `dict` of `wrappers` naming the successive levels of the interface
+    > along with a `theme` that provides style declarations for each level.
+    > *(truncated — see stub for full docstring)*
+    - `__init__(items, wrappers=None, theme=None, extend_base_theme=True, **attrs)`
+    - `handle_variants(theme)` — Expand a theme's `variant`/`base-cls` shorthand into the concrete
+    - `manage_theme(theme, extend_base_theme=True)` — Resolve the effective theme, optionally merging it over the class's base theme.
+    - `merge_themes(theme, attrs, merge_keys=('cls',))` — Needs to handle cases where a `theme` is provided
+    - `manage_items(items, attrs)` — Normalize the items spec into a `(items_list, attrs)` pair, pulling out any
+    - `get_child(key)` — Get a wrapped item by index.
+    - `set_child(which, new)` — Set a wrapped item by index.
+    - `insert_child(where, child)` — Insert a wrapped item at a position (appending if `where` is `None`).
+    - `wrap_items(items)` — Render the items inside the wrapper element(s), applying the themed attributes.
+    - `to_jhtml(parent=None)` — Render the component by wrapping its items.
+  - **class `Container`** (WrapperComponent)
+    > Extends the base `WrapperComponent` to include a final
+    > `items` spec for cases where there is a base wrapper and a set of items,
+    > e.g. a list group which has the `list-group` outer class and a set of `list-items` inside.
+    - `__init__(items, wrappers=None, **attrs)`
+    - `items()` — The wrapped items, each built via `create_item`.
+    - `items(items)` — The wrapped items, each built via `create_item`.
+    - `create_item(i, **kw)` — Build an item element from a spec: pass a `raw` element through, expand a dict
+    - `update_widget_child(key, value)` — Rebuild an item and push it into the live widget cache.
+    - `insert_widget_child(where, child)` — Build an item and insert it into the live widget cache.
+  - **class `ComponentContainer`** (WrapperComponent)
+    - `__init__(component_args=None, component_kwargs=None, components=None, **attrs)`
+    - `create_components()` — Instantiate the named sub-components from their args/kwargs and per-component
+    - `handle_variants(theme)` — Pass the theme through unchanged (variants are handled per sub-component).
+    - `wrap_items(items)` — Build the sub-components and wrap them in the outer element.
+  - **class `ModifierComponent`** (Component)
+    - `__init__(base=None, **modifiers)`
+    - `to_jhtml()` — Render the base element with the modifier attributes applied.
+  - **class `Button`** (WrapperComponent)
+    - `__init__(body, action=None, event_handlers=None, **kwargs)`
+    - `action()` — The button's click action.
+    - `action(a)` — The button's click action.
+  - **class `LinkButton`** (Button)
+  - **class `Spinner`** (WrapperComponent)
+    - `__init__(body=None, role='status', **attrs)`
+  - **class `Progress`** (WrapperComponent)
+    - `__init__(value=0, label=None, wrappers=None, **attrs)`
+    - `container()` — The progress bar's outer container element.
+    - `bar()` — The progress bar's inner (filled) element.
+    - `update_widget_attr(attr, val)` — Push an attribute change into the bar's live widget.
+  - **class `MenuComponent`** (Container)
+    - `__init__(items, **attrs)`
+    - `create_item(item, **kw)` — Build a menu item element from its spec.
+  - **class `ListGroup`** (MenuComponent)
+  - **class `ButtonGroup`** (MenuComponent)
+  - **class `DropdownList`** (MenuComponent)
+    - `create_item(item, **kw)` — Build a dropdown-list item element (a dropdown menu entry).
+  - **class `Dropdown`** (ComponentContainer)
+    - `__init__(header, actions, **attrs)`
+    - `prep_actions(actions)` — Normalize the dropdown actions into item specs.
+  - **class `Navbar`** (MenuComponent)
+  - **class `Sidebar`** (MenuComponent)
+  - **class `Pagination`** (MenuComponent)
+- `short_uuid(len=6)` — Generate a short random id string.
+  - **class `Carousel`** (MenuComponent)
+    - `__init__(items, include_controls=True, data_bs_ride='carousel', include_indicators=False, overlap_controls=False, interval=None, **attrs)`
+    - `create_item(item, cls=None, data_bs_interval=None, **kw)` — **LLM Docstring**
+    - `next_button(body=None, **kwargs)` — **LLM Docstring**
+    - `prev_button(body=None, **kwargs)` — **LLM Docstring**
+    - `indicators(**kwargs)` — **LLM Docstring**
+    - `wrap_items(items)` — Wrap the slides (and controls/indicators) into the carousel element.
+  - **class `TabList`** (MenuComponent)
+    - `__init__(*args, base_name=None, role='tablist', **kwargs)`
+    - `create_item(item, cls=None, **kw)` — **LLM Docstring**
+  - **class `TabPane`** (MenuComponent)
+    - `__init__(*args, base_name=None, **kwargs)`
+    - `create_item(item, cls=None, **kw)` — **LLM Docstring**
+  - **class `Tabs`** (ComponentContainer)
+    - `__init__(tabs, base_name=None, **attrs)`
+  - **class `AccordionHeader`** (Container)
+    - `__init__(key, base_name=None, **kw)`
+    - `create_item(i, **kw)` — **LLM Docstring**
+  - **class `AccordionBody`** (Container)
+    - `__init__(key, parent_name=None, base_name=None, **kw)`
+  - **class `Accordion`** (MenuComponent)
+    - `__init__(items, base_name=None, header_classes=None, **attrs)`
+    - `create_item(item, cls=None, **kw)` — Build an accordion item (header plus collapsible body).
+  - **class `OpenerHeader`** (Container)
+    - `__init__(key, base_name=None, **kw)`
+    - `create_item(i, **kw)` — **LLM Docstring**
+  - **class `OpenerBody`** (Container)
+    - `__init__(key, base_name=None, **kw)`
+  - **class `Opener`** (MenuComponent)
+    - `__init__(items, base_name=None, open=False, **attrs)`
+    - `create_item(item, open=None, **kw)` — Build an opener item (header plus collapsible body).
+  - **class `CardOpener`** (Opener)
+  - **class `Breadcrumb`** (MenuComponent)
+  - **class `CardBody`** (WrapperComponent)
+  - **class `CardHeader`** (WrapperComponent)
+  - **class `CardFooter`** (WrapperComponent)
+  - **class `Card`** (ComponentContainer)
+    - `__init__(*args, header=None, body=None, footer=None, **attrs)`
+  - **class `Modal`** (Container)
+    - `__init__(header=None, body=None, footer=None, id=None, tabindex=-1, **attrs)`
+    - `get_trigger(*items, trigger_class=None, data_bs_toggle='modal', data_bs_target=None, **attrs)` — Build a trigger element that opens the modal.
+    - `close_button()` — **LLM Docstring**
+  - **class `ModalHeader`** (WrapperComponent)
+    - `__init__(items, **attrs)`
+  - **class `ModalFooter`** (WrapperComponent)
+  - **class `ModalBody`** (WrapperComponent)
+  - **class `Offcanvas`** (Container)
+    - `__init__(header=None, body=None, id=None, tabindex=-1, cls=None, placement='start', **attrs)`
+    - `get_trigger(*items, trigger_class=None, data_bs_toggle='offcanvas', data_bs_target=None, **attrs)` — Build a trigger element that opens the offcanvas panel.
+    - `close_button()` — **LLM Docstring**
+  - **class `OffcanvasHeader`** (WrapperComponent)
+    - `__init__(items, **attrs)`
+  - **class `OffcanvasBody`** (WrapperComponent)
+  - **class `Spacer`** (WrapperComponent)
+    - `__init__(items=None, **kwargs)`
+  - **class `ToastBody`** (WrapperComponent)
+    - `__init__(items, include_controls=False, cls=None, **attrs)`
+  - **class `ToastHeader`** (WrapperComponent)
+    - `__init__(items, include_controls=True, **attrs)`
+  - **class `Toast`** (WrapperComponent)
+    - `__init__(header=None, body=None, role='alert', hidden=True, cls=None, id=None, javascript_handles=None, onevents=None, **attrs)`
+    - `get_trigger(*items, trigger_class=None, data_bs_toggle='toast', data_bs_target=None, **attrs)` — Build a trigger element that shows the toast.
+    - `close_button()` — **LLM Docstring**
+    - `show()` — **LLM Docstring**
+    - `hide()` — **LLM Docstring**
+  - **class `ToastContainer`** (WrapperComponent)
+    - `__init__(items=None, **kwargs)`
+    - `create_toast(header=None, body=None, hidden=False, **kwargs)` — Create and add a toast to the container.
+  - **class `Tooltip`** (ModifierComponent)
+    - `__init__(base=None, title='tooltip', data_bs_html=None, **kwargs)`
+  - **class `Popover`** (ModifierComponent)
+    - `__init__(base=None, body='', data_bs_trigger='hover focus', data_bs_html=None, title=None, **kwargs)`
+  - **class `LayoutItem`** (Component)
+    - `__init__(item, **attrs)`
+    - `get_layout_styles(**kwargs)` — Abstract: return the CSS styles positioning this item.
+    - `to_jhtml()` — Render the item in its wrapper with the layout styles applied.
+  - **class `Layout`** (Component)
+    - `__init__(elements, wrapper=None, item_attrs=None, style=None, **attrs)`
+    - `wrap_item(e, attrs)` — Wrap an element as a layout `Item`.
+    - `setup_layout(elements, item_attrs)` — Prepare the layout: wrap each element as an item, returning `(layout_settings, items)`.
+    - `get_layout_styles(**kwargs)` — Abstract: return the CSS styles for the container.
+    - `styles()` — The container's combined explicit and computed layout styles.
+    - `to_jhtml()` — Render the layout container with its items and styles.
+  - **class `GridItem`** (LayoutItem)
+    - `__init__(item, row=None, col=None, row_span=None, col_span=None, alignment=None, justification=None, **attrs)`
+    - `get_grid_styles(row=None, row_span=None, col=None, col_span=None, alignment=None, justification=None)` — Compute the CSS grid-placement styles from a row/column position and span.
+    - `get_layout_styles()` — **LLM Docstring**
+  - **class `Grid`** (Layout)
+    - `__init__(elements, rows=None, cols=None, alignment=None, justification=None, row_spacing=None, col_spacing=None, item_attrs=None, row_height='auto', column_width='1fr', **attrs)`
+    - `setup_layout(grid, attrs)` — Wrap each non-empty grid cell as a positioned item and infer the row/column counts.
+    - `wrap_item(e, attrs)` — Wrap a grid element as a positioned `GridItem`, filling in its row/column.
+    - `get_grid_styles(rows=None, cols=None, alignment=None, justification=None, row_gap=None, col_gap=None, row_height='1fr', col_width='1fr')` — Compute the CSS grid-container styles (template rows/columns, gaps, alignment).
+    - `get_layout_styles()` — **LLM Docstring**
+  - **class `TableItem`** (GridItem)
+    - `__init__(item, row=None, col=None, row_span=None, col_span=None, alignment=None, justification=None, header=False, **attrs)`
+    - `wrapper(item, **kwargs)` — Return the cell element (a heading cell if `header`, else a data cell).
+  - **class `Table`** (Grid)
+    - `__init__(elements, rows=None, cols=None, alignment=None, justification=None, row_spacing=None, col_spacing=None, item_attrs=None, row_height='1fr', column_width='1fr', table_headings=None, striped=True, **attrs)`
+    - `wrapper(*elems, cls=None, **attrs)` — Wrap the rows in a `<table>` (with header/body sections and striping).
+    - `setup_layout(grid, attrs)` — Build the table rows (including an optional heading row) and infer the row/column counts.
+  - **class `FlexItem`** (LayoutItem)
+    - `__init__(item, order=None, grow=None, shrink=None, basis=None, alignment=None, **attrs)`
+    - `get_flex_styles(order=None, grow=None, shrink=None, basis=None, alignment=None)` — Compute the CSS flex-item styles from the order/grow/shrink/basis/alignment.
+    - `get_layout_styles()` — **LLM Docstring**
+  - **class `Flex`** (Layout)
+    - `__init__(elements, direction=None, wrap=None, alignment=None, justification=None, content_alignment=None, **attrs)`
+    - `get_flex_styles(direction=None, wrap=None, alignment=None, justification=None, content_alignment=None)` — Compute the CSS flex-container styles from the direction/wrap/alignment.
+    - `get_layout_styles()` — **LLM Docstring**
+  - **class `GenericDisplay`** (WidgetInterface)
+    - `__init__(obj)`
+    - `to_widget()` — Render the object to a widget (using its own `to_widget` or an output area).
+  - **class `ResultTypes`**
+  - **class `DelayedResult`** (WidgetInterface)
+    - `__init__(func, *args, output=None, callback=None, parent=None, **kwargs)`
+    - `get_output_area(output=None)` — Return the output area (creating one if none is given).
+    - `start_process()` — Start the background thread running the function (once).
+    - `to_widget()` — Start the background process and return the output area widget.
+
+### `Apps/Variables.py`
+  - **class `SettingChecker`**
+    - `check(**props)` — Base predicate: test whether a set of control settings matches this checker's
+  - **class `CheckboxChecker`** (SettingChecker)
+    - `check(value=None, **rest)` — Test whether the settings describe a `Checkbox` control (the value is a bool).
+  - **class `DropdownChecker`** (SettingChecker)
+    - `check(options=None, **rest)` — Test whether the settings describe a `Dropdown` control (`options` are given).
+  - **class `TextChecker`** (SettingChecker)
+    - `check(value=None, **rest)` — Test whether the settings describe a `Text` control (the value is a string).
+  - **class `IntSliderChecker`** (SettingChecker)
+    - `check(value=None, min=None, max=None, **rest)` — Test whether the settings describe an `IntSlider` (integer value with integer
+  - **class `FloatSliderChecker`** (SettingChecker)
+    - `check(value=None, min=None, max=None, **rest)` — Test whether the settings describe a `FloatSlider` (numeric value with numeric
+  - **class `IntRangeChecker`** (SettingChecker)
+    - `check(value=None, min=None, max=None, **rest)` — Test whether the settings describe an `IntRangeSlider` (a length-2 integer value
+  - **class `FloatRangeChecker`** (SettingChecker)
+    - `check(value=None, min=None, max=None, **rest)` — Test whether the settings describe a `FloatRangeSlider` (a length-2 numeric value
+  - **class `InterfaceVars`**
+    - `__init__(*vars, callbacks=None, namespace=None)`
+    - `unique_namespace(tag='vars')` — **LLM Docstring**
+    - `active_vars()` — Return the innermost active variable set (from the context stack), or `None`.
+    - `dict()` — The variables as a `{name: value}` mapping.
+    - `items()` — The variables as a list of `(name, value)` pairs.
+    - `add(var)` — Add a variable to the set (if new), firing the change callbacks.
+  - **class `DefaultVars`**
+    - `__init__(vars=None)`
+    - `resolve()` — Return the current default variable set (a fresh one if none is active).
+  - **class `VariableNamespace`**
+    - `__init__(name=None, dedupe=True)`
+    - `create(name)` — Resolve a namespace name (or namespace) to a cached `VariableNamespace`, creating
+  - **class `VariableSynchronizer`**
+    - `__init__(name, namespace=None, value=None, callbacks=(), output_pane=None, autounlink=True)`
+    - `create_var(var, namespace=None)` — Resolve a name (or synchronizer) to a `VariableSynchronizer` in the namespace,
+    - `name()` — **LLM Docstring**
+    - `value()` — The variable's current value.
+    - `value(v)` — The variable's current value.
+    - `set_value(v, caller=None)` — Set the value (if changed), firing the change callbacks and propagating to every
+    - `link(widget)` — Link a widget to the variable: seed the variable from the widget's value, observe
+    - `unlink(widget)` — Unlink a widget from the variable, removing its change observers.
+- `Var(name, namespace=None)` — Resolve a name (or synchronizer) to a `VariableSynchronizer`, optionally within a
+  - **class `WidgetControl`**
+    - `__init__(var, control_type=None, widget=None, **settings)`
+    - `to_widget()` — Link the variable to the widget and return the widget.
+
+### `Apps/types.py`
+  - **class `HTMLableType`** (typing.Protocol)
+    - `to_tree()`
+  - **class `IPyHTMLableType`** (typing.Protocol)
+  - **class `ImageableType`** (typing.Protocol)
+  - **class `WidgetableType`** (typing.Protocol)
+    - `to_widget()`
+
+### `JHTML/Bootstrap.py`
+  - **class `BootstrapBase`** (HTML)
+    - **class `DivComponent`** (HTML.Div)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `SpanComponent`** (HTML.Span)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `ListComponent`** (HTML.List)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `ListItemComponent`** (HTML.ListItem)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `ItalicComponent`** (HTML.Italic)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `TableComponent`** (HTML.Table)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `ButtonComponent`** (HTML.Button)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `AnchorComponent`** (HTML.Anchor)
+      - `__init__(*elems, variant=None, cls=None, **attrs)`
+    - **class `BoostrapIcon`** (ItalicComponent)
+      - `__init__(icon_name, cls=None, **attrs)`
+    - **class `FontAwesomeIcon`** (SpanComponent)
+      - `__init__(icon_name, **attrs)`
+    - **class `GlyphIcon`** (SpanComponent)
+      - `__init__(icon_name, **attrs)`
+    - **class `Col`** (HTML.Div)
+      - `__init__(*elems, width=None, size=None, cls=None, **attrs)`
+    - **class `Row`** (DivComponent)
+      - `__init__(*cols, item_attributes=None, **attrs)`
+    - **class `Container`** (DivComponent)
+    - `Grid(rows, row_attributes=None, item_attributes=None, auto_size=False, **attrs)`
+    - **class `Alert`** (DivComponent)
+    - **class `Breadcrumb`** (ListComponent)
+    - **class `BreadcrumbItem`** (ListItemComponent)
+    - **class `ListGroup`** (ListComponent)
+    - **class `ListGroupItem`** (ListItemComponent)
+    - **class `ButtonGroup`** (DivComponent)
+    - **class `Button`** (ButtonComponent)
+    - **class `CloseButton`** (ButtonComponent)
+    - **class `LinkButton`** (AnchorComponent)
+    - **class `Table`** (TableComponent)
+    - **class `Label`** (SpanComponent)
+    - **class `Badge`** (SpanComponent)
+  - **class `Bootstrap3`** (BootstrapBase)
+    - **class `Jumbotron`** (BootstrapBase.DivComponent)
+    - **class `PanelBody`** (BootstrapBase.DivComponent)
+    - **class `PanelHeader`** (BootstrapBase.DivComponent)
+    - **class `Panel`** (BootstrapBase.DivComponent)
+      - `__init__(*elems, header=None, **attrs)`
+  - **class `Bootstrap4`** (BootstrapBase)
+    - **class `Jumbotron`** (BootstrapBase.DivComponent)
+    - **class `Pill`** (BootstrapBase.SpanComponent)
+    - **class `Collapse`** (BootstrapBase.DivComponent)
+    - **class `CardBody`** (BootstrapBase.DivComponent)
+    - **class `CardHeader`** (BootstrapBase.DivComponent)
+    - **class `CardFooter`** (BootstrapBase.DivComponent)
+    - **class `CardImage`** (BootstrapBase.DivComponent)
+    - **class `Card`** (BootstrapBase.DivComponent)
+      - `__init__(*elems, header=None, **attrs)`
+  - **class `Bootstrap5`** (BootstrapBase)
+    - **class `Pill`** (BootstrapBase.SpanComponent)
+    - **class `Accordion`** (BootstrapBase.DivComponent)
+    - **class `AccordionItem`** (BootstrapBase.DivComponent)
+    - **class `AccordionCollapse`** (BootstrapBase.DivComponent)
+    - **class `AccordionBody`** (BootstrapBase.DivComponent)
+    - **class `Carousel`** (BootstrapBase.DivComponent)
+    - **class `CarouselInner`** (BootstrapBase.DivComponent)
+    - **class `CarouselItem`** (BootstrapBase.DivComponent)
+    - **class `Collapse`** (BootstrapBase.DivComponent)
+    - **class `CardBody`** (BootstrapBase.DivComponent)
+    - **class `CardHeader`** (BootstrapBase.DivComponent)
+    - **class `CardFooter`** (BootstrapBase.DivComponent)
+    - **class `CardImage`** (BootstrapBase.DivComponent)
+    - **class `Card`** (BootstrapBase.DivComponent)
+      - `__init__(*elems, header=None, **attrs)`
+
+### `JHTML/BootstrapEnums.py`
+  - **class `SemanticVariant`** (enum.Enum)
+    > Real access pattern: SemanticVariant.<MemberName> (this is an enum with 9 members, e.g. SemanticVariant.Primary == 'primary'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+  - **class `SemanticClass`** (enum.Enum)
+    > Real access pattern: SemanticClass.<MemberName> (this is an enum with 1470 members, e.g. SemanticClass.Active == 'active'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+
+### `JHTML/BootstrapWidgets.py`
+  - **class `BootstrapWidgetsBase`**
+    - `load()` — Embeds Bootstrap style definitions into the active notebook
+    - `Grid(rows, row_attributes=None, item_attributes=None, auto_size=True, **attrs)`
+  - **class `Bootstrap3Widgets`** (BootstrapWidgetsBase)
+    - **class `Icon`** (ActiveHTMLWrapper)
+    - **class `Alert`** (ActiveHTMLWrapper)
+    - **class `Badge`** (ActiveHTMLWrapper)
+    - **class `PanelBody`** (ActiveHTMLWrapper)
+    - **class `PanelHeader`** (ActiveHTMLWrapper)
+    - **class `Panel`** (ActiveHTMLWrapper)
+    - **class `Jumbotron`** (ActiveHTMLWrapper)
+    - **class `Col`** (ActiveHTMLWrapper)
+    - **class `Row`** (ActiveHTMLWrapper)
+    - **class `Container`** (ActiveHTMLWrapper)
+    - **class `Button`** (ActiveHTMLWrapper)
+    - **class `LinkButton`** (HTML.Anchor)
+    - **class `Table`** (ActiveHTMLWrapper)
+    - **class `ListGroup`** (ActiveHTMLWrapper)
+    - **class `ListGroupItem`** (ActiveHTMLWrapper)
+    - **class `FontAwesomeIcon`** (ActiveHTMLWrapper)
+    - **class `GlyphIcon`** (ActiveHTMLWrapper)
+    - **class `Label`** (ActiveHTMLWrapper)
+    - **class `ListComponent`** (ActiveHTMLWrapper)
+    - **class `ListItemComponent`** (ActiveHTMLWrapper)
+    - **class `Breadcrumb`** (ActiveHTMLWrapper)
+    - **class `BreadcrumbItem`** (ActiveHTMLWrapper)
+  - **class `Bootstrap4Widgets`** (BootstrapWidgetsBase)
+    - **class `Icon`** (ActiveHTMLWrapper)
+    - **class `Alert`** (ActiveHTMLWrapper)
+    - **class `Badge`** (ActiveHTMLWrapper)
+    - **class `CardBody`** (ActiveHTMLWrapper)
+    - **class `CardHeader`** (ActiveHTMLWrapper)
+    - **class `CardFooter`** (ActiveHTMLWrapper)
+    - **class `CardImage`** (ActiveHTMLWrapper)
+    - **class `Card`** (ActiveHTMLWrapper)
+    - **class `Jumbotron`** (ActiveHTMLWrapper)
+    - **class `Col`** (ActiveHTMLWrapper)
+    - **class `Row`** (ActiveHTMLWrapper)
+    - **class `Container`** (ActiveHTMLWrapper)
+    - **class `Button`** (ActiveHTMLWrapper)
+    - **class `LinkButton`** (HTML.Anchor)
+    - **class `Table`** (ActiveHTMLWrapper)
+    - **class `ListGroup`** (ActiveHTMLWrapper)
+    - **class `ListGroupItem`** (ActiveHTMLWrapper)
+    - **class `FontAwesomeIcon`** (ActiveHTMLWrapper)
+    - **class `GlyphIcon`** (ActiveHTMLWrapper)
+    - **class `Label`** (ActiveHTMLWrapper)
+    - **class `Pill`** (ActiveHTMLWrapper)
+    - **class `ListComponent`** (ActiveHTMLWrapper)
+    - **class `ListItemComponent`** (ActiveHTMLWrapper)
+    - **class `Breadcrumb`** (ActiveHTMLWrapper)
+    - **class `BreadcrumbItem`** (ActiveHTMLWrapper)
+  - **class `Bootstrap5Widgets`** (BootstrapWidgetsBase)
+    - **class `Icon`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Alert`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Badge`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `CardBody`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `CardHeader`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `CardFooter`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `CardImage`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Card`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Col`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Row`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Container`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `ButtonGroup`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Button`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `CloseButton`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `LinkButton`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Table`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `ListGroup`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `ListGroupItem`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `FontAwesomeIcon`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `GlyphIcon`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Label`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Pill`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `ListComponent`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `ListItemComponent`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `Breadcrumb`** (HTMLWidgets.WrappedHTMLElement)
+    - **class `BreadcrumbItem`** (HTMLWidgets.WrappedHTMLElement)
+
+### `JHTML/Enums.py`
+  - **class `Options`** (enum.Enum)
+    > Real access pattern: Options.<MemberName> (this is an enum with 121 members, e.g. Options.AspectRatio == 'aspect-ratio'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+
+### `JHTML/HTML.py`
+  - **class `ValidationError`** (ValueError)
+- `check_fill(value)`
+- `check_stroke(value)`
+- `check_color(value)`
+- `check_flood_color(value)`
+- `check_stop_color(value)`
+- `check_lighting_color(value)`
+- `check_opacity(value)`
+- `check_fill_opacity(value)`
+- `check_stroke_opacity(value)`
+- `check_flood_opacity(value)`
+- `check_stop_opacity(value)`
+- `check_fill_rule(value)` — Validate the `fill-rule` presentation value according to the constraints implemented in this module.
+- `check_stroke_width(value)` — Validate the `stroke-width` presentation value according to the constraints implemented in this mod…
+- `check_stroke_linecap(value)` — Validate the `stroke-linecap` presentation value according to the constraints implemented in this m…
+- `check_stroke_linejoin(value)` — Validate the `stroke-linejoin` presentation value according to the constraints implemented in this…
+- `check_stroke_miterlimit(value)` — Validate the `stroke-miterlimit` presentation value according to the constraints implemented in thi…
+- `check_stroke_dasharray(value)` — Validate the `stroke-dasharray` presentation value according to the constraints implemented in this…
+- `check_stroke_dashoffset(value)` — Validate the `stroke-dashoffset` presentation value according to the constraints implemented in thi…
+- `check_visibility(value)` — Validate the `visibility` presentation value according to the constraints implemented in this modul…
+- `check_display(value)` — Validate the `display` presentation value according to the constraints implemented in this module.
+- `check_paint_order(value)` — Validate the `paint-order` presentation value according to the constraints implemented in this modu…
+- `check_clip_path(value)`
+- `check_mask(value)`
+- `check_filter(value)`
+- `check_transform(value)` — Validate the `transform` presentation value according to the constraints implemented in this module.
+- `check_pointer_events(value)` — Validate the `pointer-events` presentation value according to the constraints implemented in this m…
+- `check_cursor(value)` — Validate the `cursor` presentation value according to the constraints implemented in this module.
+- `check_vector_effect(value)` — Validate the `vector-effect` presentation value according to the constraints implemented in this mo…
+- `check_font_family(value)` — Accept any font-family value without performing validation; this function currently always returns…
+- `check_font_size(value)` — Validate the `font-size` presentation value according to the constraints implemented in this module.
+- `check_font_weight(value)` — Validate the `font-weight` presentation value according to the constraints implemented in this modu…
+- `check_font_style(value)` — Validate the `font-style` presentation value according to the constraints implemented in this modul…
+- `check_font_variant(value)` — Validate the `font-variant` presentation value according to the constraints implemented in this mod…
+- `check_text_anchor(value)` — Validate the `text-anchor` presentation value according to the constraints implemented in this modu…
+- `check_dominant_baseline(value)` — Validate the `dominant-baseline` presentation value according to the constraints implemented in thi…
+- `check_text_decoration(value)` — Validate the `text-decoration` presentation value according to the constraints implemented in this…
+- `check_letter_spacing(value)`
+- `check_word_spacing(value)`
+- `check_writing_mode(value)` — Validate the `writing-mode` presentation value according to the constraints implemented in this mod…
+- `validate_props(props, validators, raise_on_invalid=True, undefined_is_missing=False)` — Run registered validators over a property mapping, optionally treating unknown properties as errors…
+  - **class `CSS`**
+    > Defines a holder for CSS properties
+    - `__init__(*selectors, **props)`
+    - `construct(*selectors, aspect_ratio=None, background=None, background_attachment=None, background_color=None, background_image=None, background_position=None, background_repeat=None, border=None, border_bottom=None, border_bottom_color=None, border_bottom_style=None, border_bottom_width=None, border_color=None, border_left=None, border_left_color=None, border_left_style=None, border_left_width=None, border_right=None, border_right_color=None, border_right_style=None, border_right_width=None, border_style=None, border_top=None, border_top_color=None, border_top_style=None, border_top_width=None, border_width=None, clear=None, clip=None, color=None, cursor=None, display=None, filter=None, float=None, font=None, font_family=None, font_size=None, font_variant=None, font_weight=None, height=None, left=None, letter_spacing=None, line_height=None, list_style=None, list_style_image=None, list_style_position=None, list_style_type=None, margin=None, margin_bottom=None, margin_left=None, margin_right=None, margin_top=None, overflow=None, padding=None, padding_bottom=None, padding_left=None, padding_right=None, padding_top=None, page_break_after=None, page_break_before=None, position=None, text_align=None, text_decoration=None, text_indent=None, text_transform=None, top=None, vertical_align=None, visibility=None, width=None, z_index=None, **props)` — Provides a convenience constructor for systems with autocompletions
+    - `canonicalize_props(props)` — Convert Python-style underscore property names to CSS hyphenated names without changing values.
+    - `parse(sty)` — Parse either inline declarations or selector blocks into one or more `CSS` objects; block parsing r…
+    - `tostring()` — Serialize the stored CSS rule as either a selector block or an inline declaration string.
+    - `validate(**kwargs)` — Validate the stored CSS properties with the class validator mapping.
+  - **class `HTMLManager`**
+    - `manage_class(cls)` — Normalize a class specification into a list of class-name strings.
+    - `manage_styles(styles)` — Convert mappings or strings into a `CSS` object while leaving existing style objects unchanged.
+    - `clean_key(k)` — Map reserved Python attribute aliases and underscores to their HTML attribute spelling.
+    - `sanitize_value(val)` — Convert NumPy scalars and rich display objects into plain Python or HTML element representations.
+    - `manage_attrs(attrs, sanitize=True)` — Canonicalize attribute names and optionally sanitize each attribute value.
+    - `extract_styles(attrs, style_props=None, ignored_styles=None)` — Remove recognized style properties from an attribute mapping and return them separately.
+    - `validate_props(props, **kwargs)` — Validate a property mapping using `HTMLManager.validators`.
+    - **class `ElementModifier`**
+      - `__init__(my_el, copy=False)`
+      - `modify()` — Return either the wrapped element or a copy, depending on the modifier setting.
+      - `tostring()` — Serialize the element produced by `modify`.
+      - `copy()` — Shallow-copy the modifier and replace its wrapped element with a copied element.
+      - `add_class(*cls, copy=True)` — Create a class-adding modifier around this modifier.
+      - `remove_class(*cls, copy=True)` — Create a class-removing modifier around this modifier.
+      - `add_styles(copy=True, **sty)` — Create a style-adding modifier around this modifier.
+    - **class `ClassAdder`** (ElementModifier)
+      - `__init__(el, cls=None, copy=True)`
+      - `modify()` — Initialize or apply a deferred class addition, preserving existing classes and avoiding duplicates.
+    - **class `ClassRemover`** (ElementModifier)
+      - `__init__(el, cls=None, copy=True)`
+      - `modify()` — Initialize or apply a deferred class removal, silently ignoring classes that are absent.
+    - **class `StyleAdder`** (ElementModifier)
+      - `__init__(el, copy=True, **styles)`
+      - `modify()` — Initialize or apply a deferred style merge onto an element’s inline `CSS` mapping.
+    - **class `StyleRemover`** (ElementModifier)
+      - `__init__(el, *styles, copy=True)`
+      - `modify()` — Initialize or apply removal of selected inline style keys when a style attribute exists.
+    - `xml_to_json(tree, root=None)` — Recursively convert an `ElementTree` node into the module’s JSON-compatible tree representation, pr…
+  - **class `XMLBase`**
+    - **class `ElementBase`**
+    - `find_globals()` — Find the first `__main__` global namespace in the call stack, falling back to the immediate caller…
+    - `expose(globs=None)` — Insert every registered tag class into a target global namespace under its class name.
+    - `get_class_map()` — Lazily build and cache the tag-to-element-class mapping from nested classes defining `tag`.
+    - `class_map_context(extra_classes)` — Temporarily extend the cached tag-class mapping and restore the previous mapping afterward.
+    - `convert(etree, strip=True, converter=None, **extra_attrs)` — Recursively convert an `ElementTree` element, including text and tails, into registered wrapper cla…
+    - `parse(str, strict=True, strip=True, fallback=None, converter=None, namespace=None)` — Parse XML/HTML text and, in non-strict mode, wrap multi-root or invalid input with a fallback eleme…
+  - **class `HTML`** (XMLBase)
+    > A namespace for holding various HTML attributes
+    - **class `XMLElement`** (XMLBase.ElementBase)
+      > Convenience API for ElementTree
+      - `get_class_map_updates()` — Return additional tag-class mappings for this element type; the base implementation supplies none.
+      - `expanded_class_map()` — Return a context manager that temporarily installs this element type’s class-map updates.
+      - `__init__(tag, *elems, on_update=None, style=None, activator=None, can_be_dynamic=None, **attrs)`
+      - **class `_update_callbacks`**
+        > Simple set of callbacks both weakly keyed and default
+        - `__init__(base_callbacks, weak_callbacks)`
+        - `from_raw(data)` — Canonicalize callback input into global and weakly keyed callback mappings.
+        - `items()` — Iterate registrant-specific callback mappings followed by the global callback mapping.
+        - `get(item, default)` — Retrieve callbacks for the global or a registrant-specific mapping.
+      - `on_update(key, new_value, old_value, subkey=None)` — Invoke callbacks registered for the specific update key and callbacks registered for all updates.
+      - `update_callbacks(key=None, registrant=None)` — Return callbacks registered for a key and optional registrant.
+      - `add_update_callback(callback, key=None, registrant=None)` — Register an update callback under an optional update key and registrant.
+      - `remove_update_callback(callback, key=None, registrant=None)` — Remove a previously registered update callback.
+      - `attrs()` — Access or replace the element’s immutable attribute view; assignment normalizes attributes and emit…
+      - `attrs(attrs)` — Access or replace the element’s immutable attribute view; assignment normalizes attributes and emit…
+      - `elems()` — Access or replace the element’s immutable child view, converting scalar numeric children to strings…
+      - `elems(elems)` — Access or replace the element’s immutable child view, converting scalar numeric children to strings…
+      - `set_elems(elems)` — Replace child content, invalidate cached trees, and emit an element-update callback.
+      - `activate()` — Pass the element to its configured activator callable.
+      - **class `StyleWrapper`**
+        - `__init__(style_dict, obj)`
+        - `get(item, default=None)` — Return a style value with an optional default.
+        - `items()` — Return the style mapping’s items view.
+        - `keys()` — Return the style mapping’s keys view.
+        - `values()` — Return the style mapping’s values view.
+      - `style()` — Access inline styles through a write-through mapping proxy, or replace the style attribute.
+      - `style(styles)` — Access inline styles through a write-through mapping proxy, or replace the style attribute.
+      - `class_list()` — Return the normalized list of CSS classes.
+      - `invalidate_cache()` — Clear the cached `ElementTree` representation and recursively invalidate parent elements.
+      - `insert(where, child)` — Insert a child at an index or append when the index is `None`, then invalidate caches and emit an u…
+      - `append(child)` — :param child: Child object to insert.
+      - `construct_etree_element(elem, root, top, parent=None, attr_converter=None)` — Append one child to an `ElementTree`, handling wrapped elements, raw HTML sentinels, text, modifier…
+      - `construct_etree_attrs(attrs, attr_converter=None)` — Convert style and class attributes to serialized strings and apply an optional final attribute conv…
+      - `tree()` — Return the cached or newly constructed `ElementTree` node.
+      - **class `TreeRoot`** (ElementTree.Element)
+        - `__init__()`
+      - `to_tree(root=None, top=None, parent=None, attr_converter=None)` — Build or attach the cached `ElementTree` node while tracking parent relationships and the shared ra…
+      - `modify(elems=None, **attrs)` — Create a new element with optionally replaced children and merged attributes/styles.
+      - `clean_props(attr_converter=None)` — Recursively rebuild the element after applying an attribute converter to this element and compatibl…
+      - `to_json(root=None, parent=None, attr_converter=None)` — Convert the serialized tree into the module’s JSON-compatible node representation.
+      - `tostring(attr_converter=None, indent=None, method='html', riffle=True, prettify=False, write_string=None, **base_etree_opts)` — Serialize the element, optionally pretty-printing or riffle-joining fragments, then restore raw HTM…
+      - `sanitize_key(key)` — Convert an HTML attribute name into the Python keyword-safe spelling used by constructor representa…
+      - `format(padding='', prefix='', linewidth=100)` — Build a reconstructible constructor-style representation, switching to multiline output when it exc…
+      - `dump(prefix='', linewidth=80)` — :param prefix: Prefix added to the generated class name.
+      - `write(file, **opts)` — Serialize the element and write it to a path or writable stream.
+      - `get_display_element()` — Wrap the element in a `div.jhtml` display container.
+      - `get_mime_bundle()` — Build a `text/html` MIME bundle for notebook display.
+      - `display_in_browser_from_wrapper(wrapper)` — Write a wrapper to a temporary HTML file and open it in the default browser.
+      - `display_in_browser()` — Ensure the element is wrapped in `body` and `html` tags before browser display.
+      - `display_ipython_from_wrapper(wrapper)` — Render a wrapper through IPython’s HTML display object.
+      - `display_ipython()` — Display the element’s standard display wrapper in IPython.
+      - `display()` — Choose IPython display in Jupyter and browser display otherwise.
+      - `validate_props(**kwargs)` — Validate the element’s stored attributes using the manager validator mapping.
+      - `make_class_list()` — Split a string-valued `class` attribute into a list in place.
+      - `add_class(*cls, copy=True)` — Return an element with the requested classes added.
+      - `remove_class(*cls, copy=True)` — Return an element with the requested classes removed.
+      - `add_styles(copy=True, **sty)` — Return an element with the requested inline styles merged.
+      - `remove_styles(copy=True, **sty)` — Return an element with the requested inline styles removed.
+      - `find(path, find_element=True)` — Run an XPath search and optionally map the result back to its wrapped element.
+      - `findall(path, find_element=True)` — Run an XPath search for all matches and optionally map each result back to its wrapped element.
+      - `iterfind(path, find_element=True)` — Iterate XPath matches and optionally map each result back to its wrapped element.
+      - `find_by_id(id, mode='first', parent=None, find_element=True)` — Search for an element with a given `id` using first, all, or iterator mode.
+      - `find_by_attributes(*, root='.//', node_type='*', parents=None, mode='first', find_element=True, **attrs)` — Build an attribute selector and dispatch to first, all, or iterator search mode.
+      - `build_selector(*dicts, **attrs)` — Build a selector from keyword constraints or chain multiple selector dictionaries.
+      - `copy()` — Shallow-copy the element, copy its attributes, and reset parent and tree caches.
+    - **class `RawHTML`** (XMLElement)
+      > Not a properly constructed subclass, but inserted as part of the
+      > type hierarchy for explicit isintance check purposes, should have a
+      > trait-style base class but too much work now
+      - `__init__(text, id=None)`
+      - `tostring(**opts)` — :param opts: Additional options forwarded to the underlying operation.
+      - `display()` — Choose IPython or browser display for the raw fragment.
+      - `display_in_browser()` — Display the raw fragment through the shared temporary-browser helper.
+      - `display_ipython()` — Display the raw fragment through the shared IPython helper.
+      - `get_display_element()` — Wrap the raw fragment in a `div.jhtml` container.
+      - `dump(prefix='', linewidth=80)` — :param prefix: Prefix added to the generated class name.
+      - `write(file, **opts)` — Write the raw fragment to a path or writable stream.
+    - **class `CDATA`** (RawHTML)
+      - `__init__(text, id=None)`
+    - **class `Comment`** (XMLElement)
+      - `__init__(*elems, **attrs)`
+    - **class `TagElement`** (XMLElement)
+      - `__init__(*elems, **attrs)`
+    - **class `Nav`** (TagElement)
+    - **class `Anchor`** (TagElement)
+    - **class `Text`** (TagElement)
+    - **class `Div`** (TagElement)
+    - **class `Heading`** (TagElement)
+    - **class `SubHeading`** (TagElement)
+    - **class `SubsubHeading`** (TagElement)
+    - **class `SubsubsubHeading`** (TagElement)
+    - **class `SubHeading5`** (TagElement)
+    - **class `SubHeading6`** (TagElement)
+    - **class `Small`** (TagElement)
+    - **class `Bold`** (TagElement)
+    - **class `Italic`** (TagElement)
+    - **class `Image`** (TagElement)
+    - `image_from_string(image_string, format='image/png', **styles)` — Create an `<img>` element whose source is a base64 data URI, encoding byte input when necessary.
+    - **class `ListItem`** (TagElement)
+    - **class `BaseList`** (TagElement)
+      - `__init__(*elems, item_attributes=None, **attrs)`
+    - **class `List`** (BaseList)
+    - **class `NumberedList`** (BaseList)
+    - **class `Pre`** (TagElement)
+    - **class `Style`** (TagElement)
+    - **class `Script`** (TagElement)
+    - **class `Span`** (TagElement)
+    - **class `Button`** (TagElement)
+    - **class `TableRow`** (TagElement)
+    - **class `TableHeading`** (TagElement)
+    - **class `TableHeader`** (TagElement)
+    - **class `TableFooter`** (TagElement)
+    - **class `TableBody`** (TagElement)
+    - **class `TableItem`** (TagElement)
+    - **class `Table`** (TagElement)
+      - `__init__(*rows, headers=None, **attrs)`
+    - **class `Canvas`** (TagElement)
+    - **class `Abbr`** (TagElement)
+    - **class `Address`** (TagElement)
+    - **class `Area`** (TagElement)
+    - **class `Article`** (TagElement)
+    - **class `Aside`** (TagElement)
+    - **class `Audio`** (TagElement)
+    - **class `B`** (TagElement)
+    - **class `Base`** (TagElement)
+    - **class `Bdi`** (TagElement)
+    - **class `Bdo`** (TagElement)
+    - **class `Blockquote`** (TagElement)
+    - **class `Body`** (TagElement)
+    - **class `Br`** (TagElement)
+    - **class `Caption`** (TagElement)
+    - **class `Cite`** (TagElement)
+    - **class `Code`** (TagElement)
+    - **class `Col`** (TagElement)
+    - **class `Colgroup`** (TagElement)
+    - **class `Data`** (TagElement)
+    - **class `Datalist`** (TagElement)
+    - **class `Dd`** (TagElement)
+    - **class `Del`** (TagElement)
+    - **class `Details`** (TagElement)
+    - **class `Dfn`** (TagElement)
+    - **class `Dialog`** (TagElement)
+    - **class `Dl`** (TagElement)
+    - **class `Dt`** (TagElement)
+    - **class `Em`** (TagElement)
+    - **class `Embed`** (TagElement)
+    - **class `Fieldset`** (TagElement)
+    - **class `Figcaption`** (TagElement)
+    - **class `Figure`** (TagElement)
+    - **class `Footer`** (TagElement)
+    - **class `Form`** (TagElement)
+    - **class `Head`** (TagElement)
+    - **class `Header`** (TagElement)
+    - **class `Hr`** (TagElement)
+    - **class `Html`** (TagElement)
+    - **class `Iframe`** (TagElement)
+    - **class `Inline`** (TagElement)
+    - **class `Input`** (TagElement)
+    - **class `Ins`** (TagElement)
+    - **class `Kbd`** (TagElement)
+    - **class `Label`** (TagElement)
+    - **class `Legend`** (TagElement)
+    - **class `Link`** (TagElement)
+    - **class `Main`** (TagElement)
+    - **class `Map`** (TagElement)
+    - **class `Mark`** (TagElement)
+    - **class `Meta`** (TagElement)
+    - **class `Meter`** (TagElement)
+    - **class `Noscript`** (TagElement)
+    - **class `Object`** (TagElement)
+    - **class `Optgroup`** (TagElement)
+    - **class `Option`** (TagElement)
+    - **class `Output`** (TagElement)
+    - **class `Param`** (TagElement)
+    - **class `Picture`** (TagElement)
+    - **class `Progress`** (TagElement)
+    - **class `Q`** (TagElement)
+    - **class `Rp`** (TagElement)
+    - **class `Rt`** (TagElement)
+    - **class `Ruby`** (TagElement)
+    - **class `S`** (TagElement)
+    - **class `Samp`** (TagElement)
+    - **class `Section`** (TagElement)
+    - **class `Select`** (TagElement)
+    - **class `Source`** (TagElement)
+    - **class `Strong`** (TagElement)
+    - **class `Sub`** (TagElement)
+    - **class `Summary`** (TagElement)
+    - **class `Sup`** (TagElement)
+    - **class `Svg`** (TagElement)
+    - **class `Template`** (TagElement)
+    - **class `Textarea`** (TagElement)
+    - **class `Time`** (TagElement)
+    - **class `Title`** (TagElement)
+    - **class `Track`** (TagElement)
+    - **class `U`** (TagElement)
+    - **class `Var`** (TagElement)
+    - **class `Video`** (TagElement)
+    - **class `Wbr`** (TagElement)
+  - **class `ContentXML`** (XMLBase)
+    - **class `Element`** (HTML.XMLElement)
+      - `get_display_element()` — Wrap XML serialization in a preformatted HTML display element.
+      - `tostring(method='xml', prettify=True, **opts)` — Serialize content as prettified XML by default.
+    - **class `TagElement`** (Element)
+      - `__init__(*elems, **attrs)`
+    - **class `DeclarativeElement`** (TagElement)
+      - `__init__(*elems, **attrs)`
+    - **class `Comment`** (HTML.Comment)
+    - **class `PrefixedElement`** (Element)
+      - `__init__(base_tag, *elems, **attrs)`
+  - **class `SVG`** (HTML)
+    - `get_class_map()` — Lazily build and cache the SVG tag-to-wrapper-class mapping.
+    - **class `TagElement`** (HTML.TagElement)
+      - `get_class_map_updates()` — Return the complete SVG class map for temporary expansion during conversion.
+      - `convert_attrs(attrs)` — Copy and stringify non-string SVG attributes, flattening arrays and iterables and omitting `None` v…
+      - `validate(**kwargs)` — Check required SVG attributes and then validate presentation properties; the current required-key d…
+    - **class `Svg`** (TagElement)
+      > Root element. Always set viewBox for responsive sizing.
+      - `__init__(*elems, xmlns='http://www.w3.org/2000/svg', width='100%', height='auto', **kwargs)`
+    - **class `G`** (TagElement)
+      > Group element. Inherits presentation attrs to all children.
+      - `__init__(*elems, **kwargs)`
+    - **class `Defs`** (TagElement)
+      > Container for reusable definitions (markers, gradients, etc.).
+      - `__init__(*elems, **kwargs)`
+    - **class `Symbol`** (TagElement)
+      > Reusable graphic referenced via <use>. Not rendered directly.
+      - `__init__(*elems, id=None, **kwargs)`
+    - **class `Use`** (TagElement)
+      > Instantiates a <symbol> or any element by id.
+      - `__init__(*elems, href=None, **kwargs)`
+    - **class `Rect`** (TagElement)
+      > Axis-aligned rectangle. rx/ry round the corners.
+      - `__init__(*elems, x=0, y=0, width=None, height=None, **kwargs)`
+    - **class `Circle`** (TagElement)
+      > Circle defined by centre (cx, cy) and radius r.
+      - `__init__(*elems, cx=0, cy=0, r=None, **kwargs)`
+    - **class `Ellipse`** (TagElement)
+      > Ellipse with independent x- and y-radii.
+      - `__init__(*elems, cx=0, cy=0, rx=None, ry=None, **kwargs)`
+    - **class `Line`** (TagElement)
+      > Straight line. stroke must be set; fill has no effect.
+      - `__init__(*elems, x1=0, y1=0, x2=0, y2=0, **kwargs)`
+    - **class `Polyline`** (TagElement)
+      > Open polygon (not closed). Use fill='none' for pure outline.
+      - `__init__(*elems, points=None, **kwargs)`
+    - **class `Polygon`** (TagElement)
+      > Closed polygon. Last point auto-connects to first.
+      - `__init__(*elems, points=None, **kwargs)`
+    - **class `Path`** (TagElement)
+      > Most versatile shape. Path commands: M/m (move), L/l (line), H/h (horiz), V/v (vert), C/c (cubic bezier), S/s (smooth cubic), Q/q (quadratic), T/t (smooth quad), A/a (arc), Z/z (close).
+      - `__init__(*elems, d=None, **kwargs)`
+    - **class `Text`** (TagElement)
+      > Text element. Contains plain text or <tspan> children.
+      - `__init__(*elems, x=0, y=0, **kwargs)`
+    - **class `Tspan`** (TagElement)
+      > Inline text span; child of <text>. Use dy='1.2em' for line breaks.
+      - `__init__(*elems, **kwargs)`
+    - **class `Textpath`** (TagElement)
+      > Renders text along a <path>.
+      - `__init__(*elems, href=None, **kwargs)`
+    - **class `Image`** (TagElement)
+      > Embeds a raster or SVG image.
+      - `__init__(*elems, href=None, x=0, y=0, width=None, height=None, **kwargs)`
+    - **class `Foreignobject`** (TagElement)
+      > Embeds arbitrary XML (e.g. HTML) inside SVG.
+      - `__init__(*elems, x=0, y=0, width=None, height=None, **kwargs)`
+    - **class `Lineargradient`** (TagElement)
+      > Define with <stop> children; apply via fill='url(#id)'.
+      - `__init__(*elems, id=None, **kwargs)`
+    - **class `Radialgradient`** (TagElement)
+      > Radial gradient. fx/fy shift the highlight off-centre.
+      - `__init__(*elems, id=None, **kwargs)`
+    - **class `Stop`** (TagElement)
+      > Colour stop inside a gradient. Always set stop-color.
+      - `__init__(*elems, offset=None, **kwargs)`
+    - **class `Pattern`** (TagElement)
+      > Tiling pattern paint server. Apply via fill='url(#id)'.
+      - `__init__(*elems, id=None, width=None, height=None, **kwargs)`
+    - **class `Clippath`** (TagElement)
+      > Hard clip. Apply via clip-path='url(#id)' on the target.
+      - `__init__(*elems, id=None, **kwargs)`
+    - **class `Mask`** (TagElement)
+      > Luminance mask (white=visible, black=hidden). Apply via mask='url(#id)'.
+      - `__init__(*elems, id=None, **kwargs)`
+    - **class `Marker`** (TagElement)
+      > Arrowhead / endpoint decoration. orient='auto-start-reverse' flips for start markers automatically.
+      - `__init__(*elems, id=None, viewBox='0 0 10 10', refX=5, refY=5, markerWidth=6, markerHeight=6, **kwargs)`
+    - **class `Filter`** (TagElement)
+      > Container for filter primitives. Apply via filter='url(#id)'.
+      - `__init__(*elems, id=None, **kwargs)`
+    - **class `Fegaussianblur`** (TagElement)
+      > Gaussian blur. stdDeviation='x y' for asymmetric blur.
+      - `__init__(*elems, stdDeviation=None, **kwargs)`
+    - **class `Fecolormatrix`** (TagElement)
+      > Colour transform. type='saturate' values='0' → grayscale.
+      - `__init__(*elems, type='matrix', **kwargs)`
+    - **class `Feblend`** (TagElement)
+      > Composites two inputs using a blend mode.
+      - `__init__(*elems, in_='SourceGraphic', in2='BackgroundImage', **kwargs)`
+    - **class `Fecomposite`** (TagElement)
+      > Alpha compositing of two filter inputs.
+      - `__init__(*elems, in_='SourceGraphic', in2='SourceGraphic', **kwargs)`
+    - **class `Feoffset`** (TagElement)
+      > Shifts its input. Combine with feGaussianBlur for drop shadows.
+      - `__init__(*elems, dx=0, dy=0, **kwargs)`
+    - **class `Femerge`** (TagElement)
+      > Combines multiple filter results. Children are <feMergeNode in_='…'>.
+      - `__init__(*elems, **kwargs)`
+    - **class `Femergenode`** (TagElement)
+      > Child of <feMerge>; references a filter result by name.
+      - `__init__(*elems, **kwargs)`
+    - **class `Feflood`** (TagElement)
+      > Fills filter region with a solid colour.
+      - `__init__(*elems, flood_color=None, **kwargs)`
+    - **class `Feturbulence`** (TagElement)
+      > Perlin / fractal noise. Good base for texture effects.
+      - `__init__(*elems, baseFrequency=None, **kwargs)`
+    - **class `Fedisplacementmap`** (TagElement)
+      > Warps 'in' using a displacement map from 'in2'.
+      - `__init__(*elems, in_='SourceGraphic', in2=None, scale=0, **kwargs)`
+    - **class `Animate`** (TagElement)
+      > SMIL animation of a single attribute on the parent element.
+      - `__init__(*elems, attributeName=None, **kwargs)`
+    - **class `Animatetransform`** (TagElement)
+      > Animates a transform. type='rotate' from/to can include cx,cy: '0 50 50'.
+      - `__init__(*elems, attributeName='transform', type='rotate', **kwargs)`
+    - **class `Animatemotion`** (TagElement)
+      > Moves element along a path. Add <mpath href='#path-id'> as child.
+      - `__init__(*elems, **kwargs)`
+    - **class `Set`** (TagElement)
+      > Discretely sets an attribute value for a duration (no interpolation).
+      - `__init__(*elems, attributeName=None, to=None, **kwargs)`
+    - **class `Title`** (TagElement)
+      > Accessible name for the SVG or a group. First child of <svg> or <g>.
+      - `__init__(*elems, **kwargs)`
+    - **class `Desc`** (TagElement)
+      > Longer accessible description. Complements <title>.
+      - `__init__(*elems, **kwargs)`
+    - **class `Metadata`** (TagElement)
+      > Container for non-SVG metadata (e.g. RDF, XMP).
+      - `__init__(*elems, **kwargs)`
+
+### `JHTML/HTMLWidgets.py`
+  - **class `ActiveHTMLWrapper`**
+    - `__init__(*elements, tag=None, cls=None, id=None, value=None, style=None, event_handlers=None, inner_html=None, javascript_handles=None, onevents=None, data=None, unsynced_properties=None, debug_pane=None, track_value=None, continuous_update=None, **attributes)`
+    - `canonicalize_widget(x)`
+    - `clean_props(props, to_str=False)`
+    - `from_HTML(x, event_handlers=None, debug_pane=None, **props)`
+    - `load_HTMLElement()`
+    - `convert_child(c)`
+    - `to_html()`
+    - `find(path, find_mirror=True)`
+    - `findall(path, find_mirror=True)`
+    - `iterfind(path, find_mirror=True)`
+    - `find_by_id(id, mode='first', parent=None, find_mirror=True)`
+    - `to_widget(parent=None)`
+    - `display()`
+    - `get_mime_bundle()`
+    - `handle_event(e)`
+    - `link(elem)`
+    - `tag()`
+    - `id()`
+    - `id(val)`
+    - `text()`
+    - `text(val)`
+    - `value()`
+    - `value(val)`
+    - `attrs()`
+    - `attrs(val)`
+    - `get_attribute(key)`
+    - `set_attribute(key, value)`
+    - `del_attribute(key)`
+    - `get_child(position, wrapper=False)`
+    - `set_child(position, value)`
+    - `insert(where, child)`
+    - `append(child)`
+    - `del_child(position)`
+    - `activate_body()`
+    - `elements()`
+    - `children()`
+    - `children(kids)`
+    - `html_string()`
+    - `html_string(val)`
+    - `html()`
+    - `html(html)`
+    - `load_HTML()`
+    - `javascript_handles()`
+    - `javascript_handles(js)`
+    - `class_list()`
+    - `class_list(cls)`
+    - `add_class(*cls)`
+    - `remove_class(*cls)`
+    - `style()`
+    - `style(style)`
+    - `add_styles(**sty)`
+    - `remove_styles(*sty)`
+    - `data()`
+    - `data(d)`
+    - `event_handlers()`
+    - `event_handlers(event_handlers)`
+    - `update_events(events)`
+    - `add_event(send=True, **events)`
+    - `remove_event(*events, send=True)`
+    - `wait_for_message(msg, callback, suppress_others=False, timeout=1, poll_interval=0.05)`
+    - `call(method, buffers=None, return_message=None, callback=None, timeout=1, poll_interval=0.05, suppress_others=False, **content)`
+    - `add_javascript(**methods)`
+    - `remove_javascript(*methods)`
+    - `trigger(method, buffers=None, **content)`
+    - `onevents()`
+    - `onevents(onevents)`
+    - `update_onevents(events)`
+    - `on(send=True, **events)`
+    - `off(*events, send=True)`
+    - `track_value()`
+    - `track_value(v)`
+    - `continuous_update()`
+    - `continuous_update(v)`
+    - **class `LazyLoader`**
+      - `__init__(base_cls, args, kwargs)`
+      - `load()`
+    - `loader(*args, **kwargs)`
+  - **class `HTMLWidgets`**
+    - `get_exec_prefix()`
+    - `load(exec_prefix=None, overwrite=False)`
+    - `get_class_map()`
+    - `from_HTML(html, event_handlers=None, debug_pane=None, **props)`
+    - **class `JavascriptAPI`** (ActiveHTMLWrapper)
+      - `__init__(safety_wrap=True, _debugPrint=False, disable_caching=True, **javascript_handles)`
+      - `safety_wrap(v)`
+    - **class `WrappedHTMLElement`** (ActiveHTMLWrapper)
+    - **class `Abbr`** (WrappedHTMLElement)
+    - **class `Address`** (WrappedHTMLElement)
+    - **class `Anchor`** (WrappedHTMLElement)
+    - **class `Area`** (WrappedHTMLElement)
+    - **class `Article`** (WrappedHTMLElement)
+    - **class `Aside`** (WrappedHTMLElement)
+    - **class `Audio`** (WrappedHTMLElement)
+    - **class `B`** (WrappedHTMLElement)
+    - **class `Base`** (WrappedHTMLElement)
+    - **class `BaseList`** (WrappedHTMLElement)
+    - **class `Bdi`** (WrappedHTMLElement)
+    - **class `Bdo`** (WrappedHTMLElement)
+    - **class `Blockquote`** (WrappedHTMLElement)
+    - **class `Body`** (WrappedHTMLElement)
+    - **class `Bold`** (WrappedHTMLElement)
+    - **class `Br`** (WrappedHTMLElement)
+    - **class `Button`** (WrappedHTMLElement)
+    - **class `Canvas`** (WrappedHTMLElement)
+    - **class `Caption`** (WrappedHTMLElement)
+    - **class `Cite`** (WrappedHTMLElement)
+    - **class `Code`** (WrappedHTMLElement)
+    - **class `Col`** (WrappedHTMLElement)
+    - **class `Colgroup`** (WrappedHTMLElement)
+    - **class `Data`** (WrappedHTMLElement)
+    - **class `Datalist`** (WrappedHTMLElement)
+    - **class `Dd`** (WrappedHTMLElement)
+    - **class `Del`** (WrappedHTMLElement)
+    - **class `Details`** (WrappedHTMLElement)
+    - **class `Dfn`** (WrappedHTMLElement)
+    - **class `Dialog`** (WrappedHTMLElement)
+    - **class `Div`** (WrappedHTMLElement)
+    - **class `Dl`** (WrappedHTMLElement)
+    - **class `Dt`** (WrappedHTMLElement)
+    - **class `Em`** (WrappedHTMLElement)
+    - **class `Embed`** (WrappedHTMLElement)
+    - **class `Fieldset`** (WrappedHTMLElement)
+    - **class `Figcaption`** (WrappedHTMLElement)
+    - **class `Figure`** (WrappedHTMLElement)
+    - **class `Footer`** (WrappedHTMLElement)
+    - **class `Form`** (WrappedHTMLElement)
+    - **class `Head`** (WrappedHTMLElement)
+    - **class `Header`** (WrappedHTMLElement)
+    - **class `Heading`** (WrappedHTMLElement)
+    - **class `Hr`** (WrappedHTMLElement)
+    - **class `Html`** (WrappedHTMLElement)
+    - **class `Iframe`** (WrappedHTMLElement)
+    - **class `Image`** (WrappedHTMLElement)
+    - **class `Img`** (WrappedHTMLElement)
+    - **class `Input`** (WrappedHTMLElement)
+    - **class `Ins`** (WrappedHTMLElement)
+    - **class `Italic`** (WrappedHTMLElement)
+    - **class `Kbd`** (WrappedHTMLElement)
+    - **class `Label`** (WrappedHTMLElement)
+    - **class `Legend`** (WrappedHTMLElement)
+    - **class `Li`** (WrappedHTMLElement)
+    - **class `Link`** (WrappedHTMLElement)
+    - **class `List`** (WrappedHTMLElement)
+    - **class `ListItem`** (WrappedHTMLElement)
+    - **class `Main`** (WrappedHTMLElement)
+    - **class `Map`** (WrappedHTMLElement)
+    - **class `Mark`** (WrappedHTMLElement)
+    - **class `Meta`** (WrappedHTMLElement)
+    - **class `Meter`** (WrappedHTMLElement)
+    - **class `Nav`** (WrappedHTMLElement)
+    - **class `Noscript`** (WrappedHTMLElement)
+    - **class `NumberedList`** (WrappedHTMLElement)
+    - **class `Object`** (WrappedHTMLElement)
+    - **class `Ol`** (WrappedHTMLElement)
+    - **class `Optgroup`** (WrappedHTMLElement)
+    - **class `Option`** (WrappedHTMLElement)
+    - **class `Output`** (WrappedHTMLElement)
+    - **class `P`** (WrappedHTMLElement)
+    - **class `Param`** (WrappedHTMLElement)
+    - **class `Picture`** (WrappedHTMLElement)
+    - **class `Pre`** (WrappedHTMLElement)
+    - **class `Progress`** (WrappedHTMLElement)
+    - **class `Q`** (WrappedHTMLElement)
+    - **class `Rp`** (WrappedHTMLElement)
+    - **class `Rt`** (WrappedHTMLElement)
+    - **class `Ruby`** (WrappedHTMLElement)
+    - **class `S`** (WrappedHTMLElement)
+    - **class `Samp`** (WrappedHTMLElement)
+    - **class `Script`** (WrappedHTMLElement)
+    - **class `Section`** (WrappedHTMLElement)
+    - **class `Select`** (WrappedHTMLElement)
+    - **class `Small`** (WrappedHTMLElement)
+    - **class `Source`** (WrappedHTMLElement)
+    - **class `Span`** (WrappedHTMLElement)
+    - **class `Strong`** (WrappedHTMLElement)
+    - **class `Style`** (WrappedHTMLElement)
+    - **class `Sub`** (WrappedHTMLElement)
+    - **class `SubHeading`** (WrappedHTMLElement)
+    - **class `SubsubHeading`** (WrappedHTMLElement)
+    - **class `SubsubsubHeading`** (WrappedHTMLElement)
+    - **class `SubHeading5`** (WrappedHTMLElement)
+    - **class `SubHeading6`** (WrappedHTMLElement)
+    - **class `Summary`** (WrappedHTMLElement)
+    - **class `Sup`** (WrappedHTMLElement)
+    - **class `Svg`** (WrappedHTMLElement)
+    - **class `Table`** (WrappedHTMLElement)
+    - **class `TableHeader`** (WrappedHTMLElement)
+    - **class `TableBody`** (WrappedHTMLElement)
+    - **class `TableHeading`** (WrappedHTMLElement)
+    - **class `TableItem`** (WrappedHTMLElement)
+    - **class `TableRow`** (WrappedHTMLElement)
+    - **class `TagElement`** (WrappedHTMLElement)
+    - **class `Tbody`** (WrappedHTMLElement)
+    - **class `Td`** (WrappedHTMLElement)
+    - **class `Template`** (WrappedHTMLElement)
+    - **class `Text`** (WrappedHTMLElement)
+    - **class `Textarea`** (WrappedHTMLElement)
+    - **class `Tfoot`** (WrappedHTMLElement)
+    - **class `Th`** (WrappedHTMLElement)
+    - **class `Thead`** (WrappedHTMLElement)
+    - **class `Time`** (WrappedHTMLElement)
+    - **class `Title`** (WrappedHTMLElement)
+    - **class `Tr`** (WrappedHTMLElement)
+    - **class `Track`** (WrappedHTMLElement)
+    - **class `U`** (WrappedHTMLElement)
+    - **class `Ul`** (WrappedHTMLElement)
+    - **class `Var`** (WrappedHTMLElement)
+    - **class `Video`** (WrappedHTMLElement)
+    - **class `Wbr`** (WrappedHTMLElement)
+    - **class `OutputArea`** (ActiveHTMLWrapper)
+      - `__init__(*elements, max_messages=None, autoclear=False, event_handlers=None, cls=None, **styles)`
+      - `print(*args, **kwargs)`
+      - `show_output(*args, **kwargs)`
+      - `append_stdout(arg)`
+      - `append_stderr(arg)`
+      - `show_buffered(*args)`
+      - `set_output(*args)`
+      - `show_raw(*args)`
+      - `clear(wait=False)`
+
+### `JHTML/HackWidgets.py`
+  - **class `JHTMLShadowDOMElement`**
+    > Provides a shadow DOM tree that can makes it easier to update
+    > chunks of a tree constructed from JupyterHTMLWrappers
+    - `__init__(widg, wrapper=None, parent=None)`
+    - `link(dom_el, recursive=False)`
+    - `tree()`
+    - `to_tree(refresh=False)`
+    - **class `Refresher`**
+      - `__init__(dom_el, which=None)`
+    - `refresh(el, key, value)`
+    - `refresh_child(el, key, value, which)`
+    - `get_parent(n)`
+    - `find(path, find_element=True)`
+    - `findall(path, find_element=True)`
+    - `iterfind(path, find_element=True)`
+    - `find_by_id(id, mode='first', parent=None, find_element=True)`
+  - **class `JupyterHTMLWrapper`**
+    > Provides simple access to Jupyter display utilities
+    - `load_styles()` — Embeds widget restyle definitions into the active notebook
+    - `get_class_stripper_js()`
+    - `get_class_stripper()`
+    - `__init__(*elements, tag=None, event_handlers=None, layout=None, extra_classes=None, cls=None, debug_pane=None, **styles)`
+    - `manage_styles(styles, validate=True)`
+    - `to_widget(parent=None)`
+    - `display_widget(w)`
+    - `display()`
+    - `find(path, find_element=True)`
+    - `findall(path, find_element=True)`
+    - `iterfind(path, find_element=True)`
+    - `find_by_id(id, mode='first', parent=None, find_element=True)`
+    - `load_base_map()`
+    - `base_map()`
+  - **class `JupyterHTMLWidgets`**
+    > Provides convenience constructors for HTML components
+    - `load()`
+    - **class `WrappedElement`** (JupyterHTMLWrapper)
+      - `__init__(*elems, base=None, event_handlers=None, container=None, layout=None, extra_classes=None, **attrs)`
+      - `copy()`
+      - `add_child_class(*cls, copy=True)`
+      - `add_class(*cls, copy=True)`
+      - `remove_class(*cls, copy=True)`
+      - `add_styles(copy=True, **sty)`
+    - **class `ContainerWrapper`** (WrappedElement)
+    - **class `Abbr`** (WrappedElement)
+    - **class `Address`** (WrappedElement)
+    - **class `Anchor`** (WrappedElement)
+    - **class `Area`** (WrappedElement)
+    - **class `Article`** (WrappedElement)
+    - **class `Aside`** (WrappedElement)
+    - **class `Audio`** (WrappedElement)
+    - **class `B`** (WrappedElement)
+    - **class `Base`** (WrappedElement)
+    - **class `BaseList`** (WrappedElement)
+    - **class `Bdi`** (WrappedElement)
+    - **class `Bdo`** (WrappedElement)
+    - **class `Blockquote`** (WrappedElement)
+    - **class `Body`** (WrappedElement)
+    - **class `Bold`** (WrappedElement)
+    - **class `Br`** (WrappedElement)
+    - **class `Button`** (WrappedElement)
+    - **class `Canvas`** (WrappedElement)
+    - **class `Caption`** (WrappedElement)
+    - **class `Cite`** (WrappedElement)
+    - **class `ClassAdder`** (WrappedElement)
+    - **class `ClassRemover`** (WrappedElement)
+    - **class `Code`** (WrappedElement)
+    - **class `Col`** (WrappedElement)
+    - **class `Colgroup`** (WrappedElement)
+    - **class `Data`** (WrappedElement)
+    - **class `Datalist`** (WrappedElement)
+    - **class `Dd`** (WrappedElement)
+    - **class `Del`** (WrappedElement)
+    - **class `Details`** (WrappedElement)
+    - **class `Dfn`** (WrappedElement)
+    - **class `Dialog`** (WrappedElement)
+    - **class `Div`** (WrappedElement)
+    - **class `Dl`** (WrappedElement)
+    - **class `Dt`** (WrappedElement)
+    - **class `ElementModifier`** (WrappedElement)
+    - **class `Em`** (WrappedElement)
+    - **class `Embed`** (WrappedElement)
+    - **class `Fieldset`** (WrappedElement)
+    - **class `Figcaption`** (WrappedElement)
+    - **class `Figure`** (WrappedElement)
+    - **class `Footer`** (WrappedElement)
+    - **class `Form`** (WrappedElement)
+    - **class `Head`** (WrappedElement)
+    - **class `Header`** (WrappedElement)
+    - **class `Heading`** (WrappedElement)
+    - **class `Hr`** (WrappedElement)
+    - **class `Iframe`** (WrappedElement)
+    - **class `Image`** (WrappedElement)
+    - **class `Img`** (WrappedElement)
+    - **class `Input`** (WrappedElement)
+    - **class `Ins`** (WrappedElement)
+    - **class `Italic`** (WrappedElement)
+    - **class `Kbd`** (WrappedElement)
+    - **class `Label`** (WrappedElement)
+    - **class `Legend`** (WrappedElement)
+    - **class `Li`** (WrappedElement)
+    - **class `Link`** (WrappedElement)
+    - **class `List`** (WrappedElement)
+    - **class `ListItem`** (WrappedElement)
+    - **class `Main`** (WrappedElement)
+    - **class `Map`** (WrappedElement)
+    - **class `Mark`** (WrappedElement)
+    - **class `Meta`** (WrappedElement)
+    - **class `Meter`** (WrappedElement)
+    - **class `Nav`** (WrappedElement)
+    - **class `Noscript`** (WrappedElement)
+    - **class `NumberedList`** (WrappedElement)
+    - **class `Object`** (WrappedElement)
+    - **class `Ol`** (WrappedElement)
+    - **class `Optgroup`** (WrappedElement)
+    - **class `Option`** (WrappedElement)
+    - **class `Output`** (WrappedElement)
+    - **class `P`** (WrappedElement)
+    - **class `Param`** (WrappedElement)
+    - **class `Picture`** (WrappedElement)
+    - **class `Pre`** (WrappedElement)
+    - **class `Progress`** (WrappedElement)
+    - **class `Q`** (WrappedElement)
+    - **class `Rp`** (WrappedElement)
+    - **class `Rt`** (WrappedElement)
+    - **class `Ruby`** (WrappedElement)
+    - **class `S`** (WrappedElement)
+    - **class `Samp`** (WrappedElement)
+    - **class `Script`** (WrappedElement)
+    - **class `Section`** (WrappedElement)
+    - **class `Select`** (WrappedElement)
+    - **class `Small`** (WrappedElement)
+    - **class `Source`** (WrappedElement)
+    - **class `Span`** (WrappedElement)
+    - **class `Strong`** (WrappedElement)
+    - **class `Style`** (WrappedElement)
+    - **class `StyleAdder`** (WrappedElement)
+    - **class `Sub`** (WrappedElement)
+    - **class `SubHeading`** (WrappedElement)
+    - **class `SubsubHeading`** (WrappedElement)
+    - **class `SubsubsubHeading`** (WrappedElement)
+    - **class `SubHeading5`** (WrappedElement)
+    - **class `SubHeading6`** (WrappedElement)
+    - **class `Summary`** (WrappedElement)
+    - **class `Sup`** (WrappedElement)
+    - **class `Svg`** (WrappedElement)
+    - **class `Table`** (WrappedElement)
+    - **class `TableBody`** (WrappedElement)
+    - **class `TableHeading`** (WrappedElement)
+    - **class `TableItem`** (WrappedElement)
+    - **class `TableRow`** (WrappedElement)
+    - **class `TagElement`** (WrappedElement)
+    - **class `Tbody`** (WrappedElement)
+    - **class `Td`** (WrappedElement)
+    - **class `Template`** (WrappedElement)
+    - **class `Text`** (WrappedElement)
+    - **class `Textarea`** (WrappedElement)
+    - **class `Tfoot`** (WrappedElement)
+    - **class `Th`** (WrappedElement)
+    - **class `Thead`** (WrappedElement)
+    - **class `Time`** (WrappedElement)
+    - **class `Title`** (WrappedElement)
+    - **class `Tr`** (WrappedElement)
+    - **class `Track`** (WrappedElement)
+    - **class `U`** (WrappedElement)
+    - **class `Ul`** (WrappedElement)
+    - **class `Var`** (WrappedElement)
+    - **class `Video`** (WrappedElement)
+    - **class `Wbr`** (WrappedElement)
+    - **class `OutputArea`** (JupyterHTMLWrapper)
+      - `__init__(*elements, autoclear=False, event_handlers=None, layout=None, extra_classes=None, cls=None, **styles)`
+      - `print(*args, **kwargs)`
+      - `display(*args)`
+      - `clear()`
+
+### `JHTML/JHTML.py`
+  - **class `JHTML`**
+    - `load(exec_prefix=None, overwrite=False)`
+    - `Markdown(text)`
+    - `__init__(context=None, include_bootstrap=False, expose_classes=False, output_pane=True, callbacks=None, widgets=None)`
+    - `insert_vars()`
+    - `wrap_callbacks(c)`
+    - `out()`
+    - `prune_vars()`
+    - `parse_handlers(handler_string)`
+    - `parse_widget(uuid)`
+    - `convert(etree, strip=True, converter=None, **extra_attrs)`
+    - `parse(src, event_handlers=None, dynamic=None, track_value=None, strict=True, fallback=None, **attrs)`
+    - `dispatcher(fn)`
+    - `Abbr(*elements, **styles)`
+    - `Address(*elements, **styles)`
+    - `Anchor(*elements, **styles)`
+    - `Area(*elements, **styles)`
+    - `Article(*elements, **styles)`
+    - `Aside(*elements, **styles)`
+    - `Audio(*elements, **styles)`
+    - `B(*elements, **styles)`
+    - `Base(*elements, **styles)`
+    - `Bdi(*elements, **styles)`
+    - `Bdo(*elements, **styles)`
+    - `Blockquote(*elements, **styles)`
+    - `Body(*elements, **styles)`
+    - `Bold(*elements, **styles)`
+    - `Br(*elements, **styles)`
+    - `Button(*elements, **styles)`
+    - `Canvas(*elements, **styles)`
+    - `Caption(*elements, **styles)`
+    - `Cite(*elements, **styles)`
+    - `Code(*elements, **styles)`
+    - `Col(*elements, **styles)`
+    - `Colgroup(*elements, **styles)`
+    - `Data(*elements, **styles)`
+    - `Datalist(*elements, **styles)`
+    - `Dd(*elements, **styles)`
+    - `Del(*elements, **styles)`
+    - `Details(*elements, **styles)`
+    - `Dfn(*elements, **styles)`
+    - `Dialog(*elements, **styles)`
+    - `Div(*elements, **styles)`
+    - `Dl(*elements, **styles)`
+    - `Dt(*elements, **styles)`
+    - `Em(*elements, **styles)`
+    - `Embed(*elements, **styles)`
+    - `Fieldset(*elements, **styles)`
+    - `Figcaption(*elements, **styles)`
+    - `Figure(*elements, **styles)`
+    - `Footer(*elements, **styles)`
+    - `Form(*elements, **styles)`
+    - `Head(*elements, **styles)`
+    - `Header(*elements, **styles)`
+    - `Heading(*elements, **styles)`
+    - `Hr(*elements, **styles)`
+    - `Html(*elements, **styles)`
+    - `Iframe(*elements, **styles)`
+    - `Image(*elements, **styles)`
+    - `image_from_string(image_string, format='image/png', **styles)`
+    - `Img(*elements, **styles)`
+    - `Input(*elements, **styles)`
+    - `Ins(*elements, **styles)`
+    - `Italic(*elements, **styles)`
+    - `Kbd(*elements, **styles)`
+    - `Label(*elements, **styles)`
+    - `Legend(*elements, **styles)`
+    - `Link(*elements, **styles)`
+    - `List(*elements, **styles)`
+    - `ListItem(*elements, **styles)`
+    - `Main(*elements, **styles)`
+    - `Map(*elements, **styles)`
+    - `Mark(*elements, **styles)`
+    - `Meta(*elements, **styles)`
+    - `Meter(*elements, **styles)`
+    - `Nav(*elements, **styles)`
+    - `Noscript(*elements, **styles)`
+    - `NumberedList(*elements, **styles)`
+    - `Object(*elements, **styles)`
+    - `Optgroup(*elements, **styles)`
+    - `Option(*elements, **styles)`
+    - `Output(*elements, **styles)`
+    - `Param(*elements, **styles)`
+    - `Picture(*elements, **styles)`
+    - `Pre(*elements, **styles)`
+    - `Progress(*elements, **styles)`
+    - `Q(*elements, **styles)`
+    - `Rp(*elements, **styles)`
+    - `Rt(*elements, **styles)`
+    - `Ruby(*elements, **styles)`
+    - `S(*elements, **styles)`
+    - `Samp(*elements, **styles)`
+    - `Script(*elements, **styles)`
+    - `Section(*elements, **styles)`
+    - `Select(*elements, **styles)`
+    - `Small(*elements, **styles)`
+    - `Source(*elements, **styles)`
+    - `Span(*elements, **styles)`
+    - `Strong(*elements, **styles)`
+    - `Style(*elements, **styles)`
+    - `Sub(*elements, **styles)`
+    - `SubHeading(*elements, **styles)`
+    - `SubsubHeading(*elements, **styles)`
+    - `SubsubsubHeading(*elements, **styles)`
+    - `SubHeading5(*elements, **styles)`
+    - `SubHeading6(*elements, **styles)`
+    - `Summary(*elements, **styles)`
+    - `Sup(*elements, **styles)`
+    - `Svg(*elements, **styles)`
+    - `Table(*elements, **styles)`
+    - `TableBody(*elements, **styles)`
+    - `TableFooter(*elements, **styles)`
+    - `TableHeader(*elements, **styles)`
+    - `TableHeading(*elements, **styles)`
+    - `TableItem(*elements, **styles)`
+    - `TableRow(*elements, **styles)`
+    - `Template(*elements, **styles)`
+    - `Text(*elements, **styles)`
+    - `Textarea(*elements, **styles)`
+    - `Time(*elements, **styles)`
+    - `Title(*elements, **styles)`
+    - `Track(*elements, **styles)`
+    - `U(*elements, **styles)`
+    - `Var(*elements, **styles)`
+    - `Video(*elements, **styles)`
+    - `Wbr(*elements, **styles)`
+    - **class `Bootstrap`**
+      - `dispatcher(fn)`
+      - `Icon(*elements, **styles)`
+      - `Alert(*elements, **styles)`
+      - `Badge(*elements, **styles)`
+      - `PanelBody(*elements, **styles)`
+      - `PanelHeader(*elements, **styles)`
+      - `Panel(*elements, **styles)`
+      - `CardBody(*elements, **styles)`
+      - `CardHeader(*elements, **styles)`
+      - `CardFooter(*elements, **styles)`
+      - `CardImage(*elements, **styles)`
+      - `Card(*elements, **styles)`
+      - `Jumbotron(*elements, **styles)`
+      - `Col(*elements, **styles)`
+      - `Row(*elements, **styles)`
+      - `Container(*elements, **styles)`
+      - `Button(*elements, **styles)`
+      - `ButtonGroup(*elements, **styles)`
+      - `LinkButton(*elements, **styles)`
+      - `Table(*elements, **styles)`
+      - `ListGroup(*elements, **styles)`
+      - `ListGroupItem(*elements, **styles)`
+      - `FontAwesomeIcon(*elements, **styles)`
+      - `GlyphIcon(*elements, **styles)`
+      - `Label(*elements, **styles)`
+      - `Pill(*elements, **styles)`
+      - `ListComponent(*elements, **styles)`
+      - `ListItemComponent(*elements, **styles)`
+      - `Breadcrumb(*elements, **styles)`
+      - `BreadcrumbItem(*elements, **styles)`
+      - `Accordion(*elements, **styles)`
+      - `AccordionItem(*elements, **styles)`
+      - `AccordionCollapse(*elements, **styles)`
+      - `AccordionBody(*elements, **styles)`
+      - `Carousel(*elements, **styles)`
+      - `CarouselInner(*elements, **styles)`
+      - `CarouselItem(*elements, **styles)`
+      - `Collapse(*elements, **styles)`
+    - **class `Styled`**
+      - `__init__(base, **attrs)`
+    - **class `Compound`**
+      - `__init__(*wrappers)`
+      - `destructure_wrapper(wrapper)`
+      - **class `CompoundWrapperData`**
+        - `__init__(list, dict)`
+
+### `JHTML/WidgetTools.py`
+  - **class `JupyterAPIs`**
+    > Provides access to the various Jupyter APIs
+    - `load_api()`
+    - `get_shell_api()`
+    - `get_shell_instance()`
+    - `get_base_api()`
+    - `in_jupyter_environment()`
+    - `get_display_api()`
+    - `display_api()`
+    - `get_widgets_api()`
+    - `widgets_api()`
+    - `get_events_api()`
+    - `events_api()`
+  - **class `DefaultOutputWidget`**
+    - `__init__(obj=None)`
+    - `get_default()`
+  - **class `frozendict`** (dict)
+
+### `JHTML/ActiveHTMLWidget/widget.py`
+  - **class `HTMLElement`** (DOMWidget)
+    > Represents an HTML element that can be interacted with
+    > and configured richly, in contrast to the limited interactions
+    > available in most core Jupyter widgets
+    - `__init__(**kwargs)`
+    - `bind_callback(callback, remove=False)` — Register a callback to execute when a DOM event occurs.
+    - `reset_callbacks()` — Remove any previously defined callback.
+    - `jupyterlab_install(exec_prefix=None, overwrite=False)` — Attempts to do a basic installation for JupterLab
+    - `jupyternb_install(exec_prefix=None, overwrite=False)` — Attempts to do a basic installation for JupterLab
+    - `trigger(event, content=None, buffers=None)`
+    - `call(method, content=None, buffers=None)`
+
+### `JHTML/ActiveHTMLWidget/tests/conftest.py`
+  - **class `MockComm`** (Comm)
+    > A mock Comm object.
+    > *(truncated — see stub for full docstring)*
+    - `__init__(*args, **kwargs)`
+    - `open(*args, **kwargs)`
+    - `send(*args, **kwargs)`
+    - `close(*args, **kwargs)`
+- `mock_comm()`
+
+### `JHTML/ActiveHTMLWidget/tests/test_example.py`
+- `test_example_creation_blank()`
+
+### `JHTML/ActiveHTMLWidget/tests/test_nbextension_path.py`
+- `test_nbextension_path()`
